@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1 · What is life? — The Living World</title>
+<meta name="description" content="Chapter 1 of The Living World, an interactive biology textbook: what living things share, how life is organised, the cell, DNA, energy, evolution, and how biologists know.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..700,0..100,0..1&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Inter:wght@400..700&display=swap">
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/typography.css">
+<link rel="stylesheet" href="../../src/styles/layout.css">
+<link rel="stylesheet" href="../../src/styles/components.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+  // The glossary must be registered before the elements that read it are defined.
+  import { GLOSSARY } from './glossary.js';
+  import { textbook } from '../../src/shell.js';
+  textbook.registerGlossary(GLOSSARY);
+  await import('../../src/components/index.js');
+</script>
+</head>
+<body>
+<a class="tb-skip" href="#question">Skip to the chapter</a>
+<tb-shell book="The Living World" book-href="../" library-href="../../" chapter="1 · What is life?"></tb-shell>
+
+<div class="tb-page">
+<nav class="tb-rail" aria-label="Chapter contents"></nav>
+
+<main class="tb-main" data-chapter="1">
+
+<header class="tb-opener">
+  <p class="tb-opener__unit">Unit I · The nature of life</p>
+  <p class="tb-opener__number" aria-hidden="true">1</p>
+  <h1>What is life?</h1>
+  <p class="tb-opener__dek">Biology begins with a question that sounds simple and is not. This chapter takes the question apart, meets the cell, and looks at how the answer was found.</p>
+
+  <tb-figure kind="pond" id="fig-pond" width="wide" class="tb-opener__hero" data-alt="A microscope's field of view, not to scale, in which slipper-shaped paramecia row along with beating cilia, green euglena spiral past, geometric diatoms and a rolling volvox colony drift, an amoeba flows, and tiny bacteria tremble; every so often a paramecium pinches in two.">
+    <figcaption>A drop of pond water under the microscope, not to scale: paramecia, euglena, diatoms, an amoeba, a volvox colony and a scatter of bacteria. Every one of them is alive, and this chapter is about what that word means.<span class="fig-hint">The drop is animated. Pause it with the button in the corner.</span></figcaption>
+  </tb-figure>
+
+  <ol class="tb-opener__contents" aria-label="In this chapter">
+    <li><a href="#question"><span class="n">1.1</span><span>The question biology asks</span></a></li>
+    <li><a href="#properties"><span class="n">1.2</span><span>What all living things share</span></a></li>
+    <li><a href="#levels"><span class="n">1.3</span><span>Life is organised in levels</span></a></li>
+    <li><a href="#cell"><span class="n">1.4</span><span>The cell is the unit of life</span></a></li>
+    <li><a href="#information"><span class="n">1.5</span><span>Life runs on information</span></a></li>
+    <li><a href="#energy"><span class="n">1.6</span><span>Energy flows and matter cycles</span></a></li>
+    <li><a href="#evolution"><span class="n">1.7</span><span>Evolution explains the pattern</span></a></li>
+    <li><a href="#method"><span class="n">1.8</span><span>How biologists know</span></a></li>
+  </ol>
+</header>
+
+<div class="tb-text">
+
+<section id="question">
+<h2>The question biology asks</h2>
+
+<p class="tb-dropcap">Hold a drop of pond water up to the light and you will see nothing. Put it under a microscope and it fills with movement: slipper-shaped paramecia rowing themselves along with thousands of tiny hairs, green euglena spiralling towards the light, diatoms in glass cases drifting past, an amoeba flowing over the slide like a spilled drop. None of them has a brain. None of them knows it is being watched. Yet no one who watches them doubts that they are alive, and no one doubts that the glass beneath them is not.</p>
+
+<p><tb-term ref="biology">Biology</tb-term> is the study of living things, so it starts by asking what a living thing is. The question is harder than it sounds. Nobody has ever written a definition of life that everyone accepts. What biologists have instead is a list of properties that every <tb-term ref="organism">organism</tb-term> shares and that nothing non-living shares all of, together with a growing understanding of how those properties arise from ordinary chemistry.</p>
+
+<p>Figure 1.1, at the top of the chapter, is the drop under the lens. Before reading the list, test your own intuition. Some of the things below are alive, some are not, and for at least one the honest answer is that it depends what you mean.</p>
+
+<tb-sort id="alive">
+  <p class="intro">Sort each one. Drag a card onto a bin, or use its buttons.</p>
+  <ul class="bins">
+    <li data-bin="alive">Alive</li>
+    <li data-bin="not">Not alive</li>
+    <li data-bin="edge">It depends</li>
+  </ul>
+  <ul class="items">
+    <li data-bin="alive" data-why="It grows, takes in water and carbon dioxide, makes its own food from sunlight, responds to light and the seasons, and reproduces by acorns.">An oak tree</li>
+    <li data-bin="not" data-why="It grows by adding matching ions, but it has no metabolism, does not respond, and passes on no information. A bigger crystal is just more of the same.">A crystal of salt</li>
+    <li data-bin="not" data-why="Fire consumes fuel, gives off heat, grows and spreads, but it is not made of cells, regulates nothing about itself, and carries no heritable information.">A candle flame</li>
+    <li data-bin="alive" data-why="Dormant, with almost no metabolism, but a seed is a living organism waiting for water. Add it and growth resumes. Life can pause.">A dry seed</li>
+    <li data-bin="edge" data-why="A virus has genes and evolves, but it has no cells and no metabolism of its own, and it cannot reproduce without a living cell to do the work. Most biologists put viruses on the border of life.">A virus</li>
+    <li data-bin="not" data-why="It senses, responds, and even returns to its charger, but it is not made of cells, does not grow, and does not reproduce or evolve. Every property it has was designed in.">A robot vacuum</li>
+    <li data-bin="alive" data-why="One cell, no nucleus, and everything on the list: it feeds, grows, keeps its interior steady, responds, and divides.">A bacterium</li>
+    <li data-bin="edge" data-why="It is a living cell that was part of you, but a mature human red blood cell has no nucleus and cannot divide; it works for about 120 days and is then recycled. Alive, but not an organism.">A red blood cell</li>
+    <li data-bin="alive" data-why="A mule is sterile, with vanishingly rare exceptions, and it is unmistakably alive. Reproduction is a property of life at the level of populations, not a test every individual must pass.">A mule</li>
+  </ul>
+</tb-sort>
+
+<p>A list makes the borderline cases visible, and the borderline is where the science gets interesting. Viruses, dormant seeds, red blood cells and sterile mules each break one rule and keep the others. That is why biologists do not rely on a single test but on a family of properties, taken together.</p>
+</section>
+
+<section id="properties">
+<h2>What all living things share</h2>
+
+<p>Seven properties recur in every organism biologists have examined, from the smallest bacterium to the blue whale. They are not a definition, but together they draw the boundary.</p>
+
+<ul class="tb-props" aria-label="The properties of life">
+  <li><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--leaf)" stroke-width="2"/><circle cx="20" cy="22" r="7" fill="var(--violet)" opacity=".85"/><circle cx="33" cy="30" r="3" fill="var(--coral)"/><circle cx="31" cy="16" r="2.5" fill="var(--gold)"/></svg><div><b>Order</b><span>Made of one or more <tb-term ref="cell">cells</tb-term>, each wrapped in a membrane and full of structure at every scale.</span></div></li>
+  <li><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 30 Q24 8 38 30" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round"/><path d="M14 34h20" stroke="var(--coral)" stroke-width="2.5" stroke-linecap="round"/><path d="M18 40h12" stroke="var(--coral)" stroke-width="2.5" stroke-linecap="round" opacity=".6"/></svg><div><b>Metabolism</b><span>Takes in energy and matter and transforms them: building up, breaking down, passing energy through. This is <tb-term ref="metabolism">metabolism</tb-term>.</span></div></li>
+  <li><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="16" fill="none" stroke="var(--water)" stroke-width="2"/><path d="M24 8 A16 16 0 0 1 40 24" fill="none" stroke="var(--water)" stroke-width="4" stroke-linecap="round"/><path d="M34 12l4 2-1 4" fill="none" stroke="var(--water)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 24h16" stroke="var(--ink-soft)" stroke-width="2" stroke-linecap="round"/></svg><div><b>Regulation</b><span>Keeps its interior steady while the outside changes: <tb-term ref="homeostasis">homeostasis</tb-term>.</span></div></li>
+  <li><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="16" cy="32" r="5" fill="var(--leaf)" opacity=".5"/><circle cx="24" cy="26" r="7" fill="var(--leaf)" opacity=".7"/><circle cx="33" cy="18" r="9" fill="var(--leaf)"/></svg><div><b>Growth and development</b><span>Grows by making more of itself according to instructions, and passes through stages on the way.</span></div></li>
+  <li><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="18" cy="28" r="8" fill="var(--violet)" opacity=".8"/><path d="M30 14l6-4M32 20l8-2M31 26l7 3" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"/></svg><div><b>Response</b><span>Senses its surroundings and reacts: a root turning towards water, a bacterium swimming towards sugar, a pupil narrowing.</span></div></li>
+  <li><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="18" r="9" fill="none" stroke="var(--coral)" stroke-width="2"/><circle cx="15" cy="34" r="7" fill="var(--coral)" opacity=".8"/><circle cx="33" cy="34" r="7" fill="var(--coral)" opacity=".8"/></svg><div><b>Reproduction</b><span>Makes new organisms of the same kind, handing on instructions written in DNA.</span></div></li>
+  <li><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 40 L20 20 L28 30 L40 8" fill="none" stroke="var(--leaf)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="20" r="3" fill="var(--gold)"/><circle cx="28" cy="30" r="3" fill="var(--gold)"/><circle cx="40" cy="8" r="3" fill="var(--gold)"/></svg><div><b>Adaptation</b><span>Populations change across generations, so organisms fit their environments. The fit is the mark of a history.</span></div></li>
+</ul>
+
+<p>Of the seven, homeostasis is the one you can feel. Your core temperature is about 37 °C whether you are standing in snow or running in the sun, and it is held there by a loop. Sensors in your skin and in the <tb-term ref="hypothalamus">hypothalamus</tb-term>, at the base of the brain, report the temperature. The hypothalamus compares the report with a <tb-term ref="set-point">set point</tb-term>. When the two disagree, it recruits effectors that push the temperature back: sweat glands and widened skin vessels shed heat, shivering muscles and narrowed vessels keep it. Because the response opposes the change that triggered it, the loop is called <tb-term ref="negative-feedback">negative feedback</tb-term>, and nearly every steady quantity in your body, from blood sugar to blood pressure to the acidity of your blood, is held by a loop of the same shape.</p>
+
+<aside class="tb-margin-note">A fever is not a failure of the loop. It is the set point moved up on purpose, by signalling molecules released during an infection. The loop then defends 39 °C as faithfully as it defended 37.</aside>
+
+<tb-figure kind="homeostasis" id="fig-homeostasis" width="wide" data-alt="A feedback-loop diagram (stimulus, sensor, control centre, effectors, response) beside a live chart of core body temperature around a 37 °C set point. Buttons apply a cold plunge, a race or a fever; the loop lights up as sweating or shivering brings the temperature back. With feedback off a cold plunge or a race drifts the temperature away, and a fever cannot start.">
+  <figcaption>Holding a body temperature. Push the model with a cold plunge, a race or a fever, and watch the loop bring the core temperature back towards its set point. Switch the feedback off and a cold plunge or a race drifts the temperature away, and a fever cannot even start: a fever is the loop at work.<span class="fig-hint">Press a button, then watch the chart for a minute of simulated time.</span></figcaption>
+</tb-figure>
+
+<p>Figure 1.2 is a model, and a crude one: real thermoregulation involves hormones, behaviour and a dozen tissues, and the model runs far faster than a body does, so a cold plunge that would play out over many minutes takes seconds here. But the shape of the loop is exact, and once you can see it you will find it everywhere in the chapters that follow.</p>
+
+<tb-key><p>Living things are not steady because nothing changes. They are steady because they keep changing to stay the same.</p></tb-key>
+</section>
+
+<section id="levels">
+<h2>Life is organised in levels</h2>
+
+<p>Take a frog apart and you find organs. Take the heart apart and you find tissues; take those apart and you find cells, and inside them <tb-term ref="organelle">organelles</tb-term>, molecules, and finally atoms that are the same atoms found in a rock. Go the other way and the frog is one member of a population, which lives with other populations in a community, which with its non-living surroundings forms an ecosystem, and all the ecosystems together make up the biosphere.</p>
+
+<p>Figure 1.3 follows one thread through all twelve levels. At each step up, something appears that was not present in the parts. A heart pumps; no single heart cell does. A community has a food web; no single frog does. This is an <tb-term ref="emergence">emergent property</tb-term>, and it is why biology cannot be replaced by chemistry even though every living thing obeys chemistry's laws. The properties that matter to a frog live at the level of the frog.</p>
+
+<tb-figure kind="levels" id="fig-levels" width="wide" data-alt="Twelve illustrated levels of organisation along one thread: an oxygen atom, a water molecule, a mitochondrion, a muscle cell, muscle tissue, a heart, a circulatory system inside a frog, the frog, a population of frogs, a pond community, the pond ecosystem, and Earth. Each level shows its approximate size and what is new at that level.">
+  <figcaption>Twelve levels of organisation, one thread: from an oxygen atom in a frog's heart to the biosphere. Scrub through them and read what appears at each step.<span class="fig-hint">Use the slider, the arrow keys, or click a level in the strip.</span></figcaption>
+</tb-figure>
+
+<p>The most important step on that ladder is the one we cannot see. Cells are small. A typical animal cell is about 20 <tb-term ref="micrometre">micrometres</tb-term> across, one-fiftieth of a millimetre, so a thousand of them side by side would just span the width of a thumbnail. Below them lie another five powers of ten before the atoms.</p>
+
+<aside class="tb-margin-note">A micrometre (µm) is a millionth of a metre; a nanometre (nm) is a billionth. Cells are measured in micrometres, molecules in nanometres.</aside>
+
+<tb-figure kind="scale" id="fig-scale" width="wide" data-alt="A logarithmic ruler from ten metres down to a tenth of a nanometre, with markers for a person, a chicken's egg, a frog's egg, a hair's width, a human egg cell, a paramecium, an animal cell, a red blood cell, a bacterium, a mitochondrion, a virus, a ribosome, a membrane, DNA, glucose, water and a hydrogen atom, and bands showing what the naked eye, a light microscope and an electron microscope can resolve. A draggable lens magnifies any region.">
+  <figcaption>How small is a cell? A ruler that shrinks by ten at every labelled tick, from a person to a hydrogen atom. Slide the lens to see what lives at each scale and which instrument can see it.</figcaption>
+</tb-figure>
+
+<p>Figure 1.4 also shows why the cell was discovered so late in the history of science. Nothing on the ruler below about a tenth of a millimetre can be seen without a lens, and nothing below about 200 nanometres, half the wavelength of visible light, can be seen with an ordinary light microscope. The fine structure inside the cell, the membranes and ribosomes and the folds of a mitochondrion, had to wait for the electron microscope, invented in the 1930s and turned on cells in the 1940s.</p>
+</section>
+
+<section id="cell">
+<h2>The cell is the unit of life</h2>
+
+<p>Every living thing is made of cells. Some are one cell; you are about 37 trillion of them. This was not obvious. Cells were first seen in 1665, when Robert Hooke looked at a sliver of cork through a microscope and named the little boxes he saw after the cells of a monastery. A few years later Antonie van Leeuwenhoek, grinding his own lenses in Delft, saw living single cells swimming in pond water and in scrapings from his own teeth. It took until 1838 and 1839 for Matthias Schleiden and Theodor Schwann to argue that all plants and all animals are built from cells, and until 1855 for Rudolf Virchow to add the claim that closed the loop: every cell comes from a cell that already existed.</p>
+
+<p><tb-term ref="cell-theory">Cell theory</tb-term>, as it is now stated, makes three claims, and they are still the foundation of biology:</p>
+
+<ol>
+  <li>All living things are made of one or more cells.</li>
+  <li>The cell is the smallest unit of life. Nothing smaller is alive on its own.</li>
+  <li>Every cell arises from a pre-existing cell.</li>
+</ol>
+
+<p>There are two kinds of cell. A <tb-term ref="prokaryote">prokaryote</tb-term>, which is what every bacterium and archaeon is, has no <tb-term ref="nucleus">nucleus</tb-term>: its DNA lies in the cytoplasm, and its cell is typically one to five micrometres across. A <tb-term ref="eukaryote">eukaryote</tb-term> keeps its DNA inside a nucleus and divides the rest of the cell into membrane-bound compartments, the organelles, each with a job. Eukaryotic cells are usually ten to a hundred micrometres across, and every animal, plant and fungus is made of them.</p>
+
+<tb-figure kind="cell3d" id="fig-cell" width="wide" data-alt="A three-dimensional animal cell about 20 micrometres across, with a translucent plasma membrane, an off-centre nucleus with nucleolus and chromatin, coral mitochondria, teal rough and smooth endoplasmic reticulum, a gold Golgi stack, magenta lysosomes, green peroxisomes, hundreds of tiny ribosomes, microtubules radiating from a centrosome, and small vesicles. It can be turned, zoomed, cut open, and each organelle clicked for its name and job.">
+  <figcaption>An animal cell, about 20 µm across. Drag to turn it, click an organelle to name it, and cut it open to see how the compartments are packed.<span class="fig-hint">Arrow keys turn the cell when it is focused; + and − zoom.</span></figcaption>
+</tb-figure>
+
+<p>Figure 1.5 is the cell you will meet again in Chapter 3. For now, the table gives each compartment its one-line job, and the figure's colours stay the same throughout the book.</p>
+
+<table>
+  <thead><tr><th>Structure</th><th>What it does</th><th>Found in</th></tr></thead>
+  <tbody>
+    <tr><td>Plasma membrane</td><td>A double layer of lipids that separates the cell from its surroundings and controls what enters and leaves.</td><td>All cells</td></tr>
+    <tr><td>Ribosomes</td><td>Read messenger RNA and build proteins.</td><td>All cells</td></tr>
+    <tr><td>Nucleus</td><td>Holds the DNA behind a double membrane.</td><td>Eukaryotes</td></tr>
+    <tr><td>Mitochondria</td><td>Burn sugar with oxygen to make ATP, the cell's energy currency.</td><td>Almost all eukaryotes</td></tr>
+    <tr><td>Endoplasmic reticulum</td><td>Rough: makes and folds proteins for export. Smooth: makes lipids, detoxifies chemicals.</td><td>Eukaryotes</td></tr>
+    <tr><td>Golgi apparatus</td><td>Sorts, modifies and ships proteins in vesicles.</td><td>Eukaryotes</td></tr>
+    <tr><td>Lysosomes</td><td>Digest worn-out parts and recycle them.</td><td>Animal cells</td></tr>
+    <tr><td>Cytoskeleton</td><td>Filaments and tubes that give the cell its shape and move things inside it.</td><td>All cells, richest in eukaryotes</td></tr>
+    <tr><td>Chloroplasts</td><td>Capture light and make sugar.</td><td>Plants and algae</td></tr>
+    <tr><td>Cell wall</td><td>A stiff outer layer that resists pressure.</td><td>Plants, fungi, most prokaryotes</td></tr>
+  </tbody>
+</table>
+
+<aside class="tb-margin-note">Mitochondria carry their own small circular DNA and divide on their own schedule: relics of their past as free-living bacteria. Section 1.7 returns to that partnership.</aside>
+
+<tb-key><p>Nothing smaller than a cell is alive on its own, and no cell has ever been seen to arise except from another cell.</p></tb-key>
+</section>
+
+<section id="information">
+<h2>Life runs on information</h2>
+
+<p>A crystal grows by copying its own arrangement. A cell grows by reading instructions. Those instructions are written in <tb-term ref="dna">DNA</tb-term>, a molecule shaped like a twisted ladder: two backbones of alternating sugar and phosphate, joined by rungs, each rung a <tb-term ref="base-pair">base pair</tb-term>. There are four bases, and they pair by a fixed rule: adenine with thymine, guanine with cytosine. The pairing rule is the whole secret. Because A always faces T and G always faces C, either strand carries enough information to rebuild the other. That is how a cell copies its DNA before it divides, and how damage on one strand can be repaired from the other. Figure 1.6 shows three turns of the molecule at its true proportions.</p>
+
+<tb-figure kind="dna3d" id="fig-dna" width="wide" data-alt="Three turns of a right-handed DNA double helix, two nanometres wide with 3.4 nanometres per turn: two sugar-phosphate backbones running in opposite directions, base pairs as coloured rungs (adenine coral, thymine gold, guanine teal, cytosine violet) meeting at two or three small hydrogen-bond dots, and visible major and minor grooves. It can be turned and each rung clicked to show which bases pair.">
+  <figcaption>Three turns of the double helix: 2 nm wide, 3.4 nm per turn, about ten and a half base pairs in each. Turn it to see the major and minor grooves; click a rung to see which bases pair.</figcaption>
+</tb-figure>
+
+<p>A <tb-term ref="gene">gene</tb-term> is a stretch of DNA that specifies a product, usually a protein. Your <tb-term ref="genome">genome</tb-term> is about 3.1 billion base pairs long and carries around 20,000 protein-coding genes on 23 chromosomes, and every cell of yours carries two sets, 46 in all. The bacterium <em>Escherichia coli</em> manages with 4.6 million base pairs and about 4,300 genes on a single circular chromosome. The striking thing is not the difference in size but the sameness of the system: the same four bases, the same pairing rule, and with only rare small variations the same code for translating DNA into protein, in every organism ever examined. It is the strongest single piece of evidence that all known life descends from a common ancestor.</p>
+
+<tb-key><p>Heredity is chemistry. Information is stored in the order of bases and copied by the rule that each base has one partner.</p></tb-key>
+</section>
+
+<section id="energy">
+<h2>Energy flows and matter cycles</h2>
+
+<p>Living things are ordered, and order does not maintain itself. Left alone, a cell's molecules would drift towards disorder, the way a room does. To keep building and repairing, an organism must take in energy from outside and spend it. That is what metabolism is for. The second law of thermodynamics is not suspended by life; it is paid for, continuously.</p>
+
+<p>Nearly all the energy that living things use arrives as sunlight. <tb-term ref="producer">Producers</tb-term>, which are plants, algae and photosynthetic bacteria, capture it and store it in the chemical bonds of sugars they make from carbon dioxide and water. <tb-term ref="consumer">Consumers</tb-term> get their energy by eating producers or other consumers. <tb-term ref="decomposer">Decomposers</tb-term>, mostly fungi and bacteria, take what is left. At every transfer most of the energy leaves as heat: only about a tenth of the energy stored in one level ends up stored in the next, which is why food chains are short and why there are far fewer foxes than rabbits, and far fewer rabbits than blades of grass.</p>
+
+<p>Matter does the opposite. The carbon in a rabbit's muscle came from carbon dioxide in the air by way of grass, and it will return to the air when the rabbit breathes out, or when a fox or a fungus takes the rabbit apart. Energy passes through an ecosystem once and leaves. Matter goes around and around. Figure 1.7 draws the two paths through one small ecosystem.</p>
+
+<tb-figure kind="energy" id="fig-energy" width="wide" data-alt="A landscape with the sun, grass and a tree, a rabbit, a fox, and fungi and bacteria in the soil. Gold arrows carry energy from the sun through producers and consumers, thinning at each step as wisps labelled heat leave upward. Green arrows carry carbon and nutrients in a closed loop through decomposers back to the producers.">
+  <figcaption>Energy flows one way, matter cycles. Gold marks energy: it arrives from the sun, thins at each transfer, and leaves as heat. Green marks carbon and nutrients: they loop through producers, consumers and decomposers, as carbon dioxide breathed out and as nutrients through the soil, and are never used up.<span class="fig-hint">The buttons show one system at a time.</span></figcaption>
+</tb-figure>
+</section>
+
+<section id="evolution">
+<h2>Evolution explains the pattern</h2>
+
+<p>Why does a whale have finger bones inside its flipper? Why do humans, mice and yeast copy their DNA with the same molecular machinery? Why does every living thing share the seven properties of Section 1.2? The answer to all three is the same: they are related. Life on Earth is one family tree, and <tb-term ref="evolution">evolution</tb-term> is the name for how it grew.</p>
+
+<p>Charles Darwin's argument, published in 1859 after Alfred Russel Wallace had reached the same idea on his own, is simple. Individuals in a population vary. Some of that variation is inherited. More offspring are produced than can survive, so individuals whose inherited traits suit their environment leave more descendants than the others. Over generations the population changes, and it changes in a particular direction: towards a better fit with its way of life. Darwin called the process <tb-term ref="natural-selection">natural selection</tb-term>, and the fit it produces is <tb-term ref="adaptation">adaptation</tb-term>. Other processes change populations too, but natural selection is the only one that produces adaptation.</p>
+
+<blockquote>“Nothing in biology makes sense except in the light of evolution.”<cite>Theodosius Dobzhansky, title of a 1973 essay</cite></blockquote>
+
+<p>Comparing DNA sequences lets biologists reconstruct the tree. Its deepest split parts Bacteria from the lineage that holds Archaea and Eukarya, and those three groups are the <tb-term ref="domain">domains</tb-term>: Bacteria; Archaea, prokaryotes first found in hot springs and salt lakes and since found everywhere; and Eukarya. Eukaryotes arose, roughly two billion years ago, when a cell of an archaeal lineage took in a bacterium and kept it. That bacterium became the mitochondrion. Later, the ancestors of plants took in a photosynthetic cyanobacterium, which became the chloroplast. Both events are <tb-term ref="endosymbiosis">endosymbiosis</tb-term>, and the partners are still together: the mitochondrion in every one of your cells, the chloroplast in every leaf. All animals, plants and fungi are a few twigs on the eukaryote branch, as Figure 1.8 shows.</p>
+
+<tb-figure kind="tree" id="fig-tree" width="wide" data-alt="A tree rooted at the last universal common ancestor, splitting into Bacteria on one side and Archaea with Eukarya on the other, with Eukarya branching into single-celled lineages, plants, fungi and animals. Two dashed arrows from Bacteria mark the origin of mitochondria at the base of Eukarya and of chloroplasts at the plants. Each domain shows example organisms and, when selected, facts about its cells.">
+  <figcaption>The tree of life, rooted at the last universal common ancestor. Tap a domain to see what its cells are like. The dashed arrows are the two partnerships: the first made eukaryotes, the second made plants.</figcaption>
+</tb-figure>
+
+<tb-key><p>The unity of life, from the shared genetic code to the shared properties of Section 1.2, is what a single family tree looks like from the inside.</p></tb-key>
+</section>
+
+<section id="method">
+<h2>How biologists know</h2>
+
+<p>Everything above is knowledge, and knowledge has a history. For two thousand years it was obvious that life could arise from non-life: maggots from meat, mice from stored grain, microbes from broth. This was <tb-term ref="spontaneous-generation">spontaneous generation</tb-term>, and it was not a foolish idea; it was what the evidence looked like. In 1668 Francesco Redi showed that maggots appear on meat only when flies can reach it. Microbes were harder. Boiled broth in a sealed flask stayed clear, while broth open to the air went cloudy. Was it the air's microbes, or did life need fresh air to generate itself?</p>
+
+<p>Between 1859 and 1861 Louis Pasteur answered with a flask whose neck he drew out into an S-curve. Air could enter freely; dust, and the microbes riding on it, settled in the bend. Boiled broth in such a flask stayed clear for months. Snap the neck, or tilt the flask so that the broth touched the dust trapped in the bend, and it clouded within days. The experiment is a model of the method: a <tb-term ref="hypothesis">hypothesis</tb-term> that microbes come from other microbes carried in the air; a prediction that could have failed; a <tb-term ref="control">controlled experiment</tb-term> in which only one thing was changed; and a result that settled the question because there was no longer any way to explain it that spontaneous generation could survive.</p>
+
+<tb-figure kind="pasteur" id="fig-pasteur" width="wide" data-alt="Two glass flasks of broth with S-shaped swan necks on a bench, with a timeline in days. After boiling, both stay clear while dust collects in the bends of the necks. Snapping one neck lets dust in and that broth turns cloudy over the following days; tilting the intact flask so the broth touches the trapped dust clouds it too.">
+  <figcaption>Pasteur's swan-neck flasks. Boil both, then snap one neck, or tilt the intact flask, and scrub through the days.<span class="fig-hint">Try leaving the flasks unboiled to see what the old evidence looked like.</span></figcaption>
+</tb-figure>
+
+<p>Most of biology is found the way Pasteur found this (Figure 1.9): an observation raises a question; a hypothesis proposes an answer and makes a prediction; an experiment or a careful comparison tests the prediction, holding everything else constant; the result is analysed, and either the hypothesis survives for now or it is revised. Then the work is published, criticised, and repeated by other people. A hypothesis that has been tested many ways, over many years, by many people, and has explained a wide range of facts without failing, earns the name <tb-term ref="theory">theory</tb-term>. Cell theory is one. The theory of evolution is another. In science the word marks the strongest kind of knowledge there is, not a guess.</p>
+
+<tb-key><p>Science does not prove. It tests. A claim earns trust by surviving honest attempts to break it.</p></tb-key>
+</section>
+
+<section id="summary" data-unnumbered class="tb-endmatter">
+<h2>Key ideas</h2>
+<ul>
+  <li>Life has no single definition. It is recognised by a family of shared properties: order, metabolism, regulation, growth and development, response, reproduction, and adaptation.</li>
+  <li>Homeostasis is maintained by negative feedback: sensors, a set point, and effectors whose response opposes the change.</li>
+  <li>Life is organised in levels, and new properties emerge at each level from the arrangement of the parts.</li>
+  <li>The cell is the unit of life: all organisms are made of cells, and every cell comes from a cell.</li>
+  <li>Prokaryotes have no nucleus; eukaryotes keep their DNA in a nucleus and divide their cells into organelles.</li>
+  <li>DNA stores information as the order of four bases and copies it by complementary pairing, in the same way in every known organism.</li>
+  <li>Energy flows through ecosystems and leaves as heat; matter cycles.</li>
+  <li>Evolution by natural selection explains both the unity of life and its fit to the environment.</li>
+  <li>Biology is built from hypotheses that survive controlled tests; a theory is the most thoroughly tested kind of explanation.</li>
+</ul>
+</section>
+
+<section id="glossary" data-unnumbered>
+<h2>Glossary</h2>
+<tb-glossary></tb-glossary>
+</section>
+
+<section id="checks" data-unnumbered>
+<h2>Check your understanding</h2>
+
+<tb-check id="q1">
+  <p class="question">Which of these is <em>not</em> a property shared by all living things?</p>
+  <ul class="options">
+    <li>Being made of cells</li>
+    <li>Keeping the interior steady</li>
+    <li data-correct>Moving from place to place</li>
+    <li>Using energy</li>
+  </ul>
+  <p class="explain">Plants, fungi and many bacteria stay put for their whole lives. Every living thing responds to its surroundings, but responding is not the same as moving.</p>
+</tb-check>
+
+<tb-check id="q2">
+  <p class="question">A virus has genes and evolves, yet most biologists do not count it as fully alive. Why?</p>
+  <ul class="options">
+    <li>It is too small to see with a light microscope.</li>
+    <li data-correct>It has no cells and no metabolism of its own, and it cannot reproduce without a host cell.</li>
+    <li>It cannot evolve.</li>
+    <li>It contains neither DNA nor RNA.</li>
+  </ul>
+  <p class="explain">Size is not a criterion, viruses do evolve, and every virus carries DNA or RNA. What they lack is the machinery: a virus is instructions without a cell to run them.</p>
+</tb-check>
+
+<tb-check id="q3">
+  <p class="question">“A heart pumps blood, but no single heart cell does.” This is an example of:</p>
+  <ul class="options">
+    <li>Homeostasis</li>
+    <li data-correct>An emergent property</li>
+    <li>Natural selection</li>
+    <li>Metabolism</li>
+  </ul>
+  <p class="explain">Pumping appears at the level of the organ, from the arrangement and coordination of the cells. It is not a property of any part alone.</p>
+</tb-check>
+
+<tb-check id="q4">
+  <p class="question">Which statement about an ecosystem is correct?</p>
+  <ul class="options">
+    <li>Both energy and matter cycle.</li>
+    <li>Both energy and matter pass through once.</li>
+    <li data-correct>Energy passes through once and leaves as heat; matter cycles.</li>
+    <li>Matter passes through once; energy cycles.</li>
+  </ul>
+  <p class="explain">Sunlight enters, is stored in sugars, and is lost as heat at every transfer, so an ecosystem needs a constant supply. The carbon, nitrogen and other atoms are used again and again.</p>
+</tb-check>
+
+<tb-check id="q5">
+  <p class="question">Pasteur's swan-neck flask stayed clear because:</p>
+  <ul class="options">
+    <li>No air could reach the broth.</li>
+    <li data-correct>Air entered, but dust and microbes settled in the bend of the neck.</li>
+    <li>The flask was sealed with wax.</li>
+    <li>The glass killed any microbes that touched it.</li>
+  </ul>
+  <p class="explain">The point of the swan neck was to let air in while keeping dust out. Tilting the flask so the broth touched the trapped dust made it cloud, which showed that the dust, not the air, carried the microbes.</p>
+</tb-check>
+</section>
+
+<a class="tb-next" href="../">
+  <span class="tb-label">Next</span>
+  <strong>2 · The chemistry of life</strong>
+  <span class="dek">Atoms, water, and the four kinds of molecule every cell is built from. In preparation; the book page lists every chapter.</span>
+</a>
+
+</div>
+</main>
+
+<aside class="tb-margin" aria-hidden="true"></aside>
+</div>
+</body>
+</html>

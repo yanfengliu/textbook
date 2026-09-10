@@ -1,0 +1,31 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # The gates drive a headless chromium; only chromium is needed, and --with-deps brings the
+      # system libraries the runner does not ship.
+      - run: npx playwright install --with-deps chromium
+      # The runner has no GPU, so the 3D figures render through SwiftShader. npm run perf is
+      # deliberately not run here: it measures the machine it runs on.
+      - run: npm test
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-output
+          path: out/
+          retention-days: 7

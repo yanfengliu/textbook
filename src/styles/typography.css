@@ -1,0 +1,232 @@
+/* Typography. Three families, one scale, one measure. Fonts are linked from the page head. */
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-text);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--ink);
+  background: var(--paper);
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  hanging-punctuation: first last;
+}
+
+@supports (font-variation-settings: normal) {
+  body {
+    font-family: var(--font-text);
+  }
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0;
+  text-wrap: balance;
+  font-variation-settings: "SOFT" 40, "WONK" 0;
+}
+
+h1 {
+  font-size: var(--text-4xl);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: var(--text-2xl);
+  margin-top: var(--space-16);
+  margin-bottom: var(--space-4);
+}
+
+h3 {
+  font-size: var(--text-lg);
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-2);
+}
+
+h4 {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-2);
+}
+
+/* Prose */
+p {
+  margin: 0 0 var(--space-4);
+  max-width: var(--measure);
+}
+
+p + p {
+  text-indent: 0;
+}
+
+a {
+  color: var(--leaf);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.14em;
+  text-decoration-color: color-mix(in srgb, var(--leaf) 45%, transparent);
+  transition: text-decoration-color var(--dur) var(--ease);
+}
+
+a:hover {
+  text-decoration-color: var(--leaf);
+}
+
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--water);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+em {
+  font-style: italic;
+}
+
+strong {
+  font-weight: 600;
+}
+
+small {
+  font-size: var(--text-sm);
+}
+
+blockquote {
+  margin: var(--space-8) 0;
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--rule-strong);
+  font-style: italic;
+  color: var(--ink-soft);
+  max-width: var(--measure);
+}
+
+blockquote cite {
+  display: block;
+  margin-top: var(--space-2);
+  font-style: normal;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--ink-faint);
+}
+
+ul, ol {
+  padding-left: 1.4em;
+  margin: 0 0 var(--space-4);
+  max-width: var(--measure);
+}
+
+li {
+  margin-bottom: var(--space-1);
+}
+
+li::marker {
+  color: var(--ink-faint);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: var(--space-12) 0;
+}
+
+sup, sub {
+  font-size: 0.7em;
+  line-height: 0;
+  font-variant-numeric: lining-nums;
+}
+
+/* Interface text */
+.ui,
+nav, button, input, select, table, figcaption .fig-num, .tb-label {
+  font-family: var(--font-ui);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Section labels: small caps, tracked */
+.tb-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* The chapter opener's drop cap */
+.tb-dropcap::first-letter {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  float: left;
+  font-size: 4.6em;
+  line-height: 0.78;
+  padding: 0.08em 0.1em 0 0;
+  margin-bottom: -0.1em;
+  color: var(--leaf);
+}
+
+/* Tables of data: lining, tabular figures, hairlines */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: var(--space-6) 0 var(--space-8);
+  font-size: var(--text-base);
+  line-height: 1.4;
+}
+
+th {
+  text-align: left;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  padding: var(--space-2) var(--space-3) var(--space-2) 0;
+  border-bottom: 1px solid var(--rule-strong);
+  vertical-align: bottom;
+}
+
+td {
+  padding: var(--space-2) var(--space-3) var(--space-2) 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+  font-family: var(--font-text);
+  font-variant-numeric: oldstyle-nums;
+}
+
+td.num, th.num {
+  text-align: right;
+  font-family: var(--font-ui);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+code, kbd {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: 0.86em;
+  background: var(--paper-2);
+  padding: 0.05em 0.35em;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--gold-soft);
+}

@@ -1,0 +1,27 @@
+{
+  "name": "textbook",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Interactive textbooks with beautiful type, illustrations, animations, and 3D models. Book 1: biology.",
+  "scripts": {
+    "dev": "node tools/serve.js",
+    "check": "node tools/check-content.js",
+    "shot": "node tools/shot.js",
+    "sweep3d": "node tools/sweep3d.js",
+    "perf": "node tools/perf.js",
+    "unit": "node --test \"test/*.test.js\"",
+    "test": "node tools/test.js",
+    "audit": "npm audit --audit-level=high",
+    "figure": "node tools/figure-shot.js",
+    "inspect": "node tools/inspect.js",
+    "flow": "node tools/flow.js",
+    "drive": "node tools/drive.js"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "playwright": "1.61.1"
+  }
+}

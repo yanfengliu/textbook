@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Figure lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..700,0..100,0..1&family=Newsreader:opsz,wght@6..72,400..600&family=Inter:wght@400..700&display=swap">
+<link rel="stylesheet" href="../src/styles/tokens.css">
+<link rel="stylesheet" href="../src/styles/typography.css">
+<link rel="stylesheet" href="../src/styles/layout.css">
+<link rel="stylesheet" href="../src/styles/components.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+<style>
+  .lab { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+  .lab__bar { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; font-family: var(--font-ui); font-size: var(--text-sm); margin-bottom: 1rem; }
+  .lab__bar select, .lab__bar input { font: inherit; padding: .25rem .5rem; }
+  .lab pre { font-size: 12px; background: var(--paper-2); padding: .75rem; overflow: auto; border-radius: 6px; }
+  tb-figure[data-width="wide"], tb-figure[data-width="bleed"] { width: 100%; left: 0; transform: none; }
+</style>
+</head>
+<body>
+<!--
+  The figure lab: mounts one figure by ?kind=<kind>, at ?theme=light|dark, with ?t=<seconds> to pin its
+  clock, ?reduce=1 to force reduced motion, and ?width=text|wide. For workers building a figure and for
+  the sweep gate. Adds nothing a chapter page does not also do.
+-->
+<main class="lab" data-chapter="0">
+  <div class="lab__bar">
+    <label>kind <select id="kind"></select></label>
+    <label>theme <select id="theme"><option value="light">light</option><option value="dark">dark</option></select></label>
+    <label>t <input id="t" type="number" step="0.5" style="width:5rem"></label>
+    <label><input id="reduce" type="checkbox"> reduced motion</label>
+    <button id="go" type="button">Reload</button>
+    <span id="state"></span>
+  </div>
+  <div id="host"></div>
+  <details><summary>describe()</summary><pre id="describe"></pre></details>
+</main>
+<script type="module">
+  import '../src/components/index.js';
+  import { KINDS, figureInfo } from '../src/figures/registry.js';
+  const p = new URLSearchParams(location.search);
+  const kind = p.get('kind') || KINDS[0];
+  const width = p.get('width') || 'wide';
+  const sel = document.getElementById('kind');
+  for (const k of KINDS) sel.innerHTML += `<option ${k === kind ? 'selected' : ''}>${k}</option>`;
+  document.getElementById('theme').value = p.get('theme') || 'light';
+  document.getElementById('t').value = p.get('t') || '';
+  document.getElementById('reduce').checked = p.get('reduce') === '1';
+  document.getElementById('go').addEventListener('click', () => {
+    const q = new URLSearchParams();
+    q.set('kind', sel.value);
+    q.set('theme', document.getElementById('theme').value);
+    q.set('eager', '1');
+    const t = document.getElementById('t').value;
+    if (t !== '') q.set('t', t);
+    if (document.getElementById('reduce').checked) q.set('reduce', '1');
+    location.search = q.toString();
+  });
+  const info = figureInfo(kind);
+  const host = document.getElementById('host');
+  host.innerHTML = `<tb-figure kind="${kind}" id="lab-${kind}" width="${width}" data-alt="${info.title}"><figcaption>${info.title} — the lab.</figcaption></tb-figure>`;
+  const stateEl = document.getElementById('state');
+  const fig = host.querySelector('tb-figure');
+  const tick = () => {
+    stateEl.textContent = `state: ${fig.dataset.state}`;
+    try { document.getElementById('describe').textContent = JSON.stringify(fig.describe?.() ?? {}, null, 1); } catch {}
+  };
+  new MutationObserver(tick).observe(fig, { attributes: true, attributeFilter: ['data-state'] });
+  setInterval(tick, 1000);
+  tick();
+</script>
+</body>
+</html>

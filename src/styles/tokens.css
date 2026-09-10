@@ -1,0 +1,136 @@
+/* Design tokens. Every colour, size and font in the site is one of these. */
+
+:root {
+  color-scheme: light;
+
+  /* Paper and ink */
+  --paper: #faf7f1;
+  --paper-2: #f3eee4;
+  --paper-3: #ebe4d6;
+  --ink: #1d1a17;
+  --ink-soft: #5c554d;
+  --ink-faint: #8a8378;
+  --rule: #e3ddd2;
+  --rule-strong: #cfc7b8;
+
+  /* Accents */
+  --leaf: #2f7d4f;
+  --water: #2a7f8f;
+  --coral: #d9663d;
+  --violet: #6b4fa0;
+  --gold: #c9a227;
+
+  /* Soft tints of the accents, for fills behind text */
+  --leaf-soft: rgba(47, 125, 79, 0.11);
+  --water-soft: rgba(42, 127, 143, 0.11);
+  --coral-soft: rgba(217, 102, 61, 0.12);
+  --violet-soft: rgba(107, 79, 160, 0.12);
+  --gold-soft: rgba(201, 162, 39, 0.16);
+
+  --shadow: 0 1px 2px rgba(29, 26, 23, 0.06), 0 8px 24px rgba(29, 26, 23, 0.08);
+  --shadow-lift: 0 2px 6px rgba(29, 26, 23, 0.1), 0 18px 40px rgba(29, 26, 23, 0.14);
+
+  /* Type */
+  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-text: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Modular scale, ratio 1.2, from the 1rem root */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-body: 1.2rem;
+  --text-lg: 1.44rem;
+  --text-xl: 1.728rem;
+  --text-2xl: 2.074rem;
+  --text-3xl: 2.488rem;
+  --text-4xl: 2.986rem;
+  --text-5xl: 3.583rem;
+
+  --leading-body: 1.55;
+  --leading-tight: 1.15;
+  --measure: 66ch;
+
+  /* Rhythm: a 0.4rem baseline grid */
+  --u: 0.4rem;
+  --space-1: calc(var(--u) * 1);
+  --space-2: calc(var(--u) * 2);
+  --space-3: calc(var(--u) * 3);
+  --space-4: calc(var(--u) * 4);
+  --space-6: calc(var(--u) * 6);
+  --space-8: calc(var(--u) * 8);
+  --space-12: calc(var(--u) * 12);
+  --space-16: calc(var(--u) * 16);
+
+  --radius: 6px;
+  --radius-lg: 12px;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 240ms;
+  --dur-slow: 400ms;
+
+  /* Layout */
+  --rail-width: 15rem;
+  --text-width: 46rem;
+  --margin-width: 15rem;
+  --wide-width: 1100px;
+  --header-height: 3.4rem;
+}
+
+/* Dark theme: the same tokens, second values. Chosen by the system unless the toggle says otherwise. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #15171a;
+    --paper-2: #1c1f23;
+    --paper-3: #24282d;
+    --ink: #e9e4da;
+    --ink-soft: #a39d93;
+    --ink-faint: #746e66;
+    --rule: #2c3036;
+    --rule-strong: #3b4048;
+    --leaf: #5fb37f;
+    --water: #5cb5c4;
+    --coral: #ef8a63;
+    --violet: #a58ad8;
+    --gold: #e0bc4a;
+    --leaf-soft: rgba(95, 179, 127, 0.14);
+    --water-soft: rgba(92, 181, 196, 0.14);
+    --coral-soft: rgba(239, 138, 99, 0.14);
+    --violet-soft: rgba(165, 138, 216, 0.16);
+    --gold-soft: rgba(224, 188, 74, 0.16);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-lift: 0 2px 6px rgba(0, 0, 0, 0.4), 0 18px 40px rgba(0, 0, 0, 0.5);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #15171a;
+  --paper-2: #1c1f23;
+  --paper-3: #24282d;
+  --ink: #e9e4da;
+  --ink-soft: #a39d93;
+  --ink-faint: #746e66;
+  --rule: #2c3036;
+  --rule-strong: #3b4048;
+  --leaf: #5fb37f;
+  --water: #5cb5c4;
+  --coral: #ef8a63;
+  --violet: #a58ad8;
+  --gold: #e0bc4a;
+  --leaf-soft: rgba(95, 179, 127, 0.14);
+  --water-soft: rgba(92, 181, 196, 0.14);
+  --coral-soft: rgba(239, 138, 99, 0.14);
+  --violet-soft: rgba(165, 138, 216, 0.16);
+  --gold-soft: rgba(224, 188, 74, 0.16);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lift: 0 2px 6px rgba(0, 0, 0, 0.4), 0 18px 40px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0ms;
+    --dur-slow: 0ms;
+  }
+}

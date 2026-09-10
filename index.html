@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Textbooks</title>
+<meta name="description" content="Interactive textbooks with beautiful type, illustrations, animations and 3D models.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..700,0..100,0..1&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Inter:wght@400..700&display=swap">
+<link rel="stylesheet" href="src/styles/tokens.css">
+<link rel="stylesheet" href="src/styles/typography.css">
+<link rel="stylesheet" href="src/styles/layout.css">
+<link rel="stylesheet" href="src/styles/components.css">
+<style>
+  .library { max-width: 1100px; margin: 0 auto; padding: var(--space-16) var(--space-6) var(--space-16); }
+  .library__eyebrow { font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--leaf); margin: 0 0 var(--space-3); }
+  .library h1 { font-size: clamp(var(--text-3xl), 6vw, var(--text-5xl)); font-variation-settings: "SOFT" 80, "WONK" 1, "opsz" 144; margin-bottom: var(--space-4); }
+  .library__dek { font-size: var(--text-lg); color: var(--ink-soft); max-width: 44ch; line-height: 1.4; }
+  .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: var(--space-6); margin-top: var(--space-12); }
+  .book { display: grid; grid-template-rows: auto 1fr; border: 1px solid var(--rule); border-radius: var(--radius-lg); overflow: hidden; text-decoration: none; color: var(--ink); background: var(--paper); transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+  .book:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); border-color: var(--rule-strong); }
+  .book__cover { aspect-ratio: 16 / 9; display: block; width: 100%; background: var(--paper-2); }
+  .book__body { padding: var(--space-4) var(--space-5, 1.2rem) var(--space-5, 1.2rem); }
+  .book__label { font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); }
+  .book h2 { font-size: var(--text-xl); margin: var(--space-1) 0 var(--space-2); }
+  .book p { font-size: var(--text-base); color: var(--ink-soft); margin: 0; }
+  .book--soon { opacity: .55; pointer-events: none; }
+</style>
+<script type="module">
+  import './src/shell.js';
+</script>
+</head>
+<body>
+<tb-shell book="Textbooks" book-href="./" library-href="./" no-crumb></tb-shell>
+<main class="library">
+  <p class="library__eyebrow">A small library</p>
+  <h1>Textbooks you can put your hands into.</h1>
+  <p class="library__dek">Set like a book, built like a laboratory: every figure is an illustration you can read, a diagram that moves to explain itself, a model you can push on, or a three-dimensional thing you can turn over.</p>
+
+  <div class="shelf">
+    <a class="book" href="biology/">
+      <svg class="book__cover" viewBox="0 0 320 180" role="img" aria-label="A stylised cell">
+        <rect width="320" height="180" fill="var(--paper-2)"/>
+        <circle cx="160" cy="92" r="66" fill="none" stroke="var(--coral)" stroke-width="2" opacity=".8"/>
+        <circle cx="160" cy="92" r="60" fill="var(--paper-3)"/>
+        <circle cx="146" cy="84" r="22" fill="var(--violet)" opacity=".9"/>
+        <circle cx="140" cy="80" r="7" fill="var(--paper)" opacity=".5"/>
+        <ellipse cx="192" cy="112" rx="14" ry="7" transform="rotate(-25 192 112)" fill="var(--coral)"/>
+        <ellipse cx="178" cy="62" rx="12" ry="6" transform="rotate(30 178 62)" fill="var(--coral)"/>
+        <path d="M118 118 q14 -8 28 0 t28 0" fill="none" stroke="var(--water)" stroke-width="3" stroke-linecap="round"/>
+        <path d="M196 84 q6 -10 12 0 q6 -10 12 0" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="128" cy="70" r="4" fill="var(--gold)"/>
+        <circle cx="205" cy="128" r="4" fill="var(--leaf)"/>
+        <g fill="var(--ink-soft)" opacity=".6"><circle cx="150" cy="120" r="1.5"/><circle cx="170" cy="128" r="1.5"/><circle cx="182" cy="96" r="1.5"/><circle cx="120" cy="96" r="1.5"/><circle cx="160" cy="44" r="1.5"/></g>
+      </svg>
+      <div class="book__body">
+        <span class="book__label">Book 1 · Biology</span>
+        <h2>The Living World</h2>
+        <p>An interactive introduction to biology. Chapter 1, “What is life?”, is ready; thirty-one more are outlined.</p>
+      </div>
+    </a>
+    <div class="book book--soon" aria-disabled="true">
+      <svg class="book__cover" viewBox="0 0 320 180" role="img" aria-label="Placeholder"><rect width="320" height="180" fill="var(--paper-2)"/></svg>
+      <div class="book__body"><span class="book__label">Book 2 · Chemistry</span><h2>Matter and change</h2><p>In preparation.</p></div>
+    </div>
+  </div>
+</main>
+</body>
+</html>
