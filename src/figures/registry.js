@@ -14,7 +14,7 @@ export const FIGURES = Object.freeze({
   dna3d: { url: new URL('./dna3d.js', import.meta.url).href, title: 'The double helix', needsWebGL: true, aspect: 16 / 9, narrowAspect: 3 / 4 },
   energy: { url: new URL('./energy.js', import.meta.url).href, title: 'Energy flows, matter cycles', needsWebGL: false, aspect: 16 / 9 },
   tree: { url: new URL('./tree.js', import.meta.url).href, title: 'The tree of life', needsWebGL: false, aspect: 16 / 10 },
-  pasteur: { url: new URL('./pasteur.js', import.meta.url).href, title: 'Pasteur\'s swan-neck flasks', needsWebGL: false, aspect: 16 / 9 },
+  pasteur: { url: new URL('./pasteur.js', import.meta.url).href, title: 'Pasteur\'s swan-neck flasks', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 3 },
 });
 
 export const KINDS = Object.freeze(Object.keys(FIGURES));

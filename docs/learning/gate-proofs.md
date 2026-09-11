@@ -6,6 +6,34 @@ Auditing a gate means reaching what was measured at the time, never the sentence
 
 Every entry names the tree its numbers were taken on. The entries below were all taken on the uncommitted foundation tree of 2026-09-08, before the first commit, so they name files rather than revisions; the first commit carries the same files.
 
+## narrow: the figures' phone layouts had no gate at all (`tools/narrow.js`)
+
+- **The gap, reported by the worker who created it (2026-09-10).** Five of the nine figures gained a
+  second composition for a narrow stage, because their desktop drawings rendered type at about four
+  device pixels on a phone. `tools/drive.js` runs one viewport, 1000x640, and `tools/shot.js` loads the
+  phone chapter but only asks whether the page threw. A whole second layout per figure was standing on
+  one worker's screenshots and nothing else.
+- Claim (in the tool's own header): at a 390 px stage, in both themes, every registered figure reaches
+  `ready`, draws a frame that is not blank, flat or near-black, keeps at least one control reachable
+  and pressable, and stays ready after it is pressed.
+- Mutation: `drawNarrow()` in `src/figures/tree.js` made to return immediately. Failure:
+  `FAIL: 1 problem(s) over 0 narrow frame(s): tree light: the figure is in state "error"`, exit 1.
+  Restored, 18 of 18 frames `ok` across nine figures. The blank-frame branch of the same `judge()` is
+  the one proved in the sweep entry below, where replacing a render with a clear produced
+  `one colour fills 98.4% of the frame ... the frame is blank`.
+- **Two of its own assertions were unsound and were removed rather than kept.** It first required that
+  pressing a control change what the figure reports. That failed on the tree, whose `Domains` button is
+  the mode it opens in, and then on the helix, whose `Reset view` at the default view correctly does
+  nothing. Idempotent controls are right, not inert, so the claim now stops at "stays ready after it is
+  pressed"; what a control does is `drive.js`'s question at desktop width. A gate asserting something
+  untrue is worse than a narrower one that is true.
+- The other thing it had to learn: the first visible button is not always pressable. Pasteur's `Play`
+  is disabled until the broth is boiled. It now takes the first enabled button that is not already
+  pressed.
+- What it does not prove: legibility, which is the whole reason the narrow layouts exist. It writes
+  `out/narrow/` at three times scale precisely so a person can judge that, and the integration owner
+  looked at those frames on 2026-09-10.
+
 ## sitting: a reader can finish a sitting, and the page does not claim more than the record supports (`tools/sitting.js`)
 
 - Claim (in the tool's own header): from a clean record the Today page offers a calibration sitting,

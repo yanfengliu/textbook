@@ -22,6 +22,7 @@ run('page shots (tools/shot.js)', ['tools/shot.js']);
 run('reader flows (tools/flow.js)', ['tools/flow.js']);
 run('figure controls (tools/drive.js)', ['tools/drive.js']);
 run('a study sitting (tools/sitting.js)', ['tools/sitting.js']);
+run('figures at phone width (tools/narrow.js)', ['tools/narrow.js']);
 run('3D sweep (tools/sweep3d.js)', ['tools/sweep3d.js']);
 // Last, because it is the slowest and the least likely to be the thing you broke: it rebuilds the
 // published tree and loads every page under the /textbook/ subpath GitHub Pages serves it at. The

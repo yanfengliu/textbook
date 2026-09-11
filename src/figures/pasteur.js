@@ -140,7 +140,7 @@ function splitNeck() {
 // layout's card covers flask A's whole neck and the flask names run into the toolbar.
 const NARROW_MAX = 880;
 const NAME_PX = 13; // device pixels for the flask names on a narrow stage, converted to viewBox units
-const SCENE_BOX = { x0: 30, y0: 100, x1: 930, y1: BENCH_Y + 12 };
+const SCENE_BOX = { x0: 30, y0: 100, x1: 930, y1: BENCH_Y + 24 };
 
 const CSS = `
 .tb-pasteur { position: absolute; inset: 0; font-family: var(--font-ui); --ps-broth: color-mix(in srgb, var(--gold) 30%, var(--paper)); }

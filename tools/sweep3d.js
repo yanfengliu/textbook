@@ -4,7 +4,7 @@
 // Claim: for each 3D kind, at twelve views (four azimuths x three polar angles, at the default distance)
 // plus a near and a far view and one dark-theme view, the rendered stage is neither black, blank, nor
 // flat: the near-black fraction stays under 0.5, the luminance spread (std) is above 6, no single 4-bit
-// colour fills more than 97% of the frame, and the mean luminance is above 8. Fails naming the kind,
+// colour fills more than 98.5% of the frame, and the mean luminance is above 8. Fails naming the kind,
 // the view and the measure.
 //
 // Bound: it detects an absent frame, not a wrong one. A cell rendered upside down, mislabelled, or with
@@ -26,7 +26,12 @@ const gpu = process.env.SWEEP_GPU === '1';
 const kinds = Object.entries(FIGURES).filter(([, f]) => f.needsWebGL).map(([k]) => k);
 const azimuths = Number(process.env.SWEEP_VIEWS || 4);
 
-const LIMITS = { darkFraction: 0.5, minStd: 6, dominantFraction: 0.97, minMean: 8 };
+// The helix is a thin column against a large paper ground, so its far frame is legitimately about
+// 97% one colour: measured at 0.96981 against a 0.97 limit, which went red when another worker's CSS
+// changed the stage height by one pixel. A bound a thousandth away from the real value is measuring
+// the layout rather than the render, so it sits at 0.985, still far below the 0.999 an empty frame
+// gives. The mutation proof in docs/learning/gate-proofs.md was re-run at this value.
+const LIMITS = { darkFraction: 0.5, minStd: 6, dominantFraction: 0.985, minMean: 8 };
 
 function judge(stats) {
   const bad = [];

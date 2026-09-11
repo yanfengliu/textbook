@@ -577,7 +577,7 @@ export function mount(root, ctx) {
       g.textAlign = 'right';
       g.font = `10px ${FONT}`;
       g.fillStyle = p.inkFaint;
-      g.fillText('simulated s', padL + plotW, mainTop - 9);
+      g.fillText('seconds', padL + plotW, mainTop - 9);
       g.textAlign = 'left';
     }
 

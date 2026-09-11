@@ -55,6 +55,47 @@
   color: var(--ink-faint);
 }
 
+/* The Today link, and the count of objectives due on it. The count is a separate mark rather than
+   more text: without its own box it ran straight into the word and read as "Today3". Hidden at zero,
+   because a badge showing nothing is worse than no badge. */
+.tb-header__today {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--leaf-text);
+  text-decoration: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  margin-right: calc(-1 * var(--space-2));
+  border-radius: var(--radius);
+  transition: background var(--dur) var(--ease);
+}
+
+.tb-header__today:hover {
+  background: var(--leaf-soft);
+}
+
+.tb-header__today[aria-current="page"] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.tb-header__due {
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--paper);
+  background: var(--leaf-text);
+  border-radius: 999px;
+  min-width: 1.25rem;
+  padding: 0.2rem 0.35rem;
+  text-align: center;
+}
+
 .tb-iconbtn {
   appearance: none;
   border: 1px solid var(--rule);

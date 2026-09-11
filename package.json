@@ -21,7 +21,8 @@
     "progress:export": "node tools/progress.js export",
     "progress:import": "node tools/progress.js import",
     "subpath": "node tools/subpath.js",
-    "sitting": "node tools/sitting.js"
+    "sitting": "node tools/sitting.js",
+    "narrow": "node tools/narrow.js"
   },
   "engines": {
     "node": ">=24"

@@ -298,13 +298,16 @@ function nudge(slipped, key) {
   text.append(lead);
   slipped.forEach((s, i) => {
     const em = document.createElement('em');
-    em.textContent = s.objective.statement;
+    const last = i === slipped.length - 1;
+    // An objective statement is a sentence and ends in a full stop. Between two of them that would
+    // read ".;", so the stop is dropped from every one but the last.
+    em.textContent = last ? s.objective.statement : s.objective.statement.replace(/\s*\.$/, '');
     text.append(em);
-    text.append(i === slipped.length - 1 ? ' ' : '; ');
+    text.append(last ? ' ' : '; ');
   });
   const link = document.createElement('a');
   link.href = todayHref();
-  link.textContent = 'Practise it in Today';
+  link.textContent = slipped.length === 1 ? 'Practise it in Today' : 'Practise them in Today';
   text.append(link, '.');
   const close = document.createElement('button');
   close.type = 'button';
