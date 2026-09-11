@@ -4,6 +4,14 @@
   box-sizing: border-box;
 }
 
+/* Set while the contents drawer is open: the article behind it must not scroll away under a swipe
+   meant for the drawer. */
+.tb-locked,
+.tb-locked body {
+  overflow: hidden;
+  touch-action: none;
+}
+
 .tb-header {
   position: sticky;
   top: 0;
@@ -22,6 +30,8 @@
   font-variant-numeric: lining-nums tabular-nums;
 }
 
+/* The book's name is the one header item that may give way. Everything else is a fixed target or the
+   page you are on, so at 320 px the title truncates rather than pushing the theme toggle off screen. */
 .tb-header__book {
   font-family: var(--font-display);
   font-size: var(--text-base);
@@ -30,6 +40,10 @@
   text-decoration: none;
   letter-spacing: 0;
   white-space: nowrap;
+  flex: 0 1 auto;
+  min-width: 3rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tb-header__crumb {
@@ -41,9 +55,14 @@
   min-width: 0;
 }
 
+/* The breadcrumb links are text in a line of text, but they are still targets, and WCAG 2.2 asks for
+   24 px on the smallest side. Padding gets them there without moving the line. */
 .tb-header__crumb a {
   color: var(--ink-soft);
   text-decoration: none;
+  display: inline-block;
+  padding-block: var(--space-1);
+  min-height: 24px;
 }
 
 .tb-header__crumb a:hover {
@@ -96,8 +115,19 @@
   text-align: center;
 }
 
+/* The theme toggle is the last thing in the header and belongs in the corner. It pins itself there
+   rather than relying on the breadcrumb's flex-grow to push it, because the crumb is display:none
+   below 800px: on a phone nothing pushed it, so it sat wherever the title happened to end, 35px short
+   of the corner and moving with the length of the book's name. */
+.tb-header > .tb-themetoggle {
+  margin-left: auto;
+}
+
 .tb-iconbtn {
   appearance: none;
+  /* A target, not a spacer: never let the flex line squeeze it below its own size. At 320 px the
+     header is crowded enough that these were shrinking to 19 px against a 24 px minimum. */
+  flex: 0 0 auto;
   border: 1px solid var(--rule);
   background: var(--paper-2);
   color: var(--ink-soft);
@@ -384,8 +414,29 @@ section > h2 .n {
     transform: translateX(0);
     box-shadow: var(--shadow-lift);
   }
+
+  /* What the reader taps to dismiss the drawer, and what tells them the page behind is waiting. */
+  .tb-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 38;
+    background: color-mix(in srgb, var(--ink) 38%, transparent);
+    animation: tb-scrim-in var(--dur-slow) var(--ease);
+  }
+
+  @keyframes tb-scrim-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tb-scrim {
+      animation: none;
+    }
+  }
   .tb-header {
-    padding: 0 var(--space-4);
+    padding: 0 var(--space-3);
+    gap: var(--space-3);
   }
   .tb-header__crumb {
     display: none;
@@ -406,13 +457,18 @@ section > h2 .n {
 }
 
 @media (min-width: 800px) {
-  .tb-navtoggle {
+  .tb-navtoggle,
+  .tb-scrim {
     display: none;
   }
 }
 
-/* Chapter opener */
+/* Chapter opener. Clamped to the same measure as the text column: it is outside .tb-text in the
+   markup, and without this its children resolve their widths against the whole grid track instead, so
+   the title ran past the prose and the hero figure's breakout landed past every other wide figure.
+   One column means one left edge and one right edge for everything that is not deliberately wide. */
 .tb-opener {
+  max-width: var(--measure);
   margin-bottom: var(--space-12);
 }
 

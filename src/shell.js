@@ -201,17 +201,46 @@ class TbShell extends HTMLElement {
           }
         }, { rootMargin: '-20% 0px -70% 0px' });
         for (const s of sections) io.observe(s);
-        // Mobile drawer
+        // The contents drawer, below 800px. It is a drawer rather than a panel, so it owes the reader
+        // everything a drawer owes: something to tap outside it, a page that does not scroll away
+        // behind it, and focus that goes in and comes back. Without the first two it reads as broken,
+        // which is how it was reported (docs/learning/defect-register.md, 2026-09-10).
         const navToggle = header.querySelector('.tb-navtoggle');
-        navToggle.addEventListener('click', () => {
-          const open = rail.classList.toggle('is-open');
+        const scrim = document.createElement('div');
+        scrim.className = 'tb-scrim';
+        scrim.hidden = true;
+        document.body.append(scrim);
+        let lastFocus = null;
+
+        const setDrawer = (open) => {
+          if (open === rail.classList.contains('is-open')) return;
+          rail.classList.toggle('is-open', open);
           navToggle.setAttribute('aria-expanded', String(open));
-        });
-        rail.addEventListener('click', (e) => {
-          if (e.target.closest('a')) {
-            rail.classList.remove('is-open');
-            navToggle.setAttribute('aria-expanded', 'false');
+          scrim.hidden = !open;
+          // Lock the page behind the drawer. Without this a swipe meant for the contents scrolls the
+          // article instead, which is the commonest way a drawer feels broken on a phone.
+          document.documentElement.classList.toggle('tb-locked', open);
+          if (open) {
+            lastFocus = document.activeElement;
+            (rail.querySelector('a') || rail).focus({ preventScroll: true });
+          } else if (lastFocus && document.contains(lastFocus)) {
+            lastFocus.focus({ preventScroll: true });
+            lastFocus = null;
           }
+        };
+
+        navToggle.addEventListener('click', () => setDrawer(!rail.classList.contains('is-open')));
+        scrim.addEventListener('click', () => setDrawer(false));
+        rail.addEventListener('click', (e) => {
+          if (e.target.closest('a')) setDrawer(false);
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && rail.classList.contains('is-open')) setDrawer(false);
+        });
+        // A drawer that is open when the screen becomes wide enough for the rail would leave the page
+        // locked and a scrim over everything.
+        matchMedia('(min-width: 800px)').addEventListener('change', (e) => {
+          if (e.matches) setDrawer(false);
         });
       }
     }

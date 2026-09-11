@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3 · Cells — The Living World</title>
+<meta name="description" content="Chapter 3 of The Living World, an interactive biology textbook: how cells are seen, why they are small, prokaryotic cells, the endomembrane system, mitochondria and chloroplasts, the cytoskeleton, the cell surface, and plant cells against animal cells.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..700,0..100,0..1&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Inter:wght@400..700&display=swap">
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/typography.css">
+<link rel="stylesheet" href="../../src/styles/layout.css">
+<link rel="stylesheet" href="../../src/styles/components.css">
+<link rel="stylesheet" href="../../src/styles/learning.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+  // The glossary must be registered before the elements that read it are defined.
+  import { GLOSSARY } from './glossary.js';
+  import { OBJECTIVES } from './objectives.js';
+  import { textbook } from '../../src/shell.js';
+  import { register } from '../../src/learning/objectives.js';
+  textbook.registerGlossary(GLOSSARY);
+  register('biology/ch03', OBJECTIVES);
+  await import('../../src/components/index.js');
+</script>
+</head>
+<body>
+<a class="tb-skip" href="#seeing">Skip to the chapter</a>
+<tb-shell book="The Living World" book-href="../" library-href="../../" today-href="../../today/" chapter="3 · Cells"></tb-shell>
+
+<div class="tb-page">
+<nav class="tb-rail" aria-label="Chapter contents"></nav>
+
+<main class="tb-main" data-chapter="3">
+
+<header class="tb-opener">
+  <p class="tb-opener__unit">Unit I · The nature of life</p>
+  <p class="tb-opener__number" aria-hidden="true">3</p>
+  <h1>Cells</h1>
+  <p class="tb-opener__dek">Chapter 1 met the cell and named its parts. This chapter opens one: how anyone can see inside, why no cell can be large, and what each compartment is actually for.</p>
+
+  <tb-figure kind="microscopes" id="fig-microscopes" width="wide" class="tb-opener__hero" data-alt="One patch of cultured cells shown by five instruments in turn: the naked eye sees a pink smear; a light microscope shows cell outlines and nuclei down to about 200 nanometres; a fluorescence microscope blacks out everything except the labelled molecules, which glow; a transmission electron microscope shows membranes, ribosomes and the folds inside a mitochondrion in grey; and a scanning electron microscope shows the cell surface in relief. Sliders for wavelength and numerical aperture move the resolution limit, and two mitochondria set a chosen distance apart merge into one blur as soon as that distance falls below the limit.">
+    <figcaption>The same patch of cells, seen five ways. Each instrument has a limit, and the limit decides what can be known. Push the two mitochondria together until the light microscope can no longer tell them apart, then switch instruments and watch them separate again.<span class="fig-hint">The wavelength and aperture sliders move the limit. The readout gives it in nanometres.</span></figcaption>
+  </tb-figure>
+
+  <ol class="tb-opener__contents" aria-label="In this chapter">
+    <li><a href="#seeing"><span class="n">3.1</span><span>Seeing the cell</span></a></li>
+    <li><a href="#small"><span class="n">3.2</span><span>Why cells are small</span></a></li>
+    <li><a href="#prokaryote"><span class="n">3.3</span><span>The prokaryotic cell</span></a></li>
+    <li><a href="#endomembrane"><span class="n">3.4</span><span>The endomembrane system</span></a></li>
+    <li><a href="#symbionts"><span class="n">3.5</span><span>Mitochondria and chloroplasts</span></a></li>
+    <li><a href="#cytoskeleton"><span class="n">3.6</span><span>The cytoskeleton</span></a></li>
+    <li><a href="#surface"><span class="n">3.7</span><span>The cell surface, and outside it</span></a></li>
+    <li><a href="#plant-animal"><span class="n">3.8</span><span>Plant cells and animal cells</span></a></li>
+  </ol>
+</header>
+
+<div class="tb-text">
+
+<section id="seeing">
+<h2>Seeing the cell</h2>
+
+<p class="tb-dropcap">Everything in this chapter was invisible until somebody built the instrument that made it visible, and that is not a small remark about equipment. For most of what follows, the instrument came first and the biology came afterwards. What biologists believed about the inside of a cell in 1930 was limited less by their imagination than by the wavelength of light. So before going in, it is worth knowing how anyone knows what is in there.</p>
+
+<p>Two words are easy to confuse, and the difference between them is the whole story. <tb-term ref="magnification">Magnification</tb-term> is how much larger the image is than the object. <tb-term ref="resolution">Resolution</tb-term> is the smallest gap between two points that still shows them as two points instead of one blur. Magnification is a matter of engineering: add lenses. Resolution is a matter of physics, and past its limit more magnification buys nothing but a larger blur. Microscopists call that empty magnification, and it is why a toy microscope advertising 1200× is not twice as good as a research instrument advertising 600×.</p>
+
+<aside class="tb-margin-note">Ernst Abbe worked the limit out in 1873 in Jena, trying to stop Carl Zeiss's workshop designing lenses by trial and error. The formula is cut into his memorial there.</aside>
+
+<p>For a light microscope the finest resolvable gap is about <em>λ</em> divided by twice the <tb-term ref="numerical-aperture">numerical aperture</tb-term> of the lens, where <em>λ</em> is the wavelength of the light. Green light is around 550 nm, and the best oil-immersion objectives reach a numerical aperture of about 1.4, so the limit lands near 200 nm — a fifth of a micrometre. Two objects closer together than that arrive as one. Figure 3.1 lets you push on both halves of that expression: shorten the wavelength or widen the aperture and the limit falls, but neither can be pushed far, and 200 nm is where an ordinary light microscope stops.</p>
+
+<p>That number decides a great deal. A bacterium is one to five micrometres long, so it can be seen. A mitochondrion is about a micrometre wide, so it can be seen as a speck. The two membranes wrapped around that mitochondrion are each about 7 nm thick, and the gap between them is only a few times that, so they cannot be seen at all; nor can a ribosome, nor a microtubule, nor the pores in the nuclear envelope. For three hundred years the inside of the cell was a granular haze, and the honest name for what was in it was protoplasm.</p>
+
+<p>What the light microscope can do, and no electron microscope will ever do, is show a cell that is alive. This matters more than it sounds. Most of the structures in this chapter move, and several of them are defined by their movement. Ordinary transmitted light shows almost nothing in a living cell, because cytoplasm is nearly transparent; the classical way round that was to kill the cell, fix it and stain it, which gives a sharp picture of something that has stopped. Phase contrast, invented by Frits Zernike in the 1930s, turns the slight differences in refractive index inside a living cell into differences in brightness, and lets you watch a cell divide without touching it.</p>
+
+<p>The bigger change came from making one molecule, and only that one, give off light. In <tb-term ref="fluorescence">fluorescence microscopy</tb-term> the specimen is lit with light of one colour, and a dye absorbs it and re-emits light of a longer wavelength, which is all the detector is allowed to see. Everything unlabelled goes black. The resolution is no better than any other light microscope — the same 200 nm — but the contrast is almost perfect, and a faint spot on a black field is visible even when it is far smaller than the resolution limit, in the way a star is visible although no telescope resolves its disc. You cannot measure such a spot, but you can see that it is there and watch where it goes.</p>
+
+<p>Two developments made this the standard tool of cell biology. The first was immunofluorescence: antibodies raised against one protein, carrying a dye, which stain that protein and nothing else in a fixed cell. The second was <tb-term ref="gfp">green fluorescent protein</tb-term>, taken from the jellyfish <em>Aequorea victoria</em>, whose gene can be fused to the gene for almost any protein so that the cell builds its own label as it builds the protein. That trick, and the family of colours engineered from it, won a Nobel Prize in 2008, and it is why so many of the images in modern cell biology are of living cells with two or three molecules glowing in different colours at once. A confocal microscope sharpens the result further by rejecting the light that comes from outside the plane of focus, so a thick specimen can be cut into optical sections without a knife.</p>
+
+<aside class="tb-margin-note">Since the 1990s, several tricks collectively called super-resolution microscopy have got below Abbe's limit — by switching single fluorescent molecules on and off, or by shaping the illuminating beam — and reach a few tens of nanometres on a fluorescent specimen. The 2014 Nobel Prize in Chemistry went to that work.</aside>
+
+<p>To go below 200 nm in the general case you must stop using light. Electrons behave as waves too, and an accelerated electron's wavelength is roughly a hundred thousand times shorter than that of visible light, so the diffraction limit drops out of the way entirely. A <tb-term ref="tem">transmission electron microscope</tb-term> fires electrons through a section of specimen a few tens of nanometres thick and forms an image from those that get through. On biological material, where the real limit is the specimen rather than the instrument, it resolves structures a couple of nanometres apart: a hundredfold better than light, and enough to see a membrane as two dark lines. A <tb-term ref="sem">scanning electron microscope</tb-term> instead sweeps a beam across a surface coated in a thin film of metal and builds a picture from the electrons knocked off it, giving the dramatic three-dimensional views of surfaces, at lower resolution than a transmission instrument.</p>
+
+<p>The cost is severe. Electrons are stopped by air, so the specimen sits in a vacuum. It must be fixed, dehydrated, embedded in resin, cut into sections thinner than a wavelength of light, and stained with heavy metals, because carbon, hydrogen, oxygen and nitrogen scatter electrons too weakly to show contrast. Nothing alive survives this. Worse, a preparation that harsh can create structures that were never in the cell, and for two decades after the war cell biologists argued about which of their beautiful new pictures were real. The answer, then and now, is that a structure earns belief when it survives several independent methods of preparation and shows up in a living cell by some other means. Freezing a specimen so fast that its water becomes glass rather than ice — the basis of <tb-term ref="cryo-em">cryo-electron microscopy</tb-term> — avoids most of the chemistry altogether, and is now the standard way to see molecular machines in something close to their working state.</p>
+
+<p>Microscopes are not the only instrument, and one of the most important compartments in this chapter was found without one. Break cells open gently and spin the soup in a centrifuge, faster and faster in stages, and the contents settle out by size and density: nuclei first, then mitochondria and chloroplasts, then fragments of membrane, then ribosomes. Each fraction can be assayed for what it does. Working this way in Brussels in the 1950s, Christian de Duve kept finding a set of digestive enzymes that behaved as though they were locked inside some bag he could not identify, and predicted the <tb-term ref="lysosome">lysosome</tb-term> from its biochemistry before anyone photographed one. He shared a Nobel Prize in 1974 with Albert Claude and George Palade, who had built the fractionation methods and used the electron microscope to name most of the structures in Section 3.4.</p>
+
+<tb-key><p>Magnification only enlarges. Resolution decides what can be known, and every advance in this chapter's biology arrived on the back of an advance in resolution or in contrast.</p></tb-key>
+</section>
+
+<section id="small">
+<h2>Why cells are small</h2>
+
+<p>Your liver cells and an elephant's are about the same size, and so are a mouse's. Animals differ in how many cells they have, not in how large the cells are, and across the whole of life most cells fall in a narrow band: 1–5 µm for a bacterium, 10–100 µm for a eukaryotic cell. Something is holding the upper end down, and it is worth doing the arithmetic, because the argument turns up again in lungs, in guts, in roots and in leaves.</p>
+
+<p>Everything a cell takes in or gives out crosses its surface: oxygen and nutrients in, carbon dioxide and waste out. Everything that consumes or produces those things is spread through its volume. Now take a spherical cell of radius <em>r</em>. Its surface area is 4π<em>r</em>², its volume is 4π<em>r</em>³/3, and the ratio of the two is 3/<em>r</em>. Surface grows as the square of the radius while volume grows as the cube, so the <tb-term ref="sa-v">surface-area-to-volume ratio</tb-term> falls as the cell grows — in exact inverse proportion to its size. Double the radius and the cell has eight times as much chemistry to supply through four times as much membrane. Supply per unit of demand has halved.</p>
+
+<aside class="tb-margin-note">The same arithmetic, applied to whole animals, is why a shrew must eat most of its waking hours and an elephant need not: heat is lost across a surface and made in a volume.</aside>
+
+<p>The second constraint is slower to state and more severe. Inside a cell there is no pump and no plumbing; molecules get about mostly by <tb-term ref="diffusion">diffusion</tb-term>, the random wandering that gradually spreads a substance from where it is concentrated to where it is not. Diffusion is very fast over short distances and hopeless over long ones, because the time it takes grows as the <em>square</em> of the distance. Doubling the distance quadruples the wait. The time to cross a distance <em>x</em> is about <em>x</em>² divided by twice a constant that depends on the molecule and the medium. For a small molecule such as oxygen that constant is around 2,000 µm² per second in water and a few times smaller in cytoplasm; the table below uses 1,000.</p>
+
+<table>
+  <thead><tr><th>Radius</th><th>Surface area</th><th>Volume</th><th>Area ÷ volume</th><th>Oxygen to the centre</th></tr></thead>
+  <tbody>
+    <tr><td>1 µm</td><td>13 µm²</td><td>4.2 µm³</td><td>3.0 µm⁻¹</td><td>0.5 ms</td></tr>
+    <tr><td>10 µm</td><td>1,300 µm²</td><td>4,200 µm³</td><td>0.30 µm⁻¹</td><td>50 ms</td></tr>
+    <tr><td>100 µm</td><td>130,000 µm²</td><td>4,200,000 µm³</td><td>0.030 µm⁻¹</td><td>5 s</td></tr>
+    <tr><td>1 mm</td><td>13,000,000 µm²</td><td>4,200,000,000 µm³</td><td>0.0030 µm⁻¹</td><td>8 min</td></tr>
+  </tbody>
+</table>
+
+<p>A cell 20 µm across has its centre stocked in about fifty milliseconds, which is fast enough that nothing runs short. A cell a millimetre across would wait eight minutes for a breath of oxygen to reach the middle, by which time the middle would be dead. Over a metre — the length of the nerve that runs from your spinal cord to your foot — diffusion alone would take years. Figure 3.2 puts both constraints on one screen: grow the cell and watch the ratio collapse while the clock runs up.</p>
+
+<tb-figure kind="surface-volume" id="fig-sav" width="wide" data-alt="A single cell the reader grows with a slider, from one micrometre across to a millimetre. Beside it, three readouts move together: the surface area and volume as numbers and as two growing bars, the surface-area-to-volume ratio falling as three over the radius, and a diffusion clock timing how long a molecule takes to reach the centre, which rises with the square of the radius. A supply-and-demand bar turns from green to red when demand from the volume outruns what the surface can deliver. Buttons change the shape from a sphere to a flattened disc, a long thin cylinder and a sphere covered in microvilli; each restores the ratio at the same volume.">
+  <figcaption>Grow a cell and watch what stops it. The surface-area-to-volume ratio falls as 3/<em>r</em> while the time for a molecule to diffuse to the centre rises as <em>r</em>², and the two together set the ceiling. Then change the shape: a disc, a thin cylinder and a fringe of microvilli each buy back the surface that growing spent.<span class="fig-hint">Drag the size slider, or use the arrow keys. The shape buttons keep the volume fixed.</span></figcaption>
+</tb-figure>
+
+<p>There are three ways out, and living things use all of them. The first is to change shape. A sphere is the worst possible shape in this respect, because for a given volume nothing has less surface; flatten it into a disc or draw it out into a cylinder and the surface rises while the volume stays put, which is why a red blood cell is a biconcave disc about 7–8 µm across and 2 µm thick, and why a nerve cell can be a metre long provided it is only micrometres wide. The second is to fold the surface. Cells lining your small intestine carry thousands of <tb-term ref="microvillus">microvilli</tb-term>, finger-like projections about 1 µm long and 0.1 µm wide, which multiply the absorbing surface roughly twentyfold without changing the cell's size at all.</p>
+
+<p>The third is to stop relying on diffusion. Eukaryotic cells move material about on tracks, hauled by motor proteins at about a micrometre a second — Section 3.6 — which beats diffusion over any distance greater than a few tens of micrometres and is why the nerve to your foot works at all. They also break the interior into compartments, so that a reaction does not have to wait for its substrate to wander in from anywhere in the cell. That, more than anything else, is what the rest of this chapter is about.</p>
+
+<p>The exceptions prove the argument rather than breaking it. The yolk of an ostrich egg is a single cell and is enormous, but it is a storehouse, not a workshop: almost none of it is active cytoplasm. A skeletal muscle fibre is centimetres long and has hundreds of nuclei, because one nucleus cannot serve that much volume. The sulfur bacterium <em>Thiomargarita namibiensis</em> reaches three-quarters of a millimetre and can be seen without a lens, and when you look at it you find that almost the whole cell is one vacuole of stored nitrate, with the living cytoplasm squeezed into a shell a few micrometres thick against the wall. It did not defeat the arithmetic. It surrendered to it and grew anyway.</p>
+
+<tb-key><p>Demand scales with volume, supply with surface, and delay with the square of the distance. A cell that grows too large starves in the middle.</p></tb-key>
+</section>
+
+<section id="prokaryote">
+<h2>The prokaryotic cell</h2>
+
+<p>Chapter 1 drew the line between prokaryotes and eukaryotes at the nucleus. That is the right line, but it makes prokaryotic cells sound like eukaryotic cells with things missing, and they are nothing of the kind. They are the older design, they are far more numerous, and they run a wider range of chemistry than every eukaryote put together. What they do not do is compartmentalise, and almost every difference follows from that.</p>
+
+<p>Start in the middle. A bacterial chromosome is usually a single circular molecule of DNA, and it sits in the cytoplasm in a region called the <tb-term ref="nucleoid">nucleoid</tb-term>, which has no membrane around it and no fixed boundary; it is simply where the DNA is. The <em>Escherichia coli</em> chromosome is 4.6 million base pairs long, which is about 1.6 mm of DNA stretched out, in a cell 2 µm long — some eight hundred times longer than its container — so it is supercoiled and folded by proteins into a dense mass. Because nothing separates the DNA from the cytoplasm, a ribosome can begin translating a messenger RNA while that RNA is still being transcribed. In a eukaryote the nuclear envelope makes that impossible, and the delay it imposes is also the opportunity: it is where RNA gets edited and regulated.</p>
+
+<aside class="tb-margin-note">Plasmids are what make antibiotic resistance spread between species, and what made genetic engineering possible: a gene can be put on a plasmid and carried into a bacterium that will copy it faithfully for ever.</aside>
+
+<p>Alongside the chromosome many bacteria carry <tb-term ref="plasmid">plasmids</tb-term>: small rings of DNA, usually a few thousand base pairs, that copy themselves independently and carry genes the cell can live without but is sometimes glad of — resistance to an antibiotic, the ability to digest an unusual sugar, the machinery for a toxin. A plasmid can be passed to a neighbour, and even to a bacterium of another species, through a tube built for the purpose.</p>
+
+<p>The cytoplasm is packed with <tb-term ref="ribosome">ribosomes</tb-term>, which do the same job here as everywhere: read messenger RNA and build protein. Prokaryotic ribosomes are slightly smaller than the ones in a eukaryote's cytosol, and the difference is measured by how fast they settle in a centrifuge: 70S against 80S, in Svedberg units. That small difference is worth a great deal to medicine, because a drug that jams a 70S ribosome and largely spares an 80S one will harm a bacterium far more than it harms you. Tetracycline and erythromycin work exactly so.</p>
+
+<p>Outside the plasma membrane sits the <tb-term ref="cell-wall">cell wall</tb-term>, and its job is mechanical. A bacterium's cytoplasm is far saltier than pond water, so water floods in by osmosis and the cell would burst within seconds without something to push back; the wall holds back an internal pressure of several atmospheres, and in some gram-positive species a great deal more. In bacteria the wall is made of <tb-term ref="peptidoglycan">peptidoglycan</tb-term>, a single enormous molecule of sugar chains cross-linked by short peptides into a mesh bag around the whole cell. Figure 3.3 lets you take the wall away and then dilute the medium, which is the fastest way to understand what it is for.</p>
+
+<tb-figure kind="prokaryote" id="fig-prokaryote" width="wide" data-alt="A bacterial cell in cutaway with its nucleoid, plasmids, ribosomes, plasma membrane and wall, and switchable envelopes: a gram-positive cell with thick peptidoglycan, a gram-negative cell with thin peptidoglycan under an outer membrane, and an archaeal cell with an S-layer and an ether-linked membrane. A stain control shows the crystal violet washing out of the gram-negative wall and staying in the gram-positive one. An osmosis control changes the solute outside, and the cell swells and bursts when the wall is removed or attacked with penicillin or lysozyme while the medium is dilute. Toggles add a capsule, flagella and pili, and the flagellum's rotary motor turns while the cell swims.">
+  <figcaption>A prokaryotic cell you can take apart. Switch the envelope between gram-positive, gram-negative and archaeal, run the gram stain and watch where the dye stays, then dilute the medium with the wall intact, removed, or under attack by penicillin.<span class="fig-hint">Every control is a button or a slider; the readout names the envelope and the cell's fate.</span></figcaption>
+</tb-figure>
+
+<p>The thickness of that mesh is what Hans Christian Gram accidentally discovered in 1884, and the <tb-term ref="gram-stain">gram stain</tb-term> named after him still sorts bacteria into two camps on the first day of an infection. Gram-positive cells have a thick peptidoglycan layer, tens of nanometres deep, which traps the crystal violet dye through an alcohol wash and leaves the cell purple. Gram-negative cells have only a thin layer, a few nanometres, but cover it with a second membrane whose outer face carries lipopolysaccharide; the alcohol dissolves that outer membrane and the dye runs out, so the cell takes up the pink counterstain instead. The outer membrane is also a barrier to drugs, which is part of why gram-negative infections are harder to treat.</p>
+
+<p>Penicillin exploits the same chemistry. It blocks the enzyme that makes the peptide cross-links, so a growing bacterium builds a wall it cannot knit together and bursts under its own pressure, while your cells, which have no peptidoglycan anywhere, carry on. Lysozyme, an enzyme in your tears and saliva and in egg white, cuts the sugar backbone directly and does the same job by a different route.</p>
+
+<p>Three further structures sit outside the wall. Many bacteria secrete a <tb-term ref="capsule">capsule</tb-term> of slippery polysaccharide, which helps them stick to surfaces and makes them hard for an immune cell to grip or recognise; a capsule is the difference between a harmless strain of pneumococcus and a lethal one. <tb-term ref="pilus">Pili</tb-term> are short protein filaments used to attach to surfaces and to each other, and one specialised kind forms the tube through which a plasmid passes from one cell to another. And the <tb-term ref="bacterial-flagellum">bacterial flagellum</tb-term> is the strangest structure in the chapter: a stiff helical propeller of protein driven by a genuine rotary motor embedded in the membrane, turning a few hundred times a second, powered not by ATP directly but by protons flowing back into the cell. <em>E. coli</em> swims at about 25 µm per second, more than ten times its own length, reversing the motor to tumble and choose a new direction. Keep it in mind for Section 3.6, because the eukaryotic flagellum, which does the same job, is built and powered on entirely different principles and is not related to it.</p>
+
+<p>One old claim should be dropped: that prokaryotes have no cytoskeleton. They do. FtsZ, a relative of the eukaryotic protein tubulin, assembles into a ring at the middle of a dividing cell and pulls it in two; MreB, a relative of actin, works around the cell's circumference, directing where new wall is laid down, and is why a rod is a rod. The eukaryotic cytoskeleton is richer, but it was not invented from nothing.</p>
+
+<p>Bacteria and <tb-term ref="archaea">archaea</tb-term> look alike down a microscope and are profoundly different underneath. Archaeal membranes are built from branched isoprenoid chains joined to glycerol by ether bonds, not the straight fatty acids joined by ester bonds that bacteria and eukaryotes use, and the glycerol itself is the mirror-image form; some archaea make a single membrane-spanning layer instead of a bilayer, which holds together in boiling acid. No archaeon has peptidoglycan, so penicillin does nothing to them; most wear a lattice of protein called an S-layer instead. Their swimming filament, the archaellum, rotates like a bacterial flagellum but is built from proteins related to pili and is driven by ATP. Meanwhile the machinery that copies DNA and makes protein — the polymerases, the promoters, the histones that many archaea wind their DNA on — is far more like a eukaryote's than like a bacterium's. That is the deep pattern behind Chapter 1's tree: eukaryotes arose from within the archaeal side of it, and the closest known archaeal relatives of eukaryotes were only identified in the last decade.</p>
+
+<tb-key><p>A prokaryotic cell is not a simplified eukaryote. It is an unpartitioned one, and its wall, not its membrane, is what keeps it from bursting.</p></tb-key>
+</section>
+
+<section id="endomembrane">
+<h2>The endomembrane system</h2>
+
+<p>The organelles Chapter 1 listed can look like a bag of unrelated gadgets. Most of them are not. The nuclear envelope, the endoplasmic reticulum, the Golgi apparatus, the lysosomes, an assortment of vesicles and the plasma membrane itself form one connected system, the <tb-term ref="endomembrane">endomembrane system</tb-term>, through which material flows in a definite direction. Some of the connections are physical, as where the nuclear envelope runs straight into the endoplasmic reticulum. The rest are made by small membrane bubbles that bud off one compartment and fuse with the next, carrying both their contents and a patch of membrane with them. Follow one protein through it and the whole system snaps into focus.</p>
+
+<p>The <tb-term ref="nuclear-envelope">nuclear envelope</tb-term> is two membranes, an inner and an outer, separated by a gap of 20–40 nm, with the outer one continuous with the endoplasmic reticulum and studded with ribosomes like it. Where the two membranes meet they form <tb-term ref="nuclear-pore">nuclear pores</tb-term>: a few thousand per nucleus, each an assembly of around thirty different proteins, and each an aqueous channel a few tens of nanometres across filled with a tangle of unstructured protein. Small molecules and ions pass freely. Anything much above about 40 kilodaltons — which includes most proteins — needs a signal sequence and a carrier to get through, so the nucleus controls what enters and what leaves, and messenger RNA leaves under supervision. Lining the inner membrane is the <tb-term ref="nuclear-lamina">nuclear lamina</tb-term>, a mesh of protein filaments that gives the nucleus its shape and anchors the chromosomes. Inside, the <tb-term ref="nucleolus">nucleolus</tb-term> is not a compartment at all but a dense region where ribosomal RNA is transcribed and ribosomal subunits are assembled before being exported.</p>
+
+<aside class="tb-margin-note">In many cells the endoplasmic reticulum is more than half of all the membrane the cell owns. It is by far the largest organelle, and it is a single continuous compartment: one lumen, from the nuclear envelope to the cell's edge.</aside>
+
+<p>The <tb-term ref="er">endoplasmic reticulum</tb-term> spreads from the nuclear envelope through most of the cytoplasm as a network of flattened sacs and tubes enclosing one continuous internal space. Where ribosomes are bound to its cytosolic face it looks granular in the electron microscope and is called <tb-term ref="rough-er">rough ER</tb-term>; where they are not, it is smooth and forms tubules rather than sheets. The distinction is real but the two are continuous, and the proportions differ wildly between cells: a plasma cell pouring out antibody is packed with rough ER, while a liver cell or a testis cell making steroid hormones is rich in <tb-term ref="smooth-er">smooth ER</tb-term>.</p>
+
+<p>The two do quite different jobs. Rough ER makes proteins destined for export, for insertion into a membrane, or for delivery to another compartment; it folds them with the help of chaperones, checks the folding and destroys what fails, and begins attaching the sugar chains that most such proteins carry. Smooth ER synthesises lipids, including the phospholipids of every membrane in the cell and the steroid hormones; it stores calcium, releasing it as a signal, which in a muscle cell is what triggers each contraction; and in the liver it carries the enzymes that chemically modify drugs and poisons to make them easier to excrete. A course of barbiturates or alcohol causes a liver cell to build more smooth ER, which is one reason tolerance develops.</p>
+
+<p>Now the journey. A protein bound for outside the cell — say insulin, made in the beta cells of the pancreas — begins on a free ribosome in the cytosol like any other. Its first twenty or so amino acids form a <tb-term ref="signal-peptide">signal peptide</tb-term>, a mostly water-hating stretch that a particle in the cytosol recognises the moment it emerges. That particle grips the signal, pauses translation, and docks the whole ribosome on a receptor in the ER membrane, where the growing chain threads through a channel into the lumen. An enzyme clips the signal off. Inside, the chain folds, sugar chains are attached, and quality control decides whether it may proceed.</p>
+
+<p>It leaves in a <tb-term ref="vesicle">vesicle</tb-term> that buds from a smooth region of the ER and travels to the <tb-term ref="golgi">Golgi apparatus</tb-term>, a stack of flattened sacs with a clear polarity: a receiving face on the ER side and a shipping face pointed at the plasma membrane. Cargo moves across the stack while enzymes in successive sacs trim and rebuild its sugar chains, so that a protein comes out the far side bearing a pattern of sugars it did not go in with. The Golgi is the sorting office as well as the finishing shop: at the shipping face each protein is packed into a vesicle addressed to a destination, and the address is a chemical tag. Enzymes bound for a lysosome, for instance, are marked with mannose-6-phosphate, and a receptor that recognises that mark packs them into the right vesicle. Children who cannot attach the mark secrete their lysosomal enzymes into the blood instead, and their lysosomes fill with undigested material.</p>
+
+<tb-figure kind="secretion" id="fig-secretion" width="wide" data-alt="One protein traced from the ribosome to the outside of the cell as a scrubbable journey in seven stages: a free ribosome in the cytosol, the signal peptide recognised, the ribosome docked on the rough endoplasmic reticulum with the chain threading into the lumen, folding and the first sugars added, a vesicle budding to the Golgi, the sugar chains rebuilt across the stack, sorting at the shipping face, and exocytosis at the plasma membrane. A panel reports the protein's current compartment and what has been done to it. Four blocks can be applied — remove the signal peptide, stop vesicles leaving the endoplasmic reticulum, disable the Golgi's sorting tag, and block fusion at the plasma membrane — and each one leaves the cargo stranded somewhere different.">
+  <figcaption>One protein, ribosome to outside. Scrub through the journey, or step it stage by stage, and read what has been added at each point. Then break one step and find out where the cargo piles up: each lesion strands it in a different compartment, which is exactly how the route was worked out.<span class="fig-hint">Drag the scrubber or use the arrow keys; the block buttons can be combined.</span></figcaption>
+</tb-figure>
+
+<p>From the shipping face a secretory vesicle carries the finished protein to the plasma membrane and fuses with it, spilling the contents outside: <tb-term ref="exocytosis">exocytosis</tb-term>. In the case of insulin the vesicle waits, packed and ready, until the cell senses a rise in blood glucose. Because the vesicle membrane becomes part of the plasma membrane, the same journey that delivers a secreted protein also delivers new membrane, with its proteins already the right way round: what faced the lumen of the ER ends up facing the outside world. The reverse process, <tb-term ref="endocytosis">endocytosis</tb-term>, pinches a piece of plasma membrane inward to bring material in, and is how a white blood cell swallows a bacterium whole.</p>
+
+<p>Those incoming packages meet the <tb-term ref="lysosome">lysosomes</tb-term>, the compartment de Duve predicted: membrane bags holding some forty different digestive enzymes that break down proteins, fats, sugars and nucleic acids. Their interior is kept at about pH 5 by a pump in their membrane, and the enzymes work only at that acidity, so a leak into the neutral cytosol does little harm — a safety interlock built out of chemistry. Lysosomes digest what the cell has swallowed, and they also digest the cell's own worn-out parts, wrapping a spent mitochondrion in membrane and recycling the pieces. When a single lysosomal enzyme is missing, the substance it should have broken down accumulates instead; in Tay-Sachs disease the missing enzyme is one that degrades a particular lipid, and nerve cells fill with it.</p>
+
+<p>Figure 3.4 traces the whole route and lets you break it. That is not a pedagogical trick: it is how the route was established. In the 1960s George Palade and James Jamieson fed radioactive amino acids to slices of guinea-pig pancreas for three minutes, then washed the label away and killed samples at intervals. The radioactivity appeared first over the rough ER, then over the Golgi, then over secretory granules, then outside the cell. Nobody saw the protein move. They saw where it was at each time, and the sequence was unmistakable.</p>
+
+<p>Two qualifications. Mitochondria and chloroplasts are <em>not</em> part of this system: they are not fed by vesicles, they make much of their own membrane, and Section 3.5 explains why. Peroxisomes, which break down fatty acids and destroy the hydrogen peroxide they generate, sit awkwardly on the boundary; they import most of their proteins straight from the cytosol and multiply by dividing, though there is good evidence that new ones can also bud from the ER.</p>
+
+<tb-key><p>The endomembrane system is one compartment with a current running through it: ER to Golgi to destination, carried by vesicles, sorted by chemical address.</p></tb-key>
+</section>
+
+<section id="symbionts">
+<h2>Mitochondria and chloroplasts</h2>
+
+<p>Two organelles stand outside everything in the last section. Both are wrapped in two membranes, both carry their own DNA and make some of their own proteins, both divide on their own schedule, and neither can be built by the cell from scratch. Chapter 1 named the reason — <tb-term ref="endosymbiosis">endosymbiosis</tb-term>, the taking in of one cell by another — and asserted it. Here is the evidence, and the structure it explains.</p>
+
+<p>A <tb-term ref="mitochondrion">mitochondrion</tb-term> is roughly the size and shape of a bacterium: about 1 µm wide and 1–10 µm long, though in a living cell they are rarely the tidy beans of a textbook drawing but a shifting network that fuses and divides. The outer membrane is smooth. The inner one is thrown into deep folds called <tb-term ref="cristae">cristae</tb-term>, which carry several times the area of the outer membrane, and that area is the point: the cristae hold the proteins that pass electrons along a chain and the enzymes that use the resulting gradient to make ATP, so more folding means more power. The space the inner membrane encloses is the <tb-term ref="mito-matrix">matrix</tb-term>, and it holds the enzymes of the citric acid cycle, the organelle's DNA and its ribosomes. Chapter 7 does the chemistry; what matters here is that the structure is shaped by it. A heart muscle cell is packed with mitochondria whose cristae are so dense the matrix is nearly squeezed out; a liver cell has a thousand or two, less tightly folded.</p>
+
+<aside class="tb-margin-note">Every mitochondrion in your body came from your mother's egg. Mitochondrial DNA therefore traces one unbroken maternal line, which is why it is used to reconstruct human migrations.</aside>
+
+<p>A <tb-term ref="chloroplast">chloroplast</tb-term> is built to the same plan with one extra floor. It too has an outer and an inner membrane, and inside them a third, separate membrane system: flattened discs called <tb-term ref="thylakoid">thylakoids</tb-term>, stacked into piles called grana and connected between the piles. The thylakoid membrane holds the chlorophyll and the machinery that captures light; the fluid around it, the <tb-term ref="stroma">stroma</tb-term>, holds the enzymes that build sugar, together with the chloroplast's DNA, its ribosomes and, usually, grains of starch. A chloroplast is larger than a mitochondrion, typically 5 µm long and lens-shaped, and it is one member of a family of <tb-term ref="plastid">plastids</tb-term>: the same kind of organelle, filled with orange and red pigments instead of chlorophyll, colours a carrot and a ripe tomato, and filled with starch it makes a potato.</p>
+
+<p>Now the evidence. Take the competing explanation seriously first, because it is not silly: perhaps these organelles arose when a cell's own plasma membrane folded inward, pinched off, and specialised. That hypothesis predicts a double membrane just as endosymbiosis does, so the double membrane by itself settles nothing. What settles it is everything that would have had to be invented twice.</p>
+
+<p>Both organelles carry their own genome, usually a circular molecule with no histones wrapped round it, sitting loose in the matrix or stroma exactly as a nucleoid sits in a bacterium. Both make their own ribosomes, and those ribosomes are of the bacterial type rather than the cytosol's, which is why antibiotics that jam bacterial protein synthesis interfere with mitochondria too, a real side effect of some of them. Both divide by pinching in two, using proteins descended from the bacterial division machinery, and a cell that loses all its mitochondria cannot make a new one: every mitochondrion comes from a mitochondrion, which is Virchow's rule one level down. The inner membrane resembles a bacterial plasma membrane in its lipids and its transport proteins, while the outer one resembles the host's. And the decisive evidence came from sequencing: the genes in mitochondrial DNA are most closely related to those of a particular group of bacteria, the alphaproteobacteria, and the genes in chloroplast DNA to those of cyanobacteria, the photosynthetic bacteria that put the oxygen in the air. Figure 3.5 sets the observations against the two hypotheses one at a time.</p>
+
+<tb-figure kind="symbiont" id="fig-symbiont" width="wide" data-alt="A mitochondrion and a chloroplast side by side, each openable to show its membranes, cristae or thylakoid stacks, matrix or stroma, circular DNA and ribosomes. A list of observations can be selected one at a time — two membranes, circular DNA with no histones, bacterial-type ribosomes, antibiotic sensitivity, division by fission, gene sequences matching alphaproteobacteria and cyanobacteria, most organelle genes now in the nucleus — and the structure highlights the part that shows it while two hypothesis columns, endosymbiosis and inward folding of the host membrane, light up as supported, contradicted or untouched. A running tally shows which observations discriminate between the two and which do not.">
+  <figcaption>The evidence, one observation at a time. Each is highlighted in the structure and scored against both hypotheses, and the useful lesson is which observations do <em>not</em> discriminate: a double membrane is predicted by either story.<span class="fig-hint">Pick observations in any order; open either organelle to see where each one lives.</span></figcaption>
+</tb-figure>
+
+<p>The genomes that remain are tiny, and that is the last piece. Human mitochondrial DNA is 16,569 base pairs long and carries thirty-seven genes, thirteen of them for proteins, while a working mitochondrion needs more than a thousand different proteins; all the rest are encoded in the nucleus, made on cytosolic ribosomes and imported. A chloroplast genome is larger, on the order of a hundred genes, and equally dependent. Over the two billion years or so since the partnership began, most of the symbiont's genes have moved into the host's nucleus or been lost, which is why these organelles cannot live alone, and why the relationship is no longer a partnership between two organisms but a single organism with a divided genome.</p>
+
+<tb-key><p>A double membrane proves nothing on its own. Bacterial ribosomes, a circular genome, division by fission and sequence relationships to living bacteria are what make endosymbiosis the only surviving explanation.</p></tb-key>
+</section>
+
+<section id="cytoskeleton">
+<h2>The cytoskeleton</h2>
+
+<p>A cell is not a bag of liquid with organelles floating in it. It is crossed and braced by a scaffolding of protein filaments, the <tb-term ref="cytoskeleton">cytoskeleton</tb-term>, which holds its shape, positions its compartments, hauls cargo from place to place, pulls the chromosomes apart when it divides, and in many cells moves the whole cell from one place to another. Unlike a skeleton, most of it is temporary: filaments are built and taken down within minutes, and that impermanence is what makes them useful.</p>
+
+<p>There are three families, and they are told apart most simply by diameter.</p>
+
+<table>
+  <thead><tr><th>Filament</th><th>Diameter</th><th>Built from</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td>Microfilament</td><td>7 nm</td><td>Two twisted strands of actin</td><td>Bears tension; muscle contraction with myosin; cleavage furrow; the core of a microvillus; crawling</td></tr>
+    <tr><td>Intermediate filament</td><td>8–12 nm</td><td>A family of rope-like proteins: keratins, lamins, others</td><td>Bears tension; permanent structure; anchors the nucleus; lines the nuclear envelope</td></tr>
+    <tr><td>Microtubule</td><td>25 nm</td><td>Thirteen rows of α- and β-tubulin pairs, hollow</td><td>Resists compression; tracks for motors; the mitotic spindle; the core of cilia and flagella</td></tr>
+  </tbody>
+</table>
+
+<p><tb-term ref="microfilament">Microfilaments</tb-term>, also called actin filaments, are the thinnest: two strands of the protein actin wound round each other. They form a dense mesh just under the plasma membrane that sets the cell's surface shape, they run in parallel bundles up the core of each microvillus, and with the motor protein myosin they produce contraction — in a muscle cell as a highly ordered machine, and in every dividing animal cell as the ring that tightens around the middle and pinches it in two. A crawling cell moves by building actin filaments at its leading edge so that they push the membrane forward.</p>
+
+<p><tb-term ref="intermediate-filament">Intermediate filaments</tb-term> are the odd family out. Where the other two are built from one highly conserved protein each, much the same in every eukaryote, these are a whole class of different proteins built to a common rope-like plan, and which one a cell uses depends on the cell: keratins in skin, neurofilaments in nerve axons, lamins everywhere in the nuclear lamina. They have no polarity, no motor walks along them, and they are the most permanent of the three. Their job is to bear tension, and the consequences of getting them wrong are instructive: a mutation in a skin keratin gives a disease in which the skin blisters at the slightest friction.</p>
+
+<aside class="tb-margin-note">A microtubule is polar: one end, the plus end, grows and shrinks quickly, the other slowly. Motors read that polarity, which is what makes directed transport possible at all.</aside>
+
+<p><tb-term ref="microtubule">Microtubules</tb-term> are the thickest and the most dynamic: hollow tubes 25 nm across, built from thirteen rows of <tb-term ref="tubulin">tubulin</tb-term> pairs. An individual microtubule grows steadily and then, without warning, falls apart — behaviour called dynamic instability — so a cell's microtubules are constantly probing the space around them, and any that finds something worth holding is stabilised. In an animal cell most of them radiate from a <tb-term ref="centrosome">centrosome</tb-term> near the nucleus, which contains a pair of <tb-term ref="centriole">centrioles</tb-term> set at right angles, each a barrel of nine triplets of microtubules. When the cell divides, this same system builds the spindle that separates the chromosomes, which is why several cancer drugs — taxol, which freezes microtubules, and the vinca alkaloids, which prevent their assembly — work by attacking it.</p>
+
+<p>Tracks are only useful with engines on them. <tb-term ref="motor-protein">Motor proteins</tb-term> convert the energy in ATP into steps along a filament, and each has a fixed direction. <tb-term ref="kinesin">Kinesin</tb-term> walks along a microtubule towards its plus end, which in most cells means outward from the centre; <tb-term ref="dynein">dynein</tb-term> walks the other way, towards the minus end and the cell's interior; <tb-term ref="myosin">myosin</tb-term> walks along actin. Kinesin moves about 8 nm per step, one step per molecule of ATP, at roughly a micrometre a second, hauling a vesicle behind it on a tether. Set that against the arithmetic of Section 3.2 and the reason for the whole apparatus is plain: over the length of a nerve axon, motor transport takes days where diffusion would take years. Figure 3.6 lets you put cargo on a filament, choose a motor, and see what happens when the ATP runs out or the track itself is dismantled.</p>
+
+<tb-figure kind="cytoskeleton" id="fig-cytoskeleton" width="wide" data-alt="A stretch of cytoplasm with a microtubule and an actin filament drawn at their true relative diameters, twenty-five and seven nanometres, both marked with their plus and minus ends. The reader loads a vesicle and chooses kinesin, dynein or myosin; the motor walks hand over hand in eight-nanometre steps, and the readout gives its direction, its speed, the steps taken and the ATP consumed. An ATP slider slows and stops the motor; drug buttons depolymerise the microtubule, stabilise it, or break the actin filament, and the cargo stalls or drifts when its track disappears.">
+  <figcaption>Motors on tracks. Choose a filament and a motor, and watch which way the cargo goes — kinesin towards the plus end, dynein towards the minus end, myosin only on actin. Then cut the ATP supply, or dismantle the track underneath it.<span class="fig-hint">The step counter and the speed readout update as the motor walks.</span></figcaption>
+</tb-figure>
+
+<p>The most elaborate thing microtubules build is a <tb-term ref="cilium">cilium</tb-term>. A motile cilium is a shaft of microtubules wrapped in an extension of the plasma membrane, about 0.25 µm across, and a eukaryotic flagellum is the same structure made longer. Inside, in cross-section, is one of the most conserved arrangements in biology: nine doublet microtubules in a ring around two single ones at the centre, the <tb-term ref="axoneme">9+2 axoneme</tb-term>, held together by protein links and joined to the central pair by radial spokes. It is essentially identical in a human airway, a green alga and a sponge. At the base sits a <tb-term ref="basal-body">basal body</tb-term> with nine triplets and no central pair, structurally the same object as a centriole, which is where the cilium grows from.</p>
+
+<p>The motion comes from dynein. Rows of dynein arms project from each doublet and grip the neighbouring doublet, and when they walk they try to slide the two past each other. Because the links between doublets and the anchorage at the basal body resist any free sliding, the force has nowhere to go but into a bend, and by activating the arms on one side of the ring and then the other, the cilium whips. Cilia are short — a few micrometres — and a cell that has them has hundreds, beating ten to twenty times a second in coordinated waves that sweep mucus up out of your airways. A flagellum is long, usually single, and undulates rather than beating: the tail of a sperm cell. Figure 3.7 turns the axoneme over, then sets it beating.</p>
+
+<tb-figure kind="cilium" id="fig-cilium" width="wide" data-alt="A cilium in three dimensions that the reader can turn from a face-on cross-section to a view along its length. Face-on it shows the nine outer doublet microtubules, the two central singlets, the radial spokes and the nexin links, with the dynein arms projecting from each doublet; a control slides the section plane down the shaft to the basal body, where the pattern changes to nine triplets and no central pair. A switch changes the cilium to a non-motile primary cilium with nine doublets and no central pair. When it is set beating, the dynein arms on one side of the ring engage in sequence, doublets try to slide, the links convert the sliding into a bend, and the bend travels from base to tip; the beat frequency is adjustable and a readout names which doublets are active.">
+  <figcaption>The 9+2 axoneme, turned over and then set going. Look down the shaft at the cross-section, slide the section to the basal body to find the 9+0 triplets, and switch between a motile cilium and a primary one. Then run the beat and watch dynein's sliding become a bend because the links will not let the doublets slip.<span class="fig-hint">Drag to turn it, or use the arrow keys; the section slider runs from tip to base.</span></figcaption>
+</tb-figure>
+
+<p>Not every cilium moves. Almost every cell type in your body carries a single <tb-term ref="primary-cilium">primary cilium</tb-term>, non-motile, with nine doublets and no central pair, which works as an antenna: it carries receptors, and it is where several important signalling pathways are read. Defects in cilia therefore cause a strange spread of disease. When the dynein arms are missing, mucus is not cleared and infections recur, sperm cannot swim, and in about half of those affected the internal organs are reversed left to right — because a patch of beating cilia in the early embryo is what tells the body which side is which.</p>
+
+<p>Finally, notice how little the eukaryotic flagellum has in common with the bacterial one of Section 3.3. The bacterial filament is a rigid helix of one protein spun by a rotary motor in the membrane, driven by a proton gradient, and sits outside the cell. The eukaryotic one is a bundle of microtubules inside an extension of the plasma membrane, bent by dynein motors burning ATP along its whole length. They do the same job and share the name, and they are not related.</p>
+
+<tb-key><p>Three filament families, told apart by diameter; two directions of travel along a microtubule; and one 9+2 arrangement, nearly unchanged across the eukaryotes, in which sliding is converted into bending.</p></tb-key>
+</section>
+
+<section id="surface">
+<h2>The cell surface, and outside it</h2>
+
+<p>A cell's boundary is its plasma membrane, and Chapter 4 is about the membrane itself. What concerns us here is what cells put outside it, and how they fasten to each other, because in a multicellular organism no cell works alone and a sheet of cells has properties no single cell has.</p>
+
+<p>Plants build a <tb-term ref="cell-wall">wall</tb-term> — a different material from a bacterium's but the same idea. Its fibres are <tb-term ref="cellulose">cellulose</tb-term>, long unbranched chains of glucose bundled into microfibrils of great tensile strength, laid down by enzyme complexes that sit in the plasma membrane and are steered from inside by cortical microtubules, so the cytoskeleton of Section 3.6 decides the grain of the wall and therefore the direction the cell can grow. The microfibrils sit in a matrix of other sugars, and adjacent cells are glued together by a layer of pectin called the <tb-term ref="middle-lamella">middle lamella</tb-term> — the same substance that sets jam. A young cell has a thin, extensible primary wall; a cell that has stopped growing may add a thick secondary wall inside it, often stiffened with lignin, and that is wood.</p>
+
+<aside class="tb-margin-note">Fungal walls are made of chitin, the polymer of an insect's shell, which is why antifungal drugs and antibacterial drugs have nothing in common: the two walls are built from different chemistry by different enzymes.</aside>
+
+<p>The wall makes a plant cell rigid, but not by itself. Water enters by osmosis, the contents press outwards, and the wall pushes back; the resulting <tb-term ref="turgor">turgor</tb-term> pressure is several times that in a car tyre, and it is what holds up a non-woody plant. A wilting plant is a plant whose cells have lost turgor, and it stands up again within minutes of being watered. The wall costs the cell something in return: it cannot crawl, it cannot change shape quickly, and it cannot engulf anything the way an amoeba or a white blood cell does.</p>
+
+<p>Animal cells have no wall and instead secrete an <tb-term ref="ecm">extracellular matrix</tb-term> around themselves: a composite of fibres in a gel. The fibres are mostly <tb-term ref="collagen">collagen</tb-term>, a triple-stranded rope that is the most abundant protein in your body and the main tensile element of skin, tendon, bone and cartilage. The gel is built from proteoglycans, proteins carrying enormous sugar chains that hold water. Other proteins in the matrix, such as fibronectin, are there to be gripped: they bind <tb-term ref="integrin">integrins</tb-term>, receptors that span the plasma membrane and are attached on the inside to the actin cytoskeleton. This makes the matrix mechanically continuous with the interior, and it makes it a channel for information. Pull on a cell and the signal reaches the nucleus; put the same cell on a soft matrix instead of a stiff one and it may switch to a different fate. The matrix is not packing material.</p>
+
+<p>Between neighbouring animal cells, three kinds of junction do three different jobs, and the distinctions are worth getting exactly right.</p>
+
+<p>A <tb-term ref="tight-junction">tight junction</tb-term> is a belt of membrane proteins that runs right around a cell and welds its membrane to its neighbour's along a line, sealing the space between them. It is not a fastening — it is a seal, and it is what makes a sheet of cells into a barrier: the lining of your gut, and the vessels of your brain, hold fluid on one side because nothing can leak between the cells. A <tb-term ref="desmosome">desmosome</tb-term> is a fastening, a rivet of protein at a single spot that anchors the intermediate filaments of one cell to those of the next, so that mechanical load passes through a tissue rather than tearing it apart; skin and heart muscle are full of them, and an autoimmune attack on the proteins involved causes the skin to blister apart. A <tb-term ref="gap-junction">gap junction</tb-term> is a doorway: a ring of six proteins in one membrane meets a matching ring in the next, forming a channel about 1.5 nm wide that lets ions and small molecules pass directly from one cytoplasm to the other. Heart muscle contracts as one because electrical excitation flows through gap junctions from cell to cell.</p>
+
+<p>Plants, whose cells are separated by walls, have none of the three, and instead have <tb-term ref="plasmodesma">plasmodesmata</tb-term>: channels bored through the wall and lined with plasma membrane, so that the cytoplasm of one cell is continuous with the cytoplasm of the next, with a narrow strand of ER threaded through the middle. A plant is therefore, to a surprising extent, one connected mass of cytoplasm. Water, ions, small molecules, and even proteins and RNA move through plasmodesmata, and so do some plant viruses, which is how an infection spreads through a leaf without ever going outside a cell.</p>
+
+<tb-sort id="junctions" objective="junction-types">
+  <p class="intro">Each observation is explained by one kind of connection between cells. Sort them. Drag a card onto a bin, or use its buttons.</p>
+  <ul class="bins">
+    <li data-bin="tight">Tight junction</li>
+    <li data-bin="desmosome">Desmosome</li>
+    <li data-bin="gap">Gap junction</li>
+    <li data-bin="plasmodesma">Plasmodesma</li>
+  </ul>
+  <ul class="items">
+    <li data-bin="gap" data-why="A dye small enough to fit through the channel passes straight from one cytoplasm to the next. A gap junction is the only animal junction that lets molecules through at all.">A small fluorescent dye injected into one heart muscle cell appears in its neighbours within seconds.</li>
+    <li data-bin="tight" data-why="Tight junctions seal the space between the cells of an epithelium, so fluid cannot take the short cut between them. This is what makes a sheet of cells a barrier.">The lining of the bladder holds urine for hours without any of it seeping between the cells.</li>
+    <li data-bin="desmosome" data-why="Desmosomes rivet the intermediate filaments of one cell to those of the next. Antibodies against the proteins that form them detach the cells from one another and the skin blisters.">In one autoimmune disease, antibodies attack the proteins that link a skin cell's keratin filaments to its neighbour's, and the skin blisters apart.</li>
+    <li data-bin="plasmodesma" data-why="Plasmodesmata are lined with plasma membrane and make the cytoplasm continuous from cell to cell, so a virus can move through a leaf without ever crossing the plasma membrane or entering the wall.">A virus spreads from cell to cell through a leaf without ever leaving the cytoplasm.</li>
+    <li data-bin="gap" data-why="Excitation passes as a current of ions through gap junctions, so the muscle behaves electrically as one cell. Without them the heart could not beat as a unit.">Heart muscle contracts as a single unit because electrical excitation passes directly from cell to cell.</li>
+    <li data-bin="tight" data-why="The blood vessels of the brain are sealed by tight junctions, so a drug cannot slip between the cells and must instead cross the membranes of the cells themselves.">A drug designed to reach the brain by slipping between the cells of the blood vessel wall fails to get through.</li>
+    <li data-bin="desmosome" data-why="A desmosome is a spot fastening, not a seal and not a channel: it transfers mechanical load between cells through their intermediate filaments.">Stretching a sheet of skin puts the load on ropes of keratin that run from one cell into the next.</li>
+    <li data-bin="plasmodesma" data-why="A tracer moves through plasmodesmata into neighbouring plant cells, and stops where the plasmodesmata have been closed or were never made — developing tissues regulate them.">A tracer loaded into one leaf cell spreads into the patch of neighbours around it, then stops at the edge of a developing vein.</li>
+  </ul>
+</tb-sort>
+
+<tb-key><p>A tight junction seals, a desmosome fastens, a gap junction connects. A plasmodesma does what a gap junction does, through a wall, and is built quite differently.</p></tb-key>
+</section>
+
+<section id="plant-animal">
+<h2>Plant cells and animal cells</h2>
+
+<p>Everything in this chapter applies to both, which is the point worth making first: a plant cell has the same nucleus, the same endomembrane system, the same mitochondria, the same cytoskeleton and the same genetic machinery as one of yours. The differences are additions and a few subtractions, and every one of them follows from the plant's way of life — fixed in place, making its own food from light, and needing to stand up without a skeleton.</p>
+
+<table>
+  <thead><tr><th>Structure</th><th>Plant cell</th><th>Animal cell</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td>Cell wall</td><td>Yes, cellulose</td><td>No</td><td>Resists turgor pressure and holds the plant up; the cost is that the cell cannot move or change shape quickly</td></tr>
+    <tr><td>Chloroplasts and other plastids</td><td>Yes</td><td>No</td><td>Capture light and make sugar; store starch and pigments</td></tr>
+    <tr><td>Large central vacuole</td><td>Yes, usually most of the cell</td><td>Small vacuoles only</td><td>Fills the cell cheaply with water, generates turgor, stores and digests</td></tr>
+    <tr><td>Plasmodesmata</td><td>Yes</td><td>No (gap junctions instead)</td><td>Connect cytoplasm through the wall</td></tr>
+    <tr><td>Lysosomes</td><td>The vacuole does the job</td><td>Yes</td><td>Digestion and recycling</td></tr>
+    <tr><td>Centrioles</td><td>Absent in flowering plants</td><td>Yes, in the centrosome</td><td>Plants organise microtubules without them</td></tr>
+    <tr><td>Cilia and flagella</td><td>Almost never</td><td>Common</td><td>A fixed organism has less use for them; the sperm of ferns and cycads still have them</td></tr>
+  </tbody>
+</table>
+
+<p>The <tb-term ref="vacuole">central vacuole</tb-term> deserves more than a row in a table, because it solves the problem of Section 3.2 in a way no animal cell has found. It is a single large compartment bounded by its own membrane, the <tb-term ref="tonoplast">tonoplast</tb-term>, and in a mature plant cell it can occupy most of the volume — commonly eighty or ninety per cent. Into it the cell pumps solutes, so water follows by osmosis and the vacuole swells, pressing the cytoplasm into a thin layer against the wall and pressing the wall outwards. The result is a cell that has become large without the cost of becoming large: its working cytoplasm is still only a few micrometres from the surface, so diffusion still serves, while the cell as a whole may be 100 µm across. The vacuole also stores ions and sugars, holds the pigments that colour a petal, keeps unpleasant chemicals away from the cytoplasm, and contains digestive enzymes that do a lysosome's work.</p>
+
+<p>Two smaller differences matter in practice. Plant cells divide differently: instead of an actin ring pinching the cell in two, vesicles are guided to the middle by microtubules and fuse there to build a new wall outwards from the centre. And plant cells are rarely alone — walls, middle lamella and plasmodesmata make a tissue a single mechanical and cytoplasmic unit in a way an animal tissue never quite is. Figure 3.8 is a plant cell you can turn over and cut open, and it is worth putting beside the animal cell of Figure 1.5, which uses the same colours for the same organelles.</p>
+
+<tb-figure kind="plantcell3d" id="fig-plantcell" width="wide" data-alt="A three-dimensional plant cell about 60 micrometres across, box-shaped, with a cellulose wall and middle lamella, a large central vacuole filling most of the interior and pressing the cytoplasm into a thin layer, lens-shaped chloroplasts with visible thylakoid stacks, mitochondria, a nucleus pushed against the wall, rough and smooth endoplasmic reticulum, a Golgi stack, peroxisomes and plasmodesmata threading through the wall into the neighbouring cell. It can be turned, zoomed and cut open, each structure clicked for its name and job, and a turgor control that removes water so the living contents shrink away from the wall and the cell wilts. A side-by-side switch puts the animal cell of Chapter 1 beside it at the same scale.">
+  <figcaption>A plant cell, about 60 µm across, beside the animal cell of Figure 1.5 at the same scale. Turn it, cut it open, and click a structure to name it. Then take the water away and watch the living contents pull back from the wall — the cell-level picture of a wilting leaf.<span class="fig-hint">Arrow keys turn the cell when it is focused; + and − zoom; the turgor slider runs from flaccid to fully turgid.</span></figcaption>
+</tb-figure>
+
+<p>One last look back, to close the chapter where it began. Everything you have just read about compartments, tracks, motors, junctions and walls had to be discovered, and almost all of it was discovered between 1940 and 1980 by people looking at dead cells with electron microscopes and at broken cells in centrifuges. What the last thirty years have added is the ability to watch it happen: to label one protein in a living cell and follow it. Chapter 4 begins there, with the membrane that all of this hangs on.</p>
+</section>
+
+<section id="summary" data-unnumbered class="tb-endmatter">
+<h2>Key ideas</h2>
+<ul>
+  <li>Magnification enlarges; resolution determines what can be distinguished. An ordinary light microscope stops near 200 nm, set by the wavelength of light and the aperture of the lens.</li>
+  <li>Fluorescence shows one labelled molecule against a black background, in a living cell; electron microscopy resolves a couple of nanometres but only in specimens that have been killed and prepared.</li>
+  <li>Surface area grows as the square of size and volume as the cube, so the surface-area-to-volume ratio falls as 3/<em>r</em>; diffusion time grows as the square of distance. Together they set the upper limit on cell size.</li>
+  <li>Cells get round the limit by changing shape, folding the surface into microvilli, or replacing diffusion with motor transport along filaments.</li>
+  <li>A prokaryotic cell has no nucleus and no membrane compartments: DNA in a nucleoid, optional plasmids, 70S ribosomes, a peptidoglycan wall that resists osmotic pressure, and often a capsule, pili and a rotary flagellum.</li>
+  <li>Archaea share the prokaryotic plan but differ from bacteria in their membrane lipids and walls, and resemble eukaryotes in the machinery that copies DNA and makes protein.</li>
+  <li>The nuclear envelope, endoplasmic reticulum, Golgi, lysosomes, vesicles and plasma membrane form one endomembrane system with a directional flow: a signal peptide targets a protein to the ER, the Golgi modifies and addresses it, and a vesicle delivers it.</li>
+  <li>Mitochondria and chloroplasts have two membranes, their own circular DNA, bacterial-type ribosomes, and division by fission; sequence evidence ties them to alphaproteobacteria and cyanobacteria. The double membrane alone does not distinguish endosymbiosis from inward folding.</li>
+  <li>Microfilaments (7 nm), intermediate filaments (8–12 nm) and microtubules (25 nm) do different jobs; kinesin walks to a microtubule's plus end and dynein to its minus end.</li>
+  <li>Motile cilia and eukaryotic flagella are 9+2 axonemes in which dynein's sliding is converted into bending; the bacterial flagellum is an unrelated rotary motor.</li>
+  <li>Tight junctions seal, desmosomes fasten, gap junctions connect; plasmodesmata connect plant cells through their walls.</li>
+  <li>Plant cells add a cellulose wall, plastids, a large central vacuole and plasmodesmata. The vacuole lets a plant cell be large while keeping its cytoplasm thin.</li>
+</ul>
+</section>
+
+<section id="glossary" data-unnumbered>
+<h2>Glossary</h2>
+<tb-glossary></tb-glossary>
+</section>
+
+<section id="checks" data-unnumbered>
+<h2>Check your understanding</h2>
+
+<tb-check id="q1" objective="abbe-limit">
+  <p class="question">Two structures 150 nm apart appear as one blob in the best light microscope and as two in an electron microscope. Why?</p>
+  <ul class="options">
+    <li>The light microscope does not magnify enough.</li>
+    <li data-correct>Visible light cannot resolve detail much finer than about half its own wavelength, and 150 nm is below that limit.</li>
+    <li>The structures are transparent to light but opaque to electrons.</li>
+    <li>Electron microscopes magnify more, so they resolve more.</li>
+  </ul>
+  <p class="explain">The limit is roughly the wavelength divided by twice the numerical aperture: about 200 nm for green light and the best lenses. Adding magnification past that gives a larger blur, not more detail. Electrons help because their wavelength is around a hundred thousand times shorter, not because the instrument magnifies harder.</p>
+</tb-check>
+
+<tb-check id="q2" objective="why-cells-small">
+  <p class="question">A spherical cell doubles its radius. What happens to its ability to supply its interior?</p>
+  <ul class="options">
+    <li>Nothing: surface and volume both double.</li>
+    <li data-correct>Volume grows eightfold while surface grows fourfold, so each unit of volume has half as much membrane serving it — and the centre is now four times as far away in diffusion time.</li>
+    <li>Surface area per unit volume doubles, so supply improves.</li>
+    <li>Supply is unaffected, because diffusion is instantaneous over the distances inside a cell.</li>
+  </ul>
+  <p class="explain">Surface goes as <em>r</em>², volume as <em>r</em>³, so the ratio goes as 3/<em>r</em> and halves. Diffusion time goes as the square of distance, so doubling the radius quadruples the wait. Both constraints tighten at once, which is why cells stay small.</p>
+</tb-check>
+
+<tb-check id="q3" objective="pathway-lesion">
+  <p class="question">A mutation deletes the signal peptide from a protein that should be secreted. Where does the finished protein end up?</p>
+  <ul class="options">
+    <li>In the Golgi apparatus, unable to leave.</li>
+    <li data-correct>Free in the cytosol, because nothing directs its ribosome to the endoplasmic reticulum.</li>
+    <li>Secreted as usual, but unfolded.</li>
+    <li>In a lysosome, which digests anything mislabelled.</li>
+  </ul>
+  <p class="explain">The signal peptide is what a cytosolic particle recognises in order to dock the ribosome on the ER membrane. Without it, translation simply finishes in the cytosol, and the protein never enters the endomembrane system at all — so it cannot reach the Golgi, a lysosome, or the outside.</p>
+</tb-check>
+
+<tb-check id="q4" objective="endosymbiosis-evidence">
+  <p class="question">Which observation does <em>not</em> help decide between endosymbiosis and the alternative, that mitochondria arose by an infolding of the host cell's own membrane?</p>
+  <ul class="options">
+    <li>Mitochondrial genes are most closely related to those of alphaproteobacteria.</li>
+    <li>Mitochondria carry a circular genome with no histones wrapped round it.</li>
+    <li data-correct>A mitochondrion is wrapped in two membranes.</li>
+    <li>Antibiotics that jam bacterial ribosomes also jam mitochondrial ones.</li>
+  </ul>
+  <p class="explain">An infolding of the plasma membrane that pinched off would also produce two membranes, so the double membrane is consistent with both stories and settles nothing on its own. The genome, the bacterial-type ribosomes and above all the sequence relationships are what an infolding cannot explain.</p>
+</tb-check>
+
+<tb-check id="q5" objective="motor-direction">
+  <p class="question">A vesicle must travel from a nerve cell body to the far tip of its axon, tens of centimetres away. What carries it, and along what?</p>
+  <ul class="options">
+    <li>Dynein, along a microtubule, towards the plus end.</li>
+    <li data-correct>Kinesin, along a microtubule, towards the plus end.</li>
+    <li>Myosin, along intermediate filaments.</li>
+    <li>Nothing carries it: diffusion is sufficient over that distance.</li>
+  </ul>
+  <p class="explain">Kinesin walks towards a microtubule's plus end, which points away from the cell body, so it is the outward motor; dynein walks the other way. No motor runs on intermediate filaments. And diffusion is hopeless here: the time grows as the square of the distance, so over that length it would take years.</p>
+</tb-check>
+</section>
+
+<a class="tb-next" href="../">
+  <span class="tb-label">Next</span>
+  <strong>4 · Membranes and transport</strong>
+  <span class="dek">The boundary everything in this chapter hangs on: what a membrane is made of, and how things cross it. In preparation; the book page lists every chapter.</span>
+</a>
+
+</div>
+</main>
+
+<aside class="tb-margin" aria-hidden="true"></aside>
+</div>
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2 · The chemistry of life — The Living World</title>
+<meta name="description" content="Chapter 2 of The Living World, an interactive biology textbook: atoms and the elements of life, chemical bonds, water, pH and buffers, carbon skeletons and functional groups, the four macromolecules, and how a protein's sequence becomes its shape.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..700,0..100,0..1&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Inter:wght@400..700&display=swap">
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/typography.css">
+<link rel="stylesheet" href="../../src/styles/layout.css">
+<link rel="stylesheet" href="../../src/styles/components.css">
+<link rel="stylesheet" href="../../src/styles/learning.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+  // The glossary must be registered before the elements that read it are defined.
+  import { GLOSSARY } from './glossary.js';
+  import { OBJECTIVES } from './objectives.js';
+  import { textbook } from '../../src/shell.js';
+  import { register } from '../../src/learning/objectives.js';
+  textbook.registerGlossary(GLOSSARY);
+  register('biology/ch02', OBJECTIVES);
+  await import('../../src/components/index.js');
+</script>
+</head>
+<body>
+<a class="tb-skip" href="#atoms">Skip to the chapter</a>
+<tb-shell book="The Living World" book-href="../" library-href="../../" today-href="../../today/" chapter="2 · The chemistry of life"></tb-shell>
+
+<div class="tb-page">
+<nav class="tb-rail" aria-label="Chapter contents"></nav>
+
+<main class="tb-main" data-chapter="2">
+
+<header class="tb-opener">
+  <p class="tb-opener__unit">Unit I · The nature of life</p>
+  <p class="tb-opener__number" aria-hidden="true">2</p>
+  <h1>The chemistry of life</h1>
+  <p class="tb-opener__dek">Every living thing is assembled from a couple of dozen ordinary elements obeying ordinary rules. This chapter is about how that turns out to be enough.</p>
+
+  <tb-figure kind="soup" id="fig-soup" width="wide" class="tb-opener__hero" data-alt="A window about twelve nanometres across into liquid water, with every molecule drawn to the same scale and jostling: hundreds of bent water molecules, a few sodium and chloride ions each wrapped in a shell of water, one ring of glucose, and one small tumbling protein. Faint lines flicker between water molecules wherever a hydrogen bond forms, lasting a moment and breaking again. A temperature control speeds or slows the jostling and changes how long the bonds survive; freezing locks the molecules into an open six-sided lattice.">
+    <figcaption>The same drop of pond water as Chapter 1, magnified until the molecules show: mostly water, a scatter of ions, one sugar and one protein, all of it shaking. The flickering lines are hydrogen bonds, each lasting a few trillionths of a second.<span class="fig-hint">Drag the temperature control, or click a molecule to name it.</span></figcaption>
+  </tb-figure>
+
+  <ol class="tb-opener__contents" aria-label="In this chapter">
+    <li><a href="#atoms"><span class="n">2.1</span><span>What everything is made of</span></a></li>
+    <li><a href="#bonds"><span class="n">2.2</span><span>Atoms stick together</span></a></li>
+    <li><a href="#water"><span class="n">2.3</span><span>Water</span></a></li>
+    <li><a href="#ph"><span class="n">2.4</span><span>Acids, bases and pH</span></a></li>
+    <li><a href="#carbon"><span class="n">2.5</span><span>Carbon builds the skeletons</span></a></li>
+    <li><a href="#macromolecules"><span class="n">2.6</span><span>Four kinds of large molecule</span></a></li>
+    <li><a href="#proteins"><span class="n">2.7</span><span>Proteins: sequence, shape, job</span></a></li>
+    <li><a href="#nucleic-acids"><span class="n">2.8</span><span>Nucleic acids carry the instructions</span></a></li>
+  </ol>
+</header>
+
+<div class="tb-text">
+
+<section id="atoms">
+<h2>What everything is made of</h2>
+
+<p class="tb-dropcap">Take the drop of pond water from Chapter 1 and keep magnifying. Past the paramecium, past its membranes and ribosomes, past the point where a light microscope gives up, the view stops being a picture of things and becomes a picture of molecules. Figure 2.1 is that view, about twelve nanometres across. Almost all of it is water, shaking so fast that the eye could never follow it. Nothing in the frame is alive. Every piece of it is ordinary chemistry, the same chemistry that runs in a beaker, and the business of this chapter is to see what has to be true of that chemistry for a paramecium to be possible.</p>
+
+<p>Start with the pieces. An <tb-term ref="atom">atom</tb-term> is a dense nucleus of <tb-term ref="proton">protons</tb-term> and <tb-term ref="neutron">neutrons</tb-term>, with <tb-term ref="electron">electrons</tb-term> occupying the space around it. Protons carry one unit of positive charge each, electrons one unit of negative, and neutrons none. The number of protons is called the <tb-term ref="atomic-number">atomic number</tb-term>, and it is the atom's identity: six protons make carbon, seven make nitrogen, and nothing that happens chemically ever changes that. An <tb-term ref="element">element</tb-term> is simply all the atoms that share an atomic number.</p>
+
+<aside class="tb-margin-note">Change the neutrons instead and you get an <tb-term ref="isotope">isotope</tb-term>: carbon-12, carbon-13 and carbon-14 all have six protons and behave almost identically in a cell. Carbon-14 is unstable, decays at a known rate, and is what dates a bone; carbon-13 is stable and is used to follow a labelled molecule through a metabolism.</aside>
+
+<p>Everything else about an atom's behaviour is decided by its electrons, and almost entirely by the outermost ones. Electrons occupy shells at different distances from the nucleus. The first shell holds at most two electrons and the second holds eight; the third can hold more, but for the light elements life is built from it behaves as though it holds eight as well. An atom with a full outer shell is chemically content: helium, neon and argon do almost nothing. An atom with a partly filled outer shell is not, and it will share, give away or take on electrons until the outer shell is full. The electrons in that outer shell are the <tb-term ref="valence">valence</tb-term> electrons, and how many an atom is short of a full shell tells you how many bonds it will make. Hydrogen has one electron and needs one more, so it makes one bond. Oxygen has six and needs two, so it makes two. Nitrogen makes three. Carbon, with four, makes four. That single table of numbers is the grammar of every molecule in the rest of this book.</p>
+
+<p>Life uses about twenty-five of the ninety-odd elements that occur naturally on Earth, and it uses four of them for almost everything. Oxygen, carbon, hydrogen and nitrogen together make up about 96 per cent of your mass. The table below is the whole inventory of a human body down to a tenth of one per cent.</p>
+
+<table>
+  <thead><tr><th>Element</th><th>% of body mass</th><th>Mostly doing</th></tr></thead>
+  <tbody>
+    <tr><td>Oxygen (O)</td><td>65</td><td>Most of it is simply the oxygen in water; the rest is built into almost every biological molecule. It is also the atom that accepts the electrons at the end of respiration.</td></tr>
+    <tr><td>Carbon (C)</td><td>18.5</td><td>The skeleton of every molecule life builds.</td></tr>
+    <tr><td>Hydrogen (H)</td><td>9.5</td><td>In water and in every organic molecule. Its ion sets acidity.</td></tr>
+    <tr><td>Nitrogen (N)</td><td>3.2</td><td>In every amino acid and every base of DNA and RNA.</td></tr>
+    <tr><td>Calcium (Ca)</td><td>1.5</td><td>Bone and teeth, as calcium phosphate. As an ion inside a cell it triggers muscle contraction and carries signals.</td></tr>
+    <tr><td>Phosphorus (P)</td><td>1.0</td><td>The backbone of DNA and RNA, the head of a phospholipid, the business end of ATP, and, with calcium, bone.</td></tr>
+    <tr><td>Potassium (K)</td><td>0.4</td><td>The main positive ion inside cells; nerve and muscle signalling.</td></tr>
+    <tr><td>Sulfur (S)</td><td>0.3</td><td>In two of the twenty amino acids. Its bridges pin proteins into shape.</td></tr>
+    <tr><td>Sodium (Na)</td><td>0.2</td><td>The main positive ion outside cells; nerve signalling and water balance.</td></tr>
+    <tr><td>Chlorine (Cl)</td><td>0.2</td><td>As chloride, the main negative ion outside cells; also stomach acid.</td></tr>
+    <tr><td>Magnesium (Mg)</td><td>0.1</td><td>A partner to hundreds of enzymes, and the atom at the centre of chlorophyll.</td></tr>
+    <tr><td>Trace elements</td><td>under 0.01 each</td><td>Iron carries oxygen in haemoglobin; iodine is built into thyroid hormones; zinc, copper, manganese, selenium, molybdenum and cobalt mostly sit in the working parts of enzymes.</td></tr>
+  </tbody>
+</table>
+
+<p>Mass is a misleading way to count, because atoms have very different weights. Counting atoms instead, roughly three in every five of your atoms are hydrogen, about a quarter are oxygen, and about one in ten is carbon. You are, by the numbers, mostly hydrogen, and that is mostly because you are mostly water.</p>
+
+<p>Notice what the table is not. It is not a list of the commonest things on Earth. The crust is about 46 per cent oxygen by mass and 28 per cent silicon, while carbon, which is nearly a fifth of you, is only a few hundredths of one per cent of the ground you stand on. Life is not made of what is abundant. It is made of what its chemistry needs, gathered and concentrated at some cost.</p>
+
+<p>Not all of that inventory is locked into molecules. A good deal of the sodium, potassium, calcium, chloride and magnesium is dissolved, as <tb-term ref="ion">ions</tb-term>: atoms that have lost or gained electrons and so carry a charge. Sodium gives up its single outer electron readily and becomes Na<sup>+</sup>; chlorine, one electron short of a full shell, takes one and becomes Cl<sup>−</sup>. These are the electrolytes, and they are not passengers. A nerve fires because sodium ions rush across a membrane. A muscle contracts because calcium ions are released inside the cell. Chapter 4 is largely about the machinery that keeps those ions where they are wanted.</p>
+
+<tb-key><p>Protons decide which element an atom is. Electrons decide what it can do.</p></tb-key>
+</section>
+
+<section id="bonds">
+<h2>Atoms stick together</h2>
+
+<p>A lone atom is a rarity in a cell. Almost every atom in you is attached to others, and the attachments come in kinds that differ enormously in strength. Getting the strengths right is the key to the whole chapter, because biology depends on having some joins that never come apart on their own and others that come apart constantly.</p>
+
+<p>The strong one is the <tb-term ref="covalent">covalent bond</tb-term>: two atoms sharing a pair of electrons, so that the pair counts towards a full outer shell for both. Two shared pairs make a double bond, three a triple. A single carbon–carbon bond takes about 350 kilojoules per <tb-term ref="mole">mole</tb-term> to break; an oxygen–hydrogen bond about 460. Compare that with the thermal jostling available at 37 °C, which amounts to only about 2.6 kilojoules per mole, and you can see why a covalent bond is effectively permanent: the odds of one shaking apart by chance are vanishingly small. This is what makes a molecule a thing at all, and it is why the skeleton of a protein survives a journey through a cell.</p>
+
+<p>Sharing is rarely equal. <tb-term ref="electronegativity">Electronegativity</tb-term> measures how hard an atom pulls on the electrons it is sharing, and the elements of life differ: oxygen pulls hardest, then nitrogen, then carbon, with hydrogen close behind carbon. When two identical atoms bond, as in O<sub>2</sub>, the pull is even and the bond is nonpolar. When carbon bonds to hydrogen the pull is so nearly even that the bond is nonpolar for practical purposes, which is the reason fats are greasy. But when oxygen bonds to hydrogen, the shared electrons spend most of their time near the oxygen, leaving the oxygen slightly negative and the hydrogen slightly positive. Such a bond is <tb-term ref="polar">polar</tb-term>, and those partial charges, written δ− and δ+, are where most of biology's interesting behaviour begins.</p>
+
+<aside class="tb-margin-note">Push the difference in electronegativity far enough and sharing stops. The boundaries between nonpolar, polar and ionic are conventions drawn across a continuum, not three separate phenomena.</aside>
+
+<p>When the pull is very lopsided, one atom simply takes the electron. Sodium hands its outer electron to chlorine; both end up with full shells and opposite charges, and the attraction between them is an <tb-term ref="ionic">ionic bond</tb-term>. In a dry crystal of table salt this is a formidable bond: each ion is held by its neighbours in a lattice that takes a great deal of energy to dismantle. Drop the crystal into water, though, and it falls apart in seconds. The bond has not changed; its surroundings have. Water surrounds each freed ion with a shell of its own molecules, turned so that their negative ends face a positive ion and their positive ends a negative one, and that arrangement returns almost exactly as much energy as pulling the lattice apart cost. Inside a cell, therefore, an ionic attraction between two charged groups is a weak thing, worth only a few kilojoules per mole.</p>
+
+<p>Then there is the bond that does most of biology's day-to-day work. When a hydrogen is covalently bonded to an oxygen or a nitrogen, it carries a real partial positive charge and hardly any electron cloud of its own to hide behind. It is therefore attracted to the electrons of another oxygen or nitrogen nearby. That attraction is a <tb-term ref="hydrogen-bond">hydrogen bond</tb-term>. It is worth about 20 kilojoules per mole between two water molecules, roughly a twentieth of a covalent bond, and in liquid water each one survives only a few trillionths of a second before breaking and re-forming with a different partner. Weaker still are <tb-term ref="van-der-waals">van der Waals forces</tb-term>, which arise because the electrons in any molecule are momentarily unevenly spread, making a fleeting charge that induces a matching one in a neighbour. One such contact is worth about a kilojoule per mole. A gecko hangs from a ceiling on nothing else, because its toes carry about two million bristles, each splitting into hundreds of finer tips, and every tip makes contact.</p>
+
+<table>
+  <thead><tr><th>Bond or force</th><th>What holds it</th><th>Rough strength (kJ/mol)</th></tr></thead>
+  <tbody>
+    <tr><td>Covalent, O–H</td><td>A shared pair of electrons, pulled towards the oxygen</td><td>460</td></tr>
+    <tr><td>Covalent, C–C</td><td>A shared pair, pulled evenly</td><td>350</td></tr>
+    <tr><td>Hydrogen bond, water to water</td><td>δ+ hydrogen attracted to a δ− oxygen</td><td>20</td></tr>
+    <tr><td>Ionic attraction, in water</td><td>Opposite charges, most of the attraction already spent on the surrounding water</td><td>a few</td></tr>
+    <tr><td>Van der Waals contact</td><td>Momentary uneven electron clouds</td><td>about 1</td></tr>
+    <tr><td><em>Thermal energy available at 37 °C</em></td><td><em>The jostling of everything against everything</em></td><td><em>2.6</em></td></tr>
+  </tbody>
+</table>
+
+<p>Read that last row against the others and the logic of living chemistry appears. Covalent bonds sit far above the thermal noise, so they hold. Hydrogen bonds sit not far above it, so they hold for a moment and then let go. Van der Waals contacts and ionic attractions in water sit at or below it, so on their own they barely hold at all. Figure 2.2 lets you pull the bonds apart yourself and watch the meter, in air and then in water.</p>
+
+<tb-figure kind="bondlab" id="fig-bondlab" width="wide" data-alt="A two-atom workbench. A picker chooses the elements; the shell diagram beside each atom shows how many electrons it has and how many it needs, and the bench names the kind of bond that forms: covalent when both atoms need electrons, ionic when one gives one up, none when both shells are full. Dragging the atoms apart raises a force meter and fills an energy bar against the thermal energy available at body temperature, and a switch that floods the bench with water collapses the ionic bond's energy while leaving the covalent bond untouched.">
+  <figcaption>Two atoms and a meter. Choose the elements, see what each needs, then drag them apart and read the energy it takes. The water switch is the point of the figure: it changes an ionic bond from unbreakable to trivial and leaves the covalent bond exactly as it was.<span class="fig-hint">Drag either atom, or use the arrow keys once the bench is focused.</span></figcaption>
+</tb-figure>
+
+<p>It follows that the weak bonds, not the strong ones, are where biology happens. A covalent skeleton is a commitment; a hydrogen bond is a suggestion. An antibody must grip a virus and then let go. The two strands of DNA must be held together firmly enough to protect the sequence and separated every time a cell divides. An enzyme must seize its molecule, alter it, and release the product hundreds of times a second. None of that is possible with bonds that need an enormous shove to break. What makes the weak bonds strong enough to be useful is arithmetic: one hydrogen bond means almost nothing, but a fold that makes two hundred of them at once is firmly held, and it comes apart the moment enough of them are disrupted. It also means that binding is specific, because many weak bonds can only line up at once if the two surfaces genuinely fit.</p>
+
+<tb-key><p>The strong bonds decide what a molecule is. The weak ones, in bulk, decide what it does.</p></tb-key>
+</section>
+
+<section id="water">
+<h2>Water</h2>
+
+<blockquote>“Water is life's matter and matrix, mother and medium.”<cite>Albert Szent-Györgyi</cite></blockquote>
+
+<aside class="tb-margin-note">A cell is about 70 per cent water by mass, and because water molecules are so small, they outnumber everything else by a wide margin: a bacterium holds something like ten thousand water molecules for every protein molecule.</aside>
+
+<p>An adult human is roughly 60 per cent water by mass, a little less in a body carrying more fat. Life began in water, every cell is mostly water, and every reaction in this book happens in it. That is a large claim to rest on a small molecule, so it is worth seeing exactly where water's behaviour comes from, because all of it comes from one arrangement of three atoms.</p>
+
+<p>An oxygen atom needs two electrons, so it binds two hydrogens. The two bonds do not lie opposite each other: oxygen's remaining electrons occupy space of their own and push the hydrogens together, leaving a bent molecule with an angle of about 104.5° between the bonds. Oxygen is far more electronegative than hydrogen, so each bond is strongly polar, with δ− at the oxygen and δ+ at each hydrogen.</p>
+
+<p>The bend is the whole story. Carbon dioxide also has polar bonds, but it is straight, so its two pulls point in opposite directions and cancel: as a whole the molecule is neutral and dull, and it is a gas that barely interacts with anything. Water's pulls do not cancel. They add up to a molecule with a distinctly negative end and a distinctly positive end, which is what it means to call a whole molecule polar. Bend the molecule straight in your imagination and you lose every property in this section at once.</p>
+
+<p>Now put two of these together. The δ+ hydrogen of one is attracted to the δ− oxygen of another: a hydrogen bond. Each water molecule has two hydrogens to offer and room for two more molecules to attach at its oxygen, so it can hold up to four neighbours at once, arranged towards the corners of a tetrahedron. In ice each molecule holds exactly four. In liquid water at room temperature the average is nearer three and a half, and no particular bond lasts: the network is complete and constantly rearranging, a liquid that behaves in some ways like a loose solid. Figure 2.3 is one molecule and its neighbours, and you can pull them apart and watch the bonds make and break.</p>
+
+<tb-figure kind="water3d" id="fig-water3d" width="wide" data-alt="A three-dimensional water molecule with its 104.5 degree bond angle, shaded to show the partial negative charge at the oxygen and partial positive charge at each hydrogen, surrounded by four neighbouring molecules held at the corners of a tetrahedron. Dragging a neighbour stretches and snaps its hydrogen bond, and the count of bonds currently held is reported. A temperature control runs from ice, where every molecule holds exactly four neighbours in an open lattice, through liquid water, where the average is about three and a half and each bond lasts only a moment, to steam, where the molecules fly apart alone.">
+  <figcaption>One water molecule and the four it can hold. Turn it to see the bend and the charge, drag a neighbour until its hydrogen bond snaps, and take the temperature down until the lattice locks: notice that freezing pushes the molecules further apart, not closer.<span class="fig-hint">Drag to orbit; drag a neighbouring molecule to pull it away.</span></figcaption>
+</tb-figure>
+
+<p>Everything that follows is a consequence of that flickering network.</p>
+
+<p><b>Water sticks to itself.</b> Because every molecule is being held by its neighbours, water has <tb-term ref="cohesion">cohesion</tb-term>: it hangs together instead of separating. A molecule in the middle of the liquid is pulled equally in all directions, but one at the surface has no neighbours above it, so the pull is sideways and downwards and the surface behaves as though it has a skin. That is <tb-term ref="surface-tension">surface tension</tb-term>, and water's is about 72 millinewtons per metre, higher than that of any other common liquid except mercury. A water strider stands on it. A raindrop is round because the skin pulls it into the shape with the least surface. Water also sticks to other polar surfaces, which is <tb-term ref="adhesion">adhesion</tb-term>, and the two together let water climb: adhesion to the walls of the narrow tubes in a stem drags the column upward, cohesion keeps the column in one piece, and evaporation from the leaves pulls it. This is how water reaches the top of a hundred-metre redwood without a pump anywhere in the tree.</p>
+
+<p><b>Water resists changes in temperature.</b> To warm a liquid you must make its molecules move faster, but in water much of the energy you add goes first into loosening hydrogen bonds, and only what is left over speeds the molecules up. So the temperature climbs slowly. Water's <tb-term ref="specific-heat">specific heat capacity</tb-term> is 4.18 joules per gram per kelvin, higher than almost any other common substance: the same energy that warms a gram of water by one degree would warm a gram of iron by more than nine. An organism that is mostly water is therefore buffered against a cold morning and a hot afternoon, and an ocean is a still larger flywheel, which is why coasts have milder winters than the middle of a continent at the same latitude.</p>
+
+<p><b>Evaporating water carries off a great deal of heat.</b> To leave the liquid entirely, a molecule must break every hydrogen bond holding it, so only the fastest-moving molecules can go, and they take their energy with them; what is left behind is cooler. The energy cost is remarkable: vaporising a gram of water at body temperature takes about 2.4 kilojoules, close to six times what it takes to heat that same gram from freezing to boiling. This is why sweating works, and why it works so well that a person can lose a litre or two of sweat an hour in hard exercise and stay near 37 °C. It is also why a dog, which sweats very little, pants instead: evaporation from a wet tongue does the same job.</p>
+
+<p><b>Ice floats.</b> Nearly every substance is denser as a solid than as a liquid, because cooling slows the particles and lets them pack closer. Water does this too, down to about 4 °C. Below that, the hydrogen bonds begin to win: molecules lock into a lattice in which each one is held at arm's length from exactly four neighbours, and that arrangement is more open than the crowded jostle of the liquid. Ice is about 0.92 grams per cubic centimetre against liquid water's 1.00, so it floats. A lake therefore freezes from the top down, and the ice insulates what is underneath. Were it the other way round, lakes and shallow seas would freeze solid from the bottom, and life in them would end each winter.</p>
+
+<p>Those four properties look like four separate facts about a familiar liquid, and Figure 2.4 is there to show that they are not. All four panels share one control, the strength of the hydrogen bond, and turning it down spoils all four at once.</p>
+
+<tb-figure kind="waterprops" id="fig-waterprops" width="wide" data-alt="A bench of four demonstrations sharing a single control for hydrogen-bond strength: a needle resting on a water surface whose molecules pull sideways, two beakers warming under identical heaters with a live temperature trace for water and for a comparison liquid, a dish losing its fastest molecules to evaporation with the average speed of those left behind falling, and a cooling tank in which the molecules first crowd closer and then, below four degrees, lock into an open lattice while a density curve traces the turn. Turning hydrogen bonding down sinks the needle, sends the temperature trace steeply up, removes the cooling effect, and makes the solid sink.">
+  <figcaption>Four properties, one cause. Each panel runs on its own, and the slider they share is the strength of the hydrogen bond. Weaken it and the needle sinks, the temperature bolts, the evaporating dish stops cooling, and the ice goes to the bottom.<span class="fig-hint">Choose a panel with the buttons; the hydrogen-bond slider applies to all four.</span></figcaption>
+</tb-figure>
+
+<p>The last property needs a section of its own, because it is the one that builds cells. Water is an extraordinary <tb-term ref="solvent">solvent</tb-term>: it dissolves more kinds of substance than any other common liquid. A <tb-term ref="solute">solute</tb-term> dissolves when water molecules can surround it and hold it, and water can do that for anything charged or polar. Around a sodium ion, water molecules turn their oxygens inward; around a chloride ion, their hydrogens. Around a sugar, they hydrogen-bond to each of its hydroxyl groups. Substances that water can treat this way are <tb-term ref="hydrophilic">hydrophilic</tb-term>; salts, sugars, amino acids and most of the small molecules of metabolism are among them.</p>
+
+<p>Substances water cannot treat this way are <tb-term ref="hydrophobic">hydrophobic</tb-term>: oils, fats, and hydrocarbons generally, which have no charge and no atom that will hydrogen-bond. The name is misleading, because it suggests that oil is repelled by water, and it is not. What happens is that a nonpolar molecule sitting in water forces the water around it into a more restricted arrangement, since those molecules must find their hydrogen-bonding partners without any help from the intruder. Herding all the nonpolar molecules into a single blob reduces the surface where that restriction applies, and so the water pushes them together. The oil is not attracted to the oil; the water is excluding it. This is the <tb-term ref="hydrophobic-effect">hydrophobic effect</tb-term>, the details of which chemists still argue about, and it is the force that folds a protein and assembles a membrane. A very large share of the structure in a cell exists because water will not have it any other way.</p>
+
+<tb-sort id="dissolve" objective="water-solvent">
+  <p class="intro">Will water take it? Drag each substance onto a bin, or use its buttons.</p>
+  <ul class="bins">
+    <li data-bin="water">Dissolves in water</li>
+    <li data-bin="oil">Keeps out of water</li>
+    <li data-bin="both">Both at once</li>
+  </ul>
+  <ul class="items">
+    <li data-bin="water" data-why="An ionic solid. Water turns its negative ends to the sodium ions and its positive ends to the chloride, and what it returns in doing so pays for taking the crystal apart.">Table salt</li>
+    <li data-bin="water" data-why="A small ring wearing five hydroxyl groups, every one of them able to hydrogen-bond with water.">Glucose</li>
+    <li data-bin="water" data-why="A two-carbon tail is too short to matter next to the hydroxyl group on its end, so alcohol and water mix in any proportion at all.">Ethanol</li>
+    <li data-bin="oil" data-why="Long hydrocarbon tails: no charge, and no oxygen or nitrogen for a hydrogen bond. Water closes its network and squeezes the tails together.">Olive oil</li>
+    <li data-bin="oil" data-why="Two identical atoms share their electrons evenly, so there is no charged end for water to hold. Very little oxygen will dissolve in blood plasma, which is why blood needs haemoglobin to carry it.">Oxygen gas</li>
+    <li data-bin="oil" data-why="Made in the skin from cholesterol and almost entirely hydrocarbon. Fat-soluble vitamins are stored in body fat rather than passed in urine, which is why it is possible to take too much of this one.">Vitamin D</li>
+    <li data-bin="both" data-why="A charged phosphate head that water welcomes and two hydrocarbon tails it will not have. Molecules like this build every membrane you own.">A phospholipid</li>
+    <li data-bin="both" data-why="One hydroxyl group on a large greasy body of four fused rings. Not enough to dissolve it, but enough to anchor it in a membrane with the hydroxyl at the watery surface.">Cholesterol</li>
+  </ul>
+</tb-sort>
+
+<tb-key><p>Every strange thing water does follows from one fact: a bent molecule with a positive end and a negative end, sticking briefly to its neighbours.</p></tb-key>
+</section>
+
+<section id="ph">
+<h2>Acids, bases and pH</h2>
+
+<p>Water is not quite inert. Now and then a collision knocks a hydrogen nucleus off one molecule and onto another, leaving a hydrogen ion, H<sup>+</sup>, and a hydroxide ion, OH<sup>−</sup>. It is a rare event: in pure water at 25 °C only about one molecule in five hundred million is split at any moment, giving a concentration of 10<sup>−7</sup> moles per litre of each. The lone hydrogen ion does not really travel alone, since it attaches at once to another water molecule to make H<sub>3</sub>O<sup>+</sup>, but writing H<sup>+</sup> is a harmless shorthand and everyone uses it.</p>
+
+<p>Rare or not, those ions matter, because so much of a cell's chemistry is sensitive to them. An <tb-term ref="acid">acid</tb-term> is a substance that donates hydrogen ions to a solution; a <tb-term ref="base">base</tb-term> is one that accepts them, whether by taking up H<sup>+</sup> directly or by releasing OH<sup>−</sup> that removes it. Since the concentrations involved span many powers of ten, chemists compress them with a logarithm. The <tb-term ref="ph">pH</tb-term> of a solution is −log<sub>10</sub> of its hydrogen ion concentration in moles per litre. Pure water, at 10<sup>−7</sup> moles per litre, has a pH of 7, and that is what neutral means: as many hydrogen ions as hydroxide ions.</p>
+
+<aside class="tb-margin-note">Neutral is not always 7. Water splits a little more readily when warm, so at body temperature the neutral point is nearer 6.8. Blood at pH 7.4 is therefore further above neutral than comparing it with 7 would suggest.</aside>
+
+<p>Because the scale is logarithmic, each step is a factor of ten, and steps add up alarmingly. Lemon juice at pH 2 holds a hundred thousand times the hydrogen ions of pure water. Stomach contents run between about pH 1.5 and 3.5, more acidic still at their strongest, which is why the stomach lining has to be replaced continually. Seawater sits near pH 8.1; household bleach is around 12.5. Reading a pH difference as though it were a difference of ordinary numbers is the commonest mistake made with this scale, and it understates everything.</p>
+
+<p>Most of a cell's interior is held close to pH 7.2, and blood is held between 7.35 and 7.45 — a tighter range than the body allows its temperature. The reason is that a protein's shape depends on which of its side groups are charged, and that depends on the hydrogen ion concentration around them. Change the pH and you change the charges, and the machine changes shape. Pepsin works in the stomach at about pH 2 and is destroyed at the pH of blood; trypsin, which does much the same job further along, works at about pH 8 and is useless in the stomach. Each enzyme is built for the acidity it will meet.</p>
+
+<p>Holding a pH steady while acid is continually being produced — every cell makes carbon dioxide, which becomes an acid in water — requires a <tb-term ref="buffer">buffer</tb-term>. A buffer is a weak acid together with the base it turns into, both present at once. When hydrogen ions are added, the base mops them up; when they are removed, the acid gives some back. The main buffer in blood is the carbonic acid and bicarbonate pair, tied to the carbon dioxide that respiration produces:</p>
+
+<p style="text-align:center">CO<sub>2</sub> + H<sub>2</sub>O ⇌ H<sub>2</sub>CO<sub>3</sub> ⇌ H<sup>+</sup> + HCO<sub>3</sub><sup>−</sup></p>
+
+<p>Push hydrogen ions in from the left and the reaction runs to the left, consuming them and releasing carbon dioxide, which you breathe out. Take hydrogen ions away and it runs to the right, replacing them. This is a chemical version of the negative feedback of Chapter 1, and it is wrapped in a physiological one: the lungs adjust carbon dioxide within minutes by changing how fast you breathe, and the kidneys adjust bicarbonate over hours. A buffer has a capacity, though, and the capacity can be exhausted. Blood below pH 7.35 is acidosis and above 7.45 alkalosis; sustained values outside roughly 6.8 to 7.8 are rarely survived.</p>
+
+<tb-figure kind="phlab" id="fig-phlab" width="wide" data-alt="Three beakers side by side — pure water, a bicarbonate buffer, and blood plasma — each with a pH readout, a live titration curve, and a magnified view of the ions in solution. Adding acid or base a drop at a time sends the pure water's pH plunging or climbing almost immediately while the buffered beakers hold near their starting value, with the molecular view showing bicarbonate ions taking up each added hydrogen ion and turning into carbonic acid. Keep adding and the buffer is used up, after which the buffered beaker's curve falls as steeply as the water's.">
+  <figcaption>Add acid, a drop at a time, to plain water and to a buffered solution. The curves diverge immediately and then, once the buffer is spent, converge again: a buffer does not stop acid arriving, it postpones the consequences until it runs out.<span class="fig-hint">Add drops with the buttons, or hold the arrow keys to pour.</span></figcaption>
+</tb-figure>
+
+<p>Figure 2.5 makes one further point worth carrying out of this section. The flat part of the buffered curve is not indefinite. The ocean has taken up roughly a quarter of the carbon dioxide humans have released, and the pH of its surface water has fallen by about 0.1 unit since pre-industrial times. That sounds trivial, and on a logarithmic scale it is not: it means about a quarter more hydrogen ions in the water, and it is already making it harder for corals, molluscs and some plankton to build shells of calcium carbonate.</p>
+
+<tb-key><p>A buffer does not stop acid being added. It stops the acid being felt, until it is used up.</p></tb-key>
+</section>
+
+<section id="carbon">
+<h2>Carbon builds the skeletons</h2>
+
+<p>Of all the elements, one does something none of the others can do as well, and it does it because of a number. Carbon has four valence electrons and needs four more, so it makes four covalent bonds, arranged towards the corners of a tetrahedron at about 109.5° to one another. Four is the useful number. An atom that makes one bond can only ever be an ending. An atom that makes two can only make a chain. Four bonds mean that a carbon can be part of a chain and still have two bonds left over for something else, which is what allows branching, and branching is what allows variety.</p>
+
+<p>Carbon also bonds to carbon strongly, and it does so indefinitely. Chains can be two atoms long or thousands. They can close into rings of five or six. Bonds within them can be single, double or triple, and a double bond is rigid where a single bond can rotate. The result is that the number of distinct molecules that can be built on a carbon skeleton is effectively unlimited, and it is why this one element accounts for nearly a fifth of your mass while making up almost none of the rock beneath you.</p>
+
+<aside class="tb-margin-note">Silicon sits directly below carbon and also makes four bonds, which is why it recurs in speculation about alien life. But silicon–silicon bonds are much weaker than carbon–carbon ones, and silicon's bond to oxygen is so strong that its oxide is sand rather than a gas. A silicon organism would exhale rock.</aside>
+
+<p>A skeleton of carbon and hydrogen alone is a <tb-term ref="hydrocarbon">hydrocarbon</tb-term>. Because carbon and hydrogen pull on electrons almost equally, a hydrocarbon has no charged region anywhere on it, and so it is thoroughly hydrophobic. Petrol is a hydrocarbon; so are the tails of every fat and every membrane lipid in your body. The oily middle of a cell membrane, which Chapter 4 is built around, is nothing more than this fact applied consistently.</p>
+
+<p>Because a skeleton can be rearranged, two molecules can contain exactly the same atoms and be different substances. These are <tb-term ref="isomer">isomers</tb-term>. Glucose and fructose are both C<sub>6</sub>H<sub>12</sub>O<sub>6</sub> and differ only in where the carbonyl group sits, at the end of the chain in glucose and one carbon in from the end in fructose, yet enzymes treat them as separate compounds and fructose tastes considerably sweeter. Because a double bond cannot rotate, the two groups it joins are locked on one side or on opposite sides, giving <i>cis</i> and <i>trans</i> forms: the kink in a <i>cis</i> double bond is why olive oil is liquid, and an artificially straightened <i>trans</i> version of the same fatty acid behaves in the body much more like a saturated fat. And a carbon with four different groups attached can be assembled in two ways that are mirror images and cannot be superimposed, like a left and a right hand. Life is emphatically handed: it builds proteins almost entirely from one mirror form of amino acid and sugars almost entirely from the other, and a receptor shaped for one will not accept the other. The same molecule, carvone, smells of spearmint in one form and of caraway in the other, because the receptors in your nose are handed too.</p>
+
+<p>If the skeleton supplied everything, though, organic chemistry would be dull. What a molecule actually does is mostly decided by small clusters of atoms hung off the skeleton, called <tb-term ref="functional-group">functional groups</tb-term>. There are seven worth knowing, and they recur throughout the rest of this book.</p>
+
+<table>
+  <thead><tr><th>Group</th><th>Written</th><th>What it does</th><th>Where you meet it</th></tr></thead>
+  <tbody>
+    <tr><td>Hydroxyl</td><td>—OH</td><td>Polar; hydrogen-bonds readily, so it makes a molecule more soluble.</td><td>Sugars, alcohols</td></tr>
+    <tr><td>Carbonyl</td><td>C=O</td><td>Polar. At the end of a skeleton it makes an aldehyde, within one a ketone.</td><td>Glucose (aldehyde), fructose (ketone)</td></tr>
+    <tr><td>Carboxyl</td><td>—COOH</td><td>Acidic: gives up its hydrogen ion, so at cell pH it is usually the negatively charged&nbsp;—&#8288;COO<sup>−</sup>.</td><td>Amino acids, fatty acids</td></tr>
+    <tr><td>Amino</td><td>—NH<sub>2</sub></td><td>Basic: picks up a hydrogen ion, so at cell pH it is usually the positively charged&nbsp;—&#8288;NH<sub>3</sub><sup>+</sup>.</td><td>Amino acids</td></tr>
+    <tr><td>Sulfhydryl</td><td>—SH</td><td>Two of them can join into a covalent bridge that pins a folded protein in place.</td><td>Cysteine; hair and feathers</td></tr>
+    <tr><td>Phosphate</td><td>—OPO<sub>3</sub><sup>2−</sup></td><td>Strongly negative, and its bonds to further phosphates carry energy the cell can spend.</td><td>ATP, DNA, phospholipids</td></tr>
+    <tr><td>Methyl</td><td>—CH<sub>3</sub></td><td>Nonpolar and unreactive, so it acts as a tag: adding one to DNA can switch a gene off.</td><td>Gene regulation; the sex hormones</td></tr>
+  </tbody>
+</table>
+
+<p>Figure 2.6 is a bench for building skeletons and hanging groups on them. It is worth a few minutes, because the rest of the chapter is nothing but particular answers to the question it poses.</p>
+
+<tb-figure kind="carbonkit" id="fig-carbonkit" width="wide" data-alt="A molecule-building bench. Carbons are added, branched, closed into a ring or joined by a double bond, and hydrogens fill every remaining bond automatically so that no carbon is ever left with the wrong number. Functional groups can be dragged onto any carbon from a tray of seven. A readout gives the molecular formula, the count of free bonds, whether the molecule is polar or nonpolar and whether it is acidic or basic at cell pH, and names the familiar molecule whenever the build matches one, such as ethanol, acetic acid, glycine or glucose.">
+  <figcaption>Build a skeleton and hang groups on it. The formula and the behaviour update as you go, and when a build happens to match a molecule the book uses later, the bench says so.<span class="fig-hint">Click a carbon to grow the chain; drag a group from the tray onto any free bond.</span></figcaption>
+</tb-figure>
+
+<tb-key><p>Carbon supplies the frame. The functional groups supply the behaviour.</p></tb-key>
+</section>
+
+<section id="macromolecules">
+<h2>Four kinds of large molecule</h2>
+
+<p>Most of what distinguishes a cell from a puddle is large molecules. A <tb-term ref="macromolecule">macromolecule</tb-term> is a molecule big enough that its size is part of what it does, and most of them are <tb-term ref="polymer">polymers</tb-term>: long chains assembled from small repeating units called <tb-term ref="monomer">monomers</tb-term>. There are four classes of large biological molecule, and three of the four are polymers.</p>
+
+<p>Remarkably, almost all of them are built and taken apart by the same two reactions. In <tb-term ref="dehydration">dehydration synthesis</tb-term>, also called condensation, one monomer gives up a hydroxyl group and the next gives up a hydrogen; the two join directly and the discarded pieces leave as a molecule of water. Joining <i>n</i> monomers into one chain therefore releases <i>n</i> − 1 waters. <tb-term ref="hydrolysis">Hydrolysis</tb-term> is the same reaction run backwards: a water molecule is split across the bond, its hydroxyl going to one side and its hydrogen to the other, and the chain comes apart. Digestion is hydrolysis, from the first mouthful to the last; growth is condensation.</p>
+
+<tb-figure kind="polymer" id="fig-polymer" width="wide" data-alt="Two monomers on a bench that can be run forwards into a polymer and backwards again. A switch chooses glucose units joining into a disaccharide, amino acids joining into a peptide, or glycerol taking on fatty acids to make a fat. Running the reaction forwards pulls a hydroxyl from one partner and a hydrogen from the other, releases them as a visible water molecule, and forms the new bond; running it backwards takes a water from the surroundings, splits it across the bond, and separates the pieces. A counter tracks the chain length and the number of waters released, and an energy bar shows that condensation must be paid for while hydrolysis is downhill.">
+  <figcaption>One reaction and its reverse, in both directions and at your own speed. Watch where the atoms of the departing water come from: one partner loses a hydroxyl, the other a hydrogen, and neither loses a whole water of its own.<span class="fig-hint">Step forwards and backwards with the buttons; the monomer switch changes the family without changing the reaction.</span></figcaption>
+</tb-figure>
+
+<p>Neither reaction happens quickly on its own. In a cell both are catalysed by <tb-term ref="enzyme">enzymes</tb-term>, and the direction they go is not symmetrical: hydrolysis is energetically downhill in water, which is the deep reason polymers do not assemble themselves in a pond. Building a polymer is building order, and as Chapter 1 argued, order has to be paid for. Chapter 5 takes up the currency.</p>
+
+<ul class="tb-props" aria-label="The four classes of large biological molecule">
+  <li><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 24l5-8h9l5 8-5 8h-9z" fill="none" stroke="var(--leaf)" stroke-width="2" stroke-linejoin="round"/><path d="M27 24l5-8h9l5 8-5 8h-9z" fill="var(--leaf)" opacity=".25" stroke="var(--leaf)" stroke-width="2" stroke-linejoin="round"/></svg><div><b>Carbohydrates</b><span>Monomer: a monosaccharide such as glucose. Quick fuel in every organism, and in plants and insects structural fibre as well.</span></div></li>
+  <li><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="12" cy="24" r="6" fill="var(--gold)"/><path d="M19 21q6 3 11 0t12 2M19 27q6 3 11 0t12 2" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round"/></svg><div><b>Lipids</b><span>No shared monomer: a class defined by not dissolving in water. Dense energy storage, membranes, and some hormones.</span></div></li>
+  <li><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 34c4-10 10 4 14-6s8 6 14-4" fill="none" stroke="var(--coral)" stroke-width="3" stroke-linecap="round"/><circle cx="10" cy="34" r="2.5" fill="var(--coral)"/><circle cx="38" cy="24" r="2.5" fill="var(--coral)"/></svg><div><b>Proteins</b><span>Monomer: an amino acid. Nearly everything a cell does actively, from catalysis to structure to signalling.</span></div></li>
+  <li><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 8c12 6 12 10 0 16s-12 10 0 16M32 8c-12 6-12 10 0 16s12 10 0 16" fill="none" stroke="var(--violet)" stroke-width="2.5" stroke-linecap="round"/><path d="M18 16h12M18 32h12" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"/></svg><div><b>Nucleic acids</b><span>Monomer: a nucleotide. Storing the instructions, and carrying them to the machinery that reads them.</span></div></li>
+</ul>
+
+<p><tb-term ref="carbohydrate">Carbohydrates</tb-term> are the simplest. A single sugar unit is a <tb-term ref="monosaccharide">monosaccharide</tb-term>: glucose, fructose and galactose are the common ones, and all three share the formula C<sub>6</sub>H<sub>12</sub>O<sub>6</sub>. Two joined make a disaccharide — glucose with glucose is maltose, glucose with fructose is sucrose, glucose with galactose is lactose. Many joined make a <tb-term ref="polysaccharide">polysaccharide</tb-term>, and here the same monomer produces startlingly different materials. Plants store glucose as starch and build their cell walls from cellulose; animals store it as glycogen, which is starch's more heavily branched cousin, held in the liver and the muscles.</p>
+
+<p>Starch and cellulose are both chains of glucose, and the difference between food and firewood is a single detail. Glucose closes into a ring in two ways, called α and β, differing only in which side one hydroxyl group ends up on. Starch links α-glucose units, which gives a chain that coils. Cellulose links β-glucose, which flips every second unit over and gives a straight ribbon; ribbons lie alongside each other and hydrogen-bond into fibres of great strength. The enzymes in your gut are shaped for the α link and cannot touch the β one, so starch is a meal and cellulose passes through as fibre. Cows cannot digest it either. The microbes in their fore-stomachs can, and the cow lives off what the microbes leave.</p>
+
+<p><tb-term ref="lipid">Lipids</tb-term> are the odd class out, because they are grouped by a behaviour rather than by a structure: they do not dissolve in water. There is no lipid monomer and no lipid polymer. A fat is built from one glycerol and three <tb-term ref="fatty-acid">fatty acids</tb-term>, joined by three condensation reactions that release three waters. If the fatty acid tails have no double bonds they are saturated with hydrogen, lie straight, and pack together closely, so the fat is solid at room temperature: butter and lard. If the tails carry one or more <i>cis</i> double bonds they are unsaturated, kinked, and cannot pack, so the fat is a liquid oil. Fats store about 37 kilojoules per gram against a carbohydrate's 17, because their carbons are bonded mostly to hydrogen rather than to oxygen and so have further to fall when they are oxidised.</p>
+
+<p>Two variations matter enough to name now. A <tb-term ref="phospholipid">phospholipid</tb-term> replaces one of the three fatty acids with a phosphate group, producing a molecule with a charged head that water welcomes and two hydrophobic tails that it will not have. Put enough of them in water and they arrange themselves, with no help at all, into a double sheet with the tails turned inward and the heads facing out on both sides: a bilayer, which is the basis of every membrane in every cell. Nothing assembles it. The hydrophobic effect does. A <tb-term ref="steroid">steroid</tb-term>, meanwhile, is built not from tails but from four carbon rings fused together; cholesterol is one, and it is both a component of animal membranes and the raw material from which testosterone, oestrogen and vitamin D are made.</p>
+
+<tb-key><p>Four classes, two reactions. Almost every large molecule in you is assembled by taking a water out and dismantled by putting one back.</p></tb-key>
+</section>
+
+<section id="proteins">
+<h2>Proteins: sequence, shape, job</h2>
+
+<p>If a cell is a factory, the <tb-term ref="protein">proteins</tb-term> are the machines, the scaffolding and most of the workforce. They catalyse reactions, as enzymes. They hold tissues up: collagen in tendon and skin, keratin in hair and nail. They carry things, as haemoglobin carries oxygen and as the channels in a membrane carry ions. They signal, as insulin does. They defend, as antibodies do. They move, as the actin and myosin in a muscle do. More than half the dry mass of a bacterium is protein, and the reason one class of molecule can do so many unrelated jobs is that its members differ in shape, and can differ in shape almost without limit.</p>
+
+<p>The monomer is the <tb-term ref="amino-acid">amino acid</tb-term>. Every one has the same core: a central carbon carrying an amino group, a carboxyl group, a hydrogen, and one side chain. The core never varies; the side chain always does, and it is the side chain that gives an amino acid its character. Some side chains are hydrocarbon and hydrophobic. Some are polar. Some carry a carboxyl group and are negatively charged at cell pH, others an amino group and are positive. One, cysteine, ends in a sulfhydryl group that can bond covalently to another cysteine. One, glycine, has nothing but a hydrogen, so the chain can bend freely there; another, proline, loops its side chain back onto the backbone and forces a kink. Twenty side chains are specified by the standard genetic code, with two more used by a scattering of organisms, and twenty is enough.</p>
+
+<aside class="tb-margin-note">Twenty choices at each of a hundred positions gives 20<sup>100</sup> possible chains, about 10<sup>130</sup>. There are perhaps 10<sup>80</sup> atoms in the observable universe. Evolution has sampled an unimaginably small corner of the possibilities.</aside>
+
+<p>Amino acids join by condensation, exactly as in Figure 2.7: the carboxyl group of one and the amino group of the next lose a water between them and form a <tb-term ref="peptide-bond">peptide bond</tb-term>. The result is a <tb-term ref="polypeptide">polypeptide</tb-term>, a backbone of repeating N–C–C units with the side chains projecting from it. The chain has a direction, an amino end and a carboxyl end, and it is always built in the same direction. Most proteins are between one hundred and one thousand amino acids long.</p>
+
+<p>A polypeptide is not yet a protein. It becomes one by folding, and biologists describe the fold in four levels.</p>
+
+<p>The <b>primary structure</b> is the sequence itself, the order of the side chains along the chain, and it is dictated by a gene. The <b>secondary structure</b> is local, repeating pattern held together by hydrogen bonds between backbone atoms — the N–H of one amino acid and the C=O of another — and not between side chains at all. There are two common patterns: the α-helix, a coil with 3.6 amino acids per turn, and the β-pleated sheet, in which stretches of chain lie side by side. Linus Pauling and Robert Corey predicted both in 1951 from the geometry of the peptide bond alone, years before anyone had seen a protein's structure. The <b>tertiary structure</b> is the shape of the whole chain, and it is dominated by the side chains: hydrophobic ones are driven into the interior away from water, oppositely charged ones attract, hydrogen bonds form wherever partners align, van der Waals contacts fill the packing, and disulfide bridges between cysteines lock the arrangement with a genuinely covalent pin. The <b>quaternary structure</b> exists only for proteins built from more than one chain. Haemoglobin is four chains that work as one; collagen is three wound into a rope.</p>
+
+<p>The crucial claim about all this is that the sequence determines the fold. Christian Anfinsen showed it directly in the 1950s and 1960s: he unfolded the enzyme ribonuclease completely, destroying its activity, then removed the agents that had unfolded it, and the chain refolded by itself into the same shape and recovered its function. No template was needed; the information was in the order of the amino acids. The claim needs two hedges. Many proteins in a living cell fold with help from chaperone proteins, which do not specify the shape but keep a half-folded chain from sticking to its neighbours; and some large proteins, once unfolded, never refold. But the principle stands, and it is the foundation of the chapters on genes: a gene specifies a sequence, the sequence specifies a fold, and the fold is the function.</p>
+
+<tb-figure kind="foldlab" id="fig-foldlab" width="wide" data-alt="A protein-folding bench. The reader edits a short chain of amino acids by clicking residues to switch them between hydrophobic, polar, positively charged and negatively charged, then folds the chain on a grid; the simulation seeks the arrangement that buries the most hydrophobic residues away from the surrounding water, reporting the buried fraction, the number of favourable contacts and how many different starting conditions reach the same final shape. Overlays label the four levels of structure, a temperature control shakes the fold apart and lets it re-form on cooling, and a pH control flips the charges on the acidic and basic residues so that the ionic contacts holding the fold together break.">
+  <figcaption>Write a sequence and fold it. The only rule the simulation obeys is that hydrophobic residues do better buried, and that rule alone produces a compact shape with a greasy core. Change one residue and refold, then heat it or swing the pH and watch what is lost.<span class="fig-hint">Click a residue to change it, then press Fold. Try the same sequence twice from different starts.</span></figcaption>
+</tb-figure>
+
+<p>Figure 2.8 shows why a small change to the sequence is not necessarily a small change to the protein. The clearest real example is sickle-cell haemoglobin. The β chain of haemoglobin is 146 amino acids long; in the sickle-cell version the sixth is valine instead of glutamic acid. Glutamic acid is charged and comfortable at the surface; valine is hydrophobic, and the patch of grease it creates makes the molecules stick to one another when oxygen is scarce, assembling into fibres that distort the whole red cell. One side chain out of 146 changes the shape of a cell, and blocks a capillary.</p>
+
+<p>Because the fold is held mostly by weak bonds, it can be undone. <tb-term ref="denaturation">Denaturation</tb-term> is the loss of a protein's shape, and it takes very little. Heat shakes the weak bonds apart faster than they can re-form. A change in pH alters which side chains are charged, so ionic attractions vanish or appear in the wrong places. Salts, alcohols and detergents compete for the interactions that held the fold. When the shape goes, the function goes with it, which is what you see in a frying pan: egg white sets between about 60 and 65 °C, as its unfolded chains tangle irreversibly with one another. Most human proteins hold their shape up to about 40 °C and begin to fail not far above it, which is part of why a high fever is dangerous and much of why boiling sterilises a soup.</p>
+
+<tb-key><p>The sequence sets the fold, and the fold is the function. Whatever a protein does, it does with its shape.</p></tb-key>
+</section>
+
+<section id="nucleic-acids">
+<h2>Nucleic acids carry the instructions</h2>
+
+<p>The fourth class is the one Chapter 1 has already introduced and Chapters 8 and 9 will take apart properly. A <tb-term ref="nucleic-acid">nucleic acid</tb-term> is a polymer of <tb-term ref="nucleotide">nucleotides</tb-term>, and a nucleotide has three parts: a phosphate group, a five-carbon sugar, and a nitrogen-containing base. The sugar is deoxyribose in DNA and ribose in RNA, and the difference between them is a single oxygen. That one atom makes RNA the more chemically fragile of the two, which suits their jobs: DNA is an archive and RNA is a working copy.</p>
+
+<p>There are five bases in common use. Adenine and guanine are built on two fused rings; cytosine, thymine and uracil on one. DNA uses adenine, guanine, cytosine and thymine; RNA uses uracil in place of thymine. Nucleotides join in the same way everything else in this chapter joins, by a condensation that links the phosphate of one to the sugar of the next, so a nucleic acid has a sugar–phosphate backbone with the bases projecting from it, and a direction, since the two ends of the chain are chemically different. A cell does not in practice squeeze two plain nucleotides together: it builds with nucleotides that already carry extra phosphates, and so carry the energy the reaction needs, which is a story for Chapter 8.</p>
+
+<p>The pairing rule of Chapter 1 now has a mechanism behind it. Adenine pairs with thymine across two hydrogen bonds and guanine with cytosine across three, and the pairs are the same width, so the ladder has even rungs. This is the weak-bond arithmetic of Section 2.2 doing exactly what it is good for: strong enough in aggregate to hold two strands together through a cell's whole life, weak enough that an enzyme can unzip them at ordinary temperature when it is time to copy. It is also why a stretch of DNA rich in guanine and cytosine, with three bonds per rung instead of two, takes more heat to separate than one rich in adenine and thymine.</p>
+
+<p>One last nucleotide is worth meeting here, because it belongs to this chemistry rather than to genetics. ATP is adenine and ribose with a chain of three phosphates attached. Those phosphates are all negatively charged and crowded unhappily together, and letting one go releases energy the cell can put to work. The molecule that stores your genetic information and the molecule that pays for nearly every transaction in your body are built from the same parts. Chapter 5 spends that currency; Chapter 8 reads the archive.</p>
+</section>
+
+<section id="summary" data-unnumbered class="tb-endmatter">
+<h2>Key ideas</h2>
+<ul>
+  <li>The number of protons fixes an atom's element; the electrons, and chiefly the outermost ones, fix its chemistry. An atom makes as many covalent bonds as it has gaps in its outer shell: hydrogen one, oxygen two, nitrogen three, carbon four.</li>
+  <li>Oxygen, carbon, hydrogen and nitrogen are about 96 per cent of a body by mass. Phosphorus and sulfur, and the ions of sodium, potassium, calcium, chloride and magnesium, account for nearly all the rest.</li>
+  <li>Covalent bonds are far stronger than thermal jostling and so do not come apart on their own. A hydrogen bond is only about eight times stronger than that jostling, and ionic attractions in water and van der Waals contacts are comparable to it, so all of them form and break constantly. Biology's specificity comes from many weak bonds having to line up at once.</li>
+  <li>Water is a bent, polar molecule that hydrogen-bonds to up to four neighbours. Cohesion and surface tension, a high specific heat, powerful evaporative cooling, floating ice and a broad capacity to dissolve all follow from that one arrangement.</li>
+  <li>Nonpolar substances are pushed together in water rather than attracted to each other. The hydrophobic effect folds proteins and builds membranes.</li>
+  <li>pH is the negative logarithm of the hydrogen ion concentration, so one unit is a factor of ten. A buffer, such as the carbonic acid and bicarbonate pair, holds pH steady until its capacity is used up; blood is kept between 7.35 and 7.45.</li>
+  <li>Carbon's four bonds allow chains, branches and rings of unlimited variety; functional groups hung on those skeletons decide how a molecule behaves.</li>
+  <li>Dehydration synthesis joins monomers and releases a water; hydrolysis splits a water across the bond and separates them. Both need enzymes, and building costs energy.</li>
+  <li>The four classes are carbohydrates, lipids, proteins and nucleic acids. Lipids alone are defined by a behaviour rather than by a monomer.</li>
+  <li>A protein's amino acid sequence determines how it folds, and its fold determines what it does. Denaturation by heat or a change in pH destroys the shape and with it the function.</li>
+</ul>
+</section>
+
+<section id="glossary" data-unnumbered>
+<h2>Glossary</h2>
+<tb-glossary></tb-glossary>
+</section>
+
+<section id="checks" data-unnumbered>
+<h2>Check your understanding</h2>
+
+<tb-check id="q1" objective="valence-bonds">
+  <p class="question">Nitrogen has five electrons in its outer shell. How many covalent bonds does a nitrogen atom usually form?</p>
+  <ul class="options">
+    <li>Five</li>
+    <li data-correct>Three</li>
+    <li>Two</li>
+    <li>One</li>
+  </ul>
+  <p class="explain">The outer shell holds eight, so nitrogen is three electrons short and shares three pairs to fill it. The number of bonds is the number of gaps, not the number of electrons already there.</p>
+</tb-check>
+
+<tb-check id="q2" objective="ice-floats">
+  <p class="question">Ice floats because, as water freezes:</p>
+  <ul class="options">
+    <li>The molecules move faster and take up more room.</li>
+    <li>Air is trapped between the molecules.</li>
+    <li data-correct>Each molecule becomes fixed at arm's length from four neighbours, in a lattice more open than the liquid.</li>
+    <li>The hydrogen bonds break, letting the molecules spread out.</li>
+  </ul>
+  <p class="explain">Freezing makes the hydrogen bonds permanent rather than breaking them, and a molecule held by four fixed bonds cannot crowd its neighbours the way a jostling one does. Ice is about 0.92 g/cm³ against liquid water's 1.00.</p>
+</tb-check>
+
+<tb-check id="q3" objective="ph-scale">
+  <p class="question">A solution is changed from pH 5 to pH 3. Its hydrogen ion concentration is now:</p>
+  <ul class="options">
+    <li>Two times higher</li>
+    <li data-correct>A hundred times higher</li>
+    <li>Two times lower</li>
+    <li>A hundred times lower</li>
+  </ul>
+  <p class="explain">Each pH unit is a factor of ten, and a lower pH means more hydrogen ions, so two units down is ten times ten more. Treating pH as an ordinary number is the commonest error with this scale.</p>
+</tb-check>
+
+<tb-check id="q4" objective="condensation-hydrolysis">
+  <p class="question">Five amino acids are joined into a single chain. How many water molecules are released?</p>
+  <ul class="options">
+    <li>Five</li>
+    <li data-correct>Four</li>
+    <li>Ten</li>
+    <li>None; water is taken up instead</li>
+  </ul>
+  <p class="explain">One water leaves at each bond formed, and joining five units in a row takes four bonds. Water is taken up, not released, when the chain is broken by hydrolysis.</p>
+</tb-check>
+
+<tb-check id="q5" objective="denaturation">
+  <p class="question">An enzyme is heated to 80 °C and then cooled again, but it no longer works. The best explanation is that:</p>
+  <ul class="options">
+    <li>Its peptide bonds were broken by the heat.</li>
+    <li>Its amino acid sequence was changed.</li>
+    <li data-correct>The weak bonds holding its fold were shaken apart, and the unfolded chains tangled with one another instead of refolding.</li>
+    <li>Heat destroys the gene that made it.</li>
+  </ul>
+  <p class="explain">Denaturation acts on the fold, not the sequence: the covalent backbone survives intact, which is why the primary structure is unchanged. What is lost is the shape, and in a crowd of unfolded chains the shape often cannot be recovered.</p>
+</tb-check>
+</section>
+
+<a class="tb-next" href="../">
+  <span class="tb-label">Next</span>
+  <strong>3 · Cells</strong>
+  <span class="dek">Everything in this chapter, assembled into a compartment that keeps itself going. In preparation; the book page lists every chapter.</span>
+</a>
+
+</div>
+</main>
+
+<aside class="tb-margin" aria-hidden="true"></aside>
+</div>
+</body>
+</html>

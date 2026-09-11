@@ -75,8 +75,23 @@ export class TbFigure extends HTMLElement {
     try {
       info = figureInfo(kind);
     } catch (err) {
+      // Build a real stage first. The error box is position:absolute inset:0, so without a positioned
+      // ancestor it lays itself over the viewport instead of over the figure, and a page with several
+      // unregistered kinds renders as a blank sheet.
       this.dataset.state = 'error';
-      this.innerHTML = `<div class="tb-figure__error">${err.message}</div>`;
+      this.dataset.width = this.getAttribute('width') || 'text';
+      const figure = document.createElement('figure');
+      const stage = document.createElement('div');
+      stage.className = 'tb-figure__stage';
+      stage.style.setProperty('--fig-aspect', '16 / 10');
+      const box = document.createElement('div');
+      box.className = 'tb-figure__error';
+      box.textContent = err.message;
+      stage.append(box);
+      figure.append(stage);
+      const caption = this.querySelector('figcaption');
+      if (caption) figure.append(caption);
+      this.replaceChildren(figure);
       textbook.registerFigure(id, { kind, state: 'error', error: err.message });
       return;
     }

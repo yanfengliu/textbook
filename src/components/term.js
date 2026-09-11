@@ -80,9 +80,25 @@ export class TbTerm extends HTMLElement {
     this.button.setAttribute('aria-expanded', 'true');
     this.button.setAttribute('aria-describedby', pop.id);
     openTerm = this;
-    // Keep the popover on screen.
-    const r = pop.getBoundingClientRect();
-    if (r.right > innerWidth - 8) pop.classList.add('is-right');
+    this.place();
+  }
+
+  // Keep the popover inside the viewport on both sides. The popover is positioned against the term,
+  // which can sit anywhere on a line, and on a phone it is wider than the space on either side of most
+  // terms; so it is nudged along its own axis until both edges are in, rather than flipped from one
+  // anchor to the other. Flipping cannot help a box wider than both gaps, which is why the first
+  // version pushed a mid-line term's definition off the left edge.
+  place() {
+    const pop = this.pop;
+    if (!pop) return;
+    const margin = 8;
+    pop.style.left = '0px';
+    const host = this.getBoundingClientRect();
+    const width = pop.getBoundingClientRect().width;
+    let left = 0;
+    if (host.left + width > innerWidth - margin) left = innerWidth - margin - width - host.left;
+    if (host.left + left < margin) left = margin - host.left;
+    pop.style.left = `${Math.round(left)}px`;
   }
 
   close() {

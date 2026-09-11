@@ -59,7 +59,12 @@
 
   --leading-body: 1.55;
   --leading-tight: 1.15;
-  --measure: 66ch;
+  /* The text column, as one length rather than a per-element calculation. It was `66ch`, and `ch`
+     resolves against the font of the element it is applied to, so a small-caps label in Inter at 12px
+     and body prose in Newsreader at 19.2px produced column widths 88px apart on the same page. This is
+     66 characters of the body face at its default size, fixed, so every block in the column shares an
+     edge. */
+  --measure: 43.6rem;
 
   /* Rhythm: a 0.4rem baseline grid. Every step the stylesheets name exists here; a missing one would
      silently fall through to a hand-written fallback and leave the grid without anyone noticing. */

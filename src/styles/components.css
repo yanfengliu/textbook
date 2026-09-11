@@ -275,7 +275,8 @@ tb-term > button:focus-visible {
   z-index: 30;
   left: 0;
   top: calc(100% + 0.5rem);
-  width: min(22rem, 80vw);
+  /* Never wider than the screen less the margin the clamp in term.js keeps on each side. */
+  width: min(22rem, calc(100vw - 16px));
   font-family: var(--font-text);
   font-size: var(--text-base);
   line-height: 1.45;
@@ -288,11 +289,6 @@ tb-term > button:focus-visible {
   text-indent: 0;
   font-weight: 400;
   font-style: normal;
-}
-
-.tb-term__pop.is-right {
-  left: auto;
-  right: 0;
 }
 
 .tb-term__pop b {

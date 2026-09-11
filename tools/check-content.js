@@ -7,7 +7,8 @@
 // every id in the document is unique; there is exactly one <h1>, on a chapter page (main[data-chapter])
 // every <h2> is the direct child of a <section id> so the shell can number it, and no heading level is
 // skipped; every "Figure N.M" mentioned in the prose exists and
-// every figure is mentioned at least once; every relative href resolves to a file; and no TODO,
+// every figure is mentioned at least once; every relative href resolves to a file; every objective's
+// prerequisites resolve, in this chapter or another, with no cycle inside the chapter; and no TODO,
 // FIXME, XXX or lorem is left in the page.
 //
 // Bound: it reads the authored HTML with a small tolerant tokenizer, not the rendered DOM, so it knows
@@ -222,7 +223,7 @@ export function checkDocument(html, { glossary = {}, kinds = [], objectives = []
 // these are data files, not markup: the prose check reads HTML, this reads what the adaptive study
 // system (docs/design/adaptive.md) runs on. Bound: structure and cross-references only. It cannot
 // tell a good question from a bad one, which is what the agent's rounds and the owner's reading are for.
-export function checkChapterData({ objectives = [], items = [], sections = [], figures = [], kinds = [], file = 'chapter' } = {}) {
+export function checkChapterData({ objectives = [], items = [], sections = [], figures = [], kinds = [], otherChapterObjectiveIds = [], file = 'chapter' } = {}) {
   const fails = [];
   const fail = (msg) => fails.push(`${file}: ${msg}`);
   if (!objectives.length) return fails;
@@ -242,12 +243,20 @@ export function checkChapterData({ objectives = [], items = [], sections = [], f
     }
     if (!(o.teaches?.sections ?? []).length) fail(`objective "${o.id}" names no section that teaches it`);
   }
+  // A prerequisite may live in an earlier chapter: that is what makes the study queue work across the
+  // book rather than within one chapter, and `src/learning/objectives.js` resolves them that way at
+  // runtime. The first version of this check looked only at the chapter's own array and reported every
+  // one of them as unresolved, which is how both chapter 2 and chapter 3 first came back red.
+  const elsewhere = new Set(otherChapterObjectiveIds);
   for (const o of objectives) {
     for (const p of o.prereqs ?? []) {
-      if (!byId.has(p)) fail(`objective "${o.id}" requires "${p}", which is not an objective of this chapter`);
+      if (byId.has(p) || elsewhere.has(p)) continue;
+      fail(`objective "${o.id}" requires "${p}", which is not an objective of this chapter or of any other`);
     }
   }
   // A cycle in the prerequisite graph would hang the queue: it would look for a foundation forever.
+  // Only within this chapter: a cross-chapter cycle would need every chapter at once, which
+  // `validate()` in src/learning/objectives.js does at runtime over the whole registered book.
   const mark = new Map();
   const walk = (id, trail) => {
     if (mark.get(id) === 'done') return;
@@ -311,6 +320,14 @@ async function main() {
       if (statSync(cdir).isDirectory() && existsSync(join(cdir, 'index.html'))) pages.push(join(cdir, 'index.html'));
     }
   }
+  // Every objective id in the book, so a chapter's prerequisites may reach into another chapter.
+  const allObjectiveIds = new Set();
+  for (const page of pages) {
+    const objPath = join(dirname(page), 'objectives.js');
+    if (!existsSync(objPath)) continue;
+    for (const o of (await import(pathToFileURL(objPath).href)).OBJECTIVES) allObjectiveIds.add(o.id);
+  }
+
   let total = 0;
   for (const page of pages) {
     const html = readFileSync(page, 'utf8');
@@ -339,6 +356,7 @@ async function main() {
       sections: findAll(tree, (n) => n.tag === 'section' && n.attrs.id).map((n) => n.attrs.id),
       figures: findAll(tree, (n) => n.tag === 'tb-figure').map((n) => n.attrs.id),
       kinds: KINDS,
+      otherChapterObjectiveIds: [...allObjectiveIds].filter((id) => !objectives.some((o) => o.id === id)),
       file: `${dirname(rel)}/objectives.js`,
     });
     const all = [...fails, ...dataFails];

@@ -15,6 +15,26 @@ export const FIGURES = Object.freeze({
   energy: { url: new URL('./energy.js', import.meta.url).href, title: 'Energy flows, matter cycles', needsWebGL: false, aspect: 16 / 9 },
   tree: { url: new URL('./tree.js', import.meta.url).href, title: 'The tree of life', needsWebGL: false, aspect: 16 / 10 },
   pasteur: { url: new URL('./pasteur.js', import.meta.url).href, title: 'Pasteur\'s swan-neck flasks', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 3 },
+
+  // Chapter 2, The chemistry of life
+  soup: { url: new URL('./soup.js', import.meta.url).href, title: 'What a drop is made of', needsWebGL: false, aspect: 21 / 9, narrowAspect: 4 / 3 },
+  bondlab: { url: new URL('./bondlab.js', import.meta.url).href, title: 'Two atoms and a meter', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
+  water3d: { url: new URL('./water3d.js', import.meta.url).href, title: 'One molecule and the four it holds', needsWebGL: true, aspect: 16 / 10, narrowAspect: 1 },
+  waterprops: { url: new URL('./waterprops.js', import.meta.url).href, title: 'Four properties, one cause', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 5 },
+  phlab: { url: new URL('./phlab.js', import.meta.url).href, title: 'Add acid to water, and to blood', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
+  carbonkit: { url: new URL('./carbonkit.js', import.meta.url).href, title: 'Build a skeleton', needsWebGL: false, aspect: 16 / 10, narrowAspect: 4 / 5 },
+  polymer: { url: new URL('./polymer.js', import.meta.url).href, title: 'One reaction, and its reverse', needsWebGL: false, aspect: 16 / 7, narrowAspect: 4 / 3 },
+  foldlab: { url: new URL('./foldlab.js', import.meta.url).href, title: 'Write a sequence, fold it', needsWebGL: false, aspect: 16 / 10, narrowAspect: 4 / 5 },
+
+  // Chapter 3, Cells
+  microscopes: { url: new URL('./microscopes.js', import.meta.url).href, title: 'Four instruments, one specimen', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 5 },
+  'surface-volume': { url: new URL('./surface-volume.js', import.meta.url).href, title: 'Why cells are small', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 5 },
+  prokaryote: { url: new URL('./prokaryote.js', import.meta.url).href, title: 'A prokaryotic cell', needsWebGL: false, aspect: 16 / 10, narrowAspect: 4 / 5 },
+  secretion: { url: new URL('./secretion.js', import.meta.url).href, title: 'One protein, ribosome to outside', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
+  symbiont: { url: new URL('./symbiont.js', import.meta.url).href, title: 'The evidence for endosymbiosis', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 5 },
+  cytoskeleton: { url: new URL('./cytoskeleton.js', import.meta.url).href, title: 'Motors on tracks', needsWebGL: false, aspect: 16 / 7, narrowAspect: 3 / 4 },
+  cilium: { url: new URL('./cilium.js', import.meta.url).href, title: 'The 9+2 axoneme', needsWebGL: true, aspect: 16 / 10, narrowAspect: 1 },
+  plantcell3d: { url: new URL('./plantcell3d.js', import.meta.url).href, title: 'A plant cell', needsWebGL: true, aspect: 16 / 10, narrowAspect: 1 },
 });
 
 export const KINDS = Object.freeze(Object.keys(FIGURES));
