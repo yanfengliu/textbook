@@ -128,6 +128,20 @@ function splitNeck() {
   return { stub: toPath(stub), piece: toPath(piece), rest };
 }
 
+// The narrow arrangement. Below NARROW_MAX stage pixels the whole scene is lifted and shrunk into the
+// band left between the card strip at the top and the single row of controls at the bottom, so nothing
+// covers the bench; the names stay outside that group and are drawn several times larger in viewBox
+// units, which is what makes them legible at 390 px. The band is measured from the card and toolbar as
+// they actually render rather than guessed, so a two-line card or a taller stage moves it honestly.
+// SCENE_BOX is what the scene draws inside: the top is the arch of the neck, the bottom the front edge
+// of the bench.
+// 880 px of stage, not a phone's 340: the wide arrangement needs the height that comes with the width.
+// A chapter's wide figure is about 656 px across at a 1024 px viewport, and at that size the wide
+// layout's card covers flask A's whole neck and the flask names run into the toolbar.
+const NARROW_MAX = 880;
+const NAME_PX = 13; // device pixels for the flask names on a narrow stage, converted to viewBox units
+const SCENE_BOX = { x0: 30, y0: 100, x1: 930, y1: BENCH_Y + 12 };
+
 const CSS = `
 .tb-pasteur { position: absolute; inset: 0; font-family: var(--font-ui); --ps-broth: color-mix(in srgb, var(--gold) 30%, var(--paper)); }
 :root[data-theme="dark"] .tb-pasteur { --ps-broth: color-mix(in srgb, var(--gold) 46%, var(--paper)); }
@@ -147,14 +161,22 @@ const CSS = `
 .tb-pasteur .ps-lead { fill: none; stroke: var(--ink-faint); stroke-width: 1; }
 .tb-pasteur .fig-btn[disabled] { opacity: 0.45; cursor: default; }
 .tb-pasteur .ps-short { display: none; }
-@container (max-width: 640px) {
-  .tb-pasteur .fig-card { display: none; }
-  .tb-pasteur .ps-long { display: none; }
-  .tb-pasteur .ps-short { display: inline; }
-  .tb-pasteur .ps-day { display: none; }
-  .tb-pasteur .ps-range { flex-basis: 4rem; }
-  .tb-pasteur .fig-btn { padding: 0.3rem 0.55rem; }
+/* Narrow: the scene lifts clear of the controls, the scene type is drawn several times larger in
+   viewBox units so it lands at about 10 device px, and the card becomes a one-line strip on top. */
+.tb-pasteur.is-narrow .ps-long { display: none; }
+.tb-pasteur.is-narrow .ps-short { display: inline; }
+.tb-pasteur.is-narrow .ps-day { display: none; }
+.tb-pasteur.is-narrow .ps-range { flex: 1 1 3.5rem; min-width: 3rem; }
+.tb-pasteur.is-narrow .fig-btn { padding: 0.22rem 0.5rem; }
+.tb-pasteur.is-narrow .fig-toolbar { bottom: var(--space-1); left: var(--space-2); right: var(--space-2); }
+.tb-pasteur.is-narrow .fig-toolbar { gap: var(--space-1); flex-wrap: nowrap; }
+.tb-pasteur.is-narrow .fig-card {
+  max-width: none; left: var(--space-2); right: var(--space-2); top: var(--space-1);
+  padding: 0.18rem 0.45rem; border-radius: var(--radius); box-shadow: none; line-height: 1.25;
 }
+.tb-pasteur.is-narrow .fig-card h5 { display: inline; font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 600; }
+.tb-pasteur.is-narrow .fig-card h5::after { content: " · "; color: var(--ink-faint); }
+.tb-pasteur.is-narrow .fig-card p { display: inline; font-size: var(--text-xs); }
 `;
 
 // ---------- one flask: geometry, layers, and its per-frame update ----------
@@ -419,34 +441,45 @@ function storyAt(t, actions, reduced) {
   };
 }
 
+// What a flask looks like right now, read from the haze the figure is actually drawing. The haze only
+// begins 0.8 day after dust reaches the broth (see cloudAt), so a card that announced "both are
+// clouding" at the moment of the tilt was describing a picture nobody could see; the card is written
+// from this instead, and can never run ahead of the glass.
+const APPEARANCE = { clear: 'is still clear', clouding: 'is clouding', cloudy: 'is cloudy' };
+const lookOf = (cloud) => (cloud < 0.02 ? 'clear' : cloud < 0.6 ? 'clouding' : 'cloudy');
+
 function narrate(t, actions, s) {
   const day = Math.floor(t + 1e-6);
   const title = `Day ${day}`;
-  const clearA = s.a.cloud < 0.5;
-  const clearB = s.b.cloud < 0.5;
+  const A = lookOf(s.a.cloud);
+  const B = lookOf(s.b.cloud);
+  const out = (body, short) => ({ title, body, short });
   if (!actions.boil) {
-    if (t < 0.8) return { title, body: 'Two flasks of broth, unboiled, each with a swan neck open to the air. Boil them to start the experiment, or let the days run to see what unboiled broth does.' };
-    if (s.a.cloud < 0.9) return { title, body: 'Nobody boiled the broth, and both flasks are clouding: the microbes already in it are multiplying. This is what the old evidence for spontaneous generation looked like.' };
-    return { title, body: 'Both flasks are cloudy. Without boiling, the broth was never free of microbes, so the experiment shows nothing about where they come from. Press Boil to start again.' };
+    if (A === 'clear') return out('Two flasks of broth, unboiled, each with a swan neck open to the air. Boil them to start the experiment, or let the days run to see what unboiled broth does.', 'Unboiled broth. Press Boil to start.');
+    if (A === 'clouding') return out('Nobody boiled the broth, and both flasks are clouding: the microbes already in it are multiplying. This is what the old evidence for spontaneous generation looked like.', 'Unboiled: both flasks are clouding.');
+    return out('Both flasks are cloudy. Without boiling, the broth was never free of microbes, so the experiment shows nothing about where they come from. Press Boil to start again.', 'Both cloudy. Unboiled broth shows nothing.');
   }
-  if (t < 0.8) return { title, body: 'The broth boils. The heat kills every microbe in it, and the steam drives the air out of both necks.' };
-  const parts = [];
+  if (s.boiling > 0) return out('The broth boils. The heat kills every microbe in it, and the steam drives the air out of both necks.', 'Boiling: the heat kills every microbe.');
+  const snapDay = actions.snap === null ? 0 : Math.floor(actions.snap);
+  const tiltDay = actions.tilt === null ? 0 : Math.floor(actions.tilt);
   if (s.snapped && s.tilted) {
-    parts.push(`Flask B's neck was snapped on day ${Math.floor(actions.snap)}; flask A was tilted on day ${Math.floor(actions.tilt)}.`);
-    if (clearA || clearB) parts.push('Dust reached the broth in both, and both are clouding.');
-    else parts.push('Both are cloudy now. Each clouded only once dust reached the broth, and only then.');
-  } else if (s.snapped) {
-    parts.push(`Flask B's neck was snapped on day ${Math.floor(actions.snap)}. Dust falls straight in, and its broth ${clearB ? 'is clouding' : 'is cloudy'}.`);
-    parts.push(clearA ? 'Flask A is still clear. The only difference is the neck.' : '');
-  } else if (s.tilted) {
-    parts.push(`Flask A was tilted on day ${Math.floor(actions.tilt)}, so the broth touched the dust caught in its bend. It ${clearA ? 'is clouding' : 'is cloudy'} now.`);
-    parts.push(clearB ? 'Flask B, never tilted, is still clear.' : '');
-  } else if (day >= DAYS) {
-    parts.push('Both flasks are still clear, and would stay clear for years: some of Pasteur\'s flasks are clear to this day. Air reaches the broth, but dust and microbes are trapped in the bend.');
-  } else {
-    parts.push(`Both flasks are still clear. Air reaches the broth through the open necks, but dust and microbes settle in the bend${day >= 3 ? ', where they are collecting' : ''}.`);
+    const lead = `Flask B's neck was snapped on day ${snapDay}; flask A was tilted on day ${tiltDay}.`;
+    if (A === 'cloudy' && B === 'cloudy') return out(`${lead} Both are cloudy now. Each clouded once dust reached its broth, and not before.`, 'Dust reached both, and both are cloudy.');
+    if (A === 'clear' && B === 'clear') return out(`${lead} Dust has reached the broth in both, and neither has clouded yet.`, 'Dust reached both. Neither has clouded.');
+    return out(`${lead} Dust reached the broth in both: flask A ${APPEARANCE[A]}, flask B ${APPEARANCE[B]}.`, `A ${APPEARANCE[A]}, B ${APPEARANCE[B]}.`);
   }
-  return { title, body: parts.filter(Boolean).join(' ') };
+  if (s.snapped) {
+    const lead = `Flask B's neck was snapped on day ${snapDay}. Dust falls straight in`;
+    const body = B === 'clear' ? `${lead}; its broth has not clouded yet.` : `${lead}, and its broth ${APPEARANCE[B]}.`;
+    return out(`${body} Flask A is still clear. The only difference is the neck.`, B === 'clear' ? "B's neck is open; nothing yet. A is clear." : `B's broth ${APPEARANCE[B]}; A is still clear.`);
+  }
+  if (s.tilted) {
+    const lead = `Flask A was tilted on day ${tiltDay}, so the broth touched the dust caught in its bend.`;
+    const body = A === 'clear' ? `${lead} It has not clouded yet.` : `${lead} It ${APPEARANCE[A]} now.`;
+    return out(`${body} Flask B, never tilted, is still clear.`, A === 'clear' ? 'A met its dust; nothing yet. B is clear.' : `A ${APPEARANCE[A]}; B, never tilted, is clear.`);
+  }
+  if (day >= DAYS) return out('Both flasks are still clear, and would stay clear for years: some of Pasteur\'s flasks are clear to this day. Air reaches the broth, but dust and microbes are trapped in the bend.', 'Still clear after thirty days.');
+  return out(`Both flasks are still clear. Air reaches the broth through the open necks, but dust and microbes settle in the bend${day >= 3 ? ', where they are collecting' : ''}.`, 'Both clear. Dust stops in the bend.');
 }
 
 // ---------- the figure ----------
@@ -467,32 +500,37 @@ export function mount(root, ctx) {
   wrap.append(h('style', { text: CSS }));
   const svg = el('svg', { class: 'tb-fill', viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: 'xMidYMid meet', tabindex: 0, role: 'img', 'aria-label': 'Two swan-neck flasks of broth on a bench. Left and right arrow keys move a day; Space plays or pauses.' });
 
-  // Bench
-  svg.append(el('rect', { x: 30, y: BENCH_Y, width: W - 60, height: 24, rx: 3, fill: tint(C.ink, 14, C.paper2) }));
-  svg.append(el('rect', { x: 30, y: BENCH_Y, width: W - 60, height: 5, rx: 2, fill: tint(C.ink, 26, C.paper2) }));
+  // Bench, shadows and both flasks live in one group so the narrow layout can lift and shrink the
+  // whole scene without disturbing anything measured from BENCH_Y inside a flask.
+  const scene = el('g');
+  scene.append(el('rect', { x: 30, y: BENCH_Y, width: W - 60, height: 24, rx: 3, fill: tint(C.ink, 14, C.paper2) }));
+  scene.append(el('rect', { x: 30, y: BENCH_Y, width: W - 60, height: 5, rx: 2, fill: tint(C.ink, 26, C.paper2) }));
   for (const id of ['A', 'B']) {
     const { cx } = FLASKS[id];
-    svg.append(el('ellipse', { cx: cx + 4, cy: BENCH_Y + 2, rx: 62, ry: 6, fill: C.ink, opacity: 0.08 }));
+    scene.append(el('ellipse', { cx: cx + 4, cy: BENCH_Y + 2, rx: 62, ry: 6, fill: C.ink, opacity: 0.08 }));
   }
 
   const rand = mulberry32(SEED);
   const flaskA = buildFlask(ns, 'A', rand);
   const flaskB = buildFlask(ns, 'B', rand);
-  svg.append(flaskA.g, flaskB.g);
+  scene.append(flaskA.g, flaskB.g);
 
-  // Labels in the scene: names under the bench, two notes on flask A's neck.
+  // Labels sit outside the scene group, so their size is set in viewBox units and does not shrink with
+  // it: names under the bench, two notes on flask A's neck. The bend note sits in the gap between the
+  // two bulbs, where it clears flask B's glass at every day of the story.
   const labels = el('g');
-  labels.append(el('text', { x: FLASKS.A.cx, y: BENCH_Y + 46, 'text-anchor': 'middle', class: 'ps-name', text: 'Flask A' }));
-  labels.append(el('text', { x: FLASKS.B.cx, y: BENCH_Y + 46, 'text-anchor': 'middle', class: 'ps-name', text: 'Flask B' }));
+  const nameA = el('text', { 'text-anchor': 'middle', class: 'ps-name', text: 'Flask A' });
+  const nameB = el('text', { 'text-anchor': 'middle', class: 'ps-name', text: 'Flask B' });
+  labels.append(nameA, nameB);
   const endA = { x: FLASKS.A.cx + 202, y: FLASKS.A.cy - 160 };
   const dipA = { x: FLASKS.A.cx + DIP.x, y: FLASKS.A.cy + DIP.y };
   const neckNotes = el('g');
   neckNotes.append(el('path', { d: `M${endA.x + 8} ${endA.y - 10} L${endA.x + 30} ${endA.y - 40}`, class: 'ps-lead' }));
   neckNotes.append(el('text', { x: endA.x + 34, y: endA.y - 44, class: 'ps-label', text: 'open to the air' }));
-  neckNotes.append(el('path', { d: `M${dipA.x + 4} ${dipA.y + 17} L${dipA.x + 18} ${dipA.y + 44}`, class: 'ps-lead' }));
-  neckNotes.append(el('text', { x: dipA.x + 22, y: dipA.y + 58, class: 'ps-label', text: 'dust settles in the bend' }));
+  neckNotes.append(el('path', { d: `M${dipA.x + 6} ${dipA.y + 14} L${dipA.x + 24} ${dipA.y + 58}`, class: 'ps-lead' }));
+  neckNotes.append(el('text', { x: dipA.x + 26, y: dipA.y + 74, 'text-anchor': 'middle', class: 'ps-label', text: 'dust settles in the bend' }));
   labels.append(neckNotes);
-  svg.append(labels);
+  svg.append(scene, labels);
   wrap.append(svg);
 
   // Narration card
@@ -520,6 +558,7 @@ export function mount(root, ctx) {
 
   let shownCard = '';
   let story = null;
+  let narrow = null;
 
   function draw() {
     story = storyAt(t, actions, reduced);
@@ -529,9 +568,11 @@ export function mount(root, ctx) {
     neckNotes.setAttribute('opacity', (1 - smooth(story.tilt / 8)).toFixed(2));
     const day = Math.floor(t + 1e-6);
     const text = narrate(t, actions, story);
-    if (text.body !== shownCard) {
-      shownCard = text.body;
-      cardBody.textContent = text.body;
+    const body = narrow ? text.short : text.body;
+    if (body !== shownCard) {
+      shownCard = body;
+      cardBody.textContent = body;
+      fitNarrow(); // the card is the top of the narrow band, and a longer line makes it taller
     }
     cardTitle.textContent = text.title;
     dayChip.textContent = `Day ${day}`;
@@ -637,7 +678,65 @@ export function mount(root, ctx) {
   range.addEventListener('input', onRange);
   svg.addEventListener('keydown', onKey);
 
-  draw();
+  // ----- layout: the wide bench-top scene, or the lifted narrow one -----
+  let band = '';
+  function placeNames(x0, x1, y) {
+    for (const [node, x] of [[nameA, x0], [nameB, x1]]) {
+      node.setAttribute('x', x.toFixed(1));
+      node.setAttribute('y', y.toFixed(1));
+    }
+  }
+  // Fit the scene into what the card and the controls have left. Called on every resize and whenever
+  // the card changes height, because the card is the top of the band.
+  function fitNarrow() {
+    const w = root.clientWidth;
+    const hpx = root.clientHeight;
+    if (!narrow || !w || !hpx) return;
+    const u = W / w; // viewBox units per device pixel
+    const VH = Math.round(W * (hpx / w));
+    const nameSize = NAME_PX * u; // the names live outside the scene, so they are sized in device pixels
+    const top = (card.offsetTop + card.offsetHeight + 4) * u;
+    const bottom = (toolbar.offsetTop - 4) * u - nameSize * 0.95;
+    const key = `${VH}|${top.toFixed(1)}|${bottom.toFixed(1)}`;
+    if (key === band) return;
+    band = key;
+    svg.setAttribute('viewBox', `0 0 ${W} ${VH}`);
+    const sw = SCENE_BOX.x1 - SCENE_BOX.x0;
+    const sh = SCENE_BOX.y1 - SCENE_BOX.y0;
+    const k = Math.max(0.2, Math.min((W - 32) / sw, (bottom - top) / sh));
+    const tx = 16 + (W - 32 - sw * k) / 2 - SCENE_BOX.x0 * k;
+    const ty = top - SCENE_BOX.y0 * k;
+    scene.setAttribute('transform', `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${k.toFixed(4)})`);
+    for (const node of [nameA, nameB]) node.style.fontSize = `${nameSize.toFixed(1)}px`; // inline, so it beats the stylesheet's 12.5px
+    placeNames(tx + k * FLASKS.A.cx, tx + k * FLASKS.B.cx, ty + k * SCENE_BOX.y1 + nameSize * 0.9);
+  }
+  function applyLayout(width) {
+    const want = width > 0 && width < NARROW_MAX;
+    if (want !== narrow) {
+      narrow = want;
+      band = '';
+      wrap.classList.toggle('is-narrow', want);
+      // The two notes on A's neck need more room than a phone has; the card carries them instead.
+      neckNotes.style.display = want ? 'none' : '';
+      if (!want) {
+        svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        scene.removeAttribute('transform');
+        for (const node of [nameA, nameB]) node.style.fontSize = '';
+        placeNames(FLASKS.A.cx, FLASKS.B.cx, BENCH_Y + 46);
+      }
+      shownCard = '';
+      draw();
+    }
+    fitNarrow();
+  }
+  const resize = new ResizeObserver((entries) => {
+    if (destroyed) return;
+    const r = entries[entries.length - 1].contentRect;
+    if (r.width > 0) applyLayout(r.width);
+  });
+  resize.observe(root);
+  applyLayout(root.clientWidth || W);
+
   readyRaf = requestAnimationFrame(() => {
     readyRaf = 0;
     ctx.onReady();
@@ -649,6 +748,7 @@ export function mount(root, ctx) {
       if (raf) cancelAnimationFrame(raf);
       if (readyRaf) cancelAnimationFrame(readyRaf);
       raf = 0;
+      resize.disconnect();
       range.removeEventListener('input', onRange);
       svg.removeEventListener('keydown', onKey);
       root.replaceChildren();

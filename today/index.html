@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Today — The Living World</title>
+<meta name="description" content="A short sitting: where you stand on the ideas of the book, about ten questions chosen from what is due, and what to look at again afterwards.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..700,0..100,0..1&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Inter:wght@400..700&display=swap">
+<link rel="stylesheet" href="../src/styles/tokens.css">
+<link rel="stylesheet" href="../src/styles/typography.css">
+<link rel="stylesheet" href="../src/styles/layout.css">
+<link rel="stylesheet" href="../src/styles/components.css">
+<link rel="stylesheet" href="../src/styles/learning.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+  // A figure task mounts a real chapter figure, so this page loads the same component vocabulary the
+  // chapters do. The objectives and the item bank are read from the chapters linked in <tb-sitting>.
+  await import('../src/components/index.js');
+</script>
+</head>
+<body class="tb-todaypage">
+<a class="tb-skip" href="#sitting">Skip to the sitting</a>
+<tb-shell book="The Living World" book-href="../biology/" library-href="../" chapter="Today" is-today today-href="./"></tb-shell>
+
+<main class="tb-today" id="sitting">
+
+<header class="tb-today__head">
+  <p class="tb-today__kicker">Today</p>
+  <h1>A short sitting</h1>
+  <p class="tb-today__dek">About ten questions, chosen from what you are closest to forgetting and what you are ready for. The book itself is always open: nothing here is locked, and nothing has to be earned.</p>
+</header>
+
+<tb-sitting size="10">
+  <a class="tb-source" href="../biology/ch01-what-is-life/" data-key="biology/ch01">1 · What is life?</a>
+</tb-sitting>
+
+</main>
+
+</body>
+</html>

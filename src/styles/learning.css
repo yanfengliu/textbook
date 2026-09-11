@@ -1,0 +1,951 @@
+/* The adaptive study surfaces: the Today page, the figure task, and the mastery markers a chapter
+   annotates itself with. Every colour, size and step here is a token from tokens.css; nothing in this
+   file invents one. The four mastery states are told apart by shape and by word before colour, so a
+   reader who cannot separate the greens from the corals still reads them.
+
+   Scope: src/components/task.js, src/components/mastery.js and today/index.html. Nothing else. */
+
+/* ---------- the Today page ---------- */
+
+.tb-today {
+  max-width: calc(var(--text-width) + 2 * var(--space-6));
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-16);
+}
+
+/* The page has no chapter rail, so the drawer button in the header has nothing to open; and the
+   header's own Today link would point at the page the reader is already on. */
+.tb-todaypage .tb-navtoggle,
+.tb-todaypage .tb-header__today {
+  display: none;
+}
+
+.tb-today__head {
+  margin-bottom: var(--space-4);
+}
+
+.tb-today__kicker {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--leaf-text);
+  margin-bottom: var(--space-2);
+}
+
+.tb-today h1 {
+  font-size: clamp(var(--text-2xl), 6vw, var(--text-4xl));
+  font-variation-settings: "SOFT" 60, "WONK" 1, "opsz" 144;
+  margin-bottom: var(--space-3);
+}
+
+.tb-today__dek {
+  font-size: var(--text-lg);
+  line-height: 1.4;
+  color: var(--ink-soft);
+  max-width: 42ch;
+  text-wrap: pretty;
+}
+
+.tb-today h2 {
+  font-size: var(--text-xl);
+  margin-top: var(--space-12);
+  margin-bottom: var(--space-4);
+}
+
+.tb-today h3 {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-2);
+}
+
+tb-sitting {
+  display: block;
+}
+
+/* Before the scripts run, <tb-sitting> holds plain links to the chapters it studies from: a page that
+   says where to go is a better no-script fallback than an empty box. */
+tb-sitting > a.tb-source {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+
+/* ---------- where you stand ---------- */
+
+.tb-standing__lede {
+  font-size: var(--text-lg);
+  line-height: 1.42;
+  text-wrap: pretty;
+  margin-bottom: var(--space-4);
+}
+
+.tb-standing__list,
+.tb-close__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-4);
+  max-width: var(--measure);
+}
+
+.tb-standing__list li,
+.tb-close__list li {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  gap: var(--space-1) var(--space-3);
+  align-items: baseline;
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--rule);
+}
+
+.tb-standing__statement,
+.tb-close__statement {
+  font-size: var(--text-base);
+  line-height: 1.4;
+  color: var(--ink);
+  text-decoration-color: color-mix(in srgb, var(--ink-soft) 32%, transparent);
+}
+
+.tb-standing__statement:hover,
+.tb-close__statement:hover {
+  text-decoration-color: var(--leaf);
+}
+
+.tb-standing__blocked {
+  grid-column: 2;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.tb-standing__more {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  border-top: 1px solid var(--rule);
+}
+
+.tb-standing__caveat,
+.tb-close__gap,
+.tb-close__where {
+  font-size: var(--text-base);
+  color: var(--ink-soft);
+  max-width: var(--measure);
+}
+
+/* ---------- the mastery marker ---------- */
+
+tb-mastery {
+  display: inline-block;
+}
+
+.tb-mark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.tb-mark__glyph {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  flex: none;
+  transform: translateY(0.06em);
+}
+
+.tb-mark__glyph svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.tb-mark[data-state="new"] {
+  color: var(--ink-faint);
+}
+
+.tb-mark[data-state="learning"] {
+  color: var(--water-text);
+}
+
+.tb-mark[data-state="review"] {
+  color: var(--leaf-text);
+}
+
+.tb-mark[data-state="lapsed"] {
+  color: var(--coral-text);
+}
+
+.tb-mark__detail {
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-soft);
+  white-space: normal;
+}
+
+.tb-mark__detail::before {
+  content: "· ";
+}
+
+/* In a list the mark and its qualifier stack in the first column. */
+.tb-standing__list .tb-mark,
+.tb-close__list .tb-mark {
+  display: grid;
+  white-space: normal;
+  grid-template-columns: 0.85em 1fr;
+  gap: 0.1rem 0.4em;
+}
+
+.tb-standing__list .tb-mark__detail,
+.tb-close__list .tb-mark__detail {
+  grid-column: 2;
+  font-size: var(--text-xs);
+}
+
+.tb-standing__list .tb-mark__detail::before,
+.tb-close__list .tb-mark__detail::before {
+  content: none;
+}
+
+/* ---------- the marker on a chapter heading ----------
+   A margin annotation, not a bar: small, quiet, and on a wide screen hung outside the measure so the
+   heading itself is untouched. Below that it sits under the heading on its own line. */
+
+h2.has-mastery {
+  position: relative;
+}
+
+h2.has-mastery > tb-mastery {
+  display: block;
+  margin-top: var(--space-2);
+  font-variation-settings: normal;
+  letter-spacing: normal;
+}
+
+/* 1200px is where layout.css gives the page its margin column; below it there is nothing to hang in,
+   and an absolutely positioned marker walks off the right edge of the viewport. */
+@media (min-width: 1200px) {
+  h2.has-mastery > tb-mastery {
+    position: absolute;
+    left: 100%;
+    top: 0.55em;
+    margin-top: 0;
+    margin-left: var(--space-4);
+    width: calc(var(--margin-width) - var(--space-4));
+  }
+
+  h2.has-mastery > tb-mastery .tb-mark {
+    display: grid;
+    grid-template-columns: 0.85em 1fr;
+    gap: 0.15rem 0.4em;
+    white-space: normal;
+  }
+
+  h2.has-mastery > tb-mastery .tb-mark__detail {
+    grid-column: 2;
+  }
+
+  h2.has-mastery > tb-mastery .tb-mark__detail::before {
+    content: none;
+  }
+}
+
+/* ---------- the inline nudge in a chapter ---------- */
+
+.tb-nudge {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-3);
+  align-items: start;
+  max-width: var(--measure);
+  margin: var(--space-4) 0 var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  background: var(--coral-soft);
+  border-left: 3px solid var(--coral);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.tb-nudge__text {
+  margin: 0;
+  font-size: var(--text-base);
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.tb-nudge__text em {
+  color: var(--ink-soft);
+}
+
+.tb-nudge__dismiss {
+  appearance: none;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--ink-soft);
+  font-family: var(--font-ui);
+  font-size: var(--text-lg);
+  line-height: 1;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.tb-nudge__dismiss:hover {
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+
+/* ---------- one step of a sitting ---------- */
+
+.tb-run__idle {
+  font-size: var(--text-lg);
+  line-height: 1.42;
+  color: var(--ink-soft);
+  max-width: var(--measure);
+}
+
+.tb-step {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  padding: var(--space-4) var(--space-6) var(--space-5);
+  max-width: var(--measure);
+}
+
+.tb-step__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tb-step__count {
+  color: var(--water-text);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.tb-step__level,
+.tb-step__kind {
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+}
+
+.tb-step__why {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--rule-strong);
+  font-size: var(--text-base);
+  line-height: 1.45;
+  color: var(--ink-soft);
+  max-width: none;
+}
+
+.tb-step__whylabel {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* The scheduler's own sentence about this pick — "due 3.2 d ago, predicted recall 41%" — kept under
+   the plain reason rather than in place of it. */
+.tb-step__evidence {
+  display: block;
+  margin-top: var(--space-1);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--ink-faint);
+}
+
+.tb-step__stem {
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: 1.45;
+  margin-bottom: var(--space-3);
+  text-wrap: pretty;
+}
+
+.tb-step__stem p {
+  margin: 0 0 var(--space-2);
+}
+
+.tb-step__stem p:last-child {
+  margin-bottom: 0;
+}
+
+.tb-opts {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.tb-opt {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.6rem 1fr;
+  align-items: start;
+  gap: var(--space-2);
+  width: 100%;
+  /* Room on the right for the tick or cross an answered option carries. */
+  padding: var(--space-2) var(--space-6) var(--space-2) var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font-text);
+  font-size: var(--text-base);
+  line-height: 1.4;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+
+.tb-opt:hover:not(:disabled) {
+  border-color: var(--rule-strong);
+  background: var(--paper-2);
+}
+
+.tb-opt:focus-visible {
+  outline: 2px solid var(--water);
+  outline-offset: 2px;
+}
+
+.tb-opt:disabled {
+  cursor: default;
+}
+
+/* An option that is disabled but neither right nor wrong — the rest of the list after an answer, or
+   every option after "I already know this" — has to look spent, or the question still looks live. */
+.tb-opt:disabled:not(.is-correct):not(.is-wrong) {
+  color: var(--ink-soft);
+  border-color: color-mix(in srgb, var(--rule) 55%, transparent);
+}
+
+.tb-opt:disabled:not(.is-correct):not(.is-wrong) .k {
+  color: var(--ink-faint);
+  border-color: var(--rule);
+}
+
+.tb-opt .k {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink-faint);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: inline-grid;
+  place-items: center;
+  margin-top: 0.1rem;
+}
+
+.tb-opt.is-correct {
+  border-color: var(--leaf);
+  background: var(--leaf-soft);
+}
+
+.tb-opt.is-correct .k {
+  background: var(--leaf);
+  color: var(--paper);
+  border-color: var(--leaf);
+}
+
+.tb-opt.is-wrong {
+  border-color: var(--coral);
+  background: var(--coral-soft);
+}
+
+.tb-opt.is-wrong .k {
+  background: var(--coral);
+  color: var(--paper);
+  border-color: var(--coral);
+}
+
+/* An answered option carries a mark as well as a colour, for the same reason the state markers do. */
+.tb-opt.is-correct::after,
+.tb-opt.is-wrong::after {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  line-height: 1;
+}
+
+.tb-opt.is-correct::after {
+  content: "✓";
+  color: var(--leaf-text);
+}
+
+.tb-opt.is-wrong::after {
+  content: "×";
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--coral-text);
+}
+
+.tb-step__result:empty {
+  display: none;
+}
+
+.tb-verdict {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin: var(--space-3) 0 var(--space-1);
+}
+
+.tb-verdict.ok {
+  color: var(--leaf-text);
+}
+
+.tb-verdict.no {
+  color: var(--coral-text);
+}
+
+.tb-verdict--known {
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.tb-explain {
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0 0 var(--space-2);
+}
+
+.tb-explain p {
+  margin: 0 0 var(--space-2);
+  max-width: none;
+}
+
+.tb-explain--why {
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--coral);
+  color: var(--ink);
+}
+
+.tb-step__taught {
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--ink-faint);
+  max-width: none;
+}
+
+.tb-step__taught a {
+  color: var(--ink-soft);
+  text-decoration-color: var(--rule-strong);
+}
+
+.tb-step__taught a:hover {
+  color: var(--ink);
+  text-decoration-color: var(--leaf);
+}
+
+.tb-step__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.tb-step__next,
+.tb-step__known,
+.tb-step__stop {
+  appearance: none;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.tb-step__next {
+  background: var(--leaf);
+  color: var(--paper);
+  border: 1px solid var(--leaf);
+}
+
+.tb-step__next:hover {
+  background: var(--leaf-text);
+  border-color: var(--leaf-text);
+}
+
+.tb-step__next[hidden] {
+  display: none;
+}
+
+.tb-step__known,
+.tb-step__stop {
+  background: var(--paper);
+  color: var(--ink-soft);
+  border: 1px solid var(--rule-strong);
+}
+
+.tb-step__known:hover,
+.tb-step__stop:hover {
+  color: var(--ink);
+  border-color: var(--ink-faint);
+}
+
+.tb-step__stop {
+  margin-left: auto;
+  border-color: transparent;
+  background: none;
+}
+
+/* ---------- the closing summary ---------- */
+
+.tb-close__lede {
+  font-size: var(--text-lg);
+  line-height: 1.42;
+  text-wrap: pretty;
+}
+
+.tb-close__back {
+  margin-top: var(--space-6);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+
+.tb-close h2:focus-visible {
+  outline: 2px solid var(--water);
+  outline-offset: 4px;
+  border-radius: var(--radius);
+}
+
+/* ---------- nothing to run ---------- */
+
+.tb-unavailable {
+  max-width: var(--measure);
+  padding: var(--space-4) var(--space-6);
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid var(--coral);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  background: var(--paper-2);
+}
+
+.tb-unavailable h2 {
+  margin-top: 0;
+  font-size: var(--text-lg);
+}
+
+.tb-unavailable p {
+  margin-bottom: 0;
+  font-size: var(--text-base);
+  color: var(--ink-soft);
+  max-width: none;
+}
+
+/* ---------- tb-task ---------- */
+
+tb-task {
+  display: block;
+  margin: var(--space-6) 0;
+  max-width: var(--measure);
+}
+
+.tb-step tb-task {
+  margin: 0;
+  max-width: none;
+}
+
+.tb-task__label {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--water-text);
+  margin-bottom: var(--space-2);
+}
+
+/* Inside a sitting the step already says which format this is. */
+.tb-step .tb-task__label {
+  display: none;
+}
+
+.tb-task__goal {
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: 1.45;
+  margin-bottom: var(--space-3);
+  text-wrap: pretty;
+}
+
+tb-task tb-figure {
+  margin: 0;
+}
+
+.tb-task__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.tb-task__check {
+  appearance: none;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+
+.tb-task__check:hover:not(:disabled) {
+  border-color: var(--ink-faint);
+  background: var(--paper-2);
+}
+
+.tb-task__check:disabled {
+  color: var(--ink-faint);
+  cursor: default;
+}
+
+.tb-task__hint {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+}
+
+.tb-task__verdict {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin: var(--space-3) 0 var(--space-1);
+}
+
+.tb-task__verdict.ok {
+  color: var(--leaf-text);
+}
+
+.tb-task__verdict.no {
+  color: var(--coral-text);
+}
+
+.tb-task__reading {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--ink-faint);
+}
+
+tb-task .explain {
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: none;
+}
+
+tb-task .explain[hidden] {
+  display: none;
+}
+
+.tb-task__broken,
+.tb-task__skipped {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid var(--coral);
+  background: var(--coral-soft);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: none;
+}
+
+.tb-task__skipped {
+  border-left-color: var(--rule-strong);
+  background: var(--paper-2);
+  color: var(--ink-soft);
+}
+
+/* ---------- narrow ---------- */
+
+@media (max-width: 799.98px) {
+  .tb-today {
+    padding: var(--space-6) var(--space-4) var(--space-12);
+  }
+
+  .tb-step {
+    padding: var(--space-3) var(--space-4) var(--space-4);
+  }
+
+  /* A figure task on a phone gets the whole width, the way a wide figure does inside a chapter.
+     Held to the card's padding the homeostasis stage is 285px across and its chart is unreadable. */
+  .tb-step tb-task tb-figure {
+    position: relative;
+    left: 50%;
+    width: 100vw;
+    transform: translateX(-50%);
+  }
+
+  .tb-step tb-task .tb-figure__stage {
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+  }
+
+  .tb-standing__list li,
+  .tb-close__list li {
+    grid-template-columns: 1fr;
+  }
+
+  .tb-standing__blocked {
+    grid-column: 1;
+  }
+
+  .tb-standing__list .tb-mark,
+  .tb-close__list .tb-mark {
+    grid-template-columns: 0.85em auto;
+    justify-content: start;
+  }
+
+  .tb-step__stop {
+    margin-left: 0;
+  }
+}
+
+/* ---------- a written answer ---------- */
+
+.tb-free__answer {
+  display: block;
+  width: 100%;
+  margin: var(--space-2) 0 var(--space-3);
+  padding: var(--space-3);
+  font-family: var(--font-text);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  resize: vertical;
+}
+
+.tb-free__answer::placeholder {
+  color: var(--ink-faint);
+}
+
+.tb-free__answer:focus-visible {
+  outline: 2px solid var(--water);
+  outline-offset: 2px;
+}
+
+.tb-free__reveal {
+  appearance: none;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+}
+
+.tb-free__reveal:hover {
+  border-color: var(--ink-faint);
+  background: var(--paper-2);
+}
+
+.tb-step__result h3 {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.tb-free__rubric {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-4);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.tb-free__rubric li {
+  margin-bottom: var(--space-1);
+}
+
+.tb-free__note {
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  max-width: none;
+  margin-bottom: var(--space-3);
+}
+
+.tb-free__mark {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tb-free__markbtn {
+  appearance: none;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ink-soft);
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.tb-free__markbtn:hover {
+  color: var(--ink);
+  border-color: var(--ink-faint);
+}

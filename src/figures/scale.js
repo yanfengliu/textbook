@@ -1,9 +1,20 @@
 // How small is a cell? A logarithmic ruler from 10 m down to 0.1 nm, seventeen things drawn at their
-// true positions with a tiny icon each, three bands for what the naked eye, a light microscope and an
-// electron microscope can resolve, and a hand lens the reader slides along the ruler. The lens shows
-// the ruler under it magnified 2.6×, so crowded neighbours spread out, and a card names the nearest
-// thing with its size, one line about it, and the instrument that can see it. The only motion is the
-// lens gliding to a new place (280 ms, a cut under reduced motion). describe() -> { lensMetres, nearest }.
+// true positions with a tiny icon each, and the instrument each one needs. The figure draws itself two
+// ways and a ResizeObserver on the stage picks between them at NARROW_MAX of stage width.
+//
+// Wide (a stage of NARROW_MAX px or more): the whole eleven decades at once, three bands for what the naked
+// eye, a light microscope and an electron microscope can resolve, and a hand lens the reader slides
+// along the ruler. The lens shows the ruler under it magnified 2.6x, so crowded neighbours spread out.
+//
+// Narrow (a phone, where the whole ruler at 1000 units would render an 11.5 px label at 4 px): the
+// frame becomes the magnified window. A thin strip across the top carries the whole range, coloured by
+// the instrument that reaches it, with a bracket showing which slice is open below; the window under it
+// is a couple of decades of ruler with the things in it drawn at full size. Dragging, the arrow keys
+// and the buttons move the window instead of the lens. The narrow drawing's viewBox is the stage's own
+// pixel size, so a 11.5 px label is 11.5 device pixels.
+//
+// The only motion is the glide to a new place (280 ms, a cut under reduced motion).
+// describe() -> { lensMetres, nearest }.
 import { el, h, text, C, tint, tween, clamp, uid, lerp } from './lib/svg.js';
 
 export const meta = { kind: 'scale', title: 'How small is a cell?', needsWebGL: false, aspect: 16 / 7 };
@@ -21,6 +32,14 @@ const HANDLE = 26; // handle length beyond the rim
 const HANDLE_DEG = 62; // handle angle below the horizontal, so it clears the right edge and the card
 const ZOOM = 2.6;
 const GLIDE_MS = 280;
+
+// Below this stage width the narrow layout is drawn. The wide drawing is 1000 units across, so all of
+// its type lands at (size * stage / 1000) device pixels, and the binding one is the 10.5 px size line
+// under every name: at 900 it is 9.5 px, the floor for type in this book, and under that the wide
+// layout is not a smaller picture but an unreadable one. Stages this decides for: the lab at a 1000 px
+// viewport is 952 and stays wide (the drive gate's viewport, so its recipe still meets the lens); the
+// chapter is 100vw under an 800 px viewport, and measured 656 at 1024 and 989 at 1440.
+const NARROW_MAX = 900;
 
 const xOf = (u) => X0 + ((U_MAX - u) / (U_MAX - U_MIN)) * (X1 - X0);
 const uOf = (x) => U_MAX - ((x - X0) / (X1 - X0)) * (U_MAX - U_MIN);
@@ -45,6 +64,10 @@ const BANDS = [
   { id: 'light', label: 'light microscope', from: 5e-3, to: 2e-7, limit: 'down to about 200 nm', colour: C.water },
   { id: 'electron', label: 'electron microscope', from: 5e-4, to: 1e-10, limit: 'down to about 0.1 nm', colour: C.violet },
 ];
+
+// Where one instrument gives out and the next takes over, as log10 metres. The narrow strip paints the
+// whole range in these three pieces, so the reader sees which instrument reaches which size at a glance.
+const HANDOVER = [uOfMetres(1e-4), uOfMetres(2e-7)];
 
 function seenWith(metres) {
   if (metres >= 1e-4) return BANDS[0];
@@ -191,20 +214,47 @@ const CSS = `
 .tb-scale .sc-track { cursor: pointer; }
 .tb-scale .fig-card { top: auto; bottom: var(--space-3); left: var(--space-3); max-width: min(23rem, 46%); padding: var(--space-2) var(--space-4) var(--space-3); }
 .tb-scale .fig-card h5 { display: flex; align-items: baseline; gap: 0.5em; flex-wrap: wrap; }
-.tb-scale .fig-card h5 .sc-card-size { font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 600; color: var(--leaf); font-variant-numeric: lining-nums tabular-nums; }
+.tb-scale .fig-card h5 .sc-card-size { font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 600; color: var(--leaf-text); font-variant-numeric: lining-nums tabular-nums; }
 .tb-scale .fig-card .sc-seen { margin-top: 0.35em; display: flex; align-items: center; gap: 0.45em; }
 .tb-scale .fig-card .sc-seen i { width: 0.55em; height: 0.55em; border-radius: 50%; background: var(--dot); flex: none; }
 .tb-scale .fig-toolbar { left: 52%; justify-content: flex-end; flex-wrap: nowrap; }
 .tb-scale .sc-range { flex: 0 1 12rem; min-width: 4rem; }
-@container (max-width: 640px) {
-  .tb-scale .fig-card { max-width: 60%; padding: 0.25rem 0.55rem; bottom: var(--space-2); left: var(--space-2); border-radius: var(--radius); box-shadow: none; }
-  .tb-scale .fig-card h5 { font-size: var(--text-xs); gap: 0.35em; margin: 0; }
-  .tb-scale .fig-card p, .tb-scale .fig-card .sc-seen { display: none; }
-  .tb-scale .fig-toolbar { left: auto; right: var(--space-2); bottom: var(--space-2); }
-  .tb-scale .fig-chip, .tb-scale .sc-range { display: none; }
-  .tb-scale .fig-btn { padding: 0.2rem 0.45rem; }
+/* The chip carries one short phrase and must not break it over two lines when the toolbar is tight. */
+.tb-scale .fig-chip { white-space: nowrap; }
+
+/* The narrow layout. The drawing's viewBox is the stage's own pixel box, so every size below is the
+   size it lands at on the glass; nothing here may go under 10. The card and the buttons share one
+   band across the bottom that the drawing leaves empty (NARROW_BAND in this file). */
+.tb-scale.is-narrow .sc-name { font-size: 11.5px; }
+.tb-scale.is-narrow .sc-size { font-size: 10px; }
+.tb-scale.is-narrow .sc-tick { font-size: 10.5px; }
+.tb-scale.is-narrow .sc-band { font-size: 11.5px; font-weight: 600; }
+.tb-scale.is-narrow .sc-halo { stroke-width: 3px; }
+.tb-scale.is-narrow .sc-inline { font-size: 10.5px; font-weight: 600; fill: var(--leaf); }
+.tb-scale.is-narrow .sc-track { cursor: grab; }
+.tb-scale.is-narrow.is-dragging .sc-track { cursor: grabbing; }
+.tb-scale.is-narrow .fig-card {
+  top: auto; bottom: var(--space-1); left: var(--space-2); max-width: 52%;
+  padding: 0.2rem 0.5rem; border-radius: var(--radius); box-shadow: none;
+}
+.tb-scale.is-narrow .fig-card h5 { display: block; margin: 0; font-size: var(--text-xs); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tb-scale.is-narrow .fig-card h5 .sc-card-size { margin-left: 0.4em; }
+.tb-scale.is-narrow .fig-card p, .tb-scale.is-narrow .fig-card .sc-seen { display: none; }
+.tb-scale.is-narrow .fig-toolbar { left: auto; right: var(--space-2); bottom: var(--space-1); gap: var(--space-1); }
+.tb-scale.is-narrow .fig-chip { display: none; }
+.tb-scale.is-narrow .sc-range { flex: 0 1 6rem; min-width: 3rem; }
+.tb-scale.is-narrow .fig-btn { padding: 0.2rem 0.5rem; line-height: 1.25; }
+@container (max-width: 290px) {
+  .tb-scale.is-narrow .fig-card { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); padding: 0; border: 0; }
 }
 `;
+
+// The bottom band of the narrow stage, in px: the card and the buttons live there and the drawing
+// stops above it. Measured, not guessed: a narrow .fig-btn is 12px type on line-height 1.25, 0.2rem of
+// padding and a hairline, and it hangs var(--space-1) = 6.4px off the floor, so the band is 29 px and
+// this leaves a pixel of air. tools/inspect.js frames elements but does not report boxes inside a
+// stage, so the number came from a scratch probe that reads the toolbar's box relative to the stage.
+const NARROW_BAND = 30;
 
 export function mount(root, ctx) {
   const ns = uid('sc');
@@ -213,85 +263,7 @@ export function mount(root, ctx) {
   const svg = el('svg', { class: 'tb-fill', viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: 'xMidYMid meet' });
   wrap.append(svg);
 
-  const defs = el('defs');
-  svg.append(defs);
-
-  // ----- the instrument bands, each fading in on its left ("and larger") and capped at its limit -----
-  const bands = el('g');
-  BANDS.forEach((b, i) => {
-    const y = 10 + i * 15;
-    const xa = xOf(uOfMetres(b.from));
-    const xb = xOf(uOfMetres(b.to));
-    const gid = `${ns}-band${i}`;
-    const grad = el('linearGradient', { id: gid, gradientUnits: 'userSpaceOnUse', x1: xa, x2: xa + 80, y1: 0, y2: 0 });
-    grad.append(el('stop', { offset: 0, style: `stop-color: ${b.colour}; stop-opacity: 0` }));
-    grad.append(el('stop', { offset: 1, style: `stop-color: ${b.colour}; stop-opacity: 0.34` }));
-    defs.append(grad);
-    bands.append(el('rect', { x: xa, y, width: xb - xa, height: 11, rx: 5.5, fill: `url(#${gid})` }));
-    bands.append(el('path', { d: `M${xb} ${y - 1} L${xb} ${y + 12}`, stroke: b.colour, 'stroke-width': 2, 'stroke-linecap': 'round' }));
-    bands.append(el('path', { d: `M${xb} ${y + 13} L${xb} ${RY - 6}`, stroke: b.colour, 'stroke-width': 1, 'stroke-dasharray': '1.5 4', opacity: 0.5 }));
-    bands.append(text(xa + 72, y + 9, b.label, { class: 'sc-band', fill: b.colour }));
-    bands.append(text(xb - 7, y + 9, b.limit, { anchor: 'end', class: 'sc-band sc-halo', fill: b.colour }));
-  });
-  svg.append(bands);
-
-  // ----- the ruler -----
-  const ruler = el('g');
-  ruler.append(el('path', { d: `M${X0 - 8} ${RY} L${X1 + 8} ${RY}`, stroke: C.ink, 'stroke-width': 1.5, 'stroke-linecap': 'round' }));
-  for (const t of TICKS) {
-    const x = xOf(t.u).toFixed(1);
-    ruler.append(el('path', { d: `M${x} ${RY} L${x} ${RY + (t.major ? 10 : 5)}`, stroke: t.major ? C.ink : C.ruleStrong, 'stroke-width': t.major ? 1.5 : 1 }));
-    if (t.major) ruler.append(text(x, RY + 24, t.label, { anchor: 'middle', class: 'sc-tick' }));
-  }
-  svg.append(ruler);
-
-  // ----- the markers: a dot on the ruler, a stem, an icon and a two-line label -----
-  const stems = el('g');
-  const icons = el('g');
-  const labels = el('g', { class: 'sc-labels' });
-  const dots = el('g');
-  const markerNodes = MARKERS.map((m) => {
-    const x = xOf(uOfMetres(m.metres));
-    const y = ROW_Y[m.row];
-    stems.append(el('path', { d: `M${x.toFixed(1)} ${RY - 4} L${x.toFixed(1)} ${y + 12}`, stroke: C.ruleStrong, 'stroke-width': 1 }));
-    const icon = el('g', { transform: `translate(${x.toFixed(1)} ${y})` });
-    m.icon(icon);
-    icons.append(icon);
-    const anchor = m.anchor || 'middle';
-    const lx = anchor === 'end' ? x + 12 : x;
-    const label = el('g', { class: 'sc-label' });
-    label.append(text(lx.toFixed(1), y - 27, m.label, { anchor, class: 'sc-name sc-halo' }));
-    label.append(text(lx.toFixed(1), y - 15, formatMetres(m.metres), { anchor, class: 'sc-size sc-halo' }));
-    labels.append(label);
-    const dot = el('circle', { cx: x.toFixed(1), cy: RY, r: 3, fill: C.ink });
-    dots.append(dot);
-    return { m, x, label, dot };
-  });
-  svg.append(stems, icons, labels, dots);
-
-  // A wide invisible track: a click or tap anywhere near the ruler sends the lens there.
-  const track = el('rect', { class: 'sc-track', x: 0, y: RY - LR - 40, width: W, height: LR * 2 + 90, fill: 'transparent' });
-  svg.append(track);
-
-  // ----- the lens -----
-  const clipId = `${ns}-lensclip`;
-  defs.append(el('clipPath', { id: clipId }, [el('circle', { r: LR })]));
-  const lensG = el('g', { class: 'sc-lens', tabindex: 0, role: 'slider', 'aria-label': 'Lens along the ruler', 'aria-valuemin': U_MIN, 'aria-valuemax': U_MAX, 'aria-orientation': 'horizontal' });
-  const ha = (HANDLE_DEG * Math.PI) / 180;
-  const hx1 = (Math.cos(ha) * (LR - 2)).toFixed(1);
-  const hy1 = (Math.sin(ha) * (LR - 2)).toFixed(1);
-  const hx2 = (Math.cos(ha) * (LR + HANDLE)).toFixed(1);
-  const hy2 = (Math.sin(ha) * (LR + HANDLE)).toFixed(1);
-  lensG.append(el('path', { d: `M${hx1} ${hy1} L${hx2} ${hy2}`, stroke: glass, 'stroke-width': 11, 'stroke-linecap': 'round' }));
-  lensG.append(el('circle', { r: LR, fill: C.paper, style: `fill: ${glassFill}` }));
-  const inner = el('g', { 'clip-path': `url(#${clipId})` });
-  lensG.append(inner);
-  lensG.append(el('circle', { class: 'sc-ring', r: LR, fill: 'none', stroke: glass, 'stroke-width': 2.5 }));
-  lensG.append(el('circle', { class: 'sc-focus', r: LR + 3.5, fill: 'none', stroke: C.ruleStrong, 'stroke-width': 1 }));
-  lensG.append(el('path', { d: `M${(-LR * 0.62).toFixed(1)} ${(-LR * 0.62).toFixed(1)} A${LR - 6} ${LR - 6} 0 0 1 ${(-LR * 0.16).toFixed(1)} ${(-LR * 0.86).toFixed(1)}`, stroke: C.paper, 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round', opacity: 0.9 }));
-  svg.append(lensG);
-
-  // ----- card and toolbar -----
+  // ----- card and toolbar: one set for both layouts -----
   const cardTitle = h('h5');
   const cardAbout = h('p');
   const cardSeen = h('p', { class: 'sc-seen' });
@@ -310,6 +282,10 @@ export function mount(root, ctx) {
   let nearest = null;
   let glide = null;
   let dragging = null;
+  let layout = null;
+  let destroyed = false;
+  // getComputedTextLength() is a layout flush, so each distinct string is measured once per layout.
+  const widths = new Map();
 
   function nearestMarker(uu) {
     let best = null;
@@ -320,53 +296,497 @@ export function mount(root, ctx) {
     return best.m;
   }
 
-  // The magnified strip: the ruler under the lens at ZOOM, with ticks and the things in view.
-  function paintLens() {
-    const lx = xOf(u);
-    lensG.setAttribute('transform', `translate(${lx.toFixed(2)} ${RY})`);
-    inner.replaceChildren();
-    inner.append(el('path', { d: `M${-LR} 0 L${LR} 0`, stroke: C.ink, 'stroke-width': 1.5 }));
-    const items = [];
-    for (const t of TICKS) {
-      const x = (xOf(t.u) - lx) * ZOOM;
-      if (Math.abs(x) > LR + 8) continue;
-      inner.append(el('path', { d: `M${x.toFixed(1)} 0 L${x.toFixed(1)} ${t.major ? 11 : 6}`, stroke: t.major ? C.ink : C.ruleStrong, 'stroke-width': t.major ? 1.5 : 1 }));
-      if (!t.major) continue;
-      const width = t.label.length * 6.6 + 8;
-      if (Math.abs(x) + width / 2 < LR - 4) items.push({ x, width, tick: t });
+  // The rendered width of a text node already in the tree. Falls back to an estimate if the node is
+  // not measurable, which would otherwise return 0 and pile every label into one row.
+  function widthOf(node, key, str) {
+    let w = widths.get(key);
+    if (w === undefined) {
+      w = node.getComputedTextLength();
+      if (!(w > 0)) w = str.length * 6.4 + 8;
+      widths.set(key, w);
     }
-    for (const m of MARKERS) {
-      const x = (xOf(uOfMetres(m.metres)) - lx) * ZOOM;
-      if (Math.abs(x) > LR - 12) continue;
-      items.push({ x, width: Math.max(m.label.length, 7) * 6.8 + 10, m });
-    }
-    // Labels below the line, in up to three rows, so neighbours never overlap.
-    items.sort((a, b) => a.x - b.x);
-    const rowEnd = [-Infinity, -Infinity, -Infinity];
+    return w;
+  }
+
+  // Greedy row packing over real measured extents: the first row with no overlap at this x wins, so a
+  // gap in a row is reusable. Sets `row`, and may move `lx`. Items must arrive in x order.
+  function packRows(items, nRows, min, max) {
+    const used = Array.from({ length: nRows }, () => []);
+    const free = (row, l, r) => !used[row].some(([a, b]) => l < b && r > a);
     for (const it of items) {
-      const left = it.x - it.width / 2;
-      let row = rowEnd.findIndex((end) => end <= left);
-      if (row < 0) row = 0;
-      rowEnd[row] = it.x + it.width / 2;
-      const y = 24 + row * 26;
-      const xs = it.x.toFixed(1);
-      if (it.tick) {
-        inner.append(text(xs, y, it.tick.label, { anchor: 'middle', class: 'sc-tick sc-halo' }));
+      const hw = it.w / 2 + 3;
+      let row = 0;
+      while (row < nRows && !free(row, it.lx - hw, it.lx + hw)) row += 1;
+      if (row < nRows) {
+        it.row = row;
+        used[row].push([it.lx - hw, it.lx + hw]);
         continue;
       }
-      const near = it.m === nearest;
-      inner.append(el('circle', { cx: xs, cy: 0, r: near ? 4.5 : 3.2, fill: near ? C.leaf : C.ink }));
-      const icon = el('g', { transform: `translate(${xs} -38) scale(1.7)` });
-      it.m.icon(icon);
-      inner.append(icon);
-      inner.append(text(xs, y, it.m.label, { anchor: 'middle', class: `sc-name sc-halo${near ? ' is-near' : ''}` }));
-      inner.append(text(xs, y + 12, formatMetres(it.m.metres), { anchor: 'middle', class: 'sc-size sc-halo' }));
+      // Every row is busy under this thing. Slide the label to the nearest clear spot rather than
+      // stack it on a neighbour: a name a little off its stem still reads, two names on top of each
+      // other do not. Nothing in this book's window has needed this yet; it is the floor, not the plan.
+      let best = null;
+      for (let r2 = 0; r2 < nRows; r2 += 1) {
+        const edges = [min + hw];
+        for (const [a, b] of used[r2]) edges.push(a - hw, b + hw);
+        for (const e of edges) {
+          const lx = clamp(e, min + hw, max - hw);
+          if (!free(r2, lx - hw, lx + hw)) continue;
+          const d = Math.abs(lx - it.lx);
+          if (!best || d < best.d) best = { row: r2, lx, d };
+        }
+      }
+      if (best) {
+        it.row = best.row;
+        it.lx = best.lx;
+        used[best.row].push([best.lx - hw, best.lx + hw]);
+      } else {
+        it.row = nRows - 1;
+      }
     }
   }
 
+  // ---------------------------------------------------------------- the wide layout
+  function buildWide() {
+    const defs = el('defs');
+    svg.append(defs);
+
+    // the instrument bands, each fading in on its left ("and larger") and capped at its limit
+    const bands = el('g');
+    BANDS.forEach((b, i) => {
+      const y = 10 + i * 15;
+      const xa = xOf(uOfMetres(b.from));
+      const xb = xOf(uOfMetres(b.to));
+      const gid = `${ns}-band${i}`;
+      const grad = el('linearGradient', { id: gid, gradientUnits: 'userSpaceOnUse', x1: xa, x2: xa + 80, y1: 0, y2: 0 });
+      grad.append(el('stop', { offset: 0, style: `stop-color: ${b.colour}; stop-opacity: 0` }));
+      grad.append(el('stop', { offset: 1, style: `stop-color: ${b.colour}; stop-opacity: 0.34` }));
+      defs.append(grad);
+      bands.append(el('rect', { x: xa, y, width: xb - xa, height: 11, rx: 5.5, fill: `url(#${gid})` }));
+      bands.append(el('path', { d: `M${xb} ${y - 1} L${xb} ${y + 12}`, stroke: b.colour, 'stroke-width': 2, 'stroke-linecap': 'round' }));
+      bands.append(el('path', { d: `M${xb} ${y + 13} L${xb} ${RY - 6}`, stroke: b.colour, 'stroke-width': 1, 'stroke-dasharray': '1.5 4', opacity: 0.5 }));
+      bands.append(text(xa + 72, y + 9, b.label, { class: 'sc-band', fill: b.colour }));
+      bands.append(text(xb - 7, y + 9, b.limit, { anchor: 'end', class: 'sc-band sc-halo', fill: b.colour }));
+    });
+    svg.append(bands);
+
+    // the ruler
+    const ruler = el('g');
+    ruler.append(el('path', { d: `M${X0 - 8} ${RY} L${X1 + 8} ${RY}`, stroke: C.ink, 'stroke-width': 1.5, 'stroke-linecap': 'round' }));
+    for (const t of TICKS) {
+      const x = xOf(t.u).toFixed(1);
+      ruler.append(el('path', { d: `M${x} ${RY} L${x} ${RY + (t.major ? 10 : 5)}`, stroke: t.major ? C.ink : C.ruleStrong, 'stroke-width': t.major ? 1.5 : 1 }));
+      if (t.major) ruler.append(text(x, RY + 24, t.label, { anchor: 'middle', class: 'sc-tick' }));
+    }
+    svg.append(ruler);
+
+    // the markers: a dot on the ruler, a stem, an icon and a two-line label
+    const stems = el('g');
+    const icons = el('g');
+    const labels = el('g', { class: 'sc-labels' });
+    const dots = el('g');
+    const markerNodes = MARKERS.map((m) => {
+      const x = xOf(uOfMetres(m.metres));
+      const y = ROW_Y[m.row];
+      stems.append(el('path', { d: `M${x.toFixed(1)} ${RY - 4} L${x.toFixed(1)} ${y + 12}`, stroke: C.ruleStrong, 'stroke-width': 1 }));
+      const icon = el('g', { transform: `translate(${x.toFixed(1)} ${y})` });
+      m.icon(icon);
+      icons.append(icon);
+      const anchor = m.anchor || 'middle';
+      const lx = anchor === 'end' ? x + 12 : x;
+      const label = el('g', { class: 'sc-label' });
+      label.append(text(lx.toFixed(1), y - 27, m.label, { anchor, class: 'sc-name sc-halo' }));
+      label.append(text(lx.toFixed(1), y - 15, formatMetres(m.metres), { anchor, class: 'sc-size sc-halo' }));
+      labels.append(label);
+      const dot = el('circle', { cx: x.toFixed(1), cy: RY, r: 3, fill: C.ink });
+      dots.append(dot);
+      return { m, x, label, dot };
+    });
+    svg.append(stems, icons, labels, dots);
+
+    // A wide invisible track: a click or tap anywhere near the ruler sends the lens there.
+    const track = el('rect', { class: 'sc-track', x: 0, y: RY - LR - 40, width: W, height: LR * 2 + 90, fill: 'transparent' });
+    svg.append(track);
+
+    // the lens
+    const clipId = `${ns}-lensclip`;
+    defs.append(el('clipPath', { id: clipId }, [el('circle', { r: LR })]));
+    const lensG = el('g', { class: 'sc-lens', tabindex: 0, role: 'slider', 'aria-label': 'Lens along the ruler', 'aria-valuemin': U_MIN, 'aria-valuemax': U_MAX, 'aria-orientation': 'horizontal' });
+    const ha = (HANDLE_DEG * Math.PI) / 180;
+    const hx1 = (Math.cos(ha) * (LR - 2)).toFixed(1);
+    const hy1 = (Math.sin(ha) * (LR - 2)).toFixed(1);
+    const hx2 = (Math.cos(ha) * (LR + HANDLE)).toFixed(1);
+    const hy2 = (Math.sin(ha) * (LR + HANDLE)).toFixed(1);
+    lensG.append(el('path', { d: `M${hx1} ${hy1} L${hx2} ${hy2}`, stroke: glass, 'stroke-width': 11, 'stroke-linecap': 'round' }));
+    lensG.append(el('circle', { r: LR, fill: C.paper, style: `fill: ${glassFill}` }));
+    const inner = el('g', { 'clip-path': `url(#${clipId})` });
+    lensG.append(inner);
+    lensG.append(el('circle', { class: 'sc-ring', r: LR, fill: 'none', stroke: glass, 'stroke-width': 2.5 }));
+    lensG.append(el('circle', { class: 'sc-focus', r: LR + 3.5, fill: 'none', stroke: C.ruleStrong, 'stroke-width': 1 }));
+    lensG.append(el('path', { d: `M${(-LR * 0.62).toFixed(1)} ${(-LR * 0.62).toFixed(1)} A${LR - 6} ${LR - 6} 0 0 1 ${(-LR * 0.16).toFixed(1)} ${(-LR * 0.86).toFixed(1)}`, stroke: C.paper, 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round', opacity: 0.9 }));
+    svg.append(lensG);
+
+    // The magnified strip: the ruler under the lens at ZOOM, with ticks and the things in view.
+    function paint() {
+      for (const node of markerNodes) {
+        const near = node.m === nearest;
+        node.label.classList.toggle('is-near', near);
+        node.dot.setAttribute('r', near ? 4.5 : 3);
+        node.dot.setAttribute('fill', near ? C.leaf : C.ink);
+      }
+      const lx = xOf(u);
+      lensG.setAttribute('transform', `translate(${lx.toFixed(2)} ${RY})`);
+      inner.replaceChildren();
+      inner.append(el('path', { d: `M${-LR} 0 L${LR} 0`, stroke: C.ink, 'stroke-width': 1.5 }));
+      const items = [];
+      for (const t of TICKS) {
+        const x = (xOf(t.u) - lx) * ZOOM;
+        if (Math.abs(x) > LR + 8) continue;
+        inner.append(el('path', { d: `M${x.toFixed(1)} 0 L${x.toFixed(1)} ${t.major ? 11 : 6}`, stroke: t.major ? C.ink : C.ruleStrong, 'stroke-width': t.major ? 1.5 : 1 }));
+        if (!t.major) continue;
+        const width = t.label.length * 6.6 + 8;
+        if (Math.abs(x) + width / 2 < LR - 4) items.push({ x, width, tick: t });
+      }
+      for (const m of MARKERS) {
+        const x = (xOf(uOfMetres(m.metres)) - lx) * ZOOM;
+        if (Math.abs(x) > LR - 12) continue;
+        items.push({ x, width: Math.max(m.label.length, 7) * 6.8 + 10, m });
+      }
+      // Labels below the line, in up to three rows, so neighbours never overlap.
+      items.sort((a, b) => a.x - b.x);
+      const rowEnd = [-Infinity, -Infinity, -Infinity];
+      for (const it of items) {
+        const left = it.x - it.width / 2;
+        let row = rowEnd.findIndex((end) => end <= left);
+        if (row < 0) row = 0;
+        rowEnd[row] = it.x + it.width / 2;
+        const y = 24 + row * 26;
+        const xs = it.x.toFixed(1);
+        if (it.tick) {
+          inner.append(text(xs, y, it.tick.label, { anchor: 'middle', class: 'sc-tick sc-halo' }));
+          continue;
+        }
+        const near = it.m === nearest;
+        inner.append(el('circle', { cx: xs, cy: 0, r: near ? 4.5 : 3.2, fill: near ? C.leaf : C.ink }));
+        const icon = el('g', { transform: `translate(${xs} -38) scale(1.7)` });
+        it.m.icon(icon);
+        inner.append(icon);
+        inner.append(text(xs, y, it.m.label, { anchor: 'middle', class: `sc-name sc-halo${near ? ' is-near' : ''}` }));
+        inner.append(text(xs, y + 12, formatMetres(it.m.metres), { anchor: 'middle', class: 'sc-size sc-halo' }));
+      }
+    }
+
+    // Drag the lens by its glass or handle, or tap the ruler to send it there.
+    function down(e, x) {
+      const onLens = lensG.contains(e.target);
+      if (!onLens && e.target !== track) return null;
+      const offset = onLens ? xOf(u) - x : 0;
+      if (!onLens) setU(uOf(x));
+      return { move: (mx) => setU(uOf(mx + offset)) };
+    }
+
+    return { mode: 'wide', vw: W, vh: H, lens: lensG, paint, down };
+  }
+
+  // ---------------------------------------------------------------- the narrow layout
+  // vw x vh are the stage's own pixels, so one unit here is one device pixel.
+  function buildNarrow(vw, vh) {
+    const pad = 9;
+    const x0 = pad;
+    const x1 = vw - pad;
+    const span = x1 - x0;
+
+    const barH = vh > 210 ? 11 : 8;
+    const barTop = vh > 210 ? 17 : 14;
+    const stripBottom = barTop + barH + 4;
+
+    // Laid out from the bottom up, because the floor is fixed: the card and the buttons own the last
+    // NARROW_BAND pixels, three rows of names must fit above them at a phone's 149 px of stage, and
+    // whatever is left over between the strip and the ruler becomes the icon row. A taller narrow
+    // stage (the chapter at a 1024 px viewport gives 656 x 287) spends the extra on bigger icons, a
+    // size under every name and a fourth row rather than on empty paper.
+    const twoLine = vh >= 215;
+    const rowGap = twoLine ? 21 : 12.5;
+    const tail = (twoLine ? 10 : 0) + 5; // the size line under the last row, plus its descenders
+    const rulerToRow = 17;
+    const tickAbove = 14; // the ruler line up to the top of a decade label's glyphs
+    const stem = clamp(17 + (vh - 150) * 0.05, tickAbove + 3, 26);
+    const rowLast = vh - NARROW_BAND - tail;
+    const iconTop = stripBottom + 3;
+    // How many rows, and how big the icons, comes from what is actually left between the strip and the
+    // control band. Rows are chosen before portraits: a name that had to slide off its stem to fit is a
+    // worse figure than a small icon, and at a 320 px phone one of the two has to give. Deriving the
+    // icon from the space left over is also what keeps it off the ruler; sizing it first and hoping put
+    // the icons through the line at a 272 px stage.
+    const rulerFor = (rows) => rowLast - (rows - 1) * rowGap - rulerToRow;
+    let nRows = 2;
+    let iconScale = 0;
+    for (const rows of [4, 3]) {
+      const space = rulerFor(rows) - stem - iconTop;
+      if (space < 21) continue;
+      nRows = rows;
+      iconScale = clamp(space / 26, 0.82, 1.5);
+      break;
+    }
+    if (!iconScale) {
+      for (const rows of [3, 2]) {
+        // The decade labels still need their band above the line, icons or no icons.
+        if (rulerFor(rows) - iconTop < tickAbove + 2) continue;
+        nRows = rows;
+        const space = rulerFor(rows) - stem - iconTop;
+        iconScale = space >= 16 ? clamp(space / 26, 0.62, 1.5) : 0;
+        break;
+      }
+    }
+    const rulerY = rulerFor(nRows);
+    const row0 = rulerY + rulerToRow;
+    const iconHalf = 13 * iconScale;
+    const iconBottom = rulerY - stem;
+    // Sit the icons a little below the middle of their space: the stems to the ruler shorten and the
+    // room under the strip grows, which is where the bracket's two connector lines want to run.
+    const iconCy = iconTop + iconHalf + Math.max(0, iconBottom - iconTop - iconHalf * 2) * 0.62;
+    const iconRow = iconScale ? iconCy - iconHalf : rulerY - tickAbove; // the top of the drawing below the strip
+    const top = Math.max(barTop + barH + 6, iconRow - 4); // where the mark's plumb line starts
+
+    // How much of the ruler the window holds. A wider stage opens a wider window, so the crowd of
+    // things per inch stays about the same wherever the reader is; a stage with a fourth label row can
+    // carry a denser window, which is what keeps a 852 px stage from being six things on a lot of paper.
+    const decades = clamp(vw / (nRows >= 4 ? 145 : 160), 1.7, 5);
+    const perU = span / decades;
+
+    const sx = (uu) => x0 + ((U_MAX - uu) / (U_MAX - U_MIN)) * span;
+    const uStrip = (x) => U_MAX - ((x - x0) / span) * (U_MAX - U_MIN);
+    let lo = u + decades / 2; // the window's large end, set by every paint
+    const uWin = (x) => lo - ((x - x0) / span) * decades;
+
+    const defs = el('defs');
+    svg.append(defs);
+
+    // Not every icon is the nominal 24-unit box: E. coli's flagella reach 40 units across and the DNA
+    // helix 24, so clamping them all by 13 pushed E. coli's tail through the frame edge. Measure each
+    // one once per layout and let the spread and the edge clamp use the real half-width.
+    const probe = el('g', { opacity: 0, 'pointer-events': 'none' });
+    svg.append(probe);
+    const iconHW = new Map();
+    for (const m of MARKERS) {
+      const g = el('g');
+      m.icon(g);
+      probe.append(g);
+      let hw = 13;
+      try {
+        const bb = g.getBBox();
+        if (bb.width > 0) hw = Math.max(-bb.x, bb.x + bb.width);
+      } catch { /* not rendered: the nominal box is close enough */ }
+      iconHW.set(m.id, hw);
+    }
+    probe.remove();
+
+    // ---- the strip: the whole eleven decades, in the three pieces the instruments carve it into ----
+    const stripG = el('g');
+    const clipId = `${ns}-strip`;
+    defs.append(el('clipPath', { id: clipId }, [el('rect', { x: x0, y: barTop, width: span, height: barH, rx: barH / 2 })]));
+    const zones = el('g', { 'clip-path': `url(#${clipId})` });
+    const edges = [U_MAX, HANDOVER[0], HANDOVER[1], U_MIN];
+    BANDS.forEach((b, i) => {
+      const a = sx(edges[i]);
+      const z = sx(edges[i + 1]);
+      zones.append(el('rect', { x: a, y: barTop, width: z - a, height: barH, fill: tint(b.colour, 34) }));
+      if (i > 0) zones.append(el('path', { d: `M${a.toFixed(1)} ${barTop} L${a.toFixed(1)} ${barTop + barH}`, stroke: b.colour, 'stroke-width': 1.4 }));
+    });
+    stripG.append(zones);
+    // --rule-strong is a hairline against paper; against the dark theme's stage it is very nearly the
+    // stage, and the eleven decade stubs under the bar vanished. A mix of the ink shows in both.
+    const stripRule = tint(C.ink, 30);
+    stripG.append(el('rect', { x: x0, y: barTop, width: span, height: barH, rx: barH / 2, fill: 'none', stroke: stripRule, 'stroke-width': 1 }));
+    for (let d = U_MAX; d >= U_MIN; d -= 1) {
+      const x = sx(d).toFixed(1);
+      stripG.append(el('path', { d: `M${x} ${barTop + barH} L${x} ${barTop + barH + 3.5}`, stroke: stripRule, 'stroke-width': 1 }));
+    }
+    // Two lines splaying from the bracket out to the window's edges, so the bracket reads as the slice
+    // the frame below has opened. Only when there is real room between the strip and the icons: at a
+    // phone's height they would be a 3 px stub, which reads as a stray mark, not as a zoom.
+    const gap = iconRow - 4 - (barTop + barH + 4);
+    const conn = gap >= 14 ? el('path', { stroke: C.ruleStrong, 'stroke-width': 1, 'stroke-dasharray': '2 3', fill: 'none' }) : null;
+    if (conn) stripG.append(conn);
+    svg.append(stripG);
+
+    // ---- the bracket on the strip: the slice the window below is showing, and a knob at the mark ----
+    const lensG = el('g', { class: 'sc-lens', tabindex: 0, role: 'slider', 'aria-label': 'Window along the ruler', 'aria-valuemin': U_MIN, 'aria-valuemax': U_MAX, 'aria-orientation': 'horizontal' });
+    // The bracket is its own focus ring: a separate outer rect would have to grow, and at either end of
+    // the strip it grew straight through the instrument's name and the range caption on the line above.
+    const bracket = el('rect', { class: 'sc-focus', fill: 'none', stroke: C.ink, 'stroke-width': 1.2, rx: 4 });
+    const knob = el('circle', { class: 'sc-knob', r: 3.4, cy: barTop + barH / 2, fill: C.leaf });
+    lensG.append(bracket, knob);
+    svg.append(lensG);
+
+    // The captions go on top of the bracket, with a halo: at either end of the strip the bracket's
+    // focus ring runs under them, and the descender of "naked eye" sat on the green line.
+    const caps = el('g', { 'pointer-events': 'none' });
+    const bandText = text(x0 + 1, barTop - 6, '', { class: 'sc-band sc-halo' });
+    caps.append(bandText);
+    caps.append(text(x1, barTop - 6, '10 m → 0.1 nm', { anchor: 'end', class: 'sc-tick sc-halo' }));
+    svg.append(caps);
+
+    // The whole strip is one scrubber: a press anywhere on it sends the window there and keeps dragging.
+    const stripHit = el('rect', { class: 'sc-track', x: 0, y: 0, width: vw, height: stripBottom + 4, fill: 'transparent' });
+    svg.append(stripHit);
+
+    // ---- the window ----
+    const winG = el('g');
+    svg.append(winG);
+    const winHit = el('rect', { class: 'sc-track', x: 0, y: stripBottom + 4, width: vw, height: Math.max(0, vh - NARROW_BAND - stripBottom - 4), fill: 'transparent' });
+    svg.append(winHit);
+
+    function paint() {
+      const half = decades / 2;
+      lo = u + half;
+      let hi = u - half;
+      if (lo > U_MAX) { lo = U_MAX; hi = U_MAX - decades; }
+      if (hi < U_MIN) { hi = U_MIN; lo = U_MIN + decades; }
+      const wx = (uu) => x0 + ((lo - uu) / decades) * span;
+
+      // the strip's bracket, knob, connectors and the name of the instrument at the mark
+      const bl = sx(lo) - 2;
+      const br = sx(hi) + 2;
+      bracket.setAttribute('x', bl.toFixed(1));
+      bracket.setAttribute('width', (br - bl).toFixed(1));
+      bracket.setAttribute('y', barTop - 3.5);
+      bracket.setAttribute('height', barH + 7);
+      knob.setAttribute('cx', sx(u).toFixed(1));
+      const band = seenWith(10 ** u);
+      bandText.textContent = band.label;
+      bandText.setAttribute('fill', band.colour);
+      if (conn) conn.setAttribute('d', `M${bl.toFixed(1)} ${barTop + barH + 4} L${x0} ${(iconRow - 4).toFixed(1)} M${br.toFixed(1)} ${barTop + barH + 4} L${x1} ${(iconRow - 4).toFixed(1)}`);
+
+      // the window: one ruler line, its ticks, the things on it, and the mark
+      winG.replaceChildren();
+      const rulerG = el('g');
+      const stemG = el('g');
+      const iconG = el('g');
+      const dotG = el('g');
+      const labelG = el('g');
+      winG.append(rulerG, stemG, iconG, dotG, labelG);
+      rulerG.append(el('path', { d: `M${x0} ${rulerY.toFixed(1)} L${x1} ${rulerY.toFixed(1)}`, stroke: C.ink, 'stroke-width': 1.5, 'stroke-linecap': 'round' }));
+      // The mark's own plumb line goes in first, behind the icons it passes through.
+      const markX = wx(u);
+      rulerG.append(el('path', { d: `M${markX.toFixed(1)} ${top.toFixed(1)} L${markX.toFixed(1)} ${rulerY.toFixed(1)}`, stroke: C.leaf, 'stroke-width': 1, opacity: 0.3 }));
+
+      // The decade labels sit above the line, right under the icons, so the three rows below it are
+      // the things' names alone: at a phone's window a cluster like the hair, the human egg and the
+      // paramecium needs all three, and a decade label taking one of them costs a name.
+      for (const t of TICKS) {
+        if (t.u > lo || t.u < hi) continue;
+        const x = wx(t.u);
+        rulerG.append(el('path', { d: `M${x.toFixed(1)} ${rulerY.toFixed(1)} L${x.toFixed(1)} ${(rulerY + (t.major ? 7 : 4)).toFixed(1)}`, stroke: t.major ? C.ink : C.ruleStrong, 'stroke-width': t.major ? 1.4 : 1 }));
+        if (!t.major) continue;
+        const node = text(0, (rulerY - 6).toFixed(1), t.label, { anchor: 'middle', class: 'sc-tick sc-halo' });
+        labelG.append(node);
+        const w = widthOf(node, `t:${t.label}`, t.label);
+        node.setAttribute('x', clamp(x, x0 + w / 2, x1 - w / 2).toFixed(1));
+      }
+
+      const items = [];
+      for (const m of MARKERS) {
+        const mu = uOfMetres(m.metres);
+        if (mu > lo || mu < hi) continue;
+        items.push({ x: wx(mu), m, near: m === nearest });
+      }
+      items.sort((a, b) => a.x - b.x);
+
+      // Build the labels first so they can be measured, then pack them into rows and place them.
+      for (const it of items) {
+        const node = el('text', { x: 0, y: -50, 'text-anchor': 'middle', class: `sc-name sc-halo${it.near ? ' is-near' : ''}` });
+        node.append(document.createTextNode(it.m.label));
+        const size = formatMetres(it.m.metres);
+        if (it.near && !twoLine) node.append(el('tspan', { class: 'sc-inline', dx: 5, text: size }));
+        labelG.append(node);
+        it.node = node;
+        it.w = widthOf(node, `${twoLine ? 'n' : it.near ? 'N' : 'n'}:${it.m.id}`, `${it.m.label}${it.near && !twoLine ? size : ''}`);
+        if (twoLine) {
+          it.sizeNode = text(0, -50, size, { anchor: 'middle', class: `sc-size sc-halo${it.near ? ' is-near' : ''}` });
+          labelG.append(it.sizeNode);
+          it.w = Math.max(it.w, widthOf(it.sizeNode, `s:${size}`, size));
+        }
+        it.hw = (iconHW.get(it.m.id) ?? 13) * iconScale;
+        it.ix = clamp(it.x, x0 + it.hw, x1 - it.hw);
+      }
+
+      // Things a tenth of a decade apart (the hair and the human egg) draw icons on top of each other.
+      // Push them apart just enough to separate, and let each stem slant back to the true position:
+      // the dot on the ruler is where the size is read, the icon is only the portrait.
+      for (let pass = 0; pass < 4; pass += 1) {
+        for (let i = 1; i < items.length; i += 1) {
+          const want = items[i - 1].hw + items[i].hw + 2;
+          const d = items[i].ix - items[i - 1].ix;
+          if (d >= want) continue;
+          const push = (want - d) / 2;
+          items[i - 1].ix -= push;
+          items[i].ix += push;
+        }
+        for (const it of items) it.ix = clamp(it.ix, x0 + it.hw, x1 - it.hw);
+      }
+
+      for (const it of items) {
+        if (iconScale) {
+          const icon = el('g', { transform: `translate(${it.ix.toFixed(1)} ${iconCy.toFixed(1)}) scale(${iconScale.toFixed(2)})` });
+          it.m.icon(icon);
+          iconG.append(icon);
+          stemG.append(el('path', { d: `M${it.ix.toFixed(1)} ${(iconCy + iconHalf).toFixed(1)} L${it.x.toFixed(1)} ${(rulerY - 1).toFixed(1)}`, stroke: C.ruleStrong, 'stroke-width': 1 }));
+        }
+        dotG.append(el('circle', { cx: it.x.toFixed(1), cy: rulerY.toFixed(1), r: it.near ? 4.5 : 3.2, fill: it.near ? C.leaf : C.ink }));
+      }
+      for (const it of items) it.lx = clamp(it.x, x0 + it.w / 2, x1 - it.w / 2);
+      packRows(items, nRows, x0, x1);
+      for (const it of items) {
+        const y = row0 + it.row * rowGap;
+        it.node.setAttribute('x', it.lx.toFixed(1));
+        it.node.setAttribute('y', y.toFixed(1));
+        if (it.sizeNode) {
+          it.sizeNode.setAttribute('x', it.lx.toFixed(1));
+          it.sizeNode.setAttribute('y', (y + 10).toFixed(1));
+        }
+      }
+
+      // the mark's head, below the line among the ticks: where the reader actually is, which is not
+      // always on a thing
+      const markG = el('g');
+      markG.append(el('path', { d: `M${(markX - 5).toFixed(1)} ${(rulerY + 8).toFixed(1)} L${(markX + 5).toFixed(1)} ${(rulerY + 8).toFixed(1)} L${markX.toFixed(1)} ${(rulerY + 1).toFixed(1)} Z`, fill: C.leaf }));
+      winG.insertBefore(markG, labelG);
+    }
+
+    // The strip scrubs; the window pans with the finger, and a tap in it goes to what was tapped.
+    function down(e, x, y) {
+      if (y <= stripBottom + 4) {
+        setU(uStrip(x));
+        return { move: (mx) => setU(uStrip(mx)) };
+      }
+      if (y > vh - NARROW_BAND + 4) return null;
+      const u0 = u;
+      const x0c = x;
+      let moved = 0;
+      return {
+        move: (mx) => {
+          moved = Math.max(moved, Math.abs(mx - x0c));
+          setU(u0 + (mx - x0c) / perU);
+        },
+        up: (mx) => {
+          if (moved >= 4) return;
+          const target = uWin(mx);
+          const m = nearestMarker(target);
+          const mu = uOfMetres(m.metres);
+          glideTo(Math.abs(mu - target) * perU <= 20 ? mu : target);
+        },
+      };
+    }
+
+    return { mode: 'narrow', vw, vh, lens: lensG, paint, down };
+  }
+
+  // ---------------------------------------------------------------- shared behaviour
   function paintCard() {
     const m = nearest;
-    cardTitle.replaceChildren(m.name, h('span', { class: 'sc-card-size', text: formatMetres(m.metres) }));
+    const narrow = layout?.mode === 'narrow';
+    cardTitle.replaceChildren(narrow ? m.label : m.name, h('span', { class: 'sc-card-size', text: formatMetres(m.metres) }));
     cardAbout.textContent = m.about;
     const seen = seenWith(m.metres);
     cardSeen.replaceChildren(h('i', { style: `--dot: ${seen.colour}` }), `${seen.label} · ${seen.limit}`);
@@ -377,25 +797,19 @@ export function mount(root, ctx) {
     const m = nearestMarker(u);
     if (m !== nearest) {
       nearest = m;
-      for (const node of markerNodes) {
-        const near = node.m === m;
-        node.label.classList.toggle('is-near', near);
-        node.dot.setAttribute('r', near ? 4.5 : 3);
-        node.dot.setAttribute('fill', near ? C.leaf : C.ink);
-      }
       paintCard();
     }
     const metres = 10 ** u;
     const valueText = `${formatMetres(metres)}, nearest ${m.name}`;
-    lensG.setAttribute('aria-valuenow', u.toFixed(2));
-    lensG.setAttribute('aria-valuetext', valueText);
+    layout.lens.setAttribute('aria-valuenow', u.toFixed(2));
+    layout.lens.setAttribute('aria-valuetext', valueText);
     range.setAttribute('aria-valuetext', valueText);
     chip.textContent = `lens at ${formatMetres(metres)}`;
     if (paintAll) {
       const v = Math.round(((U_MAX - u) / (U_MAX - U_MIN)) * 1000);
       if (Number(range.value) !== v) range.value = String(v);
     }
-    paintLens();
+    layout.paint();
     const idx = MARKERS.indexOf(m);
     prev.disabled = idx === 0 && Math.abs(uOfMetres(m.metres) - u) < 1e-6;
     next.disabled = idx === MARKERS.length - 1 && Math.abs(uOfMetres(m.metres) - u) < 1e-6;
@@ -426,42 +840,43 @@ export function mount(root, ctx) {
     if (target !== null) glideTo(target);
   }
 
-  // ----- pointer: drag the lens by its glass or handle, or tap the ruler to send it there -----
-  function svgX(e) {
-    const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM().inverse());
-    return pt.x;
+  // ----- pointer: each layout says what a press on it means -----
+  function svgPoint(e) {
+    return new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM().inverse());
   }
   const onDown = (e) => {
     if (e.button !== undefined && e.button !== 0) return;
-    const onLens = lensG.contains(e.target);
-    if (!onLens && e.target !== track) return;
-    e.preventDefault();
     if (glide) glide.finish();
-    const x = svgX(e);
-    const offset = onLens ? xOf(u) - x : 0;
-    dragging = { id: e.pointerId, offset };
+    const p = svgPoint(e);
+    const d = layout.down(e, p.x, p.y);
+    if (!d) return;
+    e.preventDefault();
+    dragging = { id: e.pointerId, ...d };
     wrap.classList.add('is-dragging');
     try { svg.setPointerCapture(e.pointerId); } catch { /* not every target supports capture */ }
-    if (!onLens) setU(uOf(x));
-    lensG.focus({ preventScroll: true });
+    layout.lens.focus({ preventScroll: true });
   };
   const onMove = (e) => {
     if (!dragging || e.pointerId !== dragging.id) return;
     e.preventDefault();
-    setU(uOf(svgX(e) + dragging.offset));
+    const p = svgPoint(e);
+    dragging.move(p.x, p.y);
   };
   const onUp = (e) => {
     if (!dragging || e.pointerId !== dragging.id) return;
+    const p = svgPoint(e);
+    const up = dragging.up;
     dragging = null;
     wrap.classList.remove('is-dragging');
     try { svg.releasePointerCapture(e.pointerId); } catch { /* already released */ }
+    up?.(p.x, p.y);
   };
   svg.addEventListener('pointerdown', onDown);
   svg.addEventListener('pointermove', onMove);
   svg.addEventListener('pointerup', onUp);
   svg.addEventListener('pointercancel', onUp);
 
-  // ----- keyboard: arrows on the lens step between things (Shift nudges), Home/End go to the ends -----
+  // ----- keyboard: arrows step between things (Shift nudges), Home/End go to the ends -----
   const onKey = (e) => {
     if (e.target === range) return;
     const nudge = e.shiftKey ? 0.1 : null;
@@ -470,7 +885,6 @@ export function mount(root, ctx) {
     else if (e.key === 'Home') { e.preventDefault(); glideTo(U_MAX); }
     else if (e.key === 'End') { e.preventDefault(); glideTo(U_MIN); }
   };
-  lensG.addEventListener('keydown', onKey);
   const onRange = () => {
     if (glide) glide.cancel();
     glide = null;
@@ -482,8 +896,49 @@ export function mount(root, ctx) {
   prev.addEventListener('click', onPrev);
   next.addEventListener('click', onNext);
 
-  setU(u);
+  // ----- choosing a layout, and rebuilding when the stage changes shape -----
+  function applyLayout() {
+    const w = root.clientWidth || W;
+    const hgt = root.clientHeight || (w * 7) / 16;
+    const mode = w < NARROW_MAX ? 'narrow' : 'wide';
+    // The narrow drawing is authored in device pixels; snapping the viewBox to a 4 px step keeps the
+    // scale within half a percent of 1:1 and keeps a slow drag-resize from rebuilding every frame.
+    const vw = mode === 'narrow' ? Math.max(240, Math.round(w / 4) * 4) : W;
+    const vh = mode === 'narrow' ? (vw * hgt) / w : H;
+    // Height as well as width: the frame can hand a figure a different aspect on a narrow screen
+    // (registry narrowAspect), and this figure lays itself out from the floor up.
+    if (layout && layout.mode === mode && layout.vw === vw && Math.abs(layout.vh - vh) < 0.5) return;
+    const keep = u;
+    if (layout) layout.lens.removeEventListener('keydown', onKey);
+    svg.replaceChildren();
+    widths.clear();
+    wrap.classList.toggle('is-narrow', mode === 'narrow');
+    layout = mode === 'wide' ? buildWide() : buildNarrow(vw, vh);
+    svg.setAttribute('viewBox', `0 0 ${layout.vw} ${layout.vh.toFixed(2)}`);
+    layout.lens.addEventListener('keydown', onKey);
+    nearest = null; // the card's title differs between the layouts, so make setU repaint it
+    setU(keep);
+  }
+
+  let roRaf = 0;
+  const ro = new ResizeObserver(() => {
+    if (roRaf) return;
+    roRaf = requestAnimationFrame(() => { roRaf = 0; if (!destroyed) applyLayout(); });
+  });
+
+  // The wrap goes in first: the narrow layout packs its rows from getComputedTextLength(), which is 0
+  // for text that is not in a rendered tree, and a wrong width there is labels sitting on top of each other.
   root.append(wrap);
+  applyLayout();
+  ro.observe(root);
+
+  // Label rows are packed from measured text, and before the webfont arrives those measurements are
+  // the fallback face's. One repaint once Inter is in hand keeps the narrow rows honest.
+  document.fonts?.ready?.then(() => {
+    if (destroyed) return;
+    widths.clear();
+    layout.paint();
+  });
 
   let readyRaf = requestAnimationFrame(() => {
     readyRaf = 0;
@@ -492,13 +947,16 @@ export function mount(root, ctx) {
 
   return {
     destroy() {
+      destroyed = true;
       cancelAnimationFrame(readyRaf);
+      cancelAnimationFrame(roRaf);
+      ro.disconnect();
       if (glide) glide.cancel();
       svg.removeEventListener('pointerdown', onDown);
       svg.removeEventListener('pointermove', onMove);
       svg.removeEventListener('pointerup', onUp);
       svg.removeEventListener('pointercancel', onUp);
-      lensG.removeEventListener('keydown', onKey);
+      layout?.lens.removeEventListener('keydown', onKey);
       range.removeEventListener('input', onRange);
       prev.removeEventListener('click', onPrev);
       next.removeEventListener('click', onNext);

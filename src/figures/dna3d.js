@@ -174,6 +174,7 @@ function build(root, ctx) {
   const project = (v, out) => { out.copy(v).project(camera); out.x = ((out.x + 1) / 2) * W; out.y = ((1 - out.y) / 2) * H; return out; };
   const s0 = new THREE.Vector3();
   const s1 = new THREE.Vector3();
+  const sEnd = new THREE.Vector3();
   // The height at which the helical feature with angle offset `off` from the front strand faces the camera,
   // choosing the turn nearest `yTarget`.
   function facingY(off, yTarget) {
@@ -223,7 +224,17 @@ function build(root, ctx) {
     }
     bracket.setAttribute('d', d);
     bracket.style.display = d ? '' : 'none';
-    ends.forEach((e, i) => labels.set(`end${i}`, e.pos, 0, e.top ? -18 : 18));
+    // 5′ and 3′ mark the two ends of each strand, and at a near view those ends are off the stage.
+    // A label whose anchor is outside the frame gets clamped onto the edge by Labels.update, where it
+    // points at nothing and collides with its partner, so each prime mark is dropped unless its own
+    // end projects inside the stage with room for the box: better absent than misplaced.
+    primesShown = 0;
+    ends.forEach((e, i) => {
+      project(e.pos, sEnd);
+      const inside = sEnd.x > 34 && sEnd.x < W - 34 && sEnd.y > 26 && sEnd.y < H - 62;
+      if (inside) primesShown += 1;
+      labels.set(`end${i}`, inside ? e.pos : null, 0, e.top ? -18 : 18);
+    });
   }
 
   // ---------- state ----------
@@ -233,6 +244,7 @@ function build(root, ctx) {
   let W = 1;
   let H = 1;
   let labelsOn = true;
+  let primesShown = 0; // 5′/3′ marks whose own end is inside the stage this frame
   let hovered = null;
   let pinned = null;
   let shown = null;
@@ -274,7 +286,7 @@ function build(root, ctx) {
   function render() {
     orbit.apply(camera, spin.angle(clock.now()));
     updateLabels();
-    labels.update(camera, W, H, 52);
+    labels.update(camera, W, H, bottomPad);
     renderer.render(scene, camera);
   }
 
@@ -329,17 +341,22 @@ function build(root, ctx) {
   addChip(toolbar, `5′-${SEQUENCE}-3′`, scope);
   addChip(toolbar, `${BP} base pairs · ${BP_PER_TURN} per turn · 1 unit = 1 nm`, scope); // "10.5 per turn"
 
+  // How much of the bottom of the stage the controls take. On a phone the toolbar wraps onto three
+  // rows, and a label placed against the old fixed 52 px sat on top of a button.
+  let bottomPad = 52;
+  const measurePad = () => { bottomPad = Math.max(52, toolbar.offsetHeight + 14); };
   const unobserve = observeSize(root, (w, h) => {
     W = w;
     H = h;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    measurePad();
     labels.measure();
     loop.invalidate();
   });
   let alive = true;
-  document.fonts?.ready.then(() => { if (alive) { labels.measure(); loop.invalidate(); } });
+  document.fonts?.ready.then(() => { if (alive) { measurePad(); labels.measure(); loop.invalidate(); } });
 
   render();
   ctx.onReady();
@@ -378,7 +395,7 @@ function build(root, ctx) {
     },
     describe() {
       const r = renderer.info.render;
-      return { drawCalls: r.calls, triangles: r.triangles, view: orbit.view(spin.angle(clock.now())), basePairs: BP, labels: labelsOn, selected: pinned };
+      return { drawCalls: r.calls, triangles: r.triangles, view: orbit.view(spin.angle(clock.now())), basePairs: BP, labels: labelsOn, primesShown, selected: pinned };
     },
   };
 }

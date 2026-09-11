@@ -18,8 +18,8 @@ const SEED = 20260908;
 const TAU = Math.PI * 2;
 
 // Binary fission schedule: fission k starts at FISSION_FIRST + k × FISSION_EVERY seconds and lasts
-// FISSION_LENGTH seconds; paramecium (k mod count) divides. The daughter swims off and fades over
-// DAUGHTER_LIFE seconds so the population stays put.
+// FISSION_LENGTH seconds; which paramecium divides is chosen below. The daughter swims off and fades
+// over DAUGHTER_LIFE seconds so the population stays put.
 const FISSION_FIRST = 11;
 const FISSION_EVERY = 12;
 const FISSION_LENGTH = 4;
@@ -57,8 +57,7 @@ function buildWorld(rand) {
     ay: wob * range(0.6, 1), wy: TAU / range(9, 17), py: rand() * TAU,
   });
 
-  // Orbit centres, listed so that the first fissions fall on cells near the middle of the field; the
-  // radii are capped so no orbit leaves the field.
+  // Orbit centres, spread over the field; the radii are capped so no orbit leaves it.
   const paramecia = [];
   const slots = [[430, 130], [640, 320], [200, 120], [860, 320], [640, 120], [420, 330], [200, 330], [860, 120]];
   slots.forEach(([sx, sy], i) => {
@@ -185,26 +184,86 @@ function onOrbit(o, t) {
 }
 
 // ---------- fission schedule ----------
+//
+// A fission is the one event the caption points at, so it has to happen where the reader can see it.
+// Round-robin by index put the first one in the crowded top-left corner, under an amoeba, a diatom and
+// a volvox. Instead the cell that divides in fission k is chosen at the fission's own scheduled time:
+// the paramecium with the most open water round it, measured against every organism big enough to hide
+// it and against the rim. That is a pure function of the seeded layout and the clock, so the same cell
+// divides on every machine and at every window size, and it is memoised because the positions at
+// fission k depend on the fissions before it. Cells that divided in the last RECENT fissions are
+// skipped, so the population keeps taking turns instead of one lucky cell dividing forever.
+const RECENT = 3;
+// The half-width the narrowest supported stage (16:10) crops off each side of the 21:9 field.
+const SAFE_X = 175;
 
-// The paramecium that divides in fission k.
-const fissionCell = (k, count) => k % count;
+function makeFissions(world) {
+  const cells = world.paramecia;
+  const nP = cells.length;
+  const picked = [];
 
-// Fissions that belong to paramecium i and have started by time t, most recent last.
-function fissionsOf(i, count, t) {
-  const out = [];
-  for (let k = i; ; k += count) {
-    const at = FISSION_FIRST + k * FISSION_EVERY;
-    if (at > t) break;
-    out.push(at);
+  function indexAt(k) {
+    while (picked.length <= k) picked.push(choose(picked.length));
+    return picked[k];
   }
-  return out;
-}
 
-// The path clock of paramecium i: it stops swimming while it divides, so subtract the time spent.
-function pathTime(i, count, t) {
-  let pt = t;
-  for (const at of fissionsOf(i, count, t)) pt -= Math.min(FISSION_LENGTH, t - at);
-  return pt;
+  // Fissions that belong to paramecium i and have started by time t, most recent last. `limit` caps
+  // how many fissions are consulted, which is what stops choose(k) from asking for its own answer.
+  function times(i, t, limit = Infinity) {
+    const out = [];
+    for (let k = 0; k < limit; k += 1) {
+      const at = FISSION_FIRST + k * FISSION_EVERY;
+      if (at > t) break;
+      if (indexAt(k) === i) out.push(at);
+    }
+    return out;
+  }
+
+  // The path clock of paramecium i: it stops swimming while it divides, so subtract the time spent.
+  function pathTime(i, t, limit) {
+    let pt = t;
+    for (const at of times(i, t, limit)) pt -= Math.min(FISSION_LENGTH, t - at);
+    return pt;
+  }
+
+  // The smallest gap at time t between cell i, grown to the size it reaches while dividing, and
+  // anything that would hide it — the rim, or another organism's disc. Bacteria are left out: they
+  // are specks and read as debris beside a cell rather than over it.
+  function clearance(i, t, limit) {
+    const me = cells[i];
+    const p = onOrbit(me.orbit, pathTime(i, t, limit));
+    const rMe = me.L * 0.75; // elongated, and about to be two cells drawing apart
+    // The rim is measured from SAFE_X, not from the field's own edge: a narrow stage covers rather than
+    // fits the 21:9 field (see resize), so the left and right of it are cropped away on a phone and a
+    // fission out there would be half off the screen.
+    let gap = Math.min(p.x - SAFE_X, W - SAFE_X - p.x, p.y, H - p.y) - rMe;
+    const against = (x, y, r) => { gap = Math.min(gap, Math.hypot(x - p.x, y - p.y) - r - rMe); };
+    cells.forEach((o, j) => {
+      if (j === i) return;
+      const q = onOrbit(o.orbit, pathTime(j, t, limit));
+      against(q.x, q.y, o.L * 0.5);
+    });
+    for (const o of world.euglena) { const q = onOrbit(o.orbit, t); against(q.x, q.y, o.L * 0.5); }
+    for (const o of world.diatoms) { const d = onOrbit(o.drift, t); against(o.cx + d.x, o.cy + d.y, o.L * 0.5); }
+    for (const o of world.amoebae) { const d = onOrbit(o.drift, t); against(o.cx + d.x, o.cy + d.y, o.R * 1.2); }
+    for (const o of world.volvox) { const d = onOrbit(o.drift, t); against(o.cx + d.x, o.cy + d.y, o.R * 1.1); }
+    return gap;
+  }
+
+  function choose(k) {
+    const at = FISSION_FIRST + k * FISSION_EVERY;
+    const recent = picked.slice(Math.max(0, k - RECENT), k);
+    let best = -Infinity;
+    let bestI = -1;
+    for (let i = 0; i < nP; i += 1) {
+      if (recent.includes(i)) continue;
+      const gap = clearance(i, at, k);
+      if (gap > best) { best = gap; bestI = i; }
+    }
+    return bestI < 0 ? k % nP : bestI;
+  }
+
+  return { times, pathTime, indexAt };
 }
 
 // ---------- outlines ----------
@@ -253,7 +312,7 @@ function tracePath(g, pts) {
 export function mount(root, ctx) {
   const rand = mulberry32(SEED);
   const world = buildWorld(rand);
-  const nP = world.paramecia.length;
+  const fissions = makeFissions(world);
 
   let palette = ctx.palette;
   let theme = ctx.theme;
@@ -323,7 +382,11 @@ export function mount(root, ctx) {
       dpr = nextDpr;
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
-      scale = Math.min(cw / W, ch / H);
+      // Cover, not contain. The field is 21:9 and the registry gives this figure a taller stage on a
+      // phone; fitting the whole field inside it left a third of the stage as empty paper above and
+      // below, and shrank every organism to do it. A microscope's field is cropped by its own eyepiece
+      // anyway, so filling the stage and losing the edges is the truer picture as well as the larger one.
+      scale = Math.max(cw / W, ch / H);
       ox = (cw - W * scale) / 2;
       oy = (ch - H * scale) / 2;
       fieldGradient = null;
@@ -477,13 +540,14 @@ export function mount(root, ctx) {
   let dividing = null;
 
   function drawParamecia(tt) {
+    dividing = null;
     world.paramecia.forEach((o, i) => {
-      const pt = pathTime(i, nP, tt);
+      const pt = fissions.pathTime(i, tt);
       const pos = onOrbit(o.orbit, pt);
       const heading = Math.atan2(pos.vy, pos.vx);
       const widthMod = 1 + 0.07 * Math.sin(o.spin * tt + o.spinPhase); // rolling about its long axis
-      const fissions = fissionsOf(i, nP, tt);
-      const at = fissions.length ? fissions[fissions.length - 1] : null;
+      const mine = fissions.times(i, tt);
+      const at = mine.length ? mine[mine.length - 1] : null;
       const since = at === null ? Infinity : tt - at;
       if (at !== null && since < FISSION_LENGTH) {
         // dividing: elongate, pinch, then two cells drawing apart

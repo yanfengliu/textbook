@@ -516,7 +516,7 @@ const CSS = `
 .tb-levels .lv-title { font-family: var(--font-display); font-weight: 500; font-size: max(18px, 4.2cqw); line-height: 1.05; letter-spacing: -0.015em; color: var(--ink); margin: 0.15em 0 0.3em; font-variation-settings: "SOFT" 50, "WONK" 0; }
 .tb-levels .lv-size { display: flex; align-items: center; gap: 0.5em; font-size: max(9px, 1.4cqw); color: var(--ink-soft); font-variant-numeric: lining-nums tabular-nums; }
 .tb-levels .lv-size::before { content: ""; width: 0.55em; height: 0.55em; border-radius: 50%; background: var(--leaf); flex: none; }
-.tb-levels .lv-new { margin-top: 1.6em; font-size: max(8px, 1.05cqw); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--leaf); }
+.tb-levels .lv-new { margin-top: 1.6em; font-size: max(8px, 1.05cqw); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--leaf-text); }
 .tb-levels .lv-what { font-family: var(--font-text); font-size: max(10px, 1.8cqw); line-height: 1.42; color: var(--ink); margin: 0.35em 0 0; max-width: 34ch; text-wrap: pretty; }
 .tb-levels .lv-strip { position: absolute; left: var(--space-3); right: var(--space-3); bottom: calc(var(--space-3) + 2.6rem); display: flex; justify-content: center; gap: 0.9cqw; }
 .tb-levels .lv-thumb { appearance: none; padding: 0; width: 6.3cqw; height: 6.3cqw; border-radius: 8px; border: 1px solid var(--rule-strong); background: var(--paper); cursor: pointer; overflow: hidden; transition: border-color var(--dur) var(--ease); }
@@ -532,6 +532,11 @@ const CSS = `
   .tb-levels .lv-new { margin-top: 0.8em; }
   .tb-levels .lv-word { display: none; }
   .tb-levels .fig-btn { padding: 0.3rem 0.6rem; }
+  /* The notes on the plate are set in viewBox units, so on a phone-width stage they land at about four
+     device pixels: a grey smudge, not a word. The panel beside the plate says the same things in HTML
+     type that scales, so the plate is left as a clean drawing instead — the same call the thumbnails
+     already make. The letters on the water molecule are large enough to survive and stay. */
+  .tb-levels .lv-note { display: none; }
 }
 `;
 

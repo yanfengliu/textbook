@@ -1,9 +1,16 @@
 /* The custom-element vocabulary: figure frames, terms, callouts, checks, sorts, glossary. */
 
 /* ---------- tb-figure ---------- */
+/* A figure with no width attribute is the measure, like everything else in the prose; the two width
+   attributes below each cancel this. Without it such a figure would quietly run to the grid track, wider
+   than every line of text beside it.
+   The top margin is 6u, not the 10u the missing --space-10 used to be written as: the hand-written 2.4rem
+   fallback was the real value, and every figure moving 25.6px down put the tree's first hit label one
+   pixel past the drive harness's 640px viewport, where a hover reaches nothing. */
 tb-figure {
   display: block;
-  margin: var(--space-10, 2.4rem) 0 var(--space-12);
+  margin: var(--space-6) 0 var(--space-12);
+  max-width: var(--measure);
 }
 
 tb-figure figure {
@@ -56,7 +63,7 @@ tb-figure[data-state="ready"] .tb-figure__placeholder {
   place-items: center;
   padding: var(--space-6);
   text-align: center;
-  color: var(--coral);
+  color: var(--coral-text);
   font-family: var(--font-ui);
   font-size: var(--text-sm);
   background: var(--paper-2);
@@ -78,7 +85,7 @@ tb-figure figcaption .fig-num {
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--leaf);
+  color: var(--leaf-text);
   margin-right: var(--space-2);
 }
 
@@ -90,11 +97,18 @@ tb-figure figcaption .fig-hint {
   color: var(--ink-faint);
 }
 
-tb-figure[data-width="wide"] figcaption,
+/* A wide figure's caption reads as part of the prose, so it starts where the prose starts. Centring it
+   under the frame indented it a quarter of the page and broke the page's left margin. A bleed figure has
+   no left margin to align to, so its caption is centred under the frame and padded off the edges. */
+tb-figure[data-width="wide"] figcaption {
+  margin-left: 0;
+  margin-right: 0;
+}
+
 tb-figure[data-width="bleed"] figcaption {
   margin-left: auto;
   margin-right: auto;
-  padding: 0 var(--space-4);
+  padding: 0 var(--space-6);
 }
 
 /* Controls a figure may render inside its stage: one visual family for every figure. */
@@ -143,9 +157,9 @@ tb-figure[data-width="bleed"] figcaption {
 }
 
 .tb-figure__stage .fig-btn[aria-pressed="true"] {
-  background: var(--leaf);
+  background: var(--leaf-text);
   color: var(--paper);
-  border-color: var(--leaf);
+  border-color: var(--leaf-text);
 }
 
 .tb-figure__stage .fig-range {
@@ -208,10 +222,22 @@ tb-figure[data-width="bleed"] figcaption {
   color: var(--ink-soft);
 }
 
-/* On a narrow screen a figure that can fill any shape gets a taller stage (registry narrowAspect). */
+/* On a narrow screen a figure that can fill any shape gets a taller stage (registry narrowAspect), and a
+   wide figure is the whole viewport, so its caption needs the page's own padding back. */
 @media (max-width: 799.98px) {
   .tb-figure__stage {
     aspect-ratio: var(--fig-aspect-narrow, var(--fig-aspect, 16 / 10));
+  }
+  /* A stage that runs to both edges of the screen has no corners to round and no side to draw. */
+  tb-figure[data-width="wide"] .tb-figure__stage,
+  tb-figure[data-width="bleed"] .tb-figure__stage {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  tb-figure[data-width="wide"] figcaption,
+  tb-figure[data-width="bleed"] figcaption {
+    padding: 0 var(--space-4);
   }
 }
 
@@ -226,7 +252,7 @@ tb-term > button {
   cursor: help;
   color: inherit;
   text-decoration: underline dotted;
-  text-decoration-color: var(--water);
+  text-decoration-color: var(--water-text);
   text-decoration-thickness: 1.5px;
   text-underline-offset: 0.16em;
   font-weight: 500;
@@ -235,11 +261,11 @@ tb-term > button {
 
 tb-term > button:hover,
 tb-term > button[aria-expanded="true"] {
-  color: var(--water);
+  color: var(--water-text);
 }
 
 tb-term > button:focus-visible {
-  outline: 2px solid var(--water);
+  outline: 2px solid var(--water-text);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -276,7 +302,7 @@ tb-term > button:focus-visible {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--water);
+  color: var(--water-text);
   margin-bottom: var(--space-1);
 }
 
@@ -307,7 +333,7 @@ tb-key::before {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--leaf);
+  color: var(--leaf-text);
   margin-bottom: var(--space-2);
 }
 
@@ -320,13 +346,15 @@ tb-aside {
 }
 
 /* ---------- tb-check ---------- */
+/* The card's own edge is a step stronger than the options inside it; at the same --rule both read as one
+   flat stack of boxes, and on the dark paper neither read at all. */
 tb-check {
   display: block;
   margin: var(--space-8) 0;
   max-width: var(--measure);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--rule-strong);
   border-radius: var(--radius-lg);
-  padding: var(--space-4) var(--space-6) var(--space-5, 1.2rem);
+  padding: var(--space-4) var(--space-6) var(--space-5);
   background: var(--paper);
 }
 
@@ -336,7 +364,7 @@ tb-check .tb-check__label {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--water);
+  color: var(--water-text);
   margin-bottom: var(--space-2);
 }
 
@@ -377,7 +405,7 @@ tb-check .tb-check__opt:hover {
 }
 
 tb-check .tb-check__opt:focus-visible {
-  outline: 2px solid var(--water);
+  outline: 2px solid var(--water-text);
   outline-offset: 2px;
 }
 
@@ -405,9 +433,9 @@ tb-check .tb-check__opt.is-correct {
 }
 
 tb-check .tb-check__opt.is-correct .k {
-  background: var(--leaf);
+  background: var(--leaf-text);
   color: var(--paper);
-  border-color: var(--leaf);
+  border-color: var(--leaf-text);
 }
 
 tb-check .tb-check__opt.is-wrong {
@@ -416,9 +444,9 @@ tb-check .tb-check__opt.is-wrong {
 }
 
 tb-check .tb-check__opt.is-wrong .k {
-  background: var(--coral);
+  background: var(--coral-text);
   color: var(--paper);
-  border-color: var(--coral);
+  border-color: var(--coral-text);
 }
 
 tb-check .explain {
@@ -441,18 +469,36 @@ tb-check .tb-check__verdict {
 }
 
 tb-check .tb-check__verdict.ok {
-  color: var(--leaf);
+  color: var(--leaf-text);
 }
 
 tb-check .tb-check__verdict.no {
-  color: var(--coral);
+  color: var(--coral-text);
 }
 
 /* ---------- tb-sort ---------- */
+/* The sort is an interactive, not prose, and three bins inside the measure left each explanation a ribbon
+   three words across. It takes the same breakout a wide figure takes, and the same widths, so the two sit
+   on the same left edge; the rules mirror [data-width="wide"] in layout.css. */
 tb-sort {
   display: block;
   margin: var(--space-8) 0 var(--space-12);
   font-family: var(--font-ui);
+  width: 100%;
+}
+
+/* Three columns: the sort spans the text column and the margin, as a wide figure does. */
+@media (min-width: 1400px) {
+  tb-sort {
+    width: min(var(--wide-width), calc(100% + var(--margin-width) + var(--space-8)));
+  }
+}
+
+/* Two columns: it fills what the rail leaves, as a wide figure does. */
+@media (min-width: 800px) and (max-width: 1399.98px) {
+  tb-sort {
+    width: calc(100vw - var(--rail-width) - var(--space-8) - 2 * var(--space-6));
+  }
 }
 
 tb-sort .tb-sort__intro {
@@ -507,14 +553,18 @@ tb-sort .tb-sort__bin h5 {
   font-weight: 500;
 }
 
+/* In the tray the cards share the row out between them; sized to their own content they left a ragged
+   gap at the right of every row, and at a phone's width a single card sat in a third of the tray. The
+   flex properties are inert once the card is placed, because a bin is not a flex container. */
 tb-sort .tb-sort__item {
   display: inline-flex;
+  flex: 1 1 15rem;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
   background: var(--paper);
   border: 1px solid var(--rule-strong);
   border-radius: var(--radius);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-3) var(--space-3);
   font-size: var(--text-sm);
   cursor: grab;
   box-shadow: var(--shadow);
@@ -534,23 +584,28 @@ tb-sort .tb-sort__item .name {
 tb-sort .tb-sort__item .choose {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
+  gap: var(--space-1);
 }
 
+/* Each chip is a tap target, so it clears the 24px minimum rather than the 21px the old padding gave. */
 tb-sort .tb-sort__item .choose button {
   appearance: none;
   font: inherit;
   font-size: var(--text-xs);
+  line-height: 1.2;
   border: 1px solid var(--rule-strong);
   background: var(--paper-2);
   color: var(--ink-soft);
   border-radius: 999px;
-  padding: 0.15rem 0.55rem;
+  padding: 0.35rem 0.7rem;
+  min-height: 1.6rem;
   cursor: pointer;
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease);
 }
 
 tb-sort .tb-sort__item .choose button:hover {
   border-color: var(--ink-faint);
+  background: var(--paper-3);
   color: var(--ink);
 }
 
@@ -582,11 +637,11 @@ tb-sort .tb-sort__item .verdict {
 }
 
 tb-sort .is-right .verdict {
-  color: var(--leaf);
+  color: var(--leaf-text);
 }
 
 tb-sort .is-wrong .verdict {
-  color: var(--coral);
+  color: var(--coral-text);
 }
 
 tb-sort .tb-sort__status {
@@ -605,15 +660,32 @@ tb-glossary dl {
   max-width: var(--measure);
 }
 
+/* The term is a name, so it is set in the display face like every other name in the book — a bin's
+   heading, a property's, the next chapter's. Set in the same face and size as its own definition it
+   disappeared into it, and 1.2rem between entries was less than the space between two lines of one. */
 tb-glossary dt {
-  font-weight: 600;
-  margin-top: var(--space-3);
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  margin-top: var(--space-6);
   scroll-margin-top: calc(var(--header-height) + var(--space-4));
+}
+
+tb-glossary dt:first-of-type {
+  margin-top: 0;
 }
 
 tb-glossary dd {
   margin: 0;
   color: var(--ink-soft);
+  text-wrap: pretty;
+}
+
+/* The entry a popover's "In the glossary" link jumps to names itself, so the reader can see which of
+   thirty-one entries the jump landed on. */
+tb-glossary dt:target {
+  color: var(--leaf-text);
 }
 
 /* Property list (the characteristics of life) */
@@ -654,13 +726,18 @@ tb-glossary dd {
   font-family: var(--font-display);
   font-weight: 500;
   font-size: var(--text-base);
-  margin-bottom: 0.15rem;
+  line-height: 1.3;
+  margin-bottom: var(--space-1);
 }
 
+/* The span becomes a block so that its own leading governs. As an inline it was measured against the
+   1.2rem strut of the div around it and these 14px lines were set 30px apart. */
 .tb-props li span {
+  display: block;
   font-size: var(--text-sm);
+  line-height: 1.45;
   color: var(--ink-soft);
-  line-height: 1.4;
+  text-wrap: pretty;
 }
 
 section {

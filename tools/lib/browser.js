@@ -62,6 +62,7 @@ export const PAGES = [
   { id: 'library', path: '/' },
   { id: 'biology', path: '/biology/' },
   { id: 'ch01', path: '/biology/ch01-what-is-life/' },
+  { id: 'today', path: '/today/' },
 ];
 
 export const VIEWPORTS = [

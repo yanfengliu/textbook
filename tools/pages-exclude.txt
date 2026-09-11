@@ -1,0 +1,13 @@
+node_modules
+out
+test
+tools
+docs
+progress
+package.json
+package-lock.json
+AGENTS.md
+CLAUDE.md
+.gitignore
+.nvmrc
+.claude

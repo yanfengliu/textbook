@@ -6,6 +6,7 @@
 // figure's methods), leave describe() in the state each step asserts, and the page logs no console
 // error, uncaught error, or failed request. Fails naming the kind, the step and the assertion.
 //
+// Every step works at absolute coordinates, so the stage is scrolled into view before the recipe runs.
 // Bound: one viewport (1000x640), the light theme, the steps listed, and describe()'s own account of
 // state, not the pixels; a control that reports the right state and draws the wrong thing passes, which
 // is what the screenshots are for. A kind with no recipe fails, so a new figure cannot land undriven.
@@ -331,11 +332,33 @@ const RECIPES = {
       expect(after.distance < before.distance, `the wheel did not zoom in: ${before.distance} -> ${after.distance}`);
     }],
     ['click-a-rung', async (h) => {
+      // This step asserted `selected !== undefined`, which `null` satisfies, so it passed whether or
+      // not the click hit anything — and the single centre click it used often missed, because the
+      // helix is a narrow column in a wide stage. It therefore proved nothing for as long as it was
+      // green. It now sweeps the column until something is picked, and demands a real base pair.
       const box = await h.stage.boundingBox();
-      await h.page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-      await h.page.waitForTimeout(400);
-      const d = await h.describe();
-      expect(d.selected !== undefined, `describe() has no selected field: ${JSON.stringify(d)}`);
+      expect((await h.describe()).selected === null, 'a rung was already selected before the click');
+      let picked = null;
+      const tried = [];
+      for (let i = 1; i <= 9 && picked === null; i += 1) {
+        const y = box.y + (box.height * i) / 10;
+        for (const fx of [0.5, 0.46, 0.54]) {
+          const x = box.x + box.width * fx;
+          await h.page.mouse.click(x, y);
+          await h.page.waitForTimeout(150);
+          const d = await h.describe();
+          tried.push(`${Math.round(x - box.x)},${Math.round(y - box.y)}`);
+          if (d.selected !== null && d.selected !== undefined) {
+            picked = d.selected;
+            break;
+          }
+        }
+      }
+      expect(picked !== null, `no click anywhere down the helix selected a base pair; tried ${tried.length} points (${tried.slice(0, 6).join(' ')}…)`);
+      expect(Number.isInteger(picked) && picked >= 0 && picked < 32, `selected is ${JSON.stringify(picked)}, not an index into the 32 base pairs`);
+      expect(await h.stage.locator('.fig-card').count() === 1, 'a base pair was selected but no card named it');
+      const card = await h.stage.locator('.fig-card').textContent();
+      expect(/base pair/i.test(card), `the card does not name the base pair: ${JSON.stringify(card.slice(0, 60))}`);
     }],
     ['reset-view', async (h) => {
       await h.button(/^Reset view/).click();
@@ -373,6 +396,11 @@ try {
       continue;
     }
     const stage = page.locator(`#${id} .tb-figure__stage`);
+    // Bring the stage fully into view before any step touches a coordinate. Every recipe below hovers,
+    // clicks and drags at absolute page coordinates, so a stage pushed even a little below the fold
+    // makes a step fail for a layout reason rather than a figure one.
+    await stage.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(150);
     const h = {
       page,
       stage,

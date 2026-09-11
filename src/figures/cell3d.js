@@ -426,12 +426,29 @@ function build(root, ctx) {
   // ---------- labels ----------
   const labels = new Labels(stage.labelsEl, stage.svg);
   for (const def of ORGANELLES) if (types.has(def.id)) labels.add(def.id, def.name, { color: def.color });
+  // Which labels a small cell keeps. Fifteen labels need a silhouette to hang on: zoomed out to the far
+  // end of the range the cell is a disc a few centimetres across and the leaders grow into a tangle
+  // around it. So the number shown is capped by the room the cell actually takes on the stage, and this
+  // order says which ones go first — the structures the chapter argues from stay longest.
+  const LABEL_PRIORITY = ['nucleus', 'mitochondrion', 'membrane', 'roughER', 'golgi', 'cytoplasm', 'smoothER', 'lysosome', 'ribosome', 'nucleolus', 'chromatin', 'centrosome', 'peroxisome', 'vesicle', 'cytoskeleton'];
+  const labelOrder = [...LABEL_PRIORITY.filter((id) => types.has(id)), ...[...types.keys()].filter((id) => !LABEL_PRIORITY.includes(id))];
+  const LABEL_PITCH = 38; // px of cell diameter per label kept
   const dyn = { membrane: new THREE.Vector3(), cytoplasm: new THREE.Vector3(), nucleus: new THREE.Vector3() };
   const camDir = new THREE.Vector3();
   const right = new THREE.Vector3();
   const up = new THREE.Vector3();
   const tmp = new THREE.Vector3();
   const tmpN = new THREE.Vector3();
+  const tmpS = new THREE.Vector3();
+  // The cell's radius on the stage in pixels: the centre and a point on the membrane straight out to
+  // the screen's right, both projected. `right` is set for this frame by updateLabels before this runs.
+  function silhouettePx() {
+    tmpS.set(0, 0, 0).project(camera);
+    const cx = ((tmpS.x + 1) / 2) * W;
+    const cy = ((1 - tmpS.y) / 2) * H;
+    tmpS.copy(right).multiplyScalar(R * SCALE.x).project(camera);
+    return Math.hypot(((tmpS.x + 1) / 2) * W - cx, ((1 - tmpS.y) / 2) * H - cy);
+  }
   function updateLabels() {
     camDir.copy(camera.position).normalize();
     right.setFromMatrixColumn(camera.matrixWorld, 0);
@@ -455,6 +472,7 @@ function build(root, ctx) {
       const along = tmpN.dot(tmp);
       return along < 0 || along > len || tmpN.addScaledVector(tmp, -along).length() > NR * 0.9;
     };
+    const anchorOf = new Map();
     for (const [id, ty] of types) {
       const cands = dyn[id] ? [dyn[id]] : ty.anchors;
       let a = ty.current >= 0 && ty.current < cands.length && visible(cands[ty.current], id) ? cands[ty.current] : null;
@@ -467,12 +485,31 @@ function build(root, ctx) {
           if (d > best) { best = d; ty.current = i; a = c; }
         });
       }
-      if (!a) { labels.set(id, null); continue; }
+      anchorOf.set(id, a);
+    }
+    // How wide the cell is on the stage right now, and how many labels that pays for.
+    const radius = silhouettePx();
+    const diameter = radius * 2;
+    const room = clamp(Math.floor(diameter / LABEL_PITCH), 5, labelOrder.length);
+    const keep = new Set(labelOrder.filter((id) => anchorOf.get(id)).slice(0, room));
+    labelsShown = labelsOn ? keep.size : 0;
+    // Where each label sits relative to its anchor. Close in, a short leader beside the anchor reads
+    // best. Zoomed out there is paper all round the cell, and a label sitting on the organelle it names
+    // hides it, so the labels move out to a ring just outside the silhouette, the way a plate in a book
+    // is lettered. `ring` is how much of that room the stage's short side actually has, so the crossing
+    // between the two placements follows the zoom smoothly and never pushes a label onto the frame edge.
+    const ring = clamp((H * 0.5 - 26 - radius) / 70, 0, 1);
+    const perUnit = radius / (R * SCALE.x); // stage pixels per micrometre, across the screen
+    const near = clamp(diameter * 0.135, 24, 58);
+    for (const [id, a] of anchorOf) {
+      if (!a || !keep.has(id)) { labels.set(id, null); continue; }
       const sx = a.dot(right);
       const sy = -a.dot(up);
       const len = Math.hypot(sx, sy);
-      if (len > 1.5) labels.set(id, a, (sx / len) * 58, (sy / len) * 58);
-      else labels.set(id, a, 0, -44);
+      const out = Math.max(near, radius + 30 - len * perUnit);
+      const off = near + (out - near) * ring;
+      if (len > 1.5) labels.set(id, a, (sx / len) * off, (sy / len) * off);
+      else labels.set(id, a, 0, -off * 0.76);
     }
   }
 
@@ -486,13 +523,14 @@ function build(root, ctx) {
   let cutAnim = null;
   // Labels start on, except on a narrow stage (a phone), where fifteen labels would cover the cell.
   let labelsOn = root.clientWidth >= 600;
+  let labelsShown = 0; // how many the last frame actually placed, so the thinning is visible to a check
   let selected = null;
   let hoverAt = 0;
 
   function render() {
     orbit.apply(camera, spin.angle(clock.now()));
     updateLabels();
-    labels.update(camera, W, H, 52);
+    labels.update(camera, W, H, bottomPad);
     renderer.render(scene, camera);
   }
 
@@ -614,17 +652,22 @@ function build(root, ctx) {
   });
   addChip(toolbar, '1 unit = 1 µm · cell ≈ 20 µm', scope);
 
+  // How much of the bottom of the stage the controls take. On a phone the toolbar wraps onto three
+  // rows, and a label placed against the old fixed 52 px sat on top of a button.
+  let bottomPad = 52;
+  const measurePad = () => { bottomPad = Math.max(52, toolbar.offsetHeight + 14); };
   const unobserve = observeSize(root, (w, h) => {
     W = w;
     H = h;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    measurePad();
     labels.measure();
     loop.invalidate();
   });
   let alive = true;
-  document.fonts?.ready.then(() => { if (alive) { labels.measure(); loop.invalidate(); } });
+  document.fonts?.ready.then(() => { if (alive) { measurePad(); labels.measure(); loop.invalidate(); } });
 
   render();
   ctx.onReady();
@@ -663,7 +706,7 @@ function build(root, ctx) {
     },
     describe() {
       const r = renderer.info.render;
-      return { drawCalls: r.calls, triangles: r.triangles, view: orbit.view(spin.angle(clock.now())), cut, labels: labelsOn, selected, organelles: types.size };
+      return { drawCalls: r.calls, triangles: r.triangles, view: orbit.view(spin.angle(clock.now())), cut, labels: labelsOn, labelsShown, selected, organelles: types.size };
     },
   };
 }

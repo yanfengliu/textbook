@@ -21,7 +21,7 @@
   .book { display: grid; grid-template-rows: auto 1fr; border: 1px solid var(--rule); border-radius: var(--radius-lg); overflow: hidden; text-decoration: none; color: var(--ink); background: var(--paper); transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease); }
   .book:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); border-color: var(--rule-strong); }
   .book__cover { aspect-ratio: 16 / 9; display: block; width: 100%; background: var(--paper-2); }
-  .book__body { padding: var(--space-4) var(--space-5, 1.2rem) var(--space-5, 1.2rem); }
+  .book__body { padding: var(--space-4) var(--space-5) var(--space-5); }
   .book__label { font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); }
   .book h2 { font-size: var(--text-xl); margin: var(--space-1) 0 var(--space-2); }
   .book p { font-size: var(--text-base); color: var(--ink-soft); margin: 0; }
@@ -32,7 +32,7 @@
 </script>
 </head>
 <body>
-<tb-shell book="Textbooks" book-href="./" library-href="./" no-crumb></tb-shell>
+<tb-shell book="Textbooks" book-href="./" library-href="./" today-href="today/" no-crumb></tb-shell>
 <main class="library">
   <p class="library__eyebrow">A small library</p>
   <h1>Textbooks you can put your hands into.</h1>

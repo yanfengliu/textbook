@@ -115,6 +115,11 @@ class TbShell extends HTMLElement {
     const bookHref = this.getAttribute('book-href') || '../';
     const libraryHref = this.getAttribute('library-href') || '../../';
     const chapterLabel = this.getAttribute('chapter') || '';
+    // Today is the study queue (docs/design/adaptive.md). It sits in the header on every page,
+    // because the reader arrives wanting either to read or to practise, and the book should not make
+    // them navigate to find out which. `aria-current` marks it when it is the page you are on.
+    const todayHref = this.getAttribute('today-href') || `${libraryHref}today/`;
+    const isToday = this.hasAttribute('is-today');
     const main = document.querySelector('main');
     const chapterNumber = main?.dataset.chapter;
 
@@ -125,6 +130,7 @@ class TbShell extends HTMLElement {
       <button class="tb-iconbtn tb-navtoggle" type="button" aria-label="Open chapter contents" aria-expanded="false">${MENU}</button>
       <a class="tb-header__book" href="${bookHref}">${book}</a>
       <div class="tb-header__crumb">${this.hasAttribute('no-crumb') ? '' : `<a href="${libraryHref}">Library</a>${chapterLabel ? `<span class="tb-header__sep">/</span><span>${chapterLabel}</span>` : ''}`}</div>
+      <a class="tb-header__today" href="${todayHref}"${isToday ? ' aria-current="page"' : ''}>Today<span class="tb-header__due" hidden></span></a>
       <button class="tb-iconbtn tb-themetoggle" type="button" aria-label="Switch to dark theme"></button>
     `;
     const progress = document.createElement('div');
@@ -219,6 +225,24 @@ class TbShell extends HTMLElement {
     };
     addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+
+    // How many objectives are due, on the Today link. Loaded lazily and failing silently on purpose:
+    // the shell must render on a page that never loads the study system, before the reader has any
+    // history, and on the published site where there is no server. A missing badge is the correct
+    // result in all three cases, and none of them is an error worth a console line.
+    const due = header.querySelector('.tb-header__due');
+    import('./learning/store.js')
+      .then(({ store }) => {
+        const paintDue = () => {
+          const n = store.due(Date.now()).length;
+          due.textContent = n ? String(n) : '';
+          due.hidden = n === 0;
+          due.setAttribute('aria-label', n === 1 ? '1 objective due' : `${n} objectives due`);
+        };
+        paintDue();
+        store.onChange(paintDue);
+      })
+      .catch(() => {});
 
     textbook._shellReady();
   }

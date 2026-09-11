@@ -15,9 +15,11 @@ Web-based, interactive, biology first, with beautiful type, illustrations, 3D mo
 ```text
 index.html                         # the library: every book
 biology/index.html                 # the book: units and chapters
-biology/ch01-what-is-life/         # one chapter: its page and its glossary
+biology/ch01-what-is-life/         # one chapter: its page, and the data beside it
   index.html
-  glossary.js
+  glossary.js                      # the terms it introduces
+  objectives.js                    # the claims a reader should be able to make, and their prerequisites
+  items.js                         # the review item bank the study queue draws on
 src/                               # shared code: shell, components, figures, styles
   shell.js                         # header, chapter navigation, progress, theme
   palette.js                       # the colour tokens as JS, for canvas and WebGL
@@ -133,6 +135,10 @@ Motion explains or it does not happen. A transition in the interface is at most 
 A chapter's prose is the deliverable and reads as a book, not a slideshow. Sections are `<section id="1-2">` with an `<h2>`; numbering is automatic. Every term the chapter introduces is a `<tb-term>` and has a glossary entry in the chapter's `glossary.js`, which also renders the end-of-chapter glossary. Every figure is referred to in the prose by number. A chapter ends with key ideas, a glossary, five checks, and a look ahead to the next chapter.
 
 Biology is stated as the field states it: current, sourced from standard undergraduate texts, and careful about hedges, so "all known life" rather than "all life" where that is what is known.
+
+## Adaptive study
+
+The book tracks what a reader has learned and what they are struggling with, and reorganises practice around it. That has its own design of record: [adaptive.md](adaptive.md). In brief, mastery is tracked per learning objective rather than per chapter, a pure scheduler in the browser decides what is due, and the agent's rounds do the part arithmetic cannot: diagnosing a misconception and writing against it. The prose is never hidden, locked or gated by it.
 
 ## Gates
 

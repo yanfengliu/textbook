@@ -6,6 +6,10 @@ The first book is **The Living World**, an introduction to biology. Chapter 1, *
 
 ## Read it
 
+It is published at **https://yanfengliu.github.io/textbook/**, and every push to `main` republishes it.
+
+To read it locally:
+
 ```bash
 npm run dev
 ```

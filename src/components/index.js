@@ -5,3 +5,5 @@ import './figure.js';
 import './term.js';
 import './check.js';
 import './sort.js';
+import './task.js';
+import './mastery.js';

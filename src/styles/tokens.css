@@ -9,7 +9,7 @@
   --paper-3: #ebe4d6;
   --ink: #1d1a17;
   --ink-soft: #5c554d;
-  --ink-faint: #8a8378;
+  --ink-faint: #6f6960;
   --rule: #e3ddd2;
   --rule-strong: #cfc7b8;
 
@@ -19,6 +19,16 @@
   --coral: #d9663d;
   --violet: #6b4fa0;
   --gold: #c9a227;
+
+  /* The same accents pushed towards the ink, for small text and for solid fills carrying paper-coloured
+     text. The accents themselves are tuned for figures, where they sit against each other in large areas;
+     at 12px on paper they fall short of WCAG AA, and --coral badly. Because --ink flips with the theme the
+     one expression darkens on paper and lightens on dark. Ratios on --paper / --paper-2 / the accent's own
+     soft tint: leaf 5.64 / 5.22 / 4.91 light, 7.79 / 7.17 / 6.23 dark; water 5.24 / 4.84 / 4.58 light,
+     8.27 / 7.62 / 6.53 dark; coral 5.34 / 4.94 / 4.68 light, 8.84 / 8.14 / 7.08 dark. */
+  --leaf-text: color-mix(in srgb, var(--leaf) 86%, var(--ink));
+  --water-text: color-mix(in srgb, var(--water) 86%, var(--ink));
+  --coral-text: color-mix(in srgb, var(--coral) 70%, var(--ink));
 
   /* Soft tints of the accents, for fills behind text */
   --leaf-soft: rgba(47, 125, 79, 0.11);
@@ -51,14 +61,17 @@
   --leading-tight: 1.15;
   --measure: 66ch;
 
-  /* Rhythm: a 0.4rem baseline grid */
+  /* Rhythm: a 0.4rem baseline grid. Every step the stylesheets name exists here; a missing one would
+     silently fall through to a hand-written fallback and leave the grid without anyone noticing. */
   --u: 0.4rem;
   --space-1: calc(var(--u) * 1);
   --space-2: calc(var(--u) * 2);
   --space-3: calc(var(--u) * 3);
   --space-4: calc(var(--u) * 4);
+  --space-5: calc(var(--u) * 5);
   --space-6: calc(var(--u) * 6);
   --space-8: calc(var(--u) * 8);
+  --space-10: calc(var(--u) * 10);
   --space-12: calc(var(--u) * 12);
   --space-16: calc(var(--u) * 16);
 
@@ -86,7 +99,7 @@
     --paper-3: #24282d;
     --ink: #e9e4da;
     --ink-soft: #a39d93;
-    --ink-faint: #746e66;
+    --ink-faint: #908a80;
     --rule: #2c3036;
     --rule-strong: #3b4048;
     --leaf: #5fb37f;
@@ -111,7 +124,7 @@
   --paper-3: #24282d;
   --ink: #e9e4da;
   --ink-soft: #a39d93;
-  --ink-faint: #746e66;
+  --ink-faint: #908a80;
   --rule: #2c3036;
   --rule-strong: #3b4048;
   --leaf: #5fb37f;

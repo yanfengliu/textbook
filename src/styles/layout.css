@@ -19,6 +19,7 @@
   border-bottom: 1px solid var(--rule);
   font-family: var(--font-ui);
   font-size: var(--text-sm);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .tb-header__book {
@@ -51,7 +52,7 @@
 
 .tb-header__sep {
   margin: 0 var(--space-2);
-  color: var(--rule-strong);
+  color: var(--ink-faint);
 }
 
 .tb-iconbtn {
@@ -170,12 +171,12 @@
 }
 
 .tb-rail li.is-current > a {
-  color: var(--leaf);
+  color: var(--leaf-text);
   font-weight: 600;
 }
 
 .tb-rail li.is-current > a .n {
-  color: var(--leaf);
+  color: var(--leaf-text);
 }
 
 .tb-rail ol ol {
@@ -210,7 +211,7 @@ section > h2 .n {
   font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: 0.1em;
-  color: var(--leaf);
+  color: var(--leaf-text);
   margin-bottom: var(--space-2);
   font-variant-numeric: lining-nums tabular-nums;
 }
@@ -232,12 +233,24 @@ section > h2 .n {
   transform: translateX(-50%);
 }
 
-/* On a wide screen, wide figures sit across the text column and the margin instead of centred on the page. */
-@media (min-width: 1200px) {
+/* On a wide screen, wide figures sit across the text column and the margin instead of centred on the page.
+   The threshold is where the three columns actually fit: rail 15 + text 46 + margin 15 rem, two 3.2rem
+   gaps and the page's own 2.4rem padding each side come to 1398px. Below that the third column can only be
+   paid for out of the text column, and between 1200 and 1400 it was: at 1280 the measure fell to 620px,
+   fifteen characters short, with an empty margin beside it. */
+@media (min-width: 1400px) {
   [data-width="wide"] {
     left: 0;
     transform: none;
     width: min(var(--wide-width), calc(100% + var(--margin-width) + var(--space-8)));
+  }
+  /* Anything that reaches into the margin column must wait for what is floating there. Without this the
+     figure's stage was laid out under the note and painted over it: beside Figure 1.2 the fever note lost
+     four of its five lines, and the reader never saw them. */
+  [data-width="wide"],
+  [data-width="bleed"],
+  tb-sort {
+    clear: right;
   }
 }
 
@@ -251,7 +264,7 @@ section > h2 .n {
   padding-top: var(--space-2);
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1400px) {
   .tb-margin-note {
     float: right;
     clear: right;
@@ -262,7 +275,7 @@ section > h2 .n {
   }
 }
 
-@media (max-width: 1199.98px) {
+@media (max-width: 1399.98px) {
   .tb-page {
     grid-template-columns: var(--rail-width) minmax(0, var(--text-width));
     justify-content: start;
@@ -284,6 +297,22 @@ section > h2 .n {
     border-left: 2px solid var(--rule-strong);
     border-radius: 0 var(--radius) var(--radius) 0;
     max-width: var(--measure);
+  }
+}
+
+/* Between the drawer and the full three columns the rail is the only thing the text column can take its
+   width from. Above 1000px the column is still sixty-three characters and the rail's own labels fit on one
+   line, so it keeps its width; below that the column needs the room more than the rail does, and 12rem
+   turns 46 characters into 51 at 800px. */
+@media (max-width: 999.98px) {
+  :root {
+    --rail-width: 12rem;
+  }
+  .tb-rail a {
+    grid-template-columns: 2rem 1fr;
+  }
+  .tb-rail ol ol {
+    margin-left: 2rem;
   }
 }
 
@@ -352,7 +381,7 @@ section > h2 .n {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--leaf);
+  color: var(--leaf-text);
   margin-bottom: var(--space-3);
 }
 
@@ -414,7 +443,7 @@ section > h2 .n {
 }
 
 .tb-opener__contents .n {
-  color: var(--leaf);
+  color: var(--leaf-text);
   font-weight: 600;
 }
 
@@ -424,18 +453,25 @@ section > h2 .n {
   }
 }
 
-/* End matter */
+/* End matter. The rule already sets the section apart, so the heading below it drops its own space-16;
+   the two together left a 9.6rem hole that read as a mistake. */
 .tb-endmatter {
   margin-top: var(--space-16);
   padding-top: var(--space-8);
   border-top: 1px solid var(--rule-strong);
 }
 
+.tb-endmatter > h2:first-of-type {
+  margin-top: 0;
+}
+
+/* The same edge as a tb-check card: they are the same kind of object and sit within a screen of each
+   other, so at --rule this one read as the weaker of the two. */
 .tb-next {
   display: block;
   margin-top: var(--space-12);
   padding: var(--space-6);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--rule-strong);
   border-radius: var(--radius-lg);
   text-decoration: none;
   color: var(--ink);
@@ -444,7 +480,7 @@ section > h2 .n {
 }
 
 .tb-next:hover {
-  border-color: var(--rule-strong);
+  border-color: var(--leaf-text);
   box-shadow: var(--shadow);
 }
 
@@ -457,6 +493,7 @@ section > h2 .n {
   font-family: var(--font-display);
   font-size: var(--text-lg);
   font-weight: 500;
+  font-variant-numeric: lining-nums;
 }
 
 .tb-next span.dek {
@@ -479,6 +516,10 @@ section > h2 .n {
   background: var(--paper);
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  box-shadow: var(--shadow);
 }
 
 .visually-hidden {
@@ -490,17 +531,107 @@ section > h2 .n {
   white-space: nowrap;
 }
 
-/* Print: the document is the point */
+/* Print: the document is the point. A chapter printed is a chapter to read on paper, so the chrome goes,
+   the theme is forced light whatever the screen was showing, every breakout figure comes back inside the
+   page box, and nothing that belongs together is allowed to break across a page. */
 @media print {
-  .tb-header, .tb-progress, .tb-rail, .tb-navtoggle {
+  /* Paper and ink only. The accents stay exactly as they are, because the figures take their colours
+     from these same tokens and a chapter that prints in different colours from the one on screen is a
+     different chapter. --ink going to black pulls the derived text colours down with it. */
+  :root,
+  :root[data-theme="dark"] {
+    color-scheme: light;
+    --paper: #ffffff;
+    --paper-2: #ffffff;
+    --paper-3: #f2efe8;
+    --ink: #000000;
+    --ink-soft: #3a3632;
+    --ink-faint: #5a544c;
+    --rule: #c9c9c9;
+    --rule-strong: #909090;
+    --shadow: none;
+    --shadow-lift: none;
+  }
+
+  @page {
+    margin: 18mm 16mm;
+  }
+
+  .tb-header, .tb-progress, .tb-rail, .tb-navtoggle, .tb-skip, .tb-figure__stage .fig-toolbar {
     display: none !important;
   }
+
   .tb-page {
     display: block;
     padding: 0;
+    max-width: none;
   }
+
+  .tb-main {
+    padding-top: 0;
+  }
+
+  /* The measure is narrower than an A4 text block, so the column is centred on the sheet rather than
+     hugging the binding edge with a hand's width of white beside it. */
+  .tb-text, .tb-opener {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   body {
-    background: white;
-    color: black;
+    background: #fff;
+    color: #000;
+    font-size: 11pt;
+  }
+
+  /* Every breakout comes home: no viewport-width figures, no half-page transforms, no floated notes. */
+  [data-width="wide"],
+  [data-width="bleed"],
+  tb-sort {
+    position: static;
+    left: auto;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .tb-margin-note {
+    float: none;
+    clear: both;
+    width: auto;
+    max-width: 100%;
+    margin: var(--space-4) 0;
+    padding: var(--space-2) 0 var(--space-2) var(--space-4);
+    border: 0;
+    border-left: 2px solid var(--rule-strong);
+    background: none;
+  }
+
+  /* tb-sort is taller than a sheet and has to break somewhere; its tray, its bins and its cards are not,
+     so the break falls between them rather than through one. */
+  tb-figure, tb-key, tb-check, .tb-props li, tr, blockquote, tb-glossary dt,
+  tb-sort .tb-sort__tray, tb-sort .tb-sort__bin, tb-sort .tb-sort__item {
+    break-inside: avoid;
+  }
+
+  tb-glossary dt {
+    break-after: avoid;
+  }
+
+  .tb-figure__stage {
+    border-color: var(--rule-strong);
+    background: none;
+  }
+
+  /* The reader cannot follow a link on paper; the next-chapter card becomes a plain note. */
+  .tb-next {
+    border: 0;
+    padding: 0;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  a {
+    text-decoration-color: var(--rule-strong);
   }
 }

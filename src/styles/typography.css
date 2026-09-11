@@ -46,16 +46,19 @@ h1 {
   letter-spacing: -0.02em;
 }
 
+/* A heading belongs to what follows it: the space above is about three times the space below, so the eye
+   groups the heading with its section rather than floating it between two. Both sit on the grid; the old
+   4u under an h2 was less than one line of body text and let the heading crowd its first paragraph. */
 h2 {
   font-size: var(--text-2xl);
   margin-top: var(--space-16);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-5);
 }
 
 h3 {
   font-size: var(--text-lg);
-  margin-top: var(--space-8);
-  margin-bottom: var(--space-2);
+  margin-top: var(--space-10);
+  margin-bottom: var(--space-3);
 }
 
 h4 {
@@ -65,14 +68,23 @@ h4 {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  margin-top: var(--space-6);
+  margin-top: var(--space-8);
   margin-bottom: var(--space-2);
+}
+
+/* A heading never takes the last line of a page or column with it. */
+h1, h2, h3, h4 {
+  break-after: avoid-page;
+  break-inside: avoid;
 }
 
 /* Prose */
 p {
   margin: 0 0 var(--space-4);
   max-width: var(--measure);
+  text-wrap: pretty;
+  orphans: 2;
+  widows: 2;
 }
 
 p + p {
@@ -80,22 +92,28 @@ p + p {
 }
 
 a {
-  color: var(--leaf);
+  color: var(--leaf-text);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.14em;
-  text-decoration-color: color-mix(in srgb, var(--leaf) 45%, transparent);
+  text-decoration-color: color-mix(in srgb, var(--leaf-text) 45%, transparent);
   transition: text-decoration-color var(--dur) var(--ease);
 }
 
 a:hover {
-  text-decoration-color: var(--leaf);
+  text-decoration-color: var(--leaf-text);
 }
 
+/* One focus ring for the whole site, on every kind of control, not only links and buttons. The
+   accent is pushed towards the ink so the ring holds 5.2:1 on paper and 8.3:1 on the dark paper. */
 a:focus-visible,
 button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--water);
+  outline: 2px solid var(--water-text);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -109,35 +127,53 @@ strong {
 }
 
 small {
-  font-size: var(--text-sm);
+  font-size: 0.875em;
 }
 
+/* A displayed quotation, not an indented paragraph: the display face, one step up, with the opening
+   quote mark hung into the left margin so the text block stays flush. */
 blockquote {
-  margin: var(--space-8) 0;
-  padding-left: var(--space-4);
-  border-left: 2px solid var(--rule-strong);
+  margin: var(--space-10) 0;
+  padding: 0 0 0 var(--space-5);
+  border-left: 2px solid var(--leaf);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
   font-style: italic;
-  color: var(--ink-soft);
+  font-variation-settings: "SOFT" 60, "WONK" 1;
+  line-height: 1.35;
+  color: var(--ink);
   max-width: var(--measure);
+  text-wrap: pretty;
+  break-inside: avoid;
 }
 
 blockquote cite {
   display: block;
-  margin-top: var(--space-2);
+  margin-top: var(--space-3);
   font-style: normal;
   font-family: var(--font-ui);
   font-size: var(--text-sm);
-  color: var(--ink-faint);
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+blockquote cite::before {
+  content: "— ";
 }
 
 ul, ol {
-  padding-left: 1.4em;
+  padding-left: 1.3em;
   margin: 0 0 var(--space-4);
   max-width: var(--measure);
 }
 
 li {
   margin-bottom: var(--space-1);
+  text-wrap: pretty;
+}
+
+li:last-child {
+  margin-bottom: 0;
 }
 
 li::marker {
@@ -172,45 +208,68 @@ nav, button, input, select, table, figcaption .fig-num, .tb-label {
   color: var(--ink-soft);
 }
 
-/* The chapter opener's drop cap */
+/* The chapter opener's drop cap. Two lines deep, which is what 4.6em of the body size actually is: the
+   cap height of Fraunces at 88px is 62px and two lines of the 1.55 leading are 60px. The old box was tall
+   enough for three, so the letter hung with a line of air under it and its foot on nothing. It now sits on
+   the second baseline. The optical size is stated because font-variation-settings turns
+   font-optical-sizing: auto off, and Fraunces drawn at its 9pt master and scaled up is a spindlier letter. */
 .tb-dropcap::first-letter {
   font-family: var(--font-display);
   font-weight: 500;
-  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144;
   float: left;
   font-size: 4.6em;
-  line-height: 0.78;
-  padding: 0.08em 0.1em 0 0;
-  margin-bottom: -0.1em;
-  color: var(--leaf);
+  line-height: 0.72;
+  padding: 0 0.07em 0 0;
+  margin: -0.02em 0 -0.06em;
+  color: var(--leaf-text);
 }
 
-/* Tables of data: lining, tabular figures, hairlines */
+/* The line beside the cap is set in small caps, the way a book opens a chapter. */
+.tb-dropcap::first-line {
+  font-variant-caps: all-small-caps;
+  font-variant-numeric: oldstyle-nums;
+  letter-spacing: 0.04em;
+}
+
+/* Tables of data: lining, tabular figures, hairlines. A rule above the head and a heavier one below it
+   close the table at the top the way a book does; the body rows keep the light hairline. */
 table {
   border-collapse: collapse;
   width: 100%;
   margin: var(--space-6) 0 var(--space-8);
   font-size: var(--text-base);
   line-height: 1.4;
+  border-top: 1px solid var(--rule-strong);
+  text-wrap: pretty;
 }
 
 th {
   text-align: left;
   font-weight: 600;
-  font-size: var(--text-sm);
-  letter-spacing: 0.02em;
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--ink-soft);
-  padding: var(--space-2) var(--space-3) var(--space-2) 0;
+  padding: var(--space-3) var(--space-3) var(--space-2) 0;
   border-bottom: 1px solid var(--rule-strong);
   vertical-align: bottom;
 }
 
 td {
-  padding: var(--space-2) var(--space-3) var(--space-2) 0;
+  padding: var(--space-3) var(--space-3) var(--space-3) 0;
   border-bottom: 1px solid var(--rule);
   vertical-align: top;
   font-family: var(--font-text);
   font-variant-numeric: oldstyle-nums;
+}
+
+tr:last-child td {
+  border-bottom-color: var(--rule-strong);
+}
+
+th:last-child, td:last-child {
+  padding-right: 0;
 }
 
 td.num, th.num {
@@ -219,14 +278,42 @@ td.num, th.num {
   font-variant-numeric: lining-nums tabular-nums;
 }
 
+/* The tint alone separates code from prose on warm paper and barely at all on the dark paper, so the
+   hairline carries the shape in both. */
 code, kbd {
   font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
   font-size: 0.86em;
   background: var(--paper-2);
+  border: 1px solid var(--rule);
   padding: 0.05em 0.35em;
   border-radius: 4px;
 }
 
+/* The selection tint sits behind coloured text too — links, terms, verdicts — so the ink is stated. */
 ::selection {
   background: var(--gold-soft);
+  color: var(--ink);
+}
+
+/* A three-column table of prose in 338px gives each cell about twelve characters. One step down on the
+   scale and a tighter gutter buy back four or five of them; below that a table needs a different shape
+   than CSS alone can give it. */
+@media (max-width: 799.98px) {
+  table {
+    font-size: var(--text-sm);
+  }
+
+  th, td {
+    padding-right: var(--space-2);
+  }
+}
+
+/* Ragged right at fifty characters and more does not need hyphens and reads better without them; below
+   that the long words of the subject (endoplasmic, spontaneous, photosynthetic) leave holes a line wide,
+   so from here down they break. Eight letters at least, four before the break and three after. */
+@media (max-width: 599.98px) {
+  p, li, dd, td, figcaption, blockquote {
+    hyphens: auto;
+    hyphenate-limit-chars: 8 4 3;
+  }
 }

@@ -16,7 +16,12 @@
     "figure": "node tools/figure-shot.js",
     "inspect": "node tools/inspect.js",
     "flow": "node tools/flow.js",
-    "drive": "node tools/drive.js"
+    "drive": "node tools/drive.js",
+    "review": "node tools/review.js",
+    "progress:export": "node tools/progress.js export",
+    "progress:import": "node tools/progress.js import",
+    "subpath": "node tools/subpath.js",
+    "sitting": "node tools/sitting.js"
   },
   "engines": {
     "node": ">=24"

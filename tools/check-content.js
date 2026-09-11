@@ -85,7 +85,7 @@ function hasClass(node, cls) {
 }
 
 // Check one document. Returns an array of failure strings (empty means the document passes).
-export function checkDocument(html, { glossary = {}, kinds = [], file = 'document', resolveHref = null } = {}) {
+export function checkDocument(html, { glossary = {}, kinds = [], objectives = [], file = 'document', resolveHref = null } = {}) {
   const fails = [];
   const doc = parseHtml(html);
   const fail = (msg, node) => fails.push(`${file}${node?.line ? `:${node.line}` : ''}: ${msg}`);
@@ -199,10 +199,101 @@ export function checkDocument(html, { glossary = {}, kinds = [], file = 'documen
     }
   }
 
+  // every question names the objective it tests, and that objective exists
+  if (objectives.length) {
+    const known = new Set(objectives.map((o) => o.id));
+    for (const q of findAll(doc, (n) => n.tag === 'tb-check' || n.tag === 'tb-sort')) {
+      const ref = q.attrs.objective;
+      const id = q.attrs.id || '(no id)';
+      if (!ref) fail(`<${q.tag} id="${id}"> names no objective; add objective="<id>" from objectives.js`, q);
+      else if (!known.has(ref)) fail(`<${q.tag} id="${id}"> names objective "${ref}", which is not in objectives.js (known: ${[...known].slice(0, 4).join(', ')}…)`, q);
+    }
+  }
+
   // leftovers
   const bodyText = textOf(doc);
   for (const word of ['TODO', 'FIXME', 'XXX', 'lorem ipsum']) {
     if (bodyText.toLowerCase().includes(word.toLowerCase())) fail(`the page still contains "${word}"`);
+  }
+  return fails;
+}
+
+// Check a chapter's objective graph and its review item bank. Separate from checkDocument because
+// these are data files, not markup: the prose check reads HTML, this reads what the adaptive study
+// system (docs/design/adaptive.md) runs on. Bound: structure and cross-references only. It cannot
+// tell a good question from a bad one, which is what the agent's rounds and the owner's reading are for.
+export function checkChapterData({ objectives = [], items = [], sections = [], figures = [], kinds = [], file = 'chapter' } = {}) {
+  const fails = [];
+  const fail = (msg) => fails.push(`${file}: ${msg}`);
+  if (!objectives.length) return fails;
+
+  const byId = new Map();
+  for (const o of objectives) {
+    if (!o.id) fail('an objective has no id');
+    else if (byId.has(o.id)) fail(`objective id "${o.id}" is used twice`);
+    else byId.set(o.id, o);
+    if (!o.statement || o.statement.length < 20) fail(`objective "${o.id}" needs a statement saying what the reader can do`);
+    if (!['recall', 'explain', 'apply'].includes(o.level)) fail(`objective "${o.id}" has level "${o.level}"; expected recall, explain or apply`);
+    for (const s of o.teaches?.sections ?? []) {
+      if (sections.length && !sections.includes(s)) fail(`objective "${o.id}" is taught by section "${s}", which the chapter does not have`);
+    }
+    for (const f of o.teaches?.figures ?? []) {
+      if (figures.length && !figures.includes(f)) fail(`objective "${o.id}" is taught by figure "${f}", which the chapter does not have`);
+    }
+    if (!(o.teaches?.sections ?? []).length) fail(`objective "${o.id}" names no section that teaches it`);
+  }
+  for (const o of objectives) {
+    for (const p of o.prereqs ?? []) {
+      if (!byId.has(p)) fail(`objective "${o.id}" requires "${p}", which is not an objective of this chapter`);
+    }
+  }
+  // A cycle in the prerequisite graph would hang the queue: it would look for a foundation forever.
+  const mark = new Map();
+  const walk = (id, trail) => {
+    if (mark.get(id) === 'done') return;
+    if (mark.get(id) === 'open') {
+      fail(`the prerequisites form a cycle: ${[...trail, id].join(' -> ')}`);
+      return;
+    }
+    mark.set(id, 'open');
+    for (const p of byId.get(id)?.prereqs ?? []) if (byId.has(p)) walk(p, [...trail, id]);
+    mark.set(id, 'done');
+  };
+  for (const o of objectives) walk(o.id, []);
+
+  // The item bank
+  const seen = new Set();
+  const perObjective = new Map([...byId.keys()].map((id) => [id, 0]));
+  for (const it of items) {
+    const id = it.id || '(no id)';
+    if (!it.id) fail('an item has no id');
+    else if (seen.has(it.id)) fail(`item id "${it.id}" is used twice`);
+    else seen.add(it.id);
+    if (!byId.has(it.objective)) fail(`item "${id}" tests objective "${it.objective}", which this chapter does not declare`);
+    else perObjective.set(it.objective, perObjective.get(it.objective) + 1);
+    if (!it.explain) fail(`item "${id}" has no explanation, so a reader who gets it wrong learns nothing`);
+    if (it.kind === 'mcq') {
+      const options = it.options ?? [];
+      if (options.length < 2) fail(`item "${id}" has ${options.length} option(s); a multiple choice needs at least two`);
+      const correct = options.filter((o) => o.correct).length;
+      if (correct !== 1) fail(`item "${id}" has ${correct} correct options; exactly one is required`);
+      for (const o of options) {
+        if (!o.correct && !o.why) fail(`item "${id}" has a distractor with no "why"; a distractor must say what choosing it reveals`);
+      }
+    } else if (it.kind === 'task') {
+      if (!it.figure) fail(`item "${id}" is a task with no figure`);
+      else if (figures.length && !figures.includes(it.figure)) fail(`item "${id}" sets a task on figure "${it.figure}", which the chapter does not have`);
+      if (!it.expect) fail(`item "${id}" is a task with no "expect", so nothing can grade it`);
+    } else if (it.kind === 'free') {
+      if (!(it.rubric ?? []).length) fail(`item "${id}" is free response with no rubric, so nothing can grade it`);
+    } else {
+      fail(`item "${id}" has kind "${it.kind}"; expected mcq, task or free`);
+    }
+  }
+  if (items.length) {
+    for (const [id, n] of perObjective) {
+      if (n < 3) fail(`objective "${id}" has ${n} item(s); the review queue needs at least three so a reader cannot memorise the one`);
+    }
   }
   return fails;
 }
@@ -226,19 +317,37 @@ async function main() {
     const dir = dirname(page);
     let glossary = {};
     if (existsSync(join(dir, 'glossary.js'))) glossary = (await import(pathToFileURL(join(dir, 'glossary.js')).href)).GLOSSARY;
+    let objectives = [];
+    if (existsSync(join(dir, 'objectives.js'))) objectives = (await import(pathToFileURL(join(dir, 'objectives.js')).href)).OBJECTIVES;
+    let items = [];
+    if (existsSync(join(dir, 'items.js'))) items = (await import(pathToFileURL(join(dir, 'items.js')).href)).ITEMS;
     const rel = page.slice(root.length + 1).replace(/\\/g, '/');
     const fails = checkDocument(html, {
       glossary,
       kinds: KINDS,
+      objectives,
       file: rel,
       resolveHref: (p) => {
         const target = resolve(dir, p);
         return existsSync(target) && (!statSync(target).isDirectory() || existsSync(join(target, 'index.html')));
       },
     });
-    total += fails.length;
-    console.log(`${fails.length ? 'FAIL' : 'ok  '} ${rel} (${findAll(parseHtml(html), (n) => n.tag === 'tb-figure').length} figures, ${Object.keys(glossary).length} glossary entries)`);
-    for (const f of fails) console.log(`  ${f}`);
+    const tree = parseHtml(html);
+    const dataFails = checkChapterData({
+      objectives,
+      items,
+      sections: findAll(tree, (n) => n.tag === 'section' && n.attrs.id).map((n) => n.attrs.id),
+      figures: findAll(tree, (n) => n.tag === 'tb-figure').map((n) => n.attrs.id),
+      kinds: KINDS,
+      file: `${dirname(rel)}/objectives.js`,
+    });
+    const all = [...fails, ...dataFails];
+    total += all.length;
+    const counts = [`${findAll(tree, (n) => n.tag === 'tb-figure').length} figures`, `${Object.keys(glossary).length} glossary entries`];
+    if (objectives.length) counts.push(`${objectives.length} objectives`);
+    if (items.length) counts.push(`${items.length} items`);
+    console.log(`${all.length ? 'FAIL' : 'ok  '} ${rel} (${counts.join(', ')})`);
+    for (const f of all) console.log(`  ${f}`);
   }
   if (total) {
     console.error(`FAIL: ${total} content problem(s) across ${pages.length} page(s)`);

@@ -1,0 +1,78 @@
+name: pages
+
+# The site has no build step: the repository is the site. This workflow trims the checkout to what a
+# reader needs and deploys it to GitHub Pages at https://yanfengliu.github.io/textbook/ — a subpath,
+# not a root, which is why every asset reference in the pages is relative. `node tools/subpath.js`
+# serves the same trimmed tree under /textbook/ locally and proves it before a push.
+#
+# What it deploys is whatever is on main. It does not run the gates: .github/workflows/ci.yml does
+# that on the same push, and a red gate there does not hold this back.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time. A run already under way is allowed to finish, so a queued push replaces
+# only the waiting run and never cancels a deployment half way.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # No `enablement: true`: that input needs a token other than GITHUB_TOKEN, so Pages is turned on
+      # for the repository out of band instead (`gh api -X POST repos/<owner>/textbook/pages`).
+      - uses: actions/configure-pages@v6
+
+      # The checkout is disposable, so the site is made by deleting what is not the site rather than by
+      # copying what is. tools/pages-exclude.txt is the one list; tools/subpath.js reads the same file,
+      # so the tree proved locally and the tree deployed here cannot drift apart.
+      # .git and .github are dropped by upload-pages-artifact itself, whatever this list says.
+      - name: Trim the checkout to the site
+        shell: bash
+        run: |
+          set -euo pipefail
+          excludes=$(grep -v '^[[:space:]]*$' tools/pages-exclude.txt)
+          echo "removing:"; echo "$excludes" | sed 's/^/  /'
+          echo "$excludes" | xargs -r rm -rf
+          # A missing file here means the trim ate the site, which must fail the deploy rather than
+          # publish a blank page.
+          for required in index.html .nojekyll biology/index.html biology/ch01-what-is-life/index.html src/shell.js; do
+            test -e "$required" || { echo "::error::$required is missing after the trim; tools/pages-exclude.txt removed part of the site"; exit 1; }
+          done
+          # include-hidden-files below publishes every dotfile that survives, so the survivors are an
+          # allowlist rather than a list of ones anybody remembered. .nojekyll is the site's; .git and
+          # .github are dropped by the upload action. Anything else is somebody's local configuration
+          # and stops the deploy instead of being published.
+          for entry in .* ; do
+            case "$entry" in
+              .|..|.nojekyll|.git|.github) continue ;;
+            esac
+            echo "::error::$entry would be published by include-hidden-files but is not part of the site; add it to tools/pages-exclude.txt"
+            exit 1
+          done
+          echo "deploying $(find . -path ./.git -prune -o -type f -print | wc -l) files"
+
+      # include-hidden-files is required: without it the action tars with --exclude='.[^/]*' and
+      # .nojekyll never reaches the artifact.
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: .
+          include-hidden-files: "true"
+
+      - id: deployment
+        uses: actions/deploy-pages@v5
