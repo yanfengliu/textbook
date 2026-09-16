@@ -64,6 +64,21 @@ function watchVisibility(el, cb) {
 
 let figureCounter = 0;
 
+// The word the frame writes before a figure's number, chosen from the page's own `<html lang>`.
+//
+// This was the literal `Figure`, which put an English word into a Chinese page's caption — the frame
+// writes it, so a page cannot remove it without hiding the number with it, and `figure.js:130` produces
+// one text node holding both. Found 2026-09-12 by looking at a rendered 資治通鑑 page, whose caption read
+// "Figure 2.1" over a Chinese caption. It is the same defect the content checker's figure-citation rule
+// had, fixed the same way and on the same day: a language-dependent token read from the document, with
+// English as the default so an English page is untouched. The number itself is language-neutral and is
+// what `describe()` and the gates address.
+const FIGURE_WORDS = { en: 'Figure', zh: '圖' };
+function figureWord() {
+  const lang = (document.documentElement.getAttribute('lang') || 'en').toLowerCase();
+  return FIGURE_WORDS[lang.split('-')[0]] ?? FIGURE_WORDS.en;
+}
+
 export class TbFigure extends HTMLElement {
   connectedCallback() {
     if (this.__built) return;
@@ -127,7 +142,7 @@ export class TbFigure extends HTMLElement {
     if (caption) {
       const num = document.createElement('span');
       num.className = 'fig-num';
-      num.textContent = `Figure ${this.number}`;
+      num.textContent = `${figureWord()} ${this.number}`;
       caption.prepend(num);
       figure.append(caption);
     }
@@ -251,8 +266,15 @@ export class TbFigure extends HTMLElement {
   }
 
   // For the gates and the lab: a JSON description of the figure's current state.
+  //
+  // The frame's four identity fields are spread LAST and so always win. A figure that reports a key of
+  // its own called `state` used to overwrite the frame's, and every gate that asks whether the figure
+  // reached `ready` then read the figure's word instead: foldlab reporting state:"folded" failed
+  // `npm run figure` with *figure foldlab is in state "folded"*. Winning silently is not enough on its
+  // own, because the figure's value is then dropped without a word, so `npm run drive` fails any kind
+  // whose own describe() uses one of these four names. Figures name their own state something else.
   describe() {
-    return { id: this.id, kind: this.kind, number: this.number, state: this.dataset.state, ...(this.handle?.describe?.() || {}) };
+    return { ...(this.handle?.describe?.() || {}), id: this.id, kind: this.kind, number: this.number, state: this.dataset.state };
   }
 }
 

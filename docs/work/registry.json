@@ -4,6 +4,22 @@
     {
       "id": 0,
       "theme": "foundation-chapter-1"
+    },
+    {
+      "id": 1,
+      "theme": "adaptive-study"
+    },
+    {
+      "id": 2,
+      "theme": "rest-of-the-book"
+    },
+    {
+      "id": 3,
+      "theme": "bilingual"
+    },
+    {
+      "id": 4,
+      "theme": "zizhi-tongjian"
     }
   ]
 }

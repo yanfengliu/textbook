@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>智伯之亡 — 資治通鑑</title>
+<meta name="description" content="《資治通鑑》卷一 周紀一：智宣子立瑤、晉陽之戰、三家滅智與豫讓。原文逐字可點，附現代漢語翻譯、字詞卡與背景。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- 兩個漢字家族：正文宋體 Noto Serif SC，介面黑體 Noto Sans SC。範圍式請求與書的目錄頁一致。 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200..900&family=Noto+Sans+SC:wght@100..900&display=swap">
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/typography.css">
+<link rel="stylesheet" href="../../src/styles/layout.css">
+<link rel="stylesheet" href="../../src/styles/components.css">
+<!-- 本書自己的字體系統，必須最後載入：docs/design/tongjian.md -->
+<link rel="stylesheet" href="../zj.css">
+<script type="module">
+  import { GLOSSARY } from './glossary.js';
+  import { CHARS } from './chars.js';
+  import { LEXICON } from '../lexicon.js';
+  import { WORDS } from '../words.js';
+  import { textbook } from '../../src/shell.js';
+  import { registerLexicon } from '../data/card.js';
+  textbook.registerGlossary(GLOSSARY);
+  registerLexicon({ lexicon: LEXICON, words: WORDS, chars: CHARS, chapter: 'tongjian/ch02' });
+  await import('../../src/components/index.js');
+</script>
+</head>
+<body class="zj">
+<a class="tb-skip" href="#source">跳到正文</a>
+<tb-shell book="資治通鑑" book-href="../" library-href="../../" today-href="../../today/" chapter="卷一 周紀一"></tb-shell>
+<div class="tb-page">
+<nav class="tb-rail" aria-label="本章目錄"></nav>
+<main class="tb-main" data-chapter="2" data-no-mastery>
+
+  <header class="tb-opener">
+    <p class="tb-opener__unit">資治通鑑 · 卷一 周紀一</p>
+    <p class="tb-opener__number" aria-hidden="true">2</p>
+    <h1>智伯之亡</h1>
+    <p class="tb-opener__dek">智宣子選錯了繼承人，智伯向三家索地，晉陽被水灌了，最後滅族的是智氏。司馬光寫這個故事，是為了幾行之後那個判斷：智伯之亡也，才勝德也。</p>
+    <ol class="tb-opener__contents" aria-label="本章目錄">
+      <li><a href="#read"><span class="n">2.1</span><span>怎麼讀這一章</span></a></li>
+      <li><a href="#source"><span class="n">2.2</span><span>原文</span></a></li>
+      <li><a href="#translation"><span class="n">2.3</span><span>現代漢語翻譯</span></a></li>
+      <li><a href="#notes"><span class="n">2.4</span><span>字詞</span></a></li>
+      <li><a href="#history"><span class="n">2.5</span><span>背景</span></a></li>
+      <li><a href="#discussion"><span class="n">2.6</span><span>思考</span></a></li>
+    </ol>
+  </header>
+  <div class="tb-text">
+
+  <section id="read">
+  <h2>怎麼讀這一章</h2>
+
+  <p>這是《資治通鑑》卷一〈周紀一〉的第二段。它從「初，智宣子將以瑤為後」講到「唯輔果在」，中間是晉陽城下那場水戰；智氏一族從選錯繼承人到滅族，全部寫在裡面。接著還有豫讓替智伯報仇的那一段。</p>
+
+  <p>這一頁的做法是：<em>原文是正文，譯文是拐杖</em>。原文在上一節，一句一行；譯文在下一節，一句對一句排成兩欄，左邊是原句，右邊是它的現代漢語。讀得懂原文時，右邊那一欄可以放著不看。</p>
+
+  <p>點原文裡任何一個字，都會開出一張卡片：讀音、詞性、在這一句裡的意思，以及這個字在《通鑑》裡別的用例。兩個字以上的人名、地名、官名、書名和專門用語合成一張詞卡。滑鼠移上去就開，點一下就釘住，按 Esc 或點別處關掉。所以「初」「為」「之」這種字也有卡片，不必背著它們讀過去。</p>
+
+  <p>字詞一節把本章要留意的字排成表，再按字形列出本章的詞；背景一節講這段故事假定你已經知道的事：晉是什麼，這四家是誰，這些事發生在哪一年，以及哪些說法其實有爭議；思考一節有幾道題和一個分類，用來檢查你有沒有讀出這幾層。</p>
+
+  <p>有三件事要先說清楚。第一，本書的引文以維基文庫《資治通鑑》卷001的整理本為底本，再與四部叢刊景宋刊本、胡三省音注本、四庫全書本逐字對校；凡改動底本、採用別本的地方，都在那一句的譯文旁邊註明。第二，《通鑑》原書的次序是「初，智宣子將以瑤為後」一路寫到「唯輔果在」，緊接著就是〈才德論〉，豫讓那一段在〈才德論〉之後；本書把豫讓放進這一章，是為了把故事讀完，這是教學的次序，不是《通鑑》的次序。第三，「三家分晉」是後人給這段歷史起的名字，不是《通鑑》裡的句子——《通鑑》寫的是「初命晉大夫魏斯、趙籍、韓虔為諸侯」。</p>
+
+  <tb-key><p>先讀原文，讀不通再看右邊那一欄。卡片是回頭查的工具，不是第一遍就要用的東西。</p></tb-key>
+  </section>
+
+  <section id="source">
+  <h2>原文</h2>
+
+  <p>《資治通鑑》卷一〈周紀一〉，威烈王二十三年的一條。下面依句分行，一句一行。圖 2.1 是同一個故事的年表：從智宣子立後、趙簡子的竹簡考驗，到晉陽被灌、智氏滅族，再到豫讓伏在橋下被殺。拖動圖上的年代，可以看出每一步之間隔了多久——也會看出《通鑑》把這些事全部寫在威烈王二十三年那一條之下，一件都沒有自己的年份。</p>
+
+  <tb-figure kind="zj-timeline" id="fig-timeline" width="wide" data-alt="一条从公元前五世纪到前四世纪的横向年表：智宣子立瑶为后、赵简子的竹简考验、尹铎治晋阳、智伯索地、晋阳被围灌城、智氏灭族、豫让行刺，直到公元前四〇三年三家受封为诸侯。拖动年份游标，可以看到每个事件的年代与彼此间隔，以及哪些年份来自《通鉴》原文、哪些来自后世注家。">
+    <figcaption>智氏之亡與三家分晉的年表，年代依《通鑑》本文、胡三省注與《史記》的年表。<span class="fig-hint">拖動游標可以看每一步隔了多久。</span></figcaption>
+  </tb-figure>
+
+  <aside class="tb-margin-note">原文以維基文庫《資治通鑑》卷001的整理本為底本，逐字校出，標點照錄底本。來源在同一個故事裡，引語之內再套引語時並不統一——智果那段用『』，豫讓那段用「」，這裡照錄，沒有代改。</aside>
+
+<ol class="zj-src" data-corpus="zj-001-zhi-xuan-zi">
+  <li><tb-char>初</tb-char>，<tb-term ref="智宣子" word="智宣子">智宣子</tb-term><tb-char>將</tb-char><tb-char>以</tb-char><tb-char>瑤</tb-char><tb-char>為</tb-char><tb-char>後</tb-char>。</li>
+  <li><tb-term ref="智果" word="智果">智果</tb-term><tb-char>曰</tb-char>：「<tb-term ref="不如" word="不如">不如</tb-term><tb-char>宵</tb-char><tb-char>也</tb-char>。<br><tb-char>瑤</tb-char><tb-char>之</tb-char><tb-char>賢</tb-char><tb-char>於</tb-char><tb-char>人</tb-char><tb-char>者</tb-char><tb-char>五</tb-char>，<tb-char>其</tb-char><tb-char>不</tb-char><tb-char>逮</tb-char><tb-char>者</tb-char><tb-char>一</tb-char><tb-char>也</tb-char>。<br><tb-char>美</tb-char><tb-char>鬢</tb-char><tb-char>長</tb-char><tb-char>大</tb-char><tb-char>則</tb-char><tb-char>賢</tb-char>，<tb-char>射</tb-char><tb-char>御</tb-char><tb-char>足</tb-char><tb-char>力</tb-char><tb-char>則</tb-char><tb-char>賢</tb-char>，<tb-char>伎</tb-char><tb-char>藝</tb-char><tb-char>畢</tb-char><tb-char>給</tb-char><tb-char>則</tb-char><tb-char>賢</tb-char>，<tb-char>巧</tb-char><tb-char>文</tb-char><tb-char>辯</tb-char><tb-char>慧</tb-char><tb-char>則</tb-char><tb-char>賢</tb-char>，<tb-char>強</tb-char><tb-char>毅</tb-char><tb-char>果</tb-char><tb-char>敢</tb-char><tb-char>則</tb-char><tb-char>賢</tb-char>，<tb-char>如</tb-char><tb-char>是</tb-char><tb-char>而</tb-char><tb-char>甚</tb-char><tb-char>不</tb-char><tb-char>仁</tb-char>。<br><tb-char>夫</tb-char><tb-char>以</tb-char><tb-char>其</tb-char><tb-char>五</tb-char><tb-char>賢</tb-char><tb-char>陵</tb-char><tb-char>人</tb-char>，<tb-char>而</tb-char><tb-char>以</tb-char><tb-char>不</tb-char><tb-char>仁</tb-char><tb-char>行</tb-char><tb-char>之</tb-char>，<tb-char>其</tb-char><tb-char>誰</tb-char><tb-char>能</tb-char><tb-char>待</tb-char><tb-char>之</tb-char>？<br><tb-char>若</tb-char><tb-char>果</tb-char><tb-char>立</tb-char><tb-char>瑤</tb-char><tb-char>也</tb-char>，<tb-char>智</tb-char><tb-char>宗</tb-char><tb-char>必</tb-char><tb-char>滅</tb-char>。」<br><tb-char>弗</tb-char><tb-char>聽</tb-char>，<tb-term ref="智果" word="智果">智果</tb-term><tb-char>別</tb-char><tb-char>族</tb-char><tb-char>於</tb-char><tb-term ref="太史" word="太史">太史</tb-term><tb-char>為</tb-char><tb-term ref="輔氏" word="輔氏">輔氏</tb-term>。</li>
+  <li><tb-term ref="趙簡子" word="趙簡子">趙簡子</tb-term><tb-char>之</tb-char><tb-char>子</tb-char>，<tb-char>長</tb-char><tb-char>曰</tb-char><tb-term ref="伯魯" word="伯魯">伯魯</tb-term>，<tb-char>幼</tb-char><tb-char>曰</tb-char><tb-term ref="無恤" word="無恤">無恤</tb-term>。</li>
+  <li><tb-char>將</tb-char><tb-char>置</tb-char><tb-char>後</tb-char>，<tb-char>不</tb-char><tb-char>知</tb-char><tb-char>所</tb-char><tb-char>立</tb-char>。</li>
+  <li><tb-char>乃</tb-char><tb-char>書</tb-char><tb-char>訓</tb-char><tb-char>戒</tb-char><tb-char>之</tb-char><tb-char>辭</tb-char><tb-char>於</tb-char><tb-char>二</tb-char><tb-char>簡</tb-char>，<tb-char>以</tb-char><tb-char>授</tb-char><tb-char>二</tb-char><tb-char>子</tb-char><tb-char>曰</tb-char>：「<tb-char>謹</tb-char><tb-char>識</tb-char><tb-char>之</tb-char>。」<br><tb-char>三</tb-char><tb-char>年</tb-char><tb-char>而</tb-char><tb-char>問</tb-char><tb-char>之</tb-char>，<tb-term ref="伯魯" word="伯魯">伯魯</tb-term><tb-char>不</tb-char><tb-char>能</tb-char><tb-char>舉</tb-char><tb-char>其</tb-char><tb-char>辭</tb-char>，<tb-char>求</tb-char><tb-char>其</tb-char><tb-char>簡</tb-char>，<tb-char>已</tb-char><tb-char>失</tb-char><tb-char>之</tb-char><tb-char>矣</tb-char>。</li>
+  <li><tb-char>問</tb-char><tb-term ref="無恤" word="無恤">無恤</tb-term>，<tb-char>誦</tb-char><tb-char>其</tb-char><tb-char>辭</tb-char><tb-char>甚</tb-char><tb-char>習</tb-char>，<tb-char>求</tb-char><tb-char>其</tb-char><tb-char>簡</tb-char>，<tb-char>出</tb-char><tb-char>諸</tb-char><tb-char>袖</tb-char><tb-char>中</tb-char><tb-char>而</tb-char><tb-char>奏</tb-char><tb-char>之</tb-char>。</li>
+  <li><tb-char>於</tb-char><tb-char>是</tb-char><tb-term ref="趙簡子" word="簡子">簡子</tb-term><tb-char>以</tb-char><tb-term ref="無恤" word="無恤">無恤</tb-term><tb-char>為</tb-char><tb-char>賢</tb-char>，<tb-char>立</tb-char><tb-char>以</tb-char><tb-char>為</tb-char><tb-char>後</tb-char>。</li>
+  <li><tb-term ref="趙簡子" word="簡子">簡子</tb-term><tb-char>使</tb-char><tb-term ref="尹鐸" word="尹鐸">尹鐸</tb-term><tb-char>為</tb-char><tb-term ref="晉陽" word="晉陽">晉陽</tb-term>。</li>
+  <li><tb-char>請</tb-char><tb-char>曰</tb-char>：「<tb-char>以</tb-char><tb-char>為</tb-char><tb-term ref="繭絲" word="繭絲">繭絲</tb-term><tb-char>乎</tb-char>？<br><tb-char>抑</tb-char><tb-char>為</tb-char><tb-term ref="保障" word="保障">保障</tb-term><tb-char>乎</tb-char>？」<br><tb-term ref="趙簡子" word="簡子">簡子</tb-term><tb-char>曰</tb-char>：「<tb-term ref="保障" word="保障">保障</tb-term><tb-char>哉</tb-char>！」<br><tb-term ref="尹鐸" word="尹鐸">尹鐸</tb-term><tb-char>損</tb-char><tb-char>其</tb-char><tb-term ref="戶數" word="戶數">戶數</tb-term>。</li>
+  <li><tb-term ref="趙簡子" word="簡子">簡子</tb-term><tb-char>謂</tb-char><tb-term ref="無恤" word="無恤">無恤</tb-term><tb-char>曰</tb-char>：「<tb-char>晉</tb-char><tb-char>國</tb-char><tb-char>有</tb-char><tb-char>難</tb-char>，<tb-char>而</tb-char><tb-char>無</tb-char><tb-char>以</tb-char><tb-term ref="尹鐸" word="尹鐸">尹鐸</tb-term><tb-char>為</tb-char><tb-char>少</tb-char>，<tb-char>無</tb-char><tb-char>以</tb-char><tb-term ref="晉陽" word="晉陽">晉陽</tb-term><tb-char>為</tb-char><tb-char>遠</tb-char>，<tb-char>必</tb-char><tb-char>以</tb-char><tb-char>為</tb-char><tb-char>歸</tb-char>。」<br><tb-char>及</tb-char><tb-term ref="智宣子" word="智宣子">智宣子</tb-term><tb-char>卒</tb-char>，<tb-term ref="智襄子" word="智襄子">智襄子</tb-term><tb-char>為</tb-char><tb-char>政</tb-char>，<tb-char>與</tb-char><tb-term ref="韓康子" word="韓康子">韓康子</tb-term>、<tb-term ref="魏桓子" word="魏桓子">魏桓子</tb-term><tb-char>宴</tb-char><tb-char>於</tb-char><tb-term ref="藍臺" word="藍臺">藍臺</tb-term>。</li>
+  <li><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>戲</tb-char><tb-term ref="韓康子" word="康子">康子</tb-term><tb-char>而</tb-char><tb-char>侮</tb-char><tb-term ref="段規" word="段規">段規</tb-term>，<tb-term ref="智國" word="智國">智國</tb-term><tb-char>聞</tb-char><tb-char>之</tb-char>，<tb-char>諫</tb-char><tb-char>曰</tb-char>：「<tb-char>主</tb-char><tb-char>不</tb-char><tb-char>備</tb-char>，<tb-char>難</tb-char><tb-char>必</tb-char><tb-char>至</tb-char><tb-char>矣</tb-char>！」<br><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>曰</tb-char>：「<tb-char>難</tb-char><tb-char>將</tb-char><tb-char>由</tb-char><tb-char>我</tb-char>。<br><tb-char>我</tb-char><tb-char>不</tb-char><tb-char>為</tb-char><tb-char>難</tb-char>，<tb-char>誰</tb-char><tb-char>敢</tb-char><tb-char>興</tb-char><tb-char>之</tb-char>？」<br><tb-char>對</tb-char><tb-char>曰</tb-char>：「<tb-char>不</tb-char><tb-char>然</tb-char>。<br>《<tb-term ref="夏書" word="夏書">夏書</tb-term>》<tb-char>有</tb-char><tb-char>之</tb-char><tb-char>曰</tb-char>：『<tb-char>一</tb-char><tb-char>人</tb-char><tb-char>三</tb-char><tb-char>失</tb-char>，<tb-char>怨</tb-char><tb-char>豈</tb-char><tb-char>在</tb-char><tb-char>明</tb-char>，<tb-char>不</tb-char><tb-char>見</tb-char><tb-char>是</tb-char><tb-char>圖</tb-char>。』<br><tb-char>夫</tb-char><tb-term ref="君子" word="君子">君子</tb-term><tb-char>能</tb-char><tb-char>勤</tb-char><tb-term ref="小物" word="小物">小物</tb-term>，<tb-char>故</tb-char><tb-char>無</tb-char><tb-char>大</tb-char><tb-char>患</tb-char>。<br><tb-char>今</tb-char><tb-char>主</tb-char><tb-char>一</tb-char><tb-char>宴</tb-char><tb-char>而</tb-char><tb-char>恥</tb-char><tb-char>人</tb-char><tb-char>之</tb-char><tb-char>君</tb-char><tb-char>相</tb-char>，<tb-char>又</tb-char><tb-char>弗</tb-char><tb-char>備</tb-char>，<tb-char>曰</tb-char><tb-char>不</tb-char><tb-char>敢</tb-char><tb-char>興</tb-char><tb-char>難</tb-char>，<tb-term ref="無乃" word="無乃">無乃</tb-term><tb-char>不</tb-char><tb-char>可</tb-char><tb-char>乎</tb-char>！<br><tb-char>蜹</tb-char>、<tb-char>蟻</tb-char>、<tb-char>蜂</tb-char>、<tb-char>蠆</tb-char>，<tb-char>皆</tb-char><tb-char>能</tb-char><tb-char>害</tb-char><tb-char>人</tb-char>，<tb-char>況</tb-char><tb-char>君</tb-char><tb-char>相</tb-char><tb-char>乎</tb-char>！」<br><tb-char>弗</tb-char><tb-char>聽</tb-char>。</li>
+</ol>
+
+<ol class="zj-src" data-corpus="zj-001-zhi-bo-qing-di">
+  <li><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>請</tb-char><tb-char>地</tb-char><tb-char>於</tb-char><tb-term ref="韓康子" word="韓康子">韓康子</tb-term>，<tb-term ref="韓康子" word="康子">康子</tb-term><tb-char>欲</tb-char><tb-char>弗</tb-char><tb-char>與</tb-char>。</li>
+  <li><tb-term ref="段規" word="段規">段規</tb-term><tb-char>曰</tb-char>：「<tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>好</tb-char><tb-char>利</tb-char><tb-char>而</tb-char><tb-char>愎</tb-char>，<tb-char>不</tb-char><tb-char>與</tb-char>，<tb-char>將</tb-char><tb-char>伐</tb-char><tb-char>我</tb-char>；<tb-term ref="不如" word="不如">不如</tb-term><tb-char>與</tb-char><tb-char>之</tb-char>。<br><tb-char>彼</tb-char><tb-char>狃</tb-char><tb-char>於</tb-char><tb-char>得</tb-char><tb-char>地</tb-char>，<tb-char>必</tb-char><tb-char>請</tb-char><tb-char>於</tb-char><tb-char>他</tb-char><tb-char>人</tb-char>；<tb-char>他</tb-char><tb-char>人</tb-char><tb-char>不</tb-char><tb-char>與</tb-char>，<tb-char>必</tb-char><tb-char>向</tb-char><tb-char>之</tb-char><tb-char>以</tb-char><tb-char>兵</tb-char>。<br><tb-term ref="然則" word="然則">然則</tb-term><tb-char>我</tb-char><tb-char>得</tb-char><tb-char>免</tb-char><tb-char>於</tb-char><tb-char>患</tb-char><tb-char>而</tb-char><tb-char>待</tb-char><tb-char>事</tb-char><tb-char>之</tb-char><tb-char>變</tb-char><tb-char>矣</tb-char>。」<br><tb-term ref="韓康子" word="康子">康子</tb-term><tb-char>曰</tb-char>：「<tb-char>善</tb-char>。」<br><tb-char>使</tb-char><tb-char>使</tb-char><tb-char>者</tb-char><tb-char>致</tb-char><tb-term ref="萬家之邑" word="萬家之邑">萬家之邑</tb-term><tb-char>於</tb-char><tb-term ref="智伯" word="智伯">智伯</tb-term>，<tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>悅</tb-char>。</li>
+  <li><tb-char>又</tb-char><tb-char>求</tb-char><tb-char>地</tb-char><tb-char>於</tb-char><tb-term ref="魏桓子" word="魏桓子">魏桓子</tb-term>，<tb-term ref="魏桓子" word="桓子">桓子</tb-term><tb-char>欲</tb-char><tb-char>弗</tb-char><tb-char>與</tb-char>。</li>
+  <li><tb-term ref="任章" word="任章">任章</tb-term><tb-char>曰</tb-char>：「<tb-char>何</tb-char><tb-char>故</tb-char><tb-char>弗</tb-char><tb-char>與</tb-char>？」<br><tb-term ref="魏桓子" word="桓子">桓子</tb-term><tb-char>曰</tb-char>：「<tb-char>無</tb-char><tb-char>故</tb-char><tb-char>索</tb-char><tb-char>地</tb-char>，<tb-char>故</tb-char><tb-char>弗</tb-char><tb-char>與</tb-char>。」<br><tb-term ref="任章" word="任章">任章</tb-term><tb-char>曰</tb-char>：「<tb-char>無</tb-char><tb-char>故</tb-char><tb-char>索</tb-char><tb-char>地</tb-char>，<tb-term ref="大夫" word="諸大夫">諸大夫</tb-term><tb-char>必</tb-char><tb-char>懼</tb-char>；<tb-char>吾</tb-char><tb-char>與</tb-char><tb-char>之</tb-char><tb-char>地</tb-char>，<tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>必</tb-char><tb-char>驕</tb-char>。<br><tb-char>彼</tb-char><tb-char>驕</tb-char><tb-char>而</tb-char><tb-char>輕</tb-char><tb-char>敵</tb-char>，<tb-char>此</tb-char><tb-char>懼</tb-char><tb-char>而</tb-char><tb-char>相</tb-char><tb-char>親</tb-char>。<br><tb-char>以</tb-char><tb-char>相</tb-char><tb-char>親</tb-char><tb-char>之</tb-char><tb-char>兵</tb-char><tb-char>待</tb-char><tb-char>輕</tb-char><tb-char>敵</tb-char><tb-char>之</tb-char><tb-char>人</tb-char>，<tb-term ref="智氏" word="智氏">智氏</tb-term><tb-char>之</tb-char><tb-char>命</tb-char><tb-char>必</tb-char><tb-char>不</tb-char><tb-char>長</tb-char><tb-char>矣</tb-char>。<br>《<tb-term ref="周書" word="周書">周書</tb-term>》<tb-char>曰</tb-char>：『<tb-char>將</tb-char><tb-char>欲</tb-char><tb-char>敗</tb-char><tb-char>之</tb-char>，<tb-char>必</tb-char><tb-char>姑</tb-char><tb-char>輔</tb-char><tb-char>之</tb-char>；<tb-char>將</tb-char><tb-char>欲</tb-char><tb-char>取</tb-char><tb-char>之</tb-char>，<tb-char>必</tb-char><tb-char>姑</tb-char><tb-char>與</tb-char><tb-char>之</tb-char>。』<br><tb-char>主</tb-char><tb-term ref="不如" word="不如">不如</tb-term><tb-char>與</tb-char><tb-char>之</tb-char><tb-char>以</tb-char><tb-char>驕</tb-char><tb-term ref="智伯" word="智伯">智伯</tb-term>，<tb-char>然</tb-char><tb-char>後</tb-char><tb-char>可</tb-char><tb-char>以</tb-char><tb-char>擇</tb-char><tb-char>交</tb-char><tb-char>而</tb-char><tb-char>圖</tb-char><tb-term ref="智氏" word="智氏">智氏</tb-term><tb-char>矣</tb-char>。<br><tb-term ref="奈何" word="奈何">奈何</tb-term><tb-char>獨</tb-char><tb-char>以</tb-char><tb-char>吾</tb-char><tb-char>為</tb-char><tb-term ref="智氏" word="智氏">智氏</tb-term><tb-char>質</tb-char><tb-char>乎</tb-char>！」<br><tb-term ref="魏桓子" word="桓子">桓子</tb-term><tb-char>曰</tb-char>：「<tb-char>善</tb-char>。」<br><tb-char>復</tb-char><tb-char>與</tb-char><tb-char>之</tb-char><tb-term ref="萬家之邑" word="萬家之邑">萬家之邑</tb-term><tb-char>一</tb-char>。</li>
+  <li><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>又</tb-char><tb-char>求</tb-char><tb-char>藺</tb-char>、<tb-term ref="皋狼" word="皋狼">皋狼</tb-term><tb-char>之</tb-char><tb-char>地</tb-char><tb-char>於</tb-char><tb-term ref="趙襄子" word="趙襄子">趙襄子</tb-term>，<tb-term ref="趙襄子" word="襄子">襄子</tb-term><tb-char>弗</tb-char><tb-char>與</tb-char>。</li>
+  <li><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>怒</tb-char>，<tb-char>帥</tb-char><tb-char>韓</tb-char>、<tb-char>魏</tb-char><tb-char>之</tb-char><tb-char>甲</tb-char><tb-char>以</tb-char><tb-char>攻</tb-char><tb-term ref="趙氏" word="趙氏">趙氏</tb-term>。</li>
+  <li><tb-term ref="趙襄子" word="襄子">襄子</tb-term><tb-char>將</tb-char><tb-char>出</tb-char>，<tb-char>曰</tb-char>：「<tb-char>吾</tb-char><tb-char>何</tb-char><tb-char>走</tb-char><tb-char>乎</tb-char>？」<br><tb-char>從</tb-char><tb-char>者</tb-char><tb-char>曰</tb-char>：「<tb-term ref="長子" word="長子">長子</tb-term><tb-char>近</tb-char>，<tb-char>且</tb-char><tb-char>城</tb-char><tb-char>厚</tb-char><tb-char>完</tb-char>。」<br><tb-term ref="趙襄子" word="襄子">襄子</tb-term><tb-char>曰</tb-char>：「<tb-char>民</tb-char><tb-char>罷</tb-char><tb-char>力</tb-char><tb-char>以</tb-char><tb-char>完</tb-char><tb-char>之</tb-char>，<tb-char>又</tb-char><tb-char>斃</tb-char><tb-char>死</tb-char><tb-char>以</tb-char><tb-char>守</tb-char><tb-char>之</tb-char>，<tb-char>其</tb-char><tb-char>誰</tb-char><tb-char>與</tb-char><tb-char>我</tb-char>！」<br><tb-char>從</tb-char><tb-char>者</tb-char><tb-char>曰</tb-char>：「<tb-term ref="邯鄲" word="邯鄲">邯鄲</tb-term><tb-char>之</tb-char><tb-char>倉</tb-char><tb-char>庫</tb-char><tb-char>實</tb-char>。」<br><tb-term ref="趙襄子" word="襄子">襄子</tb-term><tb-char>曰</tb-char>：「<tb-char>浚</tb-char><tb-char>民</tb-char><tb-char>之</tb-char><tb-term ref="膏澤" word="膏澤">膏澤</tb-term><tb-char>以</tb-char><tb-char>實</tb-char><tb-char>之</tb-char>，<tb-char>又</tb-char><tb-char>因</tb-char><tb-char>而</tb-char><tb-char>殺</tb-char><tb-char>之</tb-char>，<tb-char>其</tb-char><tb-char>誰</tb-char><tb-char>與</tb-char><tb-char>我</tb-char>！<br><tb-char>其</tb-char><tb-term ref="晉陽" word="晉陽">晉陽</tb-term><tb-char>乎</tb-char>，<tb-term ref="先主" word="先主">先主</tb-term><tb-char>之</tb-char><tb-char>所</tb-char><tb-char>屬</tb-char><tb-char>也</tb-char>，<tb-term ref="尹鐸" word="尹鐸">尹鐸</tb-term><tb-char>之</tb-char><tb-char>所</tb-char><tb-char>寬</tb-char><tb-char>也</tb-char>，<tb-char>民</tb-char><tb-char>必</tb-char><tb-char>和</tb-char><tb-char>矣</tb-char>。」<br><tb-char>乃</tb-char><tb-char>走</tb-char><tb-term ref="晉陽" word="晉陽">晉陽</tb-term>。</li>
+</ol>
+
+<ol class="zj-src" data-corpus="zj-001-jin-yang">
+  <li><tb-char>三</tb-char><tb-char>家</tb-char><tb-char>以</tb-char><tb-term ref="國人" word="國人">國人</tb-term><tb-char>圍</tb-char><tb-char>而</tb-char><tb-char>灌</tb-char><tb-char>之</tb-char>，<tb-char>城</tb-char><tb-char>不</tb-char><tb-char>浸</tb-char><tb-char>者</tb-char><tb-term ref="三版" word="三版">三版</tb-term>。</li>
+  <li><tb-char>沈</tb-char><tb-char>竈</tb-char><tb-char>產</tb-char><tb-char>鼃</tb-char>，<tb-char>民</tb-char><tb-char>無</tb-char><tb-char>叛</tb-char><tb-char>意</tb-char>。</li>
+  <li><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>行</tb-char><tb-char>水</tb-char>，<tb-term ref="魏桓子" word="魏桓子">魏桓子</tb-term><tb-char>御</tb-char>，<tb-term ref="韓康子" word="韓康子">韓康子</tb-term><tb-term ref="驂乘" word="驂乘">驂乘</tb-term>。</li>
+  <li><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>曰</tb-char>：「<tb-char>吾</tb-char><tb-char>乃</tb-char><tb-char>今</tb-char><tb-char>知</tb-char><tb-char>水</tb-char><tb-char>可</tb-char><tb-char>以</tb-char><tb-char>亡</tb-char><tb-char>人</tb-char><tb-char>國</tb-char><tb-char>也</tb-char>。」<br><tb-term ref="魏桓子" word="桓子">桓子</tb-term><tb-char>肘</tb-char><tb-term ref="韓康子" word="康子">康子</tb-term>，<tb-term ref="韓康子" word="康子">康子</tb-term><tb-char>履</tb-char><tb-term ref="魏桓子" word="桓子">桓子</tb-term><tb-char>之</tb-char><tb-char>跗</tb-char>，<tb-char>以</tb-char><tb-term ref="汾水" word="汾水">汾水</tb-term><tb-char>可</tb-char><tb-char>以</tb-char><tb-char>灌</tb-char><tb-term ref="安邑" word="安邑">安邑</tb-term>，<tb-term ref="絳水" word="絳水">絳水</tb-term><tb-char>可</tb-char><tb-char>以</tb-char><tb-char>灌</tb-char><tb-term ref="平陽" word="平陽">平陽</tb-term><tb-char>也</tb-char>。</li>
+  <li><tb-term ref="絺疵" word="絺疵">絺疵</tb-term><tb-char>謂</tb-char><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>曰</tb-char>：「<tb-char>韓</tb-char>、<tb-char>魏</tb-char><tb-char>必</tb-char><tb-char>反</tb-char><tb-char>矣</tb-char>。」<br><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>曰</tb-char>：「<tb-char>子</tb-char><tb-char>何</tb-char><tb-char>以</tb-char><tb-char>知</tb-char><tb-char>之</tb-char>？」<br><tb-term ref="絺疵" word="絺疵">絺疵</tb-term><tb-char>曰</tb-char>：「<tb-char>以</tb-char><tb-char>人</tb-char><tb-char>事</tb-char><tb-char>知</tb-char><tb-char>之</tb-char>。<br><tb-char>夫</tb-char><tb-char>從</tb-char><tb-char>韓</tb-char>、<tb-char>魏</tb-char><tb-char>之</tb-char><tb-char>兵</tb-char><tb-char>以</tb-char><tb-char>攻</tb-char><tb-char>趙</tb-char>，<tb-char>趙</tb-char><tb-char>亡</tb-char>，<tb-char>難</tb-char><tb-char>必</tb-char><tb-char>及</tb-char><tb-char>韓</tb-char>、<tb-char>魏</tb-char><tb-char>矣</tb-char>。<br><tb-char>今</tb-char><tb-char>約</tb-char><tb-char>勝</tb-char><tb-char>趙</tb-char><tb-char>而</tb-char><tb-char>三</tb-char><tb-char>分</tb-char><tb-char>其</tb-char><tb-char>地</tb-char>，<tb-char>城</tb-char><tb-char>不</tb-char><tb-char>沒</tb-char><tb-char>者</tb-char><tb-term ref="三版" word="三版">三版</tb-term>，<tb-char>人</tb-char><tb-char>馬</tb-char><tb-char>相</tb-char><tb-char>食</tb-char>，<tb-char>城</tb-char><tb-char>降</tb-char><tb-char>有</tb-char><tb-char>日</tb-char>，<tb-char>而</tb-char><tb-char>二</tb-char><tb-char>子</tb-char><tb-char>無</tb-char><tb-char>喜</tb-char><tb-char>志</tb-char>，<tb-char>有</tb-char><tb-char>憂</tb-char><tb-char>色</tb-char>，<tb-char>是</tb-char><tb-char>非</tb-char><tb-char>反</tb-char><tb-char>而</tb-char><tb-char>何</tb-char>？」<br><tb-char>明</tb-char><tb-char>日</tb-char>，<tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>以</tb-char><tb-term ref="絺疵" word="絺疵">絺疵</tb-term><tb-char>之</tb-char><tb-char>言</tb-char><tb-char>告</tb-char><tb-char>二</tb-char><tb-char>子</tb-char>，<tb-char>二</tb-char><tb-char>子</tb-char><tb-char>曰</tb-char>：「<tb-char>此</tb-char><tb-char>夫</tb-char><tb-term ref="讒臣" word="讒臣">讒臣</tb-term><tb-char>欲</tb-char><tb-char>為</tb-char><tb-term ref="趙氏" word="趙氏">趙氏</tb-term><tb-term ref="游說" word="游說">游說</tb-term>，<tb-char>使</tb-char><tb-char>主</tb-char><tb-char>疑</tb-char><tb-char>於</tb-char><tb-char>二</tb-char><tb-char>家</tb-char><tb-char>而</tb-char><tb-char>懈</tb-char><tb-char>於</tb-char><tb-char>攻</tb-char><tb-term ref="趙氏" word="趙氏">趙氏</tb-term><tb-char>也</tb-char>。<br><tb-char>不</tb-char><tb-char>然</tb-char>，<tb-char>夫</tb-char><tb-char>二</tb-char><tb-char>家</tb-char><tb-char>豈</tb-char><tb-char>不</tb-char><tb-char>利</tb-char><tb-char>朝</tb-char><tb-char>夕</tb-char><tb-char>分</tb-char><tb-term ref="趙氏" word="趙氏">趙氏</tb-term><tb-char>之</tb-char><tb-char>田</tb-char>，<tb-char>而</tb-char><tb-char>欲</tb-char><tb-char>為</tb-char><tb-char>危</tb-char><tb-char>難</tb-char><tb-char>不</tb-char><tb-char>可</tb-char><tb-char>成</tb-char><tb-char>之</tb-char><tb-char>事</tb-char><tb-char>乎</tb-char>？」<br><tb-char>二</tb-char><tb-char>子</tb-char><tb-char>出</tb-char>，<tb-term ref="絺疵" word="絺疵">絺疵</tb-term><tb-char>入</tb-char><tb-char>曰</tb-char>：「<tb-char>主</tb-char><tb-char>何</tb-char><tb-char>以</tb-char><tb-char>臣</tb-char><tb-char>之</tb-char><tb-char>言</tb-char><tb-char>告</tb-char><tb-char>二</tb-char><tb-char>子</tb-char><tb-char>也</tb-char>？」<br><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>曰</tb-char>：「<tb-char>子</tb-char><tb-char>何</tb-char><tb-char>以</tb-char><tb-char>知</tb-char><tb-char>之</tb-char>？」<br><tb-char>對</tb-char><tb-char>曰</tb-char>：「<tb-char>臣</tb-char><tb-char>見</tb-char><tb-char>其</tb-char><tb-char>視</tb-char><tb-char>臣</tb-char><tb-char>端</tb-char><tb-char>而</tb-char><tb-char>趨</tb-char><tb-char>疾</tb-char>，<tb-char>知</tb-char><tb-char>臣</tb-char><tb-char>得</tb-char><tb-char>其</tb-char><tb-char>情</tb-char><tb-char>故</tb-char><tb-char>也</tb-char>。」<br><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>不</tb-char><tb-char>悛</tb-char>。</li>
+  <li><tb-term ref="絺疵" word="絺疵">絺疵</tb-term><tb-char>請</tb-char><tb-char>使</tb-char><tb-char>於</tb-char><tb-char>齊</tb-char>。</li>
+</ol>
+
+<ol class="zj-src" data-corpus="zj-001-san-jia-mie-zhi">
+  <li><tb-term ref="趙襄子" word="趙襄子">趙襄子</tb-term><tb-char>使</tb-char><tb-term ref="張孟談" word="張孟談">張孟談</tb-term><tb-char>潛</tb-char><tb-char>出</tb-char><tb-char>見</tb-char><tb-char>二</tb-char><tb-char>子</tb-char>，<tb-char>曰</tb-char>：「<tb-char>臣</tb-char><tb-char>聞</tb-char><tb-char>脣</tb-char><tb-char>亡</tb-char><tb-char>則</tb-char><tb-char>齒</tb-char><tb-char>寒</tb-char>。<br><tb-char>今</tb-char><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>帥</tb-char><tb-char>韓</tb-char>、<tb-char>魏</tb-char><tb-char>而</tb-char><tb-char>攻</tb-char><tb-char>趙</tb-char>，<tb-char>趙</tb-char><tb-char>亡</tb-char><tb-char>則</tb-char><tb-char>韓</tb-char>、<tb-char>魏</tb-char><tb-char>為</tb-char><tb-char>之</tb-char><tb-char>次</tb-char><tb-char>矣</tb-char>。」<br><tb-char>二</tb-char><tb-char>子</tb-char><tb-char>曰</tb-char>：「<tb-char>我</tb-char><tb-char>心</tb-char><tb-char>知</tb-char><tb-char>其</tb-char><tb-char>然</tb-char><tb-char>也</tb-char>，<tb-char>恐</tb-char><tb-char>事</tb-char><tb-char>未</tb-char><tb-char>遂</tb-char><tb-char>而</tb-char><tb-char>謀</tb-char><tb-char>洩</tb-char>，<tb-char>則</tb-char><tb-char>禍</tb-char><tb-char>立</tb-char><tb-char>至</tb-char><tb-char>矣</tb-char>」。</li>
+  <li><tb-term ref="張孟談" word="張孟談">張孟談</tb-term><tb-char>曰</tb-char>：「<tb-char>謀</tb-char><tb-char>出</tb-char><tb-char>二</tb-char><tb-char>主</tb-char><tb-char>之</tb-char><tb-char>口</tb-char>，<tb-char>入</tb-char><tb-char>臣</tb-char><tb-char>之</tb-char><tb-char>耳</tb-char>，<tb-char>何</tb-char><tb-char>傷</tb-char><tb-char>也</tb-char>？」<br><tb-char>二</tb-char><tb-char>子</tb-char><tb-char>乃</tb-char><tb-char>陰</tb-char><tb-char>與</tb-char><tb-term ref="張孟談" word="張孟談">張孟談</tb-term><tb-char>約</tb-char>，<tb-char>為</tb-char><tb-char>之</tb-char><tb-char>期</tb-char><tb-char>日</tb-char><tb-char>而</tb-char><tb-char>遣</tb-char><tb-char>之</tb-char>。</li>
+  <li><tb-term ref="趙襄子" word="襄子">襄子</tb-term><tb-char>夜</tb-char><tb-char>使</tb-char><tb-char>人</tb-char><tb-char>殺</tb-char><tb-char>守</tb-char><tb-char>堤</tb-char><tb-char>之</tb-char><tb-char>吏</tb-char>，<tb-char>而</tb-char><tb-char>決</tb-char><tb-char>水</tb-char><tb-char>灌</tb-char><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>軍</tb-char>。</li>
+  <li><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>軍</tb-char><tb-char>救</tb-char><tb-char>水</tb-char><tb-char>而</tb-char><tb-char>亂</tb-char>，<tb-char>韓</tb-char>、<tb-char>魏</tb-char><tb-char>翼</tb-char><tb-char>而</tb-char><tb-char>擊</tb-char><tb-char>之</tb-char>，<tb-term ref="趙襄子" word="襄子">襄子</tb-term><tb-char>將</tb-char><tb-char>卒</tb-char><tb-char>犯</tb-char><tb-char>其</tb-char><tb-char>前</tb-char>，<tb-char>大</tb-char><tb-char>敗</tb-char><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>之</tb-char><tb-char>眾</tb-char>。</li>
+  <li><tb-char>遂</tb-char><tb-char>殺</tb-char><tb-term ref="智伯" word="智伯">智伯</tb-term>，<tb-char>盡</tb-char><tb-char>滅</tb-char><tb-term ref="智氏" word="智氏">智氏</tb-term><tb-char>之</tb-char><tb-char>族</tb-char>。</li>
+  <li><tb-char>唯</tb-char><tb-term ref="輔果" word="輔果">輔果</tb-term><tb-char>在</tb-char>。</li>
+</ol>
+
+  <p>智氏既滅，趙襄子把智伯的頭骨漆成飲器，於是有了下面這一段。豫讓是智伯的臣子，他要報的仇，就是這件事。</p>
+
+<ol class="zj-src" data-corpus="zj-001-yu-rang">
+  <li><tb-char>三</tb-char><tb-char>家</tb-char><tb-char>分</tb-char><tb-term ref="智氏" word="智氏">智氏</tb-term><tb-char>之</tb-char><tb-char>田</tb-char>。</li>
+  <li><tb-term ref="趙襄子" word="趙襄子">趙襄子</tb-term><tb-char>漆</tb-char><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>之</tb-char><tb-char>頭</tb-char>，<tb-char>以</tb-char><tb-char>為</tb-char><tb-term ref="飲器" word="飲器">飲器</tb-term>。</li>
+  <li><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>之</tb-char><tb-char>臣</tb-char><tb-term ref="豫讓" word="豫讓">豫讓</tb-term><tb-char>欲</tb-char><tb-char>為</tb-char><tb-char>之</tb-char><tb-char>報</tb-char><tb-char>仇</tb-char>，<tb-char>乃</tb-char><tb-char>詐</tb-char><tb-char>為</tb-char><tb-term ref="刑人" word="刑人">刑人</tb-term>，<tb-char>挾</tb-char><tb-term ref="匕首" word="匕首">匕首</tb-term>，<tb-char>入</tb-char><tb-term ref="趙襄子" word="襄子">襄子</tb-term><tb-char>宮</tb-char><tb-char>中</tb-char><tb-char>塗</tb-char><tb-char>廁</tb-char>。</li>
+  <li><tb-term ref="趙襄子" word="襄子">襄子</tb-term><tb-char>如</tb-char><tb-char>廁</tb-char><tb-char>心</tb-char><tb-char>動</tb-char>，<tb-char>索</tb-char><tb-char>之</tb-char>，<tb-char>獲</tb-char><tb-term ref="豫讓" word="豫讓">豫讓</tb-term>。</li>
+  <li><tb-term ref="左右" word="左右">左右</tb-term><tb-char>欲</tb-char><tb-char>殺</tb-char><tb-char>之</tb-char>，<tb-term ref="趙襄子" word="襄子">襄子</tb-term><tb-char>曰</tb-char>：「<tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>死</tb-char><tb-char>無</tb-char><tb-char>後</tb-char>，<tb-char>而</tb-char><tb-char>此</tb-char><tb-char>人</tb-char><tb-char>欲</tb-char><tb-char>為</tb-char><tb-char>報</tb-char><tb-char>仇</tb-char>，<tb-char>真</tb-char><tb-term ref="義士" word="義士">義士</tb-term><tb-char>也</tb-char>！<br><tb-char>吾</tb-char><tb-char>謹</tb-char><tb-char>避</tb-char><tb-char>之</tb-char><tb-char>耳</tb-char>。」<br><tb-char>乃</tb-char><tb-char>捨</tb-char><tb-char>之</tb-char>。</li>
+  <li><tb-term ref="豫讓" word="豫讓">豫讓</tb-term><tb-char>又</tb-char><tb-char>漆</tb-char><tb-char>身</tb-char><tb-char>為</tb-char><tb-char>癩</tb-char>，<tb-char>吞</tb-char><tb-char>炭</tb-char><tb-char>為</tb-char><tb-char>啞</tb-char>，<tb-char>行</tb-char><tb-char>乞</tb-char><tb-char>於</tb-char><tb-char>市</tb-char>，<tb-char>其</tb-char><tb-char>妻</tb-char><tb-char>不</tb-char><tb-char>識</tb-char><tb-char>也</tb-char>。</li>
+  <li><tb-char>行</tb-char><tb-char>見</tb-char><tb-char>其</tb-char><tb-char>友</tb-char>，<tb-char>其</tb-char><tb-char>友</tb-char><tb-char>識</tb-char><tb-char>之</tb-char>，<tb-char>為</tb-char><tb-char>之</tb-char><tb-char>泣</tb-char><tb-char>曰</tb-char>：「<tb-char>以</tb-char><tb-char>子</tb-char><tb-char>之</tb-char><tb-char>才</tb-char>，<tb-char>臣</tb-char><tb-char>事</tb-char><tb-term ref="趙孟" word="趙孟">趙孟</tb-term>，<tb-char>必</tb-char><tb-char>得</tb-char><tb-term ref="近幸" word="近幸">近幸</tb-term>。<br><tb-char>子</tb-char><tb-char>乃</tb-char><tb-char>為</tb-char><tb-char>所</tb-char><tb-char>欲</tb-char><tb-char>為</tb-char>，<tb-char>顧</tb-char><tb-char>不</tb-char><tb-char>易</tb-char><tb-char>邪</tb-char>？<br><tb-char>何</tb-char><tb-char>乃</tb-char><tb-char>自</tb-char><tb-char>苦</tb-char><tb-char>如</tb-char><tb-char>此</tb-char>！<br><tb-char>求</tb-char><tb-char>以</tb-char><tb-char>報</tb-char><tb-char>仇</tb-char>，<tb-char>不</tb-char><tb-char>亦</tb-char><tb-char>難</tb-char><tb-char>乎</tb-char>？」<br><tb-term ref="豫讓" word="豫讓">豫讓</tb-term><tb-char>曰</tb-char>：「<tb-char>不</tb-char><tb-char>可</tb-char>！<br><tb-char>既</tb-char><tb-char>已</tb-char><tb-char>委</tb-char><tb-char>質</tb-char><tb-char>為</tb-char><tb-char>臣</tb-char>，<tb-char>而</tb-char><tb-char>又</tb-char><tb-char>求</tb-char><tb-char>殺</tb-char><tb-char>之</tb-char>，<tb-char>是</tb-char><tb-term ref="二心" word="二心">二心</tb-term><tb-char>也</tb-char>。<br><tb-char>凡</tb-char><tb-char>吾</tb-char><tb-char>所</tb-char><tb-char>為</tb-char><tb-char>者</tb-char>，<tb-char>極</tb-char><tb-char>難</tb-char><tb-char>耳</tb-char>。<br><tb-char>然</tb-char><tb-term ref="所以" word="所以">所以</tb-term><tb-char>為</tb-char><tb-char>此</tb-char><tb-char>者</tb-char>，<tb-char>將</tb-char><tb-char>以</tb-char><tb-char>愧</tb-char><tb-term ref="天下" word="天下">天下</tb-term><tb-term ref="後世" word="後世">後世</tb-term><tb-char>之</tb-char><tb-char>為</tb-char><tb-term ref="人臣" word="人臣">人臣</tb-term><tb-char>懷</tb-char><tb-term ref="二心" word="二心">二心</tb-term><tb-char>者</tb-char><tb-char>也</tb-char>。」<br><tb-term ref="趙襄子" word="襄子">襄子</tb-term><tb-char>出</tb-char>，<tb-term ref="豫讓" word="豫讓">豫讓</tb-term><tb-char>伏</tb-char><tb-char>於</tb-char><tb-char>橋</tb-char><tb-char>下</tb-char>。</li>
+  <li><tb-term ref="趙襄子" word="襄子">襄子</tb-term><tb-char>至</tb-char><tb-char>橋</tb-char>，<tb-char>馬</tb-char><tb-char>驚</tb-char>，<tb-char>索</tb-char><tb-char>之</tb-char>，<tb-char>得</tb-char><tb-term ref="豫讓" word="豫讓">豫讓</tb-term>，<tb-char>遂</tb-char><tb-char>殺</tb-char><tb-char>之</tb-char>。</li>
+</ol>
+
+<ol class="zj-src" data-corpus="zj-001-shi-xi">
+  <li><tb-term ref="趙襄子" word="襄子">襄子</tb-term><tb-char>為</tb-char><tb-char>伯</tb-char><tb-char>魯</tb-char><tb-char>之</tb-char><tb-char>不</tb-char><tb-char>立</tb-char><tb-char>也</tb-char>，<tb-char>有</tb-char><tb-char>子</tb-char><tb-char>五</tb-char><tb-char>人</tb-char>，<tb-char>不</tb-char><tb-char>肯</tb-char><tb-char>置</tb-char><tb-char>後</tb-char>。</li>
+  <li><tb-char>封</tb-char><tb-char>伯</tb-char><tb-char>魯</tb-char><tb-char>之</tb-char><tb-char>子</tb-char><tb-char>於</tb-char><tb-char>代</tb-char>，<tb-char>曰</tb-char><tb-term ref="代成君" word="代成君">代成君</tb-term>，<tb-char>早</tb-char><tb-char>卒</tb-char>，<tb-char>立</tb-char><tb-char>其</tb-char><tb-char>子</tb-char><tb-char>浣</tb-char><tb-char>為</tb-char><tb-term ref="趙氏後" word="趙氏後">趙氏後</tb-term>。</li>
+  <li><tb-term ref="趙襄子" word="襄子">襄子</tb-term><tb-char>卒</tb-char>，<tb-char>弟</tb-char><tb-term ref="趙桓子" word="桓子">桓子</tb-term><tb-char>嘉</tb-char><tb-char>逐</tb-char><tb-char>浣</tb-char><tb-char>而</tb-char><tb-char>自</tb-char><tb-char>立</tb-char>，<tb-char>一</tb-char><tb-char>年</tb-char><tb-char>卒</tb-char>。</li>
+  <li><tb-term ref="趙氏" word="趙氏">趙氏</tb-term><tb-char>之</tb-char><tb-char>人</tb-char><tb-char>曰</tb-char>：「<tb-term ref="趙桓子" word="桓子">桓子</tb-term><tb-char>立</tb-char>，<tb-char>非</tb-char><tb-char>襄</tb-char><tb-char>主</tb-char><tb-char>意</tb-char>。」<br><tb-char>乃</tb-char><tb-char>共</tb-char><tb-char>殺</tb-char><tb-char>其</tb-char><tb-char>子</tb-char>，<tb-char>復</tb-char><tb-char>迎</tb-char><tb-char>浣</tb-char><tb-char>而</tb-char><tb-char>立</tb-char><tb-char>之</tb-char>，<tb-char>是</tb-char><tb-char>為</tb-char><tb-term ref="獻子" word="獻子">獻子</tb-term>。</li>
+  <li><tb-term ref="獻子" word="獻子">獻子</tb-term><tb-char>生</tb-char><tb-char>籍</tb-char>，<tb-char>是</tb-char><tb-char>為</tb-char><tb-term ref="烈侯" word="烈侯">烈侯</tb-term>。</li>
+  <li><tb-term ref="魏斯" word="魏斯">魏斯</tb-term><tb-char>者</tb-char>，<tb-term ref="趙桓子" word="桓子">桓子</tb-term><tb-char>之</tb-char><tb-char>孫</tb-char><tb-char>也</tb-char>，<tb-char>是</tb-char><tb-char>為</tb-char><tb-term ref="文侯" word="文侯">文侯</tb-term>。</li>
+  <li><tb-char>韓</tb-char><tb-char>康</tb-char><tb-char>子</tb-char><tb-char>生</tb-char><tb-term ref="武子" word="武子">武子</tb-term><tb-char>啟</tb-char><tb-char>章</tb-char>，<tb-term ref="武子" word="武子">武子</tb-term><tb-char>生</tb-char><tb-char>虔</tb-char>，<tb-char>是</tb-char><tb-char>為</tb-char><tb-term ref="景侯" word="景侯">景侯</tb-term>。</li>
+</ol>
+  </section>
+
+  <section id="translation">
+  <h2>現代漢語翻譯</h2>
+
+  <p>左欄是原句，右欄是它的現代漢語，一句對一句，句序與原文相同。底本有異文、或某個詞的讀法有爭議的地方，都在那一句的譯文旁邊用一條小註說明。</p>
+
+<ol class="zj-trans">
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">初，智宣子將以瑤為後。</span>
+      <span class="zj-trans__text">當初，智宣子打算立智瑤做繼承人。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">智果曰：「不如宵也。</span>
+      <span class="zj-trans__text">智果說：「不如立宵。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">瑤之賢於人者五，其不逮者一也。</span>
+      <span class="zj-trans__text">智瑤勝過別人的地方有五項，趕不上別人的有一項。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">美鬢長大則賢，射御足力則賢，伎藝畢給則賢，巧文辯慧則賢，強毅果敢則賢，如是而甚不仁。</span>
+      <span class="zj-trans__text">鬢髮漂亮、身材高大，是他的長處；射箭駕車、力氣過人，是他的長處；各種技藝樣樣精通，是他的長處；文辭巧辯、心思機敏，是他的長處；剛強堅毅、果敢決斷，是他的長處——可他就是極不仁厚。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">夫以其五賢陵人，而以不仁行之，其誰能待之？</span>
+      <span class="zj-trans__text">憑這五項長處去壓人，再加上不仁的行事，誰能受得了他？</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">若果立瑤也，智宗必滅。」</span>
+      <span class="zj-trans__text">倘若真立了智瑤，智氏宗族必定滅亡。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">弗聽，智果別族於太史為輔氏。</span>
+      <span class="zj-trans__text">智宣子不聽。智果便向太史申請別立族屬，改為輔氏。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">趙簡子之子，長曰伯魯，幼曰無恤。</span>
+      <span class="zj-trans__text">趙簡子的兒子，長子叫伯魯，幼子叫無恤。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">將置後，不知所立。</span>
+      <span class="zj-trans__text">簡子要確立繼承人，拿不定主意立誰。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">乃書訓戒之辭於二簡，以授二子曰：「謹識之。」</span>
+      <span class="zj-trans__text">於是他把訓誡的話寫在兩塊竹簡上，交給兩個兒子，說：「好好記住。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">三年而問之，伯魯不能舉其辭，求其簡，已失之矣。</span>
+      <span class="zj-trans__text">過了三年再問他們，伯魯背不出那些話，找那塊竹簡，已經丟了。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">問無恤，誦其辭甚習，求其簡，出諸袖中而奏之。</span>
+      <span class="zj-trans__text">問無恤，他背得極熟；找那塊竹簡，從袖子裡拿出來呈上。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">於是簡子以無恤為賢，立以為後。</span>
+      <span class="zj-trans__text">於是簡子認為無恤賢能，立他為繼承人。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">簡子使尹鐸為晉陽。</span>
+      <span class="zj-trans__text">簡子派尹鐸去治理晉陽。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">請曰：「以為繭絲乎？</span>
+      <span class="zj-trans__text">尹鐸請示說：「您是要我像抽繭取絲那樣榨取賦稅，</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">抑為保障乎？」</span>
+      <span class="zj-trans__text">還是要我去築起屏障那樣保障民生？」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">簡子曰：「保障哉！」</span>
+      <span class="zj-trans__text">簡子說：「當然是保障！」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">尹鐸損其戶數。</span>
+      <div class="zj-trans__text">尹鐸於是少報戶數，讓百姓負擔輕、賦稅少。
+        <aside class="tb-margin-note">「損其戶數」是故意把戶口報少。韋昭注的解釋是：少報戶數，百姓負擔就寬裕，賦稅也輕——這是尹鐸替晉陽留的一口氣，不是糊塗帳。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">簡子謂無恤曰：「晉國有難，而無以尹鐸為少，無以晉陽為遠，必以為歸。」</span>
+      <span class="zj-trans__text">簡子對無恤說：「晉國一旦有難，你不要嫌尹鐸資望淺，不要嫌晉陽路遠，一定要投奔那裡。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">及智宣子卒，智襄子為政，與韓康子、魏桓子宴於藍臺。</span>
+      <div class="zj-trans__text">等到智宣子去世，智襄子執掌晉國國政，與韓康子、魏桓子在藍臺宴飲。
+        <aside class="tb-margin-note">異文：底本作「藍台」，四部叢刊景宋刊本、胡三省音注本、四庫全書本並作「藍臺」；胡三省注引《爾雅》「四方而高曰臺」。本書從「臺」。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">智伯戲康子而侮段規，智國聞之，諫曰：「主不備，難必至矣！」</span>
+      <span class="zj-trans__text">智伯戲弄韓康子，又侮辱段規。智國聽說此事，勸諫說：「主上不加防備，災難一定降臨！」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">智伯曰：「難將由我。</span>
+      <span class="zj-trans__text">智伯說：「災難只能由我這裡發動。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">我不為難，誰敢興之？」</span>
+      <span class="zj-trans__text">我不製造災難，誰敢興風作浪？」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">對曰：「不然。</span>
+      <span class="zj-trans__text">智國回答：「不是這樣。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">《夏書》有之曰：『一人三失，怨豈在明，不見是圖。』</span>
+      <span class="zj-trans__text">《夏書》上有話：『一個人屢次犯錯，怨恨哪裡會在明處？要在事情還沒顯露時就設法對付。』</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">夫君子能勤小物，故無大患。</span>
+      <span class="zj-trans__text">君子能在小事上用心，所以沒有大禍。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">今主一宴而恥人之君相，又弗備，曰不敢興難，無乃不可乎！</span>
+      <span class="zj-trans__text">如今主上一次宴會就羞辱了人家的國君和國相，又不加防備，還說沒人敢興難，恐怕不行吧！</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">蜹、蟻、蜂、蠆，皆能害人，況君相乎！」</span>
+      <div class="zj-trans__text">蚊蚋、螞蟻、蜂、蠍，都能傷人，何況人家的國君和國相呢！」
+        <aside class="tb-margin-note">異文：「蜹」是來源整理本的寫法，另一條傳本作「蚋」，指的是同一種小蟲（蚊蚋）。本書從「蜹」。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">弗聽。</span>
+      <span class="zj-trans__text">智伯不聽。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">智伯請地於韓康子，康子欲弗與。</span>
+      <span class="zj-trans__text">智伯向韓康子索要土地，韓康子想不給。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">段規曰：「智伯好利而愎，不與，將伐我；不如與之。</span>
+      <span class="zj-trans__text">段規說：「智伯貪利而剛愎，不給，他就要攻打我們；不如給他。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">彼狃於得地，必請於他人；他人不與，必向之以兵。</span>
+      <span class="zj-trans__text">他一旦從得到土地中嚐到甜頭，必定再向別人索要；別人不給，他必定以兵相向。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">然則我得免於患而待事之變矣。」</span>
+      <span class="zj-trans__text">這樣我們就能免於禍患，坐等事態變化。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">康子曰：「善。」</span>
+      <span class="zj-trans__text">韓康子說：「好。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">使使者致萬家之邑於智伯，智伯悅。</span>
+      <span class="zj-trans__text">派使者把一個萬戶之邑送給智伯，智伯很高興。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">又求地於魏桓子，桓子欲弗與。</span>
+      <span class="zj-trans__text">智伯又向魏桓子索地，魏桓子想不給。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">任章曰：「何故弗與？」</span>
+      <span class="zj-trans__text">任章說：「為什麼不給？」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">桓子曰：「無故索地，故弗與。」</span>
+      <span class="zj-trans__text">魏桓子說：「無緣無故來索地，所以不給。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">任章曰：「無故索地，諸大夫必懼；吾與之地，智伯必驕。</span>
+      <span class="zj-trans__text">任章說：「無緣無故索地，各家大夫必定恐懼；我們給他地，智伯必定驕橫。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">彼驕而輕敵，此懼而相親。</span>
+      <span class="zj-trans__text">他驕橫就會輕敵，我們恐懼就會彼此親近。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">以相親之兵待輕敵之人，智氏之命必不長矣。</span>
+      <span class="zj-trans__text">用彼此親近的軍隊去對付輕敵的人，智氏的命運必定長不了。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">《周書》曰：『將欲敗之，必姑輔之；將欲取之，必姑與之。』</span>
+      <span class="zj-trans__text">《周書》說：『將要打敗他，一定先輔助他；將要奪取他，一定先給予他。』</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">主不如與之以驕智伯，然後可以擇交而圖智氏矣。</span>
+      <span class="zj-trans__text">主上不如給他，讓智伯驕橫起來，然後我們就可以選擇盟友、圖謀智氏了。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">奈何獨以吾為智氏質乎！」</span>
+      <span class="zj-trans__text">為什麼偏偏要讓我們做智氏的靶子呢！」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">桓子曰：「善。」</span>
+      <span class="zj-trans__text">魏桓子說：「好。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">復與之萬家之邑一。</span>
+      <span class="zj-trans__text">又給了他一個萬戶之邑。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">智伯又求藺、皋狼之地於趙襄子，襄子弗與。</span>
+      <div class="zj-trans__text">智伯又向趙襄子索要藺和皋狼兩地，趙襄子不給。
+        <aside class="tb-margin-note">異文：這一句的底本作「蔡、皋狼」，整理者依《史記·趙世家》與《通鑑》周烈王四年條改作「藺」。藺和皋狼都在晉陽以西，是趙的地；蔡是淮北的國，不可能是趙地。本書從「藺」。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">智伯怒，帥韓、魏之甲以攻趙氏。</span>
+      <span class="zj-trans__text">智伯大怒，率領韓、魏的甲兵攻打趙氏。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">襄子將出，曰：「吾何走乎？」</span>
+      <span class="zj-trans__text">趙襄子準備出逃，說：「我往哪裡去？」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">從者曰：「長子近，且城厚完。」</span>
+      <span class="zj-trans__text">隨從說：「長子離得近，而且城牆厚實完整。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">襄子曰：「民罷力以完之，又斃死以守之，其誰與我！」</span>
+      <span class="zj-trans__text">趙襄子說：「百姓耗盡氣力才把城修好，又要他們拼死守城，誰會跟我！」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">從者曰：「邯鄲之倉庫實。」</span>
+      <span class="zj-trans__text">隨從說：「邯鄲的倉庫充實。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">襄子曰：「浚民之膏澤以實之，又因而殺之，其誰與我！</span>
+      <span class="zj-trans__text">趙襄子說：「搜刮百姓的膏血來充實倉庫，又因此讓他們送死，誰會跟我！</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">其晉陽乎，先主之所屬也，尹鐸之所寬也，民必和矣。」</span>
+      <span class="zj-trans__text">還是晉陽吧——那是先主囑咐過的地方，是尹鐸寬待百姓的地方，百姓一定和睦。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">乃走晉陽。</span>
+      <span class="zj-trans__text">於是逃往晉陽。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">三家以國人圍而灌之，城不浸者三版。</span>
+      <span class="zj-trans__text">三家率領各自國人包圍晉陽並引水灌城，城牆只剩三版沒有被淹。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">沈竈產鼃，民無叛意。</span>
+      <span class="zj-trans__text">鍋灶沉在水裡，生出青蛙，百姓卻沒有背叛之心。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">智伯行水，魏桓子御，韓康子驂乘。</span>
+      <span class="zj-trans__text">智伯巡視水勢，魏桓子駕車，韓康子作驂乘。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">智伯曰：「吾乃今知水可以亡人國也。」</span>
+      <span class="zj-trans__text">智伯說：「我今天才知道水可以滅亡別人的國家。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">桓子肘康子，康子履桓子之跗，以汾水可以灌安邑，絳水可以灌平陽也。</span>
+      <div class="zj-trans__text">魏桓子用肘碰了碰韓康子，韓康子踩了踩魏桓子的腳背——因為汾水可以灌安邑，絳水可以灌平陽。
+        <aside class="tb-margin-note">肘與履是整場戰爭的轉折。安邑是魏的都城，平陽是韓的都城；汾水可以灌安邑，絳水可以灌平陽。智伯說水可以亡人國，聽的人各自想到了自己的都城。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">絺疵謂智伯曰：「韓、魏必反矣。」</span>
+      <span class="zj-trans__text">絺疵對智伯說：「韓、魏一定要反了。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">智伯曰：「子何以知之？」</span>
+      <span class="zj-trans__text">智伯說：「你怎麼知道？」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">絺疵曰：「以人事知之。</span>
+      <span class="zj-trans__text">絺疵說：「從人事上知道的。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">夫從韓、魏之兵以攻趙，趙亡，難必及韓、魏矣。</span>
+      <span class="zj-trans__text">率領韓、魏的兵來攻趙，趙一亡，災難必定輪到韓、魏。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">今約勝趙而三分其地，城不沒者三版，人馬相食，城降有日，而二子無喜志，有憂色，是非反而何？」</span>
+      <span class="zj-trans__text">如今約定戰勝趙國後三分其地，城牆只剩三版沒淹，人馬相食，城破有日，可這兩個人沒有一點喜色，反倒面帶憂容——這不是要反又是什麼？」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">明日，智伯以絺疵之言告二子，二子曰：「此夫讒臣欲為趙氏游說，使主疑於二家而懈於攻趙氏也。</span>
+      <span class="zj-trans__text">第二天，智伯把絺疵的話告訴了韓、魏二人。二人說：「這是進讒言的人想替趙氏遊說，讓主上懷疑我們兩家，從而放鬆對趙氏的進攻。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">不然，夫二家豈不利朝夕分趙氏之田，而欲為危難不可成之事乎？」</span>
+      <span class="zj-trans__text">不然的話，我們兩家難道不願意早日分到趙氏的土地，反而要去幹那種危險而辦不成的勾當嗎？」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">二子出，絺疵入曰：「主何以臣之言告二子也？」</span>
+      <span class="zj-trans__text">二人出去後，絺疵進來問：「主上為什麼把我的話告訴他們？」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">智伯曰：「子何以知之？」</span>
+      <span class="zj-trans__text">智伯說：「你怎麼知道？」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">對曰：「臣見其視臣端而趨疾，知臣得其情故也。」</span>
+      <span class="zj-trans__text">回答說：「我看他們看我的時候眼神端正、走路卻很快，知道我已看穿了他們的實情。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">智伯不悛。</span>
+      <span class="zj-trans__text">智伯不改。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">絺疵請使於齊。</span>
+      <div class="zj-trans__text">絺疵請求出使齊國。
+        <aside class="tb-margin-note">請求出使齊國是避禍。他已經看出智伯不會回頭，而韓、魏必反。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">趙襄子使張孟談潛出見二子，曰：「臣聞脣亡則齒寒。</span>
+      <span class="zj-trans__text">趙襄子派張孟談潛出城去見韓、魏二人，說：「我聽說唇亡則齒寒。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">今智伯帥韓、魏而攻趙，趙亡則韓、魏為之次矣。」</span>
+      <span class="zj-trans__text">如今智伯率韓、魏攻趙，趙一亡，韓、魏就是下一個。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">二子曰：「我心知其然也，恐事未遂而謀洩，則禍立至矣」。</span>
+      <div class="zj-trans__text">二人說：「我們心裡也知道是這樣，只怕事情還沒辦成而謀劃洩露，那災禍立刻就到。」
+        <aside class="tb-margin-note">異文：來源整理本作「恐事末遂而謀洩」，「末」於文義不通，另一本作「未」。本書從「未」，並在這裡記下這一處異文。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">張孟談曰：「謀出二主之口，入臣之耳，何傷也？」</span>
+      <span class="zj-trans__text">張孟談說：「謀劃出於二位主上之口，入於我的耳朵，有什麼妨礙？」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">二子乃陰與張孟談約，為之期日而遣之。</span>
+      <span class="zj-trans__text">二人於是暗中與張孟談約定，為他定下日期，送他回去。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">襄子夜使人殺守堤之吏，而決水灌智伯軍。</span>
+      <span class="zj-trans__text">襄子夜裡派人殺掉守堤的官吏，決開堤水灌智伯的軍營。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">智伯軍救水而亂，韓、魏翼而擊之，襄子將卒犯其前，大敗智伯之眾。</span>
+      <span class="zj-trans__text">智伯的軍隊救水而亂，韓、魏從兩翼夾擊，襄子率領士卒從正面進攻，大敗智伯的軍隊。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">遂殺智伯，盡滅智氏之族。</span>
+      <span class="zj-trans__text">於是殺了智伯，把智氏一族全部滅掉。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">唯輔果在。</span>
+      <span class="zj-trans__text">只有輔果還在。</span>
+    </li>
+</ol>
+
+  <p>以下是豫讓那一段。</p>
+
+<ol class="zj-trans">
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">三家分智氏之田。</span>
+      <span class="zj-trans__text">三家瓜分了智氏的田土。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">趙襄子漆智伯之頭，以為飲器。</span>
+      <span class="zj-trans__text">趙襄子把智伯的頭漆了，做成了飲器。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">智伯之臣豫讓欲為之報仇，乃詐為刑人，挾匕首，入襄子宮中塗廁。</span>
+      <div class="zj-trans__text">智伯的臣子豫讓想為他報仇，就詐扮成受刑之人，懷揣匕首，混進襄子宮中打掃廁所。
+        <aside class="tb-margin-note">「塗廁」通常解作出入廁所做工，也有人讀作「塗牆」，即把廁所的牆抹上泥。兩讀都通，這裡取前者。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">襄子如廁心動，索之，獲豫讓。</span>
+      <span class="zj-trans__text">襄子去上廁所時心裡一動，命人搜查，抓住了豫讓。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">左右欲殺之，襄子曰：「智伯死無後，而此人欲為報仇，真義士也！</span>
+      <span class="zj-trans__text">左右要殺他，襄子說：「智伯死後沒有後人，而這個人想替他報仇，真是義士啊！</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">吾謹避之耳。」</span>
+      <span class="zj-trans__text">我小心避開他就是了。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">乃捨之。</span>
+      <span class="zj-trans__text">於是放了他。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">豫讓又漆身為癩，吞炭為啞，行乞於市，其妻不識也。</span>
+      <div class="zj-trans__text">豫讓又用漆塗身讓自己長出癩瘡，吞下炭讓自己變啞，在集市上乞討，他的妻子都認不出他。
+        <aside class="tb-margin-note">「漆身為癩」是用漆塗身，讓皮膚長出惡瘡的樣子——把自己弄到認不出來，不是真的得了痲瘋。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">行見其友，其友識之，為之泣曰：「以子之才，臣事趙孟，必得近幸。</span>
+      <div class="zj-trans__text">路上遇到他的朋友，朋友認出了他，為他流淚說：「憑你的才能，去臣事趙孟，一定能得到親近寵幸。
+        <aside class="tb-margin-note">「趙孟」不是名字，是趙氏歷代宗主的稱號，趙簡子用過，這裡指趙襄子。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">子乃為所欲為，顧不易邪？</span>
+      <span class="zj-trans__text">你到了他身邊再想辦法，難道不容易嗎？</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">何乃自苦如此！</span>
+      <span class="zj-trans__text">何必這樣折磨自己！</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">求以報仇，不亦難乎？」</span>
+      <span class="zj-trans__text">用這種辦法求報仇，不也太難了嗎？」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">豫讓曰：「不可！</span>
+      <div class="zj-trans__text">豫讓說：「不可！
+        <aside class="tb-margin-note">異文：「不可」二字不見於底本，是整理者依十二行本等本子補入的。底本此處只有「豫讓曰」，接著就是「既已委質為臣」。本書從補入之本。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">既已委質為臣，而又求殺之，是二心也。</span>
+      <div class="zj-trans__text">已經委身做人家的臣子，卻又圖謀殺他，這是二心。
+        <aside class="tb-margin-note">「委質」是委身、獻身做人家的臣子，本來帶著獻禮為質的儀式意味；這裡譯作「委身做臣子」。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">凡吾所為者，極難耳。</span>
+      <span class="zj-trans__text">我所做的事，本來就是極難的。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">然所以為此者，將以愧天下後世之為人臣懷二心者也。」</span>
+      <span class="zj-trans__text">我之所以要這樣做，是要讓天下後世做臣子卻懷有二心的人感到羞愧。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">襄子出，豫讓伏於橋下。</span>
+      <span class="zj-trans__text">襄子外出，豫讓埋伏在橋下。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">襄子至橋，馬驚，索之，得豫讓，遂殺之。</span>
+      <span class="zj-trans__text">襄子到了橋上，馬受驚，命人搜查，抓到豫讓，就把他殺了。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">襄子為伯魯之不立也，有子五人，不肯置後。</span>
+      <span class="zj-trans__text">襄子因為伯魯沒有被立為繼承人，自己雖有五個兒子，卻不肯立他們。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">封伯魯之子於代，曰代成君，早卒，立其子浣為趙氏後。</span>
+      <span class="zj-trans__text">他把伯魯的兒子封在代，稱代成君，代成君死得早，便立他的兒子浣為趙氏繼承人。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">襄子卒，弟桓子嘉逐浣而自立，一年卒。</span>
+      <div class="zj-trans__text">襄子去世後，弟弟桓子嘉驅逐浣而自立，一年就死了。
+        <aside class="tb-margin-note">「嘉」是整理者依《史記索隱》引《世本》補的字。《世本》說桓子是襄子的兒子，《史記》和《通鑑》都說他是弟弟；這裡照錄《通鑑》的「弟」。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">趙氏之人曰：「桓子立，非襄主意。」</span>
+      <span class="zj-trans__text">趙氏的人說：「桓子立為宗主，不是襄子的本意。」</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">乃共殺其子，復迎浣而立之，是為獻子。</span>
+      <span class="zj-trans__text">於是共同殺掉桓子的兒子，重新迎立浣，這就是獻子。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">獻子生籍，是為烈侯。</span>
+      <span class="zj-trans__text">獻子生了籍，就是烈侯。</span>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">魏斯者，桓子之孫也，是為文侯。</span>
+      <div class="zj-trans__text">魏斯是桓子的孫子，就是文侯。
+        <aside class="tb-margin-note">異說：《史記·魏世家》索隱引《世本》說魏斯是桓子的兒子，不是孫子。這裡照錄《通鑑》的「孫」。</aside>
+      </div>
+    </li>
+    <li class="zj-trans__row">
+      <span class="zj-trans__src">韓康子生武子啟章，武子生虔，是為景侯。</span>
+      <span class="zj-trans__text">韓康子生了武子啟章，武子生了虔，就是景侯。</span>
+    </li>
+</ol>
+  </section>
+
+  <section id="notes">
+  <h2>字詞</h2>
+
+  <p>先看字。下表是本章要留意的字：字形、拼音、詞性、在本章的意思，以及一句《通鑑》的用例——用例都從本書校訂過的文本裡截出，一字不改；凡改動底本、採用別本的地方，那一句的譯文旁邊都註明了。一個字在本章之外還有別的常見意思時，意思一欄會一併寫出來，用例多半給的是那個意思，因為那才是需要看見的證據。</p>
+
+  <h3 id="lex-chars">字</h3>
+
+  <dl class="zj-lex">
+    <dt><span class="zj-lex__glyph">初</span><span class="zj-lex__pinyin">chū</span><span class="zj-lex__pos">副</span></dt>
+    <dd>當初、從前。追敘往事時的開頭詞，不是「第一次」。例：<span class="zj-quote" lang="zh-Hant">初，智宣子將以瑤為後。</span></dd>
+    <dt><span class="zj-lex__glyph">將</span><span class="zj-lex__pinyin">jiāng</span><span class="zj-lex__pos">副</span></dt>
+    <dd>將要、打算；又作動詞「率領」。例：<span class="zj-quote" lang="zh-Hant">襄子將卒犯其前</span></dd>
+    <dt><span class="zj-lex__glyph">為</span><span class="zj-lex__pinyin">wéi</span><span class="zj-lex__pos">動</span></dt>
+    <dd>做、當、作為；讀 wèi 時是「替、給」，如「豫讓欲為之報仇」。例：<span class="zj-quote" lang="zh-Hant">豫讓欲為之報仇</span></dd>
+    <dt><span class="zj-lex__glyph">後</span><span class="zj-lex__pinyin">hòu</span><span class="zj-lex__pos">名</span></dt>
+    <dd>繼承人、後嗣；也指後代、後世。例：<span class="zj-quote" lang="zh-Hant">將以愧天下後世之為人臣懷二心者也。</span></dd>
+    <dt><span class="zj-lex__glyph">賢</span><span class="zj-lex__pinyin">xián</span><span class="zj-lex__pos">動</span></dt>
+    <dd>勝過、超過；又作形容詞「賢能」、名詞「有德才的人」。例：<span class="zj-quote" lang="zh-Hant">瑤之賢於人者五</span></dd>
+    <dt><span class="zj-lex__glyph">別</span><span class="zj-lex__pinyin">bié</span><span class="zj-lex__pos">動</span></dt>
+    <dd>分出去、另立。這裡是把自己的族屬從智氏分出來。例：<span class="zj-quote" lang="zh-Hant">智果別族於太史為輔氏。</span></dd>
+    <dt><span class="zj-lex__glyph">置</span><span class="zj-lex__pinyin">zhì</span><span class="zj-lex__pos">動</span></dt>
+    <dd>確立、設立；也指設置官職。例：<span class="zj-quote" lang="zh-Hant">將置後，不知所立。</span></dd>
+    <dt><span class="zj-lex__glyph">簡</span><span class="zj-lex__pinyin">jiǎn</span><span class="zj-lex__pos">名</span></dt>
+    <dd>竹簡，寫字的竹片木片；用在人名裡則是諡號。例：<span class="zj-quote" lang="zh-Hant">乃書訓戒之辭於二簡</span></dd>
+    <dt><span class="zj-lex__glyph">舉</span><span class="zj-lex__pinyin">jǔ</span><span class="zj-lex__pos">動</span></dt>
+    <dd>背出、舉出。這裡是背誦。例：<span class="zj-quote" lang="zh-Hant">伯魯不能舉其辭</span></dd>
+    <dt><span class="zj-lex__glyph">習</span><span class="zj-lex__pinyin">xí</span><span class="zj-lex__pos">形</span></dt>
+    <dd>熟習、熟練。例：<span class="zj-quote" lang="zh-Hant">誦其辭甚習</span></dd>
+    <dt><span class="zj-lex__glyph">損</span><span class="zj-lex__pinyin">sǔn</span><span class="zj-lex__pos">動</span></dt>
+    <dd>減少。這裡是把戶口數字報少。例：<span class="zj-quote" lang="zh-Hant">尹鐸損其戶數。</span></dd>
+    <dt><span class="zj-lex__glyph">難</span><span class="zj-lex__pinyin">nàn</span><span class="zj-lex__pos">名</span></dt>
+    <dd>災難、禍事，讀 nàn；讀 nán 時是「不容易」。例：<span class="zj-quote" lang="zh-Hant">晉國有難，而無以尹鐸為少</span></dd>
+    <dt><span class="zj-lex__glyph">屬</span><span class="zj-lex__pinyin">zhǔ</span><span class="zj-lex__pos">動</span></dt>
+    <dd>囑咐、託付，通「囑」。例：<span class="zj-quote" lang="zh-Hant">先主之所屬也</span></dd>
+    <dt><span class="zj-lex__glyph">諫</span><span class="zj-lex__pinyin">jiàn</span><span class="zj-lex__pos">動</span></dt>
+    <dd>勸諫，下對上的規勸。例：<span class="zj-quote" lang="zh-Hant">智國聞之，諫曰</span></dd>
+    <dt><span class="zj-lex__glyph">備</span><span class="zj-lex__pinyin">bèi</span><span class="zj-lex__pos">動</span></dt>
+    <dd>防備、戒備。例：<span class="zj-quote" lang="zh-Hant">主不備，難必至矣！</span></dd>
+    <dt><span class="zj-lex__glyph">恥</span><span class="zj-lex__pinyin">chǐ</span><span class="zj-lex__pos">動</span></dt>
+    <dd>使……受恥辱。例：<span class="zj-quote" lang="zh-Hant">今主一宴而恥人之君相</span></dd>
+    <dt><span class="zj-lex__glyph">與</span><span class="zj-lex__pinyin">yǔ</span><span class="zj-lex__pos">動</span></dt>
+    <dd>給予；也是「跟、和」。本章兩義都有。例：<span class="zj-quote" lang="zh-Hant">不如與之</span></dd>
+    <dt><span class="zj-lex__glyph">狃</span><span class="zj-lex__pinyin">niǔ</span><span class="zj-lex__pos">動</span></dt>
+    <dd>習慣了、嚐到甜頭而不知足。例：<span class="zj-quote" lang="zh-Hant">彼狃於得地</span></dd>
+    <dt><span class="zj-lex__glyph">質</span><span class="zj-lex__pinyin">zhì</span><span class="zj-lex__pos">名</span></dt>
+    <dd>人質；引申為被拿來開刀的那一個。例：<span class="zj-quote" lang="zh-Hant">奈何獨以吾為智氏質乎！</span></dd>
+    <dt><span class="zj-lex__glyph">罷</span><span class="zj-lex__pinyin">pí</span><span class="zj-lex__pos">動</span></dt>
+    <dd>通「疲」，疲敝、耗盡氣力。例：<span class="zj-quote" lang="zh-Hant">民罷力以完之</span></dd>
+    <dt><span class="zj-lex__glyph">版</span><span class="zj-lex__pinyin">bǎn</span><span class="zj-lex__pos">名</span></dt>
+    <dd>築牆用的夾板，也用作量牆高的單位。例：<span class="zj-quote" lang="zh-Hant">城不浸者三版。</span></dd>
+    <dt><span class="zj-lex__glyph">鼃</span><span class="zj-lex__pinyin">wā</span><span class="zj-lex__pos">名</span></dt>
+    <dd>「蛙」的古字。例：<span class="zj-quote" lang="zh-Hant">沈竈產鼃</span></dd>
+    <dt><span class="zj-lex__glyph">御</span><span class="zj-lex__pinyin">yù</span><span class="zj-lex__pos">動</span></dt>
+    <dd>駕車。例：<span class="zj-quote" lang="zh-Hant">魏桓子御</span></dd>
+    <dt><span class="zj-lex__glyph">悛</span><span class="zj-lex__pinyin">quān</span><span class="zj-lex__pos">動</span></dt>
+    <dd>悔改、改變。例：<span class="zj-quote" lang="zh-Hant">智伯不悛。</span></dd>
+    <dt><span class="zj-lex__glyph">使</span><span class="zj-lex__pinyin">shǐ</span><span class="zj-lex__pos">動</span></dt>
+    <dd>出使；也指使者、派人。例：<span class="zj-quote" lang="zh-Hant">絺疵請使於齊。</span></dd>
+    <dt><span class="zj-lex__glyph">次</span><span class="zj-lex__pinyin">cì</span><span class="zj-lex__pos">名</span></dt>
+    <dd>下一個、其次。例：<span class="zj-quote" lang="zh-Hant">趙亡則韓、魏為之次矣。</span></dd>
+    <dt><span class="zj-lex__glyph">洩</span><span class="zj-lex__pinyin">xiè</span><span class="zj-lex__pos">動</span></dt>
+    <dd>洩露、走漏。例：<span class="zj-quote" lang="zh-Hant">恐事未遂而謀洩</span></dd>
+    <dt><span class="zj-lex__glyph">期</span><span class="zj-lex__pinyin">qī</span><span class="zj-lex__pos">動</span></dt>
+    <dd>約定日期。例：<span class="zj-quote" lang="zh-Hant">為之期日而遣之。</span></dd>
+    <dt><span class="zj-lex__glyph">漆</span><span class="zj-lex__pinyin">qī</span><span class="zj-lex__pos">動</span></dt>
+    <dd>塗漆。例：<span class="zj-quote" lang="zh-Hant">趙襄子漆智伯之頭，以為飲器。</span></dd>
+    <dt><span class="zj-lex__glyph">詐</span><span class="zj-lex__pinyin">zhà</span><span class="zj-lex__pos">動</span></dt>
+    <dd>假裝、冒充。例：<span class="zj-quote" lang="zh-Hant">乃詐為刑人</span></dd>
+    <dt><span class="zj-lex__glyph">挾</span><span class="zj-lex__pinyin">xié</span><span class="zj-lex__pos">動</span></dt>
+    <dd>懷藏、夾帶在身上。例：<span class="zj-quote" lang="zh-Hant">挾匕首</span></dd>
+    <dt><span class="zj-lex__glyph">捨</span><span class="zj-lex__pinyin">shě</span><span class="zj-lex__pos">動</span></dt>
+    <dd>放過、釋放。例：<span class="zj-quote" lang="zh-Hant">乃捨之。</span></dd>
+    <dt><span class="zj-lex__glyph">癩</span><span class="zj-lex__pinyin">lài</span><span class="zj-lex__pos">名</span></dt>
+    <dd>惡瘡、癩病。例：<span class="zj-quote" lang="zh-Hant">豫讓又漆身為癩</span></dd>
+    <dt><span class="zj-lex__glyph">愧</span><span class="zj-lex__pinyin">kuì</span><span class="zj-lex__pos">動</span></dt>
+    <dd>使……慚愧。例：<span class="zj-quote" lang="zh-Hant">將以愧天下後世之為人臣懷二心者也。</span></dd>
+    <dt><span class="zj-lex__glyph">伏</span><span class="zj-lex__pinyin">fú</span><span class="zj-lex__pos">動</span></dt>
+    <dd>埋伏、潛伏。例：<span class="zj-quote" lang="zh-Hant">豫讓伏於橋下。</span></dd>
+    <dt><span class="zj-lex__glyph">逐</span><span class="zj-lex__pinyin">zhú</span><span class="zj-lex__pos">動</span></dt>
+    <dd>驅逐、趕走。例：<span class="zj-quote" lang="zh-Hant">弟桓子嘉逐浣而自立</span></dd>
+    <dt><span class="zj-lex__glyph">迎</span><span class="zj-lex__pinyin">yíng</span><span class="zj-lex__pos">動</span></dt>
+    <dd>迎接；這裡是迎立。例：<span class="zj-quote" lang="zh-Hant">復迎浣而立之</span></dd>
+  </dl>
+
+  <h3 id="lex-words">詞</h3>
+
+  <p>本章的詞按字形排在下面。每一條就是原文裡一張詞卡上的解釋；點原文裡的詞，開出來的就是它。詞卡的邊界有一條規則：人名、地名、官名、書名，以及意思不等於兩個字相加的固定詞語，合成一張卡；一個字一個字讀得出來的詞組不做卡——所以「智宣子」是一個詞，「萬家之邑」是一個詞，而「民無叛意」是四個字。</p>
+
+  <tb-glossary></tb-glossary>
+  </section>
+
+  <section id="history">
+  <h2>背景</h2>
+
+  <p>先說晉。它是周初分封的諸侯國，春秋時是最強的諸侯之一；到春秋末年，國政已經落在卿大夫手裡，國君只是名義上的主。《通鑑》開卷那條命令——周威烈王二十三年（前403）「初命晉大夫魏斯、趙籍、韓虔為諸侯」——就是把三家卿大夫升格為諸侯的那一年。本章的故事發生在它之前五十年，是那條命令的來歷。</p>
+
+  <p>本章出場的四家，是晉國的四個卿大夫之家。智氏出於荀氏，是荀氏的一個分支；古書裡「知」和「智」通用，所以智瑤也寫作知瑤，姓則是荀。智宣子是晉卿、智氏家主，名申（一說名甲），前493年起任晉國的下軍佐。這裡有兩個容易混的人：智果是智氏之族，不是智宣子的兒子，他勸諫不成，便向太史申請別立族屬，改為輔氏；智國是另一個人，他在藍臺之會以後向智伯進諫。本章末句的「輔果」就是改族之後的智果，是同一個人。《說苑》和清代學者黃式三認為智果與智國是一人，楊寬不以為然；這裡從《通鑑》本文，分作兩人。</p>
+
+  <p>智伯名瑤，諡襄，所以同一段裡他又被稱作智襄子和智瑤，都是一個人，是智宣子的兒子——韋昭注和後來的工具書都這麼說，他不是宣子的孫子。他死在前453年。</p>
+
+  <p>趙簡子名鞅，又名志父，也稱趙孟，是趙氏宗主、晉國正卿，死於前476年。「趙孟」不是一個人的名字，而是趙氏歷代宗主的稱號，趙簡子用過，趙襄子也用。豫讓的朋友勸他去臣事趙孟，說的是趙襄子，不是趙簡子。</p>
+
+  <p>趙簡子有兩個兒子：長子伯魯，幼子無恤。他把訓誡的話寫在兩塊竹簡上，交給兩人，三年以後再問——伯魯背不出，竹簡也丟了；無恤背得極熟，竹簡從袖子裡拿出來。於是無恤被立為繼承人，就是後來的趙襄子。《史記》說他的母親出身低賤，是翟人的婢女；《通鑑》只寫「幼曰無恤」，母親的事一個字也沒有。他的名字在《史記》裡寫作「毋卹」，在《通鑑》裡寫作「無恤」。趙襄子自己的年代，幾家說法並不一致，本書不給他具體的在位年份。</p>
+
+  <p>簡子又派家臣尹鐸去治晉陽。尹鐸問的是要「繭絲」還是要「保障」——抽絲是一點一點抽乾，保障是築起屏障把人護住；簡子選了保障，尹鐸於是少報戶數。韋昭注的解釋是：少報戶數，百姓負擔就寬裕，賦稅也輕。晉陽因此成了趙氏最靠得住的地方，簡子也囑咐過無恤：晉國有難，不要嫌晉陽遠。順便說一個否定的事實：有些書把晉陽的經營記在董安于名下，但《通鑑》卷001裡沒有董安于這個人，通鑑把晉陽交給尹鐸一個人。</p>
+
+  <p>本章末尾那串世系，是為了把 403 年那道命令裡的三個名字接上：趙氏這邊，浣是獻子，籍是烈侯；魏斯是桓子的孫子（《世本》說是兒子，這裡照錄《通鑑》的「孫」），就是文侯；韓康子生武子啟章，武子生虔，就是景侯。爵位與世系上的這些分歧，本章的譯文旁邊都註明了。</p>
+
+  <p>年代要特別小心。《通鑑》把智氏滅亡寫在威烈王二十三年那一條之下，沒有給它自己的年份；後來的注家和《史記》的年表把它定在周貞定王十六年，即前453年，戰爭從前455年打到前453年。胡三省還記下皇甫謐的另一個說法，與此不合——兩個說法都留著，這裡不替它們調和。至於「三家分晉」：嚴格說，前403年只是周天子承認了三家諸侯的身分，並沒有分割土地；晉國還留著絳和曲沃，又和趙、魏、韓並存了二十七年，《通鑑》要到周安王二十六年（前376）才記下魏、韓、趙把晉靖公廢為家人、分掉他的土地——那一條在卷一同卷靠後的地方，不在本書的取材範圍之內，所以這裡只轉述，不引原文。前434年三家瓜分晉國公室剩餘土地那件事，《通鑑》卷001裡沒有。而把這一段歷史叫「三家分晉」，是後來的史家為了斷代取的名字，其中一個通行說法甚至把它算在前349年；本書照《通鑑》本文，不作調和。</p>
+
+  <p>還有一條讀《通鑑》要先知道的規矩：避諱。司馬光避宋真宗趙恆的名諱，把「恆」一律改成「常」——所以《通鑑》裡的「田常」就是田恆，「常山」就是恆山。這是避諱，不是他的用字選擇，也不表示「常山」是更早的寫法；讀到這些字時，心裡要把它們換回去。</p>
+
+  <p>最後是豫讓。《通鑑》對他的記載比《史記》和《戰國策》少得多。通鑑只說他是「智伯之臣」，沒有他先前事奉范氏、中行氏那一段，也沒有「士為知己者死」和「國士遇我」那些名言，更沒有請趙襄子的衣服、拔劍三躍、伏劍自殺——通鑑寫的是「索之，得豫讓，遂殺之」，他是被殺的。要讀那些，得去《史記·刺客列傳》和《戰國策·趙策一》；本書把它們留在原文之外，也不在引號裡替通鑑添上。</p>
+
+  <aside class="tb-margin-note">本章不給的幾個數字，說明白比含糊過去好：「城不浸者三版」的「版」是築牆的夾板，是量牆高的單位，但一版折合多長，本書查到的材料都沒有給出，所以不算成米尺；「藍臺」在哪裡，胡三省注只解釋「臺」是方形而高的建築，沒有說地點；段規的身分也是這樣：通鑑本文只在智國的話裡把他與韓康子並舉為「君相」，沒有另外給他官職，把他坐實為誰的「相」的是注家——《國語》韋昭注在兩處自相矛盾，一處說他是魏桓子之相，另一處說「君，康子。相，段規」——本書只說他是韓康子的家臣。</aside>
+  </section>
+
+  <section id="discussion">
+  <h2>思考</h2>
+
+  <p>下面幾道題檢查的是「讀懂了沒有」，不是背誦。每一題只有一個答案是對的，其餘三個各錯在一個地方，解釋裡會說明那個地方在哪。</p>
+
+  <tb-check id="q-changzi">
+    <p class="question">隨從說「長子近，且城厚完」，這裡的「長子」是什麼？</p>
+    <ul class="options">
+      <li>趙襄子的長子，也就是他的大兒子。</li>
+      <li data-correct>晉國的一座城邑，離得近，城牆也厚實。</li>
+      <li>一位姓長名子的大夫。</li>
+      <li>周天子的長子，駐在那裡。</li>
+    </ul>
+    <p class="explain">「長子」在這裡是地名（後世的長子縣一帶），與「邯鄲」並列，是隨從給趙襄子提的兩個避難處，兩處都被襄子否決了。把它讀成「大兒子」是本章最容易踩的坑：襄子確實有五個兒子，但他一個也不肯立，當時更沒有帶著兒子逃難這回事。</p>
+  </tb-check>
+
+  <tb-check id="q-er">
+    <p class="question">簡子對無恤說「晉國有難，而無以尹鐸為少」，句中的「而」是什麼意思？</p>
+    <ul class="options">
+      <li>而且、並且。</li>
+      <li>可是、卻。</li>
+      <li data-correct>你，第二人稱代詞。</li>
+      <li>如果。</li>
+    </ul>
+    <p class="explain">這是一句當面囑咐，「而」就是「你」：晉國一旦有難，你不要嫌尹鐸資望淺，不要嫌晉陽遠。胡三省的注就是這樣說的——他把這個「而」解作「汝」，也就是你。讀成連詞，整句話就沒有主語，囑咐的對象也就消失了。</p>
+  </tb-check>
+
+  <tb-check id="q-yu">
+    <p class="question">段規和任章都主張把地給智伯，兩人的理由有什麼共同點？</p>
+    <ul class="options">
+      <li>他們都認為智伯要的地本來就該還給他。</li>
+      <li>他們都打不過智伯，只能先花錢買平安。</li>
+      <li data-correct>都是要讓智伯更加驕橫輕敵，同時讓別家因恐懼而彼此親近，等事態自己變化。</li>
+      <li>他們都想藉此讓自己的君主取代智伯。</li>
+    </ul>
+    <p class="explain">段規說的是：給了他，他就會向別人要；別人不給，他就動兵，我們就能免禍而待變。任章說得更清楚：他驕橫就輕敵，我們恐懼就相親，用相親之兵待輕敵之人，智氏的命長不了。兩人的著眼點都不是眼前這一個邑，而是把智伯推到與所有人為敵的位置上。</p>
+  </tb-check>
+
+  <tb-check id="q-chici">
+    <p class="question">絺疵憑什麼斷定「韓、魏必反」？</p>
+    <ul class="options">
+      <li>他偷聽到了韓、魏二人的密謀。</li>
+      <li>他從占卜和天象上看出來的。</li>
+      <li data-correct>趙一亡，災難必定輪到韓、魏，而城破在即，兩人卻沒有喜色、只有憂容。</li>
+      <li>他看見兩人交換眼神、互相踩腳。</li>
+    </ul>
+    <p class="explain">他自己說「以人事知之」：約好戰勝之後三分趙地，城只剩三版沒淹，人馬相食，城降有日，可這兩個人不高興——利害擺在那裡，神色卻不對。交換眼神、互相踩腳的是魏桓子和韓康子，絺疵不在場，那是讀者看見的鏡頭；把它塞給絺疵，就把他最了不起的地方——只憑事理和臉色推斷——換成了偷聽。</p>
+  </tb-check>
+
+  <tb-check id="q-yurang">
+    <p class="question">《通鑑》寫豫讓之死，只有「索之，得豫讓，遂殺之」。本書為什麼不把拔劍三躍、呼天擊之、伏劍自殺寫進原文？</p>
+    <ul class="options">
+      <li>因為那些情節太殘忍，給讀者刪去了。</li>
+      <li data-correct>因為那些話不在《資治通鑑》裡，它們出自《史記》和《戰國策》。</li>
+      <li>因為司馬光認為豫讓不是義士。</li>
+      <li>因為那一段原文在流傳中脫落了。</li>
+    </ul>
+    <p class="explain">《史記·刺客列傳》作「豫讓拔劍三躍而擊之」，《戰國策·趙策一》作「豫讓拔劍三躍，呼天擊之」，而《通鑑》整段不取：襄子至橋、馬驚、搜查、得豫讓、殺之，五個動作就完了。原文引號裡的一字一句都要有出處，所以那些名場面可以講，但不能冒充《通鑑》的句子。本書第一章的正文也照這條規矩寫：通鑑寫的是「初命晉大夫魏斯、趙籍、韓虔為諸侯」，不是「三家分晉」。</p>
+  </tb-check>
+
+  <tb-sort id="sort-names">
+    <p class="intro">把本章的詞按類別分一分：哪一個是人，哪一個是地方，哪一個都不是。用按鈕或拖動都行。</p>
+    <ul class="bins">
+      <li data-bin="person">人名</li>
+      <li data-bin="place">地名</li>
+      <li data-bin="other">都不是</li>
+    </ul>
+    <ul class="items">
+      <li data-bin="person" data-why="智氏家主，名申（一說名甲），本章開頭那個選錯繼承人的人。">智宣子</li>
+      <li data-bin="person" data-why="趙簡子的家臣，被派去治理晉陽，問簡子要繭絲還是要保障的就是他。">尹鐸</li>
+      <li data-bin="person" data-why="韓康子的家臣，藍臺之會被智伯侮辱，後來勸康子把地給智伯。">段規</li>
+      <li data-bin="person" data-why="魏桓子的家臣，引《周書》勸桓子把地給智伯的那一位。">任章</li>
+      <li data-bin="person" data-why="智伯的臣子，兩次行刺趙襄子，最後在橋下被擒殺。">豫讓</li>
+      <li data-bin="place" data-why="智伯與韓康子、魏桓子宴飲的地方。胡三省注只解釋「臺」是方形而高的建築，沒有說它在哪裡。">藍臺</li>
+      <li data-bin="place" data-why="趙襄子否決的兩個避難處之一，倉庫充實，但民力已被榨取。">邯鄲</li>
+      <li data-bin="place" data-why="魏的都城，所以汾水可以灌安邑——這是魏桓子聽懂智伯那句話之後的動作。">安邑</li>
+      <li data-bin="place" data-why="韓的都城，所以絳水可以灌平陽。">平陽</li>
+      <li data-bin="place" data-why="趙氏的根據地，尹鐸治理過，趙簡子指定為避難之所，也是最後灌水決戰的地方。">晉陽</li>
+      <li data-bin="other" data-why="官名：掌史事與氏族登記，智果就是在太史那裡辦的別族手續。">太史</li>
+      <li data-bin="other" data-why="官名，也是爵位：諸侯之下、士之上。晉國的這三家，受封之前都是大夫。">大夫</li>
+      <li data-bin="other" data-why="車上的陪乘位置，站在車右。韓康子在晉陽城下就是這個位置——而這個位置讓他看清楚了水勢。">驂乘</li>
+      <li data-bin="other" data-why="不是人也不是地：趙襄子把智伯的頭骨漆了做成的飲器。">飲器</li>
+    </ul>
+  </tb-sort>
+  </section>
+
+  </div>
+</main>
+<aside class="tb-margin" aria-hidden="true"></aside>
+</div>
+</body>
+</html>

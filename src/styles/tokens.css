@@ -12,6 +12,12 @@
   --ink-faint: #6f6960;
   --rule: #e3ddd2;
   --rule-strong: #cfc7b8;
+  /* The structural rule: the line that opens a chapter, a question, a sorting activity, a column of
+     bins, or the last block of a chapter. It is the ink itself on paper. On the dark paper a 2px line of
+     --ink is the brightest thing on the screen and shouts across the page, so there it is mixed back
+     towards the paper until it reads with the same weight as the black rule does on white. Not a palette
+     token: src/palette.js holds the thirteen colours the figures draw with, and this is derived. */
+  --rule-head: var(--ink);
 
   /* Accents */
   --leaf: #2f7d4f;
@@ -40,10 +46,20 @@
   --shadow: 0 1px 2px rgba(29, 26, 23, 0.06), 0 8px 24px rgba(29, 26, 23, 0.08);
   --shadow-lift: 0 2px 6px rgba(29, 26, 23, 0.1), 0 18px 40px rgba(29, 26, 23, 0.14);
 
-  /* Type */
-  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  --font-text: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Type. Three families, and behind each the faces chosen to draw what it is not served with. Google
+     serves Newsreader and Fraunces with no Greek block, no arrows and no sub- or superscript figures beyond
+     ¹²³, and Inter without its own arrows and superiors, so every α, ₂, → and ⇌ in the book was drawn by
+     whatever the reader's machine had — Palatino Linotype, Segoe UI Semibold and Cambria Math on Windows,
+     read back per glyph with CSS.getPlatformFontsForNode. STIX Two Text sits at Newsreader's x-height and
+     weight and draws the Greek and the sub- and superscripts (a text face, so its superiors are text-sized;
+     STIX Two Math's are display-sized and read too big). STIX Two Math draws the arrows, ⇌ and the
+     relations, which neither text face has. Noto Sans Math draws the ⇌ Inter lacks, at Inter's weight.
+     The page heads request the Greek as a subset and the symbols as one text= subset, so a page fetches
+     only the files a glyph on it needs. font-size-adjust was tried and rejected: Newsreader's x-height
+     ratio is below STIX's, so the adjusted Greek came out too small. */
+  --font-display: "Fraunces", "STIX Two Text", "STIX Two Math", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-text: "Newsreader", "STIX Two Text", "STIX Two Math", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-ui: "Inter", "Noto Sans Math", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   /* Modular scale, ratio 1.2, from the 1rem root */
   --text-xs: 0.75rem;
@@ -56,6 +72,10 @@
   --text-3xl: 2.488rem;
   --text-4xl: 2.986rem;
   --text-5xl: 3.583rem;
+  /* One more step of the same 1.2, for the one thing that is bigger than a section heading: the title
+     on a chapter's opening page. At 3.583rem "What is life?" filled two thirds of the measure and read
+     as a large heading rather than as the opening of a chapter. */
+  --text-6xl: 4.3rem;
 
   --leading-body: 1.55;
   --leading-tight: 1.15;
@@ -78,7 +98,9 @@
   --space-8: calc(var(--u) * 8);
   --space-10: calc(var(--u) * 10);
   --space-12: calc(var(--u) * 12);
+  --space-14: calc(var(--u) * 14);
   --space-16: calc(var(--u) * 16);
+  --space-20: calc(var(--u) * 20);
 
   --radius: 6px;
   --radius-lg: 12px;
@@ -107,6 +129,7 @@
     --ink-faint: #908a80;
     --rule: #2c3036;
     --rule-strong: #3b4048;
+    --rule-head: color-mix(in srgb, var(--ink) 68%, var(--paper));
     --leaf: #5fb37f;
     --water: #5cb5c4;
     --coral: #ef8a63;
@@ -132,6 +155,7 @@
   --ink-faint: #908a80;
   --rule: #2c3036;
   --rule-strong: #3b4048;
+  --rule-head: color-mix(in srgb, var(--ink) 68%, var(--paper));
   --leaf: #5fb37f;
   --water: #5cb5c4;
   --coral: #ef8a63;

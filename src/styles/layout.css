@@ -199,13 +199,19 @@
   scrollbar-width: thin;
 }
 
+/* A column head, not a second chapter label. The opener's own unit line is the label on this screen;
+   at the same weight and size as that one, two sets of tracked capitals were competing in one view for
+   the reader's attention, and the one that won was the navigation. This is the quieter of the two: one
+   step lighter, tracked wider, and closed with a rule the way every column head in the book is. */
 .tb-rail__title {
   font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-weight: 500;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-faint);
   margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--rule);
 }
 
 .tb-rail ol {
@@ -281,7 +287,7 @@ section > h2 .n {
   font-family: var(--font-ui);
   font-size: var(--text-sm);
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   color: var(--leaf-text);
   margin-bottom: var(--space-2);
   font-variant-numeric: lining-nums tabular-nums;
@@ -325,14 +331,17 @@ section > h2 .n {
   }
 }
 
-/* Margin notes: on wide screens they float into the margin column. */
+/* Margin notes: on wide screens they float into the margin column, under a rule of their own. The rule
+   is --rule-strong, not --rule: on the dark paper a --rule hairline in an otherwise empty column was
+   invisible and the note read as a stray paragraph. */
 .tb-margin-note {
   font-family: var(--font-text);
   font-size: var(--text-base);
   line-height: 1.45;
   color: var(--ink-soft);
-  border-top: 1px solid var(--rule);
-  padding-top: var(--space-2);
+  border-top: 1px solid var(--rule-strong);
+  padding-top: var(--space-3);
+  text-wrap: pretty;
 }
 
 @media (min-width: 1400px) {
@@ -360,13 +369,15 @@ section > h2 .n {
   .tb-margin {
     display: none;
   }
+  /* Folded into the column, the note is set off by a rule and its own size, not by a tinted box: a box
+     here would be the fourth kind of rectangle on the page and the only one with nothing live in it. */
   .tb-margin-note {
-    margin: var(--space-4) 0 var(--space-6);
-    padding: var(--space-3) var(--space-4);
-    background: var(--paper-2);
+    margin: var(--space-6) 0;
+    padding: 0 0 0 var(--space-4);
+    background: none;
     border: 0;
     border-left: 2px solid var(--rule-strong);
-    border-radius: 0 var(--radius) var(--radius) 0;
+    border-radius: 0;
     max-width: var(--measure);
   }
 }
@@ -463,85 +474,124 @@ section > h2 .n {
   }
 }
 
-/* Chapter opener. Clamped to the same measure as the text column: it is outside .tb-text in the
-   markup, and without this its children resolve their widths against the whole grid track instead, so
-   the title ran past the prose and the hero figure's breakout landed past every other wide figure.
-   One column means one left edge and one right edge for everything that is not deliberately wide. */
+/* ---------- the chapter opener ---------- */
+/* A title page, not a stack of blocks. One head rule; one line of running head hanging under it, the
+   unit at its left end and the chapter at its right; a sinkage; then the title, at the top of the scale
+   and alone on the page. What it replaces: a 6rem numeral in --rule-strong (1.57:1 against the paper,
+   the only text on the page below AA) sitting above the title with nothing tying the two together.
+   Above 1400px the head rule runs the whole spread — text column and margin — and the chapter number
+   leaves the running head to become a folio hanging from the rule's right end, on the same left edge as
+   every margin note in the chapter and with its own baseline on the title's. That is the relationship
+   the numeral did not have, and it is what fills the corner the opener used to leave empty.
+   The opener stays exactly one measure wide, because it is outside .tb-text in the markup and would
+   otherwise resolve against the whole grid track; tools/devices.js holds `.tb-opener > h1` to the same
+   left and right edge as every paragraph in the chapter, so the number is positioned, never placed in
+   the flow beside the title. */
 .tb-opener {
+  position: relative;
   max-width: var(--measure);
-  margin-bottom: var(--space-12);
+  margin-bottom: var(--space-16);
+  padding-top: var(--space-3);
+  border-top: 2px solid var(--rule-head);
+}
+
+.tb-opener__unit,
+.tb-opener__number {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: var(--leading-body);
+  text-transform: uppercase;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .tb-opener__unit {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--leaf-text);
-  margin-bottom: var(--space-3);
+  color: var(--ink-soft);
+  /* The number is absolutely positioned at the other end of this line; the padding keeps a long unit
+     name from running under it. */
+  padding-right: 7rem;
 }
 
 .tb-opener__number {
-  font-family: var(--font-display);
-  font-size: 6rem;
-  font-weight: 300;
-  line-height: 0.9;
-  color: var(--rule-strong);
-  font-variant-numeric: lining-nums;
-  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144;
-  margin-bottom: var(--space-2);
+  position: absolute;
+  top: var(--space-3);
+  right: 0;
+  color: var(--ink-faint);
+}
+
+.tb-opener__number::before {
+  content: "Chapter ";
 }
 
 .tb-opener h1 {
-  font-size: clamp(var(--text-3xl), 5vw, var(--text-5xl));
+  font-size: clamp(var(--text-3xl), 5.4vw, var(--text-6xl));
   font-variation-settings: "SOFT" 60, "WONK" 1, "opsz" 144;
-  margin-bottom: var(--space-4);
+  letter-spacing: -0.025em;
+  margin: var(--space-12) 0 var(--space-5);
 }
 
 .tb-opener__dek {
   font-size: var(--text-lg);
-  line-height: 1.4;
+  line-height: 1.38;
   color: var(--ink-soft);
-  max-width: 40ch;
+  /* Fixed, not `40ch`: `ch` resolves against the element's own font, so the deck and the prose under it
+     measured to two different lengths on the same page. Fifty characters of Newsreader at 1.44rem. */
+  max-width: 32rem;
   text-wrap: pretty;
+  margin-bottom: 0;
 }
 
 .tb-opener__hero {
-  margin: var(--space-8) 0 var(--space-6);
+  margin: var(--space-12) 0 var(--space-6);
 }
 
+/* The chapter's own contents: a book's contents page, set in the text face, not a navigation list.
+   The per-item hairline is gone — eight grey lines under eight short titles read as a table with
+   nothing in it — and one rule opens the list instead. */
 .tb-opener__contents {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
+  font-family: var(--font-text);
+  font-size: var(--text-base);
   columns: 2;
-  column-gap: var(--space-8);
+  column-gap: var(--space-10);
   max-width: var(--measure);
-  margin: var(--space-6) 0 0;
-  padding: 0;
+  margin: var(--space-10) 0 0;
+  padding: var(--space-3) 0 0;
+  border-top: 1px solid var(--rule-strong);
   list-style: none;
 }
 
 .tb-opener__contents li {
   break-inside: avoid;
-  padding: var(--space-1) 0;
-  border-bottom: 1px solid var(--rule);
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
 .tb-opener__contents a {
   text-decoration: none;
-  color: var(--ink-soft);
+  color: var(--ink);
   display: grid;
-  grid-template-columns: 2rem 1fr;
+  grid-template-columns: 2.6rem 1fr;
+  align-items: baseline;
+  padding: var(--space-1) 0;
+  /* A line of contents is a target as well as a line of type. */
+  min-height: 24px;
+  border-bottom: 1px solid transparent;
 }
 
 .tb-opener__contents a:hover {
-  color: var(--ink);
+  border-bottom-color: var(--rule-strong);
 }
 
 .tb-opener__contents .n {
-  color: var(--leaf-text);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
   font-weight: 600;
+  letter-spacing: 0.04em;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--leaf-text);
 }
 
 @media (max-width: 599.98px) {
@@ -550,54 +600,179 @@ section > h2 .n {
   }
 }
 
+/* Under about 480px the running head cannot hold both ends: "Unit I · The nature of life" needs 240px
+   of tracked capitals and the number another 82px, and a phone's column is 324px at 375px wide. Rather
+   than let the unit wrap under the number, the two stack. */
+@media (max-width: 479.98px) {
+  .tb-opener__unit {
+    padding-right: 0;
+  }
+  .tb-opener__number {
+    position: static;
+    margin-top: var(--space-1);
+  }
+}
+
+@media (max-width: 799.98px) {
+  .tb-opener {
+    margin-bottom: var(--space-12);
+  }
+  .tb-opener h1 {
+    margin-top: var(--space-8);
+  }
+  .tb-opener__hero {
+    margin-top: var(--space-8);
+  }
+}
+
+/* Two columns. There is no margin to hang a folio in, so the chapter number stays on the running-head
+   line — but it stays on the head rule's right end, and the rule still runs as far as the chapter's wide
+   figures do. Between about 1040px and 1400px that is further than the measure, and a rule that stopped
+   at the measure left the hero figure sticking 240px out from under it. The expression is the one
+   [data-width="wide"] uses in this file; `100%` rather than `--measure` because below about 1040px the
+   grid track is narrower than the measure and the opener is as wide as the track. */
+@media (min-width: 800px) and (max-width: 1399.98px) {
+  .tb-opener::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: calc(100% - (100vw - var(--rail-width) - var(--space-8) - 2 * var(--space-6)));
+    border-top: 2px solid var(--rule-head);
+  }
+
+  .tb-opener__number {
+    right: calc(100% - (100vw - var(--rail-width) - var(--space-8) - 2 * var(--space-6)));
+  }
+}
+
+/* Three columns: the head rule crosses the whole spread and the chapter number hangs from its right
+   end. `top` puts the numeral's own baseline on the title's first baseline; both numbers are stated
+   because the browser gives no way to ask for another element's baseline, and both were read off the
+   rendered page rather than guessed. */
+@media (min-width: 1400px) {
+  .tb-opener::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: calc(-1 * (var(--margin-width) + var(--space-8)));
+    border-top: 2px solid var(--rule-head);
+  }
+
+  .tb-opener__number {
+    /* 5.6rem + 2.5px. The grid step alone left the numeral's baseline 2.5px above the title's, measured
+       off the rendered page at 2x: the two have different font sizes, so their baselines sit at
+       different depths inside their own line boxes and no arithmetic in rem can make them agree. */
+    top: calc(var(--space-14) + 2.5px);
+    left: calc(100% + var(--space-8));
+    right: auto;
+    width: var(--margin-width);
+    /* Right, so the title hangs from one end of the head rule and the number from the other. Left would
+       put it on the margin notes' edge, which is the correct edge for a note and the wrong one for a
+       folio: there is no note here to line up with, and the rule's two ends are what the eye reads. */
+    text-align: right;
+    font-family: var(--font-display);
+    font-size: var(--text-5xl);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-transform: none;
+    color: var(--ink-soft);
+    font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144;
+  }
+
+  .tb-opener__number::before {
+    content: "Chapter";
+    display: block;
+    font-family: var(--font-ui);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: var(--leading-body);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: var(--space-3);
+  }
+}
+
 /* End matter. The rule already sets the section apart, so the heading below it drops its own space-16;
    the two together left a 9.6rem hole that read as a mistake. */
 .tb-endmatter {
   margin-top: var(--space-16);
   padding-top: var(--space-8);
-  border-top: 1px solid var(--rule-strong);
+  border-top: 2px solid var(--rule-head);
 }
 
 .tb-endmatter > h2:first-of-type {
   margin-top: 0;
 }
 
-/* The same edge as a tb-check card: they are the same kind of object and sit within a screen of each
-   other, so at --rule this one read as the weaker of the two. */
+/* What comes next is the last thing in the chapter, so it closes the chapter the way the opener opens
+   it: a rule, a label, a title in the display face. It was a bordered card, which put a box around a
+   sentence and made the end of a chapter look like a button. The arrow is the only affordance it needs,
+   and it moves on hover; the colour change carries the same state for anyone who cannot see it move. */
 .tb-next {
-  display: block;
-  margin-top: var(--space-12);
-  padding: var(--space-6);
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--radius-lg);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  column-gap: var(--space-5);
+  margin-top: var(--space-16);
+  padding: var(--space-3) 0 0;
+  border: 0;
+  border-top: 2px solid var(--rule-head);
+  border-radius: 0;
   text-decoration: none;
   color: var(--ink);
   max-width: var(--measure);
-  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
-}
-
-.tb-next:hover {
-  border-color: var(--leaf-text);
-  box-shadow: var(--shadow);
 }
 
 .tb-next .tb-label {
+  grid-column: 1 / -1;
   display: block;
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--space-3);
 }
 
 .tb-next strong {
   font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-weight: 500;
+  font-size: var(--text-2xl);
+  font-weight: 400;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.015em;
   font-variant-numeric: lining-nums;
+  font-variation-settings: "SOFT" 60, "WONK" 1;
+  transition: color var(--dur) var(--ease);
+}
+
+/* The arrow sits on the title's line, at the far edge of the measure. */
+.tb-next::after {
+  content: "→";
+  grid-row: 2;
+  grid-column: 2;
+  font-family: var(--font-ui);
+  font-size: var(--text-xl);
+  line-height: 1.35;
+  color: var(--ink-faint);
+  transition: transform var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
 .tb-next span.dek {
+  grid-column: 1;
   display: block;
   color: var(--ink-soft);
   font-size: var(--text-base);
-  margin-top: var(--space-1);
+  line-height: 1.45;
+  margin-top: var(--space-2);
+  max-width: 34rem;
+}
+
+.tb-next:hover strong {
+  color: var(--leaf-text);
+}
+
+.tb-next:hover::after {
+  color: var(--leaf-text);
+  transform: translateX(var(--space-2));
 }
 
 .tb-skip {
@@ -646,6 +821,7 @@ section > h2 .n {
     --ink-faint: #5a544c;
     --rule: #c9c9c9;
     --rule-strong: #909090;
+    --rule-head: #000000;
     --shadow: none;
     --shadow-lift: none;
   }
@@ -673,6 +849,19 @@ section > h2 .n {
   .tb-text, .tb-opener {
     margin-left: auto;
     margin-right: auto;
+  }
+
+  /* On paper there is no rail and no margin column, so the head rule is the opener's own border and the
+     chapter number goes back to the end of it. The screen's spread rule is measured from the rail and
+     the viewport, neither of which exists here. */
+  .tb-opener::before {
+    display: none;
+  }
+
+  .tb-opener__number {
+    left: auto;
+    right: 0;
+    width: auto;
   }
 
   body {

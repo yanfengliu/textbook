@@ -1,5 +1,8 @@
-// Shared Playwright helpers for the gates.
+// Shared Playwright helpers for the gates, and the one list of pages they visit.
 import { chromium } from 'playwright';
+import { readdirSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // Headless chromium refuses WebGL on its software renderer (SwiftShader) unless this flag is set.
 export const WEBGL_ARGS = ['--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'];
@@ -58,10 +61,48 @@ export async function openPage(page, url, { timeoutMs = 120_000 } = {}) {
 }
 
 // The pages every page-level gate visits. Paths are relative to the served root.
+//
+// Chapters are DISCOVERED, never listed. A chapter that has to be added to a list by hand is a chapter
+// that can be written, gated green and never once visited by a gate, and the list existed in two places
+// (here and tools/subpath.js) plus the book's own contents page, so forgetting one of them was the
+// normal case rather than the unlucky one. Reading them off disk means `npm run shot`, `npm run check`,
+// `npm run devices`, `npm run inspect` and `npm run subpath` all cover a new chapter the moment its
+// index.html exists. The cost is that a half-written chapter turns those gates red, which is the truth.
+const REPO_ROOT = fileURLToPath(new URL('../../', import.meta.url));
+
+// A book is a directory with its own index.html holding at least one chNN-<slug>/index.html.
+//
+// A chapter's page id is qualified with its book (`biology/ch01`, `tongjian/ch01`). It used to be the
+// chapter number alone, which was unique only while the repository had one book: the second book's
+// chapter 1 collided with the first book's, so `test/pages.test.js`'s uniqueness assertion failed the
+// moment a second `ch01-.../index.html` existed, and `SHOT_PAGES=ch01`, `DEVICE_PAGES=ch01` and
+// `tools/inspect.js --page ch01` all silently addressed two pages. The study system had already chosen
+// this shape — `tools/check-content.js` keys a chapter as `<book>/chNN` — so the page list now agrees
+// with it. Found 2026-09-12 by the baseline probe for the second book (docs/work/4_zizhi-tongjian/plan.md).
+export function discoverBooks(root = REPO_ROOT) {
+  const books = [];
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    if (!entry.isDirectory() || entry.name.startsWith('.') || entry.name === 'node_modules') continue;
+    const bookDir = join(root, entry.name);
+    if (!existsSync(join(bookDir, 'index.html'))) continue;
+    const chapters = [];
+    for (const sub of readdirSync(bookDir, { withFileTypes: true })) {
+      const m = sub.isDirectory() && /^ch(\d{2})-/.exec(sub.name);
+      if (!m || !existsSync(join(bookDir, sub.name, 'index.html'))) continue;
+      chapters.push({ id: `${entry.name}/ch${m[1]}`, path: `/${entry.name}/${sub.name}/`, n: Number(m[1]), slug: sub.name });
+    }
+    if (!chapters.length) continue;
+    chapters.sort((a, b) => a.n - b.n);
+    books.push({ id: entry.name, path: `/${entry.name}/`, chapters });
+  }
+  return books.sort((a, b) => (a.id < b.id ? -1 : 1));
+}
+
+export const BOOKS = discoverBooks();
+
 export const PAGES = [
   { id: 'library', path: '/' },
-  { id: 'biology', path: '/biology/' },
-  { id: 'ch01', path: '/biology/ch01-what-is-life/' },
+  ...BOOKS.flatMap((b) => [{ id: b.id, path: b.path }, ...b.chapters.map(({ id, path }) => ({ id, path }))]),
   { id: 'today', path: '/today/' },
 ];
 

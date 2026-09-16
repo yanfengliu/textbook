@@ -28,6 +28,7 @@ Plus the figure modules it needs, in `src/figures/`, one file per figure, regist
 - Key ideas in `<tb-key>`, margin notes in `<aside class="tb-margin-note">` placed **before** the paragraph they annotate.
 - End matter: key ideas, glossary, five `<tb-check>` questions, and a card pointing at the next chapter.
 - British spelling. SI units with a space. Old-style figures in prose, lining and tabular in tables.
+- A Greek letter hyphenated to a word — `α-helix`, `β-glucose` — takes a word joiner after the hyphen, `α-&#8288;helix`, because no CSS property stops a line breaking after a hyphen (`word-break`, `line-break` and `hyphens` were each tried at 390 px and every one still broke there) and a lone `β-` at the end of a line is what you get without it.
 - Hedge where the science hedges: "all known life", not "all life".
 
 **Accuracy is not negotiable.** Write at the level of Campbell Biology or OpenStax Biology 2e, and do not write a sentence you could not source. Chapter 1 went through a read-only review that found six wrong statements in prose that read perfectly well; assume yours has some too.

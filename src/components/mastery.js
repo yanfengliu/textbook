@@ -31,7 +31,14 @@ const STATES = {
 // steps; `mastery.learnedWell` additionally wants high recall, about a week of stability, a recent
 // success, and success in two different formats, because one format is the question learned rather
 // than the idea. Only that says "Learned well".
-const LEARNED_WELL_WORD = 'Learned well';
+//
+// Exported, with the class of the element that carries it, because `tools/sitting.js` checks that no
+// per-objective label claims more than the record supports, and a check written against the English
+// literal `'Learned well'` or against a hard-coded `.tb-mark__word` empties itself the moment either
+// is reworded, translated (docs/design/i18n.md) or renamed. The gate reads both from here so the two
+// cannot drift; the record it compares them against is the store's, which is the independent half.
+export const LEARNED_WELL_WORD = 'Learned well';
+export const MARK_WORD_CLASS = 'tb-mark__word';
 
 const GLYPH = {
   // Five round dashes, not a fine dotted line: at the 11px this is drawn at, a 1.5-unit dash on a
@@ -131,7 +138,7 @@ export function markElement(state, { word = null, detail = [], hidden = '' } = {
   glyph.className = 'tb-mark__glyph';
   glyph.innerHTML = `<svg viewBox="0 0 12 12" aria-hidden="true">${GLYPH[state]}</svg>`;
   const label = document.createElement('span');
-  label.className = 'tb-mark__word';
+  label.className = MARK_WORD_CLASS;
   label.textContent = word ?? STATES[state].word;
   mark.append(glyph, label);
   if (detail.length) {

@@ -11,3 +11,5 @@ CLAUDE.md
 .gitignore
 .nvmrc
 .claude
+biology/ch02-chemistry-of-life/FIGURES.md
+biology/ch03-cells/FIGURES.md

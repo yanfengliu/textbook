@@ -33,6 +33,13 @@
 //   path       = name { "." name | "[" digits "]" }
 //   op         = "==" | "===" | "!=" | "!==" | ">" | ">=" | "<" | "<=" | "~"
 //   literal    = number | "true" | "false" | "null" | 'quoted' | "quoted" | bare-word
+//   number     = [ "-" ] digits [ "." digits ] [ ("e" | "E") [ "+" | "-" ] digits ]
+//
+// A number reads the way an author writes it for a figure that spans ten orders of magnitude: `2e-7`
+// as well as `0.0000002`. The first grammar stopped at the decimal point, and chapter 1's
+// `lensMetres < 2e-7` was read as the number 2 followed by the word "e-7" — an error the page
+// reported as a console.warn at mount, which no gate reads, so the task was broken from the day it
+// was written until `npm run check` started parsing every expect (expectProblems, below).
 //
 // "not" binds tighter than "and", which binds tighter than "or"; parentheses override both.
 // "==" and "===" mean the same thing here, and so do "!=" and "!==": values of the same type are
@@ -47,7 +54,9 @@
 // A path the figure does not report, or a comparison that cannot be made (`>` against a word), is an
 // authoring error, not a wrong answer: the task says so, in the reader's view, and grades nothing. The
 // same is true when the figure cannot mount at all — no WebGL, a module that failed — so a reader on a
-// machine that cannot run the figure is never marked wrong for it.
+// machine that cannot run the figure is never marked wrong for it. The second of those needs no figure
+// to find: `npm run check` runs every task item's expect through expectProblems() below, so an author
+// learns it from the gate and not a reader from the page.
 //
 // An expectation describes a MOMENT, not a resting state. Several of the bank's tasks name a transient
 // — an effector while an episode runs, a temperature at the peak of a fever — and a simulation that is
@@ -93,7 +102,7 @@ export async function record(event) {
 
 export class ExpectError extends Error {}
 
-const TOKEN = /\s*(?:(===|!==|==|!=|<=|>=|<|>|~)|([()])|'([^']*)'|"([^"]*)"|(-?\d+(?:\.\d+)?)|([A-Za-z_$][\w$-]*(?:\.[A-Za-z_$][\w$-]*|\[\d+\])*))/y;
+const TOKEN = /\s*(?:(===|!==|==|!=|<=|>=|<|>|~)|([()])|'([^']*)'|"([^"]*)"|(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)|([A-Za-z_$][\w$-]*(?:\.[A-Za-z_$][\w$-]*|\[\d+\])*))/y;
 const KEYWORDS = new Set(['and', 'or', 'not']);
 const CONSTANTS = { true: true, false: false, null: null };
 
@@ -243,20 +252,72 @@ function compare(actual, op, expected, path) {
   }
   if (op === '>' || op === '>=' || op === '<' || op === '<=') {
     const a = Number(actual);
-    const b = Number(expected);
     if (!Number.isFinite(a)) throw new ExpectError(`"${path} ${op} ${show(expected)}" needs a number, and ${path} is ${show(actual)}`);
-    if (!Number.isFinite(b)) throw new ExpectError(`"${path} ${op} ${show(expected)}" compares against ${show(expected)}, which is not a number`);
+    const b = literalFor(op, expected, path);
     return op === '>' ? a > b : op === '>=' ? a >= b : op === '<' ? a < b : a <= b;
   }
   const same = typeof actual === typeof expected ? actual === expected : String(actual) === String(expected);
   return op === '!=' || op === '!==' ? !same : same;
 }
 
+// The one fact about a comparison that no figure state can change: a numeric operator needs a number
+// on its right. The grammar's right-hand side is a literal and never a second path, so a bare word
+// there is text — right for `panel === heat` and `events ~ race`, impossible for `>`. compare() throws
+// this at grade time and expectProblems() asks it before any grade, through this one function, so the
+// check and the grader cannot disagree.
+function literalFor(op, expected, path) {
+  if (op !== '>' && op !== '>=' && op !== '<' && op !== '<=') return expected;
+  const b = Number(expected);
+  if (!Number.isFinite(b)) throw new ExpectError(`"${path} ${op} ${show(expected)}" compares against ${show(expected)}, which is not a number`);
+  return b;
+}
+
+// Everything wrong with an expect that is wrong before any figure reports anything: the grammar does
+// not read it, or a clause compares in a way no describe() could ever satisfy. `npm run check` runs
+// every task item's expect through this so the failure lands in the tree and not in a sitting:
+// chapter 2's bank shipped `heat.comparisonC > heat.waterC`, which parses, and then threw on every
+// grade, for ever, because the right-hand side is a literal and there is no second path. Returns one
+// sentence per problem — the grader's own message, plus what the author would have to write — and an
+// empty list when the grader could evaluate it against some figure.
+// Bound: what can be known without the figure. A path the figure does not report, or `~` on a field
+// that turns out to be a number, is found only by grading against that figure's describe().
+export function expectProblems(src) {
+  let ast;
+  try {
+    ast = parseExpect(src);
+  } catch (err) {
+    if (err instanceof ExpectError) return [err.message];
+    throw err;
+  }
+  const problems = [];
+  const visit = (n) => {
+    if (n.t === 'cmp') {
+      try {
+        literalFor(n.op, n.value, n.path);
+      } catch (err) {
+        if (!(err instanceof ExpectError)) throw err;
+        problems.push(`${err.message}; the right-hand side of "${n.op}" must be a number such as 40, because an expect compares a field against a literal and never against another field`);
+      }
+    }
+    if (n.a) visit(n.a);
+    if (n.b) visit(n.b);
+  };
+  visit(ast);
+  return problems;
+}
+
 // ---------- the element ----------
 
 let taskCounter = 0;
 
-export class TbTask extends HTMLElement {
+// The element needs a document. The expect language above does not, and `npm run check` imports this
+// module under Node to run every task item's expect through the grader's own parser, because only the
+// grader can say what the grader can evaluate. So the base class is whatever HTMLElement the host has —
+// a stand-in under Node — and the element is registered only where there is a registry to put it in.
+// In a browser nothing here differs.
+const HostElement = globalThis.HTMLElement ?? class {};
+
+export class TbTask extends HostElement {
   connectedCallback() {
     if (this.__built) return;
     this.__built = true;
@@ -532,4 +593,4 @@ function note(className, text) {
   return p;
 }
 
-customElements.define('tb-task', TbTask);
+if (globalThis.customElements) customElements.define('tb-task', TbTask);

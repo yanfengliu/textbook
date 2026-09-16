@@ -17,12 +17,16 @@ tb-figure figure {
   margin: 0;
 }
 
+/* The one box in the book. Everything else the reader meets in the prose — the checks, the sort, the key
+   ideas, the property list, what comes next — is set with rules and space, so a drawn rectangle means
+   one thing here: an instrument, with something live inside it. Its edge is --rule-strong rather than
+   --rule so that it is drawn with conviction and survives the dark paper. */
 .tb-figure__stage {
   position: relative;
   width: 100%;
   aspect-ratio: var(--fig-aspect, 16 / 10);
   background: var(--paper-2);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--rule-strong);
   border-radius: var(--radius-lg);
   overflow: hidden;
   container-type: inline-size;
@@ -69,31 +73,42 @@ tb-figure[data-state="ready"] .tb-figure__placeholder {
   background: var(--paper-2);
 }
 
+/* The number hangs: it sits on the figure's own left edge and the caption forms a block beside it, so a
+   caption that runs to four lines is a block of text rather than a paragraph with a label stuck on the
+   front of it. The hang is 5.6rem because "Figure 12.10" — the widest this book will set — measures
+   5.2rem at this size, and the caption's first line must clear it. */
 tb-figure figcaption {
   font-family: var(--font-text);
   font-size: var(--text-base);
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--ink-soft);
-  margin-top: var(--space-3);
+  margin-top: var(--space-4);
   max-width: var(--measure);
+  padding-left: var(--space-14);
+  text-indent: calc(-1 * var(--space-14));
   text-wrap: pretty;
 }
 
 tb-figure figcaption .fig-num {
+  display: inline-block;
+  width: var(--space-14);
+  text-indent: 0;
   font-family: var(--font-ui);
   font-size: var(--text-xs);
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--leaf-text);
-  margin-right: var(--space-2);
 }
 
+/* How to work the instrument: the interface voice, quieter than the caption and on the caption's edge. */
 tb-figure figcaption .fig-hint {
   display: block;
-  margin-top: var(--space-1);
+  margin-top: var(--space-2);
+  text-indent: 0;
   font-family: var(--font-ui);
   font-size: var(--text-xs);
+  line-height: 1.45;
   color: var(--ink-faint);
 }
 
@@ -235,6 +250,15 @@ tb-figure[data-width="bleed"] figcaption {
     border-left: 0;
     border-right: 0;
   }
+  /* 5.6rem of hang is a sixth of a 390px screen, so the number goes back on the line. */
+  tb-figure figcaption {
+    padding-left: 0;
+    text-indent: 0;
+  }
+  tb-figure figcaption .fig-num {
+    width: auto;
+    margin-right: var(--space-2);
+  }
   tb-figure[data-width="wide"] figcaption,
   tb-figure[data-width="bleed"] figcaption {
     padding: 0 var(--space-4);
@@ -285,40 +309,50 @@ tb-term > button:focus-visible {
   border: 1px solid var(--rule-strong);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lift);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-4);
   text-indent: 0;
   font-weight: 400;
   font-style: normal;
 }
 
+/* A dictionary entry: the term is a name, so it is set in the display face and keeps its own case,
+   rather than being shouted in tracked capitals above its own definition. */
 .tb-term__pop b {
   display: block;
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--water-text);
-  margin-bottom: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: var(--space-2);
 }
 
 .tb-term__pop a {
   display: block;
   width: max-content;
-  margin-top: var(--space-2);
+  margin-top: var(--space-3);
   font-family: var(--font-ui);
   font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.04em;
 }
 
 /* ---------- tb-key and tb-aside ---------- */
+/* A displayed extract, the way a book sets the one sentence a section is about: two hairlines, a label,
+   and the sentence itself in the display face a step and a half above the prose. It was a green tinted
+   box with a 3px rule down its left side and a 12px radius on every corner, so the rule bent at both
+   ends — a hairline that curves is a hairline that was drawn by a border-radius rather than by anyone. */
 tb-key {
   display: block;
-  margin: var(--space-8) 0;
-  padding: var(--space-4) var(--space-6);
+  margin: var(--space-12) 0;
+  padding: var(--space-4) 0 var(--space-5);
   max-width: var(--measure);
-  background: var(--leaf-soft);
-  border-radius: var(--radius-lg);
-  border-left: 3px solid var(--leaf);
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule-strong);
+  border-radius: 0;
 }
 
 tb-key::before {
@@ -327,10 +361,21 @@ tb-key::before {
   font-family: var(--font-ui);
   font-size: var(--text-xs);
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--leaf-text);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+tb-key p {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 400;
+  line-height: 1.28;
+  letter-spacing: -0.015em;
+  font-variation-settings: "SOFT" 50, "WONK" 1;
+  color: var(--ink);
+  max-width: 35rem;
 }
 
 tb-key p:last-child {
@@ -342,115 +387,177 @@ tb-aside {
 }
 
 /* ---------- tb-check ---------- */
-/* The card's own edge is a step stronger than the options inside it; at the same --rule both read as one
-   flat stack of boxes, and on the dark paper neither read at all. */
+/* A question on an exam paper, not a form. A rule opens it, the question is set a step above the prose,
+   the letters hang to the left of the answers, and a hairline separates one answer from the next.
+   What this replaces: a bordered card holding four bordered rows, each holding an outlined circle —
+   three depths of rounded rectangle — where an 860px row carried 200px of answer and the letters were
+   drawn in the grey a disabled control is drawn in.
+   The question stays in the text face. It contains `<em>`, and the display face is loaded without an
+   italic axis, so Fraunces italic here would be a slanted roman (see the blockquote in typography.css). */
 tb-check {
   display: block;
-  margin: var(--space-8) 0;
+  margin: var(--space-12) 0;
   max-width: var(--measure);
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4) var(--space-6) var(--space-5);
-  background: var(--paper);
+  border: 0;
+  border-top: 1px solid var(--rule-head);
+  border-radius: 0;
+  padding: var(--space-3) 0 0;
+  background: none;
+}
+
+/* A block that opens with a rule and follows its own heading does not also need the full space between
+   two blocks: a heading belongs to what comes after it, and 4.8rem of air between "Check your
+   understanding" and the rule under it broke that. */
+h2 + tb-check,
+h2 + tb-sort,
+h2 + tb-key,
+h3 + tb-check,
+h3 + tb-sort,
+h3 + tb-key {
+  margin-top: var(--space-6);
 }
 
 tb-check .tb-check__label {
   font-family: var(--font-ui);
   font-size: var(--text-xs);
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  font-variant-numeric: lining-nums tabular-nums;
   color: var(--water-text);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 tb-check .question {
-  margin-bottom: var(--space-3);
+  margin: 0 0 var(--space-5);
+  font-size: var(--text-lg);
+  line-height: 1.35;
   font-weight: 500;
+  color: var(--ink);
+  max-width: var(--measure);
+  text-wrap: pretty;
 }
 
 tb-check .tb-check__options {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: grid;
-  gap: var(--space-2);
+  display: block;
+  border-top: 1px solid var(--rule);
 }
 
+/* The row is the measure wide because the hairline under it is; the answer itself is clamped, so a
+   three-word answer does not sit at the head of a 700px ruled line with nothing after it. */
 tb-check .tb-check__opt {
   all: unset;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 1.6rem 1fr;
-  align-items: start;
-  gap: var(--space-2);
+  grid-template-columns: 1.8rem minmax(0, 34rem) 1fr;
+  align-items: baseline;
+  column-gap: var(--space-2);
   width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
+  padding: var(--space-2) 0;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
   cursor: pointer;
   font-family: var(--font-text);
   font-size: var(--text-base);
-  line-height: 1.4;
-  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+  line-height: 1.5;
+  color: var(--ink);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
 tb-check .tb-check__opt:hover {
-  border-color: var(--rule-strong);
   background: var(--paper-2);
+}
+
+tb-check .tb-check__opt:hover .k {
+  color: var(--ink);
 }
 
 tb-check .tb-check__opt:focus-visible {
   outline: 2px solid var(--water-text);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
+/* The letter is a hanging figure: its own baseline, one size down, no ring around it. */
 tb-check .tb-check__opt .k {
+  display: block;
+  width: auto;
+  height: auto;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
   font-family: var(--font-ui);
   font-size: var(--text-xs);
   font-weight: 600;
+  letter-spacing: 0.06em;
   color: var(--ink-faint);
-  border: 1px solid var(--rule-strong);
-  border-radius: 999px;
-  width: 1.4rem;
-  height: 1.4rem;
-  display: inline-grid;
-  place-items: center;
-  margin-top: 0.1rem;
+  transition: color var(--dur) var(--ease);
 }
 
 tb-check[data-answered] .tb-check__opt {
   cursor: default;
 }
 
-tb-check .tb-check__opt.is-correct {
-  border-color: var(--leaf);
+tb-check[data-answered] .tb-check__opt:hover {
+  background: none;
+}
+
+/* After an answer the options that were not in play step back, so the two that matter carry the block. */
+tb-check[data-answered] .tb-check__opt:not(.is-correct):not(.is-wrong) {
+  color: var(--ink-soft);
+}
+
+/* A mark as well as a tint: the verdict must not be carried by colour alone. */
+tb-check .tb-check__opt.is-correct,
+tb-check .tb-check__opt.is-wrong {
   background: var(--leaf-soft);
 }
 
-tb-check .tb-check__opt.is-correct .k {
-  background: var(--leaf-text);
-  color: var(--paper);
-  border-color: var(--leaf-text);
-}
-
 tb-check .tb-check__opt.is-wrong {
-  border-color: var(--coral);
   background: var(--coral-soft);
 }
 
+tb-check .tb-check__opt.is-correct .k {
+  color: var(--leaf-text);
+}
+
 tb-check .tb-check__opt.is-wrong .k {
-  background: var(--coral-text);
-  color: var(--paper);
-  border-color: var(--coral-text);
+  color: var(--coral-text);
+}
+
+tb-check .tb-check__opt.is-correct::after,
+tb-check .tb-check__opt.is-wrong::after {
+  grid-column: 3;
+  justify-self: end;
+  /* A hair inside the measure: flush against the edge of its own tint the mark read as clipped. */
+  margin-right: var(--space-1);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+tb-check .tb-check__opt.is-correct::after {
+  content: "✓";
+  color: var(--leaf-text);
+}
+
+tb-check .tb-check__opt.is-wrong::after {
+  content: "✗";
+  color: var(--coral-text);
 }
 
 tb-check .explain {
-  margin: var(--space-3) 0 0;
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--rule);
+  margin: var(--space-4) 0 0;
+  padding-top: 0;
+  border-top: 0;
   font-size: var(--text-base);
+  line-height: 1.5;
   color: var(--ink-soft);
+  max-width: 34rem;
 }
 
 tb-check .explain[hidden] {
@@ -459,8 +566,10 @@ tb-check .explain[hidden] {
 
 tb-check .tb-check__verdict {
   font-family: var(--font-ui);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   margin-right: var(--space-2);
 }
 
@@ -501,70 +610,93 @@ tb-sort .tb-sort__intro {
   font-family: var(--font-text);
   font-size: var(--text-base);
   color: var(--ink-soft);
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
   max-width: var(--measure);
 }
 
+/* The tray is a ruled list, one thing to a line: name on the left, the three choices on the right.
+   It was nine bordered cards inside a dashed box, each card repeating the same three pill buttons —
+   twenty-seven pills and ten rounded rectangles to ask nine questions. */
 tb-sort .tb-sort__tray {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  min-height: 3rem;
-  padding: var(--space-3);
-  border: 1px dashed var(--rule-strong);
-  border-radius: var(--radius-lg);
-  margin-bottom: var(--space-4);
+  display: block;
+  min-height: 0;
+  padding: 0;
+  /* The bins need the breakout — three columns of explanation inside the measure is a ribbon three
+     words across — but the list of things to place does not, and at the full 988px each row set a
+     four-word name against a control 600px away with nothing in between. */
+  max-width: var(--measure);
+  margin-bottom: var(--space-10);
+  border: 0;
+  border-top: 2px solid var(--rule-head);
+  border-radius: 0;
 }
 
 tb-sort .tb-sort__tray:empty::after {
   content: "All sorted.";
+  display: block;
+  padding: var(--space-3) 0;
   color: var(--ink-faint);
   font-size: var(--text-sm);
 }
 
 tb-sort .tb-sort__bins {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--space-8);
 }
 
+/* Three ruled columns, not three filled boxes. The bin's extent is drawn only while there is still
+   something to put in it: once everything is placed the dashed line has nothing left to promise. */
 tb-sort .tb-sort__bin {
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-lg);
-  padding: var(--space-3);
-  min-height: 8rem;
-  background: var(--paper-2);
-  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  min-height: 7rem;
+  background: none;
+  transition: background var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+
+tb-sort:has(.tb-sort__tray .tb-sort__item) .tb-sort__bin {
+  border-bottom: 1px dashed var(--rule-strong);
 }
 
 tb-sort .tb-sort__bin.is-over {
-  border-color: var(--leaf);
   background: var(--leaf-soft);
+  border-bottom-color: var(--leaf);
+  /* The tint bleeds past the column so the drop reads as a place, without any element changing size. */
+  box-shadow: 0 0 0 var(--space-2) var(--leaf-soft);
 }
 
 tb-sort .tb-sort__bin h5 {
   margin: 0 0 var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--text-base);
-  font-weight: 500;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--rule-head);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
 }
 
-/* In the tray the cards share the row out between them; sized to their own content they left a ragged
-   gap at the right of every row, and at a phone's width a single card sat in a third of the tray. The
-   flex properties are inert once the card is placed, because a bin is not a flex container. */
 tb-sort .tb-sort__item {
-  display: inline-flex;
-  flex: 1 1 15rem;
-  flex-direction: column;
-  gap: var(--space-2);
-  background: var(--paper);
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--radius);
-  padding: var(--space-2) var(--space-3) var(--space-3);
-  font-size: var(--text-sm);
+  display: grid;
+  /* The second track may shrink below its content: with a bare `auto` it sized to the widest the three
+     choices could ever be, and chapter 2's bins ("Dissolves in water", "Keeps out of water", "Both at
+     once") made that 444px inside a 390px phone — 79px of horizontal overflow on a page this pass never
+     opened. A track that can shrink lets the control wrap instead. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  padding: var(--space-1) 0;
+  box-shadow: none;
+  font-size: var(--text-base);
   cursor: grab;
-  box-shadow: var(--shadow);
-  max-width: 100%;
+  max-width: none;
 }
 
 tb-sort .tb-sort__item:active {
@@ -572,64 +704,102 @@ tb-sort .tb-sort__item:active {
 }
 
 tb-sort .tb-sort__item .name {
-  font-weight: 600;
+  font-weight: 500;
   font-family: var(--font-text);
   font-size: var(--text-base);
-}
-
-tb-sort .tb-sort__item .choose {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
-
-/* Each chip is a tap target, so it clears the 24px minimum rather than the 21px the old padding gave. */
-tb-sort .tb-sort__item .choose button {
-  appearance: none;
-  font: inherit;
-  font-size: var(--text-xs);
-  line-height: 1.2;
-  border: 1px solid var(--rule-strong);
-  background: var(--paper-2);
-  color: var(--ink-soft);
-  border-radius: 999px;
-  padding: 0.35rem 0.7rem;
-  min-height: 1.6rem;
-  cursor: pointer;
-  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease);
-}
-
-tb-sort .tb-sort__item .choose button:hover {
-  border-color: var(--ink-faint);
-  background: var(--paper-3);
+  line-height: 1.4;
   color: var(--ink);
 }
 
-tb-sort .tb-sort__bin .tb-sort__item {
+/* One hairline box for the three choices, divided, rather than three pills. This is a control and is
+   allowed to look like one; it is the only bordered thing in the block.
+   The dividers are the container's own colour showing through 1px gaps, not a border on each button,
+   so the box survives wrapping: a bin label long enough to push the three onto two rows gets a hairline
+   between the rows as well as between the columns, instead of a doubled line against the box's edge.
+   Square corners, so nothing has to be clipped — and clipping would take the focus ring with it. */
+tb-sort .tb-sort__item .choose {
   display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  max-width: 100%;
+  background: var(--rule);
+  border: 1px solid var(--rule-strong);
+  border-radius: 0;
+  justify-self: end;
+}
+
+tb-sort .tb-sort__item .choose button {
+  appearance: none;
+  font: inherit;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  white-space: nowrap;
+  /* Grow to fill the row. Without it a wrapped last segment left the rest of its row showing the
+     container's divider colour as a grey block; with it the segments always tile the box exactly. */
+  flex: 1 1 auto;
+  border: 0;
+  background: var(--paper);
+  color: var(--ink-soft);
+  border-radius: 0;
+  /* 24px minimum target on the smallest side, with the padding doing the work rather than a min-height
+     that the text can overflow. */
+  padding: 0.45rem 0.6rem;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+
+tb-sort .tb-sort__item .choose button:hover {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+
+/* A placed card is an entry under a column head: a mark, a name, the verdict, the reason. */
+tb-sort .tb-sort__bin .tb-sort__item {
+  display: block;
   cursor: default;
-  margin-bottom: var(--space-2);
+  margin-bottom: 0;
+  padding: var(--space-3) 0;
   box-shadow: none;
 }
 
-tb-sort .tb-sort__item.is-right {
-  border-color: var(--leaf);
+tb-sort .tb-sort__item.is-right .name::before,
+tb-sort .tb-sort__item.is-wrong .name::before {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  margin-right: var(--space-1);
 }
 
-tb-sort .tb-sort__item.is-wrong {
-  border-color: var(--coral);
+tb-sort .tb-sort__item.is-right .name::before {
+  content: "✓";
+  color: var(--leaf-text);
+}
+
+tb-sort .tb-sort__item.is-wrong .name::before {
+  content: "✗";
+  color: var(--coral-text);
 }
 
 tb-sort .tb-sort__item .why {
+  display: block;
   font-family: var(--font-text);
   font-size: var(--text-sm);
   color: var(--ink-soft);
-  line-height: 1.4;
+  line-height: 1.5;
+  margin-top: var(--space-1);
 }
 
 tb-sort .tb-sort__item .verdict {
+  display: block;
+  font-family: var(--font-ui);
   font-size: var(--text-xs);
   font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: var(--space-1);
 }
 
 tb-sort .is-right .verdict {
@@ -640,10 +810,30 @@ tb-sort .is-wrong .verdict {
   color: var(--coral-text);
 }
 
+/* The live region under the bins. It is not a label: sort.js writes the whole of the last placement
+   into it before the running count, so a sentence of eighty words lands here. In tracked capitals that
+   was three lines of shouting under the answer columns. Small, quiet, sentence case, one measure wide. */
 tb-sort .tb-sort__status {
-  margin-top: var(--space-3);
+  margin-top: var(--space-8);
+  font-family: var(--font-ui);
   font-size: var(--text-sm);
-  color: var(--ink-soft);
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--ink-faint);
+  max-width: var(--measure);
+}
+
+/* One line cannot hold a long name and three choices on a phone, so the choices drop under the name and
+   go back to the left edge of the column. */
+@media (max-width: 599.98px) {
+  tb-sort .tb-sort__item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  tb-sort .tb-sort__item .choose {
+    justify-self: start;
+  }
 }
 
 /* ---------- glossary ---------- */
@@ -651,70 +841,110 @@ tb-glossary {
   display: block;
 }
 
+/* A glossary is a two-column table of terms, not a stack of paragraphs: the term hangs in its own column
+   and the definitions all start on one edge, so thirty-one entries can be scanned down rather than read
+   through. A hairline opens each entry, and the two halves share it because the columns touch. */
 tb-glossary dl {
   margin: 0;
   max-width: var(--measure);
+  display: grid;
+  grid-template-columns: 11.5rem minmax(0, 1fr);
 }
 
-/* The term is a name, so it is set in the display face like every other name in the book — a bin's
-   heading, a property's, the next chapter's. Set in the same face and size as its own definition it
-   disappeared into it, and 1.2rem between entries was less than the space between two lines of one. */
 tb-glossary dt {
+  grid-column: 1;
+  margin: 0;
+  padding: var(--space-3) var(--space-4) var(--space-3) 0;
+  border-top: 1px solid var(--rule);
   font-family: var(--font-display);
+  font-size: var(--text-base);
   font-weight: 500;
+  line-height: 1.5;
   letter-spacing: -0.005em;
   color: var(--ink);
-  margin-top: var(--space-6);
+  text-wrap: pretty;
   scroll-margin-top: calc(var(--header-height) + var(--space-4));
 }
 
-tb-glossary dt:first-of-type {
-  margin-top: 0;
-}
-
 tb-glossary dd {
+  grid-column: 2;
   margin: 0;
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--rule);
+  font-size: var(--text-base);
+  line-height: 1.5;
   color: var(--ink-soft);
   text-wrap: pretty;
 }
 
+tb-glossary dt:first-of-type,
+tb-glossary dt:first-of-type + dd {
+  border-top: 0;
+  padding-top: 0;
+}
+
 /* The entry a popover's "In the glossary" link jumps to names itself, so the reader can see which of
-   thirty-one entries the jump landed on. */
+   thirty-one entries the jump landed on. The wash carries it as well as the colour, because a reader
+   arriving mid-list has nothing to compare the colour with. */
+tb-glossary dt:target,
+tb-glossary dt:target + dd {
+  background: var(--gold-soft);
+}
+
 tb-glossary dt:target {
   color: var(--leaf-text);
 }
 
-/* Property list (the characteristics of life) */
+/* Below the two-column measure the term goes back above its definition. */
+@media (max-width: 799.98px) {
+  tb-glossary dl {
+    display: block;
+  }
+  tb-glossary dt {
+    padding: var(--space-3) 0 0;
+  }
+  tb-glossary dd {
+    padding: 0 0 var(--space-3);
+    border-top: 0;
+  }
+  tb-glossary dt:first-of-type + dd {
+    padding-top: 0;
+  }
+}
+
+/* Property list (the characteristics of life). Seven ruled entries in two columns — a table of the
+   properties — rather than seven bordered cards. The odd one at the end used to span both columns,
+   which took its lines from forty characters to ninety in the middle of a set of seven; now it keeps
+   its column and the list's own rule closes the block under it. */
 .tb-props {
   list-style: none;
   padding: 0;
-  margin: var(--space-6) 0 var(--space-8);
+  margin: var(--space-8) 0 var(--space-10);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  column-gap: var(--space-10);
+  row-gap: 0;
   max-width: none;
+  border-bottom: 1px solid var(--rule);
 }
 
 .tb-props li {
   margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-lg);
+  padding: var(--space-3) 0 var(--space-4);
+  border: 0;
+  border-top: 1px solid var(--rule);
+  border-radius: 0;
   display: grid;
-  grid-template-columns: 2.6rem 1fr;
+  grid-template-columns: 2.1rem 1fr;
   gap: var(--space-3);
   align-items: start;
-  background: var(--paper);
-}
-
-/* An odd last card fills its row rather than sitting alone. */
-.tb-props li:last-child:nth-child(odd) {
-  grid-column: 1 / -1;
+  background: none;
 }
 
 .tb-props li svg {
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  margin-top: 0.15rem;
 }
 
 .tb-props li b {
@@ -723,6 +953,7 @@ tb-glossary dt:target {
   font-weight: 500;
   font-size: var(--text-base);
   line-height: 1.3;
+  letter-spacing: -0.005em;
   margin-bottom: var(--space-1);
 }
 
@@ -731,9 +962,51 @@ tb-glossary dt:target {
 .tb-props li span {
   display: block;
   font-size: var(--text-sm);
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--ink-soft);
   text-wrap: pretty;
+}
+
+/* ---------- tb-equation ---------- */
+/* A displayed equation, `<p class="tb-equation">`: a typographic object, not a centred paragraph. It is
+   centred in the measure and set in the text face — a chemical equation is upright roman, and the ⇌ comes
+   from STIX Two Math through the stack in tokens.css — with lining figures because a formula is table-like,
+   no indent, and a whole step of the space scale above and below rather than the paragraph gap. The step is
+   --space-6: --space-5 is 1.08 body lines against the 0.86 between paragraphs, and at that the line read
+   as one more paragraph.
+   It never wraps. A long equation scrolls inside its own box on a phone rather than taking the page
+   sideways, as the tables do below 800px; when it overflows the content is start-aligned by the line
+   layout and the bar is drawn thin under the line.
+   The sub- and superscripts are on a fixed shift, in em of their own size, instead of the engine's
+   vertical-align: sub and super, so the line box is the strut's and the same in every engine. The two
+   values are what Chromium's sub and super come to — a fifth and a third of the parent's size — so the
+   display line matches the H<sub>2</sub>O set in the prose around it. */
+.tb-equation {
+  max-width: var(--measure);
+  margin-block: var(--space-6);
+  text-align: center;
+  text-indent: 0;
+  font-family: var(--font-text);
+  font-variant-numeric: lining-nums proportional-nums;
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.tb-equation sub,
+.tb-equation sup {
+  font-size: 0.7em;
+  line-height: 0;
+  vertical-align: baseline;
+  position: relative;
+}
+
+.tb-equation sup {
+  top: -0.48em;
+}
+
+.tb-equation sub {
+  top: 0.29em;
 }
 
 section {

@@ -45,12 +45,19 @@ Type is the first thing the owner asked for, so it gets the first budget.
 | Display: chapter titles, section headings, pull numbers | **Fraunces** (variable: optical size, weight, softness) | An old-style soft serif with real optical sizes, so a 64px title and a 24px heading are drawn differently rather than scaled. |
 | Text: body, captions' prose | **Newsreader** (variable: optical size, weight) | A text serif designed for long reading on screens, with an optical-size axis so small captions stay open. |
 | Interface: navigation, labels inside figures, controls, tables of data | **Inter** (variable) | A neutral sans that stays legible at 11px inside a diagram and carries tabular figures. |
+| Greek and symbols: α, ₂, →, ⇌ | **STIX Two Text**, then **STIX Two Math**; **Noto Sans Math** behind Inter | Subsets that draw what the three families are not served with, at their x-height and weight. See below. |
 
 Loaded from Google Fonts with `display=swap`, restricted to the axes and weights used, and every role has a fallback stack (`Iowan Old Style`, `Palatino`, `Georgia`; `system-ui`) so the page is readable before and without the webfonts. Vendoring the files was considered and deferred: the three families total more than the fleet's 256 KiB blob ceiling per weight set, and a runtime font request is the same class of dependency as the Three.js CDN the page already has.
 
-Measure and rhythm: body text is 1.2rem (19.2px at the default root) on a 1.55 line height, in a column of at most 66 characters. Headings and figures sit on a 0.4rem baseline grid. The chapter opener carries a drop cap; section labels use small caps with letter spacing; numerals in prose are old-style (`font-variant-numeric: oldstyle-nums`) and in tables tabular and lining. Hanging punctuation and optical margin alignment are turned on where the browser supports them and ignored where it does not.
+Measure and rhythm: body text is 1.2rem (19.2px at the default root) on a 1.55 line height, in a column of at most 66 characters. Headings and figures sit on a 0.4rem baseline grid. The chapter opener carries a drop cap; section labels use small caps with letter spacing at one tracking (0.14em) across the whole book, so every rubric reads as one voice; numerals in prose are old-style (`font-variant-numeric: oldstyle-nums`) and in tables tabular and lining.
 
-The type scale is modular at 1.2 from 0.8rem to 3.6rem, held in `src/styles/tokens.css`, and every size in the site is one of its steps.
+Hanging punctuation is stated, not requested. `hanging-punctuation: first last` stays on the body for Safari, but Chromium — the browser the gates use and most readers have — ignores it, so a displayed quotation hangs its opening mark with a negative `text-indent` and a figure's number hangs with `padding-left` plus a negative `text-indent`. A book's optical left edge is not something to leave to a property one engine implements.
+
+Italics come from the face that has them. Fraunces is requested with the axes `opsz,wght,SOFT,WONK` and no `ital`, so `font-style: italic` on the display face is a browser-synthesised slant, and `document.fonts.check('italic 400 24px Fraunces')` answers `true` for it — the check counts a synthesised face as available, which is how the blockquote went a whole pass in faux italic. Newsreader is requested with `ital` and its italic is drawn. Anything italic in this book is therefore set in Newsreader, including displayed quotations and the `<em>` inside a question.
+
+Greek and symbols come from faces chosen for them. Google serves Newsreader and Fraunces with no Greek block, no arrows and no sub- or superscript figures beyond ¹²³, and Inter without its own arrows and superiors, so every α, ₂, → and ⇌ in the book was drawn by whatever the reader's machine offered — Palatino Linotype, Segoe UI Semibold and Cambria Math on Windows, a different set on every other platform — measured per glyph with `CSS.getPlatformFontsForNode`. The stacks in `tokens.css` name STIX Two Text after Newsreader and Fraunces, whose Greek sits at Newsreader's x-height and weight and whose superiors are text-sized; then STIX Two Math for arrows, ⇌ and relations, which neither text face has; and Noto Sans Math after Inter for the ⇌ Inter lacks. Every page head requests the Greek as Google's `greek` subset and the symbols as one `text=` subset shared by all heads, so a page fetches only the files a glyph on it needs: 15 KB for the Greek, 3–10 KB per symbol face, and 8 KB more stylesheet on every page. `font-size-adjust` was tried and rejected — Newsreader's x-height ratio is below STIX's, so the adjusted Greek came out too small — and a `<span lang="el">` convention was rejected because it depends on authors remembering.
+
+The type scale is modular at 1.2 from 0.75rem to 4.3rem, held in `src/styles/tokens.css`, and every size in the site is one of its steps. The top step, `--text-6xl`, exists for one job: the title on a chapter's (or the library's, or a book's) opening page, which is the largest thing in the book and needs to be bigger than a section heading by more than one step.
 
 ## Colour
 
@@ -70,13 +77,33 @@ Warm paper, not white; near-black ink, not black. Light and dark themes are two 
 
 Every diagram, canvas, and 3D material takes its colour from these tokens through `src/palette.js`, so a figure and the prose around it are always the same picture. The organelle colours used by both the 2D diagrams and the 3D cell are one table (`ORGANELLES` in `palette.js`), so the reader learns one colour per organelle across the whole chapter.
 
+Two more colours are derived in CSS and are deliberately not in `palette.js`, because nothing draws with them: `--leaf-text`, `--water-text` and `--coral-text` (the accents pushed towards the ink so they hold AA at 12px), and `--rule-head`, the structural rule that opens a chapter, a question, a sorting activity, a column of bins and the end matter. `--rule-head` is `--ink` on paper; on the dark paper a 2px line of `--ink` is the brightest thing on the screen, so there it is mixed 68% back towards the paper to read with the weight a black rule has on white.
+
 Contrast holds at WCAG AA for text in both themes, and the palette was chosen so the five accents remain distinguishable under the common forms of colour-vision deficiency; no figure encodes meaning in colour alone.
 
 ## Layout
 
-Three regions on a wide screen: a sticky chapter navigation rail on the left, the text column in the centre, and a margin on the right for asides and figure notes. Below 1200px the margin folds into the text column as inset notes; below 800px the rail becomes a drawer behind a button and the page is a single column.
+Three regions on a wide screen: a sticky chapter navigation rail on the left, the text column in the centre, and a margin on the right for asides and figure notes. Below 1400px the margin folds into the text column as inset notes; below 800px the rail becomes a drawer behind a button and the page is a single column.
 
 Figures come in three widths, chosen by an attribute: `text` (the measure), `wide` (breaks out to 1100px), and `bleed` (edge to edge). A reading-progress bar sits under the header, and the rail marks the section in view.
+
+**One spread, one set of edges.** At 1400px and above, the text column's right edge plus the gutter plus the margin column is the *spread*: every wide figure, every margin note and the chapter opener's head rule end on that one line. Below 1400px the spread is whatever the rail leaves, and the same three things still share it. `tools/devices.js` holds the text column and the wide figures to one left and one right edge each; the rest is held by using one expression for the spread's width wherever it is needed.
+
+## Furniture
+
+The prose's furniture — the checks, the sorting activity, the key ideas, the property list, the glossary, what comes next, the chapter opener — is set with **rules, space, indentation and changes of face**, never with boxes. There is one drawn rectangle in the book, `.tb-figure__stage`, and a reader learns that it means *an instrument, with something live inside it*: a figure, its own controls, a 3D scene. The popover a glossary term opens is the one other framed thing, because it floats over the page and has to declare its own extent.
+
+This is the rule that was missing when every piece of furniture was a rounded rectangle with a hairline: a bordered card holding four bordered rows each holding an outlined circle read as an application's form, not as a question in a textbook, and a box makes its own emptiness visible in a way a rule does not.
+
+The structural vocabulary, in order of weight:
+
+| Mark | Means | Where |
+|---|---|---|
+| 2px `--rule-head` | a major division opens here | the chapter opener's head rule (which crosses the whole spread), the sorting activity, the end matter, what comes next |
+| 1px `--rule-head` | a block of furniture opens here | a check, a bin's column head |
+| 1px `--rule-strong` | a quiet division | a key idea's two rules, a margin note, a contents list |
+| 1px `--rule` | one row from the next | a check's options, a glossary entry, a table row, a property |
+| a tint (`--leaf-soft`, `--coral-soft`) | a state, always with a mark beside it | a right or wrong answer, a bin under a drag |
 
 ## Components
 
@@ -89,10 +116,18 @@ The prose is written in semantic HTML plus a small vocabulary of custom elements
 | `<tb-term ref="homeostasis">` | A glossary term: a dotted underline, a definition on hover or tap, and a link into the chapter glossary. |
 | `<tb-aside>` | A margin note. |
 | `<tb-key>` | A key-idea callout. |
-| `<tb-check>` | A single multiple-choice question with an explanation that appears after answering, right or wrong. |
-| `<tb-sort>` | A sorting activity: items are placed into bins by drag, or by keyboard and tap, and each placement is explained. |
+| `<tb-check>` | A single multiple-choice question with an explanation that appears after answering, right or wrong. Set as a question on an exam paper: a rule, the question a step above the prose, the letters hanging to the left of the answers, a hairline between one answer and the next. |
+| `<tb-sort>` | A sorting activity: items are placed into bins by drag, or by keyboard and tap, and each placement is explained. The tray is a ruled list one measure wide, one thing to a line with its three choices in a single hairline control at the right; the bins are three ruled columns across the spread, which show their extent with a dashed foot only while something is still waiting to be placed. |
 
-Every interactive element is keyboard-operable and announces its result through a live region. Nothing depends on hover alone.
+Every interactive element is keyboard-operable and announces its result through a live region. Nothing depends on hover alone, and no verdict is carried by colour alone: a right answer takes a tint, a coloured letter and a ✓, a wrong one a tint, a coloured letter and a ✗.
+
+**The opening page.** The library, a book and a chapter open the same way: a 2px head rule, a line of tracked capitals hanging under its left end, a sinkage, then the title at the top of the scale and alone. On a chapter, the right end of that line carries the chapter number; at 1400px and above the rule crosses the whole spread and the number leaves the line to become a folio in the margin column, set in the display face with its own baseline on the title's and right-aligned to the rule's far end. That is what fills the corner the opener used to leave empty, and the number is positioned rather than placed in the flow, because `tools/devices.js` holds `.tb-opener > h1` to the same left and right edge as every paragraph in the chapter.
+
+**The glossary** is a two-column table of terms — the term hanging in its own column, every definition starting on one edge, a hairline opening each entry — so thirty-one entries can be scanned down rather than read through. Below 800px the term goes back above its definition.
+
+**A figure's number hangs.** "Figure 1.2" sits on the figure's own left edge and the caption forms a block beside it, so a four-line caption is a block of text rather than a paragraph with a label stuck on the front. Below 800px the hang is a sixth of the screen, so the number goes back on the line.
+
+**A displayed equation** is `<p class="tb-equation">`, the only class a chapter puts on a paragraph: centred in the measure, in the text face with lining figures because a formula is table-like, no indent, `--space-6` above and below rather than the paragraph gap so it reads as displayed, its sub- and superscripts on a fixed shift so the line box does not grow, and `white-space: nowrap` with its own horizontal scroll so a long equation moves inside its box on a phone instead of pushing the page sideways. The ⇌ is STIX Two Math's, through the stack described under Typography.
 
 ## The figure contract
 

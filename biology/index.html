@@ -7,29 +7,44 @@
 <meta name="description" content="The Living World: an interactive introduction to biology in six units and thirty-two chapters, with illustrations, animations and 3D models.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..700,0..100,0..1&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Inter:wght@400..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..700,0..100,0..1&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Inter:wght@400..700&family=STIX+Two+Text:ital,wght@0,400..600;1,400..600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400..600;1,400..600&family=Inter:wght@400..700&family=STIX+Two+Math&family=Noto+Sans+Math&text=⇌⇀↽→←↔↑↓⟶⟵₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎⁰⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾≈≤≥≠∝∞∆∑√∫∂⋅∼′″‰&display=swap">
 <link rel="stylesheet" href="../src/styles/tokens.css">
 <link rel="stylesheet" href="../src/styles/typography.css">
 <link rel="stylesheet" href="../src/styles/layout.css">
 <link rel="stylesheet" href="../src/styles/components.css">
 <style>
-  .book { max-width: 900px; margin: 0 auto; padding: var(--space-16) var(--space-6); }
-  .book__eyebrow { font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--leaf); margin: 0 0 var(--space-3); }
-  .book h1 { font-size: clamp(var(--text-3xl), 6vw, var(--text-5xl)); font-variation-settings: "SOFT" 80, "WONK" 1, "opsz" 144; margin-bottom: var(--space-3); }
-  .book__dek { font-size: var(--text-lg); color: var(--ink-soft); max-width: 44ch; line-height: 1.4; margin-bottom: var(--space-8); }
-  .unit { margin-top: var(--space-12); }
-  .unit h2 { font-size: var(--text-lg); margin: 0 0 var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--rule-strong); }
-  .unit h2 .n { font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--leaf); display: block; margin-bottom: var(--space-1); }
+  /* The same masthead as a chapter's opener and the library's: rule, rubric, title. */
+  .book { max-width: 56rem; margin: 0 auto; padding: var(--space-12) var(--space-6) var(--space-20); }
+  .book__head { border-top: 2px solid var(--rule-head); padding-top: var(--space-3); margin-bottom: var(--space-16); }
+  .book__eyebrow { font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 600; letter-spacing: .14em; line-height: var(--leading-body); text-transform: uppercase; color: var(--ink-soft); margin: 0; }
+  .book h1 { font-size: clamp(var(--text-3xl), 5.4vw, var(--text-6xl)); font-variation-settings: "SOFT" 80, "WONK" 1, "opsz" 144; letter-spacing: -0.025em; margin: var(--space-12) 0 var(--space-5); }
+  .book__dek { font-size: var(--text-lg); color: var(--ink-soft); max-width: 32rem; line-height: 1.38; margin: 0; }
+
+  /* A unit is a part title: the numeral small and tracked above the name, on one rule. */
+  .unit { margin-top: var(--space-16); }
+  .unit h2 { font-size: var(--text-xl); font-weight: 400; letter-spacing: -0.015em; font-variation-settings: "SOFT" 60, "WONK" 1; margin: 0 0 var(--space-2); padding-bottom: var(--space-3); border-bottom: 1px solid var(--rule-head); }
+  .unit h2 .n { font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--leaf-text); display: block; margin-bottom: var(--space-2); }
+
+  /* One chapter to a ruled line. No inline padding, so the numbers, the unit title and the rules all
+     stand on the page's one left edge; hovering colours the title rather than filling a box. */
   .chapters { list-style: none; padding: 0; margin: 0; max-width: none; }
   .chapters li { margin: 0; border-bottom: 1px solid var(--rule); }
-  .chapters a, .chapters .soon { display: grid; grid-template-columns: 2.6rem 1fr auto; align-items: baseline; gap: var(--space-3); padding: var(--space-3) var(--space-2); text-decoration: none; color: var(--ink); border-radius: var(--radius); }
-  .chapters a:hover { background: var(--paper-2); }
-  .chapters .n { font-family: var(--font-ui); font-variant-numeric: tabular-nums lining-nums; color: var(--leaf); font-weight: 600; font-size: var(--text-sm); }
-  .chapters .soon { color: var(--ink-faint); }
+  .chapters a, .chapters .soon { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) auto; align-items: baseline; gap: var(--space-3); padding: var(--space-3) 0; text-decoration: none; color: var(--ink); }
+  .chapters a .title { transition: color var(--dur) var(--ease); }
+  .chapters a:hover .title { color: var(--leaf-text); }
+  .chapters .n { font-family: var(--font-ui); font-variant-numeric: tabular-nums lining-nums; color: var(--leaf-text); font-weight: 600; font-size: var(--text-sm); }
+  .chapters .soon { color: var(--ink-soft); }
   .chapters .soon .n { color: var(--ink-faint); }
-  .chapters .tag { font-family: var(--font-ui); font-size: var(--text-xs); color: var(--ink-faint); }
-  .chapters a .tag { color: var(--leaf); }
-  .chapters .dek { display: block; font-size: var(--text-base); color: var(--ink-soft); margin-top: .1rem; }
+  /* Thirty-one rows repeat the same two words. Small tracked capitals turn that column into a rubric the
+     eye skims instead of thirty-one sentences it tries to read. */
+  .chapters .tag { font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); white-space: nowrap; }
+  .chapters a .tag { color: var(--leaf-text); font-weight: 600; }
+  .chapters .dek { display: block; font-size: var(--text-base); line-height: 1.5; color: var(--ink-soft); margin-top: var(--space-1); max-width: 34rem; }
+  @media (max-width: 599.98px) {
+    .chapters a, .chapters .soon { grid-template-columns: 2.2rem minmax(0, 1fr); }
+    .chapters .tag { grid-column: 2; margin-top: var(--space-1); }
+  }
 </style>
 <script type="module">
   import '../src/shell.js';
@@ -38,75 +53,77 @@
 <body>
 <tb-shell book="The Living World" book-href="./" library-href="../" today-href="../today/"></tb-shell>
 <main class="book">
-  <p class="book__eyebrow">Book 1 · Biology</p>
-  <h1>The Living World</h1>
-  <p class="book__dek">An introduction to biology in six units, for a reader meeting the subject seriously for the first time. Each chapter is a piece of writing with figures you can turn over, push on, and read.</p>
+  <header class="book__head">
+    <p class="book__eyebrow">Book 1 · Biology</p>
+    <h1>The Living World</h1>
+    <p class="book__dek">An introduction to biology in six units, for a reader meeting the subject seriously for the first time. Each chapter is a piece of writing with figures you can turn over, push on, and read.</p>
+  </header>
 
   <section class="unit">
     <h2><span class="n">Unit I</span>The nature of life</h2>
     <ol class="chapters">
-      <li><a href="ch01-what-is-life/"><span class="n">1</span><span>What is life?<span class="dek">The properties of life, levels of organisation, the cell, DNA, energy, evolution, and how biologists know.</span></span><span class="tag">Read</span></a></li>
-      <li><span class="soon"><span class="n">2</span><span>The chemistry of life</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">3</span><span>Cells</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">4</span><span>Membranes and transport</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">5</span><span>Energy and metabolism</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">6</span><span>Photosynthesis</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">7</span><span>Cellular respiration</span><span class="tag">In preparation</span></span></li>
+      <li><a href="ch01-what-is-life/"><span class="n">1</span><span><span class="title">What is life?</span><span class="dek">The properties of life, levels of organisation, the cell, DNA, energy, evolution, and how biologists know.</span></span><span class="tag">Read</span></a></li>
+      <li><span class="soon"><span class="n">2</span><span class="title">The chemistry of life</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">3</span><span class="title">Cells</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">4</span><span class="title">Membranes and transport</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">5</span><span class="title">Energy and metabolism</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">6</span><span class="title">Photosynthesis</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">7</span><span class="title">Cellular respiration</span><span class="tag">In preparation</span></span></li>
     </ol>
   </section>
 
   <section class="unit">
     <h2><span class="n">Unit II</span>Information</h2>
     <ol class="chapters" start="8">
-      <li><span class="soon"><span class="n">8</span><span>DNA</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">9</span><span>From genes to proteins</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">10</span><span>The cell cycle and mitosis</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">11</span><span>Meiosis and inheritance</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">12</span><span>Gene regulation</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">13</span><span>Biotechnology</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">8</span><span class="title">DNA</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">9</span><span class="title">From genes to proteins</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">10</span><span class="title">The cell cycle and mitosis</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">11</span><span class="title">Meiosis and inheritance</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">12</span><span class="title">Gene regulation</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">13</span><span class="title">Biotechnology</span><span class="tag">In preparation</span></span></li>
     </ol>
   </section>
 
   <section class="unit">
     <h2><span class="n">Unit III</span>Evolution</h2>
     <ol class="chapters" start="14">
-      <li><span class="soon"><span class="n">14</span><span>Darwin and natural selection</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">15</span><span>Population genetics</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">16</span><span>Speciation</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">17</span><span>The history and tree of life</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">14</span><span class="title">Darwin and natural selection</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">15</span><span class="title">Population genetics</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">16</span><span class="title">Speciation</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">17</span><span class="title">The history and tree of life</span><span class="tag">In preparation</span></span></li>
     </ol>
   </section>
 
   <section class="unit">
     <h2><span class="n">Unit IV</span>Diversity</h2>
     <ol class="chapters" start="18">
-      <li><span class="soon"><span class="n">18</span><span>Bacteria and archaea</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">19</span><span>Protists</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">20</span><span>Fungi</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">21</span><span>Plants</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">22</span><span>Animals</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">18</span><span class="title">Bacteria and archaea</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">19</span><span class="title">Protists</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">20</span><span class="title">Fungi</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">21</span><span class="title">Plants</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">22</span><span class="title">Animals</span><span class="tag">In preparation</span></span></li>
     </ol>
   </section>
 
   <section class="unit">
     <h2><span class="n">Unit V</span>Form and function</h2>
     <ol class="chapters" start="23">
-      <li><span class="soon"><span class="n">23</span><span>Plant structure</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">24</span><span>Animal structure and homeostasis</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">25</span><span>Nervous systems</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">26</span><span>Circulation and gas exchange</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">27</span><span>Immunity</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">28</span><span>Reproduction and development</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">23</span><span class="title">Plant structure</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">24</span><span class="title">Animal structure and homeostasis</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">25</span><span class="title">Nervous systems</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">26</span><span class="title">Circulation and gas exchange</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">27</span><span class="title">Immunity</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">28</span><span class="title">Reproduction and development</span><span class="tag">In preparation</span></span></li>
     </ol>
   </section>
 
   <section class="unit">
     <h2><span class="n">Unit VI</span>Ecology</h2>
     <ol class="chapters" start="29">
-      <li><span class="soon"><span class="n">29</span><span>Populations</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">30</span><span>Communities</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">31</span><span>Ecosystems</span><span class="tag">In preparation</span></span></li>
-      <li><span class="soon"><span class="n">32</span><span>The biosphere and conservation</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">29</span><span class="title">Populations</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">30</span><span class="title">Communities</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">31</span><span class="title">Ecosystems</span><span class="tag">In preparation</span></span></li>
+      <li><span class="soon"><span class="n">32</span><span class="title">The biosphere and conservation</span><span class="tag">In preparation</span></span></li>
     </ol>
   </section>
 </main>

@@ -7,26 +7,34 @@
 // `level` is recall (say it), explain (say why), or apply (use it on a case they have not seen).
 // `teaches` points back at the prose and the figures, so a wrong answer leads somewhere.
 //
-// Six prerequisites name objectives of chapter 1 rather than of this chapter, because chapter 3 is
-// built on section 1.4 and does not repeat it: `resolution-limits`, `cell-scale`,
-// `prokaryote-eukaryote`, `organelle-function`, `three-domains` and `endosymbiosis`. register() keys
-// objectives by chapter, so the study queue resolves them across chapters (see
-// docs/design/chapter-recipe.md, "The objectives"). `cell-theory` is not cited directly: it is already
-// a prerequisite of `prokaryote-eukaryote` in chapter 1.
+// Some prerequisites name objectives of earlier chapters rather than of this one. From chapter 1,
+// because chapter 3 is built on section 1.4 and does not repeat it: `cell-scale`, `resolution-limits`,
+// `prokaryote-eukaryote`, `organelle-function`, `three-domains` and `endosymbiosis`. From chapter 2,
+// because three of this chapter's explanations are chapter 2's chemistry applied: `hydrophobic-effect`
+// (the signal peptide is recognised and admitted because it is hydrophobic, §3.4), `ph-scale` (a
+// lysosome works only at pH 5, §3.4) and `carbohydrate-linkage` (the wall's straight fibres are the
+// β linkage of §2.6, §3.7). register() keys objectives by chapter, so the study queue resolves them
+// across chapters (see docs/design/chapter-recipe.md, "The objectives"). `cell-theory` is not cited
+// directly: it is already a prerequisite of `prokaryote-eukaryote` in chapter 1.
+//
+// `magnification-resolution` deliberately does *not* name chapter 1's `resolution-limits`. That
+// objective is "why an ordinary light microscope stops near 200 nm", which is this chapter's
+// `abbe-limit` — two steps downstream — so hanging the simple distinction on it sent a struggling
+// reader forwards instead of back. It is `abbe-limit` that rests on both.
 
 export const OBJECTIVES = [
   // ---- 3.1 Seeing the cell ----
   {
     id: 'magnification-resolution',
     statement: 'Distinguish magnification from resolution, and say why extra magnification past an instrument\'s limit adds nothing.',
-    prereqs: ['resolution-limits'],
+    prereqs: ['cell-scale'],
     teaches: { sections: ['seeing'], figures: ['fig-microscopes'] },
     level: 'explain',
   },
   {
     id: 'abbe-limit',
     statement: 'Predict whether a given instrument can resolve two structures a given distance apart, using the wavelength and the numerical aperture.',
-    prereqs: ['magnification-resolution'],
+    prereqs: ['magnification-resolution', 'resolution-limits'],
     teaches: { sections: ['seeing'], figures: ['fig-microscopes'] },
     level: 'apply',
   },
@@ -130,7 +138,7 @@ export const OBJECTIVES = [
   {
     id: 'signal-sorting',
     statement: 'Explain how a signal peptide gets a protein into the endoplasmic reticulum, and how a chemical tag gets it to the right destination afterwards.',
-    prereqs: ['endomembrane-members'],
+    prereqs: ['endomembrane-members', 'hydrophobic-effect'],
     teaches: { sections: ['endomembrane'], figures: ['fig-secretion'] },
     level: 'explain',
   },
@@ -144,7 +152,7 @@ export const OBJECTIVES = [
   {
     id: 'lysosome-function',
     statement: 'Explain what a lysosome digests, why its interior is acidic, and what happens when one of its enzymes is missing.',
-    prereqs: ['endomembrane-members'],
+    prereqs: ['endomembrane-members', 'ph-scale'],
     teaches: { sections: ['endomembrane'], figures: ['fig-secretion'] },
     level: 'explain',
   },
@@ -234,7 +242,7 @@ export const OBJECTIVES = [
   {
     id: 'wall-vs-matrix',
     statement: 'Contrast a plant cell wall with an animal extracellular matrix in composition, mechanics and what each lets its cell do.',
-    prereqs: ['wall-osmosis'],
+    prereqs: ['wall-osmosis', 'carbohydrate-linkage'],
     teaches: { sections: ['surface'], figures: [] },
     level: 'explain',
   },

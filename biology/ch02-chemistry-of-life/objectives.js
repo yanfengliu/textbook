@@ -254,7 +254,10 @@ export const OBJECTIVES = [
   {
     id: 'denaturation',
     statement: 'Predict what heat or a change in pH does to a protein, say which bonds break and which survive, and explain why the change is often permanent.',
-    prereqs: ['protein-levels', 'blood-ph'],
+    // ph-scale, not blood-ph: a reader who fumbles this needs the pH scale and what charge does to a
+    // side chain, not the renal handling of bicarbonate that blood-ph is about. The queue's job is to
+    // work on the missing foundation, and blood-ph sits alongside this objective rather than under it.
+    prereqs: ['protein-levels', 'ph-scale'],
     teaches: { sections: ['proteins'], figures: ['fig-foldlab'] },
     level: 'apply',
   },

@@ -259,6 +259,9 @@ export class Labels {
     this.svg = svg;
     this.items = new Map();
     this.groups = {};
+    // Rectangles a figure has already put something in (a readout, an inset), as { x, y, w, h } about
+    // their centres in stage pixels; a label treats each as a label already placed and goes elsewhere.
+    this.obstacles = [];
     this._v = new THREE.Vector3();
   }
 
@@ -301,7 +304,7 @@ export class Labels {
   }
 
   update(camera, W, H, bottomPad = 48) {
-    const placed = [];
+    const placed = [...this.obstacles];
     for (const it of this.items.values()) {
       // Hidden when off, when its group is off, when the anchor is behind the camera, or when the anchor
       // projects well outside the stage (a near view): a label for something off screen only misleads.

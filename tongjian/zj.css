@@ -1,0 +1,1004 @@
+/* 資治通鑑 — the book's own type system. Loaded after the five shared sheets, and the only stylesheet
+   this book adds (docs/design/tongjian.md, "The type system, and the bar it is held to").
+
+   Scope. Every selector in this file begins with `.zj`, which is on <body> of every page of this book.
+   There is no `:root` rule, no bare element selector, no `@font-face` (family names cannot be scoped),
+   and no unprefixed `@keyframes` (names cannot be scoped either). Custom properties are declared on
+   `.zj` and inherit from there; because they are declared on an element rather than at `:root`, they
+   are invisible to every other page, and `.zj` (0,1,0) beats both `:root` (0,1,0, earlier in the
+   cascade) and every bare element rule in the shared sheets. So this file cannot give the biology book
+   a different type system even if it were linked into it by mistake.
+
+   Why the book needs its own: the shared system is Latin. Fraunces and Newsreader on a 1.2 modular
+   scale, old-style figures, a drop cap, small caps and negative tracking are each wrong for a Song
+   page, and a Chinese page that merely falls back to a system font is the defect docs/design/i18n.md
+   measured at 110 of 110 glyphs (SimSun, chosen by nobody). The families, the steps and the leading
+   below are that document's measured decisions, re-taken for this book in docs/design/tongjian.md. */
+
+/* ============================================================================
+   1. The book's tokens
+   ============================================================================ */
+
+.zj {
+  /* Han first in each stack, which is the whole trick: the Han face draws U+2014, U+2018–201D, U+2026
+     and U+00B7 full-width, and hands the Latin letters to Noto Serif SC's own Latin, which sits on the
+     Han baseline at the Han weight. The local families stay in the tail for the swap and the offline
+     case (i18n.md, "The cost of the fonts"). */
+  --zj-han-text: "Noto Serif SC", "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", SimSun, serif;
+  --zj-han-ui: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-text: var(--zj-han-text);
+  --font-display: var(--zj-han-text);
+  --font-ui: var(--zj-han-ui);
+
+  /* Prose leading. 1.8 is i18n.md's measured value for Han at 1.2rem — looked at at 1.55, 1.75 and
+     1.90, with 1.8 where Chinese book practice (行距 ≈ 0.8em) and the room the 着重号 needs agree.
+     --text-body itself is deliberately NOT set here: layout.css steps it down to 1.1rem on a phone
+     with `:root` (0,1,0), and a `.zj` declaration of it would win at every width and silently kill
+     that step. */
+  --leading-body: 1.8;
+
+  /* The book's scale, one line per row of the design's type table. These are not the Latin steps: a
+     full-width ideograph fills its em box, so the same rem would not read the same, and the design
+     states these five sizes as the book's decisions. */
+  --zj-src-size: 1.25rem;        /* 原文 body: the primary object on the page */
+  --zj-src-leading: 2;           /* a classical page is read character by character down a column */
+  --zj-quoted-size: 0.95em;      /* 原文 quoted inside prose: a quotation inside an argument */
+  /* The 原文 in the pairing. The design's "quoted inside prose" step is 0.95em of the body, and the
+     shared sheet drops that body to 1.1rem on a phone, which would take this copy below the 譯文 it is
+     printed opposite — the one relation in the book that may not invert. So it is frozen at the size
+     0.95em of a 1.2rem body actually is, and steps down with the 譯文 on a phone instead. */
+  --zj-pair-src-size: 1.14rem;
+  --zj-trans-size: 1.0625rem;    /* 譯文: deliberately a step BELOW the original */
+  --zj-trans-leading: 1.85;
+  --zj-glyph-size: 2.2rem;       /* the card's glyph: large enough to examine stroke by stroke */
+  --zj-rubric-size: 0.72rem;     /* 卷次, 項目, 圖 n: Hei, 疏排 — the Chinese device for a rubric */
+  --zj-rubric-track: 0.16em;
+  --zj-ui: 0.8125rem;            /* controls; a Song face at 11–13px loses its horizontals */
+  --zj-ui-lg: 0.9375rem;
+
+  /* The character grid of the 原文, stated in characters rather than in rem because that is the unit
+     the reader sees. `--zj-grid-chars` whole characters of the face, each advanced by 1em plus the
+     tracking, and the product is the column: 33 × 1.25rem × 1.0569 = 43.6rem, which is --measure to
+     the hundredth of a pixel. The tracking is 1.0569em per character — 1/17.6 em of 字距 — and it is
+     what makes the line hold a whole number of characters instead of a whole number and a fraction.
+     Tuned against the rendered measure at 1440, 1024 and 390 px, not guessed; the phone steps are at
+     the foot of this file. */
+  --zj-grid-chars: 33;
+  --zj-grid-track: 0.0569;
+
+  /* The one accent, reserved for three uses: the current section mark in the rail, the focus ring on a
+     character, and the rule under a figure's number. Mixed from the existing tokens rather than a new
+     hex, so it follows the theme: on the dark paper --ink is light and the seal comes up with it. */
+  --seal: color-mix(in srgb, var(--coral) 72%, var(--ink));
+
+  /* The book's own --ink-faint, a step darker on paper and a step lighter on dark paper.
+     Why a local value: this token carries the smallest type in the book — the pinyin, the 詞性, the 卷次
+     hung on a card example, the caption rubrics, the section numbers, the card's own labels — and the
+     shared value misses WCAG AA on the tinted papers, which is where that type actually sits. Measured on
+     the shared value: light #6f6960 is 4.29:1 on --paper-3 #ebe4d6 and 4.70:1 on --paper-2 #f3eee4; dark
+     #908a80 is 4.33:1 on #24282d and 4.83:1 on #1c1f23. Below 4.5:1 is below the bar the rest of the site
+     holds, and this is the smallest text on the page.
+     The value is 92% of the shared token and 8% of the ink, so the book moves one step along the colour
+     relationship the two shared tokens already establish rather than inventing a grey. Measured after:
+     light #68635a is 5.59 / 5.17 / 4.72:1 on --paper / --paper-2 / --paper-3; dark #979187 is 5.76 / 5.30
+     / 4.75:1 on the same three (faint-token.mjs, both themes, all four pages). The character of the tint
+     is unchanged; only its distance from the paper.
+     It is declared here, inside `.zj`, and not on `html.zj`: `.zj` is on `<body>` of this book's pages,
+     and a custom property declared on the body shadows the one it would otherwise inherit from `:root`,
+     so this is the one place the value can land. The contents page carries the same pair in its own
+     inline block, because it does not load this file. */
+  --ink-faint: color-mix(in srgb, #6f6960 92%, var(--ink));
+}
+
+/* Both theme steps are behind a media query, as the shared token table's are, and the reader's explicit
+   choice is stated after them because `.zj[data-theme]` is (0,2,0) against `.zj`'s (0,1,0) and wins
+   wherever it lands. The light step was written as a bare `.zj` rule first, after the dark media query,
+   and it beat it: at equal specificity the later rule wins, so every dark page measured the light grey
+   while the light pages were right. */
+@media (prefers-color-scheme: light) {
+  .zj {
+    --ink-faint: color-mix(in srgb, #6f6960 92%, var(--ink));
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .zj {
+    --ink-faint: color-mix(in srgb, #908a80 92%, var(--ink));
+  }
+}
+
+.zj[data-theme="dark"] {
+  --ink-faint: color-mix(in srgb, #908a80 92%, var(--ink));
+}
+
+/* ============================================================================
+   2. What the shared Latin rules do to Han, turned off — each on the element it was set on
+   ============================================================================ */
+
+/* `oldstyle-nums` puts a numeral at x-height beside characters that fill the em box, so a date or a
+   figure number reads smaller than the text around it. Lining everywhere, tabular where a column can
+   form (the 年表, the lexicon index). */
+.zj {
+  font-variant-numeric: lining-nums proportional-nums;
+  /* `hyphens: auto` below 600px does nothing to Han and hyphenates the Latin inside it. */
+  hyphens: manual;
+  /* Full-width marks keep their full-width space; no line begins with a closing mark or ends with an
+     opening one. `text-spacing-trim` is deliberately NOT set: trimming half an em off a line's first
+     mark changes that line's advance and would break the character grid, and the grid is worth more
+     here than the half em it saves. */
+  line-break: strict;
+}
+
+.zj p,
+.zj li,
+.zj dd,
+.zj td,
+.zj figcaption {
+  hyphens: manual;
+}
+
+/* Emphasis in Chinese is a 着重号, not a slant: a synthesised oblique on an ideograph distorts the
+   strokes, and the dot is both correct and quiet. It sits under the character and raises the line
+   box, which is part of why the leading is 1.8. */
+.zj em {
+  font-style: normal;
+  text-emphasis: filled dot;
+  text-emphasis-position: under right;
+  text-emphasis-color: var(--ink);
+}
+
+/* No italic face is loaded on this book's pages — Noto Serif SC has none, and the two families in the
+   head are the whole type kit. So `i`, `cite` and `var` are set upright rather than synthesised: the
+   book's Latin runs are pinyin, dates and 卷次, none of which is italic. */
+.zj i,
+.zj cite,
+.zj var {
+  font-style: normal;
+}
+
+/* Han bold is drawn from the variable font's real 700. A synthesised Han bold smears the strokes into
+   each other at body size, which is a defect and not a weight. */
+.zj b,
+.zj strong {
+  font-weight: 700;
+}
+
+/* Negative tracking closes the gaps Han needs. Headings take their display from weight, not from a
+   second family: there is no optical-size Han serif to be had. */
+.zj h1,
+.zj h2,
+.zj h3,
+.zj h4 {
+  letter-spacing: 0;
+  font-variation-settings: normal;
+}
+
+.zj h1 {
+  font-weight: 700;
+}
+
+.zj h2 {
+  font-weight: 600;
+}
+
+.zj h3 {
+  font-weight: 600;
+}
+
+/* A displayed quotation of the 原文, inside prose. */
+.zj blockquote {
+  font-style: normal;
+  letter-spacing: 0;
+  max-width: none;
+  text-indent: 0;
+  font-size: var(--zj-src-size);
+  line-height: var(--zj-src-leading);
+}
+
+/* ============================================================================
+   3. Rubrics — Hei, 疏排
+   ============================================================================ */
+
+/* Chinese display and interface type is Hei, and 疏排 is the Chinese device where Latin small caps
+   would be. `text-transform: uppercase` is a no-op for Han and is not used. */
+.zj .tb-label,
+.zj .tb-opener__unit,
+.zj .tb-rail__title,
+.zj figcaption .fig-num,
+.zj tb-key::before,
+.zj tb-check .tb-check__label,
+.zj tb-sort .tb-sort__bin h5,
+.zj section > h2 .n {
+  font-family: var(--font-ui);
+  font-size: var(--zj-rubric-size);
+  font-weight: 500;
+  letter-spacing: var(--zj-rubric-track);
+  text-transform: none;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* The section number belongs to the rail's current-section mark, not to a second accent: the page
+   keeps one red. */
+.zj section > h2 .n {
+  color: var(--ink-faint);
+}
+
+/* ============================================================================
+   4. The opener
+   ============================================================================ */
+
+.zj .tb-opener h1 {
+  font-weight: 700;
+}
+
+.zj .tb-opener__dek {
+  line-height: 1.6;
+  max-width: 30rem;
+}
+
+/* The shell writes "Chapter " before the folio in English and no page can reach the string from
+   markup, so it is replaced here. `.zj .tb-opener__number::before` is (0,2,1) against the shared
+   (0,1,1) and (0,1,1)-in-a-media-query, so one rule covers both the running head and the wide folio.
+   The English text node is still in the DOM; the element is `aria-hidden="true"`, so nothing reads
+   it. */
+.zj .tb-opener__number::before {
+  content: "章";
+}
+
+/* ============================================================================
+   5. The 原文, set to a character grid
+   ============================================================================ */
+
+/* One 句 an item, so a reader sees where a sentence ends without punctuation carrying the whole load.
+   The width is a whole number of characters — the same expression the line box uses, so a full line
+   ends exactly on the column edge and `justify` has nothing left to distribute. `min(100%, …)` is the
+   safety net for the one band of viewport widths (about 1000–1018px) where the text column is a few
+   pixels narrower than --measure: there the grid gives up its exact count rather than overflowing. */
+.zj .zj-src {
+  list-style: none;
+  margin: var(--space-6) 0 var(--space-10);
+  padding: 0;
+  width: min(100%, calc(var(--zj-grid-chars) * 1em * (1 + var(--zj-grid-track))));
+  font-size: var(--zj-src-size);
+  line-height: var(--zj-src-leading);
+  letter-spacing: calc(var(--zj-grid-track) * 1em);
+  color: var(--ink);
+  text-align: justify;
+  text-align-last: left;
+}
+
+.zj .zj-src li {
+  margin: 0 0 var(--space-2);
+  break-inside: avoid;
+}
+
+.zj .zj-src li:last-child {
+  margin-bottom: 0;
+}
+
+/* A character is a target with no mark on it: the page is the primary object and a dotted underline
+   under every one of 294 volumes of characters would be a texture, not a text. The affordance is the
+   pointer and, on hover, a tint of the paper — no accent, no underline shifting the line. */
+.zj tb-char {
+  display: inline;
+  position: relative;
+}
+
+.zj tb-char > button {
+  all: unset;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  border-radius: 2px;
+  transition: background var(--dur) var(--ease);
+}
+
+.zj tb-char > button:hover,
+.zj tb-char > button[aria-expanded="true"] {
+  background: var(--paper-3);
+}
+
+/* The focus ring is the seal. It is the reader's only way to know which character they are on when
+   they arrive by keyboard, and it is one of the three places the accent is allowed. */
+.zj tb-char > button:focus-visible {
+  outline: 2px solid var(--seal);
+  outline-offset: 2px;
+}
+
+/* A 詞 inside the 原文 keeps a mark, but not the shared dotted one: this book sets a 着重号 as dots
+   under a character, and two dotted underlines in one paragraph are one device, not two. A 詞 is a
+   solid hairline in the rule colour; emphasis is dots. */
+.zj tb-term > button {
+  text-decoration-style: solid;
+  text-decoration-color: var(--rule-strong);
+  text-decoration-thickness: 1px;
+}
+
+.zj tb-term > button:hover,
+.zj tb-term > button[aria-expanded="true"] {
+  color: var(--ink);
+  text-decoration-color: var(--ink);
+}
+
+/* ============================================================================
+   6. 原文 and 譯文, paired
+   ============================================================================ */
+
+/* The one place this book departs from the single-column recipe, and the reason the book exists: a
+   translation the reader cannot see beside the original is a translation they read instead of the
+   original. Each `<li>` is one sentence pair; `subgrid` makes its two children take the parent's
+   tracks, so the rows line up across the whole pairing. The explicit tracks before the `@supports`
+   block are the plain-flow fallback — a browser without subgrid gets the same two columns, laid out
+   per row. */
+.zj .zj-trans {
+  list-style: none;
+  margin: var(--space-6) 0 var(--space-10);
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 0.45fr) minmax(0, 0.55fr);
+  column-gap: var(--space-8);
+}
+
+.zj .zj-trans__row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.47fr) minmax(0, 0.53fr);
+  column-gap: var(--space-8);
+  /* The first baselines of the pair line up, which is the whole point of a 對照 layout: the eye
+     crosses the gutter on one line, not on two. `start` put the boxes' tops together instead, and the
+     original's larger line box then sat half a line lower than the translation it translates. */
+  align-items: baseline;
+  break-inside: avoid;
+}
+
+.zj .zj-trans__row + .zj-trans__row {
+  border-top: 1px solid var(--rule);
+  padding-top: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+/* The original in the pairing is a reference copy of the text above, not the text itself: it is set at
+   the design's "quoted inside prose" step, in full ink so the eye can cross the gutter to the
+   translation without crossing a colour change as well. */
+.zj .zj-trans__src {
+  font-size: var(--zj-pair-src-size);
+  line-height: var(--zj-src-leading);
+  color: var(--ink);
+}
+
+/* Deliberately a step below the original and in --ink-soft. This is the single most consequential
+   size decision in the book. */
+.zj .zj-trans__text {
+  font-size: var(--zj-trans-size);
+  line-height: var(--zj-trans-leading);
+  color: var(--ink-soft);
+}
+
+/* Below about 900px there is no room for two columns of Chinese: they stack, and the translation
+   follows its own sentence. */
+@media (max-width: 899.98px) {
+  .zj .zj-trans,
+  .zj .zj-trans__row {
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 0;
+  }
+
+  .zj .zj-trans__src {
+    margin-bottom: var(--space-1);
+  }
+}
+
+/* ============================================================================
+   7. The lexicon list in 字詞
+   ============================================================================ */
+
+/* A ruled table of the chapter's own 字 and 詞, on the shared glossary's two-column pattern: the
+   head-word hangs in its own column and every gloss starts on one edge, so thirty entries can be
+   scanned down rather than read through. */
+.zj .zj-lex {
+  display: grid;
+  grid-template-columns: var(--space-20) minmax(0, 1fr);
+  margin: var(--space-6) 0 var(--space-10);
+}
+
+.zj .zj-lex dt,
+.zj .zj-lex dd {
+  margin: 0;
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--rule);
+}
+
+.zj .zj-lex dt:first-of-type,
+.zj .zj-lex dt:first-of-type + dd {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.zj .zj-lex__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+/* The head-word's three parts sit on one baseline, in three fixed columns: the reading starts on the
+   same x on every row, and so does the 詞性. Laid out as a flex row they each shifted with the width
+   of the pinyin above them and the column of readings read as a ragged edge. */
+.zj .zj-lex dt {
+  display: grid;
+  grid-template-columns: auto 3.6rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+}
+
+.zj .zj-lex__glyph {
+  font-size: var(--zj-src-size);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.zj .zj-lex__pinyin {
+  font-family: var(--font-ui);
+  font-size: var(--zj-ui);
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.zj .zj-lex__pos {
+  font-family: var(--font-ui);
+  font-size: var(--zj-rubric-size);
+  font-weight: 500;
+  letter-spacing: var(--zj-rubric-track);
+  color: var(--ink-faint);
+}
+
+.zj .zj-lex dd {
+  font-size: var(--zj-trans-size);
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 599.98px) {
+  .zj .zj-lex {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .zj .zj-lex dt {
+    padding-bottom: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .zj .zj-lex dd {
+    padding-top: var(--space-1);
+    border-top: 0;
+  }
+
+  .zj .zj-lex dt:first-of-type {
+    border-top: 0;
+  }
+}
+
+/* ============================================================================
+   8. The card — the book's centrepiece
+   ============================================================================ */
+
+/* A dictionary entry set by someone who cares. The glyph is the thing the reader clicked, the reading
+   is above the meaning, the gloss is the largest text in the card, and the hierarchy is carried by
+   space, rules and weight: no fills, no tinted sub-panels, no coloured header. It keeps the shared
+   popover's placement, width clamp, z-index and `--paper-2`-on-`--rule-strong` drawing; what changes
+   is the radius (the shared 12px is the figure stage's, and a dictionary slip is not a card with
+   rounded corners) and everything inside it. */
+.zj .zj-card {
+  /* The card hangs inside the 原文, and inherits its grid: left alone it would be tracked like the
+     passage and justified like it. */
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-align: left;
+  text-indent: 0;
+  hyphens: manual;
+  font-family: var(--zj-han-text);
+  background: var(--paper-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lift);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  animation: zj-card-in var(--dur) var(--ease);
+  /* The floor under the placement's vertical nudge: a window shorter than the card cannot be fixed by
+     moving it, so the card takes the height there is and scrolls. It is the last thing to happen, not
+     the first — on a 900 px window the card is 482 px and is simply lifted into place. */
+  max-height: calc(100vh - 2 * var(--space-4));
+  overflow-y: auto;
+}
+
+@keyframes zj-card-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zj .zj-card {
+    animation: none;
+  }
+}
+
+.zj .zj-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-3);
+  /* One unit under the head rather than three: the hairline already separates the glyph from the gloss,
+     and the card's height is the one thing about it that can fail — the placement lifts the card clear of
+     its term only while the card is shorter than the space below it, so every 4 px here is 4 px of margin
+     against the card being clamped to the window and hiding its own last line. */
+  padding-bottom: var(--space-1);
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+.zj .zj-card__glyph {
+  font-family: var(--zj-han-text);
+  font-size: var(--zj-glyph-size);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+  /* The shared popover sets a block-level `<b>` with a bottom margin (it is the term line there); in
+     the head this is a flex item on the reading's baseline. */
+  display: inline;
+  margin: 0;
+  color: var(--ink);
+}
+
+/* The reading is Hei, and the tone mark is a character rather than decoration: it is part of the
+   spelling of the syllable, so it is set at the same size as the letters. */
+/* The reading is one word with a space in it, and a space is where a browser breaks a line: left
+   alone, a long pinyin wraps in the middle of the syllable it belongs to. */
+.zj .zj-card__pinyin {
+  font-family: var(--font-ui);
+  font-size: var(--zj-ui-lg);
+  font-weight: 400;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.zj .zj-card__pos {
+  font-family: var(--font-ui);
+  font-size: var(--zj-rubric-size);
+  font-weight: 500;
+  letter-spacing: var(--zj-rubric-track);
+  color: var(--ink-faint);
+}
+
+/* A second reading, or an 異體字: a row under the head, in the interface voice, quieter than the
+   reading it qualifies. They share one centred row — two rows of 13 px text with a 12.8 px gap above
+   each cost 84 px of a card that has to fit under a character on a phone, and the two lines are each
+   half a line wide. `flex-wrap` puts them back on two lines when the card is too narrow for both. */
+.zj .zj-card__readings {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 var(--space-4);
+  margin-top: var(--space-1);
+  font-family: var(--font-ui);
+  font-size: var(--zj-ui);
+  color: var(--ink-faint);
+  text-align: center;
+}
+
+.zj .zj-card__gloss {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--zj-trans-size);
+  font-weight: 500;
+  /* 1.5 rather than 1.6: the gloss is one to three lines on a card whose width is clamped to the term it
+     belongs to, and the two long ones (智氏，晋国大夫的家族，智伯出于此族。) wrap to two lines that at 1.6
+     cost 54 px. It is the largest text in the card and it stays the largest text in the card. */
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.zj .zj-card__note {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--zj-ui-lg);
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+/* A section head inside the card: a hairline, then the rubric — the same device as the page's own
+   section numbers, at the card's scale. The rhythm above and below it is 2u/2u rather than 4u/3u: the
+   card is a slip pinned under a character, and its height is the one thing about it that can fail. */
+.zj .zj-card__sec {
+  display: block;
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-ui);
+  font-size: var(--zj-rubric-size);
+  font-weight: 500;
+  letter-spacing: var(--zj-rubric-track);
+  color: var(--ink-faint);
+}
+
+/* The 通鑑 examples: indented under the hairline, each with its 卷次 hung at the right so a reader
+   comparing two quotations compares the right-hand column. They flow side by side and wrap: the card is
+   clamped to the width of the term it belongs to — 299 px in a 1440 px column — so the example's two
+   columns are sized to their content and the row is left-aligned, rather than the quotation stretching
+   to fill a track it does not need and pushing its 卷次 to the far edge of the card. Two quotations fit
+   on one line here and take two on a narrower card, which is what horizontal wrapping is for. */
+.zj .zj-card__exs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: var(--space-1) var(--space-6);
+  margin-top: var(--space-2);
+  padding-left: var(--space-3);
+}
+
+.zj .zj-card__ex {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  column-gap: var(--space-2);
+  align-items: baseline;
+}
+
+.zj .zj-card__ex-text {
+  font-size: var(--zj-ui-lg);
+  line-height: 1.8;
+  color: var(--ink);
+}
+
+.zj .zj-card__ex-at {
+  font-family: var(--font-ui);
+  font-size: var(--zj-rubric-size);
+  letter-spacing: var(--zj-rubric-track);
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+/* A gap stated rather than hidden: a character whose entry has no attested second use says so here,
+   in the same place the example would be. */
+.zj .zj-card__gap {
+  display: block;
+  margin-top: var(--space-2);
+  padding-left: var(--space-3);
+  font-size: var(--zj-ui-lg);
+  line-height: 1.65;
+  color: var(--ink-faint);
+}
+
+/* Where else this chapter uses it: the quiet way back into the text. The clauses flow as one run of text
+   rather than one per line: the card is clamped to the width of the term it belongs to — 299 px in a
+   1440 px column, about eleven characters at this size — and a column of six 26 px lines was 185 px of a
+   468 px card. Flowing them costs a space between items and saves the leading of five line breaks. */
+.zj .zj-card__here {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  font-size: var(--zj-ui-lg);
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.zj .zj-card__here li {
+  display: inline;
+  margin: 0;
+}
+
+.zj .zj-card__here li + li {
+  margin-left: var(--space-2);
+}
+
+.zj .zj-card__here .zj-card__here-word {
+  font-family: var(--font-ui);
+  font-size: var(--zj-rubric-size);
+  letter-spacing: var(--zj-rubric-track);
+  color: var(--ink-faint);
+  margin-right: var(--space-1);
+}
+
+.zj .zj-card__index {
+  display: block;
+  width: 100%;
+  margin-top: 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-ui);
+  font-size: var(--zj-ui);
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.zj .zj-card__index:hover {
+  color: var(--ink);
+}
+
+/* ============================================================================
+   9. Links, chrome, and the page's ink
+   ============================================================================ */
+
+/* Everything else is ink on paper: the shared link green is an accent this page does not spend. The
+   underline carries "this is a link", exactly as it does in the shared sheet. */
+.zj a {
+  color: var(--ink);
+  text-decoration-color: color-mix(in srgb, var(--ink) 35%, transparent);
+}
+
+.zj a:hover {
+  text-decoration-color: var(--ink);
+}
+
+.zj ::selection {
+  background: var(--paper-3);
+  color: var(--ink);
+}
+
+.zj .tb-header__today {
+  color: var(--ink-soft);
+}
+
+.zj .tb-header__today:hover {
+  color: var(--ink);
+  background: var(--paper-2);
+}
+
+.zj .tb-header__due {
+  background: var(--ink-soft);
+  color: var(--paper);
+}
+
+.zj .tb-progress__bar {
+  background: var(--ink-faint);
+}
+
+/* The rail's current-section mark is the seal's first use. */
+.zj .tb-rail li.is-current > a,
+.zj .tb-rail li.is-current > a .n {
+  color: var(--seal);
+}
+
+.zj .tb-rail a:hover {
+  color: var(--ink);
+  background: var(--paper-2);
+}
+
+/* The contents list's numbers are a rubric, not a second accent: the page keeps one red. */
+.zj .tb-opener__contents .n {
+  color: var(--ink-faint);
+}
+
+/* The shell writes this one in English (`src/shell.js`, "In this chapter") and a page cannot replace
+   an element's text from CSS, so the label is drawn by CSS on this book's pages only: the shared
+   `p` keeps its box, its position and its border, the English run is set to zero size, and the
+   Chinese rubric is generated in front of it. The `<nav>` carries `aria-label="本章目錄"` from the
+   page's own markup, so the navigation keeps its name; the English text node is still in the
+   accessibility tree, which is the one cost of not editing another worker's file. */
+.zj .tb-rail__title {
+  font-size: 0;
+}
+
+.zj .tb-rail__title::before {
+  content: "本章目錄";
+  font-family: var(--font-ui);
+  font-size: var(--zj-rubric-size);
+  font-weight: 500;
+  letter-spacing: var(--zj-rubric-track);
+  color: var(--ink-faint);
+}
+
+/* ============================================================================
+   10. The components this book uses
+   ============================================================================ */
+
+.zj tb-key::before {
+  content: "要旨";
+}
+
+.zj tb-key p {
+  font-size: var(--zj-src-size);
+  font-weight: 500;
+  line-height: 1.75;
+  letter-spacing: 0;
+  max-width: none;
+}
+
+/* The check's options are Han prose, and the Latin 1rem step is below the book's body size; they take
+   the 譯文 step, which is this book's second body size. The question stays a step above at --text-lg
+   with its tracking zeroed. */
+.zj tb-check .question {
+  letter-spacing: 0;
+  line-height: 1.6;
+}
+
+.zj tb-check .tb-check__label {
+  color: var(--ink-faint);
+}
+
+/* The rubric above a check is written by `src/components/check.js` as "Question <n>" — English no page
+   can reach, because the number is inside the same text node. A counter draws the same number in
+   Chinese without editing another worker's file: the element's own text goes to zero size and the
+   rubric is generated in front of it. The English text node stays in the DOM and in the accessibility
+   tree, which is the one cost of not editing that file. */
+.zj main {
+  counter-reset: zj-question;
+}
+
+.zj tb-check {
+  counter-increment: zj-question;
+}
+
+.zj tb-check .tb-check__label {
+  font-size: 0;
+}
+
+.zj tb-check .tb-check__label::before {
+  content: "問題 " counter(zj-question);
+  font-family: var(--font-ui);
+  font-size: var(--zj-rubric-size);
+  font-weight: 500;
+  letter-spacing: var(--zj-rubric-track);
+  color: var(--ink-faint);
+}
+
+.zj tb-check .tb-check__opt {
+  font-size: var(--zj-trans-size);
+  line-height: 1.8;
+}
+
+.zj tb-check .tb-check__opt .k {
+  font-size: var(--zj-rubric-size);
+  letter-spacing: var(--zj-rubric-track);
+}
+
+.zj tb-check .explain {
+  font-size: var(--zj-trans-size);
+  line-height: 1.8;
+  max-width: var(--measure);
+}
+
+.zj tb-sort .tb-sort__intro,
+.zj tb-sort .tb-sort__item .name,
+.zj tb-sort .tb-sort__item .why {
+  letter-spacing: 0;
+}
+
+.zj tb-sort .tb-sort__item .choose button {
+  font-size: var(--zj-ui);
+  letter-spacing: var(--zj-rubric-track);
+}
+
+/* A table of the book's own facts: lining and tabular, because a reader compares them down a column. */
+.zj th {
+  letter-spacing: var(--zj-rubric-track);
+  text-transform: none;
+  font-size: var(--zj-rubric-size);
+  font-weight: 500;
+}
+
+.zj td {
+  font-family: var(--zj-han-text);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* The seal's third use: the rule under a figure's number. */
+.zj figcaption .fig-num {
+  color: var(--ink);
+  border-bottom: 1px solid var(--seal);
+  padding-bottom: 0.15em;
+}
+
+/* ============================================================================
+   11. Paper
+   ============================================================================ */
+
+@media print {
+  .zj .zj-trans,
+  .zj .zj-trans__row {
+    grid-template-columns: minmax(0, 0.45fr) minmax(0, 0.55fr);
+  }
+
+  .zj .zj-card {
+    border-color: var(--rule-strong);
+    box-shadow: none;
+  }
+}
+
+/* ============================================================================
+   12. The phone
+   ============================================================================ */
+
+/* The 原文 and the 譯文 step down on a phone the way the shared sheet steps the body down (1.2 →
+   1.1rem), and the three sizes move together so the ladder never inverts: the reading 原文 at 1.125rem
+   (18px), the paired quotation a step under it, the 譯文 a step under that. A 390px phone gives the
+   text column 338.8px, and 17 characters of 1.0569em at 18px need 323.4px, so a line is 17 characters
+   — a whole number, and the grid is the column less 15px rather than a stretched line. A 360px phone
+   has 308.8px and takes 16; narrower than that the grid clamps to the column and `justify` closes the
+   line, which is what the tracking and the justify are for. */
+@media (max-width: 799.98px) {
+  .zj {
+    --zj-src-size: 1.125rem;
+    --zj-grid-chars: 17;
+    --zj-pair-src-size: 1.0625rem;
+    --zj-trans-size: 1rem;
+  }
+}
+
+@media (max-width: 379.98px) {
+  .zj {
+    --zj-grid-chars: 16;
+  }
+}
+
+/* The card on a phone. It is the width of the window less 16px and there is little height to spare
+   beneath the character: the placement puts the card's top edge a little under the character it belongs
+   to, so on a 390×844 phone the space below it is about 355px, whatever the card would like to be.
+   Everything that is not carrying meaning comes down one step — the gloss to the 譯文 step, everything
+   under it to the interface step, the hairline rhythm from 2u/2u to 1u/2u — and the section rubric
+   moves onto the line with the quotation it heads (below). The glyph and its reading do not move: they
+   are what the reader clicked.
+   Measured on the 為 card, the tallest entry in the chapter, at 390×844: 453px of content before this
+   pass, against 355px of room. These rules are last in the file on purpose: the same selectors appear in
+   the card's own section, and at equal specificity the later rule wins. */
+@media (max-width: 599.98px) {
+  .zj .zj-card {
+    padding: var(--space-2) var(--space-3) var(--space-2);
+  }
+
+  .zj .zj-card__gloss {
+    font-size: var(--zj-ui-lg);
+    line-height: 1.5;
+  }
+
+  .zj .zj-card__note,
+  .zj .zj-card__gap,
+  .zj .zj-card__ex-text,
+  .zj .zj-card__here {
+    font-size: var(--zj-ui);
+  }
+
+  .zj .zj-card__note {
+    line-height: 1.5;
+  }
+
+  /* The example is a line of classical Chinese at 13px; 1.8 was set for 15px and leaves a gap as tall as
+     the line. 1.5 is a step tighter than the page's own prose and still a step looser than solid. */
+  .zj .zj-card__ex-text {
+    line-height: 1.5;
+  }
+
+  .zj .zj-card__here {
+    line-height: 1.55;
+  }
+
+  /* The section rubric moves up beside its section's first line rather than sitting on a line of its
+     own: 通鑑用例 to the left of the quotation it heads, 在這一章 to the left of the first clause. Two
+     rubrics on their own lines, each with a hairline above it, cost 50px of a 355px card — and a
+     dictionary slip this small is a list of labelled lines, not a page with sections on it. The float is
+     contained by the `overflow: hidden` on the blocks below, so the rubric never leaves its section, and
+     the hairline stays where it was: 1u above the rubric's line. */
+  .zj .zj-card__sec {
+    float: left;
+    margin: 0 var(--space-2) 0 0;
+    padding: 0;
+    border-top: 0;
+    line-height: inherit;
+  }
+
+  .zj .zj-card__sec + .zj-card__exs,
+  .zj .zj-card__sec + .zj-card__gap,
+  .zj .zj-card__sec + .zj-card__here {
+    margin-top: var(--space-1);
+    overflow: hidden;
+  }
+
+  .zj .zj-card__exs {
+    padding-left: 0;
+    gap: var(--space-1) var(--space-4);
+  }
+
+  .zj .zj-card__index {
+    margin-top: 0;
+    padding-top: var(--space-1);
+  }
+}

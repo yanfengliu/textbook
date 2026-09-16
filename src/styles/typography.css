@@ -130,19 +130,31 @@ small {
   font-size: 0.875em;
 }
 
-/* A displayed quotation, not an indented paragraph: the display face, one step up, with the opening
-   quote mark hung into the left margin so the text block stays flush. */
+/* A displayed quotation: an inset block, set larger than the prose in the text face's REAL italic and
+   with no bar beside it.
+   It was Fraunces italic, and the pages load Fraunces with the axes `opsz,wght,SOFT,WONK` — there is no
+   `ital` axis in that request, so the browser had nothing to use and slanted the roman. `document.fonts`
+   lists only "Fraunces normal 300 700" while `document.fonts.check('italic 400 24px Fraunces')` answers
+   true, which is why it went unnoticed: check() counts a synthesised face as available. Newsreader is
+   requested with `ital,opsz,wght@0,…;1,…` and its italic is a drawn face.
+   The opening quote mark hangs, so the first line's text starts on the same edge as the lines under it.
+   `hanging-punctuation: first last` on the body does this in Safari and nothing at all in Chromium,
+   which is the browser the gates and most readers use, so the indent is stated. */
 blockquote {
-  margin: var(--space-10) 0;
-  padding: 0 0 0 var(--space-5);
-  border-left: 2px solid var(--leaf);
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
+  margin: var(--space-12) 0 var(--space-12) var(--space-8);
+  padding: 0;
+  border: 0;
+  font-family: var(--font-text);
+  font-size: var(--text-xl);
   font-style: italic;
-  font-variation-settings: "SOFT" 60, "WONK" 1;
-  line-height: 1.35;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
   color: var(--ink);
-  max-width: var(--measure);
+  /* An inset, so narrower than the measure: at the measure a quotation one step up from the prose runs
+     to eighty characters and reads as another paragraph. */
+  max-width: 32rem;
+  text-indent: -0.4em;
   text-wrap: pretty;
   break-inside: avoid;
 }
@@ -150,15 +162,18 @@ blockquote {
 blockquote cite {
   display: block;
   margin-top: var(--space-3);
+  text-indent: 0;
   font-style: normal;
   font-family: var(--font-ui);
   font-size: var(--text-sm);
+  font-weight: 400;
   line-height: 1.4;
   color: var(--ink-soft);
 }
 
+/* An en rule set on the baseline, not the em dash the quotation already reads as a pause. */
 blockquote cite::before {
-  content: "— ";
+  content: "– ";
 }
 
 ul, ol {
@@ -199,11 +214,12 @@ nav, button, input, select, table, figcaption .fig-num, .tb-label {
   font-variant-numeric: lining-nums tabular-nums;
 }
 
-/* Section labels: small caps, tracked */
+/* Section labels: small caps, tracked. One tracking for every rubric in the book — the opener's unit
+   line, a key idea, a question number, a bin's head, a figure's number — so they read as one voice. */
 .tb-label {
   font-size: var(--text-xs);
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
@@ -237,9 +253,9 @@ nav, button, input, select, table, figcaption .fig-num, .tb-label {
 table {
   border-collapse: collapse;
   width: 100%;
-  margin: var(--space-6) 0 var(--space-8);
+  margin: var(--space-6) 0 var(--space-10);
   font-size: var(--text-base);
-  line-height: 1.4;
+  line-height: 1.45;
   border-top: 1px solid var(--rule-strong);
   text-wrap: pretty;
 }
@@ -248,20 +264,29 @@ th {
   text-align: left;
   font-weight: 600;
   font-size: var(--text-xs);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink-soft);
-  padding: var(--space-3) var(--space-3) var(--space-2) 0;
+  color: var(--ink-faint);
+  padding: var(--space-3) var(--space-4) var(--space-2) 0;
   border-bottom: 1px solid var(--rule-strong);
   vertical-align: bottom;
 }
 
+/* 2u above and below rather than 3u: ten rows of one or two lines each were set 60px apart, which put
+   more air inside the table than the paragraphs around it have between them. */
 td {
-  padding: var(--space-3) var(--space-3) var(--space-3) 0;
+  padding: var(--space-2) var(--space-4) var(--space-2) 0;
   border-bottom: 1px solid var(--rule);
   vertical-align: top;
   font-family: var(--font-text);
   font-variant-numeric: oldstyle-nums;
+  color: var(--ink-soft);
+}
+
+/* The first cell of a row names it, so it carries the row the way a term carries a glossary entry. */
+td:first-child {
+  font-weight: 500;
+  color: var(--ink);
 }
 
 tr:last-child td {
@@ -299,21 +324,56 @@ code, kbd {
    scale and a tighter gutter buy back four or five of them; below that a table needs a different shape
    than CSS alone can give it. */
 @media (max-width: 799.98px) {
+  /* A five-column table of measurements has a minimum width a 350px column cannot give it, whatever the
+     type does: chapter 3's radius/area/volume table needs 376px for "4,200,000,000 µm³" and four more
+     columns, and no amount of tightening reaches 350 with room to spare. So below the two-column layout
+     a table carries its own scroll rather than taking the whole document sideways with it — a page that
+     scrolls horizontally loses its left margin on every line, and a table that scrolls loses nothing.
+     `display: block` on the table makes the element a scroll container; the rows and cells keep their
+     own display values and lay out inside it as a table. The tightening below means almost no table in
+     this book ever has to use it. */
   table {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
     font-size: var(--text-sm);
   }
 
   th, td {
     padding-right: var(--space-2);
   }
+
+  /* Tracking is width. The 0.14em every rubric in the book carries adds about 14px to a header like
+     "Oxygen to the centre", and a five-column table on a 390px phone — chapter 3's radius/area/volume
+     table — has no 14px to give: it overflowed the viewport by 29px. Here the capitals track at 0.06em
+     and the first cell drops back to the body weight, because bold is wider too. */
+  th {
+    letter-spacing: 0.06em;
+  }
+
+  td:first-child {
+    font-weight: 400;
+  }
 }
 
 /* Ragged right at fifty characters and more does not need hyphens and reads better without them; below
    that the long words of the subject (endoplasmic, spontaneous, photosynthetic) leave holes a line wide,
-   so from here down they break. Eight letters at least, four before the break and three after. */
+   so from here down they break. Eight letters at least, four before the break and three after.
+   Running text only. A deck, a displayed quotation, a key idea and a question are display type: they are
+   read as a shape before they are read as words, and "Biology begins with a ques-/tion" is a broken
+   shape. They keep their ragged edge at every width. */
 @media (max-width: 599.98px) {
-  p, li, dd, td, figcaption, blockquote {
+  p, li, dd, td, figcaption {
     hyphens: auto;
     hyphenate-limit-chars: 8 4 3;
+  }
+
+  blockquote,
+  tb-key p,
+  tb-check .question,
+  .tb-opener__dek,
+  .library__dek,
+  .book__dek {
+    hyphens: manual;
   }
 }

@@ -30,7 +30,7 @@ import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writ
 import { tmpdir } from 'node:os';
 import { join, relative, sep } from 'node:path';
 import { startServer, REPO_ROOT } from './serve.js';
-import { launch, collectErrors, openPage, ACTION_TIMEOUT_MS } from './lib/browser.js';
+import { launch, collectErrors, openPage, ACTION_TIMEOUT_MS, PAGES as SITE_PAGES } from './lib/browser.js';
 
 // SUBPATH_PREFIX=/ serves the same tree at the root, so the two runs can be compared byte for byte:
 // equal figure PNGs are what proves a layout nit is the figure's own and not the prefix's doing.
@@ -44,17 +44,26 @@ if (!PREFIX.startsWith('/') || !PREFIX.endsWith('/')) throw new Error(`SUBPATH_P
 // The one exclusion list, read from the same file .github/workflows/pages.yml deletes from the
 // checkout, so the tree proved here and the tree deployed there cannot drift apart. .git and .github
 // are added because upload-pages-artifact drops those itself, whatever the file says.
+//
+// An entry may name a path, not only a top-level directory: the workflow runs `xargs rm -rf` over the
+// list, which deletes biology/ch02-chemistry-of-life/FIGURES.md perfectly well, so matching only the
+// first path segment here silently served two files the deploy drops — the drift the list exists to
+// prevent, measured 2026-09-11. Neither reader expands globs: rm does not, and `xargs` does not either,
+// so `biology/*/FIGURES.md` would match nothing in the workflow. Entries are literal paths.
 const EXCLUDE = [
   '.git',
   '.github',
   ...readFileSync(new URL('./pages-exclude.txt', import.meta.url), 'utf8').split('\n').map((l) => l.trim()).filter(Boolean),
 ];
+const isExcluded = (rel) => {
+  const path = rel.split(sep).join('/');
+  return EXCLUDE.some((e) => path === e || path.startsWith(`${e}/`));
+};
 
+// One page list for the whole repo, discovered from disk in lib/browser.js. This gate serves the site
+// from a sub-path, so the leading slash comes off; the lab is not a reader page and is appended here.
 const PAGES = [
-  { id: 'library', path: '' },
-  { id: 'biology', path: 'biology/' },
-  { id: 'ch01', path: 'biology/ch01-what-is-life/' },
-  { id: 'today', path: 'today/' },
+  ...SITE_PAGES.map((p) => ({ id: p.id, path: p.path.replace(/^\//, '') })),
   { id: 'lab', path: 'lab/', query: 'kind=cell3d' },
 ];
 const VIEWPORTS = [
@@ -72,7 +81,7 @@ function mirrorSite() {
     filter: (src) => {
       const rel = relative(REPO_ROOT, src);
       if (!rel) return true;
-      return !EXCLUDE.includes(rel.split(sep)[0]);
+      return !isExcluded(rel);
     },
   });
   return { dir, dest };

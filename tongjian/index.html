@@ -1,0 +1,112 @@
+<!doctype html>
+<!-- `class="zj"` on <html> as well as on <body>: `zj.css` owns this book's type system, and the one
+     token it has to beat `:root` for — its own --ink-faint — has to land on <html>, because a custom
+     property declared on the body shadows the one it would otherwise inherit. See zj.css, "The book's
+     own --ink-faint". -->
+<html lang="zh-Hans" class="zj">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>資治通鑑 · 周紀一 — 一本可以點開每一個字的書</title>
+<meta name="description" content="司马光《資治通鑑》卷一周纪一的原文与现代汉语翻译对读，每一个字、每一个词都可以点开看读音、词性、义项与用例。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200..900&family=Noto+Sans+SC:wght@100..900&display=swap">
+<link rel="stylesheet" href="../src/styles/tokens.css">
+<link rel="stylesheet" href="../src/styles/typography.css">
+<link rel="stylesheet" href="../src/styles/layout.css">
+<link rel="stylesheet" href="../src/styles/components.css">
+<style>
+  /* This page is the book's title page, so it needs the same Chinese scale the chapters get from
+     `zj.css` — the Han families, the Han leading — without loading a chapter stylesheet it does not
+     otherwise use. `html.zj` is (0,1,1) and beats `:root`, so these reach everything inside `<html>`
+     and nothing outside it. The property names are `zj.css`'s own (`--zj-han-text`, `--zj-han-ui`), so
+     the two files state the same thing. Keep the two blocks in step; when the rest of this page's rules
+     move into zj.css, this block goes and a link replaces it. */
+  html.zj {
+    --zj-han-text: "Noto Serif SC", "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", SimSun, serif;
+    --zj-han-ui: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    --font-text: var(--zj-han-text), "Newsreader", serif;
+    --font-display: var(--zj-han-text), "Fraunces", serif;
+    --font-ui: var(--zj-han-ui), "Inter", sans-serif;
+    --leading-body: 1.8;
+  }
+  /* The book's own --ink-faint, the same pair `zj.css` declares on `.zj` and for the same measurement
+     (see that file). It is stated per theme here rather than once, because the value is a `color-mix()`
+     and a mix is resolved in the element's own `color-scheme`: `--ink` is the light ink or the dark one
+     depending on that, so one rule would give the dark paper the light grey. Measured with one rule in
+     place, on this page, in dark: the light grey, 1.17:1 on #15171a.
+     The explicit-choice rules have to be `:root[data-theme=…]` rather than `html.zj[data-theme=…]`:
+     the shared table states its own explicit dark step as `:root[data-theme="dark"]`, which is (0,2,0)
+     and beats `html.zj`'s (0,1,1) however late this block comes. */
+  :root.zj { --ink-faint: color-mix(in srgb, #6f6960 92%, var(--ink)); }
+  @media (prefers-color-scheme: dark) {
+    :root.zj:not([data-theme="light"]) { --ink-faint: color-mix(in srgb, #908a80 92%, var(--ink)); }
+  }
+  :root.zj[data-theme="dark"] { --ink-faint: color-mix(in srgb, #908a80 92%, var(--ink)); }
+  html.zj body {
+    font-variant-numeric: lining-nums;   /* old-style figures beside full-width ideographs read as a different size */
+    line-break: strict;
+  }
+  html.zj em { font-style: normal; text-emphasis: filled dot; text-emphasis-position: under right; }  /* 着重号, not a synthesised slant */
+  html.zj .tb-rail__title, html.zj .tb-header__crumb { display: none; }  /* the shell's English chrome; this book's pages carry their own */
+
+  .book { max-width: 56rem; margin: 0 auto; padding: var(--space-12) var(--space-6) var(--space-20); }
+  .book__head { border-top: 2px solid var(--rule-head); padding-top: var(--space-3); margin-bottom: var(--space-16); }
+  .book__eyebrow { font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 500; letter-spacing: .16em; line-height: var(--leading-body); color: var(--ink-soft); margin: 0; }
+  .book h1 { font-size: clamp(var(--text-3xl), 5.4vw, var(--text-6xl)); font-weight: 600; letter-spacing: 0; margin: var(--space-12) 0 var(--space-5); }
+  .book__dek { font-size: var(--text-lg); color: var(--ink-soft); max-width: 30rem; line-height: 1.7; margin: 0; }
+  .book__dek + .book__dek { margin-top: var(--space-4); }
+
+  /* One chapter to a ruled line, the number in the margin. Same furniture as the biology book's contents
+     page, set for Han: no uppercase, no negative tracking, and the rubric tracked rather than capitalised. */
+  .unit { margin-top: var(--space-16); }
+  .unit h2 { font-size: var(--text-xl); font-weight: 500; letter-spacing: 0; margin: 0 0 var(--space-2); padding-bottom: var(--space-3); border-bottom: 1px solid var(--rule-head); }
+  .unit h2 .n { font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 500; letter-spacing: .16em; color: var(--leaf-text); display: block; margin-bottom: var(--space-2); }
+  .chapters { list-style: none; padding: 0; margin: 0; max-width: none; }
+  .chapters li { margin: 0; border-bottom: 1px solid var(--rule); }
+  .chapters a, .chapters .soon { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) auto; align-items: baseline; gap: var(--space-3); padding: var(--space-3) 0; text-decoration: none; color: var(--ink); }
+  .chapters a .title { transition: color var(--dur) var(--ease); }
+  .chapters a:hover .title { color: var(--leaf-text); }
+  .chapters .n { font-family: var(--font-ui); font-variant-numeric: tabular-nums lining-nums; color: var(--leaf-text); font-weight: 500; font-size: var(--text-sm); }
+  .chapters .soon { color: var(--ink-soft); }
+  .chapters .soon .n { color: var(--ink-faint); }
+  .chapters .tag { font-family: var(--font-ui); font-size: var(--text-xs); font-weight: 400; letter-spacing: .16em; color: var(--ink-faint); white-space: nowrap; }
+  .chapters a .tag { color: var(--leaf-text); font-weight: 500; }
+  .chapters .dek { display: block; font-size: var(--text-base); line-height: 1.7; color: var(--ink-soft); margin-top: var(--space-1); max-width: 34rem; }
+  /* The passage itself, quoted in the contents line: it is type, not decoration, and it is what tells a
+     reader whether they have met this text before. */
+  .chapters .dek q { font-style: normal; quotes: "「" "」"; }
+  @media (max-width: 599.98px) {
+    .chapters a, .chapters .soon { grid-template-columns: 2.2rem minmax(0, 1fr); }
+    .chapters .tag { grid-column: 2; margin-top: var(--space-1); }
+  }
+</style>
+<script type="module">
+  import '../src/shell.js';
+</script>
+</head>
+<body class="zj">
+<tb-shell book="資治通鑑" book-href="./" library-href="../" today-href="../today/" no-crumb></tb-shell>
+<main class="book">
+  <header class="book__head">
+    <p class="book__eyebrow">第二本 · 史</p>
+    <h1>資治通鑑 · 周紀一</h1>
+    <p class="book__dek">司马光从西元前四〇三年写起。那一年，周天子把晋国的三个大夫封为诸侯——一个他认为不该发生的承认，成了这部书的第一句话。</p>
+    <p class="book__dek">这里印的是原文，旁边是现代汉语翻译。<em>每一个字、每一个词都可以点开</em>：读音、词性、在这个句子里的意思，以及它在《通鑑》其他地方怎么用。例子都是书里的原句，不是为课本编的句子。</p>
+  </header>
+
+  <section class="unit">
+    <h2><span class="n">卷一 · 周紀一</span>三家分晉的前後</h2>
+    <ol class="chapters">
+      <li><a href="ch01-san-jia-fen-jin/"><span class="n">1</span><span><span class="title">三家分晉</span><span class="dek">《通鑑》的第一句：<q lang="zh-Hant">初命晉大夫魏斯、趙籍、韓虔為諸侯</q>。周天子承认了三个大夫，司马光认为这才是礼崩的开始。</span></span><span class="tag">可讀</span></a></li>
+      <li><a href="ch02-zhi-bo-zhi-wang/"><span class="n">2</span><span><span class="title">智伯之亡</span><span class="dek">才胜德者亡。智伯请地、晋阳被灌、三家反手灭智——以及豫让。<q lang="zh-Hant">智伯之亡也，才勝德也。</q></span></span><span class="tag">可讀</span></a></li>
+      <li><a href="ch03-cai-de-lun/"><span class="n">3</span><span><span class="title">才德論</span><span class="dek">司马光停下来议论：才与德是两件事。<q lang="zh-Hant">才德全盡謂之聖人，才德兼亡謂之愚人，德勝才謂之君子，才勝德謂之小人。</q></span></span><span class="tag">可讀</span></a></li>
+      <li><span class="soon"><span class="n">4</span><span class="title">魏文侯</span><span class="tag">未寫</span></span></li>
+      <li><span class="soon"><span class="n">5</span><span class="title">吳起</span><span class="tag">未寫</span></span></li>
+      <li><span class="soon"><span class="n">6</span><span class="title">聶政</span><span class="tag">未寫</span></span></li>
+    </ol>
+  </section>
+</main>
+</body>
+</html>

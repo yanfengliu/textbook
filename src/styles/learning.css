@@ -234,16 +234,19 @@ h2.has-mastery > tb-mastery {
   letter-spacing: normal;
 }
 
-/* 1200px is where layout.css gives the page its margin column; below it there is nothing to hang in,
-   and an absolutely positioned marker walks off the right edge of the viewport. */
-@media (min-width: 1200px) {
+/* 1400px is where layout.css gives the page its margin column; below it there is nothing to hang in,
+   and an absolutely positioned marker walks off the right edge of the viewport. It said 1200 while
+   layout.css said 1400, so between those two widths the marker was hung in a column that was not there.
+   The offset is --space-8, the page grid's own gutter, so the marker stands on the same left edge as
+   every margin note in the chapter rather than 25px inside it. */
+@media (min-width: 1400px) {
   h2.has-mastery > tb-mastery {
     position: absolute;
     left: 100%;
     top: 0.55em;
     margin-top: 0;
-    margin-left: var(--space-4);
-    width: calc(var(--margin-width) - var(--space-4));
+    margin-left: var(--space-8);
+    width: var(--margin-width);
   }
 
   h2.has-mastery > tb-mastery .tb-mark {
