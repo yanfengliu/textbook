@@ -43,11 +43,6 @@
   --zj-src-size: 1.25rem;        /* 原文 body: the primary object on the page */
   --zj-src-leading: 2;           /* a classical page is read character by character down a column */
   --zj-quoted-size: 0.95em;      /* 原文 quoted inside prose: a quotation inside an argument */
-  /* The 原文 in the pairing. The design's "quoted inside prose" step is 0.95em of the body, and the
-     shared sheet drops that body to 1.1rem on a phone, which would take this copy below the 譯文 it is
-     printed opposite — the one relation in the book that may not invert. So it is frozen at the size
-     0.95em of a 1.2rem body actually is, and steps down with the 譯文 on a phone instead. */
-  --zj-pair-src-size: 1.14rem;
   --zj-trans-size: 1.0625rem;    /* 譯文: deliberately a step BELOW the original */
   --zj-trans-leading: 1.85;
   --zj-glyph-size: 2.2rem;       /* the card's glyph: large enough to examine stroke by stroke */
@@ -65,6 +60,16 @@
      the foot of this file. */
   --zj-grid-chars: 33;
   --zj-grid-track: 0.0569;
+
+  /* The 原文's own column in the pairing, in the same unit and by the same expression. The owner's
+     second revision prints the 譯文 beside the sentence it translates, so the 原文 no longer has the whole
+     measure: 33 characters is the measure, and the translation needs the rest of it. 17 is chosen from the
+     corpus rather than by eye (out/pair-build/probe-fit.mjs): of ch02's 83 句, 43 fit on one line at 17
+     against 32 at 15, and the chapter's 原文 is 159 lines against 169 — while the 譯文 still holds 16
+     characters of 1.0625rem type a line in what is left. 17 × 1.25rem × 1.0569 = 22.46rem of the 43.6rem
+     measure, and it is the same 17 the phone step cuts the whole column to. It stops applying below
+     900 px, where the two cells stack and the 原文 takes the whole column again. */
+  --zj-pair-chars: 17;
 
   /* The one accent, reserved for three uses: the current section mark in the rail, the focus ring on a
      character, and the rule under a figure's number. Mixed from the existing tokens rather than a new
@@ -88,6 +93,44 @@
      so this is the one place the value can land. The contents page carries the same pair in its own
      inline block, because it does not load this file. */
   --ink-faint: color-mix(in srgb, #6f6960 92%, var(--ink));
+
+  /* ---- The colour this book adds, one variable per mark ------------------------------------------
+     Every colour this book spends on anything that is not plain ink, one declaration each, so that a
+     contrast failure is one line to fix rather than a search through the file. out/colour/contrast.mjs
+     measures every one of them, in both themes, on every surface it is used on, and prints the ratios.
+
+     The rule that keeps this from becoming a colouring book: **colour marks a layer** — who is speaking,
+     or what kind of text this is — **never a mood**; and the hard corollary, the 正文 itself never takes
+     coloured characters. The classical text stays ink, and the colour lives in the apparatus around it.
+     Every one of these passes the same test: if the colour were removed, the reader would lose
+     information. Recolouring a 。 is not decoration here, because what the red says is "an editor has been
+     through this text", which is a claim about the page and not a feeling about it.
+
+     Each is a mix of the shared tokens rather than a hex of this book's own, so each follows the theme the
+     way --seal does: on the dark paper --ink is light, so mixing towards it lightens the mark there and
+     darkens it on paper. */
+  --zj-punct-colour: var(--coral-text);
+  --zj-seal-colour: var(--coral-text);
+  --zj-tr-rule: var(--water-text);
+
+  /* The four houses. 魏、趙、韓 are the three that survived 前403年 and took the 諸侯's name; 智 is the house
+     that was annihilated at 晉陽, and it is the only one of the four in a grey — the family that was
+     destroyed is the one that goes quiet, so the passage's plot is carried by the colours with no legend.
+     **Spent nowhere, and that is a finding rather than an oversight.** These four exist so that a reader
+     who learns the key in the text reads the figures without being told, and none of the book's three
+     figures colours a state at all: src/figures/zj-split.js draws 魏 趙 韓 in --ink and marks 智 dead with
+     --ink-faint and a line-through, and zj-timeline.js and zj-words.js have no state colour either. So
+     there is no assignment to match, and colouring the 正文 instead is the one thing this design forbids.
+     They are declared here so the decision is one line when the figures take them up.
+
+     --violet-text is not a token in src/styles/tokens.css: that table stops at leaf, water and coral. The
+     expression below is the same one the three that do exist are built from — 86% of the accent and 14% of
+     the ink, the mix the table documents for small text — applied to the fourth accent, so the value is a
+     measurable one rather than a var() that resolves to nothing and paints nothing. */
+  --zj-state-wei: color-mix(in srgb, var(--violet) 86%, var(--ink));
+  --zj-state-zhao: var(--coral-text);
+  --zj-state-han: var(--leaf-text);
+  --zj-state-zhi: var(--ink-soft);
 }
 
 /* Both theme steps are behind a media query, as the shared token table's are, and the reader's explicit
@@ -243,6 +286,90 @@
    it. */
 .zj .tb-opener__number::before {
   content: "章";
+  display: block;
+  margin: 0 0 0.15em;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  color: var(--zj-seal-colour);
+}
+
+/* 朱文印 — the chapter's seal, and the page's most colourful moment. It is spent on the chapter's identity
+   rather than on a control: one mark per chapter, stamped on the head rule at the end the eye already
+   reads as the document's edge, so the rule runs from the title and finishes in the mark. A reader who has
+   met a 善本 knows this object — it is the impression the book puts on a finished page, and the difference
+   between it and a UI badge is that a badge floats in a rounded box above the content while a seal is
+   pressed onto the page's own rule.
+
+   朱文 (the frame and the characters in red, the ground left as paper) and not 白文 (a solid red ground with
+   paper-coloured characters): at 2.75rem a solid red square is the loudest object on the page, which is a
+   badge, and it would also be the only filled shape in a book that has no fills anywhere else. The 2px
+   frame is the head rule's own weight, so the mark is built from the page's existing parts.
+
+   `background: var(--paper)` is not a fill for its own sake: the seal straddles the rule, and without a
+   ground of its own the rule would be drawn straight through the characters inside it. It is the paper
+   showing through the impression, which is what makes the rule stop at the mark the way a stamp stops a
+   line of writing.
+
+   The element is the shell's folio — the chapter's ordinal, already `aria-hidden="true"` — and it is the
+   only place on the page that carries one. Its `章` label and its numeral are stacked rather than set side
+   by side, which is how a two-character seal is cut. */
+.zj .tb-opener {
+  /* In rem so it follows the reader's type size. 2.75rem holds the 章 rubric over the ordinal with 4px of
+     ground to spare at the sizes below. */
+  --zj-seal-size: 2.75rem;
+}
+
+.zj .tb-opener__unit {
+  /* The seal is absolutely positioned at the head rule's right end, so the unit line is what could run
+     under it. layout.css reserves 7rem for a numeral that is no longer there; 6rem is clearance for a
+     2.75rem mark and its gap, and at the phone width — where layout.css drops that reservation to zero
+     because it stacks the folio under this line — it is the only thing keeping the two apart. The unit is
+     「资治通鉴 · 卷一 周纪一」 at 12px, about 195px, so at 390px the line plus the mark still fits the
+     column's 338px with room over. */
+  padding-right: 6rem;
+}
+
+.zj .tb-opener__number {
+  position: absolute;
+  /* Straddling the rule: half the square above it, half below, with the 2px border accounted for. */
+  top: calc(-1 * (var(--zj-seal-size) / 2) - 1px);
+  right: 0;
+  left: auto;
+  margin: 0;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  gap: 0;
+  width: var(--zj-seal-size);
+  height: var(--zj-seal-size);
+  padding: 0;
+  background: var(--paper);
+  border: 2px solid var(--zj-seal-colour);
+  border-radius: 2px;
+  font-family: var(--zj-han-text);
+  font-variation-settings: normal;
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+  text-align: center;
+  text-transform: none;
+  color: var(--zj-seal-colour);
+}
+
+/* At 1400px the head rule and the folio both step out into the margin column, and the rule's right end is
+   the end of the spread. The seal goes to that end. layout.css positions the folio there by `left` and a
+   15rem width, because the numeral it used to hold was 3.58rem of Fraunces set right; a square is placed
+   by its right edge instead, and `right` is the same expression the rule above it ends at, so the two agree
+   to the pixel at every width in the band. */
+@media (min-width: 1400px) {
+  .zj .tb-opener__number {
+    right: calc(-1 * (var(--margin-width) + var(--space-8)));
+    left: auto;
+  }
 }
 
 /* ============================================================================
@@ -258,7 +385,29 @@
   list-style: none;
   margin: var(--space-6) 0 var(--space-10);
   padding: 0;
-  width: min(100%, calc(var(--zj-grid-chars) * 1em * (1 + var(--zj-grid-track))));
+  /* A column of N characters plus the tracking the last one carries: `letter-spacing` is added after
+     every character, the last on the line included, so a column of exactly N advances holds N−1 and
+     `justify` then distributes a whole character's width. Measured on ch01 句 1 before the `+ track` was
+     here: 14 characters in a 15-character column with the pitch jumping from 21.14px to 31.69px at each
+     、 — and at 390px, 16 characters in the 17-character column the phone step cuts, with 、 at 28.49px.
+     `min(100%, …)` still caps it at the measure, so at every width the block is the text column. */
+  width: min(100%, calc((var(--zj-grid-chars) + var(--zj-grid-track)) * 1em * (1 + var(--zj-grid-track))));
+  /* The pairing is the list's own grid, and this is the one place this book departs from the recipe's
+     single-column rule: a translation the reader cannot see beside the original is a translation they
+     read instead of the original. Both columns are tracks of the whole passage rather than of one row,
+     so the 原文's left edge and the 譯文's right edge are the same two edges on every pair.
+     Why the 譯文 is the `<li>`'s sibling and not its child, which the markup cannot show: a 原文 block is
+     compared with the corpus as the text of every `<li>` in it, character for character
+     (`test/corpus.test.js`), and `tongjian/data/card.js` reads `.zj-src li` textContent for the card's
+     在這一章 — a cell inside the `<li>` would put the translation into both. So one row is an `<li>` and
+     the `<span>` that follows it, and the two of them are all the grid sees. */
+  display: grid;
+  grid-template-columns: calc((var(--zj-pair-chars) + var(--zj-grid-track)) * 1em * (1 + var(--zj-grid-track))) minmax(0, 1fr);
+  column-gap: var(--space-8);
+  row-gap: var(--space-5);
+  /* The first baselines of a pair line up, which is the whole point of a 對照 layout: the eye crosses
+     the gutter on one line, not on two. */
+  align-items: baseline;
   font-size: var(--zj-src-size);
   line-height: var(--zj-src-leading);
   letter-spacing: calc(var(--zj-grid-track) * 1em);
@@ -267,15 +416,60 @@
   text-align-last: left;
 }
 
-.zj .zj-src li {
-  margin: 0 0 var(--space-2);
+/* One pair: a row of the list's own grid. `subgrid` makes the cells take the list's tracks, so the columns
+   belong to the passage rather than to the row and the 原文's left edge and the 譯文's right edge are the
+   same two edges on every pair — which is the whole point of a 對照 layout. The explicit tracks are the
+   plain-flow fallback, which gives the same two columns row by row. The first baselines line up, so the
+   eye crosses the gutter on one line.
+   The row is a `<li>` and both cells are inside it, which is what the markup shows; the earlier shape put
+   the 譯文 beside the `<li>` as a sibling span so that a reader of the markup could see the corpus
+   comparison, at the price of a `<span>` as a direct child of an `<ol>` — invalid HTML, and a DOM whose
+   shape is the parser's business rather than ours. The readers that needed the `<li>` to hold only the
+   原文 now name the source cell instead (`test/corpus.test.js`, `tongjian/data/card.js`). */
+.zj .zj-src > .zj-pair {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: calc((var(--zj-pair-chars) + var(--zj-grid-track)) * 1em * (1 + var(--zj-grid-track))) minmax(0, 1fr);
+  column-gap: var(--space-8);
+  align-items: baseline;
   break-inside: avoid;
 }
 
-.zj .zj-src li:last-child {
-  margin-bottom: 0;
+@supports (grid-template-columns: subgrid) {
+  .zj .zj-src > .zj-pair {
+    grid-template-columns: subgrid;
+  }
 }
 
+/* The 原文 cell: the character grid above and nothing else. No margin — the space between two pairs is
+   the grid's row gap, so a 句 that wraps to three lines cannot change the rhythm of the passage.
+   The shared sheet's `li { text-wrap: pretty }` is deliberately left in place. It was overridden here for
+   one pass on the reasoning that a rebalanced full line is one character short and so gets stretched by
+   `justify`; measured over ch02 and ch03 at a 15-, 16-, 17- and 18-character column, `pretty` costs
+   nothing in height (169 lines either way at 15 in ch02, 159 at 17) and removes every last line that is a
+   single closing mark — 4 in ch02 and 5 in ch03 without it, 0 with it. A lone 。 at the start of a line is
+   the defect the design forbids ("no line begins with a closing mark"); the stretch is the price and it is
+   the smaller one. out/pair-build/probe-wraps.mjs is the measurement. */
+.zj .zj-src > .zj-pair > .zj-pair__src {
+  margin: 0;
+  break-inside: avoid;
+}
+
+/* The 譯文: deliberately a step below the original and in --ink-soft. This is the single most
+   consequential size decision in the book. Both the tracking and the justification are turned off here
+   — the character grid is the classical text's device, and a modern paragraph is set as a paragraph.
+   `pretty` is restated rather than inherited, because the cell is a `<span>` and the shared sheet gives
+   `pretty` to `li`. */
+.zj .zj-src > .zj-pair > .zj-pair__tr {
+  margin: 0;
+  font-size: var(--zj-trans-size);
+  line-height: var(--zj-trans-leading);
+  color: var(--ink-soft);
+  letter-spacing: normal;
+  text-align: left;
+  text-align-last: auto;
+  text-wrap: pretty;
+}
 /* 原文 holds the text and nothing else (owner instruction, 2026-09-18: "If a section says original text,
    then it should simply have the original text and nothing more"), and the page has to SAY so, not only
    be so: the reader's complaint was that they could not tell the book's words from the book's own
@@ -303,6 +497,36 @@
   padding-top: var(--space-8);
 }
 
+/* 朱筆句讀 — the sentence-final mark in cinnabar. The highest-value move in this pass, and the one that
+   says what the book is: a punctuated 通鑑 is not a text that happens to have punctuation in it, it is a
+   text an editor has been through, and what the editor added is in red. 朱熹's punctuation marks are red,
+   校勘 is blue and yellow, and a 善本 sets its text in ink and its editorial layer in cinnabar. This page
+   has exactly one editorial layer that belongs to nobody else — the 句 mark — so that mark is the one
+   thing in the 原文 allowed to be a colour. The 正文's characters stay ink, which is the rule the whole
+   design rests on.
+
+   **Only the sentence-final 。 moves.** 、，；： are the same editor's marks, and reddening all of them
+   would be a texture rather than a signal — the page would have a coloured punctuation layer, which is
+   noise, instead of one red mark per 句, which is the passage's rhythm at a glance. Rhythm is the thing a
+   classical page is read for and the thing a wall of one-colour ink hides; a reader scanning a chapter's
+   原文 can now see where its sentences end without reading them.
+
+   What the mark costs in markup, stated because CSS cannot do it alone: the 。 is a bare text node — for
+   chapter 1 it is the last thing in the `<li>` (…<tb-term>諸侯</tb-term>。</li>), and in a corpus string that
+   holds several 句 it is the last thing before a `<br>` (chapter 2's 智果曰 runs eight of them) — and no
+   selector reaches one character of a text node. So the 原文 wraps it, one span per 句:
+
+       <span class="zj-ju">。</span>
+
+   That is the whole requirement: one class per sentence-final mark, wherever in the passage it falls, and
+   nothing on the 、，；： that sit inside a 句. Without it this rule matches nothing and the text is
+   uniformly ink, which is what the pages look like today — the specimen's mark and the chapter's have
+   been photographed side by side in out/colour/frames/ for exactly this reason; `npm run check` cannot
+   see the difference, because a colour is not content. */
+.zj .zj-src .zj-ju {
+  color: var(--zj-punct-colour);
+}
+
 /* A chapter's 原文 can arrive in several 句-groups (第二章 has six). They are one passage read on — one
    group ends where the next begins — so the gap between two of them is a paragraph's, and only the last
    one carries the space that closes the section. Nothing is added between them to label them: a section
@@ -319,8 +543,26 @@
    under every one of 294 volumes of characters would be a texture, not a text. The affordance is the
    pointer and, on hover, a tint of the paper — no accent, no underline shifting the line. */
 .zj tb-char {
-  display: inline;
+  display: inline-block;
   position: relative;
+}
+
+/* **`inline-block` rather than `inline`, because a card is an ELEMENT inside the term.**
+   With `display: inline`, appending the popover's `<span>` into `<tb-term>` gives the CJK line breaker a
+   second element box in the middle of a term, which is a break opportunity: the justified 原文 re-breaks,
+   the term jumps (measured: +318px across, −40px up, and every marked character on the line re-justified),
+   and hit-testing moves with it — so a press that began on the term ends on the span beside it. Chromium
+   then dispatches `click` on their nearest common ancestor, the term's own handler never runs, and the
+   document-level handler reads a click outside the open card and closes it. The card could not be
+   dismissed by clicking it, and on hover it flickered open and shut about ten times a second for as long
+   as the pointer rested, because Chromium re-hit-tests hover after every layout change.
+   An atomic inline cannot be split, so the passage never re-breaks. Measured across the three chapters:
+   0 of 1,625 glyphs move and no document height changes; the element's own box grows 29 → 40px, which
+   brings the card 6px lower, still on screen. `out/vanishing/proposed-fix.md` is the diagnosis, with the
+   stack traces. */
+.zj tb-char,
+.zj tb-term {
+  display: inline-block;
 }
 
 .zj tb-char > button {
@@ -364,67 +606,79 @@
    6. 原文 and 譯文, paired
    ============================================================================ */
 
-/* The one place this book departs from the single-column recipe, and the reason the book exists: a
-   translation the reader cannot see beside the original is a translation they read instead of the
-   original. Each `<li>` is one sentence pair; `subgrid` makes its two children take the parent's
-   tracks, so the rows line up across the whole pairing. The explicit tracks before the `@supports`
-   block are the plain-flow fallback — a browser without subgrid gets the same two columns, laid out
-   per row. */
-.zj .zj-trans {
-  list-style: none;
-  margin: var(--space-6) 0 var(--space-10);
-  padding: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 0.45fr) minmax(0, 0.55fr);
-  column-gap: var(--space-8);
+/* The layout of the pairing is part of the list it is (§5, `.zj-src`): one grid for the whole passage,
+   the 原文 in the first track and its 譯文 in the second, stacking to one column below 900 px. What is
+   left here is the mark that separates the two registers, which is a colour and belongs with the book's
+   other colours.
+   The old shape — a `#translation` section holding a `.zj-trans` list of `.zj-trans__row`s, each with a
+   second copy of the 原文 beside its 譯文 — is gone with its selectors. It printed the received text
+   twice, and the owner's second reading asked for the translation beside the sentence instead of in a
+   section of its own (docs/work/4_zizhi-tongjian/restructure.md). */
+
+/* 青 marks the 譯文's register. The pairing is the reason this book exists, and until now the seam between
+   its two registers was a column gap and a difference in ink — which is to say the reader had to know the
+   layout to know which half they were reading. A 2px rule on the translation's leading edge names the
+   register the way the rule above the 原文 names the quotation, and at the same weight on purpose: the two
+   rules are the same statement about the same page, that below this line is a different kind of text.
+   青 is the other ink a Chinese editor worked in (朱筆句讀, 藍筆校勘), so the register the translation
+   belongs to is the one the editor's second brush was for, and it stays a colour the 正文 never takes.
+
+   The rule is a graphic and not type, so WCAG's bar for it is 3:1, and it measures well past the 4.5:1
+   this book holds its text to: 5.24:1 on --paper in the light theme and 8.27:1 on the dark one
+   (out/colour/contrast.mjs, both themes, every surface). The padding is what keeps the rule off the
+   glyphs: a full-width Han character fills its em box, and a 2px line set flush against one reads as a
+   stroke of it. */
+.zj .zj-pair__tr {
+  border-left: 2px solid var(--zj-tr-rule);
+  padding-left: var(--space-4);
 }
 
-.zj .zj-trans__row {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: minmax(0, 0.47fr) minmax(0, 0.53fr);
-  column-gap: var(--space-8);
-  /* The first baselines of the pair line up, which is the whole point of a 對照 layout: the eye
-     crosses the gutter on one line, not on two. `start` put the boxes' tops together instead, and the
-     original's larger line box then sat half a line lower than the translation it translates. */
-  align-items: baseline;
-  break-inside: avoid;
-}
-
-.zj .zj-trans__row + .zj-trans__row {
-  border-top: 1px solid var(--rule);
-  padding-top: var(--space-4);
-  margin-top: var(--space-4);
-}
-
-/* The original in the pairing is a reference copy of the text above, not the text itself: it is set at
-   the design's "quoted inside prose" step, in full ink so the eye can cross the gutter to the
-   translation without crossing a colour change as well. */
-.zj .zj-trans__src {
-  font-size: var(--zj-pair-src-size);
-  line-height: var(--zj-src-leading);
-  color: var(--ink);
-}
-
-/* Deliberately a step below the original and in --ink-soft. This is the single most consequential
-   size decision in the book. */
-.zj .zj-trans__text {
-  font-size: var(--zj-trans-size);
-  line-height: var(--zj-trans-leading);
-  color: var(--ink-soft);
-}
-
-/* Below about 900px there is no room for two columns of Chinese: they stack, and the translation
-   follows its own sentence. */
+/* Below about 900px there is no room for two columns of Chinese: the pair stacks — the cells of one pair
+   are adjacent in the grid, so the translation lands under its own sentence rather than at the foot of
+   the passage — and the rhythm comes from the cells' own margins, tight inside a pair and a paragraph's
+   space between two. */
 @media (max-width: 899.98px) {
-  .zj .zj-trans,
-  .zj .zj-trans__row {
+  .zj .zj-src {
     grid-template-columns: minmax(0, 1fr);
     column-gap: 0;
+    row-gap: 0;
+    align-items: normal;
   }
 
-  .zj .zj-trans__src {
-    margin-bottom: var(--space-1);
+  .zj .zj-src > .zj-pair {
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 0;
+    align-items: normal;
+  }
+
+  .zj .zj-src > .zj-pair > .zj-pair__src {
+    margin-top: var(--space-6);
+  }
+
+  .zj .zj-src > .zj-pair:first-child > .zj-pair__src {
+    margin-top: 0;
+  }
+
+  .zj .zj-src > .zj-pair > .zj-pair__tr {
+    margin-top: var(--space-1);
+  }
+
+  /* Stacked, the translation is under its own sentence and has no leading edge left to rule, so the mark
+     becomes a short rule above it: the same statement, drawn for a column that now runs down the page
+     instead of across it. --space-10 rather than the cell's own width, because a rule as wide as the text
+     reads as a section divider and this one is a label. */
+  .zj .zj-pair__tr {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .zj .zj-pair__tr::before {
+    content: "";
+    display: block;
+    width: var(--space-10);
+    height: 2px;
+    background: var(--zj-tr-rule);
+    margin-bottom: var(--space-2);
   }
 }
 
@@ -939,9 +1193,23 @@
    ============================================================================ */
 
 @media print {
-  .zj .zj-trans,
-  .zj .zj-trans__row {
-    grid-template-columns: minmax(0, 0.45fr) minmax(0, 0.55fr);
+  /* Paper is about 816px wide, which the phone rule below would otherwise take for a phone: the pairing
+     keeps its two columns on the page as it does on a wide screen. */
+  .zj .zj-src {
+    grid-template-columns: calc((var(--zj-pair-chars) + var(--zj-grid-track)) * 1em * (1 + var(--zj-grid-track))) minmax(0, 1fr);
+    row-gap: var(--space-5);
+    align-items: baseline;
+  }
+
+  .zj .zj-src > .zj-pair {
+    grid-template-columns: calc((var(--zj-pair-chars) + var(--zj-grid-track)) * 1em * (1 + var(--zj-grid-track))) minmax(0, 1fr);
+    column-gap: var(--space-8);
+    align-items: baseline;
+  }
+
+  .zj .zj-src > .zj-pair > .zj-pair__src,
+  .zj .zj-src > .zj-pair > .zj-pair__tr {
+    margin-top: 0;
   }
 
   .zj .zj-card {
@@ -955,17 +1223,16 @@
    ============================================================================ */
 
 /* The 原文 and the 譯文 step down on a phone the way the shared sheet steps the body down (1.2 →
-   1.1rem), and the three sizes move together so the ladder never inverts: the reading 原文 at 1.125rem
-   (18px), the paired quotation a step under it, the 譯文 a step under that. A 390px phone gives the
-   text column 338.8px, and 17 characters of 1.0569em at 18px need 323.4px, so a line is 17 characters
-   — a whole number, and the grid is the column less 15px rather than a stretched line. A 360px phone
-   has 308.8px and takes 16; narrower than that the grid clamps to the column and `justify` closes the
-   line, which is what the tracking and the justify are for. */
+   1.1rem), and the two sizes move together so the ladder never inverts: the 原文 at 1.125rem (18px) and
+   the 譯文 it is printed against at 1rem. A 390px phone gives the text column 338.8px, and 17 characters
+   of 1.0569em at 18px need 323.4px, so a line is 17 characters — a whole number, and the grid is the
+   column less 15px rather than a stretched line. A 360px phone has 308.8px and takes 16; narrower than
+   that the grid clamps to the column and `justify` closes the line, which is what the tracking and the
+   justify are for. The pairing is one column at this width, so the 原文 has the whole of it. */
 @media (max-width: 799.98px) {
   .zj {
     --zj-src-size: 1.125rem;
     --zj-grid-chars: 17;
-    --zj-pair-src-size: 1.0625rem;
     --zj-trans-size: 1rem;
   }
 }

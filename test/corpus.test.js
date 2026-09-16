@@ -230,8 +230,19 @@ test('a chapter page\'s 原文 is the corpus entry it names', t => {
           `${dir}: a 原文 block quotes 通鑑 without saying which corpus entry it is — add data-corpus="<entry id>". Nothing outside the corpus may be printed as 通鑑.`);
         const entry = byId.get(id);
         assert.ok(entry, `${dir}: data-corpus="${id}" names no corpus entry`);
-        const items = [...list[0].matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/g)]
+        // **The 原文 is read from the source cell, not from the whole `<li>`.** A pair now holds the 原文
+        // and its 譯文 inside one `<li class="zj-pair">`, so reading the `<li>` would compare the book's
+        // translation against the received text and fail on a page that is exactly right — which is what
+        // happened, on all three chapters, while the pairing was being built.
+        //
+        // The cell that carries the original is everything up to the 譯文 cell's opening tag. A non-greedy
+        // match for `</span>` will NOT do: the source cell holds `<span class="zj-ju">。</span>` of its own
+        // for the cinnabar punctuation, so it would stop at the first full stop and truncate the sentence.
+        // Both readings were tried against all three pages before this one was taken.
+        const items = [...list[0].matchAll(/<li class="zj-pair">([\s\S]*?)<span class="zj-pair__tr"/g)]
           .map(m => m[1].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#(\d+);/g, (s, n) => String.fromCodePoint(+n)).replace(/\s+/g, '').trim());
+        assert.ok(items.length > 0,
+          `${dir}: the 原文 block for "${id}" holds no <li class="zj-pair">, so nothing was read from it; the pairing markup changed shape and this reading went with it`);
         const pageText = items.join('\n');
         const entryText = entry.text.join('\n');
         assert.equal(pageText, entryText,

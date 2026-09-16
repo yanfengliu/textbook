@@ -767,13 +767,21 @@ export function mount(root, ctx) {
     // apart, and not beside the moving point: both start at 20 °C, so beside the point the two names
     // stood on top of each other for the first few hundred joules and ran off the chart at the last.
     // When even the ends are within a line of each other — water against ethanol with the hydrogen
-    // bond turned down — the warmer goes above its line and the cooler below.
-    const ends = pair.map((v) => ({ v, y: Y(tempOf(v.c, HEAT_WATTS * HEAT_SECONDS)) }));
+    // bond turned down, or on a phone's short chart — the warmer goes above its line and the cooler
+    // below. Below means below the line along the whole word, not only under its last letter: the
+    // curve rises to the right, so a word hung eleven pixels under the end point had the line five
+    // pixels lower at its first letter, cutting through the top of the word.
+    g.font = `600 10px ${FONT}`;
+    const ends = pair.map((v) => ({ v, y: Y(tempOf(v.c, HEAT_WATTS * HEAT_SECONDS)), w: g.measureText(v.name).width }));
     const close = Math.abs(ends[0].y - ends[1].y) < 13;
     const order = ends[0].y <= ends[1].y ? ends : [ends[1], ends[0]];
     order.forEach((e, i) => {
-      const dy = close && i === 1 ? 11 : -5;
-      text(e.v.name, x1 - 3, e.y + dy, { size: 10, weight: 600, colour: e.v.colour, align: 'right', base: 'alphabetic' });
+      let y = e.y - 5;
+      if (close && i === 1) {
+        const atLeft = Y(tempOf(e.v.c, HEAT_WATTS * HEAT_SECONDS * (1 - (e.w + 3) / chartW)));
+        y = Math.max(e.y, atLeft) + 12;
+      }
+      text(e.v.name, x1 - 3, y, { size: 10, weight: 600, colour: e.v.colour, align: 'right', base: 'alphabetic' });
     });
 
     return {
@@ -1074,17 +1082,28 @@ export function mount(root, ctx) {
     branch(ICE_START_C, Math.max(temp, 0), col.water, 2.2, []);
     // The step at zero and the solid branch: dashed ahead of the run, solid once it is reached. The
     // step is the whole point of the chart, and until the tank had frozen the chart did not show it —
-    // a large empty grid with three pixels of trace along the top of it.
+    // a large empty grid with three pixels of trace along the top of it. The dashed preview runs to
+    // −10 °C all through the freeze: it used to stop at the temperature reached, so the chart was
+    // whole before the tank froze and again at −10, and in between the solid branch ended in mid-air.
     const stepY0 = Y(liquidDensity(0, tMax));
-    g.setLineDash(frozen ? [] : [3, 3]);
-    g.strokeStyle = frozen ? (floats ? col.leaf : col.coral) : alpha(floats ? col.leaf : col.coral, 0.55);
-    g.lineWidth = frozen ? 2.2 : 1.6;
-    g.beginPath();
-    g.moveTo(X(0), stepY0);
-    g.lineTo(X(0), Y(rhoSolid));
-    g.lineTo(X(frozen ? temp : ICE_END_C), Y(rhoSolid));
-    g.stroke();
+    const solidColour = floats ? col.leaf : col.coral;
+    const stepAndBranch = (toC) => {
+      g.beginPath();
+      g.moveTo(X(0), stepY0);
+      g.lineTo(X(0), Y(rhoSolid));
+      g.lineTo(X(toC), Y(rhoSolid));
+      g.stroke();
+    };
+    g.setLineDash([3, 3]);
+    g.strokeStyle = alpha(solidColour, 0.55);
+    g.lineWidth = 1.6;
+    stepAndBranch(ICE_END_C);
     g.setLineDash([]);
+    if (frozen) {
+      g.strokeStyle = solidColour;
+      g.lineWidth = 2.2;
+      stepAndBranch(temp);
+    }
     if (s > 0.05 && tMax > 0.2) {
       const mx = X(tMax);
       const my = Y(liquidDensity(tMax, tMax));

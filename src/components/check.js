@@ -11,6 +11,45 @@
 // shows the explanation, and announces the result through a live region. Options are real buttons,
 // so the keyboard works without any extra handling.
 
+// The words this component says, per language. The verdict is the one moment the component addresses
+// the reader directly, and it was the literal English `Right.` / `Not quite.` on a page whose every
+// other word is Chinese — reported by a reader of the 通鉴 book, who had all eleven of its questions
+// answer them in English.
+//
+// English is the default, so an English page reads character for character as it did. The language is
+// the page's own `<html lang>`, the way `tools/check-content.js` chooses its figure-citation token and
+// `src/components/figure.js` the word before a figure number; a language with no table here keeps
+// English rather than being quietly exempted.
+//
+// A page may publish its own words on the shared handshake object, because a component cannot know
+// what a book wants to say — `textbook.strings.check` is merged over the table below, one key at a
+// time:
+//
+//   textbook.strings = { check: { right: '对了。' } };
+const CHECK_WORDS = {
+  en: {
+    question: (n) => `Question ${n}`,
+    right: 'Right.',
+    wrong: 'Not quite.',
+    correct: 'Correct.',
+    incorrect: 'Incorrect.',
+  },
+  zh: {
+    // 第1题: a Chinese exercise labels its questions that way, and text-autospace sets the numeral
+    // off the ideographs, so no space is authored between them (docs/design/i18n.md).
+    question: (n) => `第${n}题`,
+    right: '对了。',
+    wrong: '不对。',
+    correct: '回答正确。',
+    incorrect: '回答错误。',
+  },
+};
+
+function checkWords() {
+  const lang = (document.documentElement.getAttribute('lang') || 'en').toLowerCase().split('-')[0];
+  return { ...(CHECK_WORDS[lang] ?? CHECK_WORDS.en), ...(window.__textbook?.strings?.check || {}) };
+}
+
 export class TbCheck extends HTMLElement {
   connectedCallback() {
     if (this.__built) return;
@@ -18,10 +57,11 @@ export class TbCheck extends HTMLElement {
     const question = this.querySelector('.question');
     const options = Array.from(this.querySelectorAll('.options > li'));
     const explain = this.querySelector('.explain');
+    const words = checkWords();
     const label = document.createElement('div');
     label.className = 'tb-check__label';
     const n = Array.from(document.querySelectorAll('tb-check')).indexOf(this) + 1;
-    label.textContent = `Question ${n}`;
+    label.textContent = words.question(n);
     const list = document.createElement('div');
     list.className = 'tb-check__options';
     list.setAttribute('role', 'group');
@@ -54,10 +94,10 @@ export class TbCheck extends HTMLElement {
           explain.hidden = false;
           const v = document.createElement('span');
           v.className = `tb-check__verdict ${right ? 'ok' : 'no'}`;
-          v.textContent = right ? 'Right.' : 'Not quite.';
+          v.textContent = right ? words.right : words.wrong;
           explain.prepend(v);
         }
-        live.textContent = `${right ? 'Correct.' : 'Incorrect.'} ${explain ? explain.textContent : ''}`;
+        live.textContent = `${right ? words.correct : words.incorrect} ${explain ? explain.textContent : ''}`;
       });
     }
   }

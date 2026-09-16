@@ -406,7 +406,12 @@ test('the 原文 and its quotations are Traditional, and everything else is Simp
         `${rel}: a 原文 block does not carry lang="zh-Hant", so a screen reader reads the received text with the modern voice`);
       const id = /\bdata-corpus="([^"]+)"/.exec(m[1])?.[1];
       assert.ok(id && byId.has(id), `${rel}: a 原文 block names no corpus entry (data-corpus="${id}")`);
-      const printed = [...m[2].matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/g)].map(li => stripTags(li[1])).join('\n');
+      // The 原文 is read from the source cell, not the whole `<li>`: a pair holds the 原文 and its 譯文 in
+      // one row, and reading the row would compare the book's own translation against the received text.
+      // Everything before the 譯文 cell's opening tag is the original — see the same reading in
+      // test/corpus.test.js for why a non-greedy `</span>` truncates at the first cinnabar full stop.
+      const printed = [...m[2].matchAll(/<li class="zj-pair">([\s\S]*?)<span class="zj-pair__tr"/g)].map(li => stripTags(li[1])).join('\n');
+      assert.ok(printed, `${rel}: the 原文 block for "${id}" holds no <li class="zj-pair">, so this compared nothing`);
       assert.equal(printed, byId.get(id).text.join('\n'),
         `${rel}: the printed 原文 is not CORPUS['${id}'] — either the 原文 was converted away from the received text, or it was edited`);
     }

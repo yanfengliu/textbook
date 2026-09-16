@@ -26,6 +26,18 @@
 // (20 µm against 60 µm) from the same ORGANELLES colours as Figure 1.5, not the chapter-1 module's own
 // geometry: that module builds into its own stage and exports nothing to borrow.
 //
+// Compare. The two cells sit side by side from a view a little above the middle, and each carries a
+// caption under it — its name and size, then what only it has — set as type rather than in a panel,
+// because a panel listing three columns of organelles covered the animal cell it was describing. The
+// two structures only the animal cell has are labelled on it whenever it is shown. On a phone the
+// captions have no room under the cells, so the two "only" lines take the readout's place at the top.
+//
+// Follow a plasmodesma. The camera goes to the middle channel of the five, on the section, and the
+// labels switch to the things that view is for: the channel, the plasma membrane lining it, the strand
+// of ER through it, and the two layers it crosses. The channel is drawn after the translucent shells
+// (a transparent material at full opacity), or the wall and membrane faces it passes through show as
+// bright bands across a lining that is meant to be continuous.
+//
 // Everything is procedural, coloured from the palette, and a pure function of the clock and the
 // reader's input: the only randomness is a seeded generator.
 import { ORGANELLE_BY_ID, mix } from '../palette.js';
@@ -79,11 +91,14 @@ const G = new THREE.Vector3(21, -8.5, inPlaneZ(-8.5)); // Golgi, beyond the nucl
 const ER_DIR = new THREE.Vector3(-0.55, 0.7, -0.45).normalize(); // the ER sheets face into the cell
 
 const FOLLOW_VIEW = Object.freeze({ theta: 0, phi: Math.acos(CUT_N.y), distance: FOLLOW_DISTANCE });
+const IN_PLANE_UP = new THREE.Vector3(0, CUT_N.z, -CUT_N.y); // "up" within the section, across the channel
 
-// Which structures each cell type has, for the comparison panel and the cards.
+// Which structures each cell type has, for the captions and the cards. The captions name them in the
+// plural where the cell has several, so they are written out rather than read from the organelle table.
 const PLANT_ONLY = ['wall', 'middleLamella', 'chloroplast', 'vacuole', 'plasmodesma'];
 const ANIMAL_ONLY = ['lysosome', 'centrosome'];
-const IN_BOTH = ['membrane', 'nucleus', 'mitochondrion', 'roughER', 'smoothER', 'golgi', 'vesicle', 'peroxisome', 'ribosome', 'cytoskeleton'];
+const PLANT_ONLY_TEXT = 'cell wall, middle lamella, chloroplasts, central vacuole, plasmodesmata';
+const ANIMAL_ONLY_TEXT = 'lysosomes, centrosome';
 
 const Y = new THREE.Vector3(0, 1, 0);
 const ONE = new THREE.Vector3(1, 1, 1);
@@ -531,8 +546,12 @@ function build(root, ctx) {
       strands.push(placed(strand, p, X));
       anchors.push(p.clone().addScaledVector(CUT_N, -0.5));
     }
-    part('plasmodesma', mergeGeometries(linings), material('plasmodesma', { roughness: 0.5, cap: 0.5 }), 'plasmodesmata', anchors, scene, N_PD);
-    part('plasmodesma', mergeGeometries(strands), material('plasmodesma', { color: ORGANELLE_BY_ID.smoothER.color, roughness: 0.5 }), 'desmotubules', [], scene);
+    // Opaque, but sorted with the transparent bodies and after the shells (renderOrder 9): the shells
+    // write no depth, so the channel paints over the wall and membrane faces that cross it instead of
+    // showing them as bands through its lining.
+    const pdOpts = { transparent: true, opacity: 1, roughness: 0.5 };
+    part('plasmodesma', mergeGeometries(linings), material('plasmodesma', { ...pdOpts, cap: 0.5 }), 'plasmodesmata', anchors, scene, N_PD).renderOrder = 9;
+    part('plasmodesma', mergeGeometries(strands), material('plasmodesma', { ...pdOpts, color: ORGANELLE_BY_ID.smoothER.color }), 'desmotubules', [], scene).renderOrder = 9;
   }
   typeOf('cytoplasm');
 
@@ -633,13 +652,43 @@ function build(root, ctx) {
   // ---------- labels ----------
   const labels = new Labels(stage.labelsEl, stage.svg);
   for (const ty of types.values()) labels.add(ty.id, ty.def.name, { color: ty.def.color });
-  labels.add('plant-title', 'Plant cell · 60 µm', { group: 'titles', leader: false });
-  labels.add('animal-title', 'Animal cell · 20 µm', { group: 'titles', leader: false });
+  // The desmotubule is drawn in the smooth ER's colour and labelled only in the plasmodesma view.
+  labels.add('desmotubule', 'Desmotubule · a strand of ER', { color: ORGANELLE_BY_ID.smoothER.color });
+  // The two captions in Compare: a name and size, and under it what only that cell has. Type, not a
+  // label box, so they read as captions under two specimens; on a phone they carry the name alone.
+  const titleOf = {};
+  for (const [id, name, only] of [['plant-title', 'Plant cell · 60 µm', PLANT_ONLY_TEXT], ['animal-title', 'Animal cell · 20 µm', ANIMAL_ONLY_TEXT]]) {
+    const it = labels.add(id, name, { group: 'titles', leader: false });
+    it.node.classList.add('pc-title');
+    titleOf[id] = { it, name, only };
+  }
+  function setTitles() {
+    for (const { it, name, only } of Object.values(titleOf)) {
+      const sub = document.createElement('span');
+      sub.textContent = `only here: ${only}`;
+      it.node.replaceChildren(name, ...(narrow ? [] : [sub]));
+      it.w = 0; // re-measured on the next update
+    }
+  }
+  labels.setGroup('titles', true); // the captions are the comparison's readout, not labels, so they never toggle off
   const LABEL_PRIORITY = ['vacuole', 'wall', 'chloroplast', 'nucleus', 'plasmodesma', 'mitochondrion', 'middleLamella', 'membrane', 'roughER', 'golgi', 'cytoplasm', 'smoothER', 'peroxisome', 'thylakoid', 'ribosome', 'cytoskeleton', 'nucleolus', 'chromatin', 'vesicle', 'lysosome', 'centrosome'];
   const labelOrder = [...LABEL_PRIORITY.filter((id) => types.has(id)), ...[...types.keys()].filter((id) => !LABEL_PRIORITY.includes(id))];
   const ANIMAL_TYPES = new Set(ANIMAL_ONLY);
   const LABEL_PITCH = 52;
   const dyn = { wall: new THREE.Vector3(), membrane: new THREE.Vector3(), cytoplasm: new THREE.Vector3(), vacuole: new THREE.Vector3(), nucleus: new THREE.Vector3() };
+  // The plasmodesma view: five anchors on the section itself, a hair behind it so the cut keeps them,
+  // and a fixed offset for each, because the ring placement below aims every label away from the cell's
+  // centre and in a view 9 µm across that put all five in one column.
+  const followAt = pdPoints[Math.floor(N_PD / 2)];
+  const X = new THREE.Vector3(1, 0, 0);
+  const onSection = (along, up) => followAt.clone().addScaledVector(X, along).addScaledVector(IN_PLANE_UP, up).addScaledVector(CUT_N, -0.3);
+  const FOLLOW_LABELS = {
+    plasmodesma: { at: onSection(PD_LEN * 0.34, PD_R * 0.9), dx: 40, dy: -64 },
+    membrane: { at: onSection(-PD_LEN * 0.3, PD_R), dx: -60, dy: -56 },
+    desmotubule: { at: onSection(PD_LEN * 0.08, -0.04), dx: 30, dy: 62 },
+    wall: { at: onSection(LAMELLA_T / 2 + WALL_T / 2, 1.7), dx: 0, dy: -44 },
+    middleLamella: { at: onSection(0, -1.7), dx: 0, dy: 44 },
+  };
   const camDir = new THREE.Vector3();
   const right = new THREE.Vector3();
   const up = new THREE.Vector3();
@@ -679,6 +728,19 @@ function build(root, ctx) {
       if (cut) return plane.distanceToPoint(a) > 0.25;
       return tmp.copy(a).sub(orbit.center).dot(camDir) > -21;
     };
+    if (following) {
+      // The five things this view is for, at fixed spots on the section, and nothing else.
+      for (const [id, ty] of types) if (!FOLLOW_LABELS[id]) { labels.set(id, null); ty.current = -1; }
+      let shown = 0;
+      for (const [id, f] of Object.entries(FOLLOW_LABELS)) {
+        if (labelsOn) { labels.set(id, f.at, f.dx, f.dy); shown += 1; } else labels.set(id, null);
+      }
+      labelsShown = shown;
+      labels.set('plant-title', null);
+      labels.set('animal-title', null);
+      return;
+    }
+    labels.set('desmotubule', null);
     const anchorOf = new Map();
     for (const [id, ty] of types) {
       if (ANIMAL_TYPES.has(id) && !comparison) { anchorOf.set(id, null); continue; }
@@ -697,9 +759,10 @@ function build(root, ctx) {
     }
     const radius = silhouettePx();
     const diameter = radius * 2;
-    const room = following ? 3 : clamp(Math.floor(diameter / LABEL_PITCH), 5, labelOrder.length);
-    const order = following ? ['plasmodesma', 'membrane', 'smoothER', 'wall', 'middleLamella'] : labelOrder;
-    const keep = new Set(order.filter((id) => anchorOf.get(id)).slice(0, room));
+    const room = clamp(Math.floor(diameter / LABEL_PITCH), 5, labelOrder.length);
+    // The two structures only the animal cell has are kept whenever it is shown: they are what the
+    // comparison is for, and by priority they would be the first two dropped.
+    const keep = new Set([...labelOrder.filter((id) => anchorOf.get(id)).slice(0, room), ...(comparison ? ANIMAL_ONLY.filter((id) => anchorOf.get(id)) : [])]);
     labelsShown = labelsOn ? keep.size : 0;
     const ring = clamp((H * 0.5 - 26 - radius) / 70, 0, 1);
     const perUnit = radius / Math.hypot(OUTER.x, OUTER.y, OUTER.z);
@@ -715,44 +778,48 @@ function build(root, ctx) {
       if (len > 1.5) labels.set(id, a, (sx / len) * off, (sy / len) * off);
       else labels.set(id, a, 0, -off * 0.76);
     }
-    // The titles hang under each cell on the screen, whatever the elevation: straight down from the
+    // The captions hang under each cell on the screen, whatever the elevation: straight down from the
     // centre by the cell's own reach, not at the box's world-space bottom, which an elevated camera
-    // projects into the middle of the silhouette.
-    labels.set('plant-title', comparison && !following ? tmp.copy(up).multiplyScalar(-Math.hypot(OUTER.y, OUTER.z) * 0.92) : null, 0, 18);
-    labels.set('animal-title', comparison && !following ? tmpS.copy(ANIMAL_AT).addScaledVector(up, -ANIMAL_R * 1.02) : null, 0, 18);
+    // projects into the middle of the silhouette. Two lines on a wide stage, so the block hangs lower.
+    const drop = narrow ? 14 : 22;
+    labels.set('plant-title', comparison ? tmp.copy(up).multiplyScalar(-Math.hypot(OUTER.y, OUTER.z) * 0.92) : null, 0, drop);
+    labels.set('animal-title', comparison ? tmpS.copy(ANIMAL_AT).addScaledVector(up, -ANIMAL_R * 1.02) : null, 0, drop);
   }
 
-  // ---------- readout panel ----------
+  // ---------- readout ----------
+  // Set as type over the scene, with a paper halo for the wall behind it, not in a box: the stage is the
+  // one drawn rectangle. Three rows on a wide stage; one line across the top of a phone's.
+  const HALO = '0 0 2px var(--paper), 0 0 3px var(--paper), 0 0 6px var(--paper), 0 0 10px var(--paper)';
   const style = document.createElement('style');
   style.textContent = `
-    .pc-panel { position: absolute; top: var(--space-3); right: var(--space-3); max-width: 13.5rem; padding: 0.35rem 0.55rem 0.4rem;
-      font-family: var(--font-ui); font-size: var(--text-xs); line-height: 1.3; color: var(--ink);
-      background: color-mix(in srgb, var(--paper) 80%, transparent); border-radius: var(--radius); pointer-events: none; }
-    .pc-panel dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.05rem 0.55rem; margin: 0;
-      font-variant-numeric: lining-nums tabular-nums; }
-    .pc-panel dt { color: var(--ink-faint); }
-    .pc-panel dd { margin: 0; font-weight: 600; }
-    .pc-panel .pc-head { margin: 0.4rem 0 0.15rem; padding-top: 0.3rem; border-top: 1px solid var(--rule-strong);
-      font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); }
-    .pc-panel .pc-compare dd { font-weight: 400; color: var(--ink-soft); text-wrap: pretty; }
-    .pc-panel .pc-compare dl { gap: 0.15rem 0.55rem; }
+    .pc-read { position: absolute; top: var(--space-3); right: var(--space-4); font-family: var(--font-ui); font-size: var(--text-xs);
+      line-height: 1.3; color: var(--ink); pointer-events: none; font-variant-numeric: lining-nums tabular-nums; text-shadow: ${HALO}; }
+    .pc-read dl { display: grid; grid-template-columns: auto auto; gap: 0.05rem 0.6rem; margin: 0; }
+    .pc-read dt { color: var(--ink-soft); }
+    .pc-read dd { margin: 0; font-weight: 600; }
+    .pc-read .pc-line, .pc-read .pc-only { display: none; }
+    .pc-read .pc-line { font-weight: 600; white-space: nowrap; }
+    .pc-read .pc-line span { font-weight: 400; color: var(--ink-soft); }
+    .pc-read .pc-only p { margin: 0; color: var(--ink-soft); text-wrap: pretty; }
+    .pc-read .pc-only b { font-weight: 600; color: var(--ink); }
     .pc-slider { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.2rem 0.6rem 0.2rem 0.5rem; }
     .pc-slider input { width: 6.5rem; accent-color: var(--leaf); }
-    .pc-slider span { min-width: 5.6rem; color: var(--ink); font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
-    .pc-panel .pc-line { display: none; font-weight: 600; white-space: nowrap; }
-    .pc-panel .pc-line span { font-weight: 400; color: var(--ink-faint); }
-    .tb-plantcell3d-narrow .pc-panel { max-width: none; font-size: 0.68rem; padding: 0.22rem 0.45rem; }
-    .tb-plantcell3d-narrow .pc-panel > dl { display: none; }
-    .tb-plantcell3d-narrow .pc-panel .pc-line { display: block; }
-    .tb-plantcell3d-narrow .pc-panel .pc-head { font-size: 0.56rem; }
+    .pc-slider span { min-width: 4.4rem; color: var(--ink); font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
+    .tb3d-plantcell3d-labels .pc-title { background: none; border: 0; padding: 0; font-weight: 600; text-align: center; text-shadow: ${HALO}; }
+    .tb3d-plantcell3d-labels .pc-title span { display: block; font-weight: 400; color: var(--ink-soft); }
+    .tb-plantcell3d-narrow .pc-read { left: var(--space-3); right: var(--space-3); text-align: center; font-size: 0.68rem; }
+    .tb-plantcell3d-narrow .pc-read > dl { display: none; }
+    .tb-plantcell3d-narrow .pc-read .pc-line { display: block; }
+    .tb-plantcell3d-narrow .pc-read .pc-only { display: block; text-align: left; }
+    .tb-plantcell3d-narrow .pc-read .pc-only[hidden], .tb-plantcell3d-narrow .pc-read .pc-line[hidden] { display: none; }
     .tb-plantcell3d-narrow .pc-slider input { width: 3.8rem; }
-    .tb-plantcell3d-narrow .pc-slider span { min-width: 4.6rem; font-size: 0.68rem; }
+    .tb-plantcell3d-narrow .pc-slider span { min-width: 3.9rem; font-size: 0.68rem; }
     .tb-plantcell3d-narrow .fig-btn { padding: 0.26rem 0.5rem; font-size: 0.7rem; }
     .tb-plantcell3d-narrow .fig-toolbar { gap: 0.3rem; }
   `;
   root.append(style);
   const panel = document.createElement('div');
-  panel.className = 'pc-panel fig-ui';
+  panel.className = 'pc-read fig-ui';
   const read = document.createElement('dl');
   const readRow = (label) => {
     const dt = document.createElement('dt');
@@ -766,23 +833,19 @@ function build(root, ctx) {
   const ddState = readRow('State');
   const line = document.createElement('div'); // the same three numbers on one line, for a phone
   line.className = 'pc-line';
-  const compare = document.createElement('div');
-  compare.className = 'pc-compare';
-  compare.hidden = true;
-  const compHead = document.createElement('div');
-  compHead.className = 'pc-head';
-  compHead.textContent = 'Plant against animal';
-  const compList = document.createElement('dl');
-  const names = (ids) => ids.map((id) => organelle(id).name.toLowerCase().replace('rough endoplasmic reticulum', 'rough ER').replace('smooth endoplasmic reticulum', 'smooth ER')).join(', ');
-  for (const [label, ids] of [['Plant only', PLANT_ONLY], ['Animal only', ANIMAL_ONLY], ['Both', IN_BOTH]]) {
-    const dt = document.createElement('dt');
-    dt.textContent = label;
-    const dd = document.createElement('dd');
-    dd.textContent = names(ids);
-    compList.append(dt, dd);
+  // On a phone the two cells' captions have no room under them, so the "only" lines sit here instead
+  // of the readout while the comparison is shown.
+  const only = document.createElement('div');
+  only.className = 'pc-only';
+  only.hidden = true;
+  for (const [who, what] of [['Only the plant cell', PLANT_ONLY_TEXT], ['Only the animal cell', ANIMAL_ONLY_TEXT]]) {
+    const p = document.createElement('p');
+    const b = document.createElement('b');
+    b.textContent = `${who}: `;
+    p.append(b, what);
+    only.append(p);
   }
-  compare.append(compHead, compList);
-  panel.append(read, line, compare);
+  panel.append(read, line, only);
   root.append(panel);
 
   // ---------- state ----------
@@ -816,13 +879,14 @@ function build(root, ctx) {
     ddState.textContent = turgorState;
     line.replaceChildren();
     line.append(`${Math.round(fraction * 100)} % vacuole`, sp(), `${g.toFixed(1)} µm cytoplasm`, sp(), turgorState);
-    turgorVal.textContent = `${turgorState} · ${Math.round(turgor * 100)} %`;
+    // The word for the state is in the readout; the slider says which quantity it moves.
+    turgorVal.textContent = `turgor ${Math.round(turgor * 100)} %`;
   }
 
   function render() {
     orbit.apply(camera, spin.angle(clock.now()));
     updateLabels();
-    labels.obstacles = panelRect ? [panelRect] : [];
+    labels.obstacles = [panelRect, cardRect].filter(Boolean);
     labels.update(camera, W, H, bottomPad);
     renderer.render(scene, camera);
   }
@@ -890,6 +954,13 @@ function build(root, ctx) {
     loop.invalidate();
   }
 
+  function setLabels(on) {
+    labelsOn = on;
+    btnLabels.setAttribute('aria-pressed', String(on));
+    labels.setGroup('main', on);
+  }
+
+  let labelsBeforeFollow = null;
   function setFollowing(on) {
     following = on;
     btnFollow.setAttribute('aria-pressed', String(on));
@@ -897,17 +968,26 @@ function build(root, ctx) {
       if (comparison) setComparison(false);
       if (!cut) setCut(true);
       spin.hold(orbit, clock.now());
-      centreGoal.copy(pdPoints[Math.floor(N_PD / 2)]);
+      centreGoal.copy(followAt);
       goTo(FOLLOW_VIEW);
-      stage.showCard('A plasmodesma', 'A channel through both walls and the middle lamella, lined by plasma membrane that runs unbroken from one cell into the next, with a strand of ER, the desmotubule, down the middle. Small molecules and signals pass; the cytoplasm of the two cells is one.', 'Drawn about ten times its real width, which is 30–50 nm.');
+      // The five labels are what this view is for, so on a phone, where labels start off, they come on
+      // for it and go back afterwards. The card explains; on a phone it would cover the channel it
+      // explains, so there the labels do the whole job.
+      labelsBeforeFollow = labelsOn;
+      if (!labelsOn) setLabels(true);
+      if (narrow) stage.hideCard();
+      else stage.showCard('A plasmodesma', 'A channel through both walls and the middle lamella, lined by plasma membrane that runs unbroken from one cell into the next, with a strand of ER, the desmotubule, down the middle. Small molecules and signals pass; the cytoplasm of the two cells is one.', 'Drawn about ten times its real width, which is 30–50 nm.');
     } else {
       centreGoal.set(0, 0, 0);
       goTo(homeView());
       if (!cut) spin.release(clock.now());
+      if (labelsBeforeFollow !== null && labelsOn !== labelsBeforeFollow) setLabels(labelsBeforeFollow);
+      labelsBeforeFollow = null;
       if (selected === null) stage.hideCard();
     }
     if (instant()) stepCentre(0, true);
     for (const ty of types.values()) ty.current = -1;
+    measureCard();
     loop.invalidate();
   }
 
@@ -915,7 +995,6 @@ function build(root, ctx) {
     comparison = on;
     btnCompare.setAttribute('aria-pressed', String(on));
     animal.visible = on;
-    compare.hidden = !on;
     if (on && following) setFollowing(false);
     centreGoal.copy(on ? COMPARE_CENTRE : ZERO);
     const distance = clamp(orbit.goal.distance * (on ? COMPARE_ZOOM : 1 / COMPARE_ZOOM), ZOOM_MIN, ZOOM_MAX);
@@ -925,8 +1004,15 @@ function build(root, ctx) {
     }
     if (instant()) stepCentre(0, true);
     for (const ty of types.values()) ty.current = -1;
-    measurePanel();
+    paintRead();
     loop.invalidate();
+  }
+
+  // On a phone the comparison's two lines take the readout's place at the top while it is shown.
+  function paintRead() {
+    only.hidden = !(comparison && narrow);
+    line.hidden = comparison && narrow;
+    measurePanel();
   }
 
   function applyShellTheme(theme) {
@@ -958,8 +1044,8 @@ function build(root, ctx) {
       else if (ty.count > 1) note = `${ty.count} in this model.`;
       if (id === 'vacuole') note = `Its membrane is the tonoplast. ${note}`;
       stage.showCard(ty.def.name, ty.def.role, note);
-    } else if (following) setFollowing(true);
-    else stage.hideCard();
+    } else stage.hideCard(); // including the plasmodesma card: Escape and a click on nothing dismiss it
+    measureCard();
     loop.invalidate();
   }
 
@@ -985,14 +1071,10 @@ function build(root, ctx) {
   // ---------- controls ----------
   const btnCut = addButton(toolbar, 'Cut open', () => setCut(!cut), false);
   const btnLabels = addButton(toolbar, 'Labels', () => {
-    labelsOn = !labelsOn;
-    btnLabels.setAttribute('aria-pressed', String(labelsOn));
-    labels.setGroup('main', labelsOn);
-    labels.setGroup('titles', labelsOn);
+    setLabels(!labelsOn);
     loop.invalidate();
   }, labelsOn);
   labels.setGroup('main', labelsOn);
-  labels.setGroup('titles', labelsOn);
   const btnCompare = addButton(toolbar, 'Compare', () => setComparison(!comparison), false);
   btnCompare.setAttribute('aria-label', 'Compare: put the animal cell of Chapter 1 beside it at the same scale');
   const btnFollow = addButton(toolbar, 'Plasmodesma', () => setFollowing(!following), false);
@@ -1027,12 +1109,17 @@ function build(root, ctx) {
   // ---------- sizing ----------
   let bottomPad = 52;
   let panelRect = null;
+  let cardRect = null;
   const measurePad = () => { bottomPad = Math.max(52, toolbar.offsetHeight + 14); };
-  const measurePanel = () => {
-    const r = panel.getBoundingClientRect();
+  // Rectangles the labels keep clear of, about their centres in stage pixels.
+  const rectOf = (el) => {
+    if (el.hidden) return null;
+    const r = el.getBoundingClientRect();
     const s = root.getBoundingClientRect();
-    panelRect = r.width ? { x: r.left - s.left + r.width / 2, y: r.top - s.top + r.height / 2, w: r.width, h: r.height } : null;
+    return r.width ? { x: r.left - s.left + r.width / 2, y: r.top - s.top + r.height / 2, w: r.width, h: r.height } : null;
   };
+  const measurePanel = () => { panelRect = rectOf(panel); };
+  const measureCard = () => { cardRect = rectOf(stage.card); };
   const unobserve = observeSize(root, (w, h) => {
     W = w;
     H = h;
@@ -1047,10 +1134,9 @@ function build(root, ctx) {
       btnReset.textContent = narrow ? 'Reset' : 'Reset view';
       btnFollow.textContent = narrow ? 'Channel' : 'Plasmodesma';
       chip.textContent = narrow ? 'cell ≈ 60 µm' : '1 unit = 1 µm · cell ≈ 60 µm';
-      labelsOn = !narrow;
-      btnLabels.setAttribute('aria-pressed', String(labelsOn));
-      labels.setGroup('main', labelsOn);
-      labels.setGroup('titles', labelsOn);
+      setLabels(!narrow || following);
+      setTitles();
+      paintRead();
       if (!following) orbit.set(homeView());
     }
     // On a phone the toolbar wraps to two rows over the bottom of the cell, where the nucleus pocket
@@ -1059,13 +1145,19 @@ function build(root, ctx) {
     else camera.clearViewOffset();
     measurePad();
     measurePanel();
+    measureCard();
     labels.measure();
     loop.invalidate();
   });
+  // The toolbar reflows on its own when a button's text changes or the stage narrows, and a label
+  // placed against a stale height sat on top of a button.
+  const toolbarSize = new ResizeObserver(() => { measurePad(); loop.invalidate(); });
+  toolbarSize.observe(toolbar);
   let alive = true;
-  document.fonts?.ready.then(() => { if (alive) { measurePad(); measurePanel(); labels.measure(); loop.invalidate(); } });
+  document.fonts?.ready.then(() => { if (alive) { measurePad(); measurePanel(); measureCard(); labels.measure(); loop.invalidate(); } });
 
   applyTurgor();
+  setTitles();
   measurePanel();
   render();
   ctx.onReady();
@@ -1076,6 +1168,7 @@ function build(root, ctx) {
       alive = false;
       loop.stop();
       unobserve();
+      toolbarSize.disconnect();
       disposeScene(scene);
       mats.dispose();
       renderer.dispose();

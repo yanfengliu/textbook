@@ -497,6 +497,17 @@ function build(root, ctx) {
     .cl-slider input { width: 6rem; accent-color: var(--leaf); }
     .cl-slider span { min-width: 4.4rem; color: var(--ink); font-weight: 600;
       font-variant-numeric: lining-nums tabular-nums; }
+    /* The beat's readout, set as type: the stroke in the display face and the doublets driving it in
+       the small sans beside it, on the toolbar's second row after the scale chip. A row of its own
+       above the controls was tried first and ran into the basal body's label, which sits low because
+       the cilium fills the stage top to bottom. On a phone it takes the chip's place and says less. */
+    .cl-read { flex: 1 1 auto; min-width: 0; margin-left: 0.2rem; color: var(--ink-soft); line-height: 1.2;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none !important;
+      font-variant-numeric: lining-nums tabular-nums; }
+    .cl-read b { font-family: var(--font-display); font-size: var(--text-base); font-weight: 500;
+      color: var(--ink); margin-right: 0.45rem; }
+    .tb-cilium-narrow .cl-read { font-size: 0.68rem; margin-left: 0; }
+    .tb-cilium-narrow .cl-read b { margin-right: 0.35rem; }
     .tb-cilium-narrow .cl-slider input { width: 3.6rem; }
     .tb-cilium-narrow .cl-slider span { min-width: 3.4rem; font-size: 0.68rem; }
     .tb-cilium-narrow .fig-btn { padding: 0.26rem 0.5rem; font-size: 0.7rem; }
@@ -523,7 +534,31 @@ function build(root, ctx) {
     sectionCam.up.set(0, 0, 1);
     sectionCam.lookAt(c.x, c.y, 0);
     sectionCam.updateMatrixWorld();
-    caption.textContent = `Section at ${sectionUm.toFixed(1)} µm · ${arrangementAt(s)}`;
+    const region = { 'basal-body': 'basal body', transition: 'transition zone', shaft: 'shaft' }[regionAt(s)];
+    caption.textContent = narrow ? `${sectionUm.toFixed(1)} µm · ${region} · ${arrangementAt(s)}` : `Section at ${sectionUm.toFixed(1)} µm · ${region} · ${arrangementAt(s)}`;
+  }
+
+  // The readout the beat is judged by: which stroke, which doublets are driving it, how far the tip
+  // swings. Written only when it changes, because it is read every frame while the cilium beats.
+  const readout = document.createElement('div');
+  readout.className = 'cl-read fig-ui';
+  const readBig = document.createElement('b');
+  const readRest = document.createElement('span');
+  readout.append(readBig, readRest);
+  let readLast = '';
+  const list = (ids) => (ids.length ? `${ids.slice(0, -1).join(', ')} and ${ids[ids.length - 1]}` : '');
+  function paintReadout(phase) {
+    const active = activeNow(phase);
+    const stroke = strokeNow(phase);
+    const bendUm = (bendAmp * 0.1).toFixed(2);
+    let big;
+    let rest;
+    if (mode === 'primary') { big = 'Primary'; rest = narrow ? '9+0' : '9+0 · no central pair, no dynein arms · does not beat'; } else if (!armsOn) { big = 'Limp'; rest = narrow ? 'no arms' : 'no dynein arms · nothing slides, so nothing bends'; } else if (beating && sliding) { big = 'Sliding'; rest = narrow ? `${active.join(', ')} · no bend` : `links released · doublets ${list(active)} telescope out · no bend`; } else if (beating) { big = stroke === 'effective' ? 'Effective' : 'Recovery'; rest = narrow ? `${active.join(', ')} · ${bendUm} µm` : `stroke · doublets ${list(active)} driving · tip swings ${bendUm} µm · ${beatHz} Hz at 1/${BEAT_SLOW} speed`; } else { big = 'At rest'; rest = narrow ? '9+2' : '9+2 · nine doublets round a central pair, dynein arms and nexin links in place'; }
+    const key = `${big}|${rest}`;
+    if (key === readLast) return;
+    readLast = key;
+    readBig.textContent = big;
+    readRest.textContent = rest;
   }
 
   // ---------- per-frame update ----------
@@ -556,6 +591,7 @@ function build(root, ctx) {
     cutC.visible = s < BASAL;
     cutCentral.visible = hasCentral();
     void tg;
+    paintReadout(phase);
   }
 
   function render() {
@@ -673,15 +709,14 @@ function build(root, ctx) {
     else Object.assign(orbit.goal, view0());
     loop.invalidate();
   });
-  const chip = addChip(toolbar, '', scope);
+  const chip = addChip(toolbar, '1 unit = 100 nm · shaft 2.4 µm', scope);
+  toolbar.append(readout);
 
   function updateSectionText() {
-    const s = sectionUnits();
     secVal.textContent = `${sectionUm.toFixed(1)} µm`;
     hzVal.textContent = `${beatHz} Hz`;
-    chip.textContent = narrow
-      ? `${arrangementAt(s)} · 1/${BEAT_SLOW} speed`
-      : `1 unit = 100 nm · shaft 2.4 µm · the beat is shown at 1/${BEAT_SLOW} of real speed`;
+    // The scale note has no room on a phone; the readout stands where it stood.
+    chip.hidden = narrow;
   }
 
   function showNote() {
@@ -732,6 +767,7 @@ function build(root, ctx) {
       labelsOn = !narrow;
       btnLabels.setAttribute('aria-pressed', String(labelsOn));
       labels.setGroup('main', labelsOn);
+      updateSectionText();
       orbit.set(view0());
     }
     // On a phone the toolbar wraps to three rows and the section window takes the top-right corner,
@@ -740,11 +776,15 @@ function build(root, ctx) {
     // sliders. A view offset moves the picture, not the orbit, so turning the cilium keeps it in place.
     if (narrow) camera.setViewOffset(w, h, 0.19 * w, 0.165 * h, w, h);
     else camera.clearViewOffset();
+    readLast = ''; // the readout's wording follows the layout
     placeSection();
     measurePad();
     labels.measure();
     loop.invalidate();
   });
+  // The toolbar reflows on its own when its text changes, and the labels are placed against its height.
+  const toolbarSize = new ResizeObserver(() => { measurePad(); loop.invalidate(); });
+  toolbarSize.observe(toolbar);
   let alive = true;
   document.fonts?.ready.then(() => { if (alive) { measurePad(); labels.measure(); loop.invalidate(); } });
 
@@ -760,6 +800,7 @@ function build(root, ctx) {
       alive = false;
       loop.stop();
       unobserve();
+      toolbarSize.disconnect();
       disposeScene(scene);
       mats.dispose();
       renderer.dispose();

@@ -1,15 +1,22 @@
-// Shared chemistry for the chapter-2 molecular figures (soup, bondlab, water3d, waterprops): the element
-// table, the one colour per element the chapter's brief fixes, the geometry of a water molecule, the two
-// energy models the bond bench and the soup both read from, and a seeded PRNG.
+// Shared chemistry for the chapter-2 molecular figures: the one element table, the one colour per
+// element the chapter's brief fixes, the geometry of a water molecule, the two energy models the bond
+// bench and the soup both read from, and the one seeded PRNG.
+//
+// The canvas and WebGL figures (soup, bondlab, water3d, waterprops) import this directly and resolve the
+// colours through `ctx.palette`. The SVG figures (phlab, carbonkit, polymer, foldlab) go through
+// lib/mol-draw.js, which derives its CSS expressions from the token names in ELEMENTS below rather than
+// keeping a table of its own; test/element-table.test.js fails a second table anywhere under src/figures/.
 //
 // Every number here is a measured value with its source named in the comment beside it, or a stated model
 // with its form written out. Nothing is invented: a figure that needs a number it cannot source does not
 // draw it.
 //
-// Colours resolve through `ctx.palette`, never a hex of their own. The table is the brief's:
+// Colours resolve through `ctx.palette`, never a hex of their own. The table is the brief's
+// (biology/ch02-chemistry-of-life/FIGURES.md):
 //   carbon inkSoft · hydrogen paper3 on a ruleStrong outline · oxygen coral · nitrogen water
 //   phosphorus violet · sulfur gold · ions leaf, always with the symbol written on them
 //   covalent bond solid ink · hydrogen bond dashed inkFaint · ionic attraction dotted gold
+// The symbol written on an atom is paper on every coloured disc, and inkSoft on hydrogen's pale one.
 
 // ---------- determinism ----------
 
@@ -44,22 +51,35 @@ export const ramp = (x, a, b) => smoothstep((x - a) / (b - a));
 
 // ---------- elements ----------
 //
+// The one element table. Every figure that colours or measures an atom reads this record, directly or
+// through lib/mol-draw.js.
+//
 // valence   outer-shell electrons
 // shell     electrons a full outer shell holds (2 for hydrogen, 8 for the rest here)
 // en        Pauling electronegativity (CRC Handbook, 97th ed.)
-// covalent  single-bond covalent radius, pm (Cordero et al. 2008)
-// vdw       van der Waals radius, pm (Bondi 1964; Na+/Cl- carry their ionic radii below instead)
+// covalent  single-bond covalent radius, pm (Cordero et al. 2008). Chlorine carries 99, the traditional
+//           value, where Cordero gives 102: bondlab's rest lengths (H-Cl 130, C-Cl 175) are built on it
+//           and its describe() reports them, so it is not changed here without re-checking those.
+// vdw       van der Waals radius, pm (Bondi 1964, and Ca from Mantina et al. 2009, which extended Bondi's
+//           set; Na+/Cl- carry their ionic radii below instead)
 // ionic     Shannon ionic radius of the ion the element forms in a cell, pm, 6-coordinate
+// charge    the charge of that ion
 // mass      relative atomic mass
+// token     the palette token the atom is filled with; outline its rule; label the symbol written on it
 export const ELEMENTS = Object.freeze({
-  H: { symbol: 'H', name: 'Hydrogen', valence: 1, shell: 2, en: 2.20, covalent: 31, vdw: 120, mass: 1.008, token: 'paper3', outline: 'ruleStrong', metal: false },
-  C: { symbol: 'C', name: 'Carbon', valence: 4, shell: 8, en: 2.55, covalent: 76, vdw: 170, mass: 12.011, token: 'inkSoft', outline: 'inkSoft', metal: false },
-  N: { symbol: 'N', name: 'Nitrogen', valence: 5, shell: 8, en: 3.04, covalent: 71, vdw: 155, mass: 14.007, token: 'water', outline: 'water', metal: false },
-  O: { symbol: 'O', name: 'Oxygen', valence: 6, shell: 8, en: 3.44, covalent: 66, vdw: 152, mass: 15.999, token: 'coral', outline: 'coral', metal: false },
-  P: { symbol: 'P', name: 'Phosphorus', valence: 5, shell: 8, en: 2.19, covalent: 107, vdw: 180, mass: 30.974, token: 'violet', outline: 'violet', metal: false },
-  S: { symbol: 'S', name: 'Sulfur', valence: 6, shell: 8, en: 2.58, covalent: 105, vdw: 180, mass: 32.06, token: 'gold', outline: 'gold', metal: false },
-  Na: { symbol: 'Na', name: 'Sodium', valence: 1, shell: 8, en: 0.93, covalent: 166, vdw: 227, ionic: 102, charge: 1, mass: 22.990, token: 'leaf', outline: 'leaf', metal: true },
-  Cl: { symbol: 'Cl', name: 'Chlorine', valence: 7, shell: 8, en: 3.16, covalent: 99, vdw: 175, ionic: 181, charge: -1, mass: 35.45, token: 'leaf', outline: 'leaf', metal: false },
+  H: { symbol: 'H', name: 'Hydrogen', valence: 1, shell: 2, en: 2.20, covalent: 31, vdw: 120, mass: 1.008, token: 'paper3', outline: 'ruleStrong', label: 'inkSoft', metal: false },
+  C: { symbol: 'C', name: 'Carbon', valence: 4, shell: 8, en: 2.55, covalent: 76, vdw: 170, mass: 12.011, token: 'inkSoft', outline: 'inkSoft', label: 'paper', metal: false },
+  N: { symbol: 'N', name: 'Nitrogen', valence: 5, shell: 8, en: 3.04, covalent: 71, vdw: 155, mass: 14.007, token: 'water', outline: 'water', label: 'paper', metal: false },
+  O: { symbol: 'O', name: 'Oxygen', valence: 6, shell: 8, en: 3.44, covalent: 66, vdw: 152, mass: 15.999, token: 'coral', outline: 'coral', label: 'paper', metal: false },
+  P: { symbol: 'P', name: 'Phosphorus', valence: 5, shell: 8, en: 2.19, covalent: 107, vdw: 180, mass: 30.974, token: 'violet', outline: 'violet', label: 'paper', metal: false },
+  S: { symbol: 'S', name: 'Sulfur', valence: 6, shell: 8, en: 2.58, covalent: 105, vdw: 180, mass: 32.06, token: 'gold', outline: 'gold', label: 'paper', metal: false },
+  // The ions share one colour and are told apart by the symbol written on them: charge and identity are
+  // never colour alone.
+  Na: { symbol: 'Na', name: 'Sodium', valence: 1, shell: 8, en: 0.93, covalent: 166, vdw: 227, ionic: 102, charge: 1, mass: 22.990, token: 'leaf', outline: 'leaf', label: 'paper', metal: true },
+  K: { symbol: 'K', name: 'Potassium', valence: 1, shell: 8, en: 0.82, covalent: 203, vdw: 275, ionic: 138, charge: 1, mass: 39.098, token: 'leaf', outline: 'leaf', label: 'paper', metal: true },
+  Ca: { symbol: 'Ca', name: 'Calcium', valence: 2, shell: 8, en: 1.00, covalent: 176, vdw: 231, ionic: 100, charge: 2, mass: 40.078, token: 'leaf', outline: 'leaf', label: 'paper', metal: true },
+  Mg: { symbol: 'Mg', name: 'Magnesium', valence: 2, shell: 8, en: 1.31, covalent: 141, vdw: 173, ionic: 72, charge: 2, mass: 24.305, token: 'leaf', outline: 'leaf', label: 'paper', metal: true },
+  Cl: { symbol: 'Cl', name: 'Chlorine', valence: 7, shell: 8, en: 3.16, covalent: 99, vdw: 175, ionic: 181, charge: -1, mass: 35.45, token: 'leaf', outline: 'leaf', label: 'paper', metal: false },
 });
 
 // Electrons short of a full outer shell. A metal is counted by what it gives away, not what it needs:
@@ -75,12 +95,13 @@ export function gives(symbol) {
   return e && e.metal ? e.valence : 0;
 }
 
-// The fill and the outline for an atom, resolved against a palette. Hydrogen is the only one drawn as a
-// pale disc with a darker rule, because every other element is a colour and hydrogen is everywhere.
+// The fill, the outline and the symbol colour for an atom, resolved against a palette. Hydrogen is the
+// only one drawn as a pale disc with a darker rule, because every other element is a colour and hydrogen
+// is everywhere.
 export function atomColours(palette, symbol) {
   const e = ELEMENTS[symbol];
-  if (!e) return { fill: palette.inkSoft, stroke: palette.inkSoft };
-  return { fill: palette[e.token], stroke: palette[e.outline] };
+  if (!e) return { fill: palette.inkSoft, stroke: palette.inkSoft, label: palette.paper };
+  return { fill: palette[e.token], stroke: palette[e.outline], label: palette[e.label] };
 }
 
 // ---------- geometry ----------

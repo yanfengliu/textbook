@@ -66,7 +66,21 @@ class TbPopover extends HTMLElement {
     // statement that the primary pointer cannot hover, which is exactly the case this is about; a mouse,
     // a trackpad and a stylus that hovers all keep the behaviour they had. The popover's touch path is
     // then the click alone, which is one event with nothing to race.
-    const canHover = !matchMedia('(pointer: coarse)').matches;
+    //
+    // **A character does not open on hover; a glossary term does.** The first version attached hover to
+    // both, on the reasoning that a term's hover-to-read is the biology book's behaviour and a character
+    // is the same kind of thing. It is not, and the difference is one of scale. An independent reader
+    // reported, in their words: *"Moving the mouse across 原文 characters with no clicks opened 14 cards
+    // in 14 cursor positions… Chapter 2 has 1,291 clickable characters. My mouse brushed text on the way
+    // to the scrollbar and cards fired over the paragraph I was reading. The phone was the better read."*
+    // A term is a handful per chapter and a reader may reasonably want its gloss without committing a
+    // click; 1,291 of them in a 37,000-pixel column turns the pointer into a trigger, and the page fights
+    // the reader. So the hover path is `TbTerm`'s alone, and `TbChar` opens on click.
+    //
+    // This defect is invisible to every gate in this repository: `narrow` and `devices` set a narrow
+    // viewport on a desktop browser, which still has a mouse and `pointer: fine`, and the touch arms have
+    // no desktop-hover counterpart. It was found by a person reading.
+    const canHover = this.hoverable() && !matchMedia('(pointer: coarse)').matches;
     button.addEventListener('click', (e) => {
       e.stopPropagation();
       if (this.pop && this.pinned) this.close();
@@ -82,6 +96,11 @@ class TbPopover extends HTMLElement {
         if (this.hoverOnly) this.close();
       });
     }
+  }
+
+  /** Whether a pointer resting on this opens its card. A term does; a single character does not. */
+  hoverable() {
+    return true;
   }
 
   /** What the popover is about: a reference for a term, a character or a `for` attribute. */
@@ -133,6 +152,32 @@ class TbPopover extends HTMLElement {
     // second tap would do nothing. Found by walking the touch path after hover-to-open was disabled on
     // coarse pointers (docs/learning/defect-register.md, 2026-09-12).
     this.pinned = !hover;
+    // **A card closes when the READER scrolls, and not when the page does.** A card left open while its
+    // anchor leaves the viewport hangs off the screen and then swallows the next tap on whatever character
+    // it covers, so something must dismiss it.
+    //
+    // The first version listened for `scroll`, which fires for a programmatic `scrollIntoView` as well —
+    // and a page that settles its layout after load fires one too. Measured: a hover-opened glossary term
+    // on the biology book was closed by a scroll nobody performed, and on this book a probe that scrolls
+    // each term into view before pressing it closed the card it had just opened, at one term in 172,
+    // nondeterministically. A distance guard on the event did not fix it, because the scroll was real.
+    //
+    // So the listener is on the reader's own gestures — a wheel, a finger, or a key that scrolls — which
+    // are exactly the moments a reader has deliberately moved the page away from the card. `pointerdown`
+    // is deliberately NOT among them: the press that opens the next card would close it.
+    const closeOnGesture = () => this.close();
+    const SCROLL_KEYS = [' ', 'PageUp', 'PageDown', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
+    const onKey = (e) => {
+      if (SCROLL_KEYS.includes(e.key)) this.close();
+    };
+    addEventListener('wheel', closeOnGesture, { once: true, passive: true });
+    addEventListener('touchmove', closeOnGesture, { once: true, passive: true });
+    addEventListener('keydown', onKey, { once: true });
+    this.__closeOnGesture = () => {
+      removeEventListener('wheel', closeOnGesture);
+      removeEventListener('touchmove', closeOnGesture);
+      removeEventListener('keydown', onKey);
+    };
     this.button.setAttribute('aria-expanded', 'true');
     this.button.setAttribute('aria-describedby', pop.id);
     openTerm = this;
@@ -201,6 +246,9 @@ class TbPopover extends HTMLElement {
     this.pop = null;
     this.hoverOnly = false;
     this.pinned = false;
+    // The gesture listeners are `once` and re-armed by the next open, so a card that closes any other way
+    // must take them off or a stale one would close the following card the moment a reader scrolls.
+    if (this.__closeOnGesture) this.__closeOnGesture();
     this.button.setAttribute('aria-expanded', 'false');
     this.button.removeAttribute('aria-describedby');
     if (openTerm === this) openTerm = null;
@@ -248,6 +296,11 @@ export class TbTerm extends TbPopover {
 }
 
 export class TbChar extends TbPopover {
+  /** A character opens on click, never on hover — see the note in `TbPopover.connectedCallback`. */
+  hoverable() {
+    return false;
+  }
+
   lookupKey() {
     return this.getAttribute('for') || this.textContent.trim();
   }

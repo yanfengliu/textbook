@@ -35,6 +35,9 @@
 //   literal    = number | "true" | "false" | "null" | 'quoted' | "quoted" | bare-word
 //   number     = [ "-" ] digits [ "." digits ] [ ("e" | "E") [ "+" | "-" ] digits ]
 //
+// Under ">", ">=", "<" and "<=" the literal must be a number as written: "", null, true and false are
+// not, whatever Number() would make of them.
+//
 // A number reads the way an author writes it for a figure that spans ten orders of magnitude: `2e-7`
 // as well as `0.0000002`. The first grammar stopped at the decimal point, and chapter 1's
 // `lensMetres < 2e-7` was read as the number 2 followed by the word "e-7" — an error the page
@@ -264,12 +267,17 @@ function compare(actual, op, expected, path) {
 // on its right. The grammar's right-hand side is a literal and never a second path, so a bare word
 // there is text — right for `panel === heat` and `events ~ race`, impossible for `>`. compare() throws
 // this at grade time and expectProblems() asks it before any grade, through this one function, so the
-// check and the grader cannot disagree.
+// check and the grader cannot disagree. "A number" means the tokenizer handed over a JavaScript number,
+// not that Number() could make one: Number("") is 0, Number(null) is 0 and Number(true) is 1, so
+// `core > ''` graded as `core > 0` for ever without a word, and the check sharing this function passed
+// it (review, 2026-09-16).
 function literalFor(op, expected, path) {
   if (op !== '>' && op !== '>=' && op !== '<' && op !== '<=') return expected;
-  const b = Number(expected);
-  if (!Number.isFinite(b)) throw new ExpectError(`"${path} ${op} ${show(expected)}" compares against ${show(expected)}, which is not a number`);
-  return b;
+  if (typeof expected !== 'number' || !Number.isFinite(expected)) {
+    const what = expected === '' ? 'an empty string' : show(expected);
+    throw new ExpectError(`"${path} ${op} ${show(expected)}" compares against ${what}, which is not a number`);
+  }
+  return expected;
 }
 
 // Everything wrong with an expect that is wrong before any figure reports anything: the grammar does

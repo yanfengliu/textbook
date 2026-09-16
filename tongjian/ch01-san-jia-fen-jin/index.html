@@ -25,6 +25,18 @@
   import { registerLexicon } from '../data/card.js';
   textbook.registerGlossary(GLOSSARY);
   registerLexicon({ lexicon: LEXICON, words: WORDS, chars: CHARS, chapter: 'tongjian/ch01' });
+  // 组件在这个页面上说的话：src/components/check.js 与 src/components/sort.js 按 <html lang="zh-Hans">
+  // 取到的默认值已经是中文，所以这里只写组件不知道的那一句——归完之后按什么算对，是这一章自己的事。
+  textbook.strings = {
+    sort: {
+      status: ({ placed, n, right, last }) => {
+        const summary = placed === n
+          ? `${n}条都归好了，按人名、官爵、动作三类归对了${right}条。`
+          : `还剩${n - placed}条没归。`;
+        return last ? `${last}${summary}` : summary;
+      },
+    },
+  };
   await import('../../src/components/index.js');
 </script>
 </head>
@@ -35,16 +47,15 @@
 <nav class="tb-rail" aria-label="本章目录"></nav>
 <main class="tb-main" data-chapter="1" data-no-mastery>
   <header class="tb-opener">
-    <p class="tb-opener__unit">资治通鉴 · 卷一 周纪一</p>
+    <p class="tb-opener__unit">卷一 · 周纪一 · 威烈王二十三年</p>
     <p class="tb-opener__number" aria-hidden="true">1</p>
     <h1>三家分晋</h1>
     <p class="tb-opener__dek">周威烈王二十三年，天子把晋国的三个大夫封为诸侯。司马光用这一句开始了《资治通鉴》：不是先记一件事，是先立一个是非。</p>
     <ol class="tb-opener__contents" aria-label="本章目录">
       <li><a href="#source"><span class="n">1.1</span><span>原文</span></a></li>
-      <li><a href="#translation"><span class="n">1.2</span><span>现代汉语翻译</span></a></li>
-      <li><a href="#notes"><span class="n">1.3</span><span>字词</span></a></li>
-      <li><a href="#history"><span class="n">1.4</span><span>背景</span></a></li>
-      <li><a href="#discussion"><span class="n">1.5</span><span>思考</span></a></li>
+      <li><a href="#notes"><span class="n">1.2</span><span>字词</span></a></li>
+      <li><a href="#history"><span class="n">1.3</span><span>背景</span></a></li>
+      <li><a href="#discussion"><span class="n">1.4</span><span>思考</span></a></li>
     </ol>
   </header>
   <div class="tb-text">
@@ -55,27 +66,17 @@
   <p class="zj-cite">《资治通鉴》卷一〈周纪一〉，威烈王二十三年。</p>
 
   <ol class="zj-src" lang="zh-Hant" data-corpus="zj-001-wei-lie-23">
-    <li><tb-char>初</tb-char><tb-char>命</tb-char><tb-char>晉</tb-char><tb-term ref="dafu" word="大夫">大夫</tb-term><tb-char>魏</tb-char><tb-char>斯</tb-char>、<tb-char>趙</tb-char><tb-char>籍</tb-char>、<tb-char>韓</tb-char><tb-char>虔</tb-char><tb-char>為</tb-char><tb-term ref="zhuhou" word="諸侯">諸侯</tb-term>。</li>
-  </ol>
-  </section>
-
-  <section id="translation">
-  <h2>现代汉语翻译</h2>
-
-  <p>译文与原文一句对一句，用现代汉语的标点。它不是原文的替代品：读不通原文时看它，读通了就回到左边。</p>
-
-  <ol class="zj-trans">
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">初命晉大夫魏斯、趙籍、韓虔為諸侯。</span>
-      <span class="zj-trans__text">当初，周威烈王任命晋国的大夫魏斯、赵籍、韩虔为诸侯。</span>
-    </li>
-  </ol>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-char>初</tb-char><tb-char>命</tb-char><tb-char>晉</tb-char><tb-term ref="dafu" word="大夫">大夫</tb-term><tb-char>魏</tb-char><tb-char>斯</tb-char>、<tb-char>趙</tb-char><tb-char>籍</tb-char>、<tb-char>韓</tb-char><tb-char>虔</tb-char><tb-char>為</tb-char><tb-term ref="zhuhou" word="諸侯">諸侯</tb-term><span class="zj-ju">。</span></span>
+    <span class="zj-pair__tr" lang="zh-Hans">当初，周威烈王任命晋国的大夫魏斯、赵籍、韩虔为诸侯。</span>
+  </li>
+</ol>
   </section>
 
   <section id="notes">
   <h2>字词</h2>
 
-  <p>这一章的字与词。点原文里的字，开出来的就是这里的卡片；从这里也可以一路点下去。每一条给的是它在这一句里的意思。</p>
+  <p>本章的字与词：点任何一个字、一个词，开出来的就是它在这一句里的卡片。</p>
 
   <h3 id="lex-chars">字</h3>
   <dl class="zj-lex">

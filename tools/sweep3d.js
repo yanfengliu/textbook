@@ -14,18 +14,24 @@
 // render was replaced by a clear still passed because fifteen labels and three buttons vary enough to
 // look like a frame (proved 2026-09-10, docs/learning/gate-proofs.md). The labelled frame is still
 // written beside the bare one for a person to look at. The renderer is SwiftShader unless SWEEP_GPU=1.
-// SWEEP_VIEWS=<n> trims the azimuth count for CI; SWEEP_KINDS=<a,b> trims the run to those kinds, and a
-// trimmed run proves only its part.
+// SWEEP_VIEWS=<n> trims the azimuth count for CI; SWEEP_KINDS=<a,b> trims the run to those kinds, a
+// trimmed run proves only its part, and a name that is not a WebGL kind stops the run rather than
+// emptying it (tools/lib/trim.js).
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { startServer } from './serve.js';
 import { launch, collectErrors, openPage, ACTION_TIMEOUT_MS } from './lib/browser.js';
 import { pngStats } from './lib/pixels.js';
+import { trim } from './lib/trim.js';
 import { FIGURES } from '../src/figures/registry.js';
 
 const OUT = 'out/sweep';
 const gpu = process.env.SWEEP_GPU === '1';
-const wanted = process.env.SWEEP_KINDS ? process.env.SWEEP_KINDS.split(',') : null;
-const kinds = Object.entries(FIGURES).filter(([k, f]) => f.needsWebGL && (!wanted || wanted.includes(k))).map(([k]) => k);
+const WEBGL_KINDS = Object.entries(FIGURES).filter(([, f]) => f.needsWebGL).map(([k]) => k);
+// A registry with no WebGL figure stops the run here, before it empties out/sweep/; a sweep over
+// nothing used to run to its end and then fail with the registry's name on it, whether the cause was
+// the registry or a SWEEP_KINDS that named no 3D kind.
+if (!WEBGL_KINDS.length) throw new Error('the registry lists no WebGL figure, so the sweep has nothing to run on');
+const kinds = trim('SWEEP_KINDS', WEBGL_KINDS, { noun: 'WebGL kind' });
 const azimuths = Number(process.env.SWEEP_VIEWS || 4);
 
 // The helix is a thin column against a large paper ground, so its far frame is legitimately about
@@ -134,10 +140,6 @@ try {
   await server.close();
 }
 writeFileSync(`${OUT}/report.json`, JSON.stringify(report, null, 2));
-if (!kinds.length) {
-  console.error('FAIL: the registry lists no WebGL figure, so the sweep ran on nothing');
-  process.exit(1);
-}
 if (failures) {
   console.error(`FAIL: ${failures} problem(s) across ${report.length} frames; see ${OUT}/report.json`);
   process.exit(1);

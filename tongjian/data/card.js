@@ -41,9 +41,18 @@ function layerFor(key, kind) {
   return key.length === 1 ? ['lexicon', 'words'] : ['words', 'lexicon'];
 }
 
-/** Every sentence of the chapter's own 原文, in reading order, split on the corpus's own line. */
+/**
+ * Every sentence of the chapter's own 原文, in reading order, split on the corpus's own line.
+ *
+ * **Read the source cell, never the row.** A pair holds the 原文 and its 譯文 in one `<li class="zj-pair">`,
+ * so reading the row's textContent hands the card the book's own translation and the card then shows it
+ * under 在這一章 as though 司馬光 had written it. The cell is the same reading `test/corpus.test.js` takes
+ * from the markup, for the same reason.
+ */
 function sourceSentences() {
-  return [...document.querySelectorAll('.zj-src li')].map((li) => li.textContent.trim()).filter(Boolean);
+  return [...document.querySelectorAll('.zj-src .zj-pair__src')]
+    .map((cell) => cell.textContent.trim())
+    .filter(Boolean);
 }
 
 /** The chapter's 原文 as a list, built once: the card can open on any of ~600 characters. */

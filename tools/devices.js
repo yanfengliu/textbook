@@ -2,13 +2,15 @@
 // break between one screen and another.
 //
 // Claim: on each device below, every page loads with no console error, page error or failed request;
-// the document does not scroll sideways; every control in the header is fully inside the viewport and
-// at least 24 px on its smallest side; the chapter's contents drawer is reachable and operable by the
-// device's own input, closes when a link in it is followed, and is not present on screens wide enough
-// to show the rail instead; and nothing that pops up over the text (a glossary definition, a figure's
-// card) hangs off either edge; the drawer has a scrim, locks the page behind it, takes focus, and
-// closes on a tap outside; and the blocks of a chapter share one left and one right edge.
-// Fails naming the device, the page and the measure.
+// the document does not scroll sideways; the header is there and every control in it is fully inside
+// the viewport and at least 24 px on its smallest side; on a chapter page the contents drawer is there,
+// reachable and operable by the device's own input, closes when a link in it is followed, and is not
+// present on screens wide enough to show the rail instead; the drawer has a scrim, locks the page
+// behind it, takes focus, and closes on a tap outside; on a chapter page there are glossary terms, and
+// nothing that pops up over the text (a glossary definition, a figure's card) hangs off either edge;
+// and on a chapter page there is a text column, and its blocks share one left and one right edge.
+// Fails naming the device, the page and the measure — and, when a suite finds none of its subject on a
+// page that must have it, naming the selector and the page rather than skipping.
 //
 // Why it exists, and why it is not tools/narrow.js: every other gate here sets a narrow VIEWPORT on a
 // desktop browser, which has a mouse, hover, and `pointer: fine`. A phone has touch, no hover and
@@ -19,12 +21,18 @@
 // Bound: structure and reachability, not beauty. It cannot tell you a layout is ugly, only that a
 // control is off screen, too small to hit, overflowing, or unreachable by the input the device has.
 // The screenshots in out/devices/ are for the beauty question. The device list is a sample of shapes,
-// not of products: it covers small phone, phone, large phone, tablet portrait, tablet landscape,
-// small laptop and desktop, which is where the layout's breakpoints actually are.
+// not of products: it covers small phone, phone, Android phone, phone landscape, tablet portrait,
+// tablet landscape, small laptop, desktop and wide desktop — nine — which is where the layout's
+// breakpoints actually are. It presses the controls it checks — the contents button, one link in the
+// drawer, every glossary term, a tap outside the drawer — and nothing else: no check option, no sort
+// control and no figure control, which are tools/flow.js's and tools/drive.js's questions.
+// DEVICE_PAGES, DEVICE_ONLY, DEVICE_ENGINES and DEVICE_THEMES trim the run, a trimmed run proves only
+// its part, and a value naming nothing stops the run rather than emptying it (tools/lib/trim.js).
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { devices as playwrightDevices, chromium, webkit, firefox } from 'playwright';
 import { startServer } from './serve.js';
-import { WEBGL_ARGS, collectErrors, PAGES } from './lib/browser.js';
+import { WEBGL_ARGS, collectErrors, PAGES, BOOKS } from './lib/browser.js';
+import { trim, PAGE_HINT } from './lib/trim.js';
 
 const OUT = 'out/devices';
 
@@ -51,10 +59,11 @@ const MIN_TARGET = 24;
 
 // Three engines, not one. Emulating an iPhone in Chromium gives you an iPhone's SIZE and an iPhone's
 // INPUT, and Blink's layout — but a real iPhone runs WebKit, and the owner's four defects were found on
-// a real phone. So the phone and desktop shapes are re-run on WebKit and Gecko over the pages that hold
-// every component, while Chromium carries the full device matrix. Widening every engine to every device
-// and page would triple a gate that is already the slowest in the chain for a thin return: the engines
-// differ in layout and input handling, not in how many screen sizes exist.
+// a real phone. So the phone and desktop shapes are re-run on WebKit and Gecko over the two pages that
+// between them carry everything this gate checks, while Chromium carries the full device matrix.
+// Widening every engine to every device and page would triple a gate that is already the slowest in
+// the chain for a thin return: the engines differ in layout and input handling, not in how many screen
+// sizes exist.
 //
 // Firefox cannot emulate a mobile device in Playwright (`isMobile` is unsupported and throws), so its
 // phone run is a narrow viewport with touch, and it is the weakest of the three. It is here for layout
@@ -65,11 +74,36 @@ const ENGINES = [
   { id: 'firefox', launch: () => firefox.launch(), full: false },
 ];
 
-// What the two secondary engines run: the shapes either side of the drawer breakpoint, over the pages
-// that carry every component between them. Page ids are book-qualified (see `discoverBooks`), so this
-// names one chapter rather than whichever chapter 1 happens to match first.
+// What the two secondary engines run: the shapes either side of the drawer breakpoint, over the library
+// and one chapter, which between them carry everything the suites below check — the header, which every
+// page has, and the rail, the glossary terms and the text column, which a chapter has. Page ids are
+// book-qualified (see `discoverBooks`), so this names one chapter rather than whichever chapter 1
+// happens to match first. Today is not here: its study surfaces are `npm run sitting`'s, on Chromium
+// only, and nothing below presses them.
 const CROSS_DEVICES = ['phone', 'desktop'];
 const CROSS_PAGES = ['library', 'biology/ch01'];
+
+// The selectors the suites read, in one place, so a rename fails by name below.
+const SEL = { header: '.tb-header', rail: '.tb-rail', toggle: '.tb-navtoggle', scrim: '.tb-scrim', term: 'tb-term button', pop: '.tb-term__pop', main: '.tb-main' };
+
+// What each page must carry, so a suite that finds nothing fails instead of skipping. The header,
+// drawer, popover and edge suites were each guarded on their own selector, so a renamed class emptied
+// the suite and the load stayed `ok` (review of 2026-09-16, finding 5). The requirement is keyed on the
+// page's shape, which is what makes a component required: the shell builds the rail for
+// `main[data-chapter]`, and a chapter's recipe puts terms and prose in the text column. The other three
+// shapes are stated too, so a page that legitimately lacks a component is on record here rather than
+// silently exempt. Every page has the header. A page carrying something this table does not require is
+// still checked: the table says what must be there, not what may be.
+const EXPECT = {
+  chapter: { rail: true, terms: true, column: true },
+  book: { rail: false, terms: false, column: false },
+  library: { rail: false, terms: false, column: false },
+  today: { rail: false, terms: false, column: false },
+};
+function shapeOf(pageDef) {
+  if (pageDef.id === 'library' || pageDef.id === 'today') return pageDef.id;
+  return BOOKS.some((b) => b.id === pageDef.id) ? 'book' : 'chapter';
+}
 
 // Firefox rejects isMobile; strip it and keep the viewport, touch and scale factor.
 function contextFor(engineId, device) {
@@ -78,12 +112,10 @@ function contextFor(engineId, device) {
   return use;
 }
 
-const themes = process.env.DEVICE_THEMES ? process.env.DEVICE_THEMES.split(',') : ['light'];
-const only = process.env.DEVICE_ONLY ? process.env.DEVICE_ONLY.split(',') : null;
-const wanted = only ? DEVICES.filter((d) => only.includes(d.id)) : DEVICES;
-const pages = process.env.DEVICE_PAGES ? PAGES.filter((p) => process.env.DEVICE_PAGES.split(',').includes(p.id)) : PAGES;
-const engines = process.env.DEVICE_ENGINES ? ENGINES.filter((e) => process.env.DEVICE_ENGINES.split(',').includes(e.id)) : ENGINES;
-if (!engines.length) throw new Error(`DEVICE_ENGINES matched no engine; the engines are ${ENGINES.map((e) => e.id).join(', ')}`);
+const themes = trim('DEVICE_THEMES', ['light', 'dark'], { noun: 'theme', unset: ['light'] });
+const wanted = trim('DEVICE_ONLY', DEVICES, { idOf: (d) => d.id, noun: 'device' });
+const pages = trim('DEVICE_PAGES', PAGES, { idOf: (p) => p.id, noun: 'page', hint: PAGE_HINT });
+const engines = trim('DEVICE_ENGINES', ENGINES, { idOf: (e) => e.id, noun: 'engine' });
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
@@ -114,10 +146,14 @@ try {
         const context = await browser.newContext(contextFor(engine.id, device));
         for (const pageDef of enginePages) {
           const where = `${engine.id} ${device.id} ${pageDef.id}${themes.length > 1 ? ` ${theme}` : ''}`;
+          const expect = EXPECT[shapeOf(pageDef)];
           const page = await context.newPage();
           page.setDefaultTimeout(120_000);
           const errors = collectErrors(page);
           const found = [];
+          // What each suite actually measured, printed on every line so a load that checked nothing
+          // cannot read like one that checked everything.
+          const counts = { controls: 0, drawer: false, terms: 0, column: false, prose: 0, wide: 0 };
           try {
             await page.goto(`${server.url}${pageDef.path}?theme=${theme}`, { waitUntil: 'load', timeout: 120_000 });
             await page.waitForFunction(() => window.__textbook?.state === 'ready', null, { timeout: 120_000 });
@@ -130,11 +166,12 @@ try {
             const doc = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
             if (doc.scrollWidth > doc.clientWidth + 1) found.push(`the page scrolls sideways: ${doc.scrollWidth} px of content in a ${doc.clientWidth} px viewport`);
 
-            // --- every header control inside the viewport, and big enough to hit ---
-            const header = await page.evaluate((min) => {
-              const out = { controls: [], headerRight: null, headerHeight: null };
-              const h = document.querySelector('.tb-header');
+            // --- the header is there, and every control in it inside the viewport and big enough to hit ---
+            const header = await page.evaluate(({ sel, min }) => {
+              const out = { found: false, controls: [], headerRight: null, headerHeight: null };
+              const h = document.querySelector(sel);
               if (!h) return out;
+              out.found = true;
               const hr = h.getBoundingClientRect();
               out.headerRight = Math.round(innerWidth - hr.right);
               out.headerHeight = Math.round(hr.height);
@@ -154,7 +191,10 @@ try {
                 });
               }
               return out;
-            }, MIN_TARGET);
+            }, { sel: SEL.header, min: MIN_TARGET });
+            counts.controls = header.controls.length;
+            if (!header.found) found.push(`nothing matches ${SEL.header}, so the header suite measured nothing on a page that must have a header`);
+            else if (!header.controls.length) found.push(`${SEL.header} holds no button or link, so there is no header control to measure`);
             for (const c of header.controls) {
               if (c.offRight) found.push(`the header control "${c.label || c.name}" runs past the right edge: right ${c.right} in a ${width} px viewport`);
               if (c.offLeft) found.push(`the header control "${c.label || c.name}" runs past the left edge: left ${c.left}`);
@@ -174,26 +214,28 @@ try {
             }
 
             // --- the contents drawer, on a chapter page ---
-            const hasRail = await page.locator('.tb-rail').count();
+            const hasRail = await page.locator(SEL.rail).count();
+            if (expect.rail && !hasRail) found.push(`nothing matches ${SEL.rail} on this chapter page, so the contents drawer was not checked at all`);
             if (hasRail) {
-              const toggleVisible = await page.locator('.tb-navtoggle').isVisible();
+              counts.drawer = true;
+              const toggleVisible = await page.locator(SEL.toggle).isVisible();
               if (width < DRAWER_BELOW && !toggleVisible) {
-                found.push(`at ${width} px the contents are a drawer, but its button is not visible, so the contents cannot be reached at all`);
+                found.push(`at ${width} px the contents are a drawer, but its button (${SEL.toggle}) is not visible, so the contents cannot be reached at all`);
               }
               if (width >= DRAWER_BELOW && toggleVisible) {
                 found.push(`at ${width} px the rail is shown, so the drawer button should not also be there`);
               }
               if (width < DRAWER_BELOW && toggleVisible) {
-                const closed = await page.evaluate(() => {
-                  const r = document.querySelector('.tb-rail').getBoundingClientRect();
+                const closed = await page.evaluate((sel) => {
+                  const r = document.querySelector(sel.rail).getBoundingClientRect();
                   return { x: Math.round(r.x), w: Math.round(r.width) };
-                });
+                }, SEL);
                 if (closed.x + closed.w > 1) found.push(`the drawer is already on screen before it is opened (x ${closed.x}, width ${closed.w})`);
 
-                await press(page, page.locator('.tb-navtoggle'), device.kind);
+                await press(page, page.locator(SEL.toggle), device.kind);
                 await page.waitForTimeout(650);
-                const opened = await page.evaluate(() => {
-                  const rail = document.querySelector('.tb-rail');
+                const opened = await page.evaluate((sel) => {
+                  const rail = document.querySelector(sel.rail);
                   const r = rail.getBoundingClientRect();
                   const cs = getComputedStyle(rail);
                   // What is actually on top at the drawer's own left edge? If the drawer is behind the
@@ -201,12 +243,12 @@ try {
                   const probe = document.elementFromPoint(Math.max(2, Math.min(r.x + 24, innerWidth - 2)), Math.round(r.y + Math.min(80, r.height / 2)));
                   return {
                     x: Math.round(r.x), w: Math.round(r.width), visibility: cs.visibility, opacity: cs.opacity,
-                    expanded: document.querySelector('.tb-navtoggle')?.getAttribute('aria-expanded'),
+                    expanded: document.querySelector(sel.toggle)?.getAttribute('aria-expanded'),
                     topmost: probe ? `${probe.tagName.toLowerCase()}${probe.className ? `.${String(probe.className).split(' ')[0]}` : ''}` : null,
-                    inRail: probe ? Boolean(probe.closest('.tb-rail')) : false,
+                    inRail: probe ? Boolean(probe.closest(sel.rail)) : false,
                     links: rail.querySelectorAll('a').length,
                   };
-                });
+                }, SEL);
                 if (opened.x > 1) found.push(`tapping the contents button did not bring the drawer on screen: it is at x ${opened.x}`);
                 if (opened.visibility === 'hidden' || opened.opacity === '0') found.push(`the drawer moved on screen but is ${opened.visibility}/${opened.opacity}`);
                 if (opened.expanded !== 'true') found.push(`the contents button reports aria-expanded="${opened.expanded}" after being pressed`);
@@ -216,15 +258,15 @@ try {
                 // A drawer owes the reader more than opening. These three were all missing, and their
                 // absence is what "the sidebar does not work" meant: the reader opens it, changes their
                 // mind, taps the article, and nothing happens.
-                const dressing = await page.evaluate(() => {
-                  const scrim = document.querySelector('.tb-scrim');
+                const dressing = await page.evaluate((sel) => {
+                  const scrim = document.querySelector(sel.scrim);
                   const r = scrim && !scrim.hidden ? scrim.getBoundingClientRect() : null;
                   return {
                     scrim: Boolean(r) && Math.round(r.width) >= innerWidth && Math.round(r.height) >= innerHeight,
                     locked: getComputedStyle(document.documentElement).overflow === 'hidden',
-                    focusInside: Boolean(document.activeElement?.closest('.tb-rail')),
+                    focusInside: Boolean(document.activeElement?.closest(sel.rail)),
                   };
-                });
+                }, SEL);
                 if (!dressing.scrim) found.push('the drawer opened with nothing over the page behind it, so there is nothing to tap to dismiss it and no sign the page is waiting');
                 if (!dressing.locked) found.push('the page behind the open drawer still scrolls, so a swipe meant for the contents moves the article instead');
                 if (!dressing.focusInside) found.push('opening the drawer left focus outside it, so a keyboard or screen-reader user is still in the article');
@@ -235,23 +277,23 @@ try {
                 if (device.kind === 'touch') await page.touchscreen.tap(outsideX, outsideY);
                 else await page.mouse.click(outsideX, outsideY);
                 await page.waitForTimeout(650);
-                const afterOutside = await page.evaluate(() => {
-                  const r = document.querySelector('.tb-rail').getBoundingClientRect();
+                const afterOutside = await page.evaluate((sel) => {
+                  const r = document.querySelector(sel.rail).getBoundingClientRect();
                   return { x: Math.round(r.x), w: Math.round(r.width) };
-                });
+                }, SEL);
                 if (afterOutside.x + afterOutside.w > 1) found.push(`tapping outside the drawer did not close it (x ${afterOutside.x}); a reader who changes their mind is stuck with it over the text`);
 
                 // And following a link must close it, go somewhere, and leave the page scrollable.
-                await press(page, page.locator('.tb-navtoggle'), device.kind);
+                await press(page, page.locator(SEL.toggle), device.kind);
                 await page.waitForTimeout(650);
                 if (opened.links > 0) {
-                  const link = page.locator('.tb-rail a').first();
+                  const link = page.locator(`${SEL.rail} a`).first();
                   await press(page, link, device.kind);
                   await page.waitForTimeout(650);
-                  const closedAgain = await page.evaluate(() => {
-                    const r = document.querySelector('.tb-rail').getBoundingClientRect();
+                  const closedAgain = await page.evaluate((sel) => {
+                    const r = document.querySelector(sel.rail).getBoundingClientRect();
                     return { x: Math.round(r.x), w: Math.round(r.width), hash: location.hash, locked: getComputedStyle(document.documentElement).overflow === 'hidden' };
-                  });
+                  }, SEL);
                   if (closedAgain.x + closedAgain.w > 1) found.push(`following a link left the drawer open over the text (x ${closedAgain.x})`);
                   if (!closedAgain.hash) found.push('following a link in the drawer did not navigate anywhere');
                   if (closedAgain.locked) found.push('the page was left locked after the drawer closed, so nothing scrolls any more');
@@ -260,31 +302,37 @@ try {
             }
 
             // --- anything that pops over the text must stay on screen ---
-            const terms = await page.locator('tb-term button').count();
+            const terms = await page.locator(SEL.term).count();
+            counts.terms = terms;
+            if (expect.terms && !terms) found.push(`nothing matches ${SEL.term} on this chapter page, so no glossary popover was opened`);
             if (terms) {
               // EVERY term, not a sample. The first version checked only the first and the last, and the
               // definition that hung off the left edge belonged to term 15 of 31: a term in the middle
               // of a line is the one the popover cannot be flipped to fit, because it is wider than the
-              // space on either side of it. A gate that samples the ends cannot see the middle.
+              // space on either side of it. A gate that samples the ends cannot see the middle. Each
+              // message names the term by its place and its text, because "the last" was said of every
+              // term but the first.
               for (let which = 0; which < terms; which += 1) {
-                const t = page.locator('tb-term button').nth(which);
+                const t = page.locator(SEL.term).nth(which);
+                const text = ((await t.textContent()) || '').trim().slice(0, 24);
+                const label = `term ${which + 1} of ${terms} ("${text}")`;
                 await t.scrollIntoViewIfNeeded();
                 await press(page, t, device.kind);
                 await page.waitForTimeout(90);
-                const pop = await page.evaluate(() => {
-                  const p = document.querySelector('.tb-term__pop');
+                const pop = await page.evaluate((sel) => {
+                  const p = document.querySelector(sel);
                   if (!p) return null;
                   const r = p.getBoundingClientRect();
                   return {
                     left: Math.round(r.left), right: Math.round(r.right), width: Math.round(r.width),
                     overRight: Math.round(r.right - innerWidth), overLeft: Math.round(-r.left),
                   };
-                });
+                }, SEL.pop);
                 if (!pop) {
-                  found.push(`tapping a glossary term (${which === 0 ? 'the first' : 'the last'}) opened no definition`);
+                  found.push(`tapping glossary ${label} opened no definition (nothing matches ${SEL.pop})`);
                 } else {
-                  if (pop.overRight > 1) found.push(`a glossary definition hangs ${pop.overRight} px off the right edge (${which === 0 ? 'first' : 'last'} term, width ${pop.width} in a ${width} px viewport)`);
-                  if (pop.overLeft > 1) found.push(`a glossary definition hangs ${pop.overLeft} px off the left edge (${which === 0 ? 'first' : 'last'} term)`);
+                  if (pop.overRight > 1) found.push(`a glossary definition hangs ${pop.overRight} px off the right edge (${label}, width ${pop.width} in a ${width} px viewport)`);
+                  if (pop.overLeft > 1) found.push(`a glossary definition hangs ${pop.overLeft} px off the left edge (${label})`);
                 }
                 // Close it before reaching for the next term: an open definition covers the line below it,
                 // and the next tap then waits for a target it can never hit.
@@ -297,8 +345,8 @@ try {
             // column so its title ran 38 px past the prose, the hero figure's breakout landed 38 px past
             // every other wide figure, and `--measure: 66ch` resolved against each element's own font,
             // so a small-caps label and body prose ended 88 px apart on the same page.
-            const cols = await page.evaluate(() => {
-              const main = document.querySelector('.tb-main');
+            const cols = await page.evaluate((sel) => {
+              const main = document.querySelector(sel);
               if (!main) return null;
               const round = (n) => Math.round(n);
               const prose = [];
@@ -315,8 +363,13 @@ try {
                 wide.push({ what: `${el.tagName.toLowerCase()}#${el.id || ''}`, l: round(r.left), r: round(r.right) });
               }
               return { prose, wide };
-            });
+            }, SEL.main);
+            counts.column = Boolean(cols);
+            if (expect.column && !cols) found.push(`nothing matches ${SEL.main} on this chapter page, so the text column's edges were not measured`);
             if (cols) {
+              counts.prose = cols.prose.length;
+              counts.wide = cols.wide.length;
+              if (expect.column && cols.prose.length < 2) found.push(`only ${cols.prose.length} prose block(s) inside ${SEL.main} on this chapter page, so there are no edges to compare`);
               for (const [name, group] of [['the text column', cols.prose], ['the wide figures', cols.wide]]) {
                 if (group.length < 2) continue;
                 const lefts = [...new Set(group.map((g) => g.l))].sort((a, b) => a - b);
@@ -332,9 +385,15 @@ try {
           }
           for (const e of errors) found.push(e);
           loads += 1;
-          report.push({ engine: engine.id, device: device.id, page: pageDef.id, theme, problems: found });
+          report.push({ engine: engine.id, device: device.id, page: pageDef.id, theme, counts, problems: found });
           for (const p of found) problems.push(`${where}: ${p}`);
-          console.log(`${found.length ? 'FAIL' : 'ok  '} ${where}${found.length ? ` (${found.length})` : ''}`);
+          const measured = [
+            `${counts.controls} header control(s)`,
+            counts.drawer ? 'the drawer' : 'no drawer',
+            `${counts.terms} term(s)`,
+            counts.column ? `${counts.prose} prose block(s), ${counts.wide} wide` : 'no text column',
+          ].join(', ');
+          console.log(`${found.length ? 'FAIL' : 'ok  '} ${where}${found.length ? ` (${found.length})` : ''}: ${measured}`);
           for (const p of found) console.log(`  ${p}`);
           await page.close();
         }

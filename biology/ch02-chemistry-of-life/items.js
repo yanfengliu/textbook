@@ -1334,7 +1334,7 @@ export const ITEMS = [
     id: 'i-protein-levels-1',
     objective: 'protein-levels',
     kind: 'mcq',
-    question: 'What holds a protein\'s secondary structure — the α-helix and the β-pleated sheet — together?',
+    question: 'What holds a protein\'s secondary structure — the α-\u2060helix and the β-\u2060pleated sheet — together?',
     options: [
       { text: 'Hydrogen bonds between backbone atoms: the N–H of one amino acid and the C=O of another, and not between side chains at all.', correct: true },
       { text: 'Hydrogen bonds between side chains, which is how the sequence decides the pattern.',

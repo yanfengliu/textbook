@@ -1,31 +1,27 @@
-// Shared drawing for the chapter-2 molecular figures (phlab, carbonkit, polymer, foldlab, and anything
-// later that draws atoms). One element-colour table, one seeded generator, one way to draw an atom, a
-// bond, a hydrogen bond and a scale bar, so the five molecular figures of the chapter agree with each
-// other the way chapter 1's organelle colours do.
+// Shared drawing for the chapter-2 molecular figures that draw in SVG (phlab, carbonkit, polymer,
+// foldlab, and anything later that draws atoms): one way to draw an atom, a bond, a hydrogen bond and
+// a scale bar, so the molecular figures of the chapter agree with each other the way chapter 1's
+// organelle colours do.
 //
-// The colours are the table in biology/ch02-chemistry-of-life/FIGURES.md and they are CSS expressions
-// from lib/svg.js, never hex, so every atom follows the theme with no code of its own.
+// The element table and the seeded generator are not here. They are ELEMENTS and mulberry32 in
+// lib/chem-atoms.js, the one table the canvas and WebGL figures read too; this module derives the CSS
+// colour of every atom from the token names in that record (see ELEMENT_CSS below) and re-exports the
+// generator, so the chapter has one of each. The colours are CSS expressions from lib/svg.js, never hex,
+// so every atom follows the theme with no code of its own.
 //
 // Nothing here keeps state. Everything is a pure function of its arguments, which is what lets the
 // figures above be pure functions of their clock and the reader's actions.
 
 import { el, text, C, tint } from './svg.js';
+import { ELEMENTS } from './chem-atoms.js';
 
 // ---------------------------------------------------------------- the seeded generator
 
 // mulberry32: 32 bits of state, good enough for jitter and for a Monte Carlo search, and identical on
 // every machine. No figure in this chapter may call Math.random, because a screenshot at t must be the
-// same frame every run and foldlab's whole claim is that one sequence folds one way.
-export function mulberry32(seed) {
-  let a = seed >>> 0;
-  return function next() {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+// same frame every run and foldlab's whole claim is that one sequence folds one way. The one definition
+// is in lib/chem-atoms.js; mol-fold and the SVG figures keep importing it from here.
+export { mulberry32 } from './chem-atoms.js';
 
 // A stable 32-bit hash of a string, for deriving a seed from a sequence.
 export function hashString(str) {
@@ -37,29 +33,33 @@ export function hashString(str) {
   return h >>> 0;
 }
 
-// ---------------------------------------------------------------- the element table
+// ---------------------------------------------------------------- the element colours, as CSS
 
-// `covalentPm` is the covalent radius in picometres (Cordero et al. 2008, rounded), so a figure that
-// says it is to scale can be. `fill`/`stroke` are the chapter's colour table.
-export const ELEMENTS = Object.freeze({
-  C: { symbol: 'C', name: 'carbon', fill: C.soft, stroke: C.soft, label: C.paper, covalentPm: 76 },
-  H: { symbol: 'H', name: 'hydrogen', fill: C.paper3, stroke: C.ruleStrong, label: C.soft, covalentPm: 31 },
-  O: { symbol: 'O', name: 'oxygen', fill: C.coral, stroke: C.coral, label: C.paper, covalentPm: 66 },
-  N: { symbol: 'N', name: 'nitrogen', fill: C.water, stroke: C.water, label: C.paper, covalentPm: 71 },
-  P: { symbol: 'P', name: 'phosphorus', fill: C.violet, stroke: C.violet, label: C.paper, covalentPm: 107 },
-  S: { symbol: 'S', name: 'sulfur', fill: C.gold, stroke: C.gold, label: C.paper, covalentPm: 105 },
-  // Na, K, Ca, Cl and Mg share one colour and are told apart by the symbol written on them, which is
-  // the rule in FIGURES.md: charge and identity are never colour alone.
-  Na: { symbol: 'Na', name: 'sodium', fill: C.leaf, stroke: C.leaf, label: C.paper, covalentPm: 166, ion: true },
-  K: { symbol: 'K', name: 'potassium', fill: C.leaf, stroke: C.leaf, label: C.paper, covalentPm: 203, ion: true },
-  Ca: { symbol: 'Ca', name: 'calcium', fill: C.leaf, stroke: C.leaf, label: C.paper, covalentPm: 176, ion: true },
-  Cl: { symbol: 'Cl', name: 'chlorine', fill: C.leaf, stroke: C.leaf, label: C.paper, covalentPm: 102, ion: true },
-  Mg: { symbol: 'Mg', name: 'magnesium', fill: C.leaf, stroke: C.leaf, label: C.paper, covalentPm: 141, ion: true },
-});
+// The one element table is ELEMENTS in lib/chem-atoms.js. Each record there names the atom's fill, its
+// outline and the colour of the symbol written on it as palette token names (`token`, `outline`,
+// `label`), which the canvas and WebGL figures resolve through ctx.palette. The SVG figures need the same
+// three colours as CSS expressions, so they are derived here from those names and never restated: a
+// token renamed or recoloured there moves every atom in the chapter, and test/element-table.test.js
+// fails if this map and that table ever disagree. Physics (radii, electronegativity, mass) stays in
+// chem-atoms; a figure that is to scale reads it from there.
+
+// svg.js's C shortens two palette keys; every other key is its own name there.
+const CSS_KEY = { inkSoft: 'soft', inkFaint: 'faint' };
+
+// The CSS expression for a palette token name: cssOf('inkSoft') is 'var(--ink-soft)'.
+export function cssOf(token) {
+  const css = C[CSS_KEY[token] ?? token];
+  if (!css) throw new Error(`no CSS token for palette key "${token}"; lib/svg.js's C holds ${Object.keys(C).join(', ')}`);
+  return css;
+}
+
+export const ELEMENT_CSS = Object.freeze(Object.fromEntries(Object.entries(ELEMENTS).map(([sym, e]) => [
+  sym, Object.freeze({ symbol: e.symbol, fill: cssOf(e.token), stroke: cssOf(e.outline), label: cssOf(e.label) }),
+])));
 
 export function element(sym) {
-  const e = ELEMENTS[sym];
-  if (!e) throw new Error(`no colour for element "${sym}"; the table in lib/mol-draw.js holds ${Object.keys(ELEMENTS).join(', ')}`);
+  const e = ELEMENT_CSS[sym];
+  if (!e) throw new Error(`no colour for element "${sym}"; the one element table, ELEMENTS in lib/chem-atoms.js, holds ${Object.keys(ELEMENTS).join(', ')}`);
   return e;
 }
 

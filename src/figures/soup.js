@@ -1403,6 +1403,17 @@ export function mount(root, ctx) {
     const world0 = () => g.setTransform(dpr * scale, 0, 0, dpr * scale, 0, topPad * dpr);
     world0();
     g.lineJoin = 'round';
+    // On a narrow stage the picture starts at the rule under the key, so the field is clipped to its
+    // own rectangle: the background is painted a nanometre past each edge and the lattice starts a
+    // little above the top one, and both ran up into the key's band, which came out as two tones of
+    // paper with a row of half-molecules across the join. A wide stage has no band, and the canvas
+    // edge already clips the same overrun there.
+    g.save();
+    if (topPad) {
+      g.beginPath();
+      g.rect(0, 0, world.Wn, world.Hn);
+      g.clip();
+    }
     drawBackground();
     drawBonds();
     drawIonicLinks();
@@ -1414,6 +1425,7 @@ export function mount(root, ctx) {
     }
     world0();
     drawSelection();
+    g.restore();
     if (topPad) {
       // The rule between the caption and the picture. The plate's own edge, drawn once.
       g.setTransform(dpr, 0, 0, dpr, 0, 0);

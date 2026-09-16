@@ -17,17 +17,20 @@
 // asks that the figure stay ready, because several controls are correctly idempotent (Reset view at
 // the default view, a mode button already in that mode); what a control *does* is drive.js's question
 // at desktop width. So this is a smoke test of the narrow arrangement, not a second set of recipes.
+// NARROW_KINDS and NARROW_THEMES trim the run, a trimmed run proves only its part, and a value naming
+// no kind or theme stops the run rather than emptying it (tools/lib/trim.js).
 import { mkdirSync, rmSync } from 'node:fs';
 import { startServer } from './serve.js';
 import { launch, collectErrors, openPage, ACTION_TIMEOUT_MS } from './lib/browser.js';
 import { pngStats } from './lib/pixels.js';
+import { trim } from './lib/trim.js';
 import { KINDS } from '../src/figures/registry.js';
 
 const OUT = 'out/narrow';
 const WIDTH = 390;
 const HEIGHT = 844;
-const THEMES = process.env.NARROW_THEMES ? process.env.NARROW_THEMES.split(',') : ['light', 'dark'];
-const wanted = process.env.NARROW_KINDS ? process.env.NARROW_KINDS.split(',') : KINDS;
+const THEMES = trim('NARROW_THEMES', ['light', 'dark'], { noun: 'theme' });
+const wanted = trim('NARROW_KINDS', KINDS, { noun: 'kind' });
 
 // The same judgement the 3D sweep uses, on the same bare-canvas principle: overlays hidden, because a
 // toolbar and a card vary enough to look like a drawing.

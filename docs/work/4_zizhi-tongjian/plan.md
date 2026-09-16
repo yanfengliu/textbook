@@ -182,4 +182,19 @@ Recorded here because the numbers are the evidence, and because two of these wer
 
 ## Outcome
 
-Final state pending; the verified-so-far record is above under "Outcome" in the implementation steps.
+Delivered as `e6daf7a`, pushed to `main`, deployed to GitHub Pages.
+
+The book is live at <https://yanfengliu.github.io/textbook/tongjian/> and reachable from the library shelf. Three chapters of 周紀一 — 三家分晋, 智伯之亡, 才德论 — each printing the original beside a modern Chinese translation, with **every character of the 原文 clickable**: 1,405 `<tb-char>` elements across the three pages, all resolving, against a lexicon of 640 entries covering 640 of 640 corpus characters, with 1,171 quotations all verbatim inside a tracked corpus of 13 entries, 116 句 and 3,557 characters transcribed from four or more fetched witnesses each.
+
+**Four revisions the owner asked for after reading the first published version**, all landed:
+
+1. **原文 holds the original text and nothing else.** It held the text, explanatory paragraphs, a provenance note and a figure at one visual weight, so a reader could not tell 司馬光's words from the book's. Now: citation line, text, and a 2px rule with space around it. The interpretation and the figures moved to 背景.
+2. **The 原文 and its quotations are Traditional; the rest is Simplified.** Restored from `6d854cf` by index alignment, never by reverse conversion, because a blanket 简→繁 pass would turn 乾坤 into 乾幹 in the characters this book exists to discuss.
+3. **怎麼讀這一章 deleted.** It repeated itself on every chapter.
+4. **Chapter-to-chapter navigation** at the foot of each chapter.
+
+**Gates, all re-run on the integrated revision:** unit 118 of 118 — including the new script gate, proved red in both directions; `check` clean on all four pages; `shot` 24 loads; `drive` 10 of 10; `narrow` 6 of 6; `devices` 36 loads over 9 engine-device pairs; `subpath` 44 loads under `/textbook/`. The single red gate is `biology/ch03-cells`, which declares 35 objectives with no `items.js` and has been red since before this round; it fails identically in CI, where the unit suite reports 0 failures and all four `tongjian/` pages pass.
+
+**One caveat, stated rather than buried:** the 原文 is 20 px against the book's own prose at 19.2 px — a 4% margin — so the distinction is carried by the rule, the space, the character grid and the absence of prose, not by size. Enlarging it means moving `--zj-grid-chars` with it, since 33 characters × 20 px is exactly the 697.6 px measure, and that changes the page's grain.
+
+**And the honest note on the commit:** the working tree carried two other rounds' uncommitted work, and the shared files are coupled to it — `index.html`'s shelf entry needs the library redesign's classes, and `src/figures/registry.js` names sixteen biology modules those rounds wrote. So the commit lands the whole coherent, tested tree. It is wider than "only the changes this work made", and this is the record of that: the `tongjian/` directory, the three `zj-*` figures, the five shared fixes listed in the design, the tests and the docs are this round's; the rest was already in the tree and is named in the commit message.

@@ -50,15 +50,20 @@
      serves Newsreader and Fraunces with no Greek block, no arrows and no sub- or superscript figures beyond
      ¹²³, and Inter without its own arrows and superiors, so every α, ₂, → and ⇌ in the book was drawn by
      whatever the reader's machine had — Palatino Linotype, Segoe UI Semibold and Cambria Math on Windows,
-     read back per glyph with CSS.getPlatformFontsForNode. STIX Two Text sits at Newsreader's x-height and
-     weight and draws the Greek and the sub- and superscripts (a text face, so its superiors are text-sized;
-     STIX Two Math's are display-sized and read too big). STIX Two Math draws the arrows, ⇌ and the
-     relations, which neither text face has. Noto Sans Math draws the ⇌ Inter lacks, at Inter's weight.
-     The page heads request the Greek as a subset and the symbols as one text= subset, so a page fetches
-     only the files a glyph on it needs. font-size-adjust was tried and rejected: Newsreader's x-height
-     ratio is below STIX's, so the adjusted Greek came out too small. */
-  --font-display: "Fraunces", "STIX Two Text", "STIX Two Math", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  --font-text: "Newsreader", "STIX Two Text", "STIX Two Math", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+     read back per glyph with CSS.getPlatformFontsForNode. Libertinus Serif draws the Greek, the sub- and
+     superscripts, the arrows and ⇌, and sits at Newsreader's size and weight: measured on the rendered
+     chapter 2 at six device pixels per CSS pixel, 2026-09-16, its α stands 52 px against Newsreader's a and
+     o at 51, and its strokes on the middle scanline are 9 and 8 px against o's 9 and 9. It is served static,
+     so the heads request 400 and 600 only: a bold Greek letter is then the 600 that Newsreader's bold is.
+     A relation it lacks falls to the machine's serif. Noto Sans Math draws the ⇌ Inter lacks, at Inter's
+     weight; Inter's own ◀ and ▶ are in the text= subset, because Google's latin subset leaves them out and
+     a figure's step buttons were falling to Segoe UI Symbol. STIX Two Text was the first choice and measured
+     out: its Greek is a tenth taller than Newsreader's x-height (ο 56 px against o 51), which reads as a
+     large α on the line, and font-size-adjust, which cures the height, thins every fallback glyph by the
+     same tenth. The page heads request the Greek as a subset and the symbols as one text= subset, so a page
+     fetches only the files a glyph on it needs. */
+  --font-display: "Fraunces", "Libertinus Serif", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-text: "Newsreader", "Libertinus Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   --font-ui: "Inter", "Noto Sans Math", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   /* Modular scale, ratio 1.2, from the 1rem root */

@@ -283,6 +283,7 @@ function build(root, ctx) {
   let neighboursPresent = 0;
   let spacingA = ICE_D;
   let draggingNow = false;
+  let snappedNow = false;
 
   function orientNeighbour(k, pos, time) {
     const site = SITES[k];
@@ -306,6 +307,7 @@ function build(root, ctx) {
     bondsHeld = 0;
     neighboursPresent = 0;
     draggingNow = dragIndex >= 0 || pulled;
+    snappedNow = false;
     let distSum = 0;
     let distN = 0;
     for (let k = 0; k < SITES.length; k += 1) {
@@ -314,6 +316,9 @@ function build(root, ctx) {
       molQuat[k + 1].copy(orientNeighbour(k, s.pos, time));
       molOn[k + 1] = s.present;
       if (s.on && s.present > 0.5) bondsHeld += 1;
+      // A neighbour the reader holds past SNAP_A has let go of its bond whatever the clock says. The
+      // drive step reads this, because bondsHeld also counts the other three, which blink on their own.
+      if (s.dragging && !s.on) snappedNow = true;
       if (s.present > 0.5) { neighboursPresent += 1; distSum += s.dist; distN += 1; }
     }
     for (let i = 0; i < INTERSTITIAL.length; i += 1) {
@@ -865,6 +870,7 @@ function build(root, ctx) {
         spacingNm: Number((spacingA / 10).toFixed(3)),
         densityRel: Number(densityRel(mean) < 0.01 ? densityRel(mean).toPrecision(2) : densityRel(mean).toFixed(3)),
         dragging: draggingNow,
+        snapped: snappedNow,
         labels: labelsOn,
         t: Number(time.toFixed(3)),
         drawCalls: renderer.info.render.calls,

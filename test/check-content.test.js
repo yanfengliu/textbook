@@ -4,6 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { checkDocument, checkChapterData, checkStudySources, parseHtml, findAll, textOf } from '../tools/check-content.js';
+import { parseExpect, evalExpect } from '../src/components/task.js';
 
 const GLOSSARY = { cell: { term: 'Cell', def: 'The unit of life.' }, gene: { term: 'Gene', def: 'A stretch of DNA.' } };
 const KINDS = ['pond', 'cell3d'];
@@ -153,6 +154,24 @@ test('a numeric comparison against quoted text fails, wherever the clause sits i
   assert.ok(f.some((x) => x.includes('compares against "up"') && x.includes('">="')), f.join('\n'));
   f = checkTask('x > 1 and y <= two and z < three');
   assert.equal(f.length, 2, f.join('\n'));
+});
+
+test('a numeric comparison against an empty string, null or a boolean fails: Number() reads them as 0, 0 and 1, and the grader must not', () => {
+  // Found by review (2026-09-16): `x > ""`, `x > null` and `x > true` came back clean from
+  // expectProblems and graded as `> 0`, `> 0` and `> 1`, because "not a number" was implemented as
+  // "not Number()-coercible". The literal must be a number the tokenizer read.
+  for (const [src, what] of [['x > ""', 'an empty string'], ["x >= ' '", '" "'], ['x > null', 'null'], ['x > true', 'true'], ['x < false', 'false']]) {
+    const f = checkTask(src);
+    assert.equal(f.length, 1, `${src}: ${f.join('\n')}`);
+    assert.ok(f[0].includes(`compares against ${what}, which is not a number`), `${src}: ${f[0]}`);
+  }
+  // The grader refuses the same clause at grade time, through the same literalFor(): a task that
+  // slipped past the check would tell the reader rather than grade `> 0` in silence.
+  assert.throws(() => evalExpect(parseExpect('x > ""'), { x: 5 }), /compares against an empty string, which is not a number/);
+  assert.throws(() => evalExpect(parseExpect('x > null'), { x: 5 }), /compares against null, which is not a number/);
+  // Zero, a negative and an exponent are numbers and pass; equality against any literal still does.
+  assert.deepEqual(checkTask('x > 0 and y <= -1 and z >= 0.5 and w < 1e3 and v === "" and u == null and t != true'), []);
+  assert.equal(evalExpect(parseExpect('x > 0'), { x: 5 }), true);
 });
 
 test('an expect the grammar cannot read fails with the parser\'s own message', () => {

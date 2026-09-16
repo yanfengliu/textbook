@@ -354,7 +354,10 @@ export function mount(root, ctx) {
   const btnAdd = button('Add monomer', '+1', 'Add monomer, join one more unit in a single move', () => addMonomer());
   const btnReset = button('Reset', 'Reset', 'Reset, take the bench back to one unit', () => reset());
   const famBtns = Object.values(FAMILIES).map((f) => button(f.label, f.short, `${f.label}, joined by the ${f.bondName} bond`, () => setFamily(f.id), { 'aria-pressed': String(f.id === family) }));
-  const btnForm = button('α-glucose', 'α', 'Glucose form: alpha or beta', () => toggleForm(), { 'aria-pressed': 'false' });
+  // The word joiner after the hyphen keeps a lone "α-" from ending a line, as docs/design/chapter-recipe.md
+  // asks of every Greek letter hyphenated to a word. It is in the visible label only: the accessible name is
+  // the aria-label, which the polymer recipe in tools/drive.js finds by /Glucose form/.
+  const btnForm = button('α-\u2060glucose', 'α', 'Glucose form: alpha or beta', () => toggleForm(), { 'aria-pressed': 'false' });
   const group = (kids) => h('div', { class: 'pm-group' }, kids);
   const toolbar = h('div', { class: 'fig-toolbar fig-ui' }, [
     group([btnBack, btnFwd, btnPlay]),
@@ -446,7 +449,7 @@ export function mount(root, ctx) {
   }
   function toggleForm() {
     sugarForm = sugarForm === 'alpha' ? 'beta' : 'alpha';
-    btnForm.querySelector('.pm-long').textContent = `${sugarForm === 'alpha' ? 'α' : 'β'}-glucose`;
+    btnForm.querySelector('.pm-long').textContent = `${sugarForm === 'alpha' ? 'α' : 'β'}-\u2060glucose`;
     btnForm.querySelector('.pm-short').textContent = sugarForm === 'alpha' ? 'α' : 'β';
     btnForm.setAttribute('aria-pressed', String(sugarForm === 'beta'));
     redraw();

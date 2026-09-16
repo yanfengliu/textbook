@@ -30,7 +30,7 @@
 // from one seeded generator.
 import { mix, alpha, ORGANELLE_BY_ID } from '../palette.js';
 import { h } from './lib/svg.js';
-import { CELL_COLOUR, CELL_COLOURS, partInfo } from './lib/cell-colours.js';
+import { CELL_COLOUR, CELL_COLOURS, partInfo } from './lib/cell3-colours.js';
 import {
   mulberry32, TAU, clamp, clamp01, lerp, smoothstep, FONT, fitCanvas, roundRectPath, panelCss, sigFigs,
 } from './lib/cell-common.js';

@@ -163,11 +163,14 @@ const CSS = `
 .tb-symbiont .sy-obs { font-size: var(--text-xs); line-height: 1.3; text-wrap: pretty; }
 .tb-symbiont .sy-flag { display: inline-block; margin-left: 0.35rem; font-size: 0.62rem;
   letter-spacing: 0.04em; text-transform: uppercase; color: var(--sy-gold); }
+/* A verdict is a mark and a word in the accent's text colour, not a pill: the check's own vocabulary,
+   a coloured glyph and never colour alone. An untested row holds a dot in the faint ink. */
 .tb-symbiont .sy-cell { font-size: var(--text-xs); line-height: 1.2; text-align: center; color: var(--ink-faint);
-  border-radius: 999px; padding: 0.14rem 0.2rem; white-space: nowrap; }
-.tb-symbiont .sy-cell[data-v="supports"] { color: var(--leaf-text); background: color-mix(in srgb, var(--leaf) 14%, transparent); }
-.tb-symbiont .sy-cell[data-v="contradicts"] { color: var(--coral-text); background: color-mix(in srgb, var(--coral) 15%, transparent); }
-.tb-symbiont .sy-cell[data-v="neutral"] { color: var(--ink-faint); border: 1px dashed var(--rule-strong); }
+  white-space: nowrap; }
+.tb-symbiont .sy-cell[data-v] { font-weight: 600; }
+.tb-symbiont .sy-cell[data-v="supports"] { color: var(--leaf-text); }
+.tb-symbiont .sy-cell[data-v="contradicts"] { color: var(--coral-text); }
+.tb-symbiont .sy-cell[data-v="neutral"] { color: var(--ink-faint); }
 
 .tb-symbiont text { font-family: var(--font-ui); }
 .tb-symbiont .sy-name { fill: var(--ink); font-weight: 600; }
@@ -191,7 +194,7 @@ const CSS = `
   grid-template-columns: minmax(0, 1fr) 1.5rem 1.5rem; gap: 0 0.15rem; }
 .tb-symbiont.is-narrow .sy-row { padding: 0.1rem 0.25rem 0.1rem 0.35rem; }
 .tb-symbiont.is-narrow .sy-obs { font-size: 0.71rem; }
-.tb-symbiont.is-narrow .sy-cell { font-size: 0.76rem; line-height: 1.15; padding: 0 0.1rem; }
+.tb-symbiont.is-narrow .sy-cell { font-size: 0.76rem; line-height: 1.15; }
 .tb-symbiont.is-narrow .sy-head { font-size: 0.55rem; letter-spacing: 0.02em; padding-bottom: 0.12rem; }
 .tb-symbiont.is-narrow .sy-head span + span { font-size: 0.5rem; }
 .tb-symbiont.is-narrow .sy-note { flex-direction: column; align-items: stretch; gap: 0; }

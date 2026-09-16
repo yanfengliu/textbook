@@ -17,7 +17,7 @@ export const FIGURES = Object.freeze({
   pasteur: { url: new URL('./pasteur.js', import.meta.url).href, title: 'Pasteur\'s swan-neck flasks', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 3 },
 
   // Chapter 2, The chemistry of life
-  soup: { url: new URL('./soup.js', import.meta.url).href, title: 'What a drop is made of', needsWebGL: false, aspect: 21 / 9, narrowAspect: 4 / 3 },
+  soup: { url: new URL('./soup.js', import.meta.url).href, title: 'What a drop is made of', needsWebGL: false, aspect: 21 / 9, narrowAspect: 4 / 5 },
   bondlab: { url: new URL('./bondlab.js', import.meta.url).href, title: 'Two atoms and a meter', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
   water3d: { url: new URL('./water3d.js', import.meta.url).href, title: 'One molecule and the four it holds', needsWebGL: true, aspect: 16 / 10, narrowAspect: 1 },
   waterprops: { url: new URL('./waterprops.js', import.meta.url).href, title: 'Four properties, one cause', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 5 },

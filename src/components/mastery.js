@@ -39,6 +39,9 @@ const STATES = {
 // cannot drift; the record it compares them against is the store's, which is the independent half.
 export const LEARNED_WELL_WORD = 'Learned well';
 export const MARK_WORD_CLASS = 'tb-mark__word';
+// The end summary's class, exported for the same reason: the gate counts the labels inside it rather
+// than across the page, because "Where you stand" renders labels before a question is answered.
+export const CLOSING_CLASS = 'tb-close';
 
 const GLYPH = {
   // Five round dashes, not a fine dotted line: at the 11px this is drawn at, a 1.5-unit dash on a
@@ -463,7 +466,7 @@ export class TbSitting extends HTMLElement {
     this.run = document.createElement('section');
     this.run.className = 'tb-run';
     this.closing = document.createElement('section');
-    this.closing.className = 'tb-close';
+    this.closing.className = CLOSING_CLASS;
     this.closing.hidden = true;
     this.live = document.createElement('div');
     this.live.className = 'visually-hidden';

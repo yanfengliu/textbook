@@ -18,9 +18,12 @@
 // a before/after comparison: `--label before`, change something, run again without the label. The name is
 // 1-32 characters of a-z, 0-9, underscore or hyphen, so the directory is always one of this tool's own.
 //
-// Files are <page>-<viewport>-<theme>-<NN>-<selector>.png, NN in --at order and the selector reduced to
-// a-z, 0-9 and hyphens, so the file says what it shows. A selector that matches nothing is reported and
-// skipped; when none matches the directory is left empty, the run says so, and exits 2.
+// Files are <page>-<viewport>-<theme>-<NN>-<selector>.png, every one directly in the run's directory. A
+// page id is book-qualified (`biology/ch02`), so its slash becomes a hyphen (`biology-ch02`) in the name:
+// left in, it made a `biology/` subdirectory that this header did not describe and `ls out/inspect/` did
+// not show. NN is the --at order and the selector is reduced to a-z, 0-9 and hyphens, so the file says
+// what it shows. A selector that matches nothing is reported and skipped; when none matches the
+// directory is left empty, the run says so, and exits 2.
 import { mkdirSync, rmSync } from 'node:fs';
 import { startServer } from './serve.js';
 import { launch, collectErrors, openPage, ACTION_TIMEOUT_MS, PAGES, VIEWPORTS, THEMES } from './lib/browser.js';
@@ -65,6 +68,8 @@ const OUT = opts.label === null ? 'out/inspect' : `out/inspect-${opts.label}`;
 // The selector, reduced to what a file name can carry. The index stays in front, so two selectors that
 // reduce to the same word still get two files.
 const slug = (sel) => sel.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40).replace(/^-|-$/g, '') || 'el';
+// The page id with its book separator flattened, so the frame is a file in OUT and not in a subdirectory.
+const pageName = pageDef.id.replaceAll('/', '-');
 
 // Emptied here, after the arguments are known to be good, so a mistyped page id or label reports and
 // touches nothing.
@@ -98,7 +103,7 @@ try {
       continue;
     }
     await page.waitForTimeout(300);
-    const file = `${OUT}/${pageDef.id}-${vp.id}-${opts.theme}-${String(i).padStart(2, '0')}-${slug(sel)}.png`;
+    const file = `${OUT}/${pageName}-${vp.id}-${opts.theme}-${String(i).padStart(2, '0')}-${slug(sel)}.png`;
     await page.screenshot({ path: file, type: 'png' });
     written += 1;
     console.log(`wrote ${file} (${sel})`);

@@ -970,7 +970,7 @@ tb-glossary dt:target {
 /* ---------- tb-equation ---------- */
 /* A displayed equation, `<p class="tb-equation">`: a typographic object, not a centred paragraph. It is
    centred in the measure and set in the text face — a chemical equation is upright roman, and the ⇌ comes
-   from STIX Two Math through the stack in tokens.css — with lining figures because a formula is table-like,
+   from Libertinus Serif through the stack in tokens.css — with lining figures because a formula is table-like,
    no indent, and a whole step of the space scale above and below rather than the paragraph gap. The step is
    --space-6: --space-5 is 1.08 body lines against the 0.86 between paragraphs, and at that the line read
    as one more paragraph.

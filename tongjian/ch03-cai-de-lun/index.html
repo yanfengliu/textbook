@@ -24,6 +24,18 @@
   import { registerLexicon } from '../data/card.js';
   textbook.registerGlossary(GLOSSARY);
   registerLexicon({ lexicon: LEXICON, words: WORDS, chars: CHARS, chapter: 'tongjian/ch03' });
+  // 组件在这个页面上说的话：src/components/check.js 与 src/components/sort.js 按 <html lang="zh-Hans">
+  // 取到的默认值已经是中文，所以这里只写组件不知道的那一句——归完之后按什么算对，是这一章自己的事。
+  textbook.strings = {
+    sort: {
+      status: ({ placed, n, right, last }) => {
+        const summary = placed === n
+          ? `${n}条都归好了，按司马光的分类归对了${right}条。`
+          : `还剩${n - placed}条没归。`;
+        return last ? `${last}${summary}` : summary;
+      },
+    },
+  };
   await import('../../src/components/index.js');
 </script>
 </head>
@@ -35,16 +47,15 @@
 <main class="tb-main" data-chapter="3" data-no-mastery>
 
   <header class="tb-opener">
-    <p class="tb-opener__unit">资治通鉴 · 卷一 周纪一</p>
+    <p class="tb-opener__unit">卷一 · 周纪一 · 威烈王二十三年</p>
     <p class="tb-opener__number" aria-hidden="true">3</p>
     <h1>才德论</h1>
     <p class="tb-opener__dek">智伯死了。司马光停下来问：为什么一个本领那么大的人会把整个家族带进坟墓？他的回答是两句话——才胜德谓之小人。</p>
     <ol class="tb-opener__contents" aria-label="本章目录">
       <li><a href="#source"><span class="n">3.1</span><span>原文</span></a></li>
-      <li><a href="#translation"><span class="n">3.2</span><span>现代汉语翻译</span></a></li>
-      <li><a href="#notes"><span class="n">3.3</span><span>字词</span></a></li>
-      <li><a href="#history"><span class="n">3.4</span><span>背景</span></a></li>
-      <li><a href="#discussion"><span class="n">3.5</span><span>思考</span></a></li>
+      <li><a href="#notes"><span class="n">3.2</span><span>字词</span></a></li>
+      <li><a href="#history"><span class="n">3.3</span><span>背景</span></a></li>
+      <li><a href="#discussion"><span class="n">3.4</span><span>思考</span></a></li>
     </ol>
   </header>
   <div class="tb-text">
@@ -55,179 +66,82 @@
   <p class="zj-cite">《资治通鉴》卷一〈周纪一〉，威烈王二十三年，第二篇「臣光曰」。</p>
 
 <ol class="zj-src" lang="zh-Hant" data-corpus="zj-001-cai-de-lun">
-  <li><tb-term ref="臣光曰" word="臣光曰">臣光曰</tb-term>：<tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>之</tb-char><tb-char>亡</tb-char><tb-char>也</tb-char>，<tb-char>才</tb-char><tb-char>勝</tb-char><tb-char>德</tb-char><tb-char>也</tb-char>。</li>
-  <li><tb-char>夫</tb-char><tb-char>才</tb-char><tb-char>與</tb-char><tb-char>德</tb-char><tb-char>異</tb-char>，<tb-char>而</tb-char><tb-term ref="世俗" word="世俗">世俗</tb-term><tb-char>莫</tb-char><tb-char>之</tb-char><tb-char>能</tb-char><tb-char>辨</tb-char>，<tb-char>通</tb-char><tb-char>謂</tb-char><tb-char>之</tb-char><tb-char>賢</tb-char>，<tb-char>此</tb-char><tb-char>其</tb-char><tb-term ref="所以" word="所以">所以</tb-term><tb-char>失</tb-char><tb-char>人</tb-char><tb-char>也</tb-char>。</li>
-  <li><tb-char>夫</tb-char><tb-term ref="聰察" word="聰察">聰察</tb-term><tb-term ref="強毅" word="強毅">強毅</tb-term><tb-char>之</tb-char><tb-char>謂</tb-char><tb-char>才</tb-char>，<tb-term ref="正直" word="正直">正直</tb-term><tb-term ref="中和" word="中和">中和</tb-term><tb-char>之</tb-char><tb-char>謂</tb-char><tb-char>德</tb-char>。</li>
-  <li><tb-char>才</tb-char><tb-char>者</tb-char>，<tb-char>德</tb-char><tb-char>之</tb-char><tb-char>資</tb-char><tb-char>也</tb-char>；<tb-char>德</tb-char><tb-char>者</tb-char>，<tb-char>才</tb-char><tb-char>之</tb-char><tb-char>帥</tb-char><tb-char>也</tb-char>。</li>
-  <li><tb-term ref="雲夢" word="雲夢">雲夢</tb-term><tb-char>之</tb-char><tb-char>竹</tb-char>，<tb-term ref="天下" word="天下">天下</tb-term><tb-char>之</tb-char><tb-char>勁</tb-char><tb-char>也</tb-char>，<tb-char>然</tb-char><tb-char>而</tb-char><tb-char>不</tb-char><tb-term ref="矯揉" word="矯揉">矯揉</tb-term>，<tb-char>不</tb-char><tb-term ref="羽括" word="羽括">羽括</tb-term>，<tb-char>則</tb-char><tb-char>不</tb-char><tb-char>能</tb-char><tb-char>以</tb-char><tb-char>入</tb-char><tb-char>堅</tb-char>；<tb-term ref="棠溪" word="棠溪">棠溪</tb-term><tb-char>之</tb-char><tb-char>金</tb-char>，<tb-term ref="天下" word="天下">天下</tb-term><tb-char>之</tb-char><tb-char>利</tb-char><tb-char>也</tb-char>，<tb-char>然</tb-char><tb-char>而</tb-char><tb-char>不</tb-char><tb-term ref="熔范" word="熔范">熔范</tb-term>，<tb-char>不</tb-char><tb-term ref="砥礪" word="砥礪">砥礪</tb-term>，<tb-char>則</tb-char><tb-char>不</tb-char><tb-char>能</tb-char><tb-char>以</tb-char><tb-char>擊</tb-char><tb-char>強</tb-char>。</li>
-  <li><tb-term ref="是故" word="是故">是故</tb-term><tb-term ref="才德" word="才德">才德</tb-term><tb-char>全</tb-char><tb-char>盡</tb-char><tb-char>謂</tb-char><tb-char>之</tb-char><tb-term ref="聖人" word="聖人">聖人</tb-term>，<tb-term ref="才德" word="才德">才德</tb-term><tb-char>兼</tb-char><tb-char>亡</tb-char><tb-char>謂</tb-char><tb-char>之</tb-char><tb-term ref="愚人" word="愚人">愚人</tb-term>，<tb-char>德</tb-char><tb-char>勝</tb-char><tb-char>才</tb-char><tb-char>謂</tb-char><tb-char>之</tb-char><tb-term ref="君子" word="君子">君子</tb-term>，<tb-char>才</tb-char><tb-char>勝</tb-char><tb-char>德</tb-char><tb-char>謂</tb-char><tb-char>之</tb-char><tb-term ref="小人" word="小人">小人</tb-term>。</li>
-  <li><tb-char>凡</tb-char><tb-char>取</tb-char><tb-char>人</tb-char><tb-char>之</tb-char><tb-char>術</tb-char>，<tb-char>苟</tb-char><tb-char>不</tb-char><tb-char>得</tb-char><tb-term ref="聖人" word="聖人">聖人</tb-term>、<tb-term ref="君子" word="君子">君子</tb-term><tb-char>而</tb-char><tb-char>與</tb-char><tb-char>之</tb-char>，<tb-char>與</tb-char><tb-char>其</tb-char><tb-char>得</tb-char><tb-term ref="小人" word="小人">小人</tb-term>，<tb-term ref="不若" word="不若">不若</tb-term><tb-char>得</tb-char><tb-term ref="愚人" word="愚人">愚人</tb-term>。</li>
-  <li><tb-term ref="何則" word="何則">何則</tb-term>？</li>
-  <li><tb-term ref="君子" word="君子">君子</tb-term><tb-char>挾</tb-char><tb-char>才</tb-char><tb-char>以</tb-char><tb-char>為</tb-char><tb-char>善</tb-char>，<tb-term ref="小人" word="小人">小人</tb-term><tb-char>挾</tb-char><tb-char>才</tb-char><tb-char>以</tb-char><tb-char>為</tb-char><tb-char>惡</tb-char>。</li>
-  <li><tb-char>挾</tb-char><tb-char>才</tb-char><tb-char>以</tb-char><tb-char>為</tb-char><tb-char>善</tb-char><tb-char>者</tb-char>，<tb-char>善</tb-char><tb-char>無</tb-char><tb-char>不</tb-char><tb-char>至</tb-char><tb-char>矣</tb-char>；<tb-char>挾</tb-char><tb-char>才</tb-char><tb-char>以</tb-char><tb-char>為</tb-char><tb-char>惡</tb-char><tb-char>者</tb-char>，<tb-char>惡</tb-char><tb-char>亦</tb-char><tb-char>無</tb-char><tb-char>不</tb-char><tb-char>至</tb-char><tb-char>矣</tb-char>。</li>
-  <li><tb-char>愚</tb-char><tb-char>者</tb-char><tb-char>雖</tb-char><tb-char>欲</tb-char><tb-char>為</tb-char><tb-char>不</tb-char><tb-char>善</tb-char>，<tb-char>智</tb-char><tb-char>不</tb-char><tb-char>能</tb-char><tb-char>周</tb-char>，<tb-char>力</tb-char><tb-char>不</tb-char><tb-char>能</tb-char><tb-char>勝</tb-char>，<tb-char>譬</tb-char><tb-char>之</tb-char><tb-term ref="乳狗" word="乳狗">乳狗</tb-term><tb-char>搏</tb-char><tb-char>人</tb-char>，<tb-char>人</tb-char><tb-char>得</tb-char><tb-char>而</tb-char><tb-char>制</tb-char><tb-char>之</tb-char>。</li>
-  <li><tb-term ref="小人" word="小人">小人</tb-term><tb-char>智</tb-char><tb-char>足</tb-char><tb-char>以</tb-char><tb-char>遂</tb-char><tb-char>其</tb-char><tb-char>奸</tb-char>，<tb-char>勇</tb-char><tb-char>足</tb-char><tb-char>以</tb-char><tb-char>決</tb-char><tb-char>其</tb-char><tb-char>暴</tb-char>，<tb-char>是</tb-char><tb-term ref="虎而翼" word="虎而翼">虎而翼</tb-term><tb-char>者</tb-char><tb-char>也</tb-char>，<tb-char>其</tb-char><tb-char>為</tb-char><tb-char>害</tb-char><tb-char>豈</tb-char><tb-char>不</tb-char><tb-char>多</tb-char><tb-char>哉</tb-char>！</li>
-  <li><tb-char>夫</tb-char><tb-char>德</tb-char><tb-char>者</tb-char><tb-char>人</tb-char><tb-char>之</tb-char><tb-char>所</tb-char><tb-char>嚴</tb-char>，<tb-char>而</tb-char><tb-char>才</tb-char><tb-char>者</tb-char><tb-char>人</tb-char><tb-char>之</tb-char><tb-char>所</tb-char><tb-char>愛</tb-char>。</li>
-  <li><tb-char>愛</tb-char><tb-char>者</tb-char><tb-char>易</tb-char><tb-char>親</tb-char>，<tb-char>嚴</tb-char><tb-char>者</tb-char><tb-char>易</tb-char><tb-char>疏</tb-char>，<tb-term ref="是以" word="是以">是以</tb-term><tb-char>察</tb-char><tb-char>者</tb-char><tb-char>多</tb-char><tb-char>蔽</tb-char><tb-char>於</tb-char><tb-char>才</tb-char><tb-char>而</tb-char><tb-char>遺</tb-char><tb-char>於</tb-char><tb-char>德</tb-char>。</li>
-  <li><tb-term ref="自古昔以來" word="自古昔以來">自古昔以來</tb-term>，<tb-char>國</tb-char><tb-char>之</tb-char><tb-term ref="亂臣" word="亂臣">亂臣</tb-term>，<tb-char>家</tb-char><tb-char>之</tb-char><tb-term ref="敗子" word="敗子">敗子</tb-term>，<tb-char>才</tb-char><tb-char>有</tb-char><tb-char>餘</tb-char><tb-char>而</tb-char><tb-char>德</tb-char><tb-char>不</tb-char><tb-char>足</tb-char>，<tb-char>以</tb-char><tb-char>至</tb-char><tb-char>於</tb-char><tb-term ref="顛覆" word="顛覆">顛覆</tb-term><tb-char>者</tb-char><tb-char>多</tb-char><tb-char>矣</tb-char>，<tb-term ref="豈特" word="豈特">豈特</tb-term><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>哉</tb-char>！</li>
-  <li><tb-char>故</tb-char><tb-char>為</tb-char><tb-char>國</tb-char><tb-char>為</tb-char><tb-char>家</tb-char><tb-char>者</tb-char>，<tb-char>苟</tb-char><tb-char>能</tb-char><tb-char>審</tb-char><tb-char>於</tb-char><tb-term ref="才德" word="才德">才德</tb-term><tb-char>之</tb-char><tb-char>分</tb-char><tb-char>而</tb-char><tb-char>知</tb-char><tb-char>所</tb-char><tb-char>先</tb-char><tb-char>後</tb-char>，<tb-char>又</tb-char><tb-char>何</tb-char><tb-char>失</tb-char><tb-char>人</tb-char><tb-char>之</tb-char><tb-char>足</tb-char><tb-char>患</tb-char><tb-char>哉</tb-char>！</li>
-</ol>
-  </section>
-
-  <section id="translation">
-  <h2>现代汉语翻译</h2>
-
-  <p>左栏是原句，右栏是它的现代汉语，一句对一句，句序与原文相同。译文不是原文的替代品：读不通原文时看它，读通了就回到左边。</p>
-
-<ol class="zj-trans">
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">臣光曰：智伯之亡也，才勝德也。</span>
-      <span class="zj-trans__text">臣司马光说：智伯的灭亡，是因为才能胜过了品德。</span>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">夫才與德異，而世俗莫之能辨，通謂之賢，此其所以失人也。</span>
-      <span class="zj-trans__text">才能与品德本是两回事，而世俗之人不能分辨，一概称之为贤，这就是用人失当的原因。</span>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">夫聰察強毅之謂才，正直中和之謂德。</span>
-      <span class="zj-trans__text">所谓才，指的是聪明、明察、刚强、坚毅；所谓德，指的是正直、中正、平和。</span>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">才者，德之資也；德者，才之帥也。</span>
-      <span class="zj-trans__text">才是德的凭借，德是才的统帅。</span>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">雲夢之竹，天下之勁也，然而不矯揉，不羽括，則不能以入堅；棠溪之金，天下之利也，然而不熔范，不砥礪，則不能以擊強。</span>
-      <div class="zj-trans__text">云梦的竹子，是天下最坚劲的，但不加矫正揉曲、不装上箭羽箭括，就不能用它射穿坚甲；棠溪的铜，是天下最锋利的，但不经熔铸成范、不经磨砺，就不能用它击刺强敌。
-        <aside class="tb-margin-note">这两个比喻是全篇的骨头：竹子再坚劲、金属再锋利，不经过加工就用不上。才也是一样——才本身不是问题，没有德去统帅它才是问题。</aside>
-      </div>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">是故才德全盡謂之聖人，才德兼亡謂之愚人，德勝才謂之君子，才勝德謂之小人。</span>
-      <div class="zj-trans__text">所以，才德兼备到极致，称之为圣人；才德全无，称之为愚人；德胜过才，称之为君子；才胜过德，称之为小人。
-        <aside class="tb-margin-note">这一句是「才德论」得名的地方，也是全篇最常被引用的一句。四个名目两两相对：才德全尽、才德兼亡、德胜才、才胜德，四种人，一个也不多。</aside>
-      </div>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">凡取人之術，苟不得聖人、君子而與之，與其得小人，不若得愚人。</span>
-      <span class="zj-trans__text">大凡用人的方法，如果得不到圣人、君子而用他，那么与其用小人，不如用愚人。</span>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">何則？</span>
-      <span class="zj-trans__text">为什么呢？</span>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">君子挾才以為善，小人挾才以為惡。</span>
-      <span class="zj-trans__text">君子凭借才能行善，小人凭借才能作恶。</span>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">挾才以為善者，善無不至矣；挾才以為惡者，惡亦無不至矣。</span>
-      <span class="zj-trans__text">凭才行善的人，善没有做不到的；凭才作恶的人，恶也没有做不到的。</span>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">愚者雖欲為不善，智不能周，力不能勝，譬之乳狗搏人，人得而制之。</span>
-      <div class="zj-trans__text">愚人即使想做坏事，智慧不足以周全，力量不足以胜任，就像小狗扑人，人还能制服它。
-        <aside class="tb-margin-note">「乳狗搏人」就是小狗扑人。愚人不是没有坏心，是他的坏心没有能力实现——所以还能制服。</aside>
-      </div>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">小人智足以遂其奸，勇足以決其暴，是虎而翼者也，其為害豈不多哉！</span>
-      <span class="zj-trans__text">小人则智慧足以实现他的奸计，勇力足以施行他的暴行，这就像老虎长了翅膀，危害难道会少吗！</span>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">夫德者人之所嚴，而才者人之所愛。</span>
-      <span class="zj-trans__text">德是人们所敬重的，才是人们所喜爱的。</span>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">愛者易親，嚴者易疏，是以察者多蔽於才而遺於德。</span>
-      <span class="zj-trans__text">喜爱的就容易亲近，敬重的就容易疏远，所以明察之人也往往被才所蒙蔽而漏掉了德。</span>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">自古昔以來，國之亂臣，家之敗子，才有餘而德不足，以至於顛覆者多矣，豈特智伯哉！</span>
-      <div class="zj-trans__text">自古以来，国家的乱臣、家庭的败家子，才能有余而德行不足、以至于倾覆败亡的，多得很，哪里只有一个智伯呢！
-        <aside class="tb-margin-note">这一句是给智伯的故事下的判语：国之乱臣、家之败子，都是「<span lang="zh-Hant">才有餘而德不足</span>」，智伯只是其中一个，不是唯一一个。</aside>
-      </div>
-    </li>
-    <li class="zj-trans__row">
-      <span class="zj-trans__src" lang="zh-Hant">故為國為家者，苟能審於才德之分而知所先後，又何失人之足患哉！</span>
-      <span class="zj-trans__text">所以治理国家、管理家族的人，如果能弄清才与德的分际、懂得二者的先后，又哪里用得着担心用人失当呢！</span>
-    </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-term ref="臣光曰" word="臣光曰">臣光曰</tb-term>：<tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>之</tb-char><tb-char>亡</tb-char><tb-char>也</tb-char>，<tb-char>才</tb-char><tb-char>勝</tb-char><tb-char>德</tb-char><tb-char>也</tb-char><span class="zj-ju">。</span></span>
+    <span class="zj-pair__tr" lang="zh-Hans">臣司马光说：智伯的灭亡，是因为才能胜过了品德。</span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-char>夫</tb-char><tb-char>才</tb-char><tb-char>與</tb-char><tb-char>德</tb-char><tb-char>異</tb-char>，<tb-char>而</tb-char><tb-term ref="世俗" word="世俗">世俗</tb-term><tb-char>莫</tb-char><tb-char>之</tb-char><tb-char>能</tb-char><tb-char>辨</tb-char>，<tb-char>通</tb-char><tb-char>謂</tb-char><tb-char>之</tb-char><tb-char>賢</tb-char>，<tb-char>此</tb-char><tb-char>其</tb-char><tb-term ref="所以" word="所以">所以</tb-term><tb-char>失</tb-char><tb-char>人</tb-char><tb-char>也</tb-char><span class="zj-ju">。</span></span>
+    <span class="zj-pair__tr" lang="zh-Hans">才能与品德本是两回事，而世俗之人不能分辨，一概称之为贤，这就是用人失当的原因。</span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-char>夫</tb-char><tb-term ref="聰察" word="聰察">聰察</tb-term><tb-term ref="強毅" word="強毅">強毅</tb-term><tb-char>之</tb-char><tb-char>謂</tb-char><tb-char>才</tb-char>，<tb-term ref="正直" word="正直">正直</tb-term><tb-term ref="中和" word="中和">中和</tb-term><tb-char>之</tb-char><tb-char>謂</tb-char><tb-char>德</tb-char><span class="zj-ju">。</span></span>
+    <span class="zj-pair__tr" lang="zh-Hans">所谓才，指的是聪明、明察、刚强、坚毅；所谓德，指的是正直、中正、平和。</span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-char>才</tb-char><tb-char>者</tb-char>，<tb-char>德</tb-char><tb-char>之</tb-char><tb-char>資</tb-char><tb-char>也</tb-char>；<tb-char>德</tb-char><tb-char>者</tb-char>，<tb-char>才</tb-char><tb-char>之</tb-char><tb-char>帥</tb-char><tb-char>也</tb-char><span class="zj-ju">。</span></span>
+    <span class="zj-pair__tr" lang="zh-Hans">才是德的凭借，德是才的统帅。</span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-term ref="雲夢" word="雲夢">雲夢</tb-term><tb-char>之</tb-char><tb-char>竹</tb-char>，<tb-term ref="天下" word="天下">天下</tb-term><tb-char>之</tb-char><tb-char>勁</tb-char><tb-char>也</tb-char>，<tb-char>然</tb-char><tb-char>而</tb-char><tb-char>不</tb-char><tb-term ref="矯揉" word="矯揉">矯揉</tb-term>，<tb-char>不</tb-char><tb-term ref="羽括" word="羽括">羽括</tb-term>，<tb-char>則</tb-char><tb-char>不</tb-char><tb-char>能</tb-char><tb-char>以</tb-char><tb-char>入</tb-char><tb-char>堅</tb-char>；<tb-term ref="棠溪" word="棠溪">棠溪</tb-term><tb-char>之</tb-char><tb-char>金</tb-char>，<tb-term ref="天下" word="天下">天下</tb-term><tb-char>之</tb-char><tb-char>利</tb-char><tb-char>也</tb-char>，<tb-char>然</tb-char><tb-char>而</tb-char><tb-char>不</tb-char><tb-term ref="熔范" word="熔范">熔范</tb-term>，<tb-char>不</tb-char><tb-term ref="砥礪" word="砥礪">砥礪</tb-term>，<tb-char>則</tb-char><tb-char>不</tb-char><tb-char>能</tb-char><tb-char>以</tb-char><tb-char>擊</tb-char><tb-char>強</tb-char><span class="zj-ju">。</span></span>
+    <span class="zj-pair__tr" lang="zh-Hans">云梦的竹子，是天下最坚劲的，但不加矫正揉曲、不装上箭羽箭括，就不能用它射穿坚甲；棠溪的铜，是天下最锋利的，但不经熔铸成范、不经磨砺，就不能用它击刺强敌。
+  <aside class="tb-margin-note">这两个比喻是全篇的骨头：竹子再坚劲、金属再锋利，不经过加工就用不上。才也是一样——才本身不是问题，没有德去统帅它才是问题。</aside></span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-term ref="是故" word="是故">是故</tb-term><tb-term ref="才德" word="才德">才德</tb-term><tb-char>全</tb-char><tb-char>盡</tb-char><tb-char>謂</tb-char><tb-char>之</tb-char><tb-term ref="聖人" word="聖人">聖人</tb-term>，<tb-term ref="才德" word="才德">才德</tb-term><tb-char>兼</tb-char><tb-char>亡</tb-char><tb-char>謂</tb-char><tb-char>之</tb-char><tb-term ref="愚人" word="愚人">愚人</tb-term>，<tb-char>德</tb-char><tb-char>勝</tb-char><tb-char>才</tb-char><tb-char>謂</tb-char><tb-char>之</tb-char><tb-term ref="君子" word="君子">君子</tb-term>，<tb-char>才</tb-char><tb-char>勝</tb-char><tb-char>德</tb-char><tb-char>謂</tb-char><tb-char>之</tb-char><tb-term ref="小人" word="小人">小人</tb-term><span class="zj-ju">。</span></span>
+    <span class="zj-pair__tr" lang="zh-Hans">所以，才德兼备到极致，称之为圣人；才德全无，称之为愚人；德胜过才，称之为君子；才胜过德，称之为小人。
+  <aside class="tb-margin-note">这一句是「才德论」得名的地方，也是全篇最常被引用的一句。四个名目两两相对：才德全尽、才德兼亡、德胜才、才胜德，四种人，一个也不多。</aside></span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-char>凡</tb-char><tb-char>取</tb-char><tb-char>人</tb-char><tb-char>之</tb-char><tb-char>術</tb-char>，<tb-char>苟</tb-char><tb-char>不</tb-char><tb-char>得</tb-char><tb-term ref="聖人" word="聖人">聖人</tb-term>、<tb-term ref="君子" word="君子">君子</tb-term><tb-char>而</tb-char><tb-char>與</tb-char><tb-char>之</tb-char>，<tb-char>與</tb-char><tb-char>其</tb-char><tb-char>得</tb-char><tb-term ref="小人" word="小人">小人</tb-term>，<tb-term ref="不若" word="不若">不若</tb-term><tb-char>得</tb-char><tb-term ref="愚人" word="愚人">愚人</tb-term><span class="zj-ju">。</span></span>
+    <span class="zj-pair__tr" lang="zh-Hans">大凡用人的方法，如果得不到圣人、君子而用他，那么与其用小人，不如用愚人。</span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-term ref="何則" word="何則">何則</tb-term>？</span>
+    <span class="zj-pair__tr" lang="zh-Hans">为什么呢？</span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-term ref="君子" word="君子">君子</tb-term><tb-char>挾</tb-char><tb-char>才</tb-char><tb-char>以</tb-char><tb-char>為</tb-char><tb-char>善</tb-char>，<tb-term ref="小人" word="小人">小人</tb-term><tb-char>挾</tb-char><tb-char>才</tb-char><tb-char>以</tb-char><tb-char>為</tb-char><tb-char>惡</tb-char><span class="zj-ju">。</span></span>
+    <span class="zj-pair__tr" lang="zh-Hans">君子凭借才能行善，小人凭借才能作恶。</span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-char>挾</tb-char><tb-char>才</tb-char><tb-char>以</tb-char><tb-char>為</tb-char><tb-char>善</tb-char><tb-char>者</tb-char>，<tb-char>善</tb-char><tb-char>無</tb-char><tb-char>不</tb-char><tb-char>至</tb-char><tb-char>矣</tb-char>；<tb-char>挾</tb-char><tb-char>才</tb-char><tb-char>以</tb-char><tb-char>為</tb-char><tb-char>惡</tb-char><tb-char>者</tb-char>，<tb-char>惡</tb-char><tb-char>亦</tb-char><tb-char>無</tb-char><tb-char>不</tb-char><tb-char>至</tb-char><tb-char>矣</tb-char><span class="zj-ju">。</span></span>
+    <span class="zj-pair__tr" lang="zh-Hans">凭才行善的人，善没有做不到的；凭才作恶的人，恶也没有做不到的。</span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-char>愚</tb-char><tb-char>者</tb-char><tb-char>雖</tb-char><tb-char>欲</tb-char><tb-char>為</tb-char><tb-char>不</tb-char><tb-char>善</tb-char>，<tb-char>智</tb-char><tb-char>不</tb-char><tb-char>能</tb-char><tb-char>周</tb-char>，<tb-char>力</tb-char><tb-char>不</tb-char><tb-char>能</tb-char><tb-char>勝</tb-char>，<tb-char>譬</tb-char><tb-char>之</tb-char><tb-term ref="乳狗" word="乳狗">乳狗</tb-term><tb-char>搏</tb-char><tb-char>人</tb-char>，<tb-char>人</tb-char><tb-char>得</tb-char><tb-char>而</tb-char><tb-char>制</tb-char><tb-char>之</tb-char><span class="zj-ju">。</span></span>
+    <span class="zj-pair__tr" lang="zh-Hans">愚人即使想做坏事，智慧不足以周全，力量不足以胜任，就像小狗扑人，人还能制服它。
+  <aside class="tb-margin-note">「乳狗搏人」就是小狗扑人。愚人不是没有坏心，是他的坏心没有能力实现——所以还能制服。</aside></span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-term ref="小人" word="小人">小人</tb-term><tb-char>智</tb-char><tb-char>足</tb-char><tb-char>以</tb-char><tb-char>遂</tb-char><tb-char>其</tb-char><tb-char>奸</tb-char>，<tb-char>勇</tb-char><tb-char>足</tb-char><tb-char>以</tb-char><tb-char>決</tb-char><tb-char>其</tb-char><tb-char>暴</tb-char>，<tb-char>是</tb-char><tb-term ref="虎而翼" word="虎而翼">虎而翼</tb-term><tb-char>者</tb-char><tb-char>也</tb-char>，<tb-char>其</tb-char><tb-char>為</tb-char><tb-char>害</tb-char><tb-char>豈</tb-char><tb-char>不</tb-char><tb-char>多</tb-char><tb-char>哉</tb-char>！</span>
+    <span class="zj-pair__tr" lang="zh-Hans">小人则智慧足以实现他的奸计，勇力足以施行他的暴行，这就像老虎长了翅膀，危害难道会少吗！</span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-char>夫</tb-char><tb-char>德</tb-char><tb-char>者</tb-char><tb-char>人</tb-char><tb-char>之</tb-char><tb-char>所</tb-char><tb-char>嚴</tb-char>，<tb-char>而</tb-char><tb-char>才</tb-char><tb-char>者</tb-char><tb-char>人</tb-char><tb-char>之</tb-char><tb-char>所</tb-char><tb-char>愛</tb-char><span class="zj-ju">。</span></span>
+    <span class="zj-pair__tr" lang="zh-Hans">德是人们所敬重的，才是人们所喜爱的。</span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-char>愛</tb-char><tb-char>者</tb-char><tb-char>易</tb-char><tb-char>親</tb-char>，<tb-char>嚴</tb-char><tb-char>者</tb-char><tb-char>易</tb-char><tb-char>疏</tb-char>，<tb-term ref="是以" word="是以">是以</tb-term><tb-char>察</tb-char><tb-char>者</tb-char><tb-char>多</tb-char><tb-char>蔽</tb-char><tb-char>於</tb-char><tb-char>才</tb-char><tb-char>而</tb-char><tb-char>遺</tb-char><tb-char>於</tb-char><tb-char>德</tb-char><span class="zj-ju">。</span></span>
+    <span class="zj-pair__tr" lang="zh-Hans">喜爱的就容易亲近，敬重的就容易疏远，所以明察之人也往往被才所蒙蔽而漏掉了德。</span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-term ref="自古昔以來" word="自古昔以來">自古昔以來</tb-term>，<tb-char>國</tb-char><tb-char>之</tb-char><tb-term ref="亂臣" word="亂臣">亂臣</tb-term>，<tb-char>家</tb-char><tb-char>之</tb-char><tb-term ref="敗子" word="敗子">敗子</tb-term>，<tb-char>才</tb-char><tb-char>有</tb-char><tb-char>餘</tb-char><tb-char>而</tb-char><tb-char>德</tb-char><tb-char>不</tb-char><tb-char>足</tb-char>，<tb-char>以</tb-char><tb-char>至</tb-char><tb-char>於</tb-char><tb-term ref="顛覆" word="顛覆">顛覆</tb-term><tb-char>者</tb-char><tb-char>多</tb-char><tb-char>矣</tb-char>，<tb-term ref="豈特" word="豈特">豈特</tb-term><tb-term ref="智伯" word="智伯">智伯</tb-term><tb-char>哉</tb-char>！</span>
+    <span class="zj-pair__tr" lang="zh-Hans">自古以来，国家的乱臣、家庭的败家子，才能有余而德行不足、以至于倾覆败亡的，多得很，哪里只有一个智伯呢！</span>
+  </li>
+  <li class="zj-pair">
+    <span class="zj-pair__src" lang="zh-Hant"><tb-char>故</tb-char><tb-char>為</tb-char><tb-char>國</tb-char><tb-char>為</tb-char><tb-char>家</tb-char><tb-char>者</tb-char>，<tb-char>苟</tb-char><tb-char>能</tb-char><tb-char>審</tb-char><tb-char>於</tb-char><tb-term ref="才德" word="才德">才德</tb-term><tb-char>之</tb-char><tb-char>分</tb-char><tb-char>而</tb-char><tb-char>知</tb-char><tb-char>所</tb-char><tb-char>先</tb-char><tb-char>後</tb-char>，<tb-char>又</tb-char><tb-char>何</tb-char><tb-char>失</tb-char><tb-char>人</tb-char><tb-char>之</tb-char><tb-char>足</tb-char><tb-char>患</tb-char><tb-char>哉</tb-char>！</span>
+    <span class="zj-pair__tr" lang="zh-Hans">所以治理国家、管理家族的人，如果能弄清才与德的分际、懂得二者的先后，又哪里用得着担心用人失当呢！</span>
+  </li>
 </ol>
   </section>
 
   <section id="notes">
   <h2>字词</h2>
 
-  <p>先看字。下表是本章要留意的字：字形、拼音、词性、在本章的意思，以及一句《通鉴》的用例——用例都从本书校订过的文本里截出，一字不改；凡改动底本、采用别本的地方，那一句的译文旁边都注明了。一个字在本章之外还有别的常见意思时，意思一栏会一并写出来，用例多半给的是那个意思。最值得留意的是「亡」：它在这里既可以是「灭亡」，也可以是「无」——「才德兼亡」是两样都没有，不是两样都死了。</p>
-
-  <h3 id="lex-chars">字</h3>
-
-  <dl class="zj-lex">
-    <dt><span class="zj-lex__glyph">臣</span><span class="zj-lex__pinyin">chén</span><span class="zj-lex__pos">名</span></dt>
-    <dd>臣子；这里是司马光对皇帝的自称。例：<span class="zj-quote" lang="zh-Hant">國之亂臣，家之敗子</span></dd>
-    <dt><span class="zj-lex__glyph">亡</span><span class="zj-lex__pinyin">wáng</span><span class="zj-lex__pos">动</span></dt>
-    <dd>灭亡；又通「无」，没有。例：<span class="zj-quote" lang="zh-Hant">才德兼亡謂之愚人</span></dd>
-    <dt><span class="zj-lex__glyph">勝</span><span class="zj-lex__pinyin">shèng</span><span class="zj-lex__pos">动</span></dt>
-    <dd>超过、胜过；又作「承受、禁得起」。例：<span class="zj-quote" lang="zh-Hant">力不能勝</span></dd>
-    <dt><span class="zj-lex__glyph">才</span><span class="zj-lex__pinyin">cái</span><span class="zj-lex__pos">名</span></dt>
-    <dd>才能、才干。例：<span class="zj-quote" lang="zh-Hant">才有餘而德不足</span></dd>
-    <dt><span class="zj-lex__glyph">德</span><span class="zj-lex__pinyin">dé</span><span class="zj-lex__pos">名</span></dt>
-    <dd>品德。例：<span class="zj-quote" lang="zh-Hant">正直中和之謂德</span></dd>
-    <dt><span class="zj-lex__glyph">辨</span><span class="zj-lex__pinyin">biàn</span><span class="zj-lex__pos">动</span></dt>
-    <dd>分辨、辨别。例：<span class="zj-quote" lang="zh-Hant">而世俗莫之能辨</span></dd>
-    <dt><span class="zj-lex__glyph">通</span><span class="zj-lex__pinyin">tōng</span><span class="zj-lex__pos">副</span></dt>
-    <dd>一概、全都。例：<span class="zj-quote" lang="zh-Hant">通謂之賢</span></dd>
-    <dt><span class="zj-lex__glyph">謂</span><span class="zj-lex__pinyin">wèi</span><span class="zj-lex__pos">动</span></dt>
-    <dd>叫做、称为；又作「对……说」。例：<span class="zj-quote" lang="zh-Hant">夫聰察強毅之謂才</span></dd>
-    <dt><span class="zj-lex__glyph">資</span><span class="zj-lex__pinyin">zī</span><span class="zj-lex__pos">名</span></dt>
-    <dd>凭借、本钱。例：<span class="zj-quote" lang="zh-Hant">才者，德之資也</span></dd>
-    <dt><span class="zj-lex__glyph">帥</span><span class="zj-lex__pinyin">shuài</span><span class="zj-lex__pos">名</span></dt>
-    <dd>统帅。例：<span class="zj-quote" lang="zh-Hant">德者，才之帥也</span></dd>
-    <dt><span class="zj-lex__glyph">勁</span><span class="zj-lex__pinyin">jìng</span><span class="zj-lex__pos">形</span></dt>
-    <dd>坚劲、强韧。例：<span class="zj-quote" lang="zh-Hant">天下之勁也</span></dd>
-    <dt><span class="zj-lex__glyph">利</span><span class="zj-lex__pinyin">lì</span><span class="zj-lex__pos">形</span></dt>
-    <dd>锋利。例：<span class="zj-quote" lang="zh-Hant">天下之利也</span></dd>
-    <dt><span class="zj-lex__glyph">全</span><span class="zj-lex__pinyin">quán</span><span class="zj-lex__pos">形</span></dt>
-    <dd>完备、齐全。例：<span class="zj-quote" lang="zh-Hant">才德全盡謂之聖人</span></dd>
-    <dt><span class="zj-lex__glyph">兼</span><span class="zj-lex__pinyin">jiān</span><span class="zj-lex__pos">副</span></dt>
-    <dd>同时具有。例：<span class="zj-quote" lang="zh-Hant">才德兼亡謂之愚人</span></dd>
-    <dt><span class="zj-lex__glyph">苟</span><span class="zj-lex__pinyin">gǒu</span><span class="zj-lex__pos">连</span></dt>
-    <dd>如果。例：<span class="zj-quote" lang="zh-Hant">苟不得聖人、君子而與之</span></dd>
-    <dt><span class="zj-lex__glyph">挾</span><span class="zj-lex__pinyin">xié</span><span class="zj-lex__pos">动</span></dt>
-    <dd>怀藏、凭借。例：<span class="zj-quote" lang="zh-Hant">君子挾才以為善</span></dd>
-    <dt><span class="zj-lex__glyph">周</span><span class="zj-lex__pinyin">zhōu</span><span class="zj-lex__pos">动</span></dt>
-    <dd>周全、完备。例：<span class="zj-quote" lang="zh-Hant">智不能周</span></dd>
-    <dt><span class="zj-lex__glyph">譬</span><span class="zj-lex__pinyin">pì</span><span class="zj-lex__pos">动</span></dt>
-    <dd>比方、譬如。例：<span class="zj-quote" lang="zh-Hant">譬之乳狗搏人</span></dd>
-    <dt><span class="zj-lex__glyph">搏</span><span class="zj-lex__pinyin">bó</span><span class="zj-lex__pos">动</span></dt>
-    <dd>扑、击。例：<span class="zj-quote" lang="zh-Hant">譬之乳狗搏人</span></dd>
-    <dt><span class="zj-lex__glyph">制</span><span class="zj-lex__pinyin">zhì</span><span class="zj-lex__pos">动</span></dt>
-    <dd>制服、控制。例：<span class="zj-quote" lang="zh-Hant">人得而制之</span></dd>
-    <dt><span class="zj-lex__glyph">遂</span><span class="zj-lex__pinyin">suì</span><span class="zj-lex__pos">动</span></dt>
-    <dd>实现、得逞。例：<span class="zj-quote" lang="zh-Hant">智足以遂其奸</span></dd>
-    <dt><span class="zj-lex__glyph">奸</span><span class="zj-lex__pinyin">jiān</span><span class="zj-lex__pos">名</span></dt>
-    <dd>奸计、邪恶。例：<span class="zj-quote" lang="zh-Hant">智足以遂其奸</span></dd>
-    <dt><span class="zj-lex__glyph">決</span><span class="zj-lex__pinyin">jué</span><span class="zj-lex__pos">动</span></dt>
-    <dd>决然施行、放开来做。例：<span class="zj-quote" lang="zh-Hant">勇足以決其暴</span></dd>
-    <dt><span class="zj-lex__glyph">翼</span><span class="zj-lex__pinyin">yì</span><span class="zj-lex__pos">名</span></dt>
-    <dd>翅膀。例：<span class="zj-quote" lang="zh-Hant">是虎而翼者也</span></dd>
-    <dt><span class="zj-lex__glyph">嚴</span><span class="zj-lex__pinyin">yán</span><span class="zj-lex__pos">动</span></dt>
-    <dd>敬重、敬畏。例：<span class="zj-quote" lang="zh-Hant">夫德者人之所嚴</span></dd>
-    <dt><span class="zj-lex__glyph">蔽</span><span class="zj-lex__pinyin">bì</span><span class="zj-lex__pos">动</span></dt>
-    <dd>蒙蔽、遮盖。例：<span class="zj-quote" lang="zh-Hant">是以察者多蔽於才</span></dd>
-    <dt><span class="zj-lex__glyph">遺</span><span class="zj-lex__pinyin">yí</span><span class="zj-lex__pos">动</span></dt>
-    <dd>遗漏、漏掉。例：<span class="zj-quote" lang="zh-Hant">而遺於德</span></dd>
-    <dt><span class="zj-lex__glyph">覆</span><span class="zj-lex__pinyin">fù</span><span class="zj-lex__pos">动</span></dt>
-    <dd>翻倒；「颠覆」就是倾覆败亡。例：<span class="zj-quote" lang="zh-Hant">以至於顛覆者多矣</span></dd>
-    <dt><span class="zj-lex__glyph">審</span><span class="zj-lex__pinyin">shěn</span><span class="zj-lex__pos">动</span></dt>
-    <dd>审察、弄清楚。例：<span class="zj-quote" lang="zh-Hant">苟能審於才德之分</span></dd>
-    <dt><span class="zj-lex__glyph">患</span><span class="zj-lex__pinyin">huàn</span><span class="zj-lex__pos">动</span></dt>
-    <dd>担忧；作名词是祸患。例：<span class="zj-quote" lang="zh-Hant">又何失人之足患哉</span></dd>
-  </dl>
+  <p>本章的字与词：点原文里的字、词，开出来的就是它在这一句里的卡片；下面是本章的词。</p>
 
   <h3 id="lex-words">词</h3>
-
-  <p>本章的词按字形排在下面，每一条就是原文里一张词卡上的解释。词卡的边界有一条规则：人名、地名，以及意思不等于两个字相加的固定词语，合成一张卡；一个字一个字读得出来的词组不做卡——所以「聪察」「强毅」是词，而「智不能周」是四个字。</p>
 
   <tb-glossary></tb-glossary>
 
@@ -254,6 +168,8 @@
   <p>「臣光曰」是司马光在叙事之后发表议论的固定开头：「臣」是他对皇帝的自称，「光」是他的名。全书这类附论有一百八十六篇，其中署「臣光曰」的一百零二篇。威烈王二十三年这一条里有两篇：第一篇紧接在「<span lang="zh-Hant">初命晉大夫魏斯、趙籍、韓虔為諸侯</span>」之后，论礼、分、名；第二篇就是本章，紧接在智氏灭族之后。所以《通鉴》的次序是智宣子立后那一段、然后才德论、最后豫让，而本书的次序是把豫让并进第二章、才德论单独作第三章。</p>
 
   <p>这一篇议论自己在做什么，是可以一句一句指出来的：先立论——智伯之亡，亡在才胜德；再分头定义——什么叫才，什么叫德；再打两个比方——好竹子好金属也要加工才能用；再分四等人——圣人、愚人、君子、小人；再给出用人的取舍——得不到圣人君子，宁用愚人，不用小人；再解释为什么——愚人作恶而力不足，小人作恶而才足以成事；最后指出普遍的情形——自古以来的乱臣败子都是才有余而德不足，智伯只是其中一个。</p>
+  <aside class="tb-margin-note">这一句是给智伯的故事下的判语：国之乱臣、家之败子，都是「<span lang="zh-Hant">才有餘而德不足</span>」，智伯只是其中一个，不是唯一一个。</aside>
+
 
   <p>有一点要看清：这是一篇议论，不是一条史实。司马光对智伯的叙述与他对智伯的评价是两件事——故事里智伯做了什么，本书上一章照原文写了；这一章是他对那些事的判断。判断可以同意，也可以不同意，但先要看清楚他的定义和推论。思考一节最后一题问的就是这件事。</p>
 

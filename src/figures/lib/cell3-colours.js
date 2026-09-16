@@ -1,28 +1,45 @@
-// The organelle colours chapter 3 needs that `ORGANELLES` in palette.js does not yet carry, derived from
-// the ones it does carry so that nothing here is a new invented hex. Every entry is `mix()` of two
-// existing palette colours, so a change to the palette moves these with it.
+// The one table of the structures chapter 3 draws that `ORGANELLES` in src/palette.js does not name:
+// the plant cell's wall, vacuole and chloroplast, the cytoskeleton's three filaments and its motors, and
+// the prokaryote's envelope, DNA and appendages. Every colour is `mix()` of two palette colours, never a
+// hex of its own, so a change to the palette moves these with it. test/organelle-table.test.js fails a
+// literal hex here, a second structure table anywhere under src/figures/, and an id that `ORGANELLES`
+// already colours, so a chapter cannot give a structure the book has coloured a second colour.
 //
-// This file is a staging post, not a second palette. The integration owner is adding these ids to
-// `ORGANELLES` centrally (see the chapter brief, "Palette additions this chapter needs"); when they land
-// there, the figures import `ORGANELLE_BY_ID` for them and this file goes. Until then the four chapter-3
-// figures that need them (symbiont, cytoskeleton, cilium, plantcell3d) share this one table, so the
-// reader still learns one colour per structure.
+// Same shape as an `ORGANELLES` entry, { id, name, color, role }, so labels and click cards read from
+// one place. `organelle(id)` and `colourOf(id)` look up both tables. The ids are the ones the chapter
+// brief lists (biology/ch03-cells/FIGURES.md, "Palette additions this chapter needs") plus the
+// prokaryote's own layers (peptidoglycan, wallLine, lps, sLayer, flagellarMotor).
 //
-// The values these recipes produce, for the record:
-//   chloroplast #498c48 · thylakoid #3a6437 · wall #e2cc8f · middleLamella #de9e6a · vacuole #7298c4
-//   tonoplast #597290 · plasmodesma #dd7650 · microtubule #5a8184 · actin #b2755b
-//   intermediateFilament #827682 · motor #5f478b
+// Two workers built this chapter's figures in parallel and each kept a table of its own; this file is
+// the two folded into one, every recipe kept as it was. The pair disagreed twice, and both
+// disagreements are still visible here rather than settled in silence. The bacterial wall
+// (`peptidoglycan`, #dac37f) and the cellulose wall (`wall`, #e2cc8f) are both named "Cell wall" and
+// differ by a few steps of straw; giving them one colour recolours one figure, which is the author's
+// call and not a merge's. The flagellar motor (`flagellarMotor`, gold towards coral) is a rotary engine
+// in the membrane and not the motor protein (`motor`, violet) that walks a filament, so those two stay
+// apart. The prokaryote figure's hit-test ids and its describe().selected say `wall` and `motor`, so it
+// reads through CELL_COLOUR, CELL_COLOURS and partInfo at the end of this file, which map its two names
+// onto the ids here and change nothing else.
+//
+// Derived from LIGHT, as `ORGANELLES` is: those colours are single hexes used in both themes, and a
+// second, theme-dependent table would make the wall a different colour on a dark page from the one on a
+// light page. The values these recipes produce, for the record:
+//   wall #e2cc8f · middleLamella #de9e6a · vacuole #7298c4 · tonoplast #597290 · chloroplast #498c48
+//   thylakoid #3a6437 · plasmodesma #dd7650 · microtubule #5a8184 · actin #b2755b
+//   intermediateFilament #827682 · motor #5f478b · peptidoglycan #dac37f · wallLine #816920
+//   lps #daa45d · sLayer #84ab8c · capsule #a2bebb · nucleoid #5d4587 · plasmid #a592b8
+//   pilus #4d6261 · flagellum #255c65 · flagellarMotor #cf8a30
 import { ORGANELLE_BY_ID, LIGHT, mix } from '../../palette.js';
 
 const O = ORGANELLE_BY_ID;
+const L = LIGHT;
 
-const chloroplast = mix(LIGHT.leaf, O.peroxisome.color, 0.35);
-const wall = mix(LIGHT.gold, O.cytoplasm.color, 0.6);
+const chloroplast = mix(L.leaf, O.peroxisome.color, 0.35);
+const wall = mix(L.gold, O.cytoplasm.color, 0.6);
 const vacuole = mix(O.smoothER.color, O.chromatin.color, 0.45);
 
-// Same shape as an ORGANELLES entry: { id, name, color, role }, so the labels and the click cards read
-// from one place and the table can be pasted into palette.js unchanged.
 export const EXTRA_ORGANELLES = Object.freeze([
+  // ----- the plant cell (plantcell3d, symbiont) -----
   {
     id: 'wall',
     name: 'Cell wall',
@@ -32,7 +49,7 @@ export const EXTRA_ORGANELLES = Object.freeze([
   {
     id: 'middleLamella',
     name: 'Middle lamella',
-    color: mix(wall, LIGHT.coral, 0.45),
+    color: mix(wall, L.coral, 0.45),
     role: 'A layer of pectin glueing one cell wall to the next — the same substance that sets jam.',
   },
   {
@@ -44,7 +61,7 @@ export const EXTRA_ORGANELLES = Object.freeze([
   {
     id: 'tonoplast',
     name: 'Tonoplast',
-    color: mix(vacuole, LIGHT.ink, 0.3),
+    color: mix(vacuole, L.ink, 0.3),
     role: 'The vacuole’s own membrane, with the pumps that drive solutes in and water after them.',
   },
   {
@@ -56,38 +73,114 @@ export const EXTRA_ORGANELLES = Object.freeze([
   {
     id: 'thylakoid',
     name: 'Thylakoid',
-    color: mix(chloroplast, LIGHT.ink, 0.35),
+    color: mix(chloroplast, L.ink, 0.35),
     role: 'Flattened discs stacked into grana, holding the chlorophyll and the machinery that captures light.',
   },
   {
     id: 'plasmodesma',
     name: 'Plasmodesma',
-    color: mix(O.membrane.color, LIGHT.coral, 0.75),
+    color: mix(O.membrane.color, L.coral, 0.75),
     role: 'A channel through the wall lined with plasma membrane, joining the cytoplasm of one cell to the next.',
   },
+  // ----- the cytoskeleton (cytoskeleton, cilium) -----
   {
     id: 'microtubule',
     name: 'Microtubule',
-    color: mix(O.cytoskeleton.color, LIGHT.water, 0.5),
+    color: mix(O.cytoskeleton.color, L.water, 0.5),
     role: 'A hollow tube 25 nm across, built from thirteen rows of tubulin. It resists compression and carries motor traffic.',
   },
   {
     id: 'actin',
     name: 'Actin filament',
-    color: mix(O.cytoskeleton.color, LIGHT.coral, 0.5),
+    color: mix(O.cytoskeleton.color, L.coral, 0.5),
     role: 'Two twisted strands of actin, 7 nm across. It bears tension, and myosin walks along it.',
   },
   {
     id: 'intermediateFilament',
     name: 'Intermediate filament',
-    color: mix(O.cytoskeleton.color, LIGHT.violet, 0.25),
+    color: mix(O.cytoskeleton.color, L.violet, 0.25),
     role: 'A rope of coiled proteins 8–12 nm across. It bears tension and has no polarity, so no motor walks on it.',
   },
   {
     id: 'motor',
     name: 'Motor protein',
-    color: mix(LIGHT.violet, LIGHT.ink, 0.15),
+    color: mix(L.violet, L.ink, 0.15),
     role: 'Turns the energy in ATP into steps along a filament, always in one direction.',
+  },
+  // ----- the prokaryote (prokaryote) -----
+  {
+    // Peptidoglycan: a straw the gold token carries into the paper, so a wall reads as a fibrous,
+    // structural layer rather than as another organelle.
+    id: 'peptidoglycan',
+    name: 'Cell wall',
+    color: mix(L.gold, L.paper3, 0.5),
+    role: 'A mesh of sugar chains outside the membrane that holds the cell\'s shape and takes the pressure of the water flooding in.',
+  },
+  {
+    // The dye-holding mesh drawn as a line rather than a fill: the wall pushed back towards the ink.
+    id: 'wallLine',
+    name: 'Wall mesh',
+    color: mix(L.gold, L.ink, 0.42),
+    role: 'The cross-linked strands of the wall.',
+  },
+  {
+    // Lipopolysaccharide, the sugar coat on a gram-negative outer membrane: the membrane's own salmon
+    // carried towards gold, because it is a sugar on a membrane.
+    id: 'lps',
+    name: 'Lipopolysaccharide',
+    color: mix(O.membrane.color, L.gold, 0.45),
+    role: 'Sugar chains on the outer face of a gram-negative outer membrane; a barrier to drugs, and what your immune system reads as danger.',
+  },
+  {
+    // The archaeal S-layer: a protein lattice, so the leaf token taken well into the paper.
+    id: 'sLayer',
+    name: 'S-layer',
+    color: mix(L.leaf, L.paper3, 0.45),
+    role: 'A lattice of interlocking protein subunits that many archaea wear instead of a wall.',
+  },
+  {
+    // A loose polysaccharide slime, drawn translucent: the water token taken far into the paper.
+    id: 'capsule',
+    name: 'Capsule',
+    color: mix(L.water, L.paper3, 0.62),
+    role: 'A slippery polysaccharide coat that helps a cell stick to surfaces and makes it hard for an immune cell to grip.',
+  },
+  {
+    // Bacterial DNA stays in the violet family the book uses for information, one step deeper than
+    // `chromatin` so a nucleoid does not read as a nucleus.
+    id: 'nucleoid',
+    name: 'Nucleoid',
+    color: mix(L.violet, L.ink, 0.18),
+    role: 'The region where a prokaryote\'s circular chromosome sits, with no membrane around it.',
+  },
+  {
+    // Plasmids: the same family, lighter, because they are small, separate and dispensable.
+    id: 'plasmid',
+    name: 'Plasmid',
+    color: mix(L.violet, L.paper3, 0.45),
+    role: 'A small ring of DNA that copies itself independently and can pass from cell to cell.',
+  },
+  {
+    // Fine protein hairs, cooler and darker than the cytoskeleton grey so they read against a capsule.
+    id: 'pilus',
+    name: 'Pilus',
+    color: mix(L.inkSoft, L.water, 0.3),
+    role: 'A short protein filament used to stick to surfaces, and in one specialised form to pass a plasmid to another cell.',
+  },
+  {
+    // The propeller: the water token taken towards the ink so a helix stays legible against the medium.
+    id: 'flagellum',
+    name: 'Flagellum',
+    color: mix(L.water, L.ink, 0.35),
+    role: 'A stiff helical propeller of protein, spun by a rotary motor in the membrane.',
+  },
+  {
+    // The rotary motor: gold carried towards coral, because it is the one part of these structures that
+    // is doing work.
+    id: 'flagellarMotor',
+    name: 'Motor',
+    color: mix(L.gold, L.coral, 0.4),
+    role: 'The rings of protein in the membrane that turn the filament, driven by protons flowing into the cell.',
   },
 ]);
 
@@ -101,3 +194,18 @@ export function organelle(id) {
 }
 
 export const colourOf = (id) => organelle(id).color;
+
+// ----- the prokaryote figure's view -----
+// The ten parts it colours, under its own names: its `wall` is the peptidoglycan layer and its `motor`
+// the flagellar motor, and both words are hit-test ids its describe() reports, so they stay its words.
+const PROKARYOTE_IDS = Object.freeze({ wall: 'peptidoglycan', motor: 'flagellarMotor' });
+const PROKARYOTE_PARTS = ['wall', 'wallLine', 'lps', 'sLayer', 'capsule', 'nucleoid', 'plasmid', 'pilus', 'flagellum', 'motor'];
+
+export const CELL_COLOURS = Object.freeze(Object.fromEntries(PROKARYOTE_PARTS.map((k) => [k, EXTRA_BY_ID[PROKARYOTE_IDS[k] ?? k]])));
+export const CELL_COLOUR = Object.freeze(Object.fromEntries(PROKARYOTE_PARTS.map((k) => [k, CELL_COLOURS[k].color])));
+
+// One lookup for a clicked part, whichever table names it; null for a part with no colour of its own,
+// which the figure then finds in its own list of uncoloured parts.
+export function partInfo(id) {
+  return O[id] || CELL_COLOURS[id] || null;
+}

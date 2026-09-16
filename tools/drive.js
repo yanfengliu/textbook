@@ -10,15 +10,19 @@
 // Bound: one viewport (1000x640), the light theme, the steps listed, and describe()'s own account of
 // state, not the pixels; a control that reports the right state and draws the wrong thing passes, which
 // is what the screenshots are for. A kind with no recipe fails, so a new figure cannot land undriven,
-// and a kind whose describe() uses one of the frame's four names (id, kind, number, state) fails too.
-// DRIVE_KINDS=<a,b> trims the run to those kinds, and a trimmed run proves only its part.
+// and a kind whose describe() uses one of the frame's four names (id, kind, number, state) fails too,
+// as does one the frame holds no handle for or whose handle has no describe(): the ownership check
+// inspects the figure's own describe(), and a subject it cannot find is a failure, not a clean result.
+// DRIVE_KINDS=<a,b> trims the run to those kinds, a trimmed run proves only its part, and a name that
+// is not a registered kind stops the run rather than running on to "no recipe" (tools/lib/trim.js).
 import { mkdirSync, rmSync } from 'node:fs';
 import { startServer } from './serve.js';
 import { launch, collectErrors, openPage, ACTION_TIMEOUT_MS } from './lib/browser.js';
+import { trim } from './lib/trim.js';
 import { KINDS } from '../src/figures/registry.js';
 
 const OUT = 'out/drive';
-const wanted = process.env.DRIVE_KINDS ? process.env.DRIVE_KINDS.split(',') : KINDS;
+const wanted = trim('DRIVE_KINDS', KINDS, { noun: 'kind' });
 
 const expect = (cond, msg) => {
   if (!cond) throw new Error(msg);
@@ -369,14 +373,22 @@ const RECIPES = {
     }],
     ['pull-a-neighbour-until-it-snaps', async (h) => {
       const before = await h.describe();
+      expect(before.dragging === false && before.snapped === false, `nothing should be held before the pull: ${JSON.stringify({ dragging: before.dragging, snapped: before.snapped })}`);
       await h.button(/^Pull a neighbour/).click();
       await h.page.waitForTimeout(400);
       const d = await h.describe();
       expect(d.dragging === true, 'the pull did not register');
-      expect(d.bondsHeld <= before.bondsHeld, `pulling one away should not raise the count: ${before.bondsHeld} -> ${d.bondsHeld}`);
+      // The pull holds one neighbour at 4.6 Å, past the 3.65 Å its bond gives way at, so `snapped` is
+      // the figure's own verdict on that bond and does not depend on the clock. The other three bonds
+      // blink on their own periods, so a count read before the click and again after it can rise on its
+      // own (this step went red once, 2 -> 3, with no defect); what the count cannot do while one
+      // neighbour is held away is reach four.
+      expect(d.snapped === true, `the pulled neighbour's bond should have given way: ${JSON.stringify(d)}`);
+      expect(d.bondsHeld <= 3, `with a neighbour held past the snap distance the count cannot be four: ${d.bondsHeld}`);
       await h.button(/^Let it go/).click();
       await h.page.waitForTimeout(600);
-      expect((await h.describe()).dragging === false, 'letting go did not release it');
+      const after = await h.describe();
+      expect(after.dragging === false && after.snapped === false, `letting go did not release it: ${JSON.stringify({ dragging: after.dragging, snapped: after.snapped })}`);
     }],
     ['labels-toggle', async (h) => {
       const before = (await h.describe()).labels;
@@ -872,6 +884,18 @@ const RECIPES = {
       expect(d.beating === true && d.bendAmplitudeUm > 0.05, `the shaft should bend: ${JSON.stringify(d)}`);
       expect(d.activeDoublets.length === 3 && d.activeDoublets.every((i) => i >= 1 && i <= 9), `three doublets drive a stroke: ${JSON.stringify(d.activeDoublets)}`);
       expect(d.stroke === 'effective' || d.stroke === 'recovery', `stroke ${d.stroke}`);
+      // The reader is told, not just the gate: the readout names the stroke and the doublets driving it.
+      // describe() reported both before any readout existed, so this reads the stage's own text and
+      // demands it agree with describe() at the same instant.
+      const [text, now] = await h.page.evaluate((id) => {
+        const el = document.getElementById(id);
+        return [el.querySelector('.cl-read')?.textContent ?? '', el.describe()];
+      }, 'lab-cilium');
+      expect(new RegExp(now.stroke === 'effective' ? '^Effective' : '^Recovery').test(text), `the readout should name the ${now.stroke} stroke: ${JSON.stringify(text)}`);
+      expect(now.activeDoublets.every((i) => new RegExp(`\\b${i}\\b`).test(text)), `the readout should name doublets ${now.activeDoublets.join(', ')}: ${JSON.stringify(text)}`);
+      // The section caption names the region as well as the arrangement.
+      const caption = await h.stage.locator('.cl-caption').textContent();
+      expect(/shaft/.test(caption) && /9\+2/.test(caption), `the section caption should name the region and the arrangement: ${JSON.stringify(caption)}`);
     }],
     ['the-frequency-slider', async (h) => {
       await h.stage.locator('input[type=range]').first().fill('20');
@@ -983,8 +1007,17 @@ const RECIPES = {
       await h.page.waitForTimeout(1000);
       const d = await h.describe();
       expect(d.comparison === true, 'Compare did not register');
-      const panel = await h.stage.locator('.pc-compare').textContent();
-      expect(/Plant only/.test(panel) && /Animal only/.test(panel) && /chloroplast/i.test(panel) && /lysosome/i.test(panel), `the comparison panel should list what differs: ${JSON.stringify(panel.slice(0, 80))}`);
+      // The comparison is two captions under the two cells, each naming what only that cell has, and
+      // the two animal-only structures labelled on the animal cell. It was a panel that covered the
+      // animal cell, and this step read the panel's text, so it passed over the defect.
+      const captions = await h.stage.locator('.pc-title:visible').allTextContents();
+      expect(captions.length === 2, `two captions should hang under the two cells, not ${captions.length}`);
+      const plant = captions.find((t) => /^Plant cell/.test(t)) || '';
+      const animal = captions.find((t) => /^Animal cell/.test(t)) || '';
+      expect(/chloroplasts/.test(plant) && /plasmodesmata/.test(plant), `the plant cell's caption should name what only it has: ${JSON.stringify(plant)}`);
+      expect(/lysosomes/.test(animal) && /centrosome/.test(animal), `the animal cell's caption should name what only it has: ${JSON.stringify(animal)}`);
+      const shown = await h.stage.locator('.fig-label:visible').allTextContents();
+      expect(shown.includes('Lysosome') && shown.includes('Centrosome'), `the animal-only structures should be labelled on the animal cell; labels shown: ${shown.join(', ')}`);
     }],
     ['follow-a-plasmodesma', async (h) => {
       await h.button(/^Follow a plasmodesma/).click();
@@ -992,6 +1025,17 @@ const RECIPES = {
       const d = await h.describe();
       expect(d.following === true && d.cut === true && d.comparison === false, `following should cut and leave the comparison: ${JSON.stringify(d)}`);
       expect(d.view.distance < 12, `the camera should be close to the channel: ${d.view.distance}`);
+      // What the view is for: the lining and the strand of ER through it, named on the channel itself.
+      // Before this assertion the label went to a channel 11 µm off the stage and nothing was labelled.
+      const shown = await h.stage.locator('.fig-label:visible').allTextContents();
+      for (const want of ['Plasmodesma', 'Plasma membrane', 'Desmotubule']) expect(shown.some((t) => t.startsWith(want)), `the plasmodesma view should label "${want}"; labels shown: ${shown.join(', ')}`);
+      // The card explains it and Escape dismisses it; it used to come straight back.
+      expect(await h.stage.locator('.fig-card:visible').count() === 1, 'the plasmodesma card should be showing');
+      await h.focusable().focus();
+      await h.page.keyboard.press('Escape');
+      await h.page.waitForTimeout(200);
+      expect(await h.stage.locator('.fig-card:visible').count() === 0, 'Escape did not dismiss the plasmodesma card');
+      expect((await h.describe()).following === true, 'dismissing the card must not leave the view');
     }],
     ['and-come-back-to-the-whole-cell', async (h) => {
       await h.button(/^Follow a plasmodesma/).click();
@@ -1634,13 +1678,33 @@ try {
     };
     // The frame owns id, kind, number and state; describe() spreads them last so a figure cannot
     // change what a gate reads. A figure that uses one of those names would have its own value dropped
-    // in silence, so it is a failure here rather than a surprise later.
-    const shadowed = await page.evaluate((figId) => {
-      const own = window.__textbook?.figures?.[figId]?.handle?.describe?.() || {};
-      return ['id', 'kind', 'number', 'state'].filter((k) => Object.hasOwn(own, k));
+    // in silence, so it is a failure here rather than a surprise later. The subject is the handle the
+    // frame mounted, read off the element, and it must be the one the frame published for the other
+    // gates (sweep3d reads window.__textbook.figures[id].handle). A missing handle, a describe() that is
+    // not a function, or a describe() that returns no object is a failure of its own and not a clean
+    // result: the first version read it through four `?.` and an `|| {}`, so no handle meant no field
+    // and no finding (review, 2026-09-16).
+    const own = await page.evaluate((figId) => {
+      const el = document.getElementById(figId);
+      const handle = el?.handle;
+      const published = window.__textbook?.figures?.[figId]?.handle;
+      if (!handle) return { problem: `the frame holds no handle for it (document.getElementById("${figId}").handle is ${String(handle)}), so its own describe() could not be inspected` };
+      if (typeof handle.describe !== 'function') return { problem: `its handle has no describe() function (describe is ${typeof handle.describe}), so the figure reports nothing of its own to inspect` };
+      if (published !== handle) return { problem: `the handle the frame mounted is not the one it published at window.__textbook.figures["${figId}"].handle (published: ${published === undefined ? 'nothing' : typeof published}), so the other gates would read a different figure` };
+      let d;
+      try {
+        d = handle.describe();
+      } catch (err) {
+        return { problem: `its own describe() threw: ${err.message}` };
+      }
+      if (!d || typeof d !== 'object') return { problem: `its own describe() returned ${d === null ? 'null' : typeof d} rather than an object` };
+      return { shadowed: ['id', 'kind', 'number', 'state'].filter((k) => Object.hasOwn(d, k)) };
     }, id);
-    if (shadowed.length) {
-      const msg = `describe() uses ${shadowed.map((k) => `"${k}"`).join(', ')}, which the frame owns; rename the figure's own field (foldlab reports foldState)`;
+    if (own.problem) {
+      failures.push(`${kind}: ${own.problem}`);
+      console.log(`FAIL ${kind}: ${own.problem}`);
+    } else if (own.shadowed.length) {
+      const msg = `describe() uses ${own.shadowed.map((k) => `"${k}"`).join(', ')}, which the frame owns; rename the figure's own field (foldlab reports foldState)`;
       failures.push(`${kind}: ${msg}`);
       console.log(`FAIL ${kind}: ${msg}`);
     }

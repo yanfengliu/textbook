@@ -514,7 +514,9 @@ export function mount(root, ctx) {
       { kind: 'CO2', symbol: 'CO₂ + H₂O', gloss: 'what it becomes', mmol: sp.co2, empty: 'none yet' },
     ];
     if (beaker === 'plasma') {
-      groups.push({ kind: 'CO2gone', symbol: 'CO₂ ↑', gloss: 'breathed out', mmol: Math.max(0, A), empty: 'none breathed out yet' });
+      // 'none yet', like the field before it: 'none breathed out yet' is a hundred pixels at the
+      // smallest size it may be set in, and the third field of a phone's window is ninety wide.
+      groups.push({ kind: 'CO2gone', symbol: 'CO₂ ↑', gloss: 'breathed out', mmol: Math.max(0, A), empty: 'none yet' });
       return { groups, arrow: '+ H⁺ →', note: 'the lungs carry the CO₂ away, so the pair is not used up as fast' };
     }
     return { groups, arrow: '+ H⁺ →', note: 'closed: the CO₂ stays, and the bicarbonate runs out' };
@@ -639,7 +641,13 @@ export function mount(root, ctx) {
 
     const fieldTop = headY + 9;
     const fieldBot = footTop - 8;
-    const arrowW = arrow && w > 330 ? clamp(w * 0.12, 44, 60) : 10;
+    // The gap between fields carries the reaction arrow. On a pane wide enough it is one line,
+    // '+ H⁺ →', in a gap sized for it; on a tight pane — a phone, or a tablet's narrow column — the
+    // gap is 28 px and the arrow is set as two short lines, what is added over the arrow it drives.
+    // It was a 10 px gap with the one-line arrow centred on it, so the '→' sat under the first CO₂
+    // counter and '24.0 mmol/L' ran straight into 'CO₂ + H₂O' on the heading line above.
+    const tight = w <= 330;
+    const arrowW = arrow ? (tight ? 28 : clamp(w * 0.12, 44, 60)) : 10;
     const gw = (w - arrowW * (groups.length - 1)) / groups.length;
     const nameSize = clamp(gw * 0.08, 10, 12.4);
     // On a phone the field heading is the species and its figure and nothing else: the gloss under it
@@ -653,9 +661,8 @@ export function mount(root, ctx) {
     const twoLine = groups.some((grp) => est(grp.symbol, nameSize) + est(`${grp.mmol.toFixed(1)} mmol/L`, nameSize - 0.6) + 8 > gw);
     const amountDy = twoLine ? nameSize + 1 : 0;
     const top = fieldTop + nameSize + amountDy + glossSize + (narrow ? 6 : 12);
-    // On a phone the field is proportionally tighter than the gap beside it, so the counters keep a
-    // gutter at the right and the '+ H⁺ →' in the gap has room of its own. Wide there is room without.
-    const usable = gw - (narrow ? cellW * 0.45 : 0);
+    // The counters have the whole field: the gap beside it is sized for the arrow it carries.
+    const usable = gw;
     const cols = Math.max(1, Math.floor(usable / cellW));
     // Never more rows than fit above the foot. Rounded up to one, the single row was drawn straddling
     // the equilibrium line under it on a 390 px phone.
@@ -712,7 +719,14 @@ export function mount(root, ctx) {
       // The arrow sits with the counters, not with the figures: on the heading line it ran straight into
       // '24.0 mmol/L' on one side and 'CO₂ + H₂O' on the other and the three read as one sentence.
       if (arrow && gi < groups.length - 1) {
-        insetSvg.append(text(gx + gw + arrowW / 2, top + cellH * 0.5 + 4, gi === 0 ? arrow : '→', { anchor: 'middle', fill: C.soft, 'font-size': 10.6, 'font-weight': 600 }));
+        const ax = gx + gw + arrowW / 2;
+        const ay = top + cellH * 0.5;
+        const arrowText = (str, y, size) => insetSvg.append(text(ax, y, str, { anchor: 'middle', fill: C.soft, 'font-size': size, 'font-weight': 600 }));
+        if (!tight) arrowText(gi === 0 ? arrow : '→', ay + 4, 10.6);
+        else if (gi === 0) {
+          arrowText(arrow.replace(/\s*→$/, ''), ay - 1, 9.6);
+          arrowText('→', ay + 10, 9.6);
+        } else arrowText('→', ay + 4, 9.6);
       }
     });
   }

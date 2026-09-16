@@ -73,10 +73,16 @@ let figureCounter = 0;
 // had, fixed the same way and on the same day: a language-dependent token read from the document, with
 // English as the default so an English page is untouched. The number itself is language-neutral and is
 // what `describe()` and the gates address.
-const FIGURE_WORDS = { en: 'Figure', zh: '圖' };
+//
+// **Keyed on the full language tag, not just the base language.** A page declares `lang="zh-Hans"` or
+// `lang="zh-Hant"` and the two write this word differently: 图 and 圖. Keying on `zh` alone gave every
+// Chinese page the Traditional 圖, so a Simplified book printed 圖 3.1 in a caption and `npm run shot`
+// caught it — the gate compares a caption's figure word against the page's own script, and it was reading
+// a word the page never wrote. The base-language fallback stays for a page that declares only `zh`.
+const FIGURE_WORDS = { en: 'Figure', zh: '图', 'zh-hans': '图', 'zh-hant': '圖' };
 function figureWord() {
   const lang = (document.documentElement.getAttribute('lang') || 'en').toLowerCase();
-  return FIGURE_WORDS[lang.split('-')[0]] ?? FIGURE_WORDS.en;
+  return FIGURE_WORDS[lang] ?? FIGURE_WORDS[lang.split('-')[0]] ?? FIGURE_WORDS.en;
 }
 
 export class TbFigure extends HTMLElement {
@@ -122,7 +128,10 @@ export class TbFigure extends HTMLElement {
     const caption = this.querySelector('figcaption');
     const fallback = this.querySelector('[data-fallback]');
     const figure = document.createElement('figure');
-    figure.setAttribute('aria-label', `Figure ${this.number}: ${info.title}`);
+    // The label a screen reader hears before the figure's title, in the page's own script — the same word
+    // the caption carries. It was the literal `Figure`, which put an English word in front of every
+    // Chinese figure's title, and `npm run shot` fails a page whose figure label is not in its language.
+    figure.setAttribute('aria-label', `${figureWord()} ${this.number}: ${info.title}`);
     const stage = document.createElement('div');
     stage.className = 'tb-figure__stage';
     stage.style.setProperty('--fig-aspect', String(info.aspect));
