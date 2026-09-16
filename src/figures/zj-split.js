@@ -1,11 +1,11 @@
-// 三家分晉 — the figure for 卷一 周紀一's opening: what each of its three dates actually is.
+// 三家分晋 — the figure for 卷一 周纪一's opening: what each of its three dates actually is.
 //
-// The mistake this figure exists to prevent is reading 前403年 as the year 晉 was divided. It was not.
-// 通鑑 opens at the year the 周 king recognised three of 晉's 大夫 as 諸侯 — 「初命晉大夫魏斯、趙籍、
-// 韓虔為諸侯」 — an act of naming, not of drawing borders. The land had already moved at 晉陽 (453,
-// narrated by 通鑑 as background inside the 403 entry, with no year of its own) and 晉 itself lived on
+// The mistake this figure exists to prevent is reading 前403年 as the year 晋 was divided. It was not.
+// 通鉴 opens at the year the 周 king recognised three of 晋's 大夫 as 诸侯 — 「初命晋大夫魏斯、赵籍、
+// 韩虔为诸侯」 — an act of naming, not of drawing borders. The land had already moved at 晋阳 (453,
+// narrated by 通鉴 as background inside the 403 entry, with no year of its own) and 晋 itself lived on
 // until 376, when its last lord was deposed. So the figure has three steps, and each step says what that
-// date *is*, with the sentence 通鑑 gives it.
+// date *is*, with the sentence 通鉴 gives it.
 //
 // The drawing is the state as a plate: the 周 court on its head rule, the three houses across its middle,
 // the 智 clan's band under them, the 公室's band at the foot. Stepping changes what the plate says; at
@@ -29,7 +29,7 @@ import { h } from './lib/svg.js';
 
 export const meta = {
   kind: 'zj-split',
-  title: '三家分晉：從滅智到命侯',
+  title: '三家分晋：从灭智到命侯',
   needsWebGL: false,
   aspect: 16 / 10,
   // At a 390px stage the one-column composition needs about 550px for the plate, the sentence, the
@@ -37,7 +37,7 @@ export const meta = {
   narrowAspect: 2 / 3,
 };
 
-// The step the figure opens on when no clock is pinned: 前403年, the date the 通鑑 itself opens at.
+// The step the figure opens on when no clock is pinned: 前403年, the date the 通鉴 itself opens at.
 const DEFAULT_ORDER = 1;
 
 const STEPS = [
@@ -45,19 +45,19 @@ const STEPS = [
     key: 'jinyang',
     year: -453,
     yearLabel: '前453',
-    frame: '周貞定王十六年',
-    king: '貞定王',
+    frame: '周贞定王十六年',
+    king: '贞定王',
     kingYear: '十六年',
-    courtNote: '通鑑此年無目',
-    event: '晉陽之戰 · 智伯之死',
+    courtNote: '通鉴此年无目',
+    event: '晋阳之战 · 智伯之死',
     stopName: '智伯死',
     quote: '遂殺智伯，盡滅智氏之族。',
-    source: '《資治通鑑》卷一 · 繫於前403年條內追敘',
-    note: '智伯率韓、魏圍趙晉陽，決水灌城；韓、魏反與趙合，殺智伯，盡滅智氏之族，三家分其田。通鑑不為此年立目，其事附見於前403年條。',
-    asideLabel: '異說',
-    aside: '胡三省繫於周貞定王十六年；皇甫謐別繫於元王十一年。',
-    zhiNote: '前四五三年，三家殺之，盡滅其族，分其田。',
-    dukeNote: '晉君之公室猶在',
+    source: '《资治通鉴》卷一 · 系于前403年条内追叙',
+    note: '智伯率韩、魏围赵晋阳，决水灌城；韩、魏反与赵合，杀智伯，尽灭智氏之族，三家分其田。通鉴不为此年立目，其事附见于前403年条。',
+    asideLabel: '异说',
+    aside: '胡三省系于周贞定王十六年；皇甫谧别系于元王十一年。',
+    zhiNote: '前四五三年，三家杀之，尽灭其族，分其田。',
+    dukeNote: '晋君之公室犹在',
     mark: '',
     commanded: false,
   },
@@ -69,16 +69,16 @@ const STEPS = [
     king: '威烈王',
     kingYear: '二十三年',
     courtNote: '天子之命',
-    event: '命三家為諸侯',
-    stopName: '命諸侯',
+    event: '命三家为诸侯',
+    stopName: '命诸侯',
     quote: '初命晉大夫魏斯、趙籍、韓虔為諸侯。',
-    source: '《資治通鑑》卷一 周紀一 · 開篇第一句',
-    note: '周天子命三位晉國大夫——魏斯、趙籍、韓虔——為諸侯。此年未嘗分割土地；所易者，名分而已。',
+    source: '《资治通鉴》卷一 周纪一 · 开篇第一句',
+    note: '周天子命三位晋国大夫——魏斯、赵籍、韩虔——为诸侯。此年未尝分割土地；所易者，名分而已。',
     asideLabel: '臣光曰',
     aside: '故三晉之列於諸侯，非三晉之壞禮，乃天子自壞之也。',
-    zhiNote: '智氏已滅，其田分入三家。',
-    dukeNote: '受命之後，晉君尚保絳、曲沃二城，與三家並立二十七年。',
-    mark: '《資治通鑑》全書始於此年',
+    zhiNote: '智氏已灭，其田分入三家。',
+    dukeNote: '受命之后，晋君尚保绛、曲沃二城，与三家并立二十七年。',
+    mark: '《资治通鉴》全书始于此年',
     commanded: true,
   },
   {
@@ -89,29 +89,29 @@ const STEPS = [
     king: '安王',
     kingYear: '二十六年',
     courtNote: '是年王崩，子烈王喜立',
-    event: '三家滅晉',
-    stopName: '晉亡',
+    event: '三家灭晋',
+    stopName: '晋亡',
     quote: '魏、韓、趙共廢晉靖公為家人而分其地。',
-    source: '《資治通鑑》卷一 · 安王二十六年',
-    note: '晉君被廢為庶人，公室餘地盡分。自前403年受命至此二十七年，晉亡。',
-    asideLabel: '異說',
-    aside: '一說前349年再分晉靜公殘餘食邑；通鑑繫於此年。',
-    zhiNote: '智氏已滅，其田分入三家。',
+    source: '《资治通鉴》卷一 · 安王二十六年',
+    note: '晋君被废为庶人，公室余地尽分。自前403年受命至此二十七年，晋亡。',
+    asideLabel: '异说',
+    aside: '一说前349年再分晋静公残余食邑；通鉴系于此年。',
+    zhiNote: '智氏已灭，其田分入三家。',
     dukeNote: '魏、韓、趙共廢晉靖公為家人而分其地。',
     mark: '',
     commanded: false,
   },
 ];
 
-// 魏、趙、韓 in 通鑑's own order, each with the place it holds in the 智伯 story and the line 通鑑 gives
+// 魏、赵、韩 in 通鉴's own order, each with the place it holds in the 智伯 story and the line 通鉴 gives
 // its man. The places are the ones the passage or 胡三省's 注 gives; no map is drawn, because no fetched
 // source gives coordinates and a coast-line nobody can check is a fact invented by the person drawing it.
-// The lineage is 通鑑's own sentence in B (「魏斯者，桓子之孫也，是為文侯」 and the two beside it); where
-// 世本 disagrees with it the book prints 通鑑 and notes the conflict, which is W4's prose to carry.
+// The lineage is 通鉴's own sentence in B (「魏斯者，桓子之孙也，是为文侯」 and the two beside it); where
+// 世本 disagrees with it the book prints 通鉴 and notes the conflict, which is W4's prose to carry.
 const HOUSES = [
-  { key: 'wei', char: '魏', man: '斯', place: '安邑', line: '桓子之孫，是為文侯' },
-  { key: 'zhao', char: '趙', man: '籍', place: '晉陽', line: '獻子之子，是為烈侯' },
-  { key: 'han', char: '韓', man: '虔', place: '平陽', line: '康子之孫，是為景侯' },
+  { key: 'wei', char: '魏', man: '斯', place: '安邑', line: '桓子之孙，是为文侯' },
+  { key: 'zhao', char: '赵', man: '籍', place: '晋阳', line: '献子之子，是为烈侯' },
+  { key: 'han', char: '韩', man: '虔', place: '平阳', line: '康子之孙，是为景侯' },
 ];
 
 // The stage sizes the three arrangements are cut for, in CSS pixels. 470 is where the full two-column
@@ -152,7 +152,7 @@ const CSS = `
 
 .tb-zjs .zjs-body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr); gap: var(--space-5); min-height: 0; }
 
-/* ---------- the plate: the 周 court above, the state of 晉 below ----------
+/* ---------- the plate: the 周 court above, the state of 晋 below ----------
    The plate is not a second surface: the stage is already the ground, so the plate is its rule and the
    one band that has to read as somewhere else — the court's. The band is mixed from --ink, which is dark
    on the light paper and light on the dark one, so it reads as the same band in both themes. */
@@ -183,7 +183,7 @@ const CSS = `
 .tb-zjs .zjs-house::before { content: ""; position: absolute; top: 0; left: 50%; width: 1px; height: 0.55rem;
   background: var(--zjs-seal); opacity: 0; }
 .tb-zjs.is-commanded .zjs-house::before { opacity: 1; }
-.tb-zjs .zjs-house-name { margin: 0; display: flex; align-items: baseline; gap: 0.3em; }
+.tb-zjs .zjs-house-name { margin: 0; display: flex; align-items: baseline; gap: 0.3em; line-height: 1.2; }
 .tb-zjs .zjs-house-char { font-family: var(--font-text); font-size: 2.3rem; font-weight: 500; line-height: 1; }
 .tb-zjs .zjs-house-man { font-family: var(--font-text); font-size: var(--text-lg); line-height: 1; color: var(--ink-soft); }
 .tb-zjs .zjs-house-place { margin: 0; font-size: var(--text-xs); letter-spacing: 0.12em; color: var(--ink-faint); }
@@ -202,7 +202,7 @@ const CSS = `
 .tb-zjs .zjs-band.is-dead .zjs-band-char { color: var(--ink-faint); text-decoration: line-through; text-decoration-thickness: 1px; }
 .tb-zjs .zjs-band.is-dead .zjs-band-note { color: var(--ink-faint); }
 
-/* ---------- the panel: what 通鑑 says at this date ----------
+/* ---------- the panel: what 通鉴 says at this date ----------
    The reading sits at the head of the column and the apparatus — the commentator's line, the volume, and
    the marker that this is where the book begins — at its foot, above a rule. A footnote is where 臣光曰
    belongs, and it keeps the page from being a paragraph adrift in white. */
@@ -279,8 +279,23 @@ const CSS = `
 /* Under 400px of height — a phone in landscape, a browser window at 800px — the plate keeps its names,
    its status line and its struck-through dead, and the panel keeps the date, the sentence and the book's
    own words. The lineage, the two band notes, the explanation, the 臣光曰 line and the volume come off:
-   at 480x300 the body row is 161px and the plate alone is 146 of it. A cut-off line reads as a bug; an
-   absent one does not. */
+   at 480x300 the body row is 161px and the plate has to be 147 of it. Every court label is nowrap and a
+   step down, because a span that wraps inside itself is what turned the reign year into three lines
+   there. A cut-off line reads as a bug; an absent one does not. */
+.tb-zjs[data-tiny="1"] { gap: var(--space-1); }
+.tb-zjs[data-tiny="1"] .zjs-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: var(--space-3); }
+.tb-zjs[data-tiny="1"] .zjs-court { padding: 0.15rem 0.4rem; gap: 0.25rem; }
+.tb-zjs[data-tiny="1"] .zjs-court-name { font-size: var(--text-base); }
+.tb-zjs[data-tiny="1"] .zjs-court-king { font-size: var(--text-sm); }
+.tb-zjs[data-tiny="1"] .zjs-court-year { font-size: 0.6875rem; white-space: nowrap; }
+.tb-zjs[data-tiny="1"] .zjs-court-king, .tb-zjs[data-tiny="1"] .zjs-court-name { white-space: nowrap; }
+.tb-zjs[data-tiny="1"] .zjs-seal { width: 1.25rem; height: 1.25rem; border-width: 1.5px; font-size: 0.8rem; line-height: 1.05rem; }
+.tb-zjs[data-tiny="1"] .zjs-house { padding: 0.2rem 0.1rem; gap: 0; }
+.tb-zjs[data-tiny="1"] .zjs-house-char { font-size: 1.25rem; }
+.tb-zjs[data-tiny="1"] .zjs-house-man { font-size: var(--text-xs); }
+.tb-zjs[data-tiny="1"] .zjs-band { padding: 0.15rem 0.5rem; }
+.tb-zjs[data-tiny="1"] .zjs-band-char { font-size: var(--text-base); }
+.tb-zjs[data-tiny="1"] .zjs-band-sub { font-size: 0.6875rem; }
 .tb-zjs[data-tiny="1"] .zjs-house-line,
 .tb-zjs[data-tiny="1"] .zjs-band-note,
 .tb-zjs[data-tiny="1"] .zjs-note,
@@ -288,20 +303,21 @@ const CSS = `
 .tb-zjs[data-tiny="1"] .zjs-source { display: none; }
 
 /* A stage under 545px of height is the one the lab gives a phone (the narrow gate's 342x513), where the
-   system Han fallback makes every line box taller than the book's Noto face does. At 342x513 the plate
-   alone is 181px of a 391px body and the reading panel wants 224, so the two band notes and the plain
-   explanation come off and what remains is 通鑑's own sentence, 臣光曰 and the mark — the original first,
+   system Han fallback makes every line box taller than the book's Noto face does. At 342x513 the body row
+   is 391px and the plate and the reading want 398, so the lineage line, the two band notes and the plain
+   explanation come off and what remains is 通鉴's own sentence, 臣光曰 and the mark — the original first,
    which is the book's rule everywhere else. The 390px page's own 585px stage, and every wider one, keeps
    all of it. This block sits after the tier blocks on purpose: it has their specificity, so source order
    is what makes it win. */
+.tb-zjs[data-tight="1"] .zjs-house-line,
 .tb-zjs[data-tight="1"] .zjs-band-note,
 .tb-zjs[data-tight="1"] .zjs-note { display: none; }
 .tb-zjs[data-tight="1"] .zjs-note { font-size: var(--text-xs); line-height: 1.4; }
 
 /* ---------- narrow: one column, the full reading, on a capped measure ----------
-   The stage is 390x585 here and the reading — the plate, the date, 通鑑's sentence, the explanation and
+   The stage is 390x585 here and the reading — the plate, the date, 通鉴's sentence, the explanation and
    the 臣光曰 line — comes to about 550px of it. What goes is the volume line, which the figure's own
-   caption carries (the chapter prints 圖 1.1 and the volume), and the paddings come in a step. */
+   caption carries (the chapter prints 图 1.1 and the volume), and the paddings come in a step. */
 .tb-zjs[data-tier="narrow"] { width: min(34rem, 100%); inset: 0 auto 0 50%; transform: translateX(-50%);
   gap: var(--space-2); padding: var(--space-3) var(--space-3) var(--space-2); }
 .tb-zjs[data-tier="narrow"] .zjs-folio { display: none; }
@@ -335,9 +351,9 @@ const CSS = `
 `;
 
 function houseCell(spec) {
-  const pre = h('span', { class: 'zjs-pre', text: '晉大夫' });
+  const pre = h('span', { class: 'zjs-pre', text: '晋大夫' });
   const arrow = h('span', { class: 'zjs-arrow', text: '→' });
-  const post = h('b', { class: 'zjs-post', text: '諸侯' });
+  const post = h('b', { class: 'zjs-post', text: '诸侯' });
   return h('div', { class: 'zjs-house', 'data-house': spec.key }, [
     h('p', { class: 'zjs-house-name' }, [
       h('span', { class: 'zjs-house-char', text: spec.char }),
@@ -358,8 +374,8 @@ export function mount(root, ctx) {
   wrap.append(h('style', { text: CSS }));
 
   const head = h('div', { class: 'zjs-head' }, [
-    h('p', { class: 'zjs-rubric', text: '三家分晉' }),
-    h('p', { class: 'zjs-folio', text: '資治通鑑 · 卷一 周紀一' }),
+    h('p', { class: 'zjs-rubric', text: '三家分晋' }),
+    h('p', { class: 'zjs-folio', text: '资治通鉴 · 卷一 周纪一' }),
   ]);
 
   // ---------- the plate ----------
@@ -376,14 +392,14 @@ export function mount(root, ctx) {
   ]);
 
   const cells = HOUSES.map(houseCell);
-  const plateLabel = h('p', { class: 'zjs-plate-label', 'data-jin': '存', text: '晉' });
+  const plateLabel = h('p', { class: 'zjs-plate-label', 'data-jin': '存', text: '晋' });
   const houses = h('div', { class: 'zjs-houses' }, [plateLabel, ...cells]);
 
   const zhiNote = h('p', { class: 'zjs-band-note', text: STEPS[0].zhiNote });
   const zhiBand = h('div', { class: 'zjs-band is-dead' }, [
     h('p', { class: 'zjs-band-name' }, [
       h('span', { class: 'zjs-band-char', text: '智' }),
-      h('span', { class: 'zjs-band-sub', text: '瑤（智伯）' }),
+      h('span', { class: 'zjs-band-sub', text: '瑶（智伯）' }),
     ]),
     zhiNote,
   ]);
@@ -391,8 +407,8 @@ export function mount(root, ctx) {
   const dukeNote = h('p', { class: 'zjs-band-note', text: STEPS[0].dukeNote });
   const dukeBand = h('div', { class: 'zjs-band' }, [
     h('p', { class: 'zjs-band-name' }, [
-      h('span', { class: 'zjs-band-char', text: '晉' }),
-      h('span', { class: 'zjs-band-sub', text: '公室 · 絳、曲沃' }),
+      h('span', { class: 'zjs-band-char', text: '晋' }),
+      h('span', { class: 'zjs-band-sub', text: '公室 · 绛、曲沃' }),
     ]),
     dukeNote,
   ]);
@@ -456,10 +472,10 @@ export function mount(root, ctx) {
     dukeNote.textContent = s.dukeNote;
     dukeBand.classList.toggle('is-dead', s.key === 'end');
     plateLabel.dataset.jin = s.key === 'end' ? '亡' : '存';
-    plateLabel.textContent = s.key === 'end' ? '晉（亡）' : '晉';
-    // 晉大夫 at 前453年; 晉大夫 → 諸侯 at 前403年, which is the change the year consists of; 諸侯 after.
+    plateLabel.textContent = s.key === 'end' ? '晋（亡）' : '晋';
+    // 晋大夫 at 前453年; 晋大夫 → 诸侯 at 前403年, which is the change the year consists of; 诸侯 after.
     // At a stage under 400px tall the three parts collapse to the one that is true now — a cell 50px wide
-    // cannot hold 「晉大夫 → 諸侯」 on one line, and a wrapped title is what pushed the plate past the
+    // cannot hold 「晋大夫 → 诸侯」 on one line, and a wrapped title is what pushed the plate past the
     // body row at 480x300.
     for (const cell of cells) {
       const pre = cell.querySelector('.zjs-pre');
@@ -543,8 +559,8 @@ export function mount(root, ctx) {
         phase: s.key,
         frame: s.frame,
         houses: HOUSES.map((x) => x.char),
-        houseStatus: s.key === 'jinyang' ? '晉大夫' : s.key === 'investiture' ? '大夫→諸侯' : '諸侯',
-        zhi: '滅',
+        houseStatus: s.key === 'jinyang' ? '晋大夫' : s.key === 'investiture' ? '大夫→诸侯' : '诸侯',
+        zhi: '灭',
         jinRemnant: s.key === 'end' ? '亡' : '存',
         commanded: s.commanded,
         tier,

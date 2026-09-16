@@ -1,9 +1,9 @@
-// 字與詞 — how single characters become words, which is the book's central lesson.
+// 字与词 — how single characters become words, which is the book's central lesson.
 //
-// 大夫 is not "big" + "man". 諸侯 is not "many" + "marquis". But 為後 — 為 "to make", 後 "heir" — is
+// 大夫 is not "big" + "man". 诸侯 is not "many" + "marquis". But 为后 — 为 "to make", 后 "heir" — is
 // exactly the sum of its two characters, and that contrast is the thing a reader has to be able to make:
-// some adjacent characters are a 詞 with a meaning of its own, some are a phrase built from its parts.
-// So the reader picks characters out of 通鑑's own sentences and the figure says which of the two they
+// some adjacent characters are a 词 with a meaning of its own, some are a phrase built from its parts.
+// So the reader picks characters out of 通鉴's own sentences and the figure says which of the two they
 // have picked, with each character's own gloss set above the compound's.
 //
 // Where the meanings come from. A chapter page imports tongjian/lexicon.js and tongjian/words.js and
@@ -20,7 +20,7 @@
 // tongjian/lexicon.js so both arms of the figure say the same thing. If the two ever disagree the
 // figure is teaching something the book does not say, so it is kept to what the book's own entries say.
 //
-// Clock: one unit per taught word, in WORD_ORDER (0 = 大夫, 1 = 諸侯, 2 = 為後); the clock selects that
+// Clock: one unit per taught word, in WORD_ORDER (0 = 大夫, 1 = 诸侯, 2 = 为后); the clock selects that
 // word's run in the 原文. describe() -> { selection, chars, entryType, pinyin, pos, gloss, mark, line,
 // source, pairs, tier, reduced }.
 //
@@ -31,7 +31,7 @@ import { h } from './lib/svg.js';
 
 export const meta = {
   kind: 'zj-words',
-  title: '字與詞',
+  title: '字与词',
   needsWebGL: false,
   aspect: 16 / 10,
   // Measured at a 342px stage — the lab's stage at a 390px phone viewport, which is where `npm run narrow`
@@ -43,10 +43,10 @@ export const meta = {
 };
 
 // Two sentences of 卷一, verbatim, every character pickable. The first is the book's opening line; the
-// second is where 為後 comes from. Punctuation is set in its own cell and is not a control.
+// second is where 为后 comes from. Punctuation is set in its own cell and is not a control.
 const LINES = [
-  { id: 'open', text: '初命晉大夫魏斯、趙籍、韓虔為諸侯。', source: '卷一 周紀一 · 開篇' },
-  { id: 'heir', text: '初，智宣子將以瑤為後。', source: '卷一 · 智宣子立後' },
+  { id: 'open', text: '初命晉大夫魏斯、趙籍、韓虔為諸侯。', source: '卷一 周纪一 · 开篇' },
+  { id: 'heir', text: '初，智宣子將以瑤為後。', source: '卷一 · 智宣子立后' },
 ];
 
 const PUNCT = '，、。；：？！「」（）';
@@ -59,9 +59,9 @@ const WORD_ORDER = ['大夫', '諸侯', '為後'];
 // keyed here is still shown — its characters' glosses above its own — but with no mark and no claim,
 // because the figure has nothing true to say about how that particular compound is put together.
 const TEACH = {
-  '大夫': { chars: ['大', '夫'], mark: '非兩字相加', taught: '「大」「夫」兩字相加是「大人」；「大夫」是一個官名。' },
-  '諸侯': { chars: ['諸', '侯'], mark: '另成一詞', taught: '「諸」是眾，「侯」是爵位；「諸侯」是一個固定的名號，不是「許多侯」。' },
-  '為後': { chars: ['為', '後'], mark: '兩字相加', taught: '「為」是立，「後」是繼嗣；這是動賓短語，意思正是兩字相加——與「大夫」正相反。' },
+  '大夫': { chars: ['大', '夫'], mark: '非两字相加', taught: '「大」「夫」两字相加是「大人」；「大夫」是一个官名。' },
+  '諸侯': { chars: ['諸', '侯'], mark: '另成一词', taught: '「諸」是众，「侯」是爵位；「諸侯」是一个固定的名号，不是「许多侯」。' },
+  '為後': { chars: ['為', '後'], mark: '两字相加', taught: '「為」是立，「後」是继嗣；这是动宾短语，意思正是两字相加——与「大夫」正相反。' },
 };
 
 // The figure's minimal set, used only where no page registry exists. Every gloss is the book's own,
@@ -72,17 +72,17 @@ const SEED = {
       pinyin: 'dà fū',
       pos: '名',
       gloss: '官名。诸侯之下、士之上的爵位。',
-      note: '《通鑑》此处的「晉大夫」指晋国韩、赵、魏三家的宗主，他们受命为诸侯，正是全书开端。',
+      note: '《通鉴》此处的「晉大夫」指晋国韩、赵、魏三家的宗主，他们受命为诸侯，正是全书开端。',
     },
     '諸侯': {
       pinyin: 'zhū hóu',
       pos: '名',
       gloss: '天子所封的国君，有封国与社稷。',
-      note: '《通鑑》开篇记周天子命晋国三位大夫为诸侯。',
+      note: '《通鉴》开篇记周天子命晋国三位大夫为诸侯。',
     },
     '為後': {
       pinyin: 'wéi hòu',
-      pos: '動',
+      pos: '动',
       gloss: '立为继承人。',
       note: '「为后」「置后」都是立继承人的意思。',
     },
@@ -90,10 +90,10 @@ const SEED = {
   lexicon: {
     '大': { pinyin: 'dà', pos: '形', gloss: '「大夫」的大，官名用字。', note: '与「夫」合成官名「大夫」。' },
     '夫': { pinyin: 'fū', readings: ['fū', 'fú'], pos: '名', gloss: '与「大」合成「大夫」，官名。', note: '读 fū；读 fú 时是句首语气词。' },
-    '諸': { pinyin: 'zhū', pos: '形', gloss: '众；各。', note: '本卷多与「侯」合成「诸侯」。' },
+    '諸': { pinyin: 'zhū', pos: '形', gloss: '众；各。', note: '本卷多与「侯」合成「諸侯」。' },
     '侯': { pinyin: 'hóu', pos: '名', gloss: '诸侯；受天子册命的国君。', note: '爵位名：公、侯、伯、子、男。' },
-    '為': { pinyin: 'wéi', readings: ['wéi', 'wèi'], pos: '動', gloss: '做；成为。', note: '通用义。' },
-    '後': { pinyin: 'hòu', pos: '名', gloss: '继承人；嗣子。', note: '「为后」即立继承人。' },
+    '為': { pinyin: 'wéi', readings: ['wéi', 'wèi'], pos: '动', gloss: '做；成为。', note: '通用义。' },
+    '後': { pinyin: 'hòu', pos: '名', gloss: '继承人；嗣子。', note: '「為後」即立继承人。' },
   },
 };
 
@@ -105,6 +105,11 @@ const SEED = {
 const SHORT_H = 460;
 const ONE_COLUMN_W = 800;
 const TINY_H = 340;
+// The height under which the card's note comes off. The lexicon's note for a word is one or two lines of
+// Chinese, and at a 656x410 stage (a 1024px window) the card's content runs 47px past its row without it
+// being the first thing to go: the note is what a dictionary adds to a gloss, and the gloss, the
+// characters' own meanings and the mark are what this figure is for.
+const NOTE_H = 520;
 
 const CSS = `
 /* The three figures of this book share one system, because a reader meets all three in one sitting:
@@ -127,6 +132,13 @@ const CSS = `
 .tb-zjw .zjw-folio[data-source="seed"] { color: var(--zjw-seal); }
 
 .tb-zjw .zjw-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-5); min-height: 0; }
+/* At the widest stage both columns are taller than what they hold. A 1100x688 figure is not a page to be
+   filled from the top: the reading and the 原文 sit on the middle of the stage, and the 原文's cells grow
+   to 3rem so the characters the reader is picking are the largest thing in the figure — the original as
+   the primary object, which is the book's rule. */
+.tb-zjw[data-tier="wide"] .zjw-source, .tb-zjw[data-tier="wide"] .zjw-card { justify-content: center; }
+.tb-zjw[data-tier="wide"] .zjw-cell { width: 3rem; height: 3rem; font-size: 1.8rem; }
+.tb-zjw[data-tier="wide"] .zjw-glyphrun { font-size: var(--text-3xl); }
 
 /* ---------- the 原文: a character grid, every character a control ---------- */
 .tb-zjw .zjw-source { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
@@ -157,7 +169,7 @@ const CSS = `
   padding-left: var(--space-2); border-left: 1px solid var(--rule-strong); display: flex; gap: 0.4em; text-wrap: pretty; }
 .tb-zjw .zjw-ex i { font-style: normal; font-size: var(--text-xs); color: var(--ink-faint); white-space: nowrap; }
 
-/* 拆開看 above 合起來: the two blocks are the figure's argument, and the rule between them is the
+/* 拆开看 above 合起来: the two blocks are the figure's argument, and the rule between them is the
    card's one piece of colour. */
 .tb-zjw .zjw-split { display: flex; flex-direction: column; gap: var(--space-2); min-height: 0; }
 .tb-zjw .zjw-split[hidden] { display: none; }
@@ -239,6 +251,12 @@ const CSS = `
 .tb-zjw[data-tier="narrow"] .zjw-taught { font-size: var(--text-xs); }
 .tb-zjw[data-tier="narrow"] .fig-toolbar { max-width: 34rem; margin-inline: auto; width: 100%; }
 .tb-zjw[data-tier="narrow"] .fig-btn { padding: 0.25rem 0.55rem; }
+
+/* The card's note is the last block to come off as the stage gets shorter: it is what the dictionary adds
+   to the gloss, and the gloss, the characters' own meanings and the mark are what this figure is for. With
+   the book's real lexicon a note is one or two lines, and at 656x410 (a 1024px window) that is 47px the
+   card does not have. After the tier blocks on purpose: it has their specificity. */
+.tb-zjw[data-short="1"] .zjw-note { display: none; }
 `;
 
 const cellsOf = (text) => [...text].map((ch) => ({ ch, punct: PUNCT.includes(ch) }));
@@ -277,7 +295,7 @@ export function mount(root, ctx) {
   wrap.append(h('style', { text: CSS }));
   const folio = h('p', { class: 'zjw-folio' });
   wrap.append(h('div', { class: 'zjw-head' }, [
-    h('p', { class: 'zjw-title', text: '由字成詞' }),
+    h('p', { class: 'zjw-title', text: '由字成词' }),
     folio,
   ]));
 
@@ -302,7 +320,7 @@ export function mount(root, ctx) {
     });
     return h('div', {}, [lineEl, h('p', { class: 'zjw-caption', text: line.source })]);
   });
-  const hint = h('p', { class: 'zjw-hint', text: '連點相鄰兩字，看合起來是什麼；方向鍵選字，Enter 決定。' });
+  const hint = h('p', { class: 'zjw-hint', text: '连点相邻两字，看合起来是什么；方向键选字，Enter 决定。' });
   const sourcePane = h('div', { class: 'zjw-source' }, [...linesets, hint]);
 
   // ---------- the card ----------
@@ -321,7 +339,7 @@ export function mount(root, ctx) {
   // what the two characters do *not* add up to, which is the figure's whole point, and repeating the
   // gloss there would cost a line of height at every stage for nothing.
   const split = h('div', { class: 'zjw-split' }, [
-    h('p', { class: 'zjw-rubric', text: '拆開看' }),
+    h('p', { class: 'zjw-rubric', text: '拆开看' }),
     parts,
     h('div', { class: 'zjw-whole' }, [h('p', { class: 'zjw-whole-head' }, [wholeWord, mark]), taught]),
   ]);
@@ -342,7 +360,7 @@ export function mount(root, ctx) {
     btn.addEventListener('click', () => showWord(w));
     return btn;
   });
-  const clear = h('button', { class: 'fig-btn zjw-clear', type: 'button', 'aria-label': '清除選字', text: '清除' });
+  const clear = h('button', { class: 'fig-btn zjw-clear', type: 'button', 'aria-label': '清除选字', text: '清除' });
   clear.addEventListener('click', () => { pick = null; paint(); });
   const toolbar = h('div', { class: 'fig-toolbar fig-ui' }, [...chips, clear]);
 
@@ -357,7 +375,7 @@ export function mount(root, ctx) {
     if (!text) return { type: 'none' };
     const chars = [...text];
     // One character is a 字 whether or not the lexicon has reached it: the card then says the entry is
-    // missing rather than calling a single character a phrase. Two or more are a 詞 only when the word
+    // missing rather than calling a single character a phrase. Two or more are a 词 only when the word
     // list has them, and otherwise a run that this figure will not pretend is a word.
     if (chars.length === 1) return { type: 'glyph', key: text, data: lookup(text, 'char'), chars };
     const data = lookup(text, 'word');
@@ -375,7 +393,7 @@ export function mount(root, ctx) {
       g.btn.setAttribute('aria-pressed', String(on.has(`${g.li}:${g.ci}`)));
       g.btn.tabIndex = on.has(`${g.li}:${g.ci}`) || (!pick && g.li === 0 && g.ci === 0) ? '0' : '-1';
     }
-    folio.textContent = source() === 'chapter' ? '資治通鑑 · 卷一 周紀一' : '字詞庫未載入 · 本圖僅示三詞';
+    folio.textContent = source() === 'chapter' ? '资治通鉴 · 卷一 周纪一' : '字词库未载入 · 本图仅示三词';
     folio.dataset.source = source();
 
     const e = entry();
@@ -388,8 +406,8 @@ export function mount(root, ctx) {
       pos.textContent = '';
       type.textContent = '';
       gloss.textContent = source() === 'chapter'
-        ? '點原文裡的字，看它是一個字，還是一個詞。'
-        : '點原文裡的字，看它是一個字，還是一個詞。（本圖自帶大夫、諸侯、為後三詞）';
+        ? '点原文里的字，看它是一个字，还是一个词。'
+        : '点原文里的字，看它是一个字，还是一个词。（本图自带大夫、诸侯、为后三词）';
       note.textContent = '';
       example.textContent = '';
       split.hidden = true;
@@ -400,7 +418,7 @@ export function mount(root, ctx) {
       const teach = TEACH[e.key];
       pinyin.textContent = e.data.pinyin || '';
       pos.textContent = e.data.pos || '';
-      type.textContent = '詞';
+      type.textContent = '词';
       gloss.textContent = e.data.gloss || '';
       note.textContent = e.data.note || '';
       example.textContent = '';
@@ -411,7 +429,7 @@ export function mount(root, ctx) {
         return h('li', { class: 'zjw-part' }, [
           h('b', { text: ch }),
           h('i', { text: readingOf(d) }),
-          h('span', { text: d?.gloss || '字詞庫未收此字。' }),
+          h('span', { text: d?.gloss || '字词库未收此字。' }),
         ]);
       }));
       wholeWord.textContent = e.key;
@@ -423,20 +441,20 @@ export function mount(root, ctx) {
     }
 
     // A single character, or a run that is not a word: the characters' own meanings, and — where the
-    // entry attests one — the 通鑑 sentence it was taken from.
+    // entry attests one — the 通鉴 sentence it was taken from.
     split.hidden = true;
     const data = e.type === 'glyph' ? e.data : null;
     pinyin.textContent = e.type === 'glyph' ? readingOf(data) : '';
     pos.textContent = data?.pos || '';
-    type.textContent = e.type === 'glyph' ? '字' : '連讀';
+    type.textContent = e.type === 'glyph' ? '字' : '连读';
     if (e.type === 'glyph') {
-      gloss.textContent = data?.gloss || '字詞庫未收此字。';
+      gloss.textContent = data?.gloss || '字词库未收此字。';
       note.textContent = data?.note || '';
       const ex = data?.examples?.[0];
       example.textContent = ex ? `「${ex.text}」　${ex.at || ''}` : '';
     } else {
-      gloss.textContent = `「${e.key}」在此不作一詞；各字之義如下。`;
-      note.textContent = e.chars.map((ch) => `${ch}　${lookup(ch, 'char')?.gloss || '字詞庫未收此字。'}`).join('；');
+      gloss.textContent = `「${e.key}」在此不作一词；各字之义如下。`;
+      note.textContent = e.chars.map((ch) => `${ch}　${lookup(ch, 'char')?.gloss || '字词库未收此字。'}`).join('；');
       example.textContent = '';
     }
   }
@@ -498,6 +516,7 @@ export function mount(root, ctx) {
   // leave data-tier off the element and every rule keyed on it unapplied.
   let tier = null;
   let tiny = null;
+  let short = null;
   function measure() {
     const r = root.getBoundingClientRect();
     const w = Math.round(r.width);
@@ -505,14 +524,17 @@ export function mount(root, ctx) {
     if (!w || !hgt) return false;
     const nextTier = hgt < SHORT_H ? 'small' : (w < ONE_COLUMN_W ? 'narrow' : 'wide');
     const nextTiny = hgt < TINY_H;
-    if (nextTier === tier && nextTiny === tiny) return false;
+    const nextShort = hgt < NOTE_H;
+    if (nextTier === tier && nextTiny === tiny && nextShort === short) return false;
     tier = nextTier;
     tiny = nextTiny;
+    short = nextShort;
     wrap.dataset.tier = tier;
     wrap.dataset.tiny = tiny ? '1' : '0';
+    wrap.dataset.short = short ? '1' : '0';
     return true;
   }
-  const ro = new ResizeObserver(() => { measure(); });
+  const ro = new ResizeObserver(() => { if (measure()) paint(); });
   ro.observe(root.closest('.tb-figure__stage') || root);
   measure();
 
@@ -531,7 +553,7 @@ export function mount(root, ctx) {
       root.replaceChildren();
       void destroyed;
     },
-    // One unit per taught word: 0 = 大夫, 1 = 諸侯, 2 = 為後. The clock selects that word in the 原文.
+    // One unit per taught word: 0 = 大夫, 1 = 诸侯, 2 = 为后. The clock selects that word in the 原文.
     setTime(t) {
       const i = Math.round(Number(t));
       if (Number.isFinite(i)) showWord(WORD_ORDER[Math.min(WORD_ORDER.length - 1, Math.max(0, i))]);

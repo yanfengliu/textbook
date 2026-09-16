@@ -276,6 +276,45 @@
   margin-bottom: 0;
 }
 
+/* 原文 holds the text and nothing else (owner instruction, 2026-09-18: "If a section says original text,
+   then it should simply have the original text and nothing more"), and the page has to SAY so, not only
+   be so: the reader's complaint was that they could not tell the book's words from the book's own
+   commentary. Two devices do it, and neither of them touches the quotation's size or ink.
+   The citation line above the text is a rubric — Hei, 疏排, soft ink — the same device the page uses for
+   every other label, so the first thing met in the section names the work, the 卷 and the year rather
+   than being another sentence of prose. */
+.zj .zj-cite {
+  font-family: var(--font-ui);
+  font-size: var(--zj-rubric-size);
+  font-weight: 500;
+  letter-spacing: var(--zj-rubric-track);
+  color: var(--ink-soft);
+  max-width: none;
+  margin: var(--space-6) 0 0;
+}
+
+/* The quotation itself is set off by a rule above it and by the space around it, so it reads as a
+   document quoted on the page. It stays at full ink and the largest body size here: the contrast is made
+   by the space and the rule, never by dimming or shrinking the original, which is the primary object —
+   the interpretation is the secondary thing, and it lives in 背景. */
+.zj .zj-cite + .zj-src {
+  border-top: 2px solid var(--rule-head);
+  margin-top: var(--space-6);
+  padding-top: var(--space-8);
+}
+
+/* A chapter's 原文 can arrive in several 句-groups (第二章 has six). They are one passage read on — one
+   group ends where the next begins — so the gap between two of them is a paragraph's, and only the last
+   one carries the space that closes the section. Nothing is added between them to label them: a section
+   that holds the text and nothing else cannot also hold the book's notes about the text. */
+.zj .zj-src + .zj-src {
+  margin-top: 0;
+}
+
+.zj .zj-src:not(:last-child) {
+  margin-bottom: var(--space-6);
+}
+
 /* A character is a target with no mark on it: the page is the primary object and a dotted underline
    under every one of 294 volumes of characters would be a texture, not a text. The affordance is the
    pointer and, on hover, a tint of the paper — no accent, no underline shifting the line. */
@@ -509,6 +548,13 @@
      the first — on a 900 px window the card is 482 px and is simply lifted into place. */
   max-height: calc(100vh - 2 * var(--space-4));
   overflow-y: auto;
+  /* When the card does scroll, its own scrollbar is the only honest way to say so: without it the last
+     line is simply missing, which is the defect this pass is fixing. Thin, with a transparent track, so
+     it reads as a hairline at the card's edge rather than a widget — and it appears only on the cards
+     that need it, which after this pass is the handful whose lexicon entry is longer than the 469 px the
+     placement can find above the term. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-strong) transparent;
 }
 
 @keyframes zj-card-in {
@@ -973,10 +1019,13 @@
 
   /* The section rubric moves up beside its section's first line rather than sitting on a line of its
      own: 通鑑用例 to the left of the quotation it heads, 在這一章 to the left of the first clause. Two
-     rubrics on their own lines, each with a hairline above it, cost 50px of a 355px card — and a
-     dictionary slip this small is a list of labelled lines, not a page with sections on it. The float is
-     contained by the `overflow: hidden` on the blocks below, so the rubric never leaves its section, and
-     the hairline stays where it was: 1u above the rubric's line. */
+     rubrics on their own lines, each with a hairline above it, cost 60px of a card whose own natural
+     height is 463px and whose ceiling is the 469px of room the placement can find — measured, and the
+     reason this is here rather than in the card's own section. A dictionary slip this small is a list of
+     labelled lines, not a page with sections on it.
+     The rubric is floated and the block below it carries `overflow: hidden`, so the rubric can never
+     leave its own section; the hairline stays on the block, 1u above the rubric's line, which is what
+     keeps two sections apart at this size. */
   .zj .zj-card__sec {
     float: left;
     margin: 0 var(--space-2) 0 0;
@@ -997,8 +1046,73 @@
     gap: var(--space-1) var(--space-4);
   }
 
+  .zj .zj-card__here {
+    margin-top: var(--space-1);
+  }
+
   .zj .zj-card__index {
     margin-top: 0;
     padding-top: var(--space-1);
+  }
+}
+
+/* ============================================================================
+   13. Moving between chapters
+   ============================================================================ */
+
+/* Chapter-to-chapter navigation. The shell's header already links to the book's contents, and the
+   biology book ends a chapter with a single `.tb-next` block; a reader of this book moves forward and
+   back along one continuous text, so it needs both directions in one row and they must be balanced —
+   two full-width blocks would read as two chapter ends. */
+.zj .zj-chnav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  margin-top: var(--space-16);
+  padding-top: var(--space-4);
+  border-top: 2px solid var(--rule-head);
+  max-width: var(--measure);
+}
+
+.zj .zj-chnav__link {
+  display: block;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.zj .zj-chnav__link--next {
+  text-align: right;
+}
+
+.zj .zj-chnav__label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: var(--zj-rubric-size);
+  font-weight: 500;
+  letter-spacing: var(--zj-rubric-track);
+  color: var(--ink-soft);
+  margin-bottom: var(--space-2);
+}
+
+.zj .zj-chnav__link strong {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-lg);
+  transition: color var(--dur) var(--ease);
+}
+
+.zj .zj-chnav__link:hover strong {
+  color: var(--leaf-text);
+}
+
+@media (max-width: 599.98px) {
+  /* Two columns of a chapter title do not fit a phone; stacked, the forward direction still comes last. */
+  .zj .zj-chnav {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+
+  .zj .zj-chnav__link--next {
+    text-align: left;
   }
 }

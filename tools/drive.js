@@ -1152,7 +1152,7 @@ const RECIPES = {
     }],
   ],
 
-  // 《資治通鑑》 卷一 周紀一. These three address their controls by `data-` attribute rather than by
+  // 《资治通鉴》 卷一 周纪一. These three address their controls by `data-` attribute rather than by
   // their labels, because their labels are Chinese: this file addresses 76 other controls by their
   // visible English text, and `docs/design/i18n.md` records that as the reason the gate cannot run on a
   // translated page. A `data-` attribute survives translation and rewording, which is what a gate wants.
@@ -1162,10 +1162,10 @@ const RECIPES = {
   'zj-split': [
     ['opens-at-403BC', async (h) => {
       const d = await h.describe();
-      expect(d.phase === 'investiture', `it should open on the investiture, the year 通鑑 begins at: ${JSON.stringify(d)}`);
+      expect(d.phase === 'investiture', `it should open on the investiture, the year 通鉴 begins at: ${JSON.stringify(d)}`);
       expect(d.year === -403, `the opening year should be 前403: ${d.year}`);
-      expect(d.commanded === true && d.zhi === '滅' && d.jinRemnant === '存', `at 403 the 智 clan is gone and 晉 still stands: ${JSON.stringify(d)}`);
-      expect(d.houseStatus === '大夫→諸侯', `the three houses are being named 諸侯 at this step: ${d.houseStatus}`);
+      expect(d.commanded === true && d.zhi === '灭' && d.jinRemnant === '存', `at 403 the 智 clan is gone and 晋 still stands: ${JSON.stringify(d)}`);
+      expect(d.houseStatus === '大夫→诸侯', `the three houses are being named 诸侯 at this step: ${d.houseStatus}`);
     }],
     ['the-first-step-is-jinyang', async (h) => {
       await h.stage.locator('.zjs-stop[data-step="0"]').click();
@@ -1178,7 +1178,7 @@ const RECIPES = {
       await h.stage.locator('.zjs-stop[data-step="2"]').click();
       await h.page.waitForTimeout(250);
       const d = await h.describe();
-      expect(d.order === 2 && d.year === -376 && d.jinRemnant === '亡', `step 2 should be 前376年, 晉亡: ${JSON.stringify(d)}`);
+      expect(d.order === 2 && d.year === -376 && d.jinRemnant === '亡', `step 2 should be 前376年, 晋亡: ${JSON.stringify(d)}`);
     }],
     ['keyboard-steps-through-the-three-dates', async (h) => {
       // Anchor the keyboard walk with a click rather than a bare `focus()`. The first version focused the
@@ -1244,6 +1244,13 @@ const RECIPES = {
       expect(Number.isInteger(d.line) && d.line >= 0, `it should name the 原文 line the word sits in, as an index: ${JSON.stringify(d)}`);
       expect(Array.isArray(d.chars) && d.chars.length > 0, `it should show how many characters the selected word is made of: ${JSON.stringify(d)}`);
       expect(d.entryType === 'word' || d.entryType === 'glyph', `it should say which layer the entry came from: ${JSON.stringify(d)}`);
+      // `source` is which arm the figure is reading: 'chapter' when the page published a lexicon on the
+      // handshake object, 'seed' when it fell back to its own three words. This recipe runs in the lab,
+      // which publishes none, so it must say 'seed' — and that assertion is the one that would catch a
+      // regression to the defect that shipped once: the figure used to fetch `tongjian/lexicon.js`
+      // itself, which 404ed in the lab and on a chapter page alike. A figure that cannot reach its data
+      // must say so in a field a gate reads, not fall back in silence.
+      expect(d.source === 'seed', `in the lab, with no page-supplied lexicon, it should report source "seed": ${JSON.stringify(d)}`);
     }],
     ['a-chip-selects-its-word', async (h) => {
       const chip = h.stage.locator('.zjw-chip').nth(1);

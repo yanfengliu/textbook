@@ -119,7 +119,7 @@ Each of these is stated in the `note` of the entry that contains it, and the fil
 | `lexicon.js` entries | **640** — one per character, none missing |
 | … uses / examples | 925 / 981 |
 | … uses carrying no example, each with a stated reason | 304 |
-| … entries declaring two readings | 17 |
+| … entries declaring two readings | 15 (`test/lexicon.test.js` reports 15; this table said 17 until 2026-09-18, and the number is the test's) |
 | … entries carrying 異體字 | 47 |
 | `words.js` entries / examples | 143 / 190 |
 | `<tb-term word="…">` keys the three chapter pages mark | 104, all resolved |
@@ -166,6 +166,44 @@ Its key list came from two places, and the second is the one that keeps the card
 Entries carry the contract's card-facing `gloss`/`note`/`examples` **and** a `uses` list; `test/lexicon.test.js` fails when the card-facing gloss is not one of the entry's own senses, or when its examples differ from the use they come from — a card showing a merged sense the entry does not carry says something the data does not support.
 
 Three keys — 智宵, 智瑤, 繼承人 — do not occur verbatim in the 原文 (the text says 「不如宵也」 and calls 瑤 by the bare name; 繼承人 is the modern word for 「後」). Their `note` says what the text actually calls them. 藺 is deliberately **not** a 詞: it is one character, it belongs to `lexicon.js`, and its fact (底本作「蔡」，校記據《史記》改為「藺」) sits in the 皋狼 note as well.
+
+### The two scripts, and what was converted
+
+The book sets two, and which is which is a rule rather than a habit. The owner read the published version and said so in two steps: *"我是说这本书一律用简体中文"*, and then, on hearing how the 原文 is set, *"If the original text is in traditional chinese character that is fine. I just need the rest of the textbook and especially the translation to be in simplified chinese."*
+
+| What | Script | Which is |
+|---|---|---|
+| The 原文 — every sentence inside `<ol class="zj-src">` | **Traditional** | the received text, as the witnesses print it |
+| Every quotation of 通鑑: a card's 通鑑用例, a quotation in the chapters' prose, a figure's `quote`, the `.zj-trans__src` copy beside the 譯文, the 字詞 tables' glyph and example columns | **Traditional** | the text |
+| Everything else: 譯文, 背景, 思考, headings, captions, the citation line, the figures' labels, a card's `gloss` and `note` and its labels (通鉴用例, 在这一章, 又读, 异体, 本章字词), the notes in this file | **Simplified** | the book's own voice |
+
+**What the conversion was, and what it was not.** On 2026-09-18 every reader-visible file was converted to Simplified with OpenCC's character table `TSCharacters.txt` (fetched that day from [the OpenCC repository](https://raw.githubusercontent.com/BYVoid/OpenCC/master/data/dictionary/TSCharacters.txt), the first candidate per character), and the Traditional layer was then put back — the 原文 and the quotations — **from commit `6d854cf`, not by re-converting**. A blanket 简→繁 pass is ambiguous in exactly the characters this book is about: 干 is 乾 in 乾坤 and 干 in 干戈, 后 is 後 and 后, 里 is 裡 and 里, and OpenCC's own phrase table maps 乾坤 to 干坤. The committed tree holds the received text itself, so the restoration is a lookup rather than a decision: the conversion is a per-character map, so `TSCharacters` applied to the committed file and the committed file agree index by index, and any Simplified run that came from it can be read back out of it exactly. Three regions were held out of the conversion and survive from `6d854cf` unchanged:
+
+- **`work`** — the catalogued title, kept in its own form (docs/design/tongjian.md).
+- **`variants`** — the glyph a fetched witness prints (爲, 羣, 戸 …). The field's whole content is "this other form exists in the collation", so converting it would empty it. All 47 are here.
+- **乾坤 and 絺** — 乾 is Simplified already in 乾坤, and OpenCC's Simplified form of 絺 is 𫄨 (U+2B128), an astral-plane glyph the book's webfont subsets do not carry; 絺 is also a man's surname here.
+
+Four decisions inside the conversion that were **not** mechanical, recorded because a reader may disagree with any of them:
+
+- **`藉`** is a character both scripts print (狼藉, 慰藉), so the table leaves it; `藉此` is `借此` in Simplified and was changed by hand. `憑藉` stays `凭借` (the 藉 is correct there).
+- **`著`** likewise exists in both scripts, and the table does not touch it: the particle is `着` in Simplified (接著 → 接着, 帶著 → 带着), while the `zhù` senses stay 著 (非名不著, 著雍攝提格, 著稱). Each occurrence was decided by reading it.
+- **`乾`** is `干` where it means dry or 幹 (抽乾 → 抽干, 才幹 → 才干) and stays 乾 in 乾坤 — the table's single mapping cannot tell the two apart.
+- **Names inside Simplified prose**: a quoted 通鑑 word keeps its Traditional form (「晉大夫」), while the same word used as the book's own subject stays Simplified — so a `def` can read 「与「敗子」并举」. The rule is that the quotation is the text and the sentence around it is the book.
+
+**What holds it.** `test/lexicon.test.js`, *the 原文 and its quotations are Traditional, and everything else is Simplified*, scans the eighteen files a reader sees (the four pages, `corpus.js`, `lexicon.js`, `words.js`, `data/card.js`, the three chapters' `glossary.js` and `chars.js`, the three figures and the registry) against `test/fixtures/traditional-only.txt` — 3,222 characters, OpenCC's table reduced to the ones whose Simplified form differs, checked in rather than fetched. It then compares each page's 原文 block against its corpus entry character for character, and each run marked `lang="zh-Hant"` (222 of them) against the corpus, so a quotation cannot be Simplified or invented. Held out, with the reason in the test's header: the corpus's own transcription record (`juan`, `section`, `punctuation`, `note`) and this file's script discussion, which have to be able to name a received form; and the two characters above.
+
+**Where the `lang` attributes are.** The page declares `<html lang="zh-Hans">`, and every element that carries the text declares `lang="zh-Hant"`: each `<ol class="zj-src">` block in the markup, each `.zj-trans__src` copy, each `.zj-quote` example, each prose quotation the book sets off with 「」, and — built by `tongjian/data/card.js` — the card's glyph, its 通鑑用例 and its 在這一章 clauses. A screen reader is the reader this is for: without the attribute it reads 為 with a Mandarin-Simplified voice, and the two-script page is exactly the case the attribute exists for.
+
+### Note length, because the card has to fit
+
+The card worker measured every card on the three chapters at 1440 px and 390 px by opening it. Thirty-two still scrolled at 1440 px, and the cause was not the layout but `note` length: the notes behind those cards ran to 107, 63, 57, 53 characters against a lexicon whose median is far shorter. The 32 shown notes were rewritten — **428 characters cut, worst first** — keeping every source attribution, every 反切 and every variant reading, and cutting only words:
+
+| | before | after |
+|---|---|---|
+| 段規 (worst: 95 px over) | note 107, gloss 37 | note 49, gloss 16 |
+| the other 31 | 4–63 characters | 4–33 characters |
+
+One note is still longer than the rest: 段規's 49 characters, because it carries a genuine disagreement between commentators that the book prints rather than resolves, and cutting it further would drop one of the two readings. Everything else is at 33 or under. These are measured on the data, not on rendered cards — the card worker's instrument is what confirms the heights, and its next pass is the one that says whether 32 goes to 0.
 
 ### One disagreement the book prints instead of resolving
 

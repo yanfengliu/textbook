@@ -1,20 +1,20 @@
-// 年表 — where 前403年 sits, and why 司馬光 began the whole work there.
+// 年表 — where 前403年 sits, and why 司马光 began the whole work there.
 //
-// A 通鑑 year is not one date but a stack of them: the book's own heading is a 周 reign year
-// (「威烈王二十三年」), its volume head dates the volume in 歲陰歲陽 names (「起著雍攝提格，盡玄黓困敦，
+// A 通鉴 year is not one date but a stack of them: the book's own heading is a 周 reign year
+// (「威烈王二十三年」), its volume head dates the volume in 岁阴岁阳 names (「起著雍摄提格，尽玄黓困敦，
 // 凡三十五年」), and the Western year and the 干支 a modern reader reaches for are additions — the 干支
 // from 胡三省's 注, the number from a modern editor. A reader who conflates them cannot see why the book
 // opens where it does, so the figure states all three registers and says on its face which is which.
 //
-// The column carries the years this passage needs: 前453年 (the destruction of 智氏, which 通鑑 narrates
+// The column carries the years this passage needs: 前453年 (the destruction of 智氏, which 通鉴 narrates
 // as background with no year of its own), 前403年 (the year the book opens at), the two reign changes
-// between them, 前376年 (晉's extinction), and 前369年 (where 卷001 ends). Selecting a year shows what
+// between them, 前376年 (晋's extinction), and 前369年 (where 卷001 ends). Selecting a year shows what
 // the book says about it, in its own words where the fetched sources give them; where they do not, the
 // row shows the dating frame, which is the figure's subject, and nothing is composed to fill the space.
 //
 // A row never clips its own text. Each row is laid out at its content height (`flex: 1 0 auto`, so it
 // grows with what it has to say and never shrinks into its neighbours), and the event string it carries
-// is the short one — 晉陽之戰, 命為諸侯 — with the full name of the year given in the reading panel,
+// is the short one — 晋阳之战, 命为诸侯 — with the full name of the year given in the reading panel,
 // where there is room for it. A row whose text is cut in half is a defect no gate here can see.
 //
 // Clock: one unit per year row, in the order listed (0 = 前453年 … 6 = 前369年). `?t=1` pins 前403年.
@@ -27,13 +27,13 @@
 //   columns (w >= 440) — the year column and the reading panel side by side;
 //   stacked (w < 440)  — one column, the years above the panel, on a capped measure (a phone);
 // and `dense` (w < 860 or h < 520) steps the type down, drops the reign-year column from the rows and the
-// 歲名 from the frame line, and gives the panel the larger share of the width; `tiny` (h < 340) drops the
+// 岁名 from the frame line, and gives the panel the larger share of the width; `tiny` (h < 340) drops the
 // panel's note and `mini` (h < 300) its attribution, which is what a 480x270 stage can hold.
 import { h } from './lib/svg.js';
 
 export const meta = {
   kind: 'zj-timeline',
-  title: '周紀一的年表',
+  title: '周纪一的年表',
   needsWebGL: false,
   aspect: 16 / 9,
   // At a 390px stage the stacked composition measures 490px against a 4/5 stage's 488 and clipped its
@@ -56,17 +56,17 @@ const YEARS = [
     id: 'jinyang',
     year: -453,
     yearLabel: '前453',
-    frame: '周貞定王十六年',
+    frame: '周贞定王十六年',
     gan: '—',
     season: '',
-    event: '晉陽之戰 · 智伯之死',
-    railEvent: '晉陽之戰',
-    tag: '追敘',
+    event: '晋阳之战 · 智伯之死',
+    railEvent: '晋阳之战',
+    tag: '追叙',
     quote: '遂殺智伯，盡滅智氏之族。',
-    quoteAt: '《資治通鑑》卷一 · 繫於前403年條內追敘',
-    body: '智伯與韓、魏圍趙晉陽，決水灌城；韓、魏反與趙合，殺智伯，盡滅智氏之族，三家分其田。',
-    noteLabel: '繫年',
-    note: '通鑑不為此年立目。胡三省注繫於周貞定王十六年；皇甫謐別繫於元王十一年。',
+    quoteAt: '《资治通鉴》卷一 · 系于前403年条内追叙',
+    body: '智伯与韩、魏围赵晋阳，决水灌城；韩、魏反与赵合，杀智伯，尽灭智氏之族，三家分其田。',
+    noteLabel: '系年',
+    note: '通鉴不为此年立目。胡三省注系于周贞定王十六年；皇甫谧别系于元王十一年。',
   },
   {
     id: 'investiture',
@@ -75,14 +75,14 @@ const YEARS = [
     frame: '周威烈王二十三年',
     gan: '戊寅',
     season: '著雍攝提格',
-    event: '初命三家為諸侯',
-    railEvent: '命為諸侯',
-    tag: '通鑑開篇',
+    event: '初命三家为诸侯',
+    railEvent: '命为诸侯',
+    tag: '通鉴开篇',
     quote: '初命晉大夫魏斯、趙籍、韓虔為諸侯。',
-    quoteAt: '《資治通鑑》卷一 周紀一 · 開篇第一句',
-    body: '周天子命三位晉國大夫為諸侯：魏斯為魏文侯，趙籍為趙烈侯，韓虔為韓景侯。此年未嘗分割土地；所易者，名分而已。',
-    noteLabel: '何以始於此年',
-    note: '胡三省注：「此溫公書法所由始也。」司馬光曰：三晉之列於諸侯，非三晉之壞禮，乃天子自壞之也。',
+    quoteAt: '《资治通鉴》卷一 周纪一 · 开篇第一句',
+    body: '周天子命三位晋国大夫为诸侯：魏斯为魏文侯，赵籍为赵烈侯，韩虔为韩景侯。此年未尝分割土地；所易者，名分而已。',
+    noteLabel: '何以始于此年',
+    note: '胡三省注：「此温公书法所由始也。」司马光曰：三晋之列于诸侯，非三晋之坏礼，乃天子自坏之也。',
   },
   {
     id: 'weilie-24',
@@ -96,9 +96,9 @@ const YEARS = [
     tag: '',
     quote: '',
     quoteAt: '',
-    body: '威烈王崩，子驕立，是為安王。天子易世，而三家受命為諸侯如故。',
-    noteLabel: '紀年',
-    note: '通鑑次年改書「安王元年」，紀年隨天子之世而換。',
+    body: '威烈王崩，子骄立，是为安王。天子易世，而三家受命为诸侯如故。',
+    noteLabel: '纪年',
+    note: '通鉴次年改书「安王元年」，纪年随天子之世而换。',
   },
   {
     id: 'an-1',
@@ -112,7 +112,7 @@ const YEARS = [
     tag: '',
     quote: '',
     quoteAt: '',
-    body: '周室紀年自此入安王之世，去前403年之命二年。',
+    body: '周室纪年自此入安王之世，去前403年之命二年。',
     noteLabel: '',
     note: '',
   },
@@ -123,14 +123,14 @@ const YEARS = [
     frame: '周安王二十六年',
     gan: '乙巳',
     season: '',
-    event: '三家滅晉',
-    railEvent: '三家滅晉',
-    tag: '晉亡',
+    event: '三家灭晋',
+    railEvent: '三家灭晋',
+    tag: '晋亡',
     quote: '魏、韓、趙共廢晉靖公為家人而分其地。',
-    quoteAt: '《資治通鑑》卷一 · 安王二十六年',
-    body: '晉君被廢為庶人，公室餘地盡分，晉亡。距前403年二十七年。是年周王崩，子烈王喜立。',
-    noteLabel: '異說',
-    note: '一說前349年再分晉靜公殘餘食邑；通鑑繫於此年。',
+    quoteAt: '《资治通鉴》卷一 · 安王二十六年',
+    body: '晋君被废为庶人，公室余地尽分，晋亡。距前403年二十七年。是年周王崩，子烈王喜立。',
+    noteLabel: '异说',
+    note: '一说前349年再分晋静公残余食邑；通鉴系于此年。',
   },
   {
     id: 'lie-1',
@@ -144,7 +144,7 @@ const YEARS = [
     tag: '',
     quote: '',
     quoteAt: '',
-    body: '周室再易世。通鑑卷一自此至前369年而終。',
+    body: '周室再易世。通鉴卷一自此至前369年而终。',
     noteLabel: '',
     note: '',
   },
@@ -155,14 +155,14 @@ const YEARS = [
     frame: '玄黓困敦',
     gan: '壬子',
     season: '玄黓困敦',
-    event: '周紀一訖於此年',
-    railEvent: '卷終',
-    tag: '卷終',
+    event: '周纪一讫于此年',
+    railEvent: '卷终',
+    tag: '卷终',
     quote: '',
     quoteAt: '',
-    body: '通鑑卷一 起前403年（著雍攝提格），盡此年（玄黓困敦），凡三十五年。其下入卷二 周紀二。',
+    body: '通鉴卷一 起前403年（著雍攝提格），尽此年（玄黓困敦），凡三十五年。其下入卷二 周纪二。',
     noteLabel: '卷首',
-    note: '「起著雍攝提格，盡玄黓困敦，凡三十五年」——通鑑每卷卷首以歲陰歲陽紀年之例。',
+    note: '「起著雍攝提格，盡玄黓困敦，凡三十五年」——通鉴每卷卷首以岁阴岁阳纪年之例。',
   },
 ];
 
@@ -220,7 +220,7 @@ const CSS = `
 .tb-zjt .zjt-row-tag:empty { display: none; }
 
 /* ---------- the panel: what the book says about the selected year ---------- */
-.tb-zjt .zjt-panel { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; min-height: 0; }
+.tb-zjt .zjt-panel { display: flex; flex-direction: column; gap: 6px; min-width: 0; min-height: 0; }
 .tb-zjt .zjt-date { margin: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.5em; }
 .tb-zjt .zjt-year { font-family: var(--font-text); font-size: var(--text-2xl); font-weight: 500; line-height: 1;
   font-variant-numeric: lining-nums tabular-nums; }
@@ -260,7 +260,7 @@ const CSS = `
 
 /* ---------- stacked: one column, the years above the panel ----------
    A 390px stage holds seven rows and the reading once the rows are tight and the 卷次 attribution under
-   the quotation comes off (the chapter's caption names the volume); 何以始於此年 stays, because it is the
+   the quotation comes off (the chapter's caption names the volume); 何以始于此年 stays, because it is the
    reason the middle row is the one the book opens at. */
 .tb-zjt[data-tier="stacked"] { width: min(34rem, 100%); inset: 0 auto 0 50%; transform: translateX(-50%);
   gap: var(--space-2); padding: var(--space-3) var(--space-3) var(--space-2); }
@@ -270,7 +270,7 @@ const CSS = `
 .tb-zjt[data-tier="stacked"] .zjt-row { padding: 0.05rem var(--space-2) 0.05rem var(--space-3); }
 .tb-zjt[data-tier="stacked"] .zjt-row-year, .tb-zjt[data-tier="stacked"] .zjt-row-event { line-height: 1.25; }
 /* The note's rubric goes at this size and its text stays: each note names its own register in its first
-   words — 「通鑑不為此年立目」, 「一說…」, 「胡三省注：…」 — so the label is the one part that can. */
+   words — 「通鉴不为此年立目」, 「一说…」, 「胡三省注：…」 — so the label is the one part that can. */
 .tb-zjt[data-tier="stacked"] .zjt-note-label { display: none; }
 .tb-zjt[data-tier="stacked"] .zjt-note { padding-left: var(--space-2); }
 .tb-zjt[data-tier="stacked"] .zjt-quote-at { display: none; }
@@ -288,7 +288,7 @@ const CSS = `
 
 /* ---------- strip: a stage too short for two columns or for a column of years ----------
    The years lie on their side as one ruled strip and the panel takes the whole width; the panel keeps the
-   date, the year's name, the register it is dated in and 通鑑's own sentence, which is what a 480x270
+   date, the year's name, the register it is dated in and 通鉴's own sentence, which is what a 480x270
    stage holds. The seven rows are all still there and still pressable. */
 .tb-zjt[data-tier="strip"] { gap: var(--space-2); padding: var(--space-2) var(--space-3) var(--space-2); }
 .tb-zjt[data-tier="strip"] .zjt-scope, .tb-zjt[data-tier="strip"] .zjt-legend { display: none; }
@@ -316,6 +316,8 @@ const CSS = `
    one does not. */
 .tb-zjt[data-tiny="1"] .zjt-note { display: none; }
 .tb-zjt[data-mini="1"] .zjt-quote-at { display: none; }
+/* The panel's note is the last block to come off as the stage gets shorter. */
+.tb-zjt[data-short="1"] .zjt-note { display: none; }
 `;
 
 export function mount(root, ctx) {
@@ -326,18 +328,18 @@ export function mount(root, ctx) {
   wrap.append(h('style', { text: CSS }));
 
   const head = h('div', { class: 'zjt-head' }, [
-    h('p', { class: 'zjt-title', text: '年表 · 周紀一' }),
+    h('p', { class: 'zjt-title', text: '年表 · 周纪一' }),
     h('p', { class: 'zjt-scope', text: '起著雍攝提格，盡玄黓困敦，凡三十五年' }),
   ]);
   // The head says which register each part of a date belongs to, because the figure's whole claim is that
   // they are not the same thing.
   const legend = h('p', { class: 'zjt-legend' }, [
-    h('b', { text: '周紀年' }),
-    '為通鑑本文（如「威烈王二十三年」）；',
-    h('b', { text: '卷首歲名' }),
-    '亦通鑑本文（如「著雍攝提格」）；',
-    h('b', { text: '西元與干支' }),
-    '為後人所加，干支見胡三省注。',
+    h('b', { text: '周纪年' }),
+    '为通鉴本文（如「威烈王二十三年」）；',
+    h('b', { text: '卷首岁名' }),
+    '亦通鉴本文（如「著雍攝提格」）；',
+    h('b', { text: '西元与干支' }),
+    '为后人所加，干支见胡三省注。',
   ]);
 
   const rows = YEARS.map((y, i) => {
@@ -376,7 +378,7 @@ export function mount(root, ctx) {
   ]);
 
   const prev = h('button', { class: 'fig-btn zjt-prev', type: 'button', 'aria-label': '前一年', text: '← 前一年' });
-  const next = h('button', { class: 'fig-btn zjt-next', type: 'button', 'aria-label': '後一年', text: '後一年 →' });
+  const next = h('button', { class: 'fig-btn zjt-next', type: 'button', 'aria-label': '后一年', text: '后一年 →' });
   prev.addEventListener('click', () => go(row - 1));
   next.addEventListener('click', () => go(row + 1));
   const toolbar = h('div', { class: 'fig-toolbar fig-ui' }, [prev, next]);
@@ -388,13 +390,13 @@ export function mount(root, ctx) {
     const y = YEARS[row];
     wrap.dataset.year = y.id;
     yearEl.textContent = y.yearLabel;
-    ganEl.textContent = y.gan === '—' ? '干支未詳' : `· ${y.gan}`;
+    ganEl.textContent = y.gan === '—' ? '干支未详' : `· ${y.gan}`;
     eventEl.textContent = y.event;
     // At a dense stage the frame line carries the reign year and the register it belongs to, and leaves
-    // the 卷首歲名 for a stage with room for it: two lines of 12px is 40px a 396px stage does not have.
+    // the 卷首岁名 for a stage with room for it: two lines of 12px is 40px a 396px stage does not have.
     frameEl.replaceChildren(
       document.createTextNode(y.frame),
-      h('span', { text: dense ? '　通鑑紀年' : (y.season ? `　通鑑紀年 · 卷首歲名 ${y.season}` : '　通鑑紀年') }),
+      h('span', { text: dense ? '　通鉴纪年' : (y.season ? `　通鉴纪年 · 卷首岁名 ${y.season}` : '　通鉴纪年') }),
     );
     quoteEl.textContent = y.quote ? `「${y.quote}」` : '';
     quoteEl.hidden = !y.quote;
@@ -431,6 +433,7 @@ export function mount(root, ctx) {
   let dense = null;
   let tiny = null;
   let mini = null;
+  let short = null;
   function measure() {
     const r = root.getBoundingClientRect();
     const w = Math.round(r.width);
@@ -440,15 +443,21 @@ export function mount(root, ctx) {
     const nextDense = w < 860 || hgt < 520;
     const nextTiny = hgt < 340;
     const nextMini = hgt < 300;
-    if (nextTier === tier && nextDense === dense && nextTiny === tiny && nextMini === mini) return false;
+    // The panel's note is the last block to come off as the stage gets shorter: 何以始于此年 is the
+    // reason the middle row is the one the book opens at, and it is worth 33px a 656x369 stage does not
+    // have. The note's own text names its register, so the column reads without it.
+    const nextShort = hgt < 420;
+    if (nextTier === tier && nextDense === dense && nextTiny === tiny && nextMini === mini && nextShort === short) return false;
     tier = nextTier;
     dense = nextDense;
     tiny = nextTiny;
     mini = nextMini;
+    short = nextShort;
     wrap.dataset.tier = tier;
     wrap.dataset.dense = dense ? '1' : '0';
     wrap.dataset.tiny = tiny ? '1' : '0';
     wrap.dataset.mini = mini ? '1' : '0';
+    wrap.dataset.short = short ? '1' : '0';
     return true;
   }
   const ro = new ResizeObserver(() => { measure(); });

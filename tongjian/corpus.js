@@ -10,6 +10,13 @@
 // from `url`: 生民之類 (底本 害), 恐事未遂 (底本 末), 藍臺 (底本 台), and one doubled comma
 // removed after 田恆之於齊. Each departs in the entry that carries it and says so in `note`.
 // tongjian/README.md holds the fetch dates, the witnesses and what could not be verified.
+
+// Script: the 原文 is Traditional, as the witnesses print it, and every quotation of it in this book is
+// Traditional too; everything the book writes about it — 譯文, 背景, 思考, the notes — is Simplified.
+// (Owner's instruction, 2026-09-18: "If the original text is in traditional chinese character that is
+// fine. I just need the rest of the textbook and especially the translation to be in simplified
+// chinese.") `work` keeps the catalogued title; 乾 in 乾坤 and 絺 are the two forms OpenCC would have
+// changed and this file does not. tongjian/README.md holds the rule and what it could not decide.
 //
 // Bound: this file proves what the text is and where it came from. It proves nothing about
 // whether a gloss or a translation built on it is right.

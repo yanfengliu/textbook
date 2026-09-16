@@ -195,18 +195,27 @@ Every gloss, note and translation sentence is **authored content and is reviewed
 
 Bound, and stated in the test header: the checks prove the quotations are real and the data is complete. They cannot prove a gloss is *right*, which is what the independent review in the plan is for, and the reviewer reads both.
 
-## Language, and which script belongs where
+## Language: two scripts, and which is which
 
-The book sets two scripts, and which one appears where is a rule rather than a habit:
+The owner read the first published version and settled this in two steps. First: *"我是说这本书一律用简体中文"*. Then, told how the 原文 is set: *"If the original text is in traditional chinese character that is fine. I just need the rest of the textbook and especially the translation to be in simplified chinese."*
+
+So the book sets two scripts, and which one appears where is a rule rather than a habit:
 
 | Where | Script | Why |
 |---|---|---|
-| The 原文, and every quotation from 通鑑 | **Traditional** (繁體) | It is the book's text. Printing it in Simplified would be a silent editorial change to a Song work, and the vocabulary is not always the same word. |
-| The 譯文, 背景, 思考, headings, the chapter's own prose | **Simplified** (簡體) | The modern reading layer, in the script a modern reader reads most easily. |
-| A card's `gloss` and `note` | **Simplified** | They are commentary about the text, not the text. |
-| A card's 通鑑用例 | **Traditional** | It is a quotation. |
+| The 原文 — every sentence inside `<ol class="zj-src">` | **Traditional** (繁體) | It is the book's text, as the witnesses print it. |
+| Every quotation of 通鑑: a card's 通鑑用例, a quotation in the chapters' prose, a figure's `quote`, the `.zj-trans__src` copy beside the 譯文, the 字詞 tables' glyph and example columns | **Traditional** | It is the text, wherever it is quoted. |
+| Everything else: the 譯文, 背景, 思考, headings, captions, the citation line, the figures' own labels and interface text, a card's `gloss` and `note` and its labels | **Simplified** (簡體) | The book's own voice, in the script its readers read. |
 
-**What the page declares.** `<html lang="zh-Hans">` because the book's own voice is Simplified, and **`lang="zh-Hant"` on every element that carries Traditional text** — the 原文's blocks, the quoted sentences in a card, and a figure that quotes the text. `lang` is what a screen reader uses to pick a voice and what the browser uses for line breaking, so a page that declares one script while printing both is a page that reads the text wrongly aloud. A reviewer found exactly that: `zh-Hans` everywhere with `zh-Hant` only on the card's glyph.
+**It is a change of script, not of text.** The 原文 is a transcription of a received edition, and the transcription is what is faithful to the source. The conversion ran on 2026-09-18 (OpenCC's character table, per character) and the Traditional layer was put back **from the committed tree**, never by re-converting: 干 is 乾 in 乾坤 and 干 in 干戈, 后 is 後 and 后, 里 is 裡 and 里, and OpenCC's own phrase table maps 乾坤 to 干坤. The ledger — what was converted, what was held out, and the four decisions that were not mechanical — is in [tongjian/README.md](../../tongjian/README.md), "The two scripts, and what was converted".
+
+**What the page declares.** `<html lang="zh-Hans">` for the book's own voice, and **`lang="zh-Hant"` on every element that carries the text** — each 原文 block in the markup, each `.zj-trans__src` copy, each `.zj-quote` example, each prose quotation the book sets off with 「」, and the card's glyph, its 通鑑用例 and its 在這一章 clauses, which `tongjian/data/card.js` builds. `lang` is what a screen reader uses to pick a voice, so a two-script page that declares one script reads the text wrongly aloud.
+
+**One exception, and it is a title, not a script.** The corpus entry's `work` field keeps 資治通鑑, because that is the title as catalogued. Wherever the book sets the name in the reader's own prose it is 资治通鉴.
+
+**Held out of the conversion, and why.** `variants` holds the glyph a fetched witness prints — the field's content is "this other form exists in the collation", so converting it would empty it. 乾 in 乾坤 is Simplified already. 絺 has an astral-plane Simplified form (𫄨, U+2B128) the webfont subsets do not carry, and is a surname here. All three are in the README ledger.
+
+**What holds the rule.** `test/lexicon.test.js`, *the 原文 and its quotations are Traditional, and everything else is Simplified* — a checked-in character table, the pages' 原文 compared against the corpus character for character, and every `lang="zh-Hant"` run required to be a verbatim quotation. The rule had already been reversed twice in one session before the gate existed, which is what a gate is for.
 
 ## The type system, and the bar it is held to
 
@@ -248,12 +257,24 @@ A chapter has six sections in a fixed order, and each one has a job:
 
 | id | heading | what it is |
 |---|---|---|
-| `read` | 怎麼讀這一章 | how to use the page: the card, the translation, the levels. Short. |
-| `source` | 原文 | the passage, every character clickable, figures cited here |
-| `translation` | 現代漢語翻譯 | the same passage, paragraph for paragraph against the original |
-| `notes` | 字詞 | the lexicon as a browsable, filterable list — the chapter's own characters, not the whole book's |
-| `history` | 背景 | what the passage assumes: who these people are, what 晋 was, why this year |
-| `discussion` | 思考 | reading questions: the checks and the sort, about the passage rather than about a graded objective |
+| `source` | 原文 | **the citation and the text, and nothing else** — see below |
+| `translation` | 現代漢語翻譯 | the same passage, sentence against sentence |
+| `notes` | 字詞 | the lexicon as a browsable list — the chapter's own characters, not the whole book's |
+| `history` | 背景 | what the passage assumes, and everything the book has to say about it, figures included |
+| `discussion` | 思考 | reading questions: the checks and the sort |
+
+**There is no 怎麼讀這一章 section, and there will not be one again.** An early draft gave every chapter a first section explaining the page — that a character opens a card, that the translation is an aid. The owner read it and asked whether every chapter needed it, and the answer is no: it says the same thing three times to a reader who worked it out on the first page, and it delays the text they came for. What a reader genuinely needs once is on the book's contents page.
+
+### 原文 holds the original text and nothing else
+
+The owner, reading the published book: *"If a section says original text, then it should simply have the original text and nothing more. I can't tell what is original text and what is interpretation. It is not visually clear at all."*
+
+That was a real failure, not a matter of taste. Each chapter's `#source` held the text, one or more explanatory paragraphs, a provenance note and a figure, **all at the same visual weight** — so a reader scanning the page could not tell which words were 司馬光's and which were the book's. The fix has two halves and both are required:
+
+1. **The section holds the citation and the text.** One line naming the work, the 卷 and the year, then the `<ol class="zj-src">` blocks. Every explanatory paragraph, every provenance `aside` and every figure moves to `#history`, which is where the book explains things. A figure's `圖 N.M` citation moves with it, because `npm run check` fails a figure that no paragraph names.
+2. **The text is unmistakably the page's primary object.** Full ink, the largest type on the page, generous space above and below so it reads as a quoted document rather than as another paragraph in a run of prose. **The original is never shrunk or muted to make this contrast** — the interpretation is what reads as secondary.
+
+The rule generalises: a section says what its heading says. 原文 is the book's words; 譯文 is a translation; 背景 is interpretation. A reader should never have to work out which they are looking at.
 
 ### The study layer is deliberately absent, and that is a scope decision
 
@@ -337,5 +358,5 @@ They are built as different sentences per state, so CSS cannot replace them the 
 - **The whole of 通鉴.** Three chapters of 周纪一, chosen because they are one continuous reading. Chapter 4 onward is the same recipe.
 - **Vertical setting.** 古籍 are set vertically, and CSS `writing-mode: vertical-rl` would do it — but a vertical column on a phone is a horizontal scroll, the figures would need a second composition each, and no gate here could see the result. It is the right second stage, not the first.
 - **A general classical-Chinese dictionary.** The lexicon covers the characters of these three chapters. It is not 漢語大詞典 and does not claim to be.
-- **Traditional characters as an option.** 通鑑 is read in both; the prototype sets the 原文 in Traditional and everything else in Simplified, which is the rule in "Language, and which script belongs where". A reader who wants the whole page in Traditional is asking for a translation job, not a setting, because converting mechanically produces wrong terminology.
+- **A third script setting inside the book.** The split is settled and gated: the 原文 and its quotations are Traditional, everything the book writes about them is Simplified. What is *not* offered is a reader-controlled toggle between the two — a page that reprinted the 原文 in Simplified would be re-deriving the text, which is the one thing the conversion record forbids (干/乾, 后/後, 里/裡), and `tongjian/README.md` says what that costs.
 - **Training the study system on the lexicon.** The reader's record keys on objective ids like every other book; the cards are not scored and nothing about them is stored.

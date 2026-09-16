@@ -15,13 +15,13 @@
 //   textbook.lexicon.lookup(key, kind)  the entry, normalised; null when there is none
 //   textbook.lexicon.card(key, kind)    { className, html } for the popover, or null
 //
-// `kind` is 'char' for a single character and 'word' for a 詞; it only breaks a tie when a key exists
+// `kind` is 'char' for a single character and 'word' for a 词; it only breaks a tie when a key exists
 // in both layers, which the two-layer design makes possible and unusual.
 //
 // What the card shows, and where each field comes from (docs/design/tongjian.md, "What the card
-// shows"): the reading and the 詞性 from the entry, the gloss and the note from the sense this passage
-// takes (chars.js names it; with no line there the entry's first sense is the common case), the 通鑑
-// examples from that sense — or the gap stated, never invented — and 「在這一章」 computed from the
+// shows"): the reading and the 词性 from the entry, the gloss and the note from the sense this passage
+// takes (chars.js names it; with no line there the entry's first sense is the common case), the 通鉴
+// examples from that sense — or the gap stated, never invented — and 「在这一章」 computed from the
 // chapter's own 原文: the clause each occurrence stands in, at most three of them, because the length of
 // that list is the one thing on the card an entry does not bound.
 
@@ -34,7 +34,7 @@ function esc(value) {
   return String(value ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
 
-/** One character is a 字; anything longer is a 詞. The layers are keyed that way. */
+/** One character is a 字; anything longer is a 词. The layers are keyed that way. */
 function layerFor(key, kind) {
   if (kind === 'char') return ['lexicon', 'words'];
   if (kind === 'word') return ['words', 'lexicon'];
@@ -54,7 +54,7 @@ function sentences() {
   return sentenceCache;
 }
 
-// Two characters in one chapter can share every sentence a third of the way down, so the 在這一章 list is
+// Two characters in one chapter can share every sentence a third of the way down, so the 在这一章 list is
 // the one part of the card whose length is not bounded by the entry. Measured on chapter 2 before this:
 // 智 produced seven lines and the list alone was 281 px of a 468 px card, and 子 appeared in six
 // sentences of up to eighty characters for 2,731 px. The card is also narrower than the phone's — the
@@ -63,7 +63,7 @@ function sentences() {
 //
 // A quotation in that list needs only enough of the sentence to place the character, so the list carries
 // the clause the character stands in — the text between the punctuation marks around it — with an
-// ellipsis where the clause was cut out of a longer sentence. The 通鑑用例 above it keeps its whole
+// ellipsis where the clause was cut out of a longer sentence. The 通鉴用例 above it keeps its whole
 // sentence: that one is the attestation, and this one is a pointer.
 const CLAUSE_MAX = 20;
 const PUNCT = '，。、；：？！「」『』〈〉《》（）';
@@ -89,9 +89,9 @@ function clauseAround(sentence, key) {
   return `${cutStart ? '…' : ''}${clause}${cutEnd ? '…' : ''}`;
 }
 
-// The card's 在這一章 section is bounded on both axes: at most three clauses of at most CLAUSE_MAX
-// characters, and at most three of the 詞 the chapter links to it. `chars.js` may name six (智 names 智宣子,
-// 智果, 智伯, 智襄子, 智國, 智氏), and a card that lists all six plus three clauses is 400 px of list on
+// The card's 在这一章 section is bounded on both axes: at most three clauses of at most CLAUSE_MAX
+// characters, and at most three of the 词 the chapter links to it. `chars.js` may name six (智 names 智宣子,
+// 智果, 智伯, 智襄子, 智国, 智氏), and a card that lists all six plus three clauses is 400 px of list on
 // a card that has to fit under a character. Three places is a pointer; seven is a corpus dump.
 const HERE_MAX = 3;
 const HERE_WORDS_MAX = 3;
@@ -117,7 +117,7 @@ function hereLines(key, declared) {
 
 /**
  * The sense this chapter takes, and everything that follows from it. A character carries every sense
- * it has in 通鑑; `chars.js` says which one is on this page, and a character with no line there takes
+ * it has in 通鉴; `chars.js` says which one is on this page, and a character with no line there takes
  * the entry's first sense, which is the common case.
  */
 function normalise(key, kind) {
@@ -149,11 +149,14 @@ function normalise(key, kind) {
 /**
  * The card, as the popover's inner HTML.
  *
- * `lang` on the quotes. The card prints two scripts on purpose (docs/design/tongjian.md, "Language, and
- * which script belongs where"): the gloss and the note are commentary about the text and are Simplified,
- * while a 通鑑用例 and the 在這一章 clauses are quotations of the 原文 and are Traditional. `lang` is what a
- * screen reader picks its voice from, so every run of quoted text says which script it is in. The head
- * carries it too — the glyph above it is the character, in the script the book prints the text in.
+ * Two scripts, one card, and `lang` is what says which run is which. The book's own voice — its gloss,
+ * its note, and the card's labels (通鉴用例, 在这一章, 又读, 异体, 本章字词) — is Simplified, because the
+ * reader reads the book in Simplified. What the card PRINTS OF 通鑑 is not: the glyph above the card is
+ * the character as the page prints it, a 通鑑用例 is a quotation of the received text, and the clauses
+ * under 在这一章 are cut from the page's own 原文. Those runs carry `lang="zh-Hant"` so a screen reader
+ * changes voice for them, which is the whole reason the attribute exists here.
+ * (Owner's instruction, 2026-09-18: the original text may stay Traditional; the textbook and especially
+ * the translation must be Simplified.)
  */
 function cardHtml(entry) {
   const parts = [];
@@ -166,17 +169,17 @@ function cardHtml(entry) {
   );
   const extras = [];
   if (entry.readings.length > 1) {
-    extras.push(`<span class="zj-card__reading">又讀 ${esc(entry.readings.filter((r) => r !== entry.pinyin).join('、'))}</span>`);
+    extras.push(`<span class="zj-card__reading">又读 ${esc(entry.readings.filter((r) => r !== entry.pinyin).join('、'))}</span>`);
   }
   if (entry.variants.length) {
-    extras.push(`<span class="zj-card__reading">異體 ${esc(entry.variants.join('、'))}</span>`);
+    extras.push(`<span class="zj-card__reading">异体 ${esc(entry.variants.join('、'))}</span>`);
   }
   // One row, not one row each: two half-empty lines cost 34 px of a card that has to fit a phone.
   if (extras.length) parts.push(`<span class="zj-card__readings">${extras.join('')}</span>`);
   parts.push(`<span class="zj-card__gloss">${esc(entry.gloss)}</span>`);
   if (entry.note) parts.push(`<span class="zj-card__note">${esc(entry.note)}</span>`);
 
-  parts.push('<span class="zj-card__sec">通鑑用例</span>');
+  parts.push('<span class="zj-card__sec">通鉴用例</span>');
   if (entry.examples.length) {
     // They share one flowing block rather than stacking: on the card's own 299 px two short quotations
     // fit on one line side by side, and a card that has to fit under a character cannot afford a line
@@ -189,22 +192,23 @@ function cardHtml(entry) {
   } else {
     // A gap stated rather than filled: an entry with no attested second use says so, and no example is
     // invented to fill the space (docs/design/tongjian.md, "The corpus").
-    parts.push('<span class="zj-card__gap">他處用例尚未檢得。</span>');
+    parts.push('<span class="zj-card__gap">他处用例尚未检得。</span>');
   }
 
   if (entry.clauses.length || entry.words.length) {
-    parts.push('<span class="zj-card__sec">在這一章</span>');
+    parts.push('<span class="zj-card__sec">在这一章</span>');
     const items = entry.clauses.map((s) => `<li lang="zh-Hant">${esc(s)}</li>`);
-    for (const w of entry.words.slice(0, HERE_WORDS_MAX)) items.push(`<li><span class="zj-card__here-word">詞</span>${esc(w)}</li>`);
+    // The label is the book's word, the term is 通鑑's, so they do not share a script.
+    for (const w of entry.words.slice(0, HERE_WORDS_MAX)) items.push(`<li><span class="zj-card__here-word">词</span><span lang="zh-Hant">${esc(w)}</span></li>`);
     parts.push(`<ul class="zj-card__here">${items.join('')}</ul>`);
   }
 
   // The way back into the chapter. This used to point at `../#zj-<char>`, an index on the book's
   // contents page that nothing builds — so every card carried a link to an anchor that does not exist,
   // which `npm run check` cannot see (it verifies that an id in the same document is present, and a
-  // cross-document fragment is invisible to it). Until the book has a real 字詞索引, the link goes to
-  // the chapter's own 字詞 section, which does exist: it is one of the six frozen section ids.
-  parts.push('<a class="zj-card__index" href="#notes">本章字詞 →</a>');
+  // cross-document fragment is invisible to it). Until the book has a real 字词索引, the link goes to
+  // the chapter's own 字词 section, which does exist: it is one of the six frozen section ids.
+  parts.push('<a class="zj-card__index" href="#notes">本章字词 →</a>');
   return parts.join('');
 }
 
@@ -213,20 +217,7 @@ function missingHtml(key) {
   return '<span class="zj-card__head" lang="zh-Hant">'
     + `<b class="zj-card__glyph">${esc(key)}</b>`
     + '</span>'
-    + '<span class="zj-card__gloss">字詞庫尚未收錄此字。</span>';
-}
-
-// Where the book prints the 原文 and its quotations, so the page can say which script each run is in.
-// `lang` is a global HTML attribute and not a stylesheet's business: `zj.css` cannot set it, and the
-// chapter pages this book's own worker owns are not this file's to edit. The book's voice is Simplified
-// (`<html lang="zh-Hans">`), and these are the runs that are not — the 原文 itself, the reference copy of
-// it beside the 譯文, and the two quotations the card prints.
-const TRADITIONAL = '.zj-src, .zj-trans__src, .zj-card__ex-text, .zj-card__here li';
-
-function declareScripts() {
-  for (const el of document.querySelectorAll(TRADITIONAL)) {
-    if (!el.hasAttribute('lang')) el.setAttribute('lang', 'zh-Hant');
-  }
+    + '<span class="zj-card__gloss">字词库尚未收录此字。</span>';
 }
 
 /**
@@ -245,7 +236,6 @@ export function registerLexicon({ lexicon = {}, words = {}, chars = {}, chapter 
     },
   };
   textbook.lexicon = registry;
-  declareScripts();
   return registry;
 }
 

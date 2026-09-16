@@ -35,7 +35,7 @@ const HAN = /[\u3400-\u4dbf\u4e00-\u9fff]|[\u{20000}-\u{2a6df}]/u;
 const PUNCTUATION = '、。：，？；！《》「」『』';
 const TONE = /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]|\d/;
 const LATIN = /[A-Za-z]/;
-const POS = ['名', '動', '形', '副', '介', '連', '助', '代', '數', '量', '語氣', '專名'];
+const POS = ['名', '动', '形', '副', '介', '连', '助', '代', '数', '量', '语气', '专名'];
 
 const corpusSentences = CORPUS.flatMap(e => e.text);
 const corpusText = corpusSentences.join('\n');
@@ -249,4 +249,198 @@ test('every <tb-char> on a chapter page resolves to an entry', t => {
   t.diagnostic(`chapter pages discovered: ${pages.length}; <tb-char> elements read: ${chars}`);
   if (!pages.length) t.diagnostic('bound: no tongjian/chNN-*/index.html exists yet, so this check read nothing. It is live for every page that lands, and the corpus-wide coverage check above is what holds the line meanwhile.');
   assert.equal(unresolved, 0, `${unresolved} <tb-char> element(s) on a chapter page point at a character with no entry`);
+});
+
+test('the 原文 and its quotations are Traditional, and everything else is Simplified', t => {
+  // The owner's instruction, after reading the published book twice (2026-09-18):
+  //   「我是说这本书一律用简体中文」 … then 「If the original text is in traditional chinese character that
+  //   is fine. I just need the rest of the textbook and especially the translation to be in simplified
+  //   chinese.」
+  // So the book sets two scripts, and which is which is a rule rather than a habit:
+  //
+  //   | 原文 — every sentence inside <ol class="zj-src">                     | Traditional |
+  //   | every quotation of 通鑑: a card's 通鑑用例, a quotation in prose, a figure's quote | Traditional |
+  //   | everything else: 譯文, 背景, 思考, headings, captions, the citation line, gloss, note, labels | Simplified |
+  //
+  // The rule had already been reversed twice in one session before this, which is exactly why it is a
+  // check and not a paragraph: a later edit pastes a sentence out of a Traditional edition into 背景, or
+  // "tidies" the 原文 into Simplified, and nothing else here notices.
+  //
+  // Claim, in two halves:
+  //   1. Outside the regions that ARE 通鑑's text, no character exists only in the Traditional script.
+  //   2. The regions that are 通鑑's text are the received text: each page's 原文 block equals its corpus
+  //      entry character for character, and every run marked lang="zh-Hant" is a verbatim quotation from
+  //      that corpus (or the volume head's 起訖 line, which the 年表 quotes and the corpus does not carry).
+  //
+  // What it proves: script, and that a marked quotation is real. What it cannot see, stated rather than
+  // hidden: a character BOTH scripts print but use differently — 著 for 着, 沈 for 沉, 干 for 乾 — because
+  // those are not on the Traditional-only list; and a quotation the book does not mark (no 「」, not a
+  // `quote` field, no lang attribute), which no mechanical rule can tell from the book's own sentence. It
+  // says nothing about whether the 原文 is the right text — test/corpus.test.js holds that — and nothing
+  // about a gloss being right.
+  //
+  // The character set is test/fixtures/traditional-only.txt, OpenCC's TSCharacters.txt reduced to the
+  // characters whose Simplified form differs, checked in rather than fetched, so this needs no network.
+  // Held out, each for a stated reason: the corpus's `work` field (the catalogued title); `variants`
+  // (the glyph a fetched witness prints — the field's whole content is "this other form exists"); and the
+  // two characters 絺 and 乾, which are Simplified or irreplaceable in their own right and are recorded
+  // in tongjian/README.md.
+  const artifact = path.join(here, 'fixtures', 'traditional-only.txt');
+  assert.ok(fs.existsSync(artifact), `${path.relative(root, artifact)} is missing, so the script rule cannot be checked at all`);
+  const traditional = new Map();
+  for (const line of fs.readFileSync(artifact, 'utf8').split('\n')) {
+    if (!line.trim() || line.startsWith('#')) continue;
+    const [from, to] = line.split(/\t+/);
+    assert.ok(from && to, `a line of ${path.relative(root, artifact)} is not "traditional<TAB>simplified": ${JSON.stringify(line)}`);
+    assert.notEqual(from, to, `${path.relative(root, artifact)} lists 「${from}」 as Traditional-only, but the table maps it to itself — a character both scripts print is a false positive here`);
+    traditional.set(from.trim(), to.trim());
+  }
+  assert.ok(traditional.size > 1000,
+    `the character set holds ${traditional.size} entries, which is not a Traditional→Simplified table — a truncated artifact must not read as a clean book`);
+
+  const corpusText = CORPUS.map(e => e.text.join('\n')).join('\n');
+  // 通鑑's own words this corpus does not cover, named here because the corpus is one year of one 卷 and
+  // the 年表 prints two lines from outside it: the volume head's 起訖 line, and the 前376 entry that ends
+  // 晉. A new quotation from another year has to be added to this list by hand — that is this half of the
+  // check's stated bound, and it is why the list is here rather than folded into the corpus.
+  const OUTSIDE_CORPUS = [
+    '起著雍攝提格，盡玄黓困敦，凡三十五年',
+    '魏、韓、趙共廢晉靖公為家人而分其地。',
+    '著雍攝提格',
+    '玄黓困敦',
+  ];
+  const isQuotation = (s) => s.length >= 2 && (corpusText.includes(s) || OUTSIDE_CORPUS.includes(s));
+
+  const chapters = fs.existsSync(TONGJIAN)
+    ? fs.readdirSync(TONGJIAN, { withFileTypes: true }).filter(d => d.isDirectory() && /^ch\d/.test(d.name)).map(d => d.name).sort()
+    : [];
+  const pages = chapters.map(dir => path.join(TONGJIAN, dir, 'index.html')).filter(f => fs.existsSync(f));
+  const files = [
+    path.join(TONGJIAN, 'index.html'),
+    ...chapters.flatMap(dir => ['index.html', 'glossary.js', 'chars.js'].map(f => path.join(TONGJIAN, dir, f))),
+    path.join(TONGJIAN, 'corpus.js'),
+    path.join(TONGJIAN, 'lexicon.js'),
+    path.join(TONGJIAN, 'words.js'),
+    path.join(TONGJIAN, 'data', 'card.js'),
+    path.join(root, 'src', 'figures', 'zj-split.js'),
+    path.join(root, 'src', 'figures', 'zj-timeline.js'),
+    path.join(root, 'src', 'figures', 'zj-words.js'),
+    path.join(root, 'src', 'figures', 'registry.js'),
+  ].filter(f => fs.existsSync(f));
+
+  // ── Half 1: everything outside the 通鑑 regions is Simplified. ────────────────────────────────────
+  // The regions are blanked before the scan. Blanking can only MISS a defect, never invent one, so each
+  // rule below is written wide rather than narrow: a 「…」 run in a data file is blanked whether or not it
+  // is a quotation, because the book has no way for a checker to tell.
+  const SKIP = new Set(['絺', '乾']);
+  const blank = (text, rel) => {
+    let out = text;
+    // A comment is not what a reader sees. The corpus header's own comment quotes the received readings
+    // on purpose (生民之類, 藍臺, 田恆之於齊) and a note saying which reading was taken has to be able to
+    // name it. Blanking can only make this check miss, never invent, so comments go.
+    out = out.replace(/\/\*[\s\S]*?\*\//g, (m) => ' '.repeat(m.length));
+    out = out.replace(/\/\/[^\n]*/g, (m) => ' '.repeat(m.length));
+    out = out.replace(/<!--[\s\S]*?-->/g, (m) => ' '.repeat(m.length));
+    out = out.replace(/work: '[^']*'/g, (m) => ' '.repeat(m.length));
+    // The corpus's own record — the 卷 it covers, its section names, the punctuation it follows and the
+    // collation note that says which reading was taken — is the transcription's apparatus. No page prints
+    // it (the reader sees the `text` arrays and the chapters' own prose), and it has to be able to quote a
+    // witness in the witness's own script: 「底本作「藍臺」…」 is a comparison of two printed forms, not
+    // the book's prose about them. tongjian/README.md holds the same record in English.
+    out = out.replace(/^\s*(?:juan|section|punctuation|note): '[^']*',?$/gm, (m) => ' '.repeat(m.length));
+    out = out.replace(/variants: \[[^\]]*\]/g, (m) => ' '.repeat(m.length));
+    out = out.replace(/「[^「」]*」/g, (m) => ' '.repeat(m.length));
+    // The two lines from outside the corpus are 通鑑's own words wherever they appear, including bare in
+    // a figure's sentence (「起著雍攝提格…」 and the 歲陰歲陽 names inside it).
+    for (const quote of OUTSIDE_CORPUS) out = out.split(quote).join(' '.repeat(quote.length));
+    out = out.replace(/text: \[[\s\S]*?\n    \],/g, (m) => ' '.repeat(m.length)); // corpus `text:` arrays
+    out = out.replace(/examples: \[[^\]]*\],?/g, (m) => ' '.repeat(m.length));  // every quotation a card prints
+    // The key of a lexicon, word, glossary or per-chapter entry — the identifier a page prints and looks
+    // up by, so it is the received form rather than the book's prose about it.
+    out = out.replace(/^(\s*)'([^']*)':/gm, (m, ws, key) => `${ws}${' '.repeat(key.length + 2)}:`);
+    out = out.replace(/\bword: \[[^\]]*\]/g, (m) => ' '.repeat(m.length));     // chars.js word bindings
+    out = out.replace(/\bterm: '[^']*'/g, (m) => ' '.repeat(m.length));        // a glossary entry's own key
+    if (/index\.html$/.test(rel)) {
+      out = out.replace(/<ol class="zj-src"[\s\S]*?<\/ol>/g, (m) => ' '.repeat(m.length));
+      out = out.replace(/<[a-z-]+[^>]*\blang="zh-Hant"[^>]*>[\s\S]*?<\/[a-z-]+>/g, (m) => ' '.repeat(m.length));
+      out = out.replace(/<tb-(?:char|term)\b[^>]*>[^<]*<\/tb-(?:char|term)>/g, (m) => ' '.repeat(m.length));
+      out = out.replace(/\b(?:ref|word)="[^"]*"/g, (m) => ' '.repeat(m.length));
+      // The 字詞 tables print the character itself in their glyph column: that glyph is the 原文's
+      // character (and the key its card is looked up by), not the book's prose about it.
+      out = out.replace(/<span class="zj-lex__glyph">[^<]*<\/span>/g, (m) => ' '.repeat(m.length));
+    } else {
+      // A module: a literal that is a lexicon key or a corpus quotation is 通鑑's text.
+      out = out.replace(/'([^'\\\n]*)'/g, (whole, body) => {
+        if (!body) return whole;
+        if (LEXICON[body] !== undefined || WORDS[body] !== undefined || isQuotation(body)) return ' '.repeat(whole.length);
+        return whole;
+      });
+    }
+    return out;
+  };
+
+  const offenders = [];
+  let scanned = 0;
+  for (const file of files) {
+    const rel = path.relative(root, file);
+    const text = blank(fs.readFileSync(file, 'utf8'), rel);
+    text.split('\n').forEach((line, i) => {
+      for (const ch of line) {
+        if (SKIP.has(ch)) continue;
+        if (!traditional.has(ch)) { scanned++; continue; }
+        offenders.push(`${rel}:${i + 1}: 「${ch}」 is Traditional-only (Simplified: 「${traditional.get(ch)}」), outside any 原文 or quotation — a reader sees it in: 「${line.trim().slice(0, 90)}」`);
+      }
+    });
+  }
+
+  // ── Half 2: the 原文 and its marked quotations are the received text. ─────────────────────────────
+  const byId = new Map(CORPUS.map(e => [e.id, e]));
+  const stripTags = (s) => s.replace(/<br\s*\/?>(?!\n)/g, '\n').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, '');
+  let blocks = 0, marked = 0;
+  for (const file of pages) {
+    const rel = path.relative(root, file);
+    const html = fs.readFileSync(file, 'utf8');
+    for (const m of html.matchAll(/<ol class="zj-src"([^>]*)>([\s\S]*?)<\/ol>/g)) {
+      blocks++;
+      assert.ok(/\blang="zh-Hant"/.test(m[1]),
+        `${rel}: a 原文 block does not carry lang="zh-Hant", so a screen reader reads the received text with the modern voice`);
+      const id = /\bdata-corpus="([^"]+)"/.exec(m[1])?.[1];
+      assert.ok(id && byId.has(id), `${rel}: a 原文 block names no corpus entry (data-corpus="${id}")`);
+      const printed = [...m[2].matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/g)].map(li => stripTags(li[1])).join('\n');
+      assert.equal(printed, byId.get(id).text.join('\n'),
+        `${rel}: the printed 原文 is not CORPUS['${id}'] — either the 原文 was converted away from the received text, or it was edited`);
+    }
+    // Every run the book marks as 通鑑's text must be a verbatim quotation of it.
+    for (const m of html.matchAll(/<([a-z-]+)[^>]*\blang="zh-Hant"[^>]*>([\s\S]*?)<\/\1>/g)) {
+      if (/class="zj-src"/.test(m[0])) continue; // the 原文 blocks are compared above
+      const text = stripTags(m[2]);
+      if (!text) continue;
+      marked++;
+      assert.ok(isQuotation(text),
+        `${rel}: a run marked lang="zh-Hant" is not a quotation of the received text, so the mark is a claim the corpus does not support: 「${text.slice(0, 60)}」`);
+    }
+  }
+  // The figures print 通鑑 too, and their `quote` fields are data rather than markup.
+  let figureQuotes = 0;
+  for (const name of ['zj-split.js', 'zj-timeline.js', 'zj-words.js']) {
+    const rel = path.join('src', 'figures', name);
+    const src = fs.readFileSync(path.join(root, rel), 'utf8');
+    for (const m of src.matchAll(/\bquote: '([^']*)'/g)) {
+      if (!m[1]) continue; // a row of the 年表 with no 通鑑 sentence of its own
+      figureQuotes++;
+      assert.ok(isQuotation(m[1]),
+        `${rel}: a \`quote\` field is not a verbatim 通鑑 quotation: 「${m[1].slice(0, 60)}」`);
+    }
+  }
+
+  t.diagnostic(`script: ${files.length} file(s) scanned, ${scanned} Simplified-layer character(s) checked, ${offenders.length} Traditional-only outside the 原文; `
+    + `${blocks} 原文 block(s) and ${marked} marked quotation(s) compared against the corpus, ${figureQuotes} figure \`quote\` field(s); `
+    + `${traditional.size} characters in ${path.relative(root, artifact)}; held out: corpus \`work\`, \`variants\`, and the character(s) ${[...SKIP].join(' ')}`);
+  assert.ok(files.length > 0, 'no file a reader sees was found, so nothing was checked — the file list must not go quietly empty');
+  assert.ok(scanned > 0, 'zero characters were checked, so this run proves nothing');
+  assert.ok(blocks > 0, 'no 原文 block was found, so the Traditional half of the rule was never exercised');
+  assert.ok(marked > 0, 'no run marked lang="zh-Hant" was found, so no quotation was checked');
+  assert.equal(offenders.length, 0,
+    `${offenders.length} Traditional-only character(s) outside the 原文 or a quotation. The owner's rule is that the 原文 and its `
+    + `quotations stay Traditional and everything else is Simplified; tongjian/README.md holds the conversion record.\n      ${offenders.slice(0, 20).join('\n      ')}`);
 });

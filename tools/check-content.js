@@ -99,7 +99,7 @@ export function checkDocument(html, { glossary = {}, kinds = [], objectives = []
   const fail = (msg, node) => fails.push(`${file}${node?.line ? `:${node.line}` : ''}: ${msg}`);
 
   // The word the prose cites a figure with. This was the literal `Figure`, which made the rule
-  // unpassable on a page whose prose is not English: a Chinese chapter writes 圖 1.1, the rule looked
+  // unpassable on a page whose prose is not English: a Chinese chapter writes 图 1.1, the rule looked
   // for `Figure\s+1\.1`, and every figure on the page failed as "never mentioned in the prose" — a
   // failure that cannot be fixed from the page side without writing the English word into Chinese
   // prose. Found 2026-09-12 while adding the 資治通鑑 book, and the bilingual plan
@@ -107,11 +107,19 @@ export function checkDocument(html, { glossary = {}, kinds = [], objectives = []
   //
   // Chosen from the page's own `<html lang>`, defaulting to English: an English page is unaffected, and
   // a page in another language states its own token. `\s*` rather than `\s+` because Chinese needs no
-  // space between 圖 and the number. A language with no token here keeps the English one and is not
-  // silently exempted — the rule still runs and still fails, which is the honest outcome.
-  const FIGURE_TOKENS = { en: 'Figure', zh: '圖' };
+  // space between the token and the number. A language with no token here keeps the English one and is
+  // not silently exempted — the rule still runs and still fails, which is the honest outcome.
+  //
+  // The Chinese token is a list, and both spellings are accepted: 图 is what a Simplified page writes
+  // and 圖 is what a Traditional one writes (the 資治通鑑 book was converted from one to the other on
+  // 2026-09-18). This checker's claim is that the prose cites the figure, not which script the page is
+  // set in — the script has its own gate, `test/lexicon.test.js`, "the book is set in Simplified" — and
+  // a red here for a script reason would report the wrong defect on a correct page.
+  const FIGURE_TOKENS = { en: 'Figure', zh: '图' };
+  const ZH_FIGURE_WORDS = ['图', '圖'];
   const lang = (findAll(doc, (n) => n.tag === 'html')[0]?.attrs.lang || 'en').toLowerCase();
   const figureWord = FIGURE_TOKENS[lang.split('-')[0]] ?? FIGURE_TOKENS.en;
+  const figurePattern = lang.split('-')[0] === 'zh' ? ZH_FIGURE_WORDS.join('|') : figureWord;
 
   // ids unique
   const ids = new Map();
@@ -138,7 +146,7 @@ export function checkDocument(html, { glossary = {}, kinds = [], objectives = []
   if (chapter !== undefined) {
     const prose = findAll(doc, (n) => n.tag === 'p' || n.tag === 'li' || n.tag === 'aside').filter((n) => !findAll(n, (x) => x.tag === 'figcaption').length);
     const mentioned = new Set();
-    const re = new RegExp(`${figureWord}\\s*${chapter}\\.(\\d+)`, 'g');
+    const re = new RegExp(`(?:${figurePattern})\\s*${chapter}\\.(\\d+)`, 'g');
     for (const p of prose) {
       let m;
       const t = textOf(p);

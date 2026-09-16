@@ -36,14 +36,20 @@ export const FIGURES = Object.freeze({
   cilium: { url: new URL('./cilium.js', import.meta.url).href, title: 'The 9+2 axoneme', needsWebGL: true, aspect: 16 / 10, narrowAspect: 1 },
   plantcell3d: { url: new URL('./plantcell3d.js', import.meta.url).href, title: 'A plant cell', needsWebGL: true, aspect: 16 / 10, narrowAspect: 1 },
 
-  // 《資治通鑑》 卷一 周紀一 — the second book. Its figures are about a text and a history, not a
+  // 《资治通鉴》 卷一 周纪一 — the second book. Its figures are about a text and a history, not a
   // specimen: where the three states sat and when, what a character becomes when it joins another, and
   // which year the book chose to begin at. Each was added here by the integration owner from the
   // figure worker's brief so that `npm run figure -- <kind>` and `npm run drive` have something to
   // address while the modules were being written.
-  'zj-split': { url: new URL('./zj-split.js', import.meta.url).href, title: '三家分晉：從滅智到命侯', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
-  'zj-timeline': { url: new URL('./zj-timeline.js', import.meta.url).href, title: '周紀一的年表', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
-  'zj-words': { url: new URL('./zj-words.js', import.meta.url).href, title: '字與詞', needsWebGL: false, aspect: 16 / 10, narrowAspect: 4 / 5 },
+  //
+  // `narrowAspect` is 2/3 for all three, measured rather than guessed: at a 342 px stage (what a 390 px
+  // viewport gives the frame in the lab) the old values left zj-timeline 456 px for 484–501 px of content
+  // and zj-words 428 px for 477–577 px, so both clipped. At 2/3 each is 513 px and the content is 511 px,
+  // in both themes and with the system Han fallback rather than the book's webfont. One value for all
+  // three also means a reader meets one shape three times.
+  'zj-split': { url: new URL('./zj-split.js', import.meta.url).href, title: '三家分晋：从灭智到命侯', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
+  'zj-timeline': { url: new URL('./zj-timeline.js', import.meta.url).href, title: '周纪一的年表', needsWebGL: false, aspect: 16 / 9, narrowAspect: 2 / 3 },
+  'zj-words': { url: new URL('./zj-words.js', import.meta.url).href, title: '字与词', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
 });
 
 export const KINDS = Object.freeze(Object.keys(FIGURES));

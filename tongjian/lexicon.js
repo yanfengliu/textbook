@@ -11,7 +11,7 @@
 // and every character of the corpus has an entry, which test/lexicon.test.js enforces.
 //
 // Bound: this is not a dictionary of classical Chinese and does not claim to be. It covers
-// the characters of 卷一 周紀一's 威烈王二十三年 entry; a sense that only appears in another
+// the characters of 卷一 周纪一's 威烈王二十三年 entry; a sense that only appears in another
 // 卷 is not claimed here. It proves nothing about whether a gloss is right — review does.
 
 export const LEXICON = {
@@ -27,7 +27,7 @@ export const LEXICON = {
   },
   '命': {
     pinyin: 'mìng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ming4-order', gloss: '命令；下令册命。', note: '周天子下令册命晋大夫为诸侯，是本卷开篇的第一件事。',
         examples: [{ text: '是受天子之命而為諸侯也', at: '周紀一' }] },
@@ -41,7 +41,7 @@ export const LEXICON = {
   },
   '晉': {
     pinyin: 'jìn',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'jin4-state', gloss: '国名。周初所封，春秋时为大国，地在今山西一带', note: '本卷开篇的三家分晋，分的就是晋国。',
         examples: [{ text: '今晉大夫暴蔑其君，剖分晉國', at: '周紀一' }] },
@@ -74,7 +74,7 @@ export const LEXICON = {
   },
   '魏': {
     pinyin: 'wèi',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'wei4-shi', gloss: '氏名，亦国名。晋国大夫魏氏，即后来的战国魏国。', note: '本卷十二见，皆指魏氏及其宗主：魏斯（即魏文侯）、魏桓子。',
         examples: [{ text: '帥韓、魏之甲以攻趙氏', at: '周紀一' }] },
@@ -82,7 +82,7 @@ export const LEXICON = {
   },
   '斯': {
     pinyin: 'sī',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'si1-name', gloss: '人名用字。魏斯，即魏文侯。', note: '本卷三见，其中两见是晋大夫魏斯的名字；另一见是代词「此」。',
         examples: [{ text: '魏斯者，桓子之孫也，是為文侯。', at: '周紀一' }] },
@@ -92,7 +92,7 @@ export const LEXICON = {
   },
   '趙': {
     pinyin: 'zhào',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'zhao4-clan', gloss: '氏名。晋国大夫赵氏，也是战国赵国之氏。', note: '赵籍是晋国赵氏之长，即后来的赵烈侯；赵简子、赵襄子都出自此氏。',
         examples: [{ text: '趙簡子之子，長曰伯魯', at: '周紀一' }] },
@@ -102,7 +102,7 @@ export const LEXICON = {
   },
   '籍': {
     pinyin: 'jí',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'ji2-name', gloss: '人名。赵籍，赵献子之子，即赵烈侯。', note: '本卷两见皆指此人：开篇以「赵籍」与魏斯、韩虔同列，末句「献子生籍」补出其世系。本卷未见「书籍、登记」义。',
         examples: [{ text: '獻子生籍，是為烈侯。', at: '周紀一' }] },
@@ -110,15 +110,15 @@ export const LEXICON = {
   },
   '韓': {
     pinyin: 'hán',
-    pos: '專名',
+    pos: '专名',
     uses: [
-      { id: 'han2-clan', gloss: '晋国韩氏；也指韩氏后来所建的国。', note: '本卷或指韩康子、韩虔等韩氏之人，或与赵、魏并举指韩氏之兵。',
+      { id: 'han2-clan', gloss: '晋国韩氏；也指韩氏后来所建的国。', note: '本卷或指韩康子、韩虔等韩氏之人，或与赵、魏并举。',
         examples: [{ text: '智伯請地於韓康子', at: '周紀一' }, { text: '帥韓、魏之甲以攻趙氏', at: '周紀一' }, { text: '韓康子生武子啟章', at: '周紀一' }] },
     ],
   },
   '虔': {
     pinyin: 'qián',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'qian2-name', gloss: '人名。韩虔，韩康子之孙，即韩景侯', note: '字义本为恭敬，本卷只作人名用字；他与魏斯、赵籍同被周天子命为诸侯。',
         examples: [{ text: '韓康子生武子啟章，武子生虔，是為景侯。', at: '周紀一' }] },
@@ -128,7 +128,7 @@ export const LEXICON = {
   '為': {
     pinyin: 'wéi',
     readings: ['wéi', 'wèi'],
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'wei2-become', gloss: '做；成为。', note: '通用义。「为诸侯」即成为诸侯。',
         reading: 'wéi',
@@ -183,7 +183,7 @@ export const LEXICON = {
   },
   '光': {
     pinyin: 'guāng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'guang1-sima', gloss: '人名。司马光自称，是《通鉴》史臣议论的发端。', note: '「臣光曰」是司马光在叙事之后发议论的固定开头，全卷两见。本卷未见「光明」义。',
         examples: [{ text: '臣光曰：臣聞天子之職莫大於禮', at: '周紀一' }, { text: '臣光曰：智伯之亡也', at: '周紀一' }] },
@@ -191,7 +191,7 @@ export const LEXICON = {
   },
   '曰': {
     pinyin: 'yuē',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yue1-say', gloss: '说；说道', note: '引出所说的话，其后多用冒号或引号。全卷四十九见，「臣光曰」「故曰」皆此义。',
         examples: [{ text: '臣光曰：臣聞天子之職莫大於禮', at: '周紀一' }, { text: '故曰：天子之職莫大於禮也。', at: '周紀一' }] },
@@ -201,7 +201,7 @@ export const LEXICON = {
   },
   '聞': {
     pinyin: 'wén',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'wen2-hear', gloss: '听到；听说。', note: '「臣闻」是臣下进言的套语，「智国闻之」是听到这件事。',
         examples: [{ text: '臣聞天子之職莫大於禮', at: '周紀一' }, { text: '智國聞之，諫曰', at: '周紀一' }, { text: '臣聞脣亡則齒寒', at: '周紀一' }] },
@@ -326,7 +326,7 @@ export const LEXICON = {
   },
   '謂': {
     pinyin: 'wèi',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'wei4-say-to', gloss: '对……说。', note: '「谓……曰」是史书叙言的常式。',
         examples: [{ text: '簡子謂無恤曰', at: '周紀一' }, { text: '絺疵謂智伯曰', at: '周紀一' }] },
@@ -366,7 +366,7 @@ export const LEXICON = {
   },
   '也': {
     pinyin: 'yě',
-    pos: '語氣',
+    pos: '语气',
     uses: [
       { id: 'ye3-judgment', gloss: '句末语气词，表判断', note: '用于「……是也」句式，构成判断句，回答「何谓」之问。',
         examples: [{ text: '紀綱是也；何謂分？', at: '周紀一' }, { text: '公、侯、卿、大夫是也。', at: '周紀一' }] },
@@ -418,7 +418,7 @@ export const LEXICON = {
   },
   '四': {
     pinyin: 'sì',
-    pos: '數',
+    pos: '数',
     uses: [
       { id: 'si4-four', gloss: '数词，四。', note: '全卷仅一见，即「四海」之四，泛指天下。无第二处用例，故不举例。',
         examples: [] },
@@ -442,7 +442,7 @@ export const LEXICON = {
   },
   '兆': {
     pinyin: 'zhào',
-    pos: '數',
+    pos: '数',
     uses: [
       { id: 'zhao4-myriad', gloss: '数目单位，百万为兆；「兆民」谓万民、众民', note: '全卷仅一见，无第二处用例，故不举例。「兆民之众」与「四海之广」对举，极言人之多。',
         examples: [] },
@@ -471,7 +471,7 @@ export const LEXICON = {
   },
   '受': {
     pinyin: 'shòu',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shou4-endure', gloss: '承受；遭受。', note: '「受制于一人」是被动句式，「于」引出施动者。',
         examples: [{ text: '兆民之眾，受制於一人', at: '周紀一' }] },
@@ -481,7 +481,7 @@ export const LEXICON = {
   },
   '制': {
     pinyin: 'zhì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zhi4-control', gloss: '控制；统属；制伏。', note: '「受制于一人」是受控制，「制支叶」「制卿大夫」是统属。',
         examples: [{ text: '根本之制支葉', at: '周紀一' }, { text: '人得而制之。', at: '周紀一' }] },
@@ -491,9 +491,9 @@ export const LEXICON = {
   },
   '一': {
     pinyin: 'yī',
-    pos: '數',
+    pos: '数',
     uses: [
-      { id: 'yi1-one', gloss: '数词，一。', note: '本卷七见，或为实数，或与「万」相对而言少。本卷未见「统一」「专一」义。',
+      { id: 'yi1-one', gloss: '数词，一。', note: '本卷七见，或为实数，或与「万」相对。无「统一」「专一」义。',
         examples: [{ text: '兆民之眾，受制於一人', at: '周紀一' }, { text: '其不逮者一也', at: '周紀一' }, { text: '一日二日萬幾', at: '周紀一' }] },
     ],
   },
@@ -509,7 +509,7 @@ export const LEXICON = {
   },
   '雖': {
     pinyin: 'suī',
-    pos: '連',
+    pos: '连',
     uses: [
       { id: 'sui1-although', gloss: '连词，虽然。', note: '用于事实上的让步。',
         examples: [{ text: '王人雖微，序於諸侯之上', at: '周紀一' }] },
@@ -519,7 +519,7 @@ export const LEXICON = {
   },
   '有': {
     pinyin: 'yǒu',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'you3-have', gloss: '有；具有；领有', note: '表领有或存在。全卷十七见，此举两处。',
         examples: [{ text: '昔仲叔於奚有功於衛', at: '周紀一' }, { text: '天下苟有桓、文之君', at: '周紀一' }] },
@@ -529,7 +529,7 @@ export const LEXICON = {
   },
   '絕': {
     pinyin: 'jué',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jue2-unsurpassed', gloss: '极；无人能比。', note: '「绝伦」指无人可比。',
         examples: [{ text: '雖有絕倫之力', at: '周紀一' }] },
@@ -583,7 +583,7 @@ export const LEXICON = {
   },
   '智': {
     pinyin: 'zhì',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'zhi4-clan', gloss: '智氏，晋国大夫的家族，智伯出于此族。', note: '本卷多作氏族名，如智宣子、智襄子、智伯、智果、智国、智宗。',
         examples: [{ text: '初，智宣子將以瑤為後。', at: '周紀一' }, { text: '智伯請地於韓康子', at: '周紀一' }] },
@@ -593,7 +593,7 @@ export const LEXICON = {
   },
   '敢': {
     pinyin: 'gǎn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'gan3-dare', gloss: '助动词，敢；有胆量。', note: '「莫敢不奔走而服役者」用双重否定强调无人敢不听命。',
         examples: [{ text: '莫敢不奔走而服役者', at: '周紀一' }, { text: '我不為難，誰敢興之', at: '周紀一' }] },
@@ -611,7 +611,7 @@ export const LEXICON = {
   },
   '奔': {
     pinyin: 'bēn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ben1-run', gloss: '奔跑；奔走。', note: '全卷仅一见（「奔走」），无第二处用例，故不举例。',
         examples: [] },
@@ -619,7 +619,7 @@ export const LEXICON = {
   },
   '走': {
     pinyin: 'zǒu',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zou3-run', gloss: '跑；疾行', note: '古汉语的「走」是跑，不是今语的行走。',
         examples: [{ text: '莫敢不奔走而服役者', at: '周紀一' }] },
@@ -629,7 +629,7 @@ export const LEXICON = {
   },
   '而': {
     pinyin: 'ér',
-    pos: '連',
+    pos: '连',
     uses: [
       { id: 'er2-and', gloss: '连词，并列或承接。', note: '可译作「并且」「然后」，也可不译。',
         examples: [{ text: '莫敢不奔走而服役者', at: '周紀一' }, { text: '故能謹其微而治之', at: '周紀一' }] },
@@ -643,7 +643,7 @@ export const LEXICON = {
   },
   '服': {
     pinyin: 'fú',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'fu2-serve', gloss: '服事；服役。', note: '「服役」即服事役使。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -651,7 +651,7 @@ export const LEXICON = {
   },
   '役': {
     pinyin: 'yì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yi4-serve', gloss: '服役；供人驱使。', note: '全卷仅一见，即「服役者」，谓奔走供职之人。无第二处用例，故不举例。',
         examples: [] },
@@ -691,7 +691,7 @@ export const LEXICON = {
   },
   '哉': {
     pinyin: 'zāi',
-    pos: '語氣',
+    pos: '语气',
     uses: [
       { id: 'zai1-exclaim', gloss: '句末语气词，表感叹。', note: '常与「岂」呼应，构成反问式的感叹。',
         examples: [{ text: '糜滅幾盡，豈不哀哉', at: '周紀一' }, { text: '其為害豈不多哉', at: '周紀一' }, { text: '豈非以禮為之紀綱哉', at: '周紀一' }] },
@@ -701,7 +701,7 @@ export const LEXICON = {
   },
   '故': {
     pinyin: 'gù',
-    pos: '連',
+    pos: '连',
     uses: [
       { id: 'gu4-therefore', gloss: '所以；因此', note: '承接上文推出结论，全卷「故曰」「是故」屡见。',
         examples: [{ text: '故曰：天子之職莫大於禮也。', at: '周紀一' }, { text: '是故天子統三公', at: '周紀一' }] },
@@ -711,7 +711,7 @@ export const LEXICON = {
   },
   '統': {
     pinyin: 'tǒng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'tong3-command', gloss: '统领；总领。', note: '全卷仅一见，指天子统领三公，无第二处用例，故不举例。',
         examples: [] },
@@ -719,7 +719,7 @@ export const LEXICON = {
   },
   '三': {
     pinyin: 'sān',
-    pos: '數',
+    pos: '数',
     uses: [
       { id: 'san1-three', gloss: '三，数目。', note: '本卷「三版」「三年」「三公」都是实数；「一人三失」的「三」是虚指多次。',
         examples: [{ text: '城不浸者三版', at: '周紀一' }, { text: '是故天子統三公', at: '周紀一' }] },
@@ -729,7 +729,7 @@ export const LEXICON = {
   },
   '率': {
     pinyin: 'shuài',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shuai4-lead', gloss: '率领；统率。', note: '全卷仅一见，即「三公率诸侯」。胡注于「帅韩、魏之甲」下云「帅，读曰率」，可与此互证。无第二处用例，故不举例。',
         examples: [] },
@@ -738,7 +738,7 @@ export const LEXICON = {
   '治': {
     pinyin: 'zhì',
     readings: ['zhì', 'chí'],
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zhi4-govern', gloss: '治理；管理。', note: '胡注：「治，直之翻。」古平声一读 chí；今普通话治理读 zhì。',
         reading: 'chí',
@@ -780,7 +780,7 @@ export const LEXICON = {
   },
   '臨': {
     pinyin: 'lín',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'lin2-overlook', gloss: '居高临下；此谓以尊位对待', note: '全卷仅一见，无第二处用例，故不举例。「贵以临贱」谓贵者居上而临贱者。',
         examples: [] },
@@ -796,7 +796,7 @@ export const LEXICON = {
   },
   '承': {
     pinyin: 'chéng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'cheng2-serve', gloss: '承奉；在下位者侍奉在上位者。', note: '与上句「贵以临贱」的「临」相对：临是上对下，承是下对上。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -815,7 +815,7 @@ export const LEXICON = {
   '使': {
     pinyin: 'shǐ',
     readings: ['shǐ', 'shì'],
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shi3-send', gloss: '派遣；命令某人去做某事。', note: '读 shǐ，是被派遣的人或所做的事跟在后面。',
         reading: 'shǐ',
@@ -873,7 +873,7 @@ export const LEXICON = {
   },
   '運': {
     pinyin: 'yùn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yun4-move', gloss: '运转；运动。', note: '全卷仅一见，指心腹运转手足，无第二处用例，故不举例。',
         examples: [] },
@@ -943,7 +943,7 @@ export const LEXICON = {
   },
   '衛': {
     pinyin: 'wèi',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'wei4-guard', gloss: '保卫；护卫。', note: '「手足之卫心腹」即手足护卫心腹。',
         examples: [{ text: '猶手足之衛心腹', at: '周紀一' }] },
@@ -954,7 +954,7 @@ export const LEXICON = {
   },
   '庇': {
     pinyin: 'bì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'bi4-shelter', gloss: '遮蔽；庇护。', note: '「支叶之庇本根」谓枝叶遮蔽树根。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -962,7 +962,7 @@ export const LEXICON = {
   },
   '然': {
     pinyin: 'rán',
-    pos: '連',
+    pos: '连',
     uses: [
       { id: 'ran2-so', gloss: '这样；如此。', note: '「不然」即不是这样，「知其然」即知道事情是这样；「然则」即既然如此、那么。',
         examples: [{ text: '我心知其然也', at: '周紀一' }, { text: '不然，夫二家豈不利朝夕分趙氏之田', at: '周紀一' }] },
@@ -988,9 +988,9 @@ export const LEXICON = {
   },
   '能': {
     pinyin: 'néng',
-    pos: '動',
+    pos: '动',
     uses: [
-      { id: 'neng2-can', gloss: '助动词，能够。', note: '表有能力做到某事；否定式「不能」表未能、做不到，全卷多见，本卷未见「能力」的名词用法。',
+      { id: 'neng2-can', gloss: '助动词，能够。', note: '表有能力做到；「不能」表做不到。本卷无「能力」的名词用法。',
         examples: [{ text: '然後能上下相保而國家治安', at: '周紀一' }, { text: '故能謹其微而治之', at: '周紀一' }, { text: '伯魯不能舉其辭', at: '周紀一' }] },
     ],
   },
@@ -1009,7 +1009,7 @@ export const LEXICON = {
   },
   '保': {
     pinyin: 'bǎo',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'bao3-protect', gloss: '保全；互相保全。', note: '「上下相保」指上与下彼此保全。',
         examples: [{ text: '然後能上下相保而國家治安', at: '周紀一' }] },
@@ -1051,7 +1051,7 @@ export const LEXICON = {
   },
   '文': {
     pinyin: 'wén',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'wen2-king', gloss: '人名。周文王，与武王并称「文、武」。', note: '「文王序《易》」「文、武之祀」皆指周文王。',
         examples: [{ text: '文王序《易》，以乾坤為首。', at: '周紀一' }, { text: '然文、武之祀猶綿綿相屬者', at: '周紀一' }] },
@@ -1075,7 +1075,7 @@ export const LEXICON = {
   },
   '序': {
     pinyin: 'xù',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xu4-order', gloss: '动，排列次序；使有次序。', note: '「文王序《易》」是为《易》编次；「序亲疏」是排列亲疏的次第。',
         examples: [{ text: '文王序《易》，以乾坤為首。', at: '周紀一' }, { text: '夫禮，辨貴賤，序親疏', at: '周紀一' }] },
@@ -1123,7 +1123,7 @@ export const LEXICON = {
   },
   '孔': {
     pinyin: 'kǒng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'kong3-confucius', gloss: '孔子，名丘，春秋鲁国人。', note: '本卷「孔」只作姓氏用，都见于「孔子」；无「孔穴」义。',
         examples: [{ text: '衛君待孔子而為政', at: '周紀一' }, { text: '孔子以為不如多與之邑', at: '周紀一' }] },
@@ -1131,7 +1131,7 @@ export const LEXICON = {
   },
   '繫': {
     pinyin: 'xì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xi4-attach', gloss: '系辞；附系文辞于卦爻之下。', note: '全卷仅一见，即「孔子系之曰」，谓孔子为《易》作系辞。无第二处用例，故不举例。',
         examples: [] },
@@ -1139,7 +1139,7 @@ export const LEXICON = {
   },
   '尊': {
     pinyin: 'zūn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zun1-honour', gloss: '尊崇；使地位高。', note: '与「抑」相对：《春秋》抑诸侯而尊周室。',
         examples: [{ text: '《春秋》抑諸侯，尊周室', at: '周紀一' }] },
@@ -1167,7 +1167,7 @@ export const LEXICON = {
   },
   '定': {
     pinyin: 'dìng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ding4-settle', gloss: '确定；安定。', note: '全卷仅一见（「乾坤定矣」），无第二处用例，故不举例。',
         examples: [] },
@@ -1175,9 +1175,9 @@ export const LEXICON = {
   },
   '矣': {
     pinyin: 'yǐ',
-    pos: '語氣',
+    pos: '语气',
     uses: [
-      { id: 'yi3-final', gloss: '句末语气词，表陈述、肯定的语气', note: '现代汉语没有对应的虚词，只能靠语感体会。',
+      { id: 'yi3-final', gloss: '句末语气词，表陈述、肯定的语气', note: '现代汉语没有对应的虚词。',
         examples: [{ text: '先王之禮於斯盡矣。', at: '周紀一' }, { text: '卑高以陳，貴賤位矣。', at: '周紀一' }, { text: '禮之大體，什喪七八矣。', at: '周紀一' }] },
       { id: 'yi3-er-yi', gloss: '与「而已」连用，表限止，犹「罢了」', note: '全卷只有「当守节伏死而已矣」一处是这种连用。',
         examples: [{ text: '君臣之分，當守節伏死而已矣。', at: '周紀一' }] },
@@ -1185,7 +1185,7 @@ export const LEXICON = {
   },
   '陳': {
     pinyin: 'chén',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'chen2-display', gloss: '陈列；排列。', note: '全卷仅一见，指天地卑高既已陈列，无第二处用例，故不举例。',
         examples: [] },
@@ -1201,7 +1201,7 @@ export const LEXICON = {
   },
   '言': {
     pinyin: 'yán',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yan2-say', gloss: '说；说明。', note: '「何以言之」的言同此义，句仅五字，不足六字之例，故不举为例。',
         examples: [{ text: '言君臣之位，猶天地之不可易也', at: '周紀一' }] },
@@ -1211,7 +1211,7 @@ export const LEXICON = {
   },
   '可': {
     pinyin: 'kě',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ke3-can', gloss: '可以；能够。', note: '本卷十一见，多与「不」「得」连用。',
         examples: [{ text: '猶天地之不可易也', at: '周紀一' }, { text: '雖欲勿許，其可得乎？', at: '周紀一' }] },
@@ -1219,7 +1219,7 @@ export const LEXICON = {
   },
   '春': {
     pinyin: 'chūn',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'chun1-spring', gloss: '书名用字。《春秋》，鲁国编年史，孔子所修。', note: '全卷仅一见，无第二处用例，故不举例；且仅见于书名《春秋》。本卷未见「春季」义。',
         examples: [] },
@@ -1227,7 +1227,7 @@ export const LEXICON = {
   },
   '秋': {
     pinyin: 'qiū',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'qiu1-chunqiu', gloss: '《春秋》，书名，儒家五经之一', note: '全卷仅一见，无第二处用例，故不举例。此处为书名《春秋》的一半，割裂举例则不成词，故从阙。',
         examples: [] },
@@ -1235,7 +1235,7 @@ export const LEXICON = {
   },
   '抑': {
     pinyin: 'yì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yi4-restrain', gloss: '抑制；压低。', note: '「抑诸侯」指《春秋》压低诸侯的僭越，以尊周室。',
         examples: [{ text: '《春秋》抑諸侯', at: '周紀一' }] },
@@ -1245,7 +1245,7 @@ export const LEXICON = {
   },
   '周': {
     pinyin: 'zhōu',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'zhou1-dynasty', gloss: '朝代名，此指东周王室', note: '全卷议论都环绕周天子与周室。',
         examples: [{ text: '《春秋》抑諸侯，尊周室', at: '周紀一' }, { text: '幽、厲失德，周道日衰', at: '周紀一' }] },
@@ -1276,7 +1276,7 @@ export const LEXICON = {
   '見': {
     pinyin: 'jiàn',
     readings: ['jiàn', 'xiàn'],
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jian4-see', gloss: '看见；见到。', note: '读 jiàn。「臣见其视臣端而趋疾」即我看见他看我时目光端正、步履急促。',
         reading: 'jiàn',
@@ -1335,7 +1335,7 @@ export const LEXICON = {
   },
   '桀': {
     pinyin: 'jié',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'jie2-king', gloss: '人名，夏朝末代君主桀。', note: '全卷仅一见，与商纣并举为暴君，无第二处用例，故不举例。',
         examples: [] },
@@ -1343,7 +1343,7 @@ export const LEXICON = {
   },
   '紂': {
     pinyin: 'zhòu',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'zhou4-king', gloss: '商朝末代君主帝辛，谥纣。', note: '本卷以「桀、纣」为暴君的代表，与「汤、武」对举。',
         examples: [{ text: '非有桀、紂之暴', at: '周紀一' }, { text: '以微子而代紂', at: '周紀一' }] },
@@ -1361,7 +1361,7 @@ export const LEXICON = {
   },
   '湯': {
     pinyin: 'tāng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'tang1-king', gloss: '商汤，商朝的开国君主，又称成汤。', note: '本卷两见，都指商汤；「热水」义本卷未见。',
         examples: [{ text: '非有桀、紂之暴，湯、武之仁', at: '周紀一' }, { text: '則成湯配天矣', at: '周紀一' }] },
@@ -1369,7 +1369,7 @@ export const LEXICON = {
   },
   '武': {
     pinyin: 'wǔ',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'wu3-king-wu', gloss: '专名。周武王。', note: '与「汤」并举，指商汤、周武王；「文、武之祀」则指周文王、周武王。',
         examples: [{ text: '非有桀、紂之暴，湯、武之仁', at: '周紀一' }, { text: '然文、武之祀猶綿綿相屬者', at: '周紀一' }] },
@@ -1387,7 +1387,7 @@ export const LEXICON = {
   },
   '歸': {
     pinyin: 'guī',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'gui1-submit', gloss: '归附；归向。', note: '「人归之」指人心归附。',
         examples: [{ text: '湯、武之仁，人歸之', at: '周紀一' }] },
@@ -1397,7 +1397,7 @@ export const LEXICON = {
   },
   '當': {
     pinyin: 'dāng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'dang1-should', gloss: '应当；应该', note: '「当守节伏死」谓应当守节而死。',
         examples: [{ text: '君臣之分，當守節伏死而已矣', at: '周紀一' }] },
@@ -1407,7 +1407,7 @@ export const LEXICON = {
   },
   '守': {
     pinyin: 'shǒu',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shou3-keep', gloss: '守持；保持。', note: '「守节」即守住臣节；「守其名分」即守住名分。',
         examples: [{ text: '君臣之分，當守節伏死而已矣。', at: '周紀一' }, { text: '蓋以周之子孫尚能守其名分故也', at: '周紀一' }] },
@@ -1425,7 +1425,7 @@ export const LEXICON = {
   },
   '伏': {
     pinyin: 'fú',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'fu2-die', gloss: '伏死：就死；甘心受死。', note: '「当守节伏死而已矣」谓为臣当守节而死。',
         examples: [{ text: '當守節伏死而已矣', at: '周紀一' }] },
@@ -1435,7 +1435,7 @@ export const LEXICON = {
   },
   '死': {
     pinyin: 'sǐ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'si3-die', gloss: '死；死亡。', note: '本卷三见，或指臣为君死节，或指人死无后。',
         examples: [{ text: '又斃死以守之，其誰與我', at: '周紀一' }, { text: '智伯死無後，而此人欲為報仇', at: '周紀一' }] },
@@ -1453,7 +1453,7 @@ export const LEXICON = {
   },
   '代': {
     pinyin: 'dài',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'dai4-replace', gloss: '替代；取代', note: '「代纣」谓取代纣王；「代德」谓足以上代周室之德。',
         examples: [{ text: '是故以微子而代紂', at: '周紀一' }, { text: '未有代德而有二王', at: '周紀一' }] },
@@ -1463,7 +1463,7 @@ export const LEXICON = {
   },
   '則': {
     pinyin: 'zé',
-    pos: '連',
+    pos: '连',
     uses: [
       { id: 'ze2-then', gloss: '就；那么。', note: '连词，表承接或推论，本卷最常见。',
         examples: [{ text: '政亡，則國家從之', at: '周紀一' }, { text: '治其微，則用力寡而功多', at: '周紀一' }, { text: '名器既亡，則禮安得獨在哉', at: '周紀一' }] },
@@ -1473,7 +1473,7 @@ export const LEXICON = {
   },
   '成': {
     pinyin: 'chéng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'cheng2-complete', gloss: '完成；成就', note: '「成于著」谓在显著处完成。',
         examples: [{ text: '夫事未有不生於微而成於著。', at: '周紀一' }, { text: '而欲為危難不可成之事乎？', at: '周紀一' }] },
@@ -1483,7 +1483,7 @@ export const LEXICON = {
   },
   '配': {
     pinyin: 'pèi',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'pei4-match', gloss: '配享；与天相配。', note: '全卷仅一见，指商汤配天而受祭，无第二处用例，故不举例。',
         examples: [] },
@@ -1491,7 +1491,7 @@ export const LEXICON = {
   },
   '季': {
     pinyin: 'jì',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'ji4-zha', gloss: '季札，吴王寿梦之子。', note: '本卷借他让国之事说明礼不可乱。本卷「季」只作人名、氏名，无「季节」「末年」义。',
         examples: [{ text: '以季札而君吳', at: '周紀一' }] },
@@ -1501,7 +1501,7 @@ export const LEXICON = {
   },
   '札': {
     pinyin: 'zhá',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'zha2-jizha', gloss: '人名。季札，吴国公子，吴王寿梦之少子。', note: '全卷仅一见，即「以季札而君吴」，谓若季札为吴君，则太伯之祀不至断绝。无第二处用例，故不举例。',
         examples: [] },
@@ -1509,7 +1509,7 @@ export const LEXICON = {
   },
   '吳': {
     pinyin: 'wú',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'wu2-state', gloss: '国名。周初太伯所建，地在今江苏一带。', note: '全卷仅一见，无第二处用例，故不举例。此句假设季札为吴君。',
         examples: [] },
@@ -1527,7 +1527,7 @@ export const LEXICON = {
   },
   '伯': {
     pinyin: 'bó',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'bo2-zhibo', gloss: '人名。智伯，名瑶，智宣子之子，谥襄子。', note: '本卷出现最多的人名，晋阳之战败死，其亡是全卷「才胜德」之戒。',
         examples: [{ text: '智伯請地於韓康子', at: '周紀一' }, { text: '臣光曰：智伯之亡也', at: '周紀一' }] },
@@ -1547,7 +1547,7 @@ export const LEXICON = {
   },
   '食': {
     pinyin: 'shí',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shi2-eat', gloss: '吃', note: '「人马相食」谓围城中人马互相为食。',
         examples: [{ text: '城不沒者三版，人馬相食', at: '周紀一' }] },
@@ -1557,9 +1557,9 @@ export const LEXICON = {
   },
   '二': {
     pinyin: 'èr',
-    pos: '數',
+    pos: '数',
     uses: [
-      { id: 'er4-two', gloss: '数目二；两个。', note: '「二子」指伯鲁与无恤；「二简」即两片竹简。',
+      { id: 'er4-two', gloss: '数目二；两个。', note: '「二子」指伯鲁与无恤。',
         examples: [{ text: '然二子寧亡國而不為者', at: '周紀一' }, { text: '乃書訓戒之辭於二簡', at: '周紀一' }, { text: '一日二日萬幾', at: '周紀一' }] },
       { id: 'er4-two-minds', gloss: '「二心」：不专一，怀有二意。', note: '指臣事其主而又有杀主之心。',
         examples: [{ text: '而又求殺之，是二心也', at: '周紀一' }, { text: '將以愧天下後世之為人臣懷二心者也', at: '周紀一' }] },
@@ -1576,7 +1576,7 @@ export const LEXICON = {
   },
   '亡': {
     pinyin: 'wáng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'wang2-perish', gloss: '灭亡；使灭亡。', note: '「亡国」「亡人国」皆此义。本卷未见「逃亡」义。',
         examples: [{ text: '然二子寧亡國而不為者', at: '周紀一' }, { text: '吾乃今知水可以亡人國也', at: '周紀一' }] },
@@ -1596,7 +1596,7 @@ export const LEXICON = {
   },
   '亂': {
     pinyin: 'luàn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'luan4-disrupt', gloss: '动，扰乱；破坏。', note: '「礼之大节不可乱」即礼的大节不可败坏。',
         examples: [{ text: '誠以禮之大節不可亂也', at: '周紀一' }] },
@@ -1608,7 +1608,7 @@ export const LEXICON = {
   },
   '辨': {
     pinyin: 'biàn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'bian4-distinguish', gloss: '辨别；区分', note: '本卷两见，一为礼之「辨贵贱」，一为世俗之不能辨才德。',
         examples: [{ text: '夫禮，辨貴賤，序親疏', at: '周紀一' }, { text: '而世俗莫之能辨', at: '周紀一' }] },
@@ -1616,7 +1616,7 @@ export const LEXICON = {
   },
   '親': {
     pinyin: 'qīn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'qin1-close', gloss: '亲近；亲密。', note: '「相亲」指彼此亲近，「易亲」指容易亲近。',
         examples: [{ text: '愛者易親，嚴者易疏', at: '周紀一' }, { text: '彼驕而輕敵，此懼而相親', at: '周紀一' }] },
@@ -1637,7 +1637,7 @@ export const LEXICON = {
   },
   '裁': {
     pinyin: 'cái',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'cai2-judge', gloss: '裁断；裁制。', note: '全卷仅一见，指礼能裁制万物，无第二处用例，故不举例。',
         examples: [] },
@@ -1664,7 +1664,7 @@ export const LEXICON = {
   },
   '著': {
     pinyin: 'zhù',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zhu4-show', gloss: '显明；显现出来。', note: '「非名不著」即没有名分就显不出来。',
         examples: [{ text: '非名不著，非器不形。', at: '周紀一' }] },
@@ -1684,7 +1684,7 @@ export const LEXICON = {
   },
   '形': {
     pinyin: 'xíng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xing2-manifest', gloss: '显现；表现出来', note: '全卷仅一见，无第二处用例，故不举例。「非器不形」谓没有器物，名就显现不出来。',
         examples: [] },
@@ -1692,7 +1692,7 @@ export const LEXICON = {
   },
   '別': {
     pinyin: 'bié',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'bie2-distinguish', gloss: '区别；分辨。', note: '「器以别之」是用器物区别等级。胡注：「别，彼列翻。」',
         examples: [{ text: '名以命之，器以別之', at: '周紀一' }] },
@@ -1740,7 +1740,7 @@ export const LEXICON = {
   },
   '得': {
     pinyin: 'dé',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'de2-obtain', gloss: '得到；获得。', note: '可指得地，也可指得人才。',
         examples: [{ text: '彼狃於得地，必請於他人', at: '周紀一' }, { text: '凡取人之術，苟不得聖人', at: '周紀一' }] },
@@ -1760,7 +1760,7 @@ export const LEXICON = {
   },
   '在': {
     pinyin: 'zài',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zai4-exist', gloss: '存在；留存', note: '「礼安得独在哉」谓礼又怎能独自存在。本卷三见，此举一处。',
         examples: [{ text: '則禮安得獨在哉', at: '周紀一' }] },
@@ -1778,7 +1778,7 @@ export const LEXICON = {
   },
   '仲': {
     pinyin: 'zhòng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'zhong4-name', gloss: '人名用字。仲叔于奚，卫国大夫，有功于卫而辞邑请繁缨', note: '全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -1796,7 +1796,7 @@ export const LEXICON = {
   },
   '奚': {
     pinyin: 'xī',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'xi1-name', gloss: '人名用字：仲叔于奚，卫国有功之臣。', note: '本卷「奚」只作人名，不作疑问代词「何」讲。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -1832,9 +1832,9 @@ export const LEXICON = {
   },
   '請': {
     pinyin: 'qǐng',
-    pos: '動',
+    pos: '动',
     uses: [
-      { id: 'qing3-request', gloss: '请求；求取', note: '向对方求取器物、土地或名位。全卷十见，此举三处。',
+      { id: 'qing3-request', gloss: '请求；求取', note: '向对方求取器物、土地或名位。全卷十见。',
         examples: [{ text: '辭邑而請繁纓', at: '周紀一' }, { text: '請隧於襄王，襄王不許', at: '周紀一' }, { text: '智伯請地於韓康子', at: '周紀一' }] },
     ],
   },
@@ -1856,7 +1856,7 @@ export const LEXICON = {
   },
   '如': {
     pinyin: 'rú',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ru2-like', gloss: '像；如同。', note: '「如是」即像这样。',
         examples: [{ text: '如是而甚不仁', at: '周紀一' }] },
@@ -1880,7 +1880,7 @@ export const LEXICON = {
   },
   '與': {
     pinyin: 'yǔ',
-    pos: '連',
+    pos: '连',
     uses: [
       { id: 'yu3-and', gloss: '和；跟（连接名词，表并列）。', note: '「与其得小人，不若得愚人」中「与其」则表比较取舍。本卷未见「参与」义。',
         examples: [{ text: '惟器與名，不可以假人', at: '周紀一' }, { text: '夫才與德異，而世俗莫之能辨', at: '周紀一' }] },
@@ -1902,7 +1902,7 @@ export const LEXICON = {
   },
   '假': {
     pinyin: 'jiǎ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jia3-lend', gloss: '借；给予。', note: '全卷仅一见，无第二处用例，故不举例。「不可以假人」即不可借给别人。本卷未见「虚假」义。',
         examples: [] },
@@ -1912,7 +1912,7 @@ export const LEXICON = {
     pinyin: 'suǒ',
     pos: '助',
     uses: [
-      { id: 'suo3-nominalizer', gloss: '助词，与动词组成「所」字结构，指称动作的对象、处所', note: '如「所司」谓所掌管的，「所属」谓所隶属的，「无所措手足」谓没有放手脚的地方。',
+      { id: 'suo3-nominalizer', gloss: '助词，与动词组成「所」字结构，指称动作的对象、处所', note: '如「所司」谓所掌管，「所属」谓所隶属，「无所措手足」谓没处放手脚。',
         examples: [{ text: '先主之所屬也', at: '周紀一' }, { text: '尹鐸之所寬也', at: '周紀一' }, { text: '則民無所措手足', at: '周紀一' }] },
       { id: 'suo3-suo-yi', gloss: '「所以」：……的原因；用来……的', note: '「此其所以失人也」谓这正是失去人才的原因。',
         examples: [{ text: '此其所以失人也', at: '周紀一' }, { text: '然所以為此者', at: '周紀一' }] },
@@ -1920,7 +1920,7 @@ export const LEXICON = {
   },
   '司': {
     pinyin: 'sī',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'si1-manage', gloss: '主管；掌管。', note: '全卷仅一见（「君之所司也」），无第二处用例，故不举例。',
         examples: [] },
@@ -1938,7 +1938,7 @@ export const LEXICON = {
   },
   '從': {
     pinyin: 'cóng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'cong2-follow', gloss: '跟随；率领。', note: '「从者」即随从的人；「从韩、魏之兵」即率领韩、魏的军队。',
         examples: [{ text: '夫從韓、魏之兵以攻趙', at: '周紀一' }, { text: '從者曰：「長子近，且城厚完。」', at: '周紀一' }] },
@@ -1948,7 +1948,7 @@ export const LEXICON = {
   },
   '待': {
     pinyin: 'dài',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'dai4-wait', gloss: '等待。', note: '本卷「待孔子」「待其著」「待事之变」都是等待。',
         examples: [{ text: '故必待其著而後救之', at: '周紀一' }, { text: '衛君待孔子而為政', at: '周紀一' }] },
@@ -1960,7 +1960,7 @@ export const LEXICON = {
   },
   '欲': {
     pinyin: 'yù',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yu4-want', gloss: '想要；打算。', note: '本卷十余见，皆表意愿。',
         examples: [{ text: '孔子欲先正名', at: '周紀一' }, { text: '豫讓欲為之報仇', at: '周紀一' }] },
@@ -1988,7 +1988,7 @@ export const LEXICON = {
   },
   '正': {
     pinyin: 'zhèng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zheng4-rectify', gloss: '动，纠正；使端正。', note: '「正名」是端正名分，孔子认为这是为政的先务。',
         examples: [{ text: '孔子欲先正名', at: '周紀一' }, { text: '正名，細務也', at: '周紀一' }] },
@@ -2000,7 +2000,7 @@ export const LEXICON = {
   },
   '無': {
     pinyin: 'wú',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'wu2-not-have', gloss: '没有；无有', note: '表不存在或领有之否定。全卷十八见，此举两处。',
         examples: [{ text: '而二子無喜志', at: '周紀一' }, { text: '沈竈產鼃，民無叛意', at: '周紀一' }] },
@@ -2010,7 +2010,7 @@ export const LEXICON = {
   },
   '措': {
     pinyin: 'cuò',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'cuo4-place', gloss: '安放；安置。', note: '全卷仅一见（「民无所措手足」），无第二处用例，故不举例。胡注：「见《论语》。」',
         examples: [] },
@@ -2028,7 +2028,7 @@ export const LEXICON = {
   },
   '惜': {
     pinyin: 'xī',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xi1-pity', gloss: '可惜；惋惜。', note: '全卷仅一见，指孔子惋惜繁缨这件小物，无第二处用例，故不举例。',
         examples: [] },
@@ -2052,7 +2052,7 @@ export const LEXICON = {
   },
   '生': {
     pinyin: 'shēng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'sheng1-bear', gloss: '生育；出生。', note: '本卷用于篇末世系，如「献子生籍」。',
         examples: [{ text: '獻子生籍，是為烈侯。', at: '周紀一' }, { text: '韓康子生武子啟章', at: '周紀一' }] },
@@ -2106,7 +2106,7 @@ export const LEXICON = {
   '識': {
     pinyin: 'shí',
     readings: ['shí', 'zhì'],
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shi2-know', gloss: '认识；知道。', note: '「不识」即认不出；「识之」即认出他。',
         reading: 'shí',
@@ -2143,7 +2143,7 @@ export const LEXICON = {
   },
   '救': {
     pinyin: 'jiù',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jiu4-rescue', gloss: '挽救；补救。', note: '与「治」相对：治其微是及早治理，救其著是事已显著才挽救。',
         examples: [{ text: '故必待其著而後救之', at: '周紀一' }, { text: '救其著，則竭力而不能及也', at: '周紀一' }] },
@@ -2153,7 +2153,7 @@ export const LEXICON = {
   },
   '用': {
     pinyin: 'yòng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yong4-use', gloss: '使用；付出。', note: '全卷仅一见，无第二处用例，故不举例。「用力寡」即所费的力气少。',
         examples: [] },
@@ -2169,7 +2169,7 @@ export const LEXICON = {
   },
   '竭': {
     pinyin: 'jié',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jie2-exhaust', gloss: '竭尽；用尽。', note: '全卷仅一见（「竭力」），无第二处用例，故不举例。',
         examples: [] },
@@ -2177,7 +2177,7 @@ export const LEXICON = {
   },
   '及': {
     pinyin: 'jí',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ji2-reach', gloss: '赶上；够得上', note: '「竭力而不能及也」谓尽力也来不及。',
         examples: [{ text: '救其著，則竭力而不能及也', at: '周紀一' }] },
@@ -2189,7 +2189,7 @@ export const LEXICON = {
   },
   '履': {
     pinyin: 'lǚ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'lu3-tread', gloss: '踩；踏。', note: '「履霜」即踩到霜；「履桓子之跗」即踩魏桓子的脚背。',
         examples: [{ text: '《易》曰：「履霜，堅冰至」', at: '周紀一' }, { text: '康子履桓子之跗', at: '周紀一' }] },
@@ -2223,7 +2223,7 @@ export const LEXICON = {
   },
   '至': {
     pinyin: 'zhì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zhi4-arrive', gloss: '动，到；来到。', note: '可以指人到了某处，也可以指事情临头。',
         examples: [{ text: '履霜，堅冰至', at: '周紀一' }, { text: '主不備，難必至矣', at: '周紀一' }] },
@@ -2255,7 +2255,7 @@ export const LEXICON = {
   },
   '萬': {
     pinyin: 'wàn',
-    pos: '數',
+    pos: '数',
     uses: [
       { id: 'wan4-ten-thousand', gloss: '数目，十千', note: '「万家之邑」谓有万户的城邑。',
         examples: [{ text: '使使者致萬家之邑於智伯', at: '周紀一' }, { text: '復與之萬家之邑一。', at: '周紀一' }] },
@@ -2285,7 +2285,7 @@ export const LEXICON = {
   },
   '嗚': {
     pinyin: 'wū',
-    pos: '語氣',
+    pos: '语气',
     uses: [
       { id: 'wu1-alas', gloss: '呜呼：感叹词，表哀叹。', note: '本卷两见，皆单作「呜呼！」成句，全句仅三字，不足六字之例，前后又无可截取之文，故不举例。',
         examples: [] },
@@ -2294,7 +2294,7 @@ export const LEXICON = {
   },
   '呼': {
     pinyin: 'hū',
-    pos: '語氣',
+    pos: '语气',
     uses: [
       { id: 'hu1-oh', gloss: '叹词「呜呼」的用字，表感叹。', note: '全卷两见，都作「呜呼」；该句连标点只有三字，不足六字的例句，故不举例。',
         examples: [] },
@@ -2302,7 +2302,7 @@ export const LEXICON = {
   },
   '幽': {
     pinyin: 'yōu',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'you1-king-you', gloss: '专名。周幽王。', note: '全卷仅一见，无第二处用例，故不举例。与「厉」并举，指周幽王、周厉王两个失德之君。',
         examples: [] },
@@ -2310,7 +2310,7 @@ export const LEXICON = {
   },
   '厲': {
     pinyin: 'lì',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'li4-zhou-li-wang', gloss: '人名。周厉王，西周暴君。', note: '全卷仅一见，无第二处用例，故不举例。此处与「幽」连举，「幽、厉失德」指周幽王与周厉王。',
         examples: [] },
@@ -2318,7 +2318,7 @@ export const LEXICON = {
   },
   '失': {
     pinyin: 'shī',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shi1-lose', gloss: '丧失；丢失。', note: '「失德」指丧失德行，「已失之矣」指已经把它丢了。',
         examples: [{ text: '幽、厲失德，周道日衰', at: '周紀一' }, { text: '求其簡，已失之矣', at: '周紀一' }] },
@@ -2349,7 +2349,7 @@ export const LEXICON = {
   },
   '衰': {
     pinyin: 'shuāi',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shuai1-decline', gloss: '衰微；衰落。', note: '「周道日衰」谓周室之道一天天衰微。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -2357,7 +2357,7 @@ export const LEXICON = {
   },
   '散': {
     pinyin: 'sàn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'san4-scatter', gloss: '散乱；解体。', note: '全卷仅一见，即「纲纪散坏」，谓法度解体败坏。无第二处用例，故不举例。',
         examples: [] },
@@ -2365,7 +2365,7 @@ export const LEXICON = {
   },
   '壞': {
     pinyin: 'huài',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'huai4-collapse', gloss: '败坏；崩坏。', note: '读 huài（如字）。本卷四见，两见是「纲纪散坏」「君臣之礼既坏」，指礼制自己崩坏。',
         examples: [{ text: '綱紀散壞，下陵上替', at: '周紀一' }, { text: '君臣之禮既壞矣', at: '周紀一' }] },
@@ -2375,7 +2375,7 @@ export const LEXICON = {
   },
   '陵': {
     pinyin: 'líng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ling2-encroach', gloss: '动，侵犯；欺凌。', note: '「下陵上替」是在下位的侵陵在上位的，在上位的废弛。',
         examples: [{ text: '綱紀散壞，下陵上替', at: '周紀一' }] },
@@ -2385,7 +2385,7 @@ export const LEXICON = {
   },
   '替': {
     pinyin: 'tì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ti4-decline', gloss: '衰败；废弛', note: '全卷仅一见，无第二处用例，故不举例。「下陵上替」谓在下者欺凌在上者，在上者反而衰微。',
         examples: [] },
@@ -2401,7 +2401,7 @@ export const LEXICON = {
   },
   '征': {
     pinyin: 'zhēng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zheng1-punitive', gloss: '征伐；讨伐', note: '胡三省注：「诸侯专征」指齐桓公、晋文公之类。',
         examples: [{ text: '諸侯專征，大夫擅政', at: '周紀一' }] },
@@ -2411,7 +2411,7 @@ export const LEXICON = {
   },
   '擅': {
     pinyin: 'shàn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shan4-monopolize', gloss: '专擅；独揽。', note: '全卷仅一见，指大夫擅自执掌国政，无第二处用例，故不举例。',
         examples: [] },
@@ -2427,7 +2427,7 @@ export const LEXICON = {
   },
   '什': {
     pinyin: 'shí',
-    pos: '數',
+    pos: '数',
     uses: [
       { id: 'shi2-ten', gloss: '十；十分之……。', note: '全卷仅一见，即「什丧七八矣」，谓十成中丧失七八成。胡注：「丧，息浪翻。」无第二处用例，故不举例。',
         examples: [] },
@@ -2435,7 +2435,7 @@ export const LEXICON = {
   },
   '喪': {
     pinyin: 'sàng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'sang4-lose', gloss: '丧失；失去。', note: '全卷仅一见，无第二处用例，故不举例。胡注：「丧，息浪翻。」读 sàng，不是丧事的 sāng。',
         examples: [] },
@@ -2444,7 +2444,7 @@ export const LEXICON = {
   },
   '七': {
     pinyin: 'qī',
-    pos: '數',
+    pos: '数',
     uses: [
       { id: 'qi1-seven', gloss: '数词，七。', note: '全卷仅一见，无第二处用例，故不举例。「什丧七八」是说失去了十分之七八。',
         examples: [] },
@@ -2452,7 +2452,7 @@ export const LEXICON = {
   },
   '八': {
     pinyin: 'bā',
-    pos: '數',
+    pos: '数',
     uses: [
       { id: 'ba1-eight', gloss: '数词，七、八', note: '全卷仅一见，无第二处用例，故不举例。「什丧七八」谓十成之中丧失七八成。胡注：「丧，息浪翻。」',
         examples: [] },
@@ -2477,7 +2477,7 @@ export const LEXICON = {
   },
   '屬': {
     pinyin: 'zhǔ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zhu3-continuous', gloss: '连接；连续。', note: '读 zhǔ。「绵绵相属」即接连不断。',
         examples: [{ text: '然文、武之祀猶綿綿相屬者', at: '周紀一' }] },
@@ -2521,7 +2521,7 @@ export const LEXICON = {
   },
   '襄': {
     pinyin: 'xiāng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'xiang1-xiang-wang', gloss: '人名。周襄王，东周天子，名郑。', note: '晋文公请隧于襄王而襄王不许，是全卷论名分尚存的一处关键。',
         examples: [{ text: '請隧於襄王，襄王不許', at: '周紀一' }] },
@@ -2533,7 +2533,7 @@ export const LEXICON = {
   },
   '許': {
     pinyin: 'xǔ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xu3-permit', gloss: '允许；答应。', note: '本卷三见，都是答应或不答应请求。',
         examples: [{ text: '請隧於襄王，襄王不許', at: '周紀一' }, { text: '今請於天子而天子許之', at: '周紀一' }] },
@@ -2590,7 +2590,7 @@ export const LEXICON = {
   },
   '焉': {
     pinyin: 'yān',
-    pos: '語氣',
+    pos: '语气',
     uses: [
       { id: 'yan1-final', gloss: '句末语气词，表反问。', note: '全卷仅一见，无第二处用例，故不举例。「又何请焉」即又何必请示呢。',
         examples: [] },
@@ -2598,7 +2598,7 @@ export const LEXICON = {
   },
   '乎': {
     pinyin: 'hū',
-    pos: '語氣',
+    pos: '语气',
     uses: [
       { id: 'hu1-question', gloss: '句末语气词，表疑问', note: '「其可得乎」谓难道办得到吗，是反问而实为否定。',
         examples: [{ text: '雖欲勿許，其可得乎', at: '周紀一' }] },
@@ -2610,7 +2610,7 @@ export const LEXICON = {
   },
   '懼': {
     pinyin: 'jù',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ju4-fear', gloss: '害怕；恐惧。', note: '本卷三见，都是畏惧之义。',
         examples: [{ text: '文公於是乎懼而不敢違', at: '周紀一' }, { text: '無故索地，諸大夫必懼', at: '周紀一' }, { text: '彼驕而輕敵，此懼而相親', at: '周紀一' }] },
@@ -2618,7 +2618,7 @@ export const LEXICON = {
   },
   '違': {
     pinyin: 'wéi',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'wei2-disobey', gloss: '违背；违抗', note: '全卷仅一见，无第二处用例，故不举例。「惧而不敢违」谓畏惧而不敢违抗王命。',
         examples: [] },
@@ -2626,7 +2626,7 @@ export const LEXICON = {
   },
   '曹': {
     pinyin: 'cáo',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'cao2-state', gloss: '国名，曹国。', note: '全卷仅一见，与滕、邾、莒并举，无第二处用例，故不举例。',
         examples: [] },
@@ -2634,7 +2634,7 @@ export const LEXICON = {
   },
   '滕': {
     pinyin: 'téng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'teng2-state', gloss: '国名，滕国，与曹国同为小国。', note: '「不大于曹、滕」谓周的土地方圆不如曹、滕。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -2642,7 +2642,7 @@ export const LEXICON = {
   },
   '邾': {
     pinyin: 'zhū',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'zhu1-state', gloss: '国名。邾国，曹姓小国，在今山东邹城一带。', note: '全卷仅一见，与莒并举，以言周室地狭民少。无第二处用例，故不举例。',
         examples: [] },
@@ -2650,7 +2650,7 @@ export const LEXICON = {
   },
   '莒': {
     pinyin: 'jǔ',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'ju3-state', gloss: '国名。周代小国，地在今山东莒县一带。', note: '全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -2658,7 +2658,7 @@ export const LEXICON = {
   },
   '歷': {
     pinyin: 'lì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'li4-pass', gloss: '经历；经过。', note: '全卷仅一见，无第二处用例，故不举例。「历数百年」即经过数百年。',
         examples: [] },
@@ -2677,7 +2677,7 @@ export const LEXICON = {
   },
   '百': {
     pinyin: 'bǎi',
-    pos: '數',
+    pos: '数',
     uses: [
       { id: 'bai3-hundred', gloss: '百；数目字。', note: '全卷仅一见（「数百年」），无第二处用例，故不举例。',
         examples: [] },
@@ -2717,7 +2717,7 @@ export const LEXICON = {
   },
   '楚': {
     pinyin: 'chǔ',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'chu3-state', gloss: '国名。楚国。', note: '本卷两见，一与晋、齐、秦并举，一见于「白公之于楚」。',
         examples: [{ text: '雖以晉、楚、齊、秦之強', at: '周紀一' }, { text: '田恆之於齊，白公之於楚', at: '周紀一' }] },
@@ -2725,7 +2725,7 @@ export const LEXICON = {
   },
   '齊': {
     pinyin: 'qí',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'qi2-state', gloss: '国名。周初封姜太公于齐，地在今山东北部。', note: '本卷三见，都指齐国。',
         examples: [{ text: '田恆之於齊，白公之於楚', at: '周紀一' }, { text: '絺疵請使於齊。', at: '周紀一' }] },
@@ -2733,7 +2733,7 @@ export const LEXICON = {
   },
   '秦': {
     pinyin: 'qín',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'qin2-state', gloss: '专名。国名，秦国。', note: '全卷仅一见，无第二处用例，故不举例。此句举晋、楚、齐、秦四强，说明周室虽弱而诸侯不敢加兵。',
         examples: [] },
@@ -2743,7 +2743,7 @@ export const LEXICON = {
     pinyin: 'qiáng',
     pos: '形',
     uses: [
-      { id: 'qiang2-strong', gloss: '强大；强盛', note: '本卷或指三晋之强，或指晋、楚、齐、秦之强。胡注：「三家分晋国，时因谓之『三晋』。」',
+      { id: 'qiang2-strong', gloss: '强大；强盛', note: '本卷或指三晋，或指晋、楚、齐、秦。胡注：「时因谓之三晋。」',
         examples: [{ text: '三晉強盛，雖欲勿許', at: '周紀一' }, { text: '夫三晉雖強，苟不顧天下之誅', at: '周紀一' }] },
       { id: 'qiang2-resolute', gloss: '刚强；坚毅', note: '「强毅」谓刚强果决，是智果所举智伯五贤之一，也是《才德论》所谓「才」。',
         examples: [{ text: '夫聰察強毅之謂才', at: '周紀一' }, { text: '強毅果敢則賢', at: '周紀一' }] },
@@ -2754,7 +2754,7 @@ export const LEXICON = {
   },
   '加': {
     pinyin: 'jiā',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jia1-impose', gloss: '加；施加（兵威）。', note: '全卷仅一见（「不敢加者」），无第二处用例，故不举例。此指诸侯不敢对周室用兵。',
         examples: [] },
@@ -2770,7 +2770,7 @@ export const LEXICON = {
   },
   '存': {
     pinyin: 'cún',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'cun2-remain', gloss: '存在；留存。', note: '全卷仅一见，指名分尚且存在，无第二处用例，故不举例。',
         examples: [] },
@@ -2786,7 +2786,7 @@ export const LEXICON = {
   },
   '魯': {
     pinyin: 'lǔ',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'lu3-state', gloss: '国名。鲁国。', note: '「季氏之于鲁」谓鲁国季氏专权。',
         examples: [{ text: '至於季氏之於魯，田恆之於齊', at: '周紀一' }] },
@@ -2806,7 +2806,7 @@ export const LEXICON = {
   },
   '恆': {
     pinyin: 'héng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'heng2-tian-heng', gloss: '专名。人名：田恒，齐国大夫，即田常。', note: '全卷仅一见，无第二处用例，故不举例。司马光避宋真宗讳，改「恒」为「常」，所以别本多作「田常」。',
         examples: [] },
@@ -2814,7 +2814,7 @@ export const LEXICON = {
   },
   '白': {
     pinyin: 'bái',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'bai2-bai-gong', gloss: '人名。白公，名胜，楚平王之孙，封于白邑。', note: '全卷仅一见，无第二处用例，故不举例。胡注谓白公胜杀楚令尹子西、司马子期而不肯自立，与季氏、田恒、智伯并举为「势足以逐君而自为」者。',
         examples: [] },
@@ -2838,7 +2838,7 @@ export const LEXICON = {
   },
   '逐': {
     pinyin: 'zhú',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zhu2-expel', gloss: '驱逐；赶走。', note: '「逐君」即赶走国君；「逐浣」即赶走赵浣。',
         examples: [{ text: '其勢皆足以逐君而自為', at: '周紀一' }, { text: '弟桓子嘉逐浣而自立', at: '周紀一' }] },
@@ -2856,7 +2856,7 @@ export const LEXICON = {
   },
   '卒': {
     pinyin: 'zú',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zu2-die', gloss: '死。', note: '胡注：「卒，子恤翻。」',
         examples: [{ text: '及智宣子卒，智襄子為政', at: '周紀一' }, { text: '襄子卒，弟桓子嘉逐浣而自立', at: '周紀一' }] },
@@ -2868,7 +2868,7 @@ export const LEXICON = {
   },
   '忍': {
     pinyin: 'rěn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ren3-bear', gloss: '忍心；狠心。', note: '全卷仅一见，无第二处用例，故不举例。「心不忍」谓于心不忍。',
         examples: [] },
@@ -2890,7 +2890,7 @@ export const LEXICON = {
   },
   '畏': {
     pinyin: 'wèi',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'wei4-fear', gloss: '畏惧；害怕', note: '全卷仅一见，无第二处用例，故不举例。「畏奸名犯分」谓畏惧触犯名分而遭天下共诛。',
         examples: [] },
@@ -2899,7 +2899,7 @@ export const LEXICON = {
   '奸': {
     pinyin: 'jiān',
     readings: ['jiān', 'gān'],
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'gan1-violate', gloss: '冒犯；干犯。', note: '读 gān。胡注：「奸，居寒翻，亦犯也。」「奸名犯分」就是冒犯名分。',
         reading: 'gān',
@@ -2912,7 +2912,7 @@ export const LEXICON = {
   },
   '犯': {
     pinyin: 'fàn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'fan4-violate', gloss: '触犯；违犯', note: '「奸名犯分」「犯义侵礼」都是此义。',
         examples: [{ text: '乃畏奸名犯分而天下共誅之也', at: '周紀一' }, { text: '苟不顧天下之誅而犯義侵禮', at: '周紀一' }] },
@@ -2930,7 +2930,7 @@ export const LEXICON = {
   },
   '誅': {
     pinyin: 'zhū',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zhu1-punish', gloss: '讨伐；诛杀。', note: '「天下之诛」是名词性用法，指天下的讨伐。',
         examples: [{ text: '天下共誅之也', at: '周紀一' }, { text: '不顧天下之誅', at: '周紀一' }] },
@@ -2946,7 +2946,7 @@ export const LEXICON = {
   },
   '蔑': {
     pinyin: 'miè',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'mie4-slight', gloss: '轻视；欺凌。「暴蔑」即欺凌。', note: '全卷仅一见，无第二处用例，故不举例。此句指晋大夫欺凌其君。',
         examples: [] },
@@ -2954,7 +2954,7 @@ export const LEXICON = {
   },
   '剖': {
     pinyin: 'pōu',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'pou1-split', gloss: '剖开；分割。', note: '全卷仅一见，无第二处用例，故不举例。「剖分晋国」即把晋国分割开来；胡注引《史记·六国年表》，系于周定王十六年。',
         examples: [] },
@@ -2962,7 +2962,7 @@ export const LEXICON = {
   },
   '討': {
     pinyin: 'tǎo',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'tao3-punish', gloss: '讨伐；声讨', note: '本卷两见，皆就天子对晋大夫而言：一为不能讨，一为问谁得而讨之。',
         examples: [{ text: '剖分晉國，天子既不能討', at: '周紀一' }, { text: '誰得而討之！', at: '周紀一' }] },
@@ -2970,7 +2970,7 @@ export const LEXICON = {
   },
   '寵': {
     pinyin: 'chǒng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'chong3-favor', gloss: '宠爱；加恩。', note: '全卷仅一见（「又宠秩之」），无第二处用例，故不举例。此指周天子反加恩宠、提升其秩位。',
         examples: [] },
@@ -2978,7 +2978,7 @@ export const LEXICON = {
   },
   '秩': {
     pinyin: 'zhì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zhi4-rank', gloss: '本指官秩、爵禄，此作动词，谓授以秩位', note: '全卷仅一见，无第二处用例，故不举例。「宠秩之」谓宠爱他而给他秩位。',
         examples: [] },
@@ -2986,7 +2986,7 @@ export const LEXICON = {
   },
   '列': {
     pinyin: 'liè',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'lie4-rank', gloss: '位列；列名其中。', note: '「列于诸侯」即位列诸侯之中。',
         examples: [{ text: '又寵秩之，使列於諸侯', at: '周紀一' }, { text: '故三晉之列於諸侯', at: '周紀一' }] },
@@ -3018,7 +3018,7 @@ export const LEXICON = {
   },
   '棄': {
     pinyin: 'qì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'qi4-discard', gloss: '抛弃；舍弃。', note: '全卷仅一见，无第二处用例，故不举例。「并弃之」是说连区区之名分也一并丢掉。',
         examples: [] },
@@ -3026,7 +3026,7 @@ export const LEXICON = {
   },
   '盡': {
     pinyin: 'jìn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jin4-exhausted', gloss: '穷尽；完结', note: '「先王之礼于斯尽矣」谓先王的礼制到此完结。',
         examples: [{ text: '先王之禮於斯盡矣。', at: '周紀一' }] },
@@ -3076,16 +3076,16 @@ export const LEXICON = {
   },
   '苟': {
     pinyin: 'gǒu',
-    pos: '連',
+    pos: '连',
     uses: [
-      { id: 'gou3-if', gloss: '如果；假使。', note: '本卷四见，都用来提出一个假设。',
+      { id: 'gou3-if', gloss: '如果；假使。', note: '本卷四见，皆提出一个假设。',
         examples: [{ text: '苟不顧天下之誅而犯義侵禮', at: '周紀一' }, { text: '天下苟有桓、文之君', at: '周紀一' }, { text: '苟能審於才德之分而知所先後', at: '周紀一' }] },
     ],
     variants: ['茍'],
   },
   '顧': {
     pinyin: 'gù',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'gu4-consider', gloss: '动，顾念；顾及。', note: '「不顾天下之诛」即不顾忌天下的诛讨。',
         examples: [{ text: '苟不顧天下之誅', at: '周紀一' }] },
@@ -3105,7 +3105,7 @@ export const LEXICON = {
   },
   '侵': {
     pinyin: 'qīn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'qin1-encroach', gloss: '侵犯；侵越。', note: '全卷仅一见（「犯义侵礼」），无第二处用例，故不举例。',
         examples: [] },
@@ -3113,7 +3113,7 @@ export const LEXICON = {
   },
   '立': {
     pinyin: 'lì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'li4-stand', gloss: '立；即刻', note: '「祸立至矣」谓祸患立刻到来。',
         examples: [{ text: '恐事未遂而謀洩，則禍立至矣', at: '周紀一' }] },
@@ -3139,7 +3139,7 @@ export const LEXICON = {
   },
   '桓': {
     pinyin: 'huán',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'huan2-duke', gloss: '人名。齐桓公，春秋霸主，与晋文公并称「桓、文」。', note: '「天下苟有桓、文之君」之桓即齐桓公。',
         examples: [{ text: '天下苟有桓、文之君，必奉禮義而征之', at: '周紀一' }] },
@@ -3151,7 +3151,7 @@ export const LEXICON = {
   },
   '奉': {
     pinyin: 'fèng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'feng4-honour', gloss: '奉行；遵奉。', note: '全卷仅一见，无第二处用例，故不举例。「奉礼义而征之」谓遵奉礼义去讨伐。',
         examples: [] },
@@ -3169,7 +3169,7 @@ export const LEXICON = {
   },
   '雄': {
     pinyin: 'xióng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xiong2-vie-for-power', gloss: '称雄；争雄。「雄长」谓以智力相争而居长', note: '全卷仅一见，无第二处用例，故不举例。胡注：「长，知两翻。」',
         examples: [] },
@@ -3231,7 +3231,7 @@ export const LEXICON = {
   },
   '泯': {
     pinyin: 'mǐn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'min3-extinct', gloss: '消灭；尽。「泯绝」即灭绝。', note: '全卷仅一见，无第二处用例，故不举例。胡注：「泯，弥忍翻，尽也。」',
         examples: [] },
@@ -3239,7 +3239,7 @@ export const LEXICON = {
   },
   '糜': {
     pinyin: 'mí',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'mi2-mash', gloss: '糜烂；碎。', note: '全卷仅一见，无第二处用例，故不举例。胡注引《说文》：糜，糁也，取糜烂之义；「糜灭几尽」即几乎消亡殆尽。',
         examples: [] },
@@ -3247,7 +3247,7 @@ export const LEXICON = {
   },
   '滅': {
     pinyin: 'miè',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'mie4-destroy', gloss: '灭亡；消灭', note: '本卷三见：智宗之必灭、智氏之族之尽灭、生民之类之糜灭，皆此义。',
         examples: [{ text: '若果立瑤也，智宗必滅', at: '周紀一' }, { text: '遂殺智伯，盡滅智氏之族', at: '周紀一' }, { text: '生民之類糜滅幾盡', at: '周紀一' }] },
@@ -3263,7 +3263,7 @@ export const LEXICON = {
   },
   '宣': {
     pinyin: 'xuān',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'xuan1-name', gloss: '人名用字。智宣子，智伯之父', note: '本卷未见宣布、宣示义的「宣」；两见都在「智宣子」这一称号里。',
         examples: [{ text: '初，智宣子將以瑤為後。', at: '周紀一' }, { text: '及智宣子卒，智襄子為政', at: '周紀一' }] },
@@ -3288,7 +3288,7 @@ export const LEXICON = {
   },
   '瑤': {
     pinyin: 'yáo',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'yao2-name', gloss: '智瑶，智宣子之子，即智伯。', note: '本卷只作人名，不作「美玉」讲。智宣子立他为后，智果以为智宗必灭。',
         examples: [{ text: '初，智宣子將以瑤為後。', at: '周紀一' }, { text: '若果立瑤也，智宗必滅', at: '周紀一' }] },
@@ -3297,7 +3297,7 @@ export const LEXICON = {
   },
   '果': {
     pinyin: 'guǒ',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'guo3-zhiguo', gloss: '人名。智果，智氏之族；别族之后为辅果。', note: '胡注引韦昭曰：「智果，智氏之族也。」',
         examples: [{ text: '智果曰：「不如宵也', at: '周紀一' }, { text: '智果別族於太史為輔氏', at: '周紀一' }] },
@@ -3309,7 +3309,7 @@ export const LEXICON = {
   },
   '宵': {
     pinyin: 'xiāo',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'xiao1-name', gloss: '人名。智宣子的庶子，智果主张立他为后。', note: '全卷仅一见，无第二处用例，故不举例。胡注引韦昭：「宵，宣子之庶子也。」',
         examples: [] },
@@ -3317,7 +3317,7 @@ export const LEXICON = {
   },
   '五': {
     pinyin: 'wǔ',
-    pos: '數',
+    pos: '数',
     uses: [
       { id: 'wu3-five', gloss: '数词，五。', note: '可以数德性，也可以数人。',
         examples: [{ text: '瑤之賢於人者五', at: '周紀一' }, { text: '夫以其五賢陵人', at: '周紀一' }, { text: '有子五人，不肯置後', at: '周紀一' }] },
@@ -3325,7 +3325,7 @@ export const LEXICON = {
   },
   '逮': {
     pinyin: 'dài',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'dai4-reach', gloss: '及；赶上。「不逮」谓不及、不如', note: '全卷仅一见，无第二处用例，故不举例。此语出智果论智伯「贤于人者五，其不逮者一」，即五长而一短。胡注引韦昭曰：「不仁也。」',
         examples: [] },
@@ -3349,7 +3349,7 @@ export const LEXICON = {
   },
   '射': {
     pinyin: 'shè',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'she4-archery', gloss: '射箭。', note: '全卷仅一见，指智瑶擅长射箭驾车，无第二处用例，故不举例。',
         examples: [] },
@@ -3357,7 +3357,7 @@ export const LEXICON = {
   },
   '御': {
     pinyin: 'yù',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yu4-drive', gloss: '驾车；驾驭。', note: '胡注：兵车尊者居左，御者居中。「射御」是六艺之二，指射箭与驾车。',
         examples: [{ text: '智伯行水，魏桓子御', at: '周紀一' }, { text: '射御足力則賢', at: '周紀一' }] },
@@ -3390,7 +3390,7 @@ export const LEXICON = {
   },
   '給': {
     pinyin: 'jǐ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ji3-sufficient', gloss: '丰足；具备。「毕给」谓完全具备', note: '全卷仅一见，无第二处用例，故不举例。此处读上声，取「足备」之义，非今「给予」之义。',
         examples: [] },
@@ -3438,7 +3438,7 @@ export const LEXICON = {
   },
   '行': {
     pinyin: 'xíng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xing2-practise', gloss: '实行；做。', note: '读 xíng（如字）。「以不仁行之」谓用不仁之心去做。',
         examples: [{ text: '夫以其五賢陵人，而以不仁行之', at: '周紀一' }] },
@@ -3450,7 +3450,7 @@ export const LEXICON = {
   },
   '若': {
     pinyin: 'ruò',
-    pos: '連',
+    pos: '连',
     uses: [
       { id: 'ruo4-if', gloss: '连，如果。', note: '「若果立瑶也」即如果真的立了瑶。',
         examples: [{ text: '若果立瑤也，智宗必滅', at: '周紀一' }] },
@@ -3462,13 +3462,13 @@ export const LEXICON = {
     pinyin: 'fú',
     pos: '副',
     uses: [
-      { id: 'fu2-not', gloss: '不', note: '否定副词，多修饰及物动词而省去宾语，如「弗听」即不听其言。全卷八见，此举三处。',
+      { id: 'fu2-not', gloss: '不', note: '否定副词，多修饰及物动词而省宾语，如「弗听」。全卷八见。',
         examples: [{ text: '弗聽，智果別族於太史為輔氏', at: '周紀一' }, { text: '智伯請地於韓康子，康子欲弗與', at: '周紀一' }, { text: '又弗備，曰不敢興難', at: '周紀一' }] },
     ],
   },
   '聽': {
     pinyin: 'tīng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ting1-heed', gloss: '听从；接受劝谏。', note: '「弗听」是《通鉴》记言的套语；本卷两见，一在智果谏智宣子，一在智国谏智伯。',
         examples: [{ text: '弗聽，智果別族於太史為輔氏', at: '周紀一' }, { text: '況君相乎！」弗聽', at: '周紀一' }] },
@@ -3494,7 +3494,7 @@ export const LEXICON = {
   },
   '輔': {
     pinyin: 'fǔ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'fu3-assist', gloss: '辅助；帮助。', note: '《周书》引语的「辅之」即帮助他。',
         examples: [{ text: '將欲敗之，必姑輔之', at: '周紀一' }] },
@@ -3504,7 +3504,7 @@ export const LEXICON = {
   },
   '簡': {
     pinyin: 'jiǎn',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'jian3-zhaojianzi', gloss: '人名。赵简子，名鞅，晋国正卿，赵襄子之父。', note: '胡注引《谥法》：「一德不懈曰简。」本卷或省称「简子」。',
         examples: [{ text: '趙簡子之子，長曰伯魯，幼曰無恤。', at: '周紀一' }, { text: '於是簡子以無恤為賢，立以為後。', at: '周紀一' }] },
@@ -3523,7 +3523,7 @@ export const LEXICON = {
   },
   '恤': {
     pinyin: 'xù',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'xu4-name', gloss: '专名。人名用字：无恤，赵简子之子，即赵襄子。', note: '全卷四见都在「无恤」这个名字里。胡注：赵简子，文子之孙鞅也。单用的「忧恤」义本卷未见。',
         examples: [{ text: '於是簡子以無恤為賢', at: '周紀一' }, { text: '問無恤，誦其辭甚習', at: '周紀一' }] },
@@ -3531,7 +3531,7 @@ export const LEXICON = {
   },
   '置': {
     pinyin: 'zhì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zhi4-establish-heir', gloss: '设立；确立（继承人）', note: '本卷两见皆作「置后」，谓确立继承人：一为赵简子之犹豫，一为赵襄子之不肯。',
         examples: [{ text: '將置後，不知所立', at: '周紀一' }, { text: '有子五人，不肯置後', at: '周紀一' }] },
@@ -3539,7 +3539,7 @@ export const LEXICON = {
   },
   '知': {
     pinyin: 'zhī',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zhi1-know', gloss: '知道；明白。', note: '本卷「知」都读 zhī，未见通「智」的用法。',
         examples: [{ text: '將置後，不知所立', at: '周紀一' }, { text: '我心知其然也', at: '周紀一' }] },
@@ -3565,7 +3565,7 @@ export const LEXICON = {
   },
   '授': {
     pinyin: 'shòu',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shou4-give', gloss: '交给；授予。', note: '「以授二子」谓把训戒之辞交给两个儿子。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -3573,7 +3573,7 @@ export const LEXICON = {
   },
   '問': {
     pinyin: 'wèn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'wen4-ask', gloss: '询问；考问。', note: '本卷两见，皆指赵简子三年后考问二子所记的训辞。',
         examples: [{ text: '三年而問之，伯魯不能舉其辭', at: '周紀一' }, { text: '問無恤，誦其辭甚習', at: '周紀一' }] },
@@ -3581,7 +3581,7 @@ export const LEXICON = {
   },
   '舉': {
     pinyin: 'jǔ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ju3-recite', gloss: '列举；说出来。', note: '全卷仅一见，无第二处用例，故不举例。「不能举其辞」谓背不出那些话。本卷未见「举起」「推举」义。',
         examples: [] },
@@ -3589,7 +3589,7 @@ export const LEXICON = {
   },
   '求': {
     pinyin: 'qiú',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'qiu2-seek', gloss: '动，寻找。', note: '「求其简」即找那两片竹简。',
         examples: [{ text: '求其簡，已失之矣', at: '周紀一' }, { text: '求其簡，出諸袖中而奏之', at: '周紀一' }] },
@@ -3601,7 +3601,7 @@ export const LEXICON = {
   },
   '誦': {
     pinyin: 'sòng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'song4-recite', gloss: '背诵；诵读', note: '全卷仅一见，无第二处用例，故不举例。胡注：「习，熟也。」谓无恤背诵训辞极熟。',
         examples: [] },
@@ -3617,7 +3617,7 @@ export const LEXICON = {
   },
   '出': {
     pinyin: 'chū',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'chu1-go-out', gloss: '出来；退出', note: '「二子出」谓二人退出，「襄子出」谓襄子出门。',
         examples: [{ text: '二子出，絺疵入曰', at: '周紀一' }, { text: '襄子出，豫讓伏於橋下。', at: '周紀一' }] },
@@ -3647,7 +3647,7 @@ export const LEXICON = {
   },
   '奏': {
     pinyin: 'zòu',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zou4-present', gloss: '进献；呈上。', note: '全卷仅一见。胡注引毛晃曰：「奏，进上也。」无第二处用例，故不举例。',
         examples: [] },
@@ -3655,7 +3655,7 @@ export const LEXICON = {
   },
   '尹': {
     pinyin: 'yǐn',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'yin3-duo', gloss: '人名。尹铎，赵简子的家臣，受命治理晋阳。', note: '本卷四见，都指尹铎一人。',
         examples: [{ text: '簡子使尹鐸為晉陽。', at: '周紀一' }, { text: '尹鐸損其戶數。', at: '周紀一' }] },
@@ -3663,7 +3663,7 @@ export const LEXICON = {
   },
   '鐸': {
     pinyin: 'duó',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'duo2-name', gloss: '专名。人名：尹铎，赵简子的家臣，受命治理晋阳。', note: '全卷四见都是此名。胡注引韦昭：损其户，则民优而税少。单用的「大铃」义本卷未见。',
         examples: [{ text: '簡子使尹鐸為晉陽', at: '周紀一' }, { text: '尹鐸損其戶數', at: '周紀一' }] },
@@ -3671,7 +3671,7 @@ export const LEXICON = {
   },
   '陽': {
     pinyin: 'yáng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'yang2-jinyang', gloss: '地名。晋阳，赵氏之邑，在今山西太原一带。', note: '赵简子使尹铎治晋阳，其后襄子走晋阳而赖以存，是本卷赵氏存亡所系之地。全卷五见，四处指晋阳。',
         examples: [{ text: '簡子使尹鐸為晉陽。', at: '周紀一' }, { text: '其晉陽乎，先主之所屬也', at: '周紀一' }] },
@@ -3705,7 +3705,7 @@ export const LEXICON = {
   },
   '損': {
     pinyin: 'sǔn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'sun3-reduce', gloss: '减少。', note: '胡注引韦昭曰：损其户，则民优而税少。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -3728,7 +3728,7 @@ export const LEXICON = {
       { id: 'nan2-hard', gloss: '困难；不容易。', note: '读 nán。胡注于「危难」下注「如字」，即读本音。',
         reading: 'nán',
         examples: [{ text: '求以報仇，不亦難乎', at: '周紀一' }, { text: '凡吾所為者，極難耳', at: '周紀一' }] },
-      { id: 'nan4-calamity', gloss: '灾难；祸患。', note: '读 nàn。胡注：「难，乃旦翻。」本卷多指兵难、国难。',
+      { id: 'nan4-calamity', gloss: '灾难；祸患。', note: '读 nàn。胡注：「难，乃旦翻。」多指兵难、国难。',
         reading: 'nàn',
         examples: [{ text: '晉國有難，而無以尹鐸為少', at: '周紀一' }, { text: '主不備，難必至矣', at: '周紀一' }, { text: '趙亡，難必及韓、魏矣', at: '周紀一' }] },
     ],
@@ -3743,15 +3743,15 @@ export const LEXICON = {
   },
   '康': {
     pinyin: 'kāng',
-    pos: '專名',
+    pos: '专名',
     uses: [
-      { id: 'kang1-han-kang-zi', gloss: '人名。韩康子，晋卿，韩氏宗主，韩武子启章之父。', note: '本卷中与魏桓子同受智伯之陵，后与赵、魏共灭智氏。全卷九见，皆指此人。',
+      { id: 'kang1-han-kang-zi', gloss: '人名。韩康子，晋卿，韩氏宗主，韩武子启章之父。', note: '本卷与魏桓子同受智伯之陵，后共灭智氏。全卷九见皆指此人。',
         examples: [{ text: '智伯請地於韓康子', at: '周紀一' }, { text: '與韓康子、魏桓子宴於藍臺', at: '周紀一' }, { text: '智伯行水，魏桓子御，韓康子驂乘。', at: '周紀一' }] },
     ],
   },
   '宴': {
     pinyin: 'yàn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yan4-feast', gloss: '宴饮；设宴。', note: '「宴于蓝台」指在蓝台宴会。胡注引《尔雅》：「四方而高曰台。」',
         examples: [{ text: '與韓康子、魏桓子宴於藍臺', at: '周紀一' }] },
@@ -3761,7 +3761,7 @@ export const LEXICON = {
   },
   '藍': {
     pinyin: 'lán',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'lan2-terrace', gloss: '地名。蓝台，晋国之台', note: '全卷仅一见，无第二处用例，故不举例。胡三省注引《尔雅》：四方而高曰台。',
         examples: [] },
@@ -3777,7 +3777,7 @@ export const LEXICON = {
   },
   '戲': {
     pinyin: 'xì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xi4-joke', gloss: '戏弄；开玩笑。', note: '「智伯戏康子而侮段规」谓智伯戏弄韩康子、侮辱段规。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -3785,7 +3785,7 @@ export const LEXICON = {
   },
   '侮': {
     pinyin: 'wǔ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'wu3-insult', gloss: '轻慢；侮辱。', note: '全卷仅一见，即「智伯戏康子而侮段规」。无第二处用例，故不举例。',
         examples: [] },
@@ -3793,7 +3793,7 @@ export const LEXICON = {
   },
   '段': {
     pinyin: 'duàn',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'duan4-gui', gloss: '人名。段规，韩康子的相。', note: '本卷两见，都是段规其人。胡注引《姓谱》：「段，郑共叔段之后。」',
         examples: [{ text: '智伯戲康子而侮段規', at: '周紀一' }, { text: '而侮段規，智國聞之', at: '周紀一' }] },
@@ -3802,7 +3802,7 @@ export const LEXICON = {
   },
   '規': {
     pinyin: 'guī',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'gui1-name', gloss: '专名。人名：段规，韩康子的家臣。', note: '全卷两见都是此名。胡注引《姓谱》：段，郑共叔段之后。单用的「规劝」「法度」义本卷未见。',
         examples: [{ text: '智伯戲康子而侮段規', at: '周紀一' }, { text: '段規曰：「智伯好利而愎', at: '周紀一' }] },
@@ -3810,7 +3810,7 @@ export const LEXICON = {
   },
   '諫': {
     pinyin: 'jiàn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jian4-admonish', gloss: '规劝；劝谏（下对上）', note: '全卷仅一见，无第二处用例，故不举例。此处为智国谏智伯，智伯弗听。',
         examples: [] },
@@ -3818,7 +3818,7 @@ export const LEXICON = {
   },
   '備': {
     pinyin: 'bèi',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'bei4-guard', gloss: '防备；戒备。', note: '「主不备」指主上不加防备。胡注：「春秋以来，大夫之家臣谓大夫曰主。」',
         examples: [{ text: '主不備，難必至矣', at: '周紀一' }, { text: '又弗備，曰不敢興難', at: '周紀一' }] },
@@ -3843,7 +3843,7 @@ export const LEXICON = {
   },
   '興': {
     pinyin: 'xīng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xing1-raise', gloss: '兴起；发动。', note: '读 xīng。本卷两处都指发动祸难。',
         examples: [{ text: '我不為難，誰敢興之', at: '周紀一' }, { text: '又弗備，曰不敢興難', at: '周紀一' }] },
@@ -3851,7 +3851,7 @@ export const LEXICON = {
   },
   '對': {
     pinyin: 'duì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'dui4-reply', gloss: '回答；应对。', note: '本卷两见，皆作「对曰」，记臣下回答君上。',
         examples: [{ text: '對曰：「不然。', at: '周紀一' }, { text: '對曰：「臣見其視臣端而趨疾', at: '周紀一' }] },
@@ -3859,7 +3859,7 @@ export const LEXICON = {
   },
   '夏': {
     pinyin: 'xià',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'xia4-dynasty', gloss: '朝代名，夏代。《夏书》是《尚书》中记夏代的一部分。', note: '全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -3885,7 +3885,7 @@ export const LEXICON = {
   },
   '圖': {
     pinyin: 'tú',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'tu2-plan', gloss: '图谋；打算。', note: '「不见是图」是在事态未显露时就作打算，「图智氏」是谋取智氏。胡注说这是《书》五子之歌的句子。',
         examples: [{ text: '怨豈在明，不見是圖', at: '周紀一' }, { text: '然後可以擇交而圖智氏矣', at: '周紀一' }] },
@@ -3893,7 +3893,7 @@ export const LEXICON = {
   },
   '勤': {
     pinyin: 'qín',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'qin2-diligent', gloss: '勤勉；在小处用心', note: '全卷仅一见，无第二处用例，故不举例。「能勤小物」谓能在小事上用心。',
         examples: [] },
@@ -3911,7 +3911,7 @@ export const LEXICON = {
   },
   '恥': {
     pinyin: 'chǐ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'chi3-shame', gloss: '羞辱；使……受辱。', note: '「耻人之君相」谓羞辱人家的国君与国相。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -3952,7 +3952,7 @@ export const LEXICON = {
   },
   '害': {
     pinyin: 'hài',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'hai4-harm', gloss: '伤害；危害。', note: '「皆能害人」指蚊蜂一类小虫都能伤人。',
         examples: [{ text: '蜹、蟻、蜂、蠆，皆能害人', at: '周紀一' }] },
@@ -3962,7 +3962,7 @@ export const LEXICON = {
   },
   '況': {
     pinyin: 'kuàng',
-    pos: '連',
+    pos: '连',
     uses: [
       { id: 'kuang4-how-much-more', gloss: '何况；况且', note: '全卷仅一见，无第二处用例，故不举例。「况君相乎」谓何况是国君与国相。',
         examples: [] },
@@ -3970,7 +3970,7 @@ export const LEXICON = {
   },
   '好': {
     pinyin: 'hào',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'hao4-like', gloss: '喜好；贪求。', note: '读 hào，是喜好、贪求的意思；全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -3998,7 +3998,7 @@ export const LEXICON = {
   },
   '伐': {
     pinyin: 'fá',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'fa2-attack', gloss: '讨伐；攻打。', note: '全卷仅一见，无第二处用例，故不举例。「不与，将伐我」是段规料智伯必来攻打。',
         examples: [] },
@@ -4016,7 +4016,7 @@ export const LEXICON = {
   },
   '狃': {
     pinyin: 'niǔ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'niu3-accustomed', gloss: '习惯；惯于。「狃于得地」谓惯于得地而生骄', note: '全卷仅一见，无第二处用例，故不举例。胡注：「狃，女九翻，骄忲也，又相狎也。」',
         examples: [] },
@@ -4033,7 +4033,7 @@ export const LEXICON = {
   },
   '向': {
     pinyin: 'xiàng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xiang4-aim-at', gloss: '朝向；此谓把兵锋指向', note: '全卷仅一见，无第二处用例，故不举例。「必向之以兵」谓必将以兵相加。',
         examples: [] },
@@ -4051,7 +4051,7 @@ export const LEXICON = {
   },
   '免': {
     pinyin: 'miǎn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'mian3-avoid', gloss: '免除；避免。', note: '「我得免于患」谓我能免于祸患。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -4077,7 +4077,7 @@ export const LEXICON = {
   },
   '致': {
     pinyin: 'zhì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zhi4-deliver', gloss: '送致；致送。', note: '全卷仅一见，无第二处用例，故不举例。「致万家之邑于智伯」即把万户之邑送给智伯。',
         examples: [] },
@@ -4094,7 +4094,7 @@ export const LEXICON = {
   },
   '任': {
     pinyin: 'rèn',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'ren4-surname', gloss: '姓氏；任章，魏桓子的家相。', note: '胡注引《姓谱》说任氏出自黄帝之后。本卷「任」只作姓氏，未见「担任」「任凭」等义。',
         examples: [{ text: '任章曰：「何故弗與？」', at: '周紀一' }, { text: '任章曰：「無故索地，諸大夫必懼', at: '周紀一' }] },
@@ -4102,7 +4102,7 @@ export const LEXICON = {
   },
   '索': {
     pinyin: 'suǒ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'suo3-demand', gloss: '索取；求取', note: '胡三省注：「索，山客翻，求也。」',
         examples: [{ text: '無故索地，故弗與。', at: '周紀一' }, { text: '無故索地，諸大夫必懼', at: '周紀一' }] },
@@ -4130,7 +4130,7 @@ export const LEXICON = {
   },
   '輕': {
     pinyin: 'qīng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'qing1-underestimate', gloss: '轻视；看不起。', note: '本卷两见，皆作「轻敌」，即轻视敌人。',
         examples: [{ text: '彼驕而輕敵，此懼而相親', at: '周紀一' }, { text: '以相親之兵待輕敵之人', at: '周紀一' }] },
@@ -4146,7 +4146,7 @@ export const LEXICON = {
   },
   '敗': {
     pinyin: 'bài',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'bai4-defeat-someone', gloss: '动，使失败；破坏。', note: '「将欲败之，必姑辅之」出《周书》，是说将要败坏他，必先辅助他。',
         examples: [{ text: '將欲敗之，必姑輔之', at: '周紀一' }] },
@@ -4166,7 +4166,7 @@ export const LEXICON = {
   },
   '取': {
     pinyin: 'qǔ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'qu3-take', gloss: '夺取；取得。', note: '「将欲取之，必姑与之」是《周书》里的话，任章引来劝桓子。',
         examples: [{ text: '將欲取之，必姑與之', at: '周紀一' }] },
@@ -4176,7 +4176,7 @@ export const LEXICON = {
   },
   '擇': {
     pinyin: 'zé',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ze2-choose', gloss: '选择；择取', note: '全卷仅一见，无第二处用例，故不举例。「可以择交而图智氏」谓可选择盟交而图谋智氏。',
         examples: [] },
@@ -4184,7 +4184,7 @@ export const LEXICON = {
   },
   '交': {
     pinyin: 'jiāo',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jiao1-friend', gloss: '结交；交往。', note: '全卷仅一见，指任章劝魏桓子选择结交的对象，无第二处用例，故不举例。',
         examples: [] },
@@ -4192,7 +4192,7 @@ export const LEXICON = {
   },
   '奈': {
     pinyin: 'nài',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'nai4-how', gloss: '与「何」合成「奈何」，表示怎么办、如何。', note: '「奈何独以吾为智氏质乎」谓为什么偏偏拿我当智氏的抵押。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -4211,7 +4211,7 @@ export const LEXICON = {
   },
   '藺': {
     pinyin: 'lìn',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'lin4-place', gloss: '地名。蔺与皋狼都是赵氏的地邑。', note: '全卷仅一见，无第二处用例，故不举例。底本作「蔡」，校记据《史记·赵世家》改作「蔺」。',
         examples: [] },
@@ -4219,7 +4219,7 @@ export const LEXICON = {
   },
   '皋': {
     pinyin: 'gāo',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'gao1-place', gloss: '专名。地名用字：皋狼，赵氏邑名。', note: '全卷仅一见，无第二处用例，故不举例。胡注引康氏「皋，姑劳切」，并据《汉书·地理志》西河郡有皋狼县，疑旧说以皋狼为蔡地之误。',
         examples: [] },
@@ -4227,7 +4227,7 @@ export const LEXICON = {
   },
   '狼': {
     pinyin: 'láng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'lang2-gaolang', gloss: '地名用字。「皋狼」，春秋晋地，汉属西河郡，在今山西吕梁一带。', note: '全卷仅一见，无第二处用例，故不举例。智伯所求蔺、皋狼二地，即赵氏所不肯与者，遂启晋阳之战。',
         examples: [] },
@@ -4235,7 +4235,7 @@ export const LEXICON = {
   },
   '怒': {
     pinyin: 'nù',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'nu4-anger', gloss: '发怒；震怒。', note: '全卷仅一见（「智伯怒」），无第二处用例，故不举例。',
         examples: [] },
@@ -4243,7 +4243,7 @@ export const LEXICON = {
   },
   '帥': {
     pinyin: 'shuài',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shuai4-lead', gloss: '率领；统率', note: '胡三省注音「所类翻」。',
         examples: [{ text: '智伯怒，帥韓、魏之甲以攻趙氏。', at: '周紀一' }, { text: '今智伯帥韓、魏而攻趙', at: '周紀一' }] },
@@ -4261,7 +4261,7 @@ export const LEXICON = {
   },
   '攻': {
     pinyin: 'gōng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'gong1-attack', gloss: '攻打；进攻。', note: '本卷「攻赵」四见，都指智伯率韩、魏之兵攻赵氏。',
         examples: [{ text: '帥韓、魏之甲以攻趙氏', at: '周紀一' }, { text: '夫從韓、魏之兵以攻趙', at: '周紀一' }] },
@@ -4269,7 +4269,7 @@ export const LEXICON = {
   },
   '且': {
     pinyin: 'qiě',
-    pos: '連',
+    pos: '连',
     uses: [
       { id: 'qie3-moreover', gloss: '而且；并且。', note: '全卷仅一见，即「长子近，且城厚完」，谓长子城近，而且城墙厚实完整。无第二处用例，故不举例。',
         examples: [] },
@@ -4279,7 +4279,7 @@ export const LEXICON = {
     pinyin: 'chéng',
     pos: '名',
     uses: [
-      { id: 'cheng2-wall', gloss: '城墙；城邑。', note: '本卷四见，或指城墙的厚薄，或指城中之人（「城降」即城中人投降）。',
+      { id: 'cheng2-wall', gloss: '城墙；城邑。', note: '本卷四见：或指城墙，或指城中之人（「城降」）。',
         examples: [{ text: '長子近，且城厚完', at: '周紀一' }, { text: '城不浸者三版。', at: '周紀一' }, { text: '城降有日，而二子無喜志', at: '周紀一' }] },
     ],
   },
@@ -4303,7 +4303,7 @@ export const LEXICON = {
   },
   '罷': {
     pinyin: 'pí',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'pi2-weary', gloss: '通「疲」，疲惫。', note: '全卷仅一见（「民罢力以完之」），无第二处用例，故不举例。胡注：「罢，读曰疲。」',
         examples: [] },
@@ -4311,7 +4311,7 @@ export const LEXICON = {
   },
   '斃': {
     pinyin: 'bì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'bi4-die', gloss: '死；仆倒而死', note: '全卷仅一见，无第二处用例，故不举例。「毙死以守之」谓拼死守城。',
         examples: [] },
@@ -4319,7 +4319,7 @@ export const LEXICON = {
   },
   '邯': {
     pinyin: 'hán',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'han2-handan', gloss: '地名用字：邯郸，赵氏城邑。', note: '全卷仅一见，指邯郸的仓库充实，无第二处用例，故不举例。',
         examples: [] },
@@ -4327,7 +4327,7 @@ export const LEXICON = {
   },
   '鄲': {
     pinyin: 'dān',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'dan1-handan', gloss: '地名用字：邯郸，赵氏的城邑。', note: '胡注：邯，音寒；郸，音丹。「邯郸之仓库实」谓邯郸的仓库充实。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -4361,7 +4361,7 @@ export const LEXICON = {
   },
   '浚': {
     pinyin: 'jùn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jun4-drain', gloss: '榨取；搜刮（本义为疏浚、淘深）', note: '全卷仅一见，无第二处用例，故不举例。胡注：「浚者，疏瀹也，淘也，深也。」此处谓搜刮民脂以实仓库。',
         examples: [] },
@@ -4393,7 +4393,7 @@ export const LEXICON = {
   },
   '殺': {
     pinyin: 'shā',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'sha1-kill', gloss: '杀死。', note: '本卷七见，都是杀死：杀守堤之吏、杀智伯、杀豫让、共杀桓子之子。',
         examples: [{ text: '遂殺智伯，盡滅智氏之族', at: '周紀一' }, { text: '襄子夜使人殺守堤之吏', at: '周紀一' }] },
@@ -4401,7 +4401,7 @@ export const LEXICON = {
   },
   '寬': {
     pinyin: 'kuān',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'kuan1-lenient', gloss: '宽缓；宽恤（指减轻赋税）。', note: '全卷仅一见，即「尹铎之所宽也」，谓晋阳是尹铎行宽缓之政的地方。无第二处用例，故不举例。',
         examples: [] },
@@ -4420,7 +4420,7 @@ export const LEXICON = {
   },
   '圍': {
     pinyin: 'wéi',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'wei2-besiege', gloss: '包围。', note: '全卷仅一见，无第二处用例，故不举例。「围而灌之」即围城并引水灌城。',
         examples: [] },
@@ -4428,15 +4428,15 @@ export const LEXICON = {
   },
   '灌': {
     pinyin: 'guàn',
-    pos: '動',
+    pos: '动',
     uses: [
-      { id: 'guan4-flood', gloss: '灌注；引水淹灌', note: '本卷四见：三家灌晋阳、智伯言汾水绛水可以灌安邑平阳、襄子决水灌智伯军。胡注：「高二尺为一版；三版，六尺。」',
+      { id: 'guan4-flood', gloss: '灌注；引水淹灌', note: '本卷四见，皆引水灌城。胡注：「高二尺为一版；三版，六尺。」',
         examples: [{ text: '三家以國人圍而灌之', at: '周紀一' }, { text: '以汾水可以灌安邑', at: '周紀一' }, { text: '而決水灌智伯軍', at: '周紀一' }] },
     ],
   },
   '浸': {
     pinyin: 'jìn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jin4-flood', gloss: '浸没；淹没。', note: '全卷仅一见（「城不浸者三版」），无第二处用例，故不举例。胡注：「高二尺为一版；三版，六尺。」',
         examples: [] },
@@ -4452,7 +4452,7 @@ export const LEXICON = {
   },
   '沈': {
     pinyin: 'chén',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'chen2-sink', gloss: '同「沉」，沉没；被水淹没。', note: '读 chén；全卷仅一见，指灶被水淹没而生出蛙，无第二处用例，故不举例。',
         examples: [] },
@@ -4468,7 +4468,7 @@ export const LEXICON = {
   },
   '產': {
     pinyin: 'chǎn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'chan3-produce', gloss: '生出；产生。', note: '全卷仅一见，谓灶沉入水中而生出青蛙。无第二处用例，故不举例。',
         examples: [] },
@@ -4485,7 +4485,7 @@ export const LEXICON = {
   },
   '叛': {
     pinyin: 'pàn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'pan4-rebel', gloss: '背叛；反叛。', note: '全卷仅一见，无第二处用例，故不举例。「民无叛意」是说城中百姓没有背叛之心。',
         examples: [] },
@@ -4503,7 +4503,7 @@ export const LEXICON = {
     pinyin: 'shuǐ',
     pos: '名',
     uses: [
-      { id: 'shui3-water', gloss: '水；水势。', note: '「决水灌智伯军」是决开堤防放水灌敌，「行水」是巡视水势。',
+      { id: 'shui3-water', gloss: '水；水势。', note: '「决水灌智伯军」是决堤放水，「行水」是巡视水势。',
         examples: [{ text: '而決水灌智伯軍', at: '周紀一' }, { text: '智伯軍救水而亂', at: '周紀一' }, { text: '智伯行水，魏桓子御', at: '周紀一' }] },
       { id: 'shui3-river', gloss: '河流名中的「水」，如汾水、绛水。', note: '本卷用来指可供灌城的河流。',
         examples: [{ text: '以汾水可以灌安邑，絳水可以灌平陽也', at: '周紀一' }] },
@@ -4511,7 +4511,7 @@ export const LEXICON = {
   },
   '驂': {
     pinyin: 'cān',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'can1-carriage', gloss: '在车右陪乘；「骖乘」谓三人同车', note: '全卷仅一见，无第二处用例，故不举例。胡三省注：骖与参同，参者三也，三人同车则曰骖乘。',
         examples: [] },
@@ -4519,7 +4519,7 @@ export const LEXICON = {
   },
   '乘': {
     pinyin: 'shèng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'sheng4-ride', gloss: '乘车；陪乘。', note: '「骖乘」读 cān shèng，指在车右陪乘；全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -4527,7 +4527,7 @@ export const LEXICON = {
   },
   '肘': {
     pinyin: 'zhǒu',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zhou3-elbow', gloss: '用胳膊肘碰，是名词活用为动词。', note: '「桓子肘康子」谓魏桓子用肘碰韩康子，暗中示意。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -4543,7 +4543,7 @@ export const LEXICON = {
   },
   '汾': {
     pinyin: 'fén',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'fen2-river', gloss: '水名。汾水，在今山西，可以灌安邑。', note: '全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -4551,7 +4551,7 @@ export const LEXICON = {
   },
   '絳': {
     pinyin: 'jiàng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'jiang4-river', gloss: '专名。水名：绛水。', note: '全卷仅一见，无第二处用例，故不举例。胡注引应劭：绛水出河东绛县西南。',
         examples: [] },
@@ -4559,7 +4559,7 @@ export const LEXICON = {
   },
   '平': {
     pinyin: 'píng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'ping2-pingyang', gloss: '地名用字。「平阳」，春秋晋地，韩氏之邑，在今山西临汾一带。', note: '全卷仅一见，无第二处用例，故不举例。此句与「安邑」对举，写桓、康二子肘足相接，各为都邑之虑。',
         examples: [] },
@@ -4567,7 +4567,7 @@ export const LEXICON = {
   },
   '絺': {
     pinyin: 'chī',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'chi1-surname', gloss: '姓氏；絺疵，智伯的臣子。', note: '胡注：「絺，抽迟翻，姓也。」胡三省又引《姓谱》说絺姓出自周苏忿生的支子。本卷「絺」只作姓氏。',
         examples: [{ text: '絺疵謂智伯曰', at: '周紀一' }, { text: '絺疵請使於齊', at: '周紀一' }] },
@@ -4575,7 +4575,7 @@ export const LEXICON = {
   },
   '疵': {
     pinyin: 'cī',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'ci1-name', gloss: '人名用字。絺疵，智伯之臣', note: '胡三省注：「絺，抽迟翻，姓也。」疵是名；本卷未见毛病、缺点义的「疵」。',
         examples: [{ text: '絺疵謂智伯曰：「韓、魏必反矣。」', at: '周紀一' }, { text: '絺疵請使於齊。', at: '周紀一' }] },
@@ -4583,7 +4583,7 @@ export const LEXICON = {
   },
   '反': {
     pinyin: 'fǎn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'fan3-rebel', gloss: '反叛；造反。', note: '「必反」即一定会反叛；「是非反而何」即这不是反叛又是什么。',
         examples: [{ text: '絺疵謂智伯曰：「韓、魏必反矣。」', at: '周紀一' }, { text: '是非反而何？', at: '周紀一' }] },
@@ -4591,7 +4591,7 @@ export const LEXICON = {
   },
   '約': {
     pinyin: 'yuē',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yue1-agree', gloss: '约定；订约。', note: '本卷两处都作动词：「约胜赵而三分其地」是约定，「阴与张孟谈约」是订约。',
         examples: [{ text: '今約勝趙而三分其地', at: '周紀一' }, { text: '二子乃陰與張孟談約', at: '周紀一' }] },
@@ -4600,7 +4600,7 @@ export const LEXICON = {
   '勝': {
     pinyin: 'shèng',
     readings: ['shèng', 'shēng'],
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'sheng4-exceed', gloss: '超过；胜过。', note: '读 shèng。「才胜德」「德胜才」皆此义。',
         reading: 'shèng',
@@ -4615,7 +4615,7 @@ export const LEXICON = {
   },
   '沒': {
     pinyin: 'mò',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'mo4-submerge', gloss: '淹没；沉没。', note: '全卷仅一见，无第二处用例，故不举例。「城不没者三版」谓城墙只剩三版没有淹到。本卷未见「没有」的 méi 一读。',
         examples: [] },
@@ -4632,7 +4632,7 @@ export const LEXICON = {
   },
   '降': {
     pinyin: 'xiáng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xiang2-surrender', gloss: '投降；归降', note: '全卷仅一见，无第二处用例，故不举例。胡注：「降，户江翻，下也，服也。」「城降有日」谓城破投降指日可待。',
         examples: [] },
@@ -4672,7 +4672,7 @@ export const LEXICON = {
   },
   '告': {
     pinyin: 'gào',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'gao4-tell', gloss: '告诉；告知。', note: '本卷两见，皆指智伯把絺疵的话告诉韩、魏二子。',
         examples: [{ text: '智伯以絺疵之言告二子', at: '周紀一' }, { text: '主何以臣之言告二子也？', at: '周紀一' }] },
@@ -4680,7 +4680,7 @@ export const LEXICON = {
   },
   '讒': {
     pinyin: 'chán',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'chan2-slander', gloss: '说人坏话；谗毁。「谗臣」即进谗言的臣子。', note: '全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -4688,7 +4688,7 @@ export const LEXICON = {
   },
   '游': {
     pinyin: 'yóu',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'you2-persuade', gloss: '游说；往来劝说使人听从。', note: '全卷仅一见，无第二处用例，故不举例。「欲为赵氏游说」是说想替赵氏游说。',
         examples: [] },
@@ -4696,7 +4696,7 @@ export const LEXICON = {
   },
   '說': {
     pinyin: 'shuì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shui4-persuade', gloss: '劝说；游说', note: '全卷仅一见，无第二处用例，故不举例。胡注：「说，输芮翻。」即劝人以言，与「喜悦」之说不同。',
         examples: [] },
@@ -4705,7 +4705,7 @@ export const LEXICON = {
   },
   '疑': {
     pinyin: 'yí',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yi2-doubt', gloss: '怀疑；使……疑心。', note: '全卷仅一见（「使主疑于二家」），无第二处用例，故不举例。',
         examples: [] },
@@ -4713,7 +4713,7 @@ export const LEXICON = {
   },
   '懈': {
     pinyin: 'xiè',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xie4-slacken', gloss: '松懈；懈怠', note: '全卷仅一见，无第二处用例，故不举例。胡三省注：「懈，居隘翻，怠也。」',
         examples: [] },
@@ -4745,15 +4745,15 @@ export const LEXICON = {
   },
   '入': {
     pinyin: 'rù',
-    pos: '動',
+    pos: '动',
     uses: [
-      { id: 'ru4-enter', gloss: '进入；进去。', note: '本卷四见，可用于人，也可用于话（入臣之耳）、用于箭（入坚）。',
+      { id: 'ru4-enter', gloss: '进入；进去。', note: '本卷四见，可用于人，也可用于话（入臣之耳）、箭（入坚）。',
         examples: [{ text: '二子出，絺疵入曰', at: '周紀一' }, { text: '則不能以入堅', at: '周紀一' }, { text: '入臣之耳，何傷也', at: '周紀一' }] },
     ],
   },
   '視': {
     pinyin: 'shì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shi4-look', gloss: '看；注视。', note: '全卷仅一见，无第二处用例，故不举例。「其视臣端而趋疾」是说他们看我的眼神端正、走路急促。',
         examples: [] },
@@ -4769,7 +4769,7 @@ export const LEXICON = {
   },
   '趨': {
     pinyin: 'qū',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'qu1-hurry', gloss: '快步走；疾行。', note: '全卷仅一见（「视臣端而趋疾」），无第二处用例，故不举例。',
         examples: [] },
@@ -4793,7 +4793,7 @@ export const LEXICON = {
   },
   '悛': {
     pinyin: 'quān',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'quan1-repent', gloss: '悔改；停止。', note: '胡注：悛，丑缘翻，改也，止也。「智伯不悛」谓智伯不肯悔改。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -4801,7 +4801,7 @@ export const LEXICON = {
   },
   '張': {
     pinyin: 'zhāng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'zhang1-mengtan', gloss: '人名。张孟谈，赵襄子之臣。', note: '本卷三见，皆作「张孟谈」。他潜出说服韩、魏反智伯。本卷未见「张开」义。',
         examples: [{ text: '趙襄子使張孟談潛出見二子', at: '周紀一' }, { text: '二子乃陰與張孟談約', at: '周紀一' }] },
@@ -4809,7 +4809,7 @@ export const LEXICON = {
   },
   '孟': {
     pinyin: 'mèng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'meng4-tan', gloss: '人名用字。张孟谈，赵襄子的家臣。', note: '本卷四见，其中三见是张孟谈。',
         examples: [{ text: '趙襄子使張孟談潛出見二子', at: '周紀一' }, { text: '二子乃陰與張孟談約', at: '周紀一' }] },
@@ -4819,7 +4819,7 @@ export const LEXICON = {
   },
   '談': {
     pinyin: 'tán',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'tan2-name', gloss: '专名。人名用字：张孟谈，赵襄子的家臣。', note: '全卷三见都是此名。单用的「谈论」义本卷未见。',
         examples: [{ text: '趙襄子使張孟談潛出見二子', at: '周紀一' }, { text: '張孟談曰：「謀出二主之口', at: '周紀一' }] },
@@ -4868,7 +4868,7 @@ export const LEXICON = {
   },
   '恐': {
     pinyin: 'kǒng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'kong3-fear', gloss: '担心；恐怕。', note: '全卷仅一见，即「恐事未遂而谋泄」，谓担心事情未成而谋划泄露。无第二处用例，故不举例。',
         examples: [] },
@@ -4884,7 +4884,7 @@ export const LEXICON = {
   },
   '洩': {
     pinyin: 'xiè',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xie4-leak', gloss: '泄露。', note: '全卷仅一见，无第二处用例，故不举例。「谋泄」即计谋泄露。',
         examples: [] },
@@ -4909,7 +4909,7 @@ export const LEXICON = {
   },
   '耳': {
     pinyin: 'ěr',
-    pos: '語氣',
+    pos: '语气',
     uses: [
       { id: 'er3-ear', gloss: '耳朵', note: '此为名词用法；本卷另一用法是句末语气词。',
         examples: [{ text: '謀出二主之口，入臣之耳', at: '周紀一' }] },
@@ -4919,7 +4919,7 @@ export const LEXICON = {
   },
   '傷': {
     pinyin: 'shāng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shang1-harm', gloss: '妨害；损害。', note: '全卷仅一见，「何伤」即有什么妨害，无第二处用例，故不举例。',
         examples: [] },
@@ -4944,7 +4944,7 @@ export const LEXICON = {
   },
   '遣': {
     pinyin: 'qiǎn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'qian3-send-away', gloss: '打发走；送走。', note: '全卷仅一见，无第二处用例，故不举例。「为之期日而遣之」谓约定日期之后送他回去。',
         examples: [] },
@@ -4976,7 +4976,7 @@ export const LEXICON = {
   },
   '決': {
     pinyin: 'jué',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jue2-break-open', gloss: '开决；掘开', note: '「决水灌智伯军」谓掘开堤防放水灌敌军。',
         examples: [{ text: '而決水灌智伯軍。', at: '周紀一' }] },
@@ -5005,7 +5005,7 @@ export const LEXICON = {
   },
   '擊': {
     pinyin: 'jī',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ji1-strike', gloss: '攻击；击打。', note: '「翼而击之」为夹击智伯军；「以击强」为击打坚强之物。',
         examples: [{ text: '韓、魏翼而擊之', at: '周紀一' }, { text: '不熔范，不砥礪，則不能以擊強', at: '周紀一' }] },
@@ -5031,7 +5031,7 @@ export const LEXICON = {
     pinyin: 'cái',
     pos: '名',
     uses: [
-      { id: 'cai2-ability', gloss: '才能；才干', note: '本卷十八见，皆在《才德论》中，与「德」对举：「才者，德之资也」。',
+      { id: 'cai2-ability', gloss: '才能；才干', note: '本卷十八见，皆在《才德论》中，与「德」对举。',
         examples: [{ text: '臣光曰：智伯之亡也，才勝德也', at: '周紀一' }, { text: '夫聰察強毅之謂才', at: '周紀一' }, { text: '才者，德之資也', at: '周紀一' }] },
     ],
   },
@@ -5096,7 +5096,7 @@ export const LEXICON = {
   },
   '雲': {
     pinyin: 'yún',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'yun2-yunmeng', gloss: '地名用字。「云梦」，古代大泽名，在今湖北一带。', note: '全卷仅一见，无第二处用例，故不举例。此处以云梦之竹喻才，谓不矫揉羽括则不能入坚。',
         examples: [] },
@@ -5104,7 +5104,7 @@ export const LEXICON = {
   },
   '夢': {
     pinyin: 'mèng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'meng4-marsh', gloss: '「云梦」是楚地大泽之名。', note: '全卷仅一见（「云梦之竹」），无第二处用例，故不举例。胡注引《汉阳志》说云在江北、梦在江南，是两处泽。',
         examples: [] },
@@ -5128,7 +5128,7 @@ export const LEXICON = {
   },
   '矯': {
     pinyin: 'jiǎo',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jiao3-straighten', gloss: '矫正；使弯曲。', note: '「不矫揉」谓不把竹材烤揉矫正，便做不成箭。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -5136,7 +5136,7 @@ export const LEXICON = {
   },
   '揉': {
     pinyin: 'róu',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'rou2-bend', gloss: '揉曲使直；用火烤使竹木弯曲或平直。', note: '全卷仅一见。胡注引康曰：「揉曲为矫，揉所以桡曲而使之直也。」无第二处用例，故不举例。',
         examples: [] },
@@ -5160,7 +5160,7 @@ export const LEXICON = {
   },
   '棠': {
     pinyin: 'táng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'tang2-tangxi', gloss: '地名用字。「棠溪」，古地名，以出产金属著名。', note: '全卷仅一见，无第二处用例，故不举例。此处以棠溪之金喻才，谓不熔范砥砺则不能击强。',
         examples: [] },
@@ -5168,7 +5168,7 @@ export const LEXICON = {
   },
   '溪': {
     pinyin: 'xī',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'xi1-stream', gloss: '「棠溪」是产精铁的地方。', note: '全卷仅一见（「棠溪之金」），无第二处用例，故不举例。',
         examples: [] },
@@ -5184,7 +5184,7 @@ export const LEXICON = {
   },
   '熔': {
     pinyin: 'róng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'rong2-melt', gloss: '熔铸；熔化。', note: '全卷仅一见，与「范」连用，指用模子熔铸，无第二处用例，故不举例。',
         examples: [] },
@@ -5200,7 +5200,7 @@ export const LEXICON = {
   },
   '砥': {
     pinyin: 'dǐ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'di3-whet', gloss: '磨；用磨石磨利。', note: '全卷仅一见。胡注：「砥，轸氏翻，柔石也。砺，力制翻。」无第二处用例，故不举例。',
         examples: [] },
@@ -5208,7 +5208,7 @@ export const LEXICON = {
   },
   '礪': {
     pinyin: 'lì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'li4-whet', gloss: '磨；磨利。「砥砺」本是磨刀石，也指磨炼。', note: '全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -5224,7 +5224,7 @@ export const LEXICON = {
   },
   '兼': {
     pinyin: 'jiān',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jian1-both', gloss: '同时具有；兼备', note: '全卷仅一见，无第二处用例，故不举例。「才德兼亡」谓才与德两者都没有，是《才德论》所谓愚人。',
         examples: [] },
@@ -5258,7 +5258,7 @@ export const LEXICON = {
   },
   '挾': {
     pinyin: 'xié',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xie2-hold', gloss: '夹持；携带。', note: '「挟匕首」谓怀里藏着匕首。',
         examples: [{ text: '乃詐為刑人，挾匕首', at: '周紀一' }] },
@@ -5268,7 +5268,7 @@ export const LEXICON = {
   },
   '譬': {
     pinyin: 'pì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'pi4-compare', gloss: '譬如；打比方。', note: '全卷仅一见，即「譬之乳狗搏人」，谓譬如小犬搏人。无第二处用例，故不举例。',
         examples: [] },
@@ -5276,7 +5276,7 @@ export const LEXICON = {
   },
   '乳': {
     pinyin: 'rǔ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ru3-nurse', gloss: '喂奶；哺育。「乳狗」即育子的母狗。', note: '全卷仅一见，无第二处用例，故不举例。胡注：「乳狗，育子之狗也。」',
         examples: [] },
@@ -5292,7 +5292,7 @@ export const LEXICON = {
   },
   '搏': {
     pinyin: 'bó',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'bo2-strike', gloss: '扑击；抓咬', note: '全卷仅一见，无第二处用例，故不举例。胡注：「搏，伯各翻。」「乳狗搏人」喻愚者虽欲为不善而力不能胜。',
         examples: [] },
@@ -5316,7 +5316,7 @@ export const LEXICON = {
   },
   '嚴': {
     pinyin: 'yán',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yan2-respect', gloss: '敬畏；尊敬。', note: '「德者人之所严」即有德的人受人敬畏。',
         examples: [{ text: '夫德者人之所嚴', at: '周紀一' }] },
@@ -5326,7 +5326,7 @@ export const LEXICON = {
   },
   '愛': {
     pinyin: 'ài',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ai4-love', gloss: '喜爱；爱护。', note: '「才者人之所爱」谓才能是人们所喜爱的；「爱者易亲」谓所爱的人容易亲近。本卷「爱」不作「吝惜」讲。',
         examples: [{ text: '而才者人之所愛', at: '周紀一' }, { text: '愛者易親，嚴者易疏', at: '周紀一' }] },
@@ -5334,7 +5334,7 @@ export const LEXICON = {
   },
   '蔽': {
     pinyin: 'bì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'bi4-obscure', gloss: '蒙蔽；遮蔽。', note: '全卷仅一见，即「多蔽于才而遗于德」，谓为才所蒙蔽而忽略其德。无第二处用例，故不举例。',
         examples: [] },
@@ -5342,7 +5342,7 @@ export const LEXICON = {
   },
   '遺': {
     pinyin: 'yí',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yi2-omit', gloss: '遗漏；忽略。', note: '全卷仅一见，无第二处用例，故不举例。「蔽于才而遗于德」谓只看重才而漏掉了德。本卷未见「赠送」的 wèi 一读。',
         examples: [] },
@@ -5374,7 +5374,7 @@ export const LEXICON = {
   },
   '顛': {
     pinyin: 'diān',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'dian1-overturn', gloss: '「颠覆」，倾覆；灭亡', note: '全卷仅一见，无第二处用例，故不举例。「以至于颠覆者多矣」谓因此倾覆的很多。',
         examples: [] },
@@ -5383,7 +5383,7 @@ export const LEXICON = {
   },
   '覆': {
     pinyin: 'fù',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'fu4-overturn', gloss: '颠覆；倾覆。', note: '全卷仅一见，「颠覆」指国家倾覆，无第二处用例，故不举例。',
         examples: [] },
@@ -5399,7 +5399,7 @@ export const LEXICON = {
   },
   '審': {
     pinyin: 'shěn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'shen3-examine', gloss: '明察；审辨。', note: '全卷仅一见，即「苟能审于才德之分」，谓能明辨才与德的分际。无第二处用例，故不举例。',
         examples: [] },
@@ -5407,7 +5407,7 @@ export const LEXICON = {
   },
   '漆': {
     pinyin: 'qī',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'qi1-lacquer', gloss: '涂漆；用漆涂物。', note: '本卷两见，一见是赵襄子漆智伯的头骨，一见是豫让漆身毁容。',
         examples: [{ text: '趙襄子漆智伯之頭', at: '周紀一' }, { text: '豫讓又漆身為癩', at: '周紀一' }] },
@@ -5423,7 +5423,7 @@ export const LEXICON = {
   },
   '飲': {
     pinyin: 'yǐn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'yin3-drink', gloss: '喝。「饮器」谓饮酒之器', note: '全卷仅一见，无第二处用例，故不举例。赵襄子漆智伯之头以为饮器，是豫让报仇之由。',
         examples: [] },
@@ -5431,7 +5431,7 @@ export const LEXICON = {
   },
   '豫': {
     pinyin: 'yù',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'yu4-name', gloss: '人名用字；豫让，智伯的臣子。', note: '本卷「豫」只作人名。单用可作安乐、预先讲，本卷未见。',
         examples: [{ text: '智伯之臣豫讓欲為之報仇', at: '周紀一' }, { text: '得豫讓，遂殺之', at: '周紀一' }] },
@@ -5439,7 +5439,7 @@ export const LEXICON = {
   },
   '讓': {
     pinyin: 'ràng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'rang4-name', gloss: '人名。豫让，智伯之臣', note: '智伯死后，豫让漆身吞炭为他报仇，是〈周纪一〉末段的义士；本卷未见谦让义的「让」。',
         examples: [{ text: '智伯之臣豫讓欲為之報仇', at: '周紀一' }, { text: '襄子如廁心動，索之，獲豫讓。', at: '周紀一' }] },
@@ -5447,7 +5447,7 @@ export const LEXICON = {
   },
   '報': {
     pinyin: 'bào',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'bao4-revenge', gloss: '报答；报仇。', note: '「报仇」即为智伯报仇。',
         examples: [{ text: '智伯之臣豫讓欲為之報仇', at: '周紀一' }, { text: '而此人欲為報仇', at: '周紀一' }, { text: '求以報仇，不亦難乎？', at: '周紀一' }] },
@@ -5463,7 +5463,7 @@ export const LEXICON = {
   },
   '詐': {
     pinyin: 'zhà',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'zha4-feign', gloss: '假装；欺诈。', note: '全卷仅一见，即「乃诈为刑人」，谓豫让假扮受刑之人。无第二处用例，故不举例。',
         examples: [] },
@@ -5496,7 +5496,7 @@ export const LEXICON = {
   },
   '塗': {
     pinyin: 'tú',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'tu2-smear', gloss: '涂抹；粉刷。', note: '全卷仅一见（「入襄子宫中涂厕」），无第二处用例，故不举例。此指豫让假扮刑人，以粉刷厕所为由入宫。',
         examples: [] },
@@ -5513,7 +5513,7 @@ export const LEXICON = {
   },
   '動': {
     pinyin: 'dòng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'dong4-stir', gloss: '触动；心动。', note: '全卷仅一见，「心动」指心里忽然有感，无第二处用例，故不举例。',
         examples: [] },
@@ -5521,7 +5521,7 @@ export const LEXICON = {
   },
   '獲': {
     pinyin: 'huò',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'huo4-capture', gloss: '捕获；捉到。', note: '「索之，获豫让」谓搜查之中捉到豫让。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -5554,7 +5554,7 @@ export const LEXICON = {
   },
   '避': {
     pinyin: 'bì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'bi4-avoid', gloss: '躲避；回避', note: '全卷仅一见，无第二处用例，故不举例。「吾谨避之耳」是襄子不欲杀豫让之语。',
         examples: [] },
@@ -5562,7 +5562,7 @@ export const LEXICON = {
   },
   '捨': {
     pinyin: 'shě',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'she3-release', gloss: '舍弃；放过。', note: '全卷仅一见（「乃舍之」），无第二处用例，故不举例。此指襄子放过了豫让。',
         examples: [] },
@@ -5587,7 +5587,7 @@ export const LEXICON = {
   },
   '吞': {
     pinyin: 'tūn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'tun1-swallow', gloss: '吞下。', note: '「吞炭为哑」谓吞下炭火，使嗓子变哑。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -5611,7 +5611,7 @@ export const LEXICON = {
   },
   '乞': {
     pinyin: 'qǐ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'qi3-beg', gloss: '乞求；讨。', note: '全卷仅一见，无第二处用例，故不举例。「行乞于市」即在市上乞讨。胡注引郑氏《周礼注》：市，杂聚之处。',
         examples: [] },
@@ -5643,7 +5643,7 @@ export const LEXICON = {
   },
   '泣': {
     pinyin: 'qì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'qi4-weep', gloss: '哭泣；流泪。', note: '全卷仅一见，「为之泣」即为他流泪，无第二处用例，故不举例。',
         examples: [] },
@@ -5651,7 +5651,7 @@ export const LEXICON = {
   },
   '幸': {
     pinyin: 'xìng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'xing4-favor', gloss: '宠幸；宠爱。', note: '「近幸」即亲近宠幸，「必得近幸」谓一定能得到亲近宠幸。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -5659,7 +5659,7 @@ export const LEXICON = {
   },
   '邪': {
     pinyin: 'yé',
-    pos: '語氣',
+    pos: '语气',
     uses: [
       { id: 'ye2-question', gloss: '句末疑问语气词，通「耶」。', note: '全卷仅一见，即「顾不易邪？」，谓难道不容易吗。无第二处用例，故不举例。',
         examples: [] },
@@ -5667,7 +5667,7 @@ export const LEXICON = {
   },
   '苦': {
     pinyin: 'kǔ',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ku3-afflict', gloss: '使受苦；折磨。', note: '全卷仅一见，无第二处用例，故不举例。「自苦如此」谓这样折磨自己。',
         examples: [] },
@@ -5675,7 +5675,7 @@ export const LEXICON = {
   },
   '委': {
     pinyin: 'wěi',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'wei3-submit', gloss: '致送；委身。', note: '全卷仅一见，无第二处用例，故不举例。「委质为臣」是说委身而为人臣。',
         examples: [] },
@@ -5691,7 +5691,7 @@ export const LEXICON = {
   },
   '愧': {
     pinyin: 'kuì',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'kui4-shame', gloss: '使……惭愧。', note: '全卷仅一见（「将以愧天下后世之为人臣怀二心者也」），无第二处用例，故不举例。',
         examples: [] },
@@ -5699,7 +5699,7 @@ export const LEXICON = {
   },
   '懷': {
     pinyin: 'huái',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'huai2-harbour', gloss: '怀藏；心存', note: '全卷仅一见，无第二处用例，故不举例。「怀二心」谓心里藏着二心。',
         examples: [] },
@@ -5715,7 +5715,7 @@ export const LEXICON = {
   },
   '驚': {
     pinyin: 'jīng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'jing1-startle', gloss: '受惊；惊动。', note: '「马惊」谓马受惊，襄子因此起疑搜查。全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -5723,7 +5723,7 @@ export const LEXICON = {
   },
   '肯': {
     pinyin: 'kěn',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ken3-willing', gloss: '肯；愿意。', note: '全卷仅一见，即「有子五人，不肯置后」，谓赵襄子因伯鲁未立而不肯立继承人。无第二处用例，故不举例。',
         examples: [] },
@@ -5731,7 +5731,7 @@ export const LEXICON = {
   },
   '封': {
     pinyin: 'fēng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'feng1-enfeoff', gloss: '封赐土地；分封。', note: '全卷仅一见，无第二处用例，故不举例。「封伯鲁之子于代」谓把代地封给伯鲁的儿子。',
         examples: [] },
@@ -5747,9 +5747,9 @@ export const LEXICON = {
   },
   '浣': {
     pinyin: 'huàn',
-    pos: '專名',
+    pos: '专名',
     uses: [
-      { id: 'huan4-name', gloss: '人名。浣，赵襄子之孙、伯鲁之子，后立为赵献子。', note: '本卷三见，叙赵氏立后之事。胡注引《史记·六国表》，谓「浣」《索隐》作「晚」。',
+      { id: 'huan4-name', gloss: '人名。浣，赵襄子之孙、伯鲁之子，后立为赵献子。', note: '本卷三见，皆叙赵氏立后。胡注引《史记·六国表》：《索隐》作「晚」。',
         examples: [{ text: '立其子浣為趙氏後', at: '周紀一' }, { text: '弟桓子嘉逐浣而自立', at: '周紀一' }, { text: '復迎浣而立之', at: '周紀一' }] },
     ],
   },
@@ -5763,7 +5763,7 @@ export const LEXICON = {
   },
   '嘉': {
     pinyin: 'jiā',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'jia1-name', gloss: '人名。赵桓子嘉，赵襄子之弟', note: '全卷仅一见，无第二处用例，故不举例。此字底本原无，是校勘者据《史记》索隐所引《世本》补的。',
         examples: [] },
@@ -5771,7 +5771,7 @@ export const LEXICON = {
   },
   '迎': {
     pinyin: 'yíng',
-    pos: '動',
+    pos: '动',
     uses: [
       { id: 'ying2-welcome', gloss: '迎接；迎立。', note: '全卷仅一见，指赵氏族人迎回赵浣而立之，无第二处用例，故不举例。',
         examples: [] },
@@ -5779,7 +5779,7 @@ export const LEXICON = {
   },
   '獻': {
     pinyin: 'xiàn',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'xian4-posthumous', gloss: '谥号用字：献子，即赵献子，名浣。', note: '赵氏之人杀桓子之子，迎浣而立之，是为献子；其子籍即赵烈侯。本卷「献」只作谥号用字。',
         examples: [{ text: '復迎浣而立之，是為獻子', at: '周紀一' }, { text: '獻子生籍，是為烈侯', at: '周紀一' }] },
@@ -5787,7 +5787,7 @@ export const LEXICON = {
   },
   '烈': {
     pinyin: 'liè',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'lie4-liehou', gloss: '谥号用字。烈侯，即赵籍，赵献子之子。', note: '全卷仅一见，即「献子生籍，是为烈侯」，赵籍与魏斯、韩虔同年受封为诸侯。无第二处用例，故不举例。',
         examples: [] },
@@ -5795,7 +5795,7 @@ export const LEXICON = {
   },
   '啟': {
     pinyin: 'qǐ',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'qi3-name', gloss: '人名用字。启章，韩武子的名字。', note: '全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
@@ -5803,7 +5803,7 @@ export const LEXICON = {
   },
   '景': {
     pinyin: 'jǐng',
-    pos: '專名',
+    pos: '专名',
     uses: [
       { id: 'jing3-posthumous', gloss: '专名。谥号用字：韩景侯。', note: '全卷仅一见，无第二处用例，故不举例。',
         examples: [] },
