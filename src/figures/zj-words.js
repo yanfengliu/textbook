@@ -1,6 +1,6 @@
 // 字与词 — how single characters become words, which is the book's central lesson.
 //
-// 大夫 is not "big" + "man". 诸侯 is not "many" + "marquis". But 为后 — 为 "to make", 后 "heir" — is
+// 大夫 is not the sum of its two characters. 诸侯 is not "many" + "marquis". But 为后 — 为 "to make", 后 "heir" — is
 // exactly the sum of its two characters, and that contrast is the thing a reader has to be able to make:
 // some adjacent characters are a 词 with a meaning of its own, some are a phrase built from its parts.
 // So the reader picks characters out of 通鉴's own sentences and the figure says which of the two they
@@ -19,6 +19,17 @@
 // itself gives them (tongjian/words.js) and the six characters they are built from, trimmed from
 // tongjian/lexicon.js so both arms of the figure say the same thing. If the two ever disagree the
 // figure is teaching something the book does not say, so it is kept to what the book's own entries say.
+//
+// Which sense a character takes is TWO questions and the figure needs the second. The registry answers
+// the chapter's: what does 夫 mean in 〈才德论〉, where chars.js binds fu2-initial (fú, 句首语气词)? The
+// figure needs the word's: 夫 inside 大夫 is fū, and chapter 1 binds that very word to fu1-dafu. The two
+// answers are not interchangeable, and printing the first where the second was meant is what put 「句首
+// 语气词」 over 大夫 on the page that mounts this figure. `card.js` resolves one use per character and
+// cannot be asked for a named one, so the six characters the three words are built from carry their
+// word-sense in this file, each naming the use of tongjian/lexicon.js it is copied from, and the rows of
+// a taught word take them in BOTH arms. Any other character still asks the page, which is the only
+// authority for the chapter's own prose. TEACH and SEED are exported so a check can hold this copy of the
+// book's wording against tongjian/lexicon.js; nothing in the frame reads either.
 //
 // Clock: one unit per taught word, in WORD_ORDER (0 = 大夫, 1 = 诸侯, 2 = 为后); the clock selects that
 // word's run in the 原文. describe() -> { selection, chars, entryType, pinyin, pos, gloss, mark, line,
@@ -54,19 +65,46 @@ const PUNCT = '，、。；：？！「」（）';
 // The words the figure opens the reader onto, and the order the clock walks them in.
 const WORD_ORDER = ['大夫', '諸侯', '為後'];
 
-// What the figure teaches about a word, keyed by the word: which characters to take apart, and the mark
-// that goes on the seal-red rule between their glosses and the word's. A word from the book that is not
-// keyed here is still shown — its characters' glosses above its own — but with no mark and no claim,
-// because the figure has nothing true to say about how that particular compound is put together.
-const TEACH = {
-  '大夫': { chars: ['大', '夫'], mark: '非两字相加', taught: '「大」「夫」两字相加是「大人」；「大夫」是一个官名。' },
-  '諸侯': { chars: ['諸', '侯'], mark: '另成一词', taught: '「諸」是众，「侯」是爵位；「諸侯」是一个固定的名号，不是「许多侯」。' },
-  '為後': { chars: ['為', '後'], mark: '两字相加', taught: '「為」是立，「後」是继嗣；这是动宾短语，意思正是两字相加——与「大夫」正相反。' },
+// What the figure teaches about a word, keyed by the word: which characters to take apart, the sense
+// each of them takes inside it — a use id of tongjian/lexicon.js, whose reading and gloss SEED.lexicon
+// below carries — and the mark that goes on the seal-red rule between their glosses and the word's. A
+// word from the book that is not keyed here is still shown — its characters' glosses above its own — but
+// with no mark and no claim, because the figure has nothing true to say about how that particular
+// compound is put together.
+export const TEACH = {
+  '大夫': {
+    chars: ['大', '夫'],
+    uses: { '大': 'da4-dafu', '夫': 'fu1-dafu' },
+    mark: '非两字相加',
+    // The sentence says what the mark says, in the book's own words: the characters' glosses are the two
+    // the rows above print, and 「大夫」 is a 官名, not those two meanings added together. It used to read
+    // 「「大」「夫」两字相加是「大人」」, which needs 夫 to mean 男子 — a sense lexicon.js does not give it
+    // (its two uses are fu1-dafu and fu2-initial, and the entry's own note says 「「丈夫」义本卷未见」) —
+    // and 「大人」 appears nowhere in the book's data. A sum the data cannot supply is not this figure's
+    // to state.
+    taught: '「大」是官名用字，「夫」与「大」合成「大夫」；「大夫」是一个官名，不是两个字的意思相加。',
+  },
+  '諸侯': {
+    chars: ['諸', '侯'],
+    uses: { '諸': 'zhu1-all', '侯': 'hou2-lord' },
+    mark: '另成一词',
+    taught: '「諸」是众，「侯」是爵位；「諸侯」是一个固定的名号，不是「许多侯」。',
+  },
+  '為後': {
+    chars: ['為', '後'],
+    uses: { '為': 'wei2-become', '後': 'hou4-heir' },
+    mark: '两字相加',
+    taught: '「為」是立，「後」是继嗣；这是动宾短语，意思正是两字相加——与「大夫」正相反。',
+  },
 };
 
-// The figure's minimal set, used only where no page registry exists. Every gloss is the book's own,
-// trimmed from tongjian/words.js and tongjian/lexicon.js.
-const SEED = {
+// The figure's minimal set: the three words with the glosses the book gives them (tongjian/words.js), used
+// where no page registry exists, and the six characters those words are built from, each one use of
+// tongjian/lexicon.js named by its id, with that use's own reading, gloss and note. The six are the rows
+// of a taught word in BOTH arms, so the page and the lab teach the same thing; `readings` is the
+// character's full set of readings, which the card shows and the row does not, because a row is about one
+// sense and the row's reading is that sense's.
+export const SEED = {
   words: {
     '大夫': {
       pinyin: 'dà fū',
@@ -88,12 +126,12 @@ const SEED = {
     },
   },
   lexicon: {
-    '大': { pinyin: 'dà', pos: '形', gloss: '「大夫」的大，官名用字。', note: '与「夫」合成官名「大夫」。' },
-    '夫': { pinyin: 'fū', readings: ['fū', 'fú'], pos: '名', gloss: '与「大」合成「大夫」，官名。', note: '读 fū；读 fú 时是句首语气词。' },
-    '諸': { pinyin: 'zhū', pos: '形', gloss: '众；各。', note: '本卷多与「侯」合成「諸侯」。' },
-    '侯': { pinyin: 'hóu', pos: '名', gloss: '诸侯；受天子册命的国君。', note: '爵位名：公、侯、伯、子、男。' },
-    '為': { pinyin: 'wéi', readings: ['wéi', 'wèi'], pos: '动', gloss: '做；成为。', note: '通用义。' },
-    '後': { pinyin: 'hòu', pos: '名', gloss: '继承人；嗣子。', note: '「為後」即立继承人。' },
+    '大': { use: 'da4-dafu', pinyin: 'dà', pos: '形', gloss: '「大夫」的大，官名用字。', note: '与「夫」合成官名「大夫」。' },
+    '夫': { use: 'fu1-dafu', pinyin: 'fū', readings: ['fū', 'fú'], pos: '名', gloss: '与「大」合成「大夫」，官名。', note: '读 fū；读 fú 时是句首语气词。' },
+    '諸': { use: 'zhu1-all', pinyin: 'zhū', pos: '形', gloss: '众；各。', note: '本卷多与「侯」合成「諸侯」。' },
+    '侯': { use: 'hou2-lord', pinyin: 'hóu', pos: '名', gloss: '诸侯；受天子册命的国君。', note: '爵位名：公、侯、伯、子、男。' },
+    '為': { use: 'wei2-become', pinyin: 'wéi', readings: ['wéi', 'wèi'], pos: '动', gloss: '做；成为。', note: '通用义。' },
+    '後': { use: 'hou4-heir', pinyin: 'hòu', pos: '名', gloss: '继承人；嗣子。', note: '「為後」即立继承人。' },
   },
 };
 
@@ -386,6 +424,50 @@ export function mount(root, ctx) {
   // is how a 多音字 like 夫 (fū in 大夫, fú as a particle) is shown honestly.
   const readingOf = (data) => (!data ? '' : (data.readings?.length ? data.readings.join(' / ') : data.pinyin || ''));
 
+  // What a looked-up character prints as its meaning. Three states, and the registry can tell them apart:
+  // an entry with a sense the chapter bound, an entry the lexicon HAS but whose sense for this occurrence
+  // the chapter's 字表 did not bind (`unbound`, with every sense it does have listed), and an entry the
+  // lexicon does not have at all. Printing 「字词库未收此字。」 for the middle state is a claim about the
+  // book's data that the book's data contradicts — the character is in the lexicon, with two to three
+  // senses — and it is what the figure said for four of the six characters its own words are built from.
+  // The popover's own wording for that state is 「此处义项未定。」, and both surfaces read one registry.
+  const glossOf = (data) => {
+    if (!data) return '字词库未收此字。';
+    return data.unbound ? '此处义项未定。' : data.gloss || '字词库未收此字。';
+  };
+  const sensesOf = (data) => (data?.unbound && data.senses?.length ? `本章义项　${data.senses.join('；')}` : data?.note || '');
+
+  // The sense a character takes inside a word the figure teaches. The word's own binding comes first: the
+  // page's answer is about this chapter's prose, which is a different text from the sentence the figure
+  // quotes — chapter 3 binds 夫 to fú, 句首语气词, and the 夫 of 大夫 is fū. A character the figure has no
+  // word-sense for still asks the page, and its row then shows the character's own readings rather than a
+  // reading this file would have had to invent.
+  function senseIn(teach, ch) {
+    const use = teach?.uses?.[ch];
+    const own = use && SEED.lexicon[ch]?.use === use ? SEED.lexicon[ch] : null;
+    const data = own || lookup(ch, 'char');
+    return { data, reading: own ? own.pinyin || '' : readingOf(data) };
+  }
+
+  // Where each taught word stands in each line of the 原文. A reader may pick a longer run that contains one
+  // — 「晉大夫」 is 晉 plus the word 大夫 — and each character in it keeps the sense it has where it stands.
+  // Without this the 连读 note would gloss the 夫 of 「晉大夫」 with chapter 3's particle sense while the
+  // 拆开看 rows a line below said fū, which is the defect this figure was just fixed for, in one panel.
+  const wordSpans = lineCells.map((cells) => {
+    const line = cells.map((c) => c.ch).join('');
+    return WORD_ORDER.flatMap((w) => {
+      const at = line.indexOf(w);
+      return at < 0 ? [] : [{ word: w, from: at, to: at + w.length - 1 }];
+    });
+  });
+
+  // The sense a character has where it stands: its word's, inside one of the three taught words, and the
+  // page's everywhere else.
+  function senseAt(li, ci) {
+    const span = wordSpans[li].find((s) => ci >= s.from && ci <= s.to);
+    return senseIn(span ? TEACH[span.word] : null, lineCells[li][ci].ch);
+  }
+
   function paint() {
     const on = new Set();
     if (pick) for (let i = pick.from; i <= pick.to; i += 1) on.add(`${pick.line}:${i}`);
@@ -425,11 +507,11 @@ export function mount(root, ctx) {
       split.hidden = false;
       const built = teach?.chars || e.chars;
       parts.replaceChildren(...built.map((ch) => {
-        const d = lookup(ch, 'char');
+        const sense = senseIn(teach, ch);
         return h('li', { class: 'zjw-part' }, [
           h('b', { text: ch }),
-          h('i', { text: readingOf(d) }),
-          h('span', { text: d?.gloss || '字词库未收此字。' }),
+          h('i', { text: sense.reading }),
+          h('span', { text: glossOf(sense.data) }),
         ]);
       }));
       wholeWord.textContent = e.key;
@@ -448,13 +530,13 @@ export function mount(root, ctx) {
     pos.textContent = data?.pos || '';
     type.textContent = e.type === 'glyph' ? '字' : '连读';
     if (e.type === 'glyph') {
-      gloss.textContent = data?.gloss || '字词库未收此字。';
-      note.textContent = data?.note || '';
+      gloss.textContent = glossOf(data);
+      note.textContent = sensesOf(data);
       const ex = data?.examples?.[0];
       example.textContent = ex ? `「${ex.text}」　${ex.at || ''}` : '';
     } else {
       gloss.textContent = `「${e.key}」在此不作一词；各字之义如下。`;
-      note.textContent = e.chars.map((ch) => `${ch}　${lookup(ch, 'char')?.gloss || '字词库未收此字。'}`).join('；');
+      note.textContent = e.chars.map((ch, i) => `${ch}　${glossOf(senseAt(pick.line, pick.from + i).data)}`).join('；');
       example.textContent = '';
     }
   }

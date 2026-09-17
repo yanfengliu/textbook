@@ -60,7 +60,7 @@ The corpus prints **W1's reading** in every case below except the three marked *
 | # | Sentence | W1 (printed) | Other witnesses | Note in the entry |
 |---|---|---|---|---|
 | 1 | 莫**敢**不奔走而服役者 | 敢 | W2 W3 W4 lack 敢 | 章校: 十二行本、乙十一行本、孔本 have 敢; W5 agrees with W1 |
-| 2 | 以禮為之**紀綱**哉 | 紀綱 | W5 W2 W3 綱紀 | W1's 校記: 據上文乙正 |
+| 2 | 以禮為之**紀綱**哉 | 紀綱 | W5 綱紀; W2 W3 紀綱 | W1's 校記: 據上文乙正; 章校 records the transposition in 十二行本、乙十一行本、孔本 |
 | 3 | 尊**周**室 | 周 | W2 W3 W4 王 | 章校: 十二行本「王」作「周」; W5 agrees with W1 |
 | 4 | 惟**器與名** | 器與名 | W2 W3 W4 名與器 | W5 agrees with W1 |
 | 5 | 上下無以**相有**故也 | 相有 | W2 W3 W4 相保 | W5 agrees with W1; no 章校 entry either way |
@@ -87,8 +87,13 @@ The corpus prints **W1's reading** in every case below except the three marked *
 | 26 | 韓康子生武子**啟章** | 啟章 | absent in W5 W2 W3 W4 | 校記: 據《史記·韓世家》索隱增補 |
 | 27 | 魏斯者，桓子之**孫**也 | 孫 | 世本 makes him 桓子之子 | 校記 records the conflict; 通鑑's 孫 is printed |
 | 28 | 田恆之於齊**，，**白公之於楚 | one comma | W1's page carries two | the doubled comma is on the page itself, raw and rendered alike — a transcription slip |
+| 29 | 夫禮，**辨**貴賤 | 辨 | W3 W4 辯 | 底本作「辨貴賤」; W5 W2 agree with W1 |
+| 30 | 美**鬢**長大則賢 | 鬢 | W5 鬚 | 胡注: 「《通鑑》俗傳寫者多作『美鬚』，非也，《國語》作『美鬢』，今從之」; 章校: 乙十一行本作「鬚」 |
+| 31 | 《夏書》有之**曰** | 曰 | W2 W3 W4 lack 曰 | W5 agrees with W1 |
+| 32 | 譬之乳狗**搏**人 | 搏 | W3 W5 摶 | 胡注「搏，伯各翻」; W2 agrees with W1 |
+| 33 | 魏斯者，桓子之孫也 | no 魏 before 桓子 | W2 W3 W4 魏 | 底本作「魏斯者，桓子之孫也」; W5 agrees with W1 |
 
-Two further differences were examined and **not** recorded as variants, because they are slips in an electronic transcription rather than readings of any edition: W3 prints 闈 for 圍 in 「三家以國人圍而灌之」, and 摶 for 搏 in 「乳狗搏人」.
+One further difference was examined and **not** recorded as a variant, because it is a slip in an electronic transcription rather than a reading of any edition: W3 prints 闈 for 圍 in 「三家以國人圍而灌之」. 摶 for 搏 is not in that class and now has its own row (32): W5 prints 摶 as well, and W5 is a different digitisation from W3, so 「a slip in W3's transcription」 is not what the fetched text establishes. 摶 may be the Song print's own reading or an error both transcriptions share, and telling those apart needs the page image, which this fetch did not open.
 
 ### The three readings taken against the transcription source
 
@@ -117,15 +122,16 @@ Each of these is stated in the `note` of the entry that contains it, and the fil
 | Corpus entries / 句 / characters | 13 / 116 / 3,557 |
 | Distinct characters of the 原文 | **640** |
 | `lexicon.js` entries | **640** — one per character, none missing |
-| … uses / examples | 925 / 981 |
-| … uses carrying no example, each with a stated reason | 304 |
+| … uses / examples | 924 / 976 |
+| … uses carrying no example, each with a stated reason | 306 |
+| … uses declaring their own 词性 | 113 |
 | … entries declaring two readings | 15 (`test/lexicon.test.js` reports 15; this table said 17 until 2026-09-18, and the number is the test's) |
 | … entries carrying 異體字 | 47 |
 | `words.js` entries / examples | 143 / 190 |
 | `<tb-term word="…">` keys the three chapter pages mark | 104, all resolved |
 | `<tb-char>` elements on those pages, all resolved | 1,405 |
 
-`lexicon.js` is 266 KiB, over the fleet's 256 KiB blob ceiling, and the reason is stated here as that ceiling asks: it is not generated output but the book's central authored asset — 640 hand-reviewed entries, each with its senses, notes and attestations, at about 420 bytes an entry. Compacting it further would cost the one-line-per-field shape a reviewer reads it in.
+`lexicon.js` is 268 KiB, over the fleet's 256 KiB blob ceiling, and the reason is stated here as that ceiling asks: it is not generated output but the book's central authored asset — 640 hand-reviewed entries, each with its senses, notes and attestations, at about 430 bytes an entry. Compacting it further would cost the one-line-per-field shape a reviewer reads it in.
 
 ### How the lexicon was made — and which parts are model-drafted
 
@@ -149,11 +155,11 @@ This is the part a reader should be sceptical about, so it is stated plainly.
    - **every gate was proved red by mutation before it was believed.** The mutation, the failing assertion and the byte-for-byte restore are in `out/tongjian-w2/mutation-*.txt` (ignored by Git; they are this round's task evidence, not a repository input). Eight data mutations — one character changed in a quotation, an example with no `at`, an entry deleted, a 多音字 given one reading, an empty-example use with no note, a word's card-facing gloss drifted from its uses, the reader's own sentence put back as an example, and the whole lexicon emptied — and three page mutations — a 原文 with one character different, a 原文 block with no `data-corpus`, and a `data-corpus` naming no entry. The emptied-lexicon run is the one that answers the denominator question: it fails with 「640 character(s) of the 原文 have no entry」 and 「LEXICON is empty — checked zero entries」, so a run that finds nothing cannot pass as one that found everything.
 4. **What was checked by reading, and how far it went.** The 胡三省 音注 (W2) is a fetched annotation source that covers this passage, and 330 of the 640 characters have a note aligned to them; the drafters were given those notes and told to use them. The glosses were then read against the sentence each character stands in. **This is not a dictionary check.** No entry's gloss was verified against a fetched dictionary entry of its own, and a wrong gloss is a well-formed entry that every gate here passes. The independent review in the round's plan is what that check is for, and it has not happened yet at the time of writing.
 
-One schema limit worth naming, because several drafters hit it and it is not a defect they could fix: `pos` holds one value per entry, and a character can genuinely be two parts of speech in one volume (周 is 專名 for the dynasty and 形 in 「智不能周」; 相 is 副 in 「相親」 and 名 in 「君相」; 眾 is 形 in 「眾人之識」 and nominal in 「部眾」). Each such entry gives the class of its dominant use and its other uses carry the rest in their notes. Splitting `pos` into one value per use would be a contract change, so it is recorded here instead.
+`pos` is one value per entry **and may also be declared per use**, which is the one schema limit this round lifted. A character can genuinely be two parts of speech in one volume — 周 is 專名 for the dynasty and 动 in 「智不能周」; 相 is 副 in 「相親」 and 名 in 「君相」; 眾 is 形 in 「眾人之識」 and 名 in 「部眾」 — and a card that printed the entry's class over another sense's gloss contradicted itself in one popover: 「相 xiàng」 above 「辅佐之臣；国相」 labelled 副, 「難 nàn」 above 「灾难；祸患。」 labelled 形, 「將 jiàng」 above 「率领。」 labelled 副. So **113 uses declare their own `pos`**, and the card prints the shown use's class, falling back to the entry's only where the use declares none — which is where the two agree. What remains of the limit, stated rather than hidden: `pos` is still one value per entry, so an entry asserts that its dominant use's class is the entry's class and cannot assert anything else about it; the vocabulary is the twelve classes `test/lexicon.test.js` holds in `POS`, which has no 兼词 slot (諸 = 之于 is given 介 here) and no 助动词 slot (敢 「助动词，敢；有胆量」 is given 动); and the declaration is a judgement about a sense, so the gate holds it only where the use's own gloss or note names a class in words — 60 uses, 24 of which contradict their entry's. `docs/work/4_zizhi-tongjian/contracts.md` §3's shape was written before either `uses[].reading` or `uses[].pos` existed and sketches neither.
 
 ### The 異體字
 
-`variants` lists the other form of a character that a fetched witness actually prints, and only that. The pairs are the ones the comparison above produced: 為/爲, 群/羣, 既/旣, 別/别, 遠/逺, 真/眞, 喪/䘮, 綿/緜, 絕/絶, 衛/衞, 眾/衆, 德/徳, 寧/寜, 強/彊, 苟/茍, 說/説, 決/决, 沒/没, 潛/潜, 廁/厠, 宮/宫, 奸/姧, 將/将, 瑤/瑶, 戶/戸, 歷/歴, 虔/䖍, 侯/矦, 世/丗, 簡/𥳑, 嘗/甞, 伎/𠆸, 悅/恱, 陰/隂, 疏/踈, 聰/聦, 顛/顚, 洩/𣳘, 他/佗, 備/僃, 奈/柰, 寬/寛, 產/産, 段/叚, 嗚/烏, 捨/舍, 蜹/蚋. Two pairs that look similar were deliberately **not** recorded: 於/于 and 巳/已 are different characters, not forms of one, and 鼃, the corpus's form of 蛙, has no witness in this fetch printing 蛙.
+`variants` lists the other form of a character that a fetched witness actually prints, and only that: all 47 declared pairs are printed by a fetched witness (46 of them in W1, W2, W3 or W5; 蜹/蚋 in W4). The 47 are 為/爲, 群/羣, 既/旣, 別/别, 遠/逺, 真/眞, 喪/䘮, 綿/緜, 絕/絶, 衛/衞, 眾/衆, 德/徳, 寧/寜, 強/彊, 苟/茍, 說/説, 決/决, 沒/没, 潛/潜, 廁/厠, 宮/宫, 奸/姧, 將/将, 瑤/瑶, 戶/戸, 歷/歴, 虔/䖍, 侯/矦, 世/丗, 簡/𥳑, 嘗/甞, 伎/𠆸, 悅/恱, 陰/隂, 疏/踈, 聰/聦, 顛/顚, 洩/𣳘, 他/佗, 備/僃, 奈/柰, 寬/寛, 產/産, 段/叚, 嗚/烏, 捨/舍, 蜹/蚋. **The list is attested but not exhaustive, and this file does not claim it is.** The comparison above is not what produced it: that comparison canonicalised the woodblock's glyph forms before it diffed — which is how 爲/為, 羣/群, 旣/既 and the rest escaped being read as disagreements — so a form outside this list is missing from it rather than denied by it. Eleven pairs a fetched witness prints **inside this passage** are known to be missing: 隄/堤 (W2 W3 W5), 谿/溪 (W2 W3 W5), 泄/洩 (W2 W3), 姦/奸 (W2 W5), 幷/並 (W2), 嚮/向 (W2 W3 W5), 况/況 (W3), 疎/疏 (W3), 悦/悅 (W3), 䟽/疏 (W5), 𣈆/晉 (W5). (A twelfth of that shape, 岀/出, is printed by W5 only on page 30, outside the passage this corpus covers, so it is not counted here.) They are named so the gap is visible rather than silent: until `variants` carries them, that field is a partial list. Two pairs that look similar were deliberately **not** recorded: 於/于 and 巳/已 are different characters, not forms of one, and 鼃, the corpus's form of 蛙, has no witness in this fetch printing 蛙.
 
 ### The 詞
 
@@ -224,7 +230,7 @@ Stated so that no reader mistakes silence for coverage.
 4. **Glosses are unchecked against a dictionary** — see above. They are consistent with the passage and with 胡三省; they are not certified.
 5. **The 胡注 snippets are the notes on this page only.** 330 characters have an aligned note; the rest were drafted from the passage alone.
 6. **Senses outside this 卷 are not claimed.** The corpus is one year of one 卷. A character's commonest classical sense may simply not occur in it; where a drafter knew of one, the honest place for it is the note, and the notes are not exhaustive.
-7. **The length of one 版 is not established.** 「城不浸者三版」 is left as three 版 with no metre figure, because no fetched source gives the unit.
+7. **The length of one 版 is given in 尺, not in metres.** 胡三省's 音注 on 「城不浸者三版」 reads 「高二尺爲一版；三版，六尺」 (W2): one 版 is two 尺 high, so three are six. The 版 and 浸 cards quote that note. The chapter prints the figure and does not convert it to metres, because no fetched witness gives the 尺 a modern equivalent.
 8. **董安于 does not appear in 卷001.** 通鑑 gives 晉陽's administration to 尹鐸 alone. If any draft credits 董安于 with 晉陽, that comes from another text.
 9. **「通鑑三家注」 does not exist.** 三家注 is a 史記 term. The attested commentary layers are 胡三省《資治通鑑音注》, 陳仁錫 評閱, and 司馬光's own 《考異》 and 《目錄》.
 10. **The historical dating is out of scope here.** The corpus carries no Western years and no 干支: W1's headings carry them as modern additions, and 胡三省 supplies the 干支 as commentary. Whatever the chapters say about 403 BC, 453 BC and 376 BC belongs to the chapter prose, not to this file.

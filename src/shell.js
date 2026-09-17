@@ -68,6 +68,55 @@ class Textbook {
 }
 
 export const textbook = new Textbook();
+
+// The words the shell says on every page of every book, per language, and what a page publishes to
+// replace them.
+//
+// The shell mounts everywhere, so these were the words a reader of 通鑑 met in English on every surface
+// the book does not author: `Library` and `Today` in the header of all three chapters, `In this
+// chapter` in the section rail, and — the ones no screenshot can show — the accessible names of the
+// theme toggle, the contents drawer, and the Today link's due count, which told a screen-reader user
+// how much was waiting in English on a page written in Chinese. Same shape as `check.js`, `sort.js`
+// and `figure.js`: English is the default, so an English page reads character for character as it did;
+// the language is the page's own `<html lang>`; and a page may publish its own words on the handshake,
+// merged one key at a time:
+//
+//   textbook.strings = { shell: { railTitle: '本卷目錄' } };
+//
+// **Keyed on the full tag first, then on the base language**, as `figure.js` is: a `zh-Hant` book
+// writes 本章目錄 where this one writes 本章目录, and keying on `zh` alone would hand it the wrong
+// script — the defect `figure.js` records for 圖 and 图. No zh-Hant book exists yet, so one `zh` block
+// covers both Chinese surfaces today; the day one ships, its words go in a `'zh-hant'` block rather
+// than in a translation of the prose. `Textbook` below stays English on purpose: it is the fallback for
+// a page that passes no `book=`, which no page does, so no reader can reach it.
+const SHELL_WORDS = {
+  en: {
+    contents: 'Open chapter contents',
+    library: 'Library',
+    today: 'Today',
+    railTitle: 'In this chapter',
+    themeDark: 'Switch to dark theme',
+    themeLight: 'Switch to light theme',
+    due: (n) => (n === 1 ? '1 objective due' : `${n} objectives due`),
+  },
+  zh: {
+    // 书库 for the site's shelf of books, 今日 for the study page, 待复习 for what is waiting there: the
+    // terse rubric register the book's own chrome uses (本章目录, 原文, 字词), not a sentence.
+    contents: '打开本章目录',
+    library: '书库',
+    today: '今日',
+    railTitle: '本章目录',
+    themeDark: '切换到深色主题',
+    themeLight: '切换到浅色主题',
+    due: (n) => `${n}条待复习`,
+  },
+};
+
+function shellWords() {
+  const lang = (document.documentElement.getAttribute('lang') || 'en').toLowerCase();
+  const table = SHELL_WORDS[lang] ?? SHELL_WORDS[lang.split('-')[0]] ?? SHELL_WORDS.en;
+  return { ...table, ...(textbook.strings?.shell || {}) };
+}
 window.__textbook = textbook;
 
 // ---------- theme ----------
@@ -111,6 +160,7 @@ class TbShell extends HTMLElement {
   connectedCallback() {
     if (this.__built) return;
     this.__built = true;
+    const words = shellWords();
     const book = this.getAttribute('book') || 'Textbook';
     const bookHref = this.getAttribute('book-href') || '../';
     const libraryHref = this.getAttribute('library-href') || '../../';
@@ -127,11 +177,11 @@ class TbShell extends HTMLElement {
     const header = document.createElement('header');
     header.className = 'tb-header';
     header.innerHTML = `
-      <button class="tb-iconbtn tb-navtoggle" type="button" aria-label="Open chapter contents" aria-expanded="false">${MENU}</button>
+      <button class="tb-iconbtn tb-navtoggle" type="button" aria-label="${words.contents}" aria-expanded="false">${MENU}</button>
       <a class="tb-header__book" href="${bookHref}">${book}</a>
-      <div class="tb-header__crumb">${this.hasAttribute('no-crumb') ? '' : `<a href="${libraryHref}">Library</a>${chapterLabel ? `<span class="tb-header__sep">/</span><span>${chapterLabel}</span>` : ''}`}</div>
-      <a class="tb-header__today" href="${todayHref}"${isToday ? ' aria-current="page"' : ''}>Today<span class="tb-header__due" hidden></span></a>
-      <button class="tb-iconbtn tb-themetoggle" type="button" aria-label="Switch to dark theme"></button>
+      <div class="tb-header__crumb">${this.hasAttribute('no-crumb') ? '' : `<a href="${libraryHref}">${words.library}</a>${chapterLabel ? `<span class="tb-header__sep">/</span><span>${chapterLabel}</span>` : ''}`}</div>
+      <a class="tb-header__today" href="${todayHref}"${isToday ? ' aria-current="page"' : ''}>${words.today}<span class="tb-header__due" hidden></span></a>
+      <button class="tb-iconbtn tb-themetoggle" type="button" aria-label="${words.themeDark}"></button>
     `;
     const progress = document.createElement('div');
     progress.className = 'tb-progress';
@@ -143,7 +193,7 @@ class TbShell extends HTMLElement {
     const paint = () => {
       const dark = effectiveTheme() === 'dark';
       toggle.innerHTML = dark ? SUN : MOON;
-      toggle.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+      toggle.setAttribute('aria-label', dark ? words.themeLight : words.themeDark);
     };
     paint();
     toggle.addEventListener('click', () => {
@@ -189,7 +239,7 @@ class TbShell extends HTMLElement {
       if (rail) {
         const title = document.createElement('p');
         title.className = 'tb-rail__title';
-        title.textContent = 'In this chapter';
+        title.textContent = words.railTitle;
         rail.replaceChildren(title, list);
         // Mark the section in view
         const io = new IntersectionObserver((entries) => {
@@ -266,7 +316,7 @@ class TbShell extends HTMLElement {
           const n = store.due(Date.now()).length;
           due.textContent = n ? String(n) : '';
           due.hidden = n === 0;
-          due.setAttribute('aria-label', n === 1 ? '1 objective due' : `${n} objectives due`);
+          due.setAttribute('aria-label', words.due(n));
         };
         paintDue();
         store.onChange(paintDue);

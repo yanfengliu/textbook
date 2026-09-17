@@ -9,11 +9,39 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..700,0..100,0..1&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Inter:wght@400..700&family=Libertinus+Serif:ital,wght@0,400;0,600;1,400;1,600&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libertinus+Serif:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@400..700&family=Noto+Sans+Math&text=⇌⇀↽→←↔↑↓⟶⟵₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎⁰⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾≈≤≥≠∝∞∆∑√∫∂⋅∼′″‰◀▶&display=swap">
+<!-- The Han of the 資治通鑑 shelf entry — its title, its description, the rubric over it and the 鑑 on its
+     plate. Without this the page asked for no CJK face at all and every one of those characters was drawn
+     by whatever the reader's machine happened to have: 67 glyphs on this page, which looked passable on a
+     machine with Noto Sans SC installed and is tofu on one without. Found 2026-09-16 by the font census
+     in `npm run shot`, on its first run.
+     The list is the 57 code points the page actually renders, read off the rendered page rather than the
+     file (two more sit in an HTML comment and need no glyph). Sans carries 400 to 700 because the rubrics
+     are 600 and the plate's glyph is 400; serif carries 400, the only serif weight the page sets. 30.5 KB
+     in two files, against several hundred for the families with their slice fetching.
+     A `text=` list is a hand-maintained list, which this repository otherwise refuses — the difference is
+     that this one is watched: the census fails the gate on any character drawn by a face the page did not
+     load, so a character added to the page and not to this line turns red instead of quietly degrading.
+     That is the only reason it is safe to write, and if the census ever stops running this line rots. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400..700&family=Noto+Serif+SC:wght@400&text=、。一与个书他代以例光其原及句可司周在地子字对开思性意打文方本每汉治点现用的篇纪翻词译语读资这通部都里鉴鑑音马，：&display=swap">
 <link rel="stylesheet" href="src/styles/tokens.css">
 <link rel="stylesheet" href="src/styles/typography.css">
 <link rel="stylesheet" href="src/styles/layout.css">
 <link rel="stylesheet" href="src/styles/components.css">
 <style>
+  /* The Han faces loaded above have to be named in a stack or the browser will not reach for them, and
+     the stacks in src/styles/tokens.css are Latin. They are appended here rather than there because this
+     is the one page that mixes the two books' scripts: a biology chapter has no Han and would pay for a
+     family it never draws from.
+     Order is the rule, not a preference — every face the page LOADED comes before any the machine might
+     have, so a character falls to a face that was paid for and only then to whatever is installed. Latin
+     still comes from Fraunces, Newsreader and Inter, because the browser picks per character and those
+     cover it first. */
+  :root {
+    --font-display: "Fraunces", "Libertinus Serif", "Noto Serif SC", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --font-text: "Newsreader", "Libertinus Serif", "Noto Serif SC", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    --font-ui: "Inter", "Noto Sans Math", "Noto Sans SC", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
   /* The library's title page uses the same masthead as a chapter's: a 2px rule, a rubric hanging under
      its left end, then the title at the top of the scale. Three pages, one opening. */
   .library { max-width: 62rem; margin: 0 auto; padding: var(--space-12) var(--space-6) var(--space-20); }
@@ -85,7 +113,7 @@
         <span class="book__go">Open the book →</span>
       </div>
     </a>
-    <a class="book" href="tongjian/">
+    <a class="book" href="tongjian/" lang="zh-Hans">
       <svg class="book__cover" viewBox="0 0 320 180" role="img" aria-label="Bamboo slips of a classical Chinese book, bound by two cords">
         <rect width="320" height="180" fill="var(--paper-2)"/>
         <!-- 簡牘: the object a book like this was before printing. Slips of even width, two binding
@@ -121,10 +149,10 @@
         <text x="272" y="145" text-anchor="middle" font-family="var(--font-ui)" font-size="13" fill="var(--coral-text)" opacity=".9">鑑</text>
       </svg>
       <div class="book__body">
-        <span class="book__label">Book 2 · 資治通鑑</span>
-        <h2>資治通鑑 · 周紀一</h2>
-        <p>司馬光的通鑑開篇，原文與現代漢語翻譯對讀。每一個字、每一個詞都可以點開：讀音、詞性、在這個句子裡的意思，以及這部書裡其他地方的用例。</p>
-        <span class="book__go">打開這本書 →</span>
+        <span class="book__label">Book 2 · 资治通鉴</span>
+        <h2>资治通鉴 · 周纪一</h2>
+        <p>司马光的通鉴开篇，原文与现代汉语翻译对读。每一个字、每一个词都可以点开：读音、词性、在这个句子里的意思，以及这部书里其他地方的用例。</p>
+        <span class="book__go">打开这本书 →</span>
       </div>
     </a>
     <div class="book book--soon" aria-disabled="true">

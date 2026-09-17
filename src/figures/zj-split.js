@@ -186,6 +186,30 @@ const CSS = `
 .tb-zjs .zjs-house-name { margin: 0; display: flex; align-items: baseline; gap: 0.3em; line-height: 1.2; }
 .tb-zjs .zjs-house-char { font-family: var(--font-text); font-size: 2.3rem; font-weight: 500; line-height: 1; }
 .tb-zjs .zjs-house-man { font-family: var(--font-text); font-size: var(--text-lg); line-height: 1; color: var(--ink-soft); }
+/* The 氏 of each house takes the book's house colour where the book is loaded. This plate is the one place
+   in the book that ENUMERATES 魏、趙、韓 as a set, and it is where a reader who has learned the key — from
+   the 世系 table, chapter 1's 字 list, the glossary — sees it apply, so the three names read as three
+   families rather than as three words. tongjian/zj.css declares --zj-state-wei/zhao/han on .zj, which is
+   on <body> of a chapter page, and a custom property inherits from there into this figure. (No backtick
+   quoting anywhere below: this whole block is one CSS template literal, and a lone backtick in a comment
+   closes it. That defect has already hit this file once — test/registry.test.js now fails a module that
+   does not parse, and defect-register.md's 2026-09-12 entry is the record.)
+
+   The second value is for the pages that do NOT load the book's sheet, and they are the ones a worker
+   looks at: npm run figure, npm run drive and npm run narrow all mount this figure on lab/index.html,
+   which carries the shared tokens and no .zj. Without it var() is invalid at computed-value time and
+   color falls back to inherited ink — the plate would lose the colour exactly where it is being judged.
+   Each fallback is the shared accent the book's own value is mixed from: 趙 and 韓 land on the value the
+   book uses (--coral-text, --leaf-text), 魏 on the accent itself, because --violet-text is not a token in
+   src/styles/tokens.css — a step brighter than the book's mix, which is the harsher of the two to judge.
+   No hex of this figure's own, and no second copy of the book's arithmetic.
+
+   Only the 氏 glyph takes it. 斯、籍、虔 are men, the place, the lineage and the title are the cell's
+   apparatus, and the 智 band below keeps what it had — the faint grey and the line-through already say
+   that house is gone, which is the statement --zj-state-zhi makes in the prose. */
+.tb-zjs .zjs-house[data-house="wei"] .zjs-house-char { color: var(--zj-state-wei, var(--violet)); }
+.tb-zjs .zjs-house[data-house="zhao"] .zjs-house-char { color: var(--zj-state-zhao, var(--coral-text)); }
+.tb-zjs .zjs-house[data-house="han"] .zjs-house-char { color: var(--zj-state-han, var(--leaf-text)); }
 .tb-zjs .zjs-house-place { margin: 0; font-size: var(--text-xs); letter-spacing: 0.12em; color: var(--ink-faint); }
 .tb-zjs .zjs-house-line { margin: 0; font-size: var(--text-xs); letter-spacing: 0.02em; color: var(--ink-faint); text-align: center; }
 .tb-zjs .zjs-house-title { margin: 0.1rem 0 0; font-size: var(--text-xs); letter-spacing: 0.04em; color: var(--ink-soft); text-align: center; }

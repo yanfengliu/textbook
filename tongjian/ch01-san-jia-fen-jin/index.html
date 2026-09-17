@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hans">
+<html lang="zh-Hans" class="zj">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,6 +10,11 @@
 <!-- 两个汉字家族：正文宋体 Noto Serif SC，介面黑体 Noto Sans SC。范围式请求（200..900）与书的
      目录页一致，Google 两者都送同一个可变字型，范围式少一半 @font-face 区块。 -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200..900&family=Noto+Sans+SC:wght@100..900&display=swap">
+<!-- 同一族、同一字重的补字请求：Google 把这两个汉字家族按字切片分发，而本书字表里这十八个字不落在任何
+     一个切片里——没有加载到的字形会由读者机器上碰巧有的字体来画，那台机器上没有就是豆腐块。text= 只为
+     这十八个字再取一份文件（13,236 B），页面上不显示其中任何一个字时它不会被下载。三个星平面异体字
+     （𠆸 U+201B8、𥳑 U+25CD1、𣳘 U+23CD8）不在其中：九种带汉字的网络字体都不含这三个字形。 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200..900&family=Noto+Sans+SC:wght@100..900&text=䖍䘮僃恱摶甞矦筈紂聦藺蜹蠆讒踈鞶驂鼃&display=swap">
 <link rel="stylesheet" href="../../src/styles/tokens.css">
 <link rel="stylesheet" href="../../src/styles/typography.css">
 <link rel="stylesheet" href="../../src/styles/layout.css">
@@ -67,7 +72,7 @@
 
   <ol class="zj-src" lang="zh-Hant" data-corpus="zj-001-wei-lie-23">
   <li class="zj-pair">
-    <span class="zj-pair__src" lang="zh-Hant"><tb-char>初</tb-char><tb-char>命</tb-char><tb-char>晉</tb-char><tb-term ref="dafu" word="大夫">大夫</tb-term><tb-char>魏</tb-char><tb-char>斯</tb-char>、<tb-char>趙</tb-char><tb-char>籍</tb-char>、<tb-char>韓</tb-char><tb-char>虔</tb-char><tb-char>為</tb-char><tb-term ref="zhuhou" word="諸侯">諸侯</tb-term><span class="zj-ju">。</span></span>
+    <span class="zj-pair__src" lang="zh-Hant"><tb-char>初</tb-char><tb-char>命</tb-char><tb-char>晉</tb-char><tb-term ref="dafu" word="大夫">大夫</tb-term><tb-char>魏</tb-char><span class="zj-kn"><tb-char>斯</tb-char>、</span><tb-char>趙</tb-char><span class="zj-kn"><tb-char>籍</tb-char>、</span><tb-char>韓</tb-char><tb-char>虔</tb-char><tb-char>為</tb-char><span class="zj-kn"><tb-term ref="zhuhou" word="諸侯">諸侯</tb-term><span class="zj-ju">。</span></span></span>
     <span class="zj-pair__tr" lang="zh-Hans">当初，周威烈王任命晋国的大夫魏斯、赵籍、韩虔为诸侯。</span>
   </li>
 </ol>
@@ -76,47 +81,35 @@
   <section id="notes">
   <h2>字词</h2>
 
-  <p>本章的字与词：点任何一个字、一个词，开出来的就是它在这一句里的卡片。</p>
+  <p>本章的字与词：点原文里的字、词，开出来的就是它在这一句里的卡片；下面是本章的词。</p>
 
+  <!-- 这一节只留读者点得开的东西。原先十六个字词后面各有一条手写的释义，字词后面另有一个词性标签；它们是
+       卡片内容的第二份抄本，而且已经抄岔了——十六条的释义与卡片全不相同（「命」是最明显的一条），十四条的
+       词性有七条与卡片不合（写「名」，卡片是「专名」）。所以这十六个 <dd> 与十四个词性标签是故意删去的，
+       不是丢失；卡片本身——下面每一个 <tb-char>（字）与「词」那一节的 <tb-glossary>——一个字也没有改。
+       「字」只剩字形与读音，本来就得点开卡片才知道意思，所以十四个字都还是按钮；「词」的意思就印在旁边的
+       <dd> 里，不必点开也知道，所以那两行不再是按钮——这一节因此和第二章、第三章同一个形状，而不是一个
+       自成一格的例外。 -->
   <h3 id="lex-chars">字</h3>
-  <dl class="zj-lex">
-    <dt><tb-char class="zj-lex__glyph">初</tb-char><span class="zj-lex__pinyin">chū</span><span class="zj-lex__pos">副</span></dt>
-    <dd>起初、当初。追叙前事，用「初」字领起。</dd>
-    <dt><tb-char class="zj-lex__glyph">命</tb-char><span class="zj-lex__pinyin">mìng</span><span class="zj-lex__pos">动</span></dt>
-    <dd>命令、任命。这一句的主语是周天子。</dd>
-    <dt><tb-char class="zj-lex__glyph">晉</tb-char><span class="zj-lex__pinyin">jìn</span><span class="zj-lex__pos">名</span></dt>
-    <dd>国名，周初所封，地在今山西一带。此时国政已由几家大夫分掌。</dd>
-    <dt><tb-char class="zj-lex__glyph">大</tb-char><span class="zj-lex__pinyin">dà</span><span class="zj-lex__pos">形</span></dt>
-    <dd>大。这一句里与「夫」合成官名「大夫」。</dd>
-    <dt><tb-char class="zj-lex__glyph">夫</tb-char><span class="zj-lex__pinyin">fū</span><span class="zj-lex__pos">名</span></dt>
-    <dd>这一句里与「大」合成官名「大夫」；单用可指成年男子、丈夫。</dd>
-    <dt><tb-char class="zj-lex__glyph">魏</tb-char><span class="zj-lex__pinyin">wèi</span><span class="zj-lex__pos">名</span></dt>
-    <dd>氏，也是国名。魏斯是晋国魏氏之长。</dd>
-    <dt><tb-char class="zj-lex__glyph">斯</tb-char><span class="zj-lex__pinyin">sī</span><span class="zj-lex__pos">名</span></dt>
-    <dd>人名用字：魏斯。单用可作指示代词「此」。</dd>
-    <dt><tb-char class="zj-lex__glyph">趙</tb-char><span class="zj-lex__pinyin">zhào</span><span class="zj-lex__pos">名</span></dt>
-    <dd>氏，也是国名。赵籍是晋国赵氏之长。</dd>
-    <dt><tb-char class="zj-lex__glyph">籍</tb-char><span class="zj-lex__pinyin">jí</span><span class="zj-lex__pos">名</span></dt>
-    <dd>人名用字：赵籍。单用可指簿册、名册。</dd>
-    <dt><tb-char class="zj-lex__glyph">韓</tb-char><span class="zj-lex__pinyin">hán</span><span class="zj-lex__pos">名</span></dt>
-    <dd>氏，也是国名。韩虔是晋国韩氏之长。</dd>
-    <dt><tb-char class="zj-lex__glyph">虔</tb-char><span class="zj-lex__pinyin">qián</span><span class="zj-lex__pos">名</span></dt>
-    <dd>人名用字：韩虔。单用可作「恭敬」。</dd>
-    <dt><tb-char class="zj-lex__glyph">為</tb-char><span class="zj-lex__pinyin">wéi</span><span class="zj-lex__pos">动</span></dt>
-    <dd>成为、做。命某人为某，就是任命他担任某职或某爵。另有 wèi 一读，见卡片。</dd>
-    <dt><tb-char class="zj-lex__glyph">諸</tb-char><span class="zj-lex__pinyin">zhū</span><span class="zj-lex__pos">形</span></dt>
-    <dd>众、各。这一句里与「侯」合成「诸侯」。</dd>
-    <dt><tb-char class="zj-lex__glyph">侯</tb-char><span class="zj-lex__pinyin">hóu</span><span class="zj-lex__pos">名</span></dt>
-    <dd>爵位名。这一句里与「诸」合成「诸侯」。</dd>
-  </dl>
+  <ul class="zj-lex">
+    <li><tb-char class="zj-lex__glyph">初</tb-char><span class="zj-lex__pinyin">chū</span></li>
+    <li><tb-char class="zj-lex__glyph">命</tb-char><span class="zj-lex__pinyin">mìng</span></li>
+    <li><tb-char class="zj-lex__glyph">晉</tb-char><span class="zj-lex__pinyin">jìn</span></li>
+    <li><tb-char class="zj-lex__glyph">大</tb-char><span class="zj-lex__pinyin">dà</span></li>
+    <li><tb-char class="zj-lex__glyph">夫</tb-char><span class="zj-lex__pinyin">fū</span></li>
+    <li><tb-char class="zj-lex__glyph" data-state="wei">魏</tb-char><span class="zj-lex__pinyin">wèi</span></li>
+    <li><tb-char class="zj-lex__glyph">斯</tb-char><span class="zj-lex__pinyin">sī</span></li>
+    <li><tb-char class="zj-lex__glyph" data-state="zhao">趙</tb-char><span class="zj-lex__pinyin">zhào</span></li>
+    <li><tb-char class="zj-lex__glyph">籍</tb-char><span class="zj-lex__pinyin">jí</span></li>
+    <li><tb-char class="zj-lex__glyph" data-state="han">韓</tb-char><span class="zj-lex__pinyin">hán</span></li>
+    <li><tb-char class="zj-lex__glyph">虔</tb-char><span class="zj-lex__pinyin">qián</span></li>
+    <li><tb-char class="zj-lex__glyph">為</tb-char><span class="zj-lex__pinyin">wéi</span></li>
+    <li><tb-char class="zj-lex__glyph">諸</tb-char><span class="zj-lex__pinyin">zhū</span></li>
+    <li><tb-char class="zj-lex__glyph">侯</tb-char><span class="zj-lex__pinyin">hóu</span></li>
+  </ul>
 
   <h3 id="lex-words">词</h3>
-  <dl class="zj-lex">
-    <dt><tb-term class="zj-lex__glyph" ref="dafu" word="大夫">大夫</tb-term><span class="zj-lex__pinyin">dà fū</span><span class="zj-lex__pos">名</span></dt>
-    <dd>官名。诸侯之下、士之上的爵位。这里指三人的官职。</dd>
-    <dt><tb-term class="zj-lex__glyph" ref="zhuhou" word="諸侯">諸侯</tb-term><span class="zj-lex__pinyin">zhū hóu</span><span class="zj-lex__pos">名</span></dt>
-    <dd>天子所封的君，有封国、军队与社稷。这一句记的正是三人由大夫升为诸侯。</dd>
-  </dl>
+  <tb-glossary></tb-glossary>
   </section>
 
   <section id="history">
@@ -124,7 +117,7 @@
 
   <p>一句话，一件事：周天子把晋国的三个大夫命为诸侯。这一章读的，就是这十四个字为什么是一切的开头。</p>
 
-  <p>这里要分清一年与两件事。《通鉴》从前四〇三年写起，而这一年周天子做的只是「命」：把晋国的三个大夫命为诸侯，并没有分割土地。真正动兵在前四五三年——三家杀智伯、尽灭智氏之族，分掉智氏的田；晋国本身要到前三七六年才亡，魏、韩、赵共废晋君而分其地。图 1.1 把这三个年份摆在一起，按图下的年份换一步，可以看到每一个年份各自记的是哪一件事——以及司马光为什么从中间那一年动笔。</p>
+  <p data-date>这里要分清一年与两件事。《通鉴》从<span class="zj-yr">前四〇三</span>年写起，而这一年周天子做的只是「命」：把晋国的三个大夫命为诸侯，并没有分割土地。真正动兵在<span class="zj-yr">前四五三</span>年——三家杀智伯、尽灭智氏之族，分掉智氏的田；晋国本身要到<span class="zj-yr">前三七六</span>年才亡，魏、韩、赵共废晋君而分其地。图 1.1 把这三个年份摆在一起，按图下的年份换一步，可以看到每一个年份各自记的是哪一件事——以及司马光为什么从中间那一年动笔。</p>
 
   <tb-figure kind="zj-split" id="fig-split" width="wide" data-alt="三家分晋的三个年份，每一步给出《通鉴》在那一年的原句与说明：公元前四五三年晋阳之战，智伯被杀、智氏灭族，其田分入三家，而《通鉴》不为这一年立目，只在公元前四〇三年那条里追叙；公元前四〇三年周威烈王命晋大夫魏斯、赵籍、韩虔为诸侯，这一年命的是名分、不是土地，《资治通鉴》全书从这里开始；公元前三七六年魏、韩、赵三家废晋君、分其地，晋亡。按图下的三个年份换一步，图上周王的纪年、魏赵韩三家的身份与晋公室的存亡都随之改变。">
     <figcaption>三家分晋的三个年份：前四五三年晋阳之战、智伯死；前四〇三年周天子命三家为诸侯，《资治通鉴》从这一年写起；前三七六年三家废晋君而分其地。年代依《通鉴》本文与胡三省注。<span class="fig-hint">按图下的年份换一步，或用左右方向键、Home、End，看每一步《通鉴》的原句。</span></figcaption>
@@ -134,18 +127,18 @@
 
   <p><tb-term ref="dafu" word="大夫">大夫</tb-term>是诸侯之下的爵位。<tb-term ref="zhuhou" word="諸侯">諸侯</tb-term>是天子所封的君，有自己的封国、军队与社稷，也要服从天子的政令。所以「命大夫为诸侯」不只是升了三个人：它把一个诸侯国的土地与人民，正式承认成三个诸侯国。</p>
 
-  <p>威烈王二十三年，是西元前四〇三年。司马光把这一年放在全书开头，是因为在他看来，天子的职守以礼为大，而礼的核心是名分：三家分了晋国，天子不但不能讨伐，反而承认了他们。名分一旦由天子自己放弃，战国的局面就再也没有回头路。</p>
+  <p data-date>威烈王二十三年，是西元<span class="zj-yr">前四〇三</span>年。司马光把这一年放在全书开头，是因为在他看来，天子的职守以礼为大，而礼的核心是名分：三家分了晋国，天子不但不能讨伐，反而承认了他们。名分一旦由天子自己放弃，战国的局面就再也没有回头路。</p>
 
-  <p>有一件事要先说明白。《通鉴》在开头这一句之后，接着是另一段「臣光曰」，论天子的职守莫大于礼、礼莫大于分、分莫大于名，四百五十多字，本书称它〈礼论〉。上面那一段说的就是它的意思，它的原文却不在这里——这一版只读三段（这一句、智氏那一段、〈才德论〉），〈礼论〉要另起一章才读得完，所以留在原书里。它在《通鉴》里的次序，正夹在本章这一句和下一章的智氏那一段之间。</p>
+  <p>有一件事要先说明白。《通鉴》在开头这一句之后，接着是另一段「臣光曰」，论天子的职守莫大于礼、礼莫大于分、分莫大于名，一千零五十四字（不含标点），本书称它〈礼论〉。上面那一段说的就是它的意思，它的原文却不在这里——这一版只读三段（这一句、智氏那一段、〈才德论〉），〈礼论〉要另起一章才读得完，所以留在原书里。它在《通鉴》里的次序，正夹在本章这一句和下一章的智氏那一段之间。</p>
 
   <table>
     <thead>
       <tr><th>氏</th><th>名</th><th>书中官职</th><th>命为</th></tr>
     </thead>
     <tbody>
-      <tr><td>魏</td><td>斯</td><td>晋大夫</td><td>诸侯</td></tr>
-      <tr><td>赵</td><td>籍</td><td>晋大夫</td><td>诸侯</td></tr>
-      <tr><td>韩</td><td>虔</td><td>晋大夫</td><td>诸侯</td></tr>
+      <tr><td data-state="wei">魏</td><td>斯</td><td>晋大夫</td><td>诸侯</td></tr>
+      <tr><td data-state="zhao">赵</td><td>籍</td><td>晋大夫</td><td>诸侯</td></tr>
+      <tr><td data-state="han">韩</td><td>虔</td><td>晋大夫</td><td>诸侯</td></tr>
     </tbody>
   </table>
 

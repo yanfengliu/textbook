@@ -2,13 +2,17 @@
 // break between one screen and another.
 //
 // Claim: on each device below, every page loads with no console error, page error or failed request;
-// the document does not scroll sideways; the header is there and every control in it is fully inside
-// the viewport and at least 24 px on its smallest side; on a chapter page the contents drawer is there,
-// reachable and operable by the device's own input, closes when a link in it is followed, and is not
-// present on screens wide enough to show the rail instead; the drawer has a scrim, locks the page
-// behind it, takes focus, and closes on a tap outside; on a chapter page there are glossary terms, and
-// nothing that pops up over the text (a glossary definition, a figure's card) hangs off either edge;
-// and on a chapter page there is a text column, and its blocks share one left and one right edge.
+// the document does not scroll sideways; the header is there, every control in it is fully inside the
+// viewport and at least 24 px on its smallest side, and the leftmost and the rightmost control each sit
+// on the header's own padding for that side rather than adrift — the LEFT corner and the right corner
+// both, because the first version of this check pinned only the right one and a control 90 px in from
+// the left edge passed it; on a chapter page the contents drawer is there, reachable and operable by the
+// device's own input, closes when a link in it is followed, and is not present on screens wide enough to
+// show the rail instead; the drawer has a scrim, locks the page behind it, takes focus, and closes on a
+// tap outside; on a chapter page there are glossary terms, and nothing that pops up over the text (a
+// glossary definition, a figure's card) hangs off either edge; on a chapter page there is a text column,
+// and its blocks share one left and one right edge; and on a chapter of the paired-column book the
+// reading column and its 原文/譯文 block each take at least half of a 1280–1920 px viewport.
 // Fails naming the device, the page and the measure — and, when a suite finds none of its subject on a
 // page that must have it, naming the selector and the page rather than skipping.
 //
@@ -28,6 +32,28 @@
 // control and no figure control, which are tools/flow.js's and tools/drive.js's questions.
 // DEVICE_PAGES, DEVICE_ONLY, DEVICE_ENGINES and DEVICE_THEMES trim the run, a trimmed run proves only
 // its part, and a value naming nothing stops the run rather than emptying it (tools/lib/trim.js).
+//
+// Bound, for the corner and width checks added on 2026-09-19. The corner checks measure the controls
+// that actually render (a control with no box at all is skipped) and compare against the header's own
+// padding with 4 px of tolerance; a header that holds no control is already a failure above them, so a
+// corner check with nothing to measure cannot come back green. The width floor belongs to the paired
+// book alone — 資治通鑑's chapters, where the 原文 is set against its 譯文 in two columns — and to
+// viewports of 1280 to 1920 px, which in the matrix below is `desktop` and `desktop-wide` and nothing
+// else: above 1920 the measure is capped at 63.4rem on purpose, so the share of the window falls there
+// by design rather than by defect. A biology chapter holds no such pair and is not asked for this: it is
+// a fixed 43.6rem, 697.6 px, at 1280, 1440, 1920 and 2560 — 54.5%, 48.4%, 36.3% and 27.3% — which is the
+// shape this check was built to catch on 資治通鑑. Whether the biology book should use the width too is a
+// design decision nobody has taken, and a floor here would be this gate inventing one.
+//
+// What a run says about the floor, because a trimmed run is read from its output alone. Every load prints
+// the share it measured and says whether the floor was exercised on it; a load the floor does not apply to
+// prints `was NOT exercised` and the widths that would exercise it. The run's summary carries the same
+// answer for the whole run — how many loads compared the shares, or that none did and which pages and
+// widths would have — and it is a report and not a failure: a phone run's floor legitimately has nothing
+// to measure, and `DEVICE_ONLY=phone` must not go red for it. What it must never do is let "all clean"
+// stand for a run whose floor never ran, which is the shape every gate in this repository is written
+// against. A run that loads no page at all fails, because two individually valid trimming variables can
+// meet in no load (see the guard at the end of the file).
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { devices as playwrightDevices, chromium, webkit, firefox } from 'playwright';
 import { startServer } from './serve.js';
@@ -84,7 +110,43 @@ const CROSS_DEVICES = ['phone', 'desktop'];
 const CROSS_PAGES = ['library', 'biology/ch01'];
 
 // The selectors the suites read, in one place, so a rename fails by name below.
-const SEL = { header: '.tb-header', rail: '.tb-rail', toggle: '.tb-navtoggle', scrim: '.tb-scrim', term: 'tb-term button', pop: '.tb-term__pop', main: '.tb-main' };
+const SEL = { header: '.tb-header', rail: '.tb-rail', toggle: '.tb-navtoggle', scrim: '.tb-scrim', term: 'tb-term button', pop: '.tb-term__pop', main: '.tb-main', text: '.tb-text', pair: '.zj-src', row: '.zj-pair', src: '.zj-pair__src', tr: '.zj-pair__tr' };
+
+// Which books set the 原文 against its 譯文 in paired columns, and so make a claim about how much of a
+// wide screen that reading column uses. 資治通鑑 alone. Measured 2026-09-19 (out/widthgate/probe-width.mjs):
+// a biology chapter has no `.zj-pair` at all, and the library, the two book pages and Today have no
+// `.tb-text` either, so a width floor on them would demand something no design decision asks of them.
+const PAIRED_BOOKS = ['tongjian'];
+
+// The band the floor above applies to, and how much of the viewport the reading column must hold there.
+// The ladder of `@media (min-width: …)` rungs in tongjian/zj.css starts at 1100 px and is fully in force
+// by 1280; above 1920 the measure stops at 63.4rem deliberately — that ceiling is what keeps the 譯文 a
+// measure of its own instead of a caption column — so past 1920 the share falls by design (1014 px is
+// 39.6% of 2560) and this check does not apply. Measured on 2026-09-19, identical on ch01, ch02 and ch03:
+//   1280 px -> 848 px, 66.3%      1440 px -> 838 px, 58.2%      1920 px -> 1014 px, 52.8%
+// The floor is 50%, which is 2.8 points under the 1920 figure and 16.3 under the 1280 one, and the
+// margin is small at the wide end because the quantity is CSS arithmetic rather than a rendering: the
+// column is `min(100vw - 37.6rem, 63.4rem)` and 63.4rem is 52.8% of 1920 whatever the fonts do. 50% is
+// therefore the statement that the top rung may not fall below 60rem, and the defect this check is for —
+// one fixed 43.6rem measure, 698 px, 36.3% at 1920 and 48.4% at 1440 — is 13 points below it.
+const WIDE_FROM = 1280;
+const WIDE_TO = 1920;
+const MIN_WIDE_SHARE = 50;
+
+// Who the floor applies to, and which widths reach it, both DERIVED rather than remembered. A run trimmed
+// by DEVICE_ONLY or DEVICE_PAGES can leave the floor with nothing to measure — a phone run is 390 px and
+// a biology run has no paired columns — and this file's rule is that a gate which cannot tell "passed"
+// from "did not run" reports the second as the first. So a load that does not exercise the floor says so
+// on its own line, and the run's summary says whether the floor ran at all and, when it did not, which
+// widths and which pages would have made it run. `DEVICES` and `PAGES` are read here rather than listed:
+// a device added to the matrix changes what this sentence says without anyone having to remember to.
+const widthOf = (device) => device.use.viewport?.width ?? 0;
+const isInBand = (device) => widthOf(device) >= WIDE_FROM && widthOf(device) <= WIDE_TO;
+const describeDevice = (device) => `${device.id} (${widthOf(device)} px)`;
+const IN_BAND_DEVICES = DEVICES.filter(isInBand);
+// The pages the floor can apply to: a chapter of a paired book, which is what `pairedPage` below decides
+// per load. `shapeOf` is declared below and hoists.
+const FLOOR_PAGES = PAGES.filter((p) => PAIRED_BOOKS.includes(String(p.id).split('/')[0]) && shapeOf(p) === 'chapter').map((p) => p.id);
 
 // What each page must carry, so a suite that finds nothing fails instead of skipping. The header,
 // drawer, popover and edge suites were each guarded on their own selector, so a renamed class emptied
@@ -151,9 +213,14 @@ try {
           page.setDefaultTimeout(120_000);
           const errors = collectErrors(page);
           const found = [];
+          // What the width floor did on this load, in one word for the report and one sentence on the
+          // line: 'exercised' means its two shares were compared against MIN_WIDE_SHARE, and anything else
+          // says why they were not. A trimmed run whose every load says one of the others is a run whose
+          // floor never ran, and the summary below says so rather than letting "all clean" stand for it.
+          let floor = 'not reached: the checks above it did not get that far';
           // What each suite actually measured, printed on every line so a load that checked nothing
           // cannot read like one that checked everything.
-          const counts = { controls: 0, drawer: false, terms: 0, column: false, prose: 0, wide: 0 };
+          const counts = { controls: 0, drawer: false, terms: 0, column: false, prose: 0, wide: 0, share: null, pair: null, width: 'not measured' };
           try {
             await page.goto(`${server.url}${pageDef.path}?theme=${theme}`, { waitUntil: 'load', timeout: 120_000 });
             await page.waitForFunction(() => window.__textbook?.state === 'ready', null, { timeout: 120_000 });
@@ -168,13 +235,15 @@ try {
 
             // --- the header is there, and every control in it inside the viewport and big enough to hit ---
             const header = await page.evaluate(({ sel, min }) => {
-              const out = { found: false, controls: [], headerRight: null, headerHeight: null };
+              const out = { found: false, controls: [], headerLeft: null, headerRight: null, headerHeight: null };
               const h = document.querySelector(sel);
               if (!h) return out;
               out.found = true;
               const hr = h.getBoundingClientRect();
+              out.headerLeft = Math.round(hr.left);
               out.headerRight = Math.round(innerWidth - hr.right);
               out.headerHeight = Math.round(hr.height);
+              out.headerPadLeft = getComputedStyle(h).paddingLeft;
               out.headerPadRight = getComputedStyle(h).paddingRight;
               for (const el of h.querySelectorAll('button, a')) {
                 const r = el.getBoundingClientRect();
@@ -211,6 +280,21 @@ try {
               // the gap moved with the length of the book's title.
               const pad = Math.round(parseFloat(header.headerPadRight) || 0);
               if (gap > pad + 4) found.push(`the rightmost header control "${rightmost.label || rightmost.name}" sits ${gap} px from the right edge, where the header's own padding is ${pad} px, so it is adrift rather than in the corner`);
+            }
+            // And the leftmost control should sit against the header's own left padding, for the same
+            // reason and by the same measure. This half was missing: the check above pinned the right
+            // corner alone, so a control that had drifted inward from the left corner — the contents
+            // button a reader reaches for first on a phone — was measured only for being on screen and
+            // big enough, never for being in its corner at all, and 90 px of drift passed. The gap is
+            // taken from the header's own left edge rather than from the viewport's, which is the same
+            // number while the header is full-bleed (it is, at every device measured) and stays right if
+            // it is ever inset. A page whose header holds no control was already failed by the guard
+            // above, so `leftmost` being absent can never be the quiet way out of this check.
+            const leftmost = header.controls.slice().sort((a, b) => a.left - b.left)[0];
+            if (leftmost) {
+              const gap = leftmost.left - header.headerLeft;
+              const pad = Math.round(parseFloat(header.headerPadLeft) || 0);
+              if (gap > pad + 4) found.push(`the leftmost header control "${leftmost.label || leftmost.name}" sits ${gap} px from the left edge, where the header's own padding is ${pad} px, so it is adrift rather than in the corner`);
             }
 
             // --- the contents drawer, on a chapter page ---
@@ -379,19 +463,105 @@ try {
               }
             }
 
+            // --- on a wide screen the book uses the width it has ---
+            // The owner, reading this book on a desktop: *"You are not taking advantage of the full width
+            // the page, especially on desktop."* Measured, that was a defect: the text column was one
+            // fixed 43.6rem measure — 698 px at 1280, at 1440 and at 1920 — so the wider the window, the
+            // smaller the share of it the book used, 36% at 1920 with 1222 px dead. The ladder of
+            // `@media (min-width: …)` rungs in tongjian/zj.css fixed it and nothing checked it, so a
+            // return to one measure would ship unseen.
+            //
+            // The quantity is the SHARE of the viewport, not the measure in characters. The accepted trade
+            // for this book is recorded as 43 Han characters to a line at 1920 px against a comfortable
+            // band of 28–36 and a practical ceiling of 40, kept deliberately because one measure must serve
+            // every prose block on the page — the edge check above is why prose cannot be capped on its
+            // own — and written down in docs/work/4_zizhi-tongjian/restructure.md. A line-length floor here
+            // would contradict that decision, and it is the wrong instrument besides: the pair of columns
+            // is what a reader sees using the screen or not. (Walking the rendered line boxes of ch02's
+            // prose on the shipped ladder gives 52–56 characters at 1920, not 43 — out/widthgate/
+            // probe-prose.mjs — so that paragraph's number was taken on an earlier state of the ladder.
+            // Whether the measure is now longer than the owner accepted is his question, not this gate's.)
+            const pairedPage = PAIRED_BOOKS.includes(String(pageDef.id).split('/')[0]) && shapeOf(pageDef) === 'chapter';
+            const inBand = width >= WIDE_FROM && width <= WIDE_TO;
+            const geom = await page.evaluate((sel) => {
+              // A tenth of a pixel, not a whole one: the share below is a ratio, and rounding 697.6 px to
+              // 698 before dividing by 1920 reports 36.4% where the defect it is for is recorded as 36.3%.
+              const box = (el) => {
+                const r = el.getBoundingClientRect();
+                return { w: Math.round(r.width * 10) / 10, l: Math.round(r.left), r: Math.round(r.right) };
+              };
+              const pair = document.querySelector(sel.pair);
+              const text = document.querySelector(sel.text);
+              const rows = pair ? [...pair.querySelectorAll(sel.row)] : [];
+              return {
+                pair: pair ? box(pair) : null,
+                text: text ? box(text) : null,
+                rows: rows.length,
+                cells: rows.filter((r) => r.querySelector(sel.src) && r.querySelector(sel.tr)).length,
+              };
+            }, SEL);
+            const share = (w) => Math.round((w / width) * 1000) / 10;
+            if (geom.text) counts.share = share(geom.text.w);
+            if (geom.pair) counts.pair = share(geom.pair.w);
+            // Every page reports what its reading column measures, whether or not the floor applies to it.
+            // "no width floor" over a page that was never measured is the shape of a check that did not
+            // run, and the bound this file's header states — that a biology chapter is 36.3% of 1920 and is
+            // not judged — is then a number the run printed rather than a number remembered. The floor's
+            // own name is spelled out wherever it is mentioned, and so is whether it was exercised on this
+            // load: `was NOT exercised` on the line is what tells a reader of a trimmed run that the
+            // clean run in front of them never compared a width, which the share alone cannot say.
+            const FLOOR = `the ${MIN_WIDE_SHARE}% reading-column floor`;
+            const WOULD_REACH = `a ${WIDE_FROM}–${WIDE_TO} px viewport, which in this matrix is ${IN_BAND_DEVICES.map(describeDevice).join(' and ')}`;
+            counts.width = !geom.text
+              ? `nothing matches ${SEL.text}`
+              : geom.pair
+                ? `reading column ${counts.share}% and pair ${counts.pair}% of ${width} px`
+                : `reading column ${counts.share}% of ${width} px, no paired columns on this page`;
+            if (pairedPage) {
+              // The pairing is not a wide-screen property: it is there at every width, stacked on a
+              // phone, so finding none of it is a failure at every width, not only inside the band.
+              if (!geom.pair) {
+                found.push(`nothing matches ${SEL.pair} on ${pageDef.id}, a chapter of a book that sets the 原文 against its 譯文 in paired columns, so no pair of columns was measured`);
+                counts.width = `nothing matches ${SEL.pair}`;
+                floor = 'not reached: no pair of columns to measure';
+              } else if (!geom.cells) {
+                found.push(`${SEL.pair} holds ${geom.rows} ${SEL.row}(s) and none with both ${SEL.src} and ${SEL.tr}, so there is no pair of columns to measure the width of`);
+                counts.width = `${geom.rows} ${SEL.row}(s), no complete pair`;
+                floor = 'not reached: no complete pair of columns';
+              } else if (!geom.text) {
+                found.push(`nothing matches ${SEL.text} on ${pageDef.id}, so the reading column's width was not measured`);
+                floor = 'not reached: no reading column to measure';
+              } else if (inBand) {
+                const floorText = `at least ${MIN_WIDE_SHARE}% of a ${WIDE_FROM}–${WIDE_TO} px viewport`;
+                if (counts.share < MIN_WIDE_SHARE) found.push(`the reading column is ${geom.text.w} px of a ${width} px viewport — ${counts.share}%, under the ${floorText} this book is built to use — so the page is not using the width it has`);
+                if (counts.pair < MIN_WIDE_SHARE) found.push(`the 原文/譯文 pair of columns is ${geom.pair.w} px of a ${width} px viewport — ${counts.pair}%, under the ${floorText} this book is built to use`);
+                floor = 'exercised';
+                counts.width += `, and ${FLOOR} applied here`;
+              } else {
+                floor = `not exercised: this load is ${width} px, outside the ${WIDE_FROM}–${WIDE_TO} px band`;
+                counts.width += `, and ${FLOOR} was NOT exercised — it applies to ${WOULD_REACH}, and this load is ${width} px`;
+              }
+            } else {
+              floor = `not exercised: ${pageDef.id} is not a chapter of ${PAIRED_BOOKS.join(', ')}`;
+              counts.width += `, and ${FLOOR} was NOT exercised — it belongs to a chapter of ${PAIRED_BOOKS.join(', ')} (${FLOOR_PAGES.join(', ')}), not to this page`;
+            }
+
             await page.screenshot({ path: `${OUT}/${device.id}-${pageDef.id}-${theme}.png`, fullPage: false });
           } catch (err) {
             found.push(err.message.split('\n')[0]);
           }
           for (const e of errors) found.push(e);
           loads += 1;
-          report.push({ engine: engine.id, device: device.id, page: pageDef.id, theme, counts, problems: found });
+          report.push({ engine: engine.id, device: device.id, page: pageDef.id, theme, floor, counts, problems: found });
           for (const p of found) problems.push(`${where}: ${p}`);
           const measured = [
             `${counts.controls} header control(s)`,
             counts.drawer ? 'the drawer' : 'no drawer',
             `${counts.terms} term(s)`,
             counts.column ? `${counts.prose} prose block(s), ${counts.wide} wide` : 'no text column',
+            // The width floor applies to one book in a band of widths; a load outside it says so rather
+            // than saying nothing, because `0 width(s)` is the shape of a check that did not run.
+            counts.width,
           ].join(', ');
           console.log(`${found.length ? 'FAIL' : 'ok  '} ${where}${found.length ? ` (${found.length})` : ''}: ${measured}`);
           for (const p of found) console.log(`  ${p}`);
@@ -412,6 +582,20 @@ try {
 
 writeFileSync(`${OUT}/report.json`, JSON.stringify(report, null, 2));
 
+// A run that loaded nothing is `tools/lib/trim.js`'s failure one level up, and that file cannot see it:
+// each variable names something that exists, and the two lists still meet in no load at all. `DEVICE_ONLY`
+// can only be checked against the full matrix and `DEVICE_ENGINES` against the engine list, so the empty
+// cross-product is invisible from either side. It is not a hypothetical: the secondary engines run two
+// shapes over two pages (CROSS_DEVICES/CROSS_PAGES above), so a WebKit run over a 資治通鑑 chapter names
+// eight valid devices and a valid page and runs none of them, printing "0 load(s) … all clean".
+if (!loads) {
+  const engineNames = engines.map((e) => e.id).join(', ');
+  const pageNames = pages.map((p) => p.id).join(', ');
+  console.error(`
+FAIL: this run loaded no page at all, so not one check in this file ran, and "all clean" over zero loads is the shape of a gate that did not run. DEVICE_ENGINES=${engineNames} and DEVICE_PAGES=${pageNames} meet in no load: chromium runs the whole matrix, and the other engines run ${CROSS_DEVICES.join(' and ')} over ${CROSS_PAGES.join(' and ')} only (CROSS_DEVICES/CROSS_PAGES in tools/devices.js). What would satisfy this: name an engine and a page that meet, or drop one of the two variables.`);
+  process.exit(1);
+}
+
 // Report what actually ran, not what was configured. `wanted.length` was printed here and it is the
 // device list, not the run: a WebKit-only run over two shapes announced "across 9 devices". A gate that
 // overstates its own coverage is the same failure as a gate that checks nothing, one step later.
@@ -419,10 +603,31 @@ const ran = new Set(report.map((r) => `${r.engine}/${r.device}`));
 const engineIds = [...new Set(report.map((r) => r.engine))].join(", ");
 const pageCount = new Set(report.map((r) => r.page)).size;
 const coverage = `${loads} load(s) over ${ran.size} engine-device pair(s) (${engineIds}) on ${pageCount} page(s)`;
+
+// Did the width floor run, and if not, what would have made it run? The per-load line carries the same
+// answer for its own page; this line carries it for the run, because a reader of the summary — which is
+// what a trimmed run is read for — has only this. The floor is not a failure when it does not apply, so
+// this never touches the exit status: it is a report, in the run's own summary, of a check that had
+// nothing to measure. Both sentences name the widths, because "wider" is not an instruction.
+const floorRan = report.filter((r) => r.floor === 'exercised');
+const floorDevices = [...new Set(floorRan.map((r) => describeDevice(DEVICES.find((d) => d.id === r.device) ?? { use: {} })))];
+const floorPages = [...new Set(floorRan.map((r) => r.page))];
+const floorLine = floorRan.length
+  ? `the ${MIN_WIDE_SHARE}% reading-column floor WAS exercised on ${floorRan.length} of ${loads} load(s) — ${floorDevices.join(', ')} over ${floorPages.join(', ')}`
+  : `the ${MIN_WIDE_SHARE}% reading-column floor was NOT exercised by this run, and a floor that did not run is not a floor that passed. It applies to ${FLOOR_PAGES.join(', ')} at a ${WIDE_FROM}–${WIDE_TO} px viewport, which in this matrix is ${IN_BAND_DEVICES.map(describeDevice).join(' and ')} — ${
+    !pages.some((p) => FLOOR_PAGES.includes(p.id))
+      ? `no chapter of ${PAIRED_BOOKS.join(', ')} was in this run (DEVICE_PAGES selected ${pages.map((p) => p.id).join(', ')})`
+      : !wanted.some(isInBand)
+        ? `no device in this run is that wide (DEVICE_ONLY selected ${wanted.map((d) => d.id).join(', ')})`
+        : `both were selected, and the engines are why it did not run: only ${ENGINES.filter((e) => e.full).map((e) => e.id).join(', ')} carries the full device matrix, and the others run ${CROSS_DEVICES.join('/')} over ${CROSS_PAGES.join('/')}`
+  }`;
+
 if (problems.length) {
   console.error(`
-FAIL: ${problems.length} problem(s) over ${coverage}; see ${OUT}/report.json`);
+FAIL: ${problems.length} problem(s) over ${coverage}; see ${OUT}/report.json
+floor:  ${floorLine}`);
   process.exit(1);
 }
 console.log(`
-devices: ${coverage}, all clean; screenshots in ${OUT}/`);
+devices: ${coverage}, all clean; screenshots in ${OUT}/
+floor:   ${floorLine}`);

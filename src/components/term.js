@@ -10,10 +10,12 @@
 //
 // <tb-char> is 資治通鑑's character: its key is its own text (exactly one character) or its `for`
 // attribute, and it opens the lexicon card. The card is not built here. A page that has a lexicon
-// leaves a registry on the shared handshake object — `textbook.lexicon.card(key, kind)`, published by
-// `tongjian/data/card.js` — and this file asks it for the popover's contents. A page without one (the
-// biology book) never touches that path: `<tb-char>` opens nothing there, and `<tb-term>` renders
-// exactly what it always rendered. `src/` therefore knows nothing about any book.
+// leaves a registry on the shared handshake object — `textbook.lexicon.card(key, kind, occurrence)`,
+// published by `tongjian/data/card.js` — and this file asks it for the popover's contents, handing over
+// the element itself: which occurrence of a character the reader pressed is the one thing the page's
+// own 字表 cannot say, and the lexicon card is built for a 句 rather than for a chapter. A page without
+// a registry (the biology book) never touches that path: `<tb-char>` opens nothing there, and
+// `<tb-term>` renders exactly what it always rendered. `src/` therefore knows nothing about any book.
 //
 // <tb-glossary> renders every registered entry, alphabetically, as a definition list.
 
@@ -284,7 +286,10 @@ export class TbTerm extends TbPopover {
   /** The rich card when the page's lexicon has this word; the glossary definition otherwise. */
   content() {
     const registry = this.lexicon();
-    const card = registry ? registry.card(this.key, 'word') : null;
+    // The element, not just the key: a 詞 has senses a chapter cannot choose between either — 桓子 is
+    // 魏桓子 in one sentence and 趙桓子 in the next — and the card reads the 句 off the element it is
+    // given. A registry that ignores the third argument renders exactly what it rendered before.
+    const card = registry ? registry.card(this.key, 'word', this) : null;
     if (card) return card;
     const ref = this.getAttribute('ref');
     const { term, def } = this.entry();
@@ -311,25 +316,142 @@ export class TbChar extends TbPopover {
 
   content() {
     const registry = this.lexicon();
-    return registry ? registry.card(this.key, 'char') : null;
+    // Hand over the element: the card is built for the occurrence the reader pressed, and the element is
+    // also what may carry that occurrence's own `use="…"` — 「況君相乎」 in a chapter whose 字表 binds 相
+    // to 互相 xiāng. See the note in `tongjian/data/card.js`.
+    return registry ? registry.card(this.key, 'char', this) : null;
   }
 }
+
+// One <dl> of an entry each, sorted as it always was. Every word of the list is here, in both
+// renderings: the index above it is a way in, never a replacement for a line of it.
+function buildList(entries) {
+  const dl = document.createElement('dl');
+  for (const [ref, entry] of entries) {
+    const { term, def } = entry;
+    const dt = document.createElement('dt');
+    dt.id = `term-${ref}`;
+    dt.textContent = term;
+    // A glossary entry may declare which house it belongs to, and the book colours it by that house.
+    // The hook is here rather than in a chapter's markup because the glossary is the one place the book
+    // already knows: 智伯, 智宣子, 魏斯, 赵籍 and 韩虔 are keys in the chapter's own `glossary.js`, so
+    // the colour cannot drift from what the page says. 資治通鑑's four houses are the book's cast, and a
+    // reader meeting 智 for the first time in a 72-entry list of names has no way to tell the family
+    // that was annihilated from the three that divided it except by reading every entry.
+    if (entry.state) dt.dataset.state = entry.state;
+    const dd = document.createElement('dd');
+    dd.innerHTML = def;
+    dl.append(dt, dd);
+  }
+  return dl;
+}
+
+/** A Han character. The 字詞 list is made of these, and the biology book's head-words are not. */
+const HAN = /\p{Script=Han}/u;
+
+// The two words the index prints — the rubric over it and its accessible name — keyed on the page's own
+// `<html lang>` the way FIGURE_WORDS is, with English as the fallback. The element is shared with the
+// biology book; what is not shared is a page that asks for an index of Han head-words. 首字 is the same
+// word in both Chinese scripts, so the tag's script half does not matter here.
+const INDEX_WORDS = { en: 'First character', zh: '首字' };
+const INDEX_NAMES = { en: 'Index by first character', zh: '首字索引' };
+
+function indexWords() {
+  const lang = (document.documentElement.getAttribute('lang') || 'en').toLowerCase();
+  const pick = (table) => table[lang] ?? table[lang.split('-')[0]] ?? table.en;
+  return { label: pick(INDEX_WORDS), name: pick(INDEX_NAMES) };
+}
+
+/**
+ * The runs of head-words that begin with the same character: what the index is built from, as
+ * `{ initial, ref, n }` — the character, the entry a press lands on, and how many entries share it.
+ *
+ * **Null when the list has an order a reader can already scan.** The list
+ * is sorted by `localeCompare`, and for Latin head-words that is the alphabet: a reader looking for
+ * `Homeostasis` scans the h's. For Han head-words the same call returns ICU's radical-and-stroke order,
+ * which is not pinyin and not anything a reader can predict — chapter 2's 72 entries come out
+ * 三版 不如 二心 人臣 代成君 … 飲器 驂乘 魏斯 魏桓子 — so the list has no visible order at all and
+ * needs one built from the head-words themselves. Measured: 72 of 72 head-words in chapter 2 and 31 of
+ * 31 in chapter 3 begin with a Han character, and 0 of 31 in the biology book's chapter 1, whose list
+ * therefore renders exactly as it always has.
+ *
+ * A run is contiguous because a character-by-character collation keeps equal first characters
+ * together; measured on both chapters, no character's entries are split (out/wordlist/order.mjs). A
+ * collation that did split one would give that character two index links, which is a worse index and
+ * not a lost entry.
+ */
+function initialRuns(entries) {
+  const runs = [];
+  for (const [ref, entry] of entries) {
+    const initial = [...String(entry.term ?? '')][0] ?? '';
+    if (!HAN.test(initial)) return null;
+    const last = runs[runs.length - 1];
+    if (last && last.initial === initial) last.n += 1;
+    else runs.push({ initial, ref, n: 1 });
+  }
+  return runs;
+}
+
+/**
+ * The way into the list: one link per run, named by the character that run begins with.
+ *
+ * This is the whole fix for the defect a reader reported — *"72 entries, 5,863px tall, in one unbroken
+ * column, with no grouping, index or jump. I read about 20 of 72 and scrolled the rest. The sentence
+ * that actually unlocked chapter 2 is buried in the back half of it."* Chapter 2 has 59 distinct first
+ * characters for its 72 entries, so the index is a run of 59 glyphs — two lines at a desktop measure
+ * against a 5,263 px list — and 智, 趙, 韓 and 魏 lead the entries that belong to each house, which the
+ * sort keeps together. A count rides on the runs of more than one, because that is where a reader's
+ * question is: 智⁶ is six entries about one family, and 智伯, 智襄子 and 智瑤 are three of them.
+ *
+ * What is deliberately NOT here: a heading per run. Measured by inserting one rubric heading before the
+ * first entry of every run (out/wordlist/headings.mjs), chapter 2's 59 runs take its list from 5,263 px
+ * to 7,931 px and chapter 3's 30 runs take its from 2,088 px to 3,445 px — headings that repeat the first
+ * character of the head-word underneath them. The index carries the structure; the entries stay a list.
+ */
+function buildIndex(runs) {
+  const { label: labelWord, name } = indexWords();
+  const nav = document.createElement('nav');
+  nav.className = 'tb-gloss__index';
+  nav.setAttribute('aria-label', name);
+  const label = document.createElement('span');
+  label.className = 'tb-gloss__index-label';
+  label.setAttribute('aria-hidden', 'true');
+  label.textContent = labelWord;
+  nav.append(label);
+  for (const { initial, ref, n } of runs) {
+    const a = document.createElement('a');
+    a.href = `#term-${encodeURIComponent(ref)}`;
+    a.textContent = initial;
+    if (n > 1) {
+      const count = document.createElement('sup');
+      count.textContent = String(n);
+      a.append(count);
+    }
+    nav.append(a);
+  }
+  return nav;
+}
+
+/**
+ * The number of entries below which a list gets no index, because the list is one screen and there is
+ * nothing to jump past. Measured: chapter 2's 72 entries are 8,527 px at a 390 px phone, so a row is
+ * 118 px and a 390 × 844 window holds seven of them; eight is the first count that cannot be seen at
+ * once. A count rather than a measured height, because the index is built before the list is laid out and
+ * a control that appeared and disappeared as the window changed would be worse than one that is either
+ * there or not. Chapter 1's own glossary — two entries, 大夫 and 諸侯 — is the case this is for: an index
+ * of 大 and 諸 over a list of two is a line of type that saves no scroll.
+ */
+const INDEX_FLOOR = 8;
 
 export class TbGlossary extends HTMLElement {
   connectedCallback() {
     if (this.__built) return;
     this.__built = true;
     const entries = Object.entries(textbook.glossary).sort((a, b) => a[1].term.localeCompare(b[1].term));
-    const dl = document.createElement('dl');
-    for (const [ref, { term, def }] of entries) {
-      const dt = document.createElement('dt');
-      dt.id = `term-${ref}`;
-      dt.textContent = term;
-      const dd = document.createElement('dd');
-      dd.innerHTML = def;
-      dl.append(dt, dd);
-    }
-    this.replaceChildren(dl);
+    const runs = entries.length >= INDEX_FLOOR ? initialRuns(entries) : null;
+    // The index is additive in the DOM as well as on the page: the list is the same element it always
+    // was, and a glossary this is not for gets that element alone.
+    this.replaceChildren(...(runs ? [buildIndex(runs), buildList(entries)] : [buildList(entries)]));
   }
 }
 

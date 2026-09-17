@@ -12,6 +12,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200..900&family=Noto+Sans+SC:wght@100..900&display=swap">
+<!-- 同一族、同一字重的补字请求：Google 把这两个汉字家族按字切片分发，而本书字表里这十八个字不落在任何
+     一个切片里——没有加载到的字形会由读者机器上碰巧有的字体来画，那台机器上没有就是豆腐块。text= 只为
+     这十八个字再取一份文件（13,236 B），页面上不显示其中任何一个字时它不会被下载。三个星平面异体字
+     （𠆸 U+201B8、𥳑 U+25CD1、𣳘 U+23CD8）不在其中：九种带汉字的网络字体都不含这三个字形。 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200..900&family=Noto+Sans+SC:wght@100..900&text=䖍䘮僃恱摶甞矦筈紂聦藺蜹蠆讒踈鞶驂鼃&display=swap">
 <link rel="stylesheet" href="../src/styles/tokens.css">
 <link rel="stylesheet" href="../src/styles/typography.css">
 <link rel="stylesheet" href="../src/styles/layout.css">

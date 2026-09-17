@@ -225,6 +225,15 @@ const CSS = `
 .tb-zjt .zjt-year { font-family: var(--font-text); font-size: var(--text-2xl); font-weight: 500; line-height: 1;
   font-variant-numeric: lining-nums tabular-nums; }
 .tb-zjt .zjt-gan { font-size: var(--text-xs); letter-spacing: 0.08em; color: var(--ink-faint); }
+/* The date line's second half, and the one thing that is not part of it.
+   zj.css paints .zjt-gan with --zj-date-colour, because the 干支 IS the same year in its other calendar,
+   and that rule is true only while the element holds a 干支. A year whose 干支 胡三省 did not give would
+   otherwise print 「干支未详」 in the colour this book keeps for a date — an absence carrying the mark of
+   the thing that is absent — so the phrase gets an element of its own, in --ink-faint: the register the
+   panel's other apparatus text uses (5.16:1 on the panel's ground, the same ratio zj.css measured for the
+   cell it paints). Gold then means a date on every date line the figure draws, including this one. */
+.tb-zjt .zjt-gan-none { font-size: var(--text-xs); letter-spacing: 0.08em; color: var(--ink-faint); }
+.tb-zjt .zjt-gan[hidden], .tb-zjt .zjt-gan-none[hidden] { display: none; }
 .tb-zjt .zjt-event { margin: 0; font-family: var(--font-text); font-size: var(--text-lg); font-weight: 600; line-height: 1.3; }
 .tb-zjt .zjt-frame { margin: 0; font-family: var(--font-text); font-size: var(--text-base); color: var(--ink); }
 .tb-zjt .zjt-frame span { font-family: var(--font-ui); font-size: var(--text-xs); color: var(--ink-faint); letter-spacing: 0.06em; }
@@ -358,7 +367,12 @@ export function mount(root, ctx) {
   const rail = h('div', { class: 'zjt-rail', role: 'group', 'aria-label': '年表' }, rows);
 
   const yearEl = h('span', { class: 'zjt-year' });
+  // Two elements, not one with two jobs: .zjt-gan holds the date's 干支 and zj.css paints it as a date,
+  // and the phrase for a missing 干支 is a statement about the record, so it is a different element in the
+  // quiet ink (see the rule in CSS above). Both live in the date line, where a reader looks for the
+  // second half of the date, and exactly one of them is ever shown.
   const ganEl = h('span', { class: 'zjt-gan' });
+  const ganNoneEl = h('span', { class: 'zjt-gan-none' });
   const eventEl = h('p', { class: 'zjt-event' });
   const frameEl = h('p', { class: 'zjt-frame' });
   const quoteEl = h('blockquote', { class: 'zjt-quote' });
@@ -368,7 +382,7 @@ export function mount(root, ctx) {
   const noteTextEl = h('p', { class: 'zjt-note-text' });
   const noteEl = h('div', { class: 'zjt-note' }, [noteLabelEl, noteTextEl]);
   const panel = h('div', { class: 'zjt-panel', 'aria-live': 'polite' }, [
-    h('p', { class: 'zjt-date' }, [yearEl, ganEl]),
+    h('p', { class: 'zjt-date' }, [yearEl, ganEl, ganNoneEl]),
     eventEl,
     frameEl,
     quoteEl,
@@ -390,7 +404,13 @@ export function mount(root, ctx) {
     const y = YEARS[row];
     wrap.dataset.year = y.id;
     yearEl.textContent = y.yearLabel;
-    ganEl.textContent = y.gan === '—' ? '干支未详' : `· ${y.gan}`;
+    // A year whose 干支 the sources do not give says so, and says it in the register of a note rather than
+    // the register of a date: the 干支 element is emptied and hidden, and the phrase stands beside the year
+    // in the same slot, in this figure's own ink.
+    ganEl.textContent = y.gan === '—' ? '' : `· ${y.gan}`;
+    ganEl.hidden = y.gan === '—';
+    ganNoneEl.textContent = y.gan === '—' ? '干支未详' : '';
+    ganNoneEl.hidden = y.gan !== '—';
     eventEl.textContent = y.event;
     // At a dense stage the frame line carries the reign year and the register it belongs to, and leaves
     // the 卷首岁名 for a stage with room for it: two lines of 12px is 40px a 396px stage does not have.

@@ -57,7 +57,7 @@
      the hundredth of a pixel. The tracking is 1.0569em per character — 1/17.6 em of 字距 — and it is
      what makes the line hold a whole number of characters instead of a whole number and a fraction.
      Tuned against the rendered measure at 1440, 1024 and 390 px, not guessed; the phone steps are at
-     the foot of this file. */
+     the foot of this file, and the desktop rungs restate this token with `--measure` in §6b. */
   --zj-grid-chars: 33;
   --zj-grid-track: 0.0569;
 
@@ -68,7 +68,8 @@
      against 32 at 15, and the chapter's 原文 is 159 lines against 169 — while the 譯文 still holds 16
      characters of 1.0625rem type a line in what is left. 17 × 1.25rem × 1.0569 = 22.46rem of the 43.6rem
      measure, and it is the same 17 the phone step cuts the whole column to. It stops applying below
-     900 px, where the two cells stack and the 原文 takes the whole column again. */
+     900 px, where the two cells stack and the 原文 takes the whole column again; on a desktop it steps up
+     with `--measure`, 18 → 20 → 22 → 24, re-derived at each width by walking the rendered lines (§6b). */
   --zj-pair-chars: 17;
 
   /* The one accent, reserved for three uses: the current section mark in the rail, the focus ring on a
@@ -123,6 +124,16 @@
      there is no assignment to match, and colouring the 正文 instead is the one thing this design forbids.
      They are declared here so the decision is one line when the figures take them up.
 
+     Round two spends three of the four, in the places the book ENUMERATES the houses rather than naming
+     one inside a sentence: the 氏 column of 背景's character table and the 字 list of 字詞 in chapter 1,
+     the 世系 paragraph of chapter 2's 背景, and — once src/components/term.js sets the attribute — the
+     glossary entries whose ref is one of the houses. Nothing was added to the 原文, which stays ink.
+     --zj-state-zhi is still spent nowhere and the reason is specific, not an oversight: the one block
+     that names 魏、趙、韓 and 智 together is chapter 2's 世系, which is inside `<ol class="zj-src">`, and
+     that is the 原文. The 年表's grey band and the split figure's struck-through 智 carry that meaning
+     instead. out/colour2/census.mjs is the check that makes "declared and unspent" a fact someone can
+     read rather than a sentence someone has to trust.
+
      --violet-text is not a token in src/styles/tokens.css: that table stops at leaf, water and coral. The
      expression below is the same one the three that do exist are built from — 86% of the accent and 14% of
      the ink, the mix the table documents for small text — applied to the fourth accent, so the value is a
@@ -130,28 +141,90 @@
   --zj-state-wei: color-mix(in srgb, var(--violet) 86%, var(--ink));
   --zj-state-zhao: var(--coral-text);
   --zj-state-han: var(--leaf-text);
-  --zj-state-zhi: var(--ink-soft);
+  /* Round two moves 智 off --ink-soft, which measures 4.28:1 on --paper-3 and is therefore under this
+     book's own bar, to the book's local --ink-faint — the value zj.css already darkened for exactly this
+     reason. It is the one line of the seven that changes value rather than being added. The mark is the
+     same quiet grey; it now measures 5.58 / 5.16 / 4.71:1 on --paper / --paper-2 / --paper-3. */
+  --zj-state-zhi: var(--ink-faint);
+
+  /* ROUND TWO. Two more marks, each answering the same question in one line: if the colour were removed,
+     the reader would lose this. out/colour2/contrast.mjs measures both, in both themes, on every surface
+     they are spent on; out/colour2/pending-zj-additions.css is the staged text they landed from and
+     carries the long form of the arithmetic.
+
+     --zj-date-colour — WHICH NUMBERS ARE YEARS OF THE COMMON ERA, and which are a 卷 number, a figure
+     number or a 年 of a reign. Gold is the register this book's design already assigns to time; it could
+     not be spent as type until now, because --gold is a fill colour and measures 2.26:1 on paper, which
+     is not a colour any type can be. The value is the accent mixed towards the ink, at the share the
+     arithmetic chooses: mixing towards --ink moves a mark towards the paper's OPPOSITE in both themes —
+     it darkens the gold on paper and lightens it on the dark paper — so the light theme needs a low
+     share of gold and the dark theme a high one, and no single value serves both. Measured over the whole
+     curve (contrast.mjs --solve): the light theme passes at every share from 0% to 54% and fails from 55%
+     up; the dark theme passes at 0% to 100%. The two ranges overlap only near 0%, where the "gold" is
+     --ink and the mark says nothing.
+
+     45%, and the last five points were chosen by looking rather than by ratio. At 52%, the widest passing
+     step, the 年表's rail years sat at 5.61:1 against paper and read as a slightly warm ink rather than as
+     a different layer — the frame is out/colour2/frames/timeline-light-1440.png, where 前453 and the
+     周贞定王十六年 beside it are the same weight of grey-brown. out/colour2/candidates.html put the whole
+     passing range side by side at the two sizes the book really spends (16px in the rail, 20px in the
+     prose) and 45% is the share that still reads as gold at both: #6a571e, 6.56:1 on --paper, against
+     5.61:1 at 52% and 7.32:1 at 40% where the mark has gone brown. The dark step is stated with the other
+     per-theme steps below.
+
+     --zj-note-textual — WHETHER A MARGIN NOTE IS ABOUT THE TEXT OR ABOUT THE HISTORY. The book's notes
+     are of two kinds and until now they were set identically: a note that a witness disagrees and says
+     which reading this book took (異文、異說、底本、兩存), and a note that says what the passage means. The
+     first kind takes 青, which is the editor's other brush (朱筆句讀, 藍筆校勘), is the colour the 譯文's
+     register rule already spends, and is already in the book's token list; the second stays --ink-soft.
+     The page's notes carry the hook as `data-note="textual"` — one attribute, no new text. */
+  --zj-date-colour: color-mix(in srgb, var(--gold) 45%, var(--ink));
+  --zj-note-textual: var(--water-text);
 }
 
 /* Both theme steps are behind a media query, as the shared token table's are, and the reader's explicit
    choice is stated after them because `.zj[data-theme]` is (0,2,0) against `.zj`'s (0,1,0) and wins
    wherever it lands. The light step was written as a bare `.zj` rule first, after the dark media query,
    and it beat it: at equal specificity the later rule wins, so every dark page measured the light grey
-   while the light pages were right. */
+   while the light pages were right.
+   The media queries yield to the reader's choice, and the choice is matched on the ANCESTOR as well,
+   because `src/shell.js` writes the attribute to `<html>` while the class is on `<body>`: `.zj[data-theme]`
+   asks one element for both and matched nothing on this book's pages, and an unguarded `.zj` rule inside a
+   media query lands on the body, which is NEARER to every label than the `<html>` the choice was written
+   to — so the OS's answer beat the reader's for every element anyone reads. Measured (out/theme/measure.mjs,
+   ../../out/theme/report.txt): a reader who picks dark on a light-OS machine computed #79736a for
+   --ink-faint — 3.83:1 on the rail rubric and 3.52:1 on the pinyin — where the dark step is #979187 at
+   5.74:1, and `?theme=light` on a dark OS computed #878178 at 3.61:1 with the date gold at 3.20:1. */
 @media (prefers-color-scheme: light) {
-  .zj {
+  .zj:not([data-theme="dark"]) {
     --ink-faint: color-mix(in srgb, #6f6960 92%, var(--ink));
   }
 }
 
 @media (prefers-color-scheme: dark) {
-  .zj {
+  .zj:not([data-theme="light"]) {
     --ink-faint: color-mix(in srgb, #908a80 92%, var(--ink));
+    /* Round two's date gold. 80% and not 100%: the bare --gold passes on the dark paper, and mixing a
+       fifth of the light ink into it keeps the mark from being the brightest thing on a dark page, which
+       is what a year is not. */
+    --zj-date-colour: color-mix(in srgb, var(--gold) 80%, var(--ink));
   }
 }
 
-.zj[data-theme="dark"] {
+.zj[data-theme="dark"],
+[data-theme="dark"] .zj {
   --ink-faint: color-mix(in srgb, #908a80 92%, var(--ink));
+  --zj-date-colour: color-mix(in srgb, var(--gold) 80%, var(--ink));
+}
+
+/* The reader's choice of light restates the gold as well as the grey. The dark media query above guards
+   against a choice of LIGHT, not of dark, so without this line a reader on a dark-OS machine who picks
+   light keeps the dark paper's 80% gold on light paper — the same shadowing this block exists to fix,
+   one token over. The light step is the one the base rule above already states. */
+.zj[data-theme="light"],
+[data-theme="light"] .zj {
+  --ink-faint: color-mix(in srgb, #6f6960 92%, var(--ink));
+  --zj-date-colour: color-mix(in srgb, var(--gold) 45%, var(--ink));
 }
 
 /* ============================================================================
@@ -527,6 +600,28 @@
   color: var(--zj-punct-colour);
 }
 
+/* **A closing mark never begins a line, and `line-break: strict` cannot enforce that here.** Measured
+   (out/kinzoku/report.md, 2026-09-19): the break opportunity is created by an ATOMIC INLINE BOX before the
+   mark, and the kinsoku rule is not consulted at a box's edge — a `<tb-char>` is `inline-block`, and the
+   `<button>` inside it is atomic even at `display: inline`, because a form control keeps a box the line
+   breaker lays out atomically. Five lines in ch02 and two in ch03 therefore began with a `，` at 1440px, and
+   one and two respectively at 1920px. `line-break` is doing its job and simply does not reach across a box:
+   `auto` = `strict` leaves 5, `loose` raises it to 12, `anywhere` to 33.
+
+   The mark is therefore bound to the glyph before it in one unbreakable run — `<span class="zj-kn">` around
+   the pair, written into the three chapters' 原文:
+
+       <span class="zj-kn"><tb-char><button …>初</button></tb-char>，</span>
+
+   `white-space: nowrap` and NOT `display: inline-block`: an atomic pair re-creates the very opportunity
+   this fixes, at its own far edge — measured as 1 violation on ch02 at 1440 and 3 at 1920, where `nowrap`
+   measures 0 at both. The census is 0 at 1440 and 1920 in all three chapters with this rule and those
+   wrappers; the cost is 260 of 1,862 glyphs moving in ch02 at 1440 (196 at 1920) and 74 of 413 in ch03, all
+   of them inside a 句 that already began with a mark, because stopping that break is the fix. */
+.zj .zj-src .zj-kn {
+  white-space: nowrap;
+}
+
 /* A chapter's 原文 can arrive in several 句-groups (第二章 has six). They are one passage read on — one
    group ends where the next begins — so the gap between two of them is a paragraph's, and only the last
    one carries the space that closes the section. Nothing is added between them to label them: a section
@@ -683,45 +778,353 @@
 }
 
 /* ============================================================================
+   6b. The measure on a desktop, and the 原文's column with it
+   ============================================================================ */
+
+/* What was wrong, measured (out/width/measure.mjs, ch02): `--measure` was one fixed 43.6rem, so the text
+   column was 698 px at 1280, at 1440 and at 1920 — 55%, 48% and 36% of the window, with 1222 px of dead
+   space at 1920. The owner's words: *"You are not taking advantage of the full width the page, especially
+   on desktop."* Inside that column the 原文 held a 17-character grid (361 px) and the 譯文 was left 258 px
+   of text, about fifteen characters to a line.
+
+   So the measure becomes a ladder and the 原文's column steps up with it. What sets each rung is the room
+   the frame actually leaves the text column, not a round number:
+
+     below 1100 px   rail 15rem + a 3.2rem gap + the page's own 2.4rem padding = 23rem of chrome, two
+                     columns, no margin column
+     1400 px and up  the margin column arrives, and the page stops being capped at 1500px — at 1920 that
+                     cap alone left 210 px dead on each side of the spread before the measure was even
+                     reached. The rail gives back 2rem and the page's padding one step (both at the foot of
+                     this block), so the 291 px the margin column and its gap cost are not all taken out of
+                     the text.
+   One step back is left at that breakpoint and it is deliberate: the text column is 848px at 1399 and
+   798px at 1400, which is what the margin column costs before the window has paid for it, and it is
+   recovered by 1479. The 原文's own column does not step back with it — it is 20 characters on both sides
+   of 1400 — so what the reader sees narrow is the 譯文, by three characters, and not the 原文.
+
+   `--zj-pair-chars` is then the number that keeps the 譯文 a measure of its own rather than a caption
+   column — it is the constraint that stops the 原文 taking the whole width — and each rung was re-derived
+   by walking the rendered lines at that width (out/width/measure.mjs), the way 17 was: the 原文's grid
+   must land a full line exactly on its column's right edge with the pitch equal to the type size plus the
+   tracking, and the widest 句 of the chapter must still read as lines rather than as a column of words.
+
+   **The ladder fixed the share of the window and overshot the line.** Measured on these rungs with
+   out/measure/probe-prose-han.mjs — every line box of every prose paragraph of ch01–ch03, counting Han
+   characters and not glyph slots — a full line ran a median of 37–39 Han characters at 1280, 37–38 at 1440
+   and 44–46 from 1600 up, worst line 47, against a design band of 28–36 and a practical ceiling of 40.
+   `--measure` is not what sets a prose line, which is why the ladder overshot it: the paragraphs have no
+   width of their own, so they take the text column, whose width is `--text-width` with `.tb-text`'s
+   `max-width: var(--measure)` over it, and every rung that widened the column widened the line with it. The
+   two tokens were one quantity in two places, so no rung could move one without the other.
+
+   They are two quantities now, and two tokens. `--measure` stays the COLUMN — the width `.tb-text` and the
+   原文/譯文 pair take, and the quantity `npm run devices` floors at 50% of a 1280–1920 px viewport, which
+   this change leaves at 52.8% at 1920. `--prose-measure` is the LINE, one value at every width from 1100 px
+   up, because a measure is a property of the text and not of the window: the prose reads at 800 px while the
+   pair keeps the column, and the 譯文 beside the 原文 holds 27 characters a line at 1920 where the prose
+   holds 35. Above 1920 px the measure stops growing by design, so the line does not grow there either.
+
+   Below 1100 px nothing here applies: the phone keeps its 17 characters at 18px and its stacked pairing,
+   which the owner has read and approved, and the tablet band keeps 33 characters of grid across the
+   measure. The 1024 and 390 px rows of the measurement are unchanged to the pixel. */
+@media (min-width: 1100px) {
+  .zj {
+    /* Two columns, so the text column has 23rem more than the three-column frame gives it. The ceiling is
+       53rem: the three-column frame at 1400px leaves the text column 798px, so every rem past 53 widens
+       the step back at that breakpoint, where the margin column arrives and 291px of it come off the text.
+       At 53rem the step back is 50px — measured, both sides, at 1399 and 1400. */
+    --measure: min(100vw - 23rem, 53rem);
+    --text-width: 53rem;
+    /* 41 characters of grid covers the 53rem ceiling (40.1 characters), so the pairing still spans the
+       text column edge to edge — `.zj-src` is `min(100%, …)`, and a value short of the measure would leave
+       the 譯文's right edge inside the column. The pair is the column's width and not the prose's: the
+       prose reads at `--prose-measure` below it. */
+    --zj-grid-chars: 41;
+    /* 18 characters of 原文 leave the 譯文 272px of text at 1100 — 16 characters — and 345px, 20, from
+       1216 up. */
+    --zj-pair-chars: 18;
+    /* The LINE, as against the column above it. 50rem is 800px: 41.7 slots of 1.2rem type, holding 36 Han
+       characters on ch01 and 35 on ch02 and ch03 — the median over every full line of every prose
+       paragraph — with a worst full line of 37, 37 and 38, and the same at each of 1280, 1440, 1600, 1920
+       and 2560 px, which is what a measure is. Inside the design's 28–36 band at the median and under its
+       practical ceiling of 40. Instrument: out/measure/probe-prose-han.mjs, its counting method in its own
+       header. Reproduced by an independent instrument, out/remeasure/probe-prose-han.mjs, with this file's
+       sha256 bracketed on either side of all fifteen loads — same 36/35/35 and worst 37/37/38 — its output
+       in out/remeasure/README.md; that copy's control arms read 32/31/31 Han across ch01/ch02/ch03 under a
+       43.6rem cap and 46/45/44 with the cap removed. */
+    --prose-measure: 50rem;
+  }
+
+  /* What reads at the prose measure, and what does not. Everything a section of the reading column holds,
+     and everything the opener holds but its deck. Measured at 1920 with the paragraphs capped alone: the
+     prose ended at 800px while the question cards, the 字 table and the ordinary figures under it still
+     ended at the column's 1014px — one column with two right edges. `npm run devices` would not have caught
+     that, because it compares the prose group with itself and the wide figures with themselves and never
+     the two, which is why the cap is written for the column's contents rather than for `<p>`. The
+     exceptions are the 原文/譯文 pair, which spans the column because that pair is what the window's width
+     is for, and the boxes the shared sheet widens past the column — `[data-width="wide"]`,
+     `[data-width="bleed"]` and `tb-sort`. */
+  .zj .tb-text > section > :not(.zj-src):not([data-width="wide"]):not([data-width="bleed"]):not(tb-sort),
+  .zj .tb-opener > :not(.tb-opener__dek) {
+    max-width: var(--prose-measure);
+  }
+}
+
+@media (min-width: 1200px) {
+  .zj {
+    /* From here the 原文 takes 20 and the 譯文 holds 19.4 characters (329px of text) at 1200, 20.3 at
+       1216, where the measure reaches its own ceiling and stops. */
+    --zj-pair-chars: 20;
+  }
+}
+
+@media (min-width: 1400px) {
+  .zj {
+    /* 37.6rem = rail 13rem + margin 15rem + two 3.2rem gaps + the page's own 2 × 1.6rem padding. */
+    --measure: min(100vw - 37.6rem, 63.4rem);
+    --text-width: 63.4rem;
+    /* 49 characters covers the 63.4rem ceiling (48.0 characters) for the reason 41 covers 53rem. */
+    --zj-grid-chars: 49;
+    /* The margin column takes 291px off the text column at this breakpoint, so the 原文 holds at 20 until
+       the window has paid that back: at 1400 the column is 798px and the 譯文 has 296px of text (17.4
+       characters), at 1479 it has 375px (22.0). */
+    --zj-pair-chars: 20;
+    /* The wide figure keeps the relation the shared sheet states for it: it starts on the text column's
+       left edge and ends on the margin column's right edge, which is the spread's right edge. Left at the
+       shared 1100px it would stop 206px short of that edge once the measure passes 808px. */
+    --wide-width: calc(var(--measure) + var(--margin-width) + var(--space-8));
+    /* 15rem of section titles is more rail than this book's eight-item 目錄 needs, and at this width the
+       column it is taken from has a second column to pay for. */
+    --rail-width: 13rem;
+  }
+
+  /* The page uses the window. The bottom padding is restated because `padding` is one declaration. */
+  .zj .tb-page {
+    max-width: none;
+    padding: 0 var(--space-4) var(--space-16);
+  }
+
+  /* The note that annotates a PARAGRAPH hangs off the prose's right edge and not the column's: the shared
+     sheet places it at the column edge, which the prose has given up by the width of `--measure` −
+     `--prose-measure`, and left where it was the note opened 265px of white at 1920 between itself and the
+     sentence it annotates.
+     Only the note that is a child of the section, and that is not a style choice: the notes of 原文 sit
+     INSIDE a `.zj-pair__tr`, because that is where the sentence they annotate is, so the shared sheet's
+     float is a float inside the 譯文's own 456px cell. Measured (out/measure/probe-note-effect.mjs, ch02 at
+     1920): moving those ten notes in with this rule shortened 8 譯文 lines to as little as 289px against the
+     cell's 425, while the ten the rule passes over leave the pair reading as it did — so a note nested in a
+     pair keeps the offset that costs the translation nothing, which is the shared sheet's own. */
+  .zj .tb-text > section > .tb-margin-note {
+    margin-right: calc(-1 * (var(--margin-width) + var(--space-8) - (var(--measure) - var(--prose-measure))));
+  }
+}
+
+@media (min-width: 1480px) {
+  .zj {
+    /* 22 characters of 原文, and the 譯文 19.6 characters at 1480 (333px of text) rising to 26.6 (452px)
+       at 1599. */
+    --zj-pair-chars: 22;
+  }
+}
+
+@media (min-width: 1600px) {
+  .zj {
+    /* The last rung, and where the measure reaches 63.4rem and stops: 24 characters of 原文 hold 509px of
+       the 1014px column and leave the 譯文 411px at 1600 — 24 characters — rising to 427px, 25, once the
+       window has paid for the margin column as well. That is the first rung at which the translation reads
+       as a paragraph rather than as a gloss, and it is what sets the ceiling: at 26 characters of 原文 the
+       譯文 falls to 23, at 28 to 20, and a wider measure than 63.4rem would have to buy that 原文 back out
+       of the 譯文, since the 原文 has taken half the grid already. */
+    --zj-pair-chars: 24;
+  }
+}
+
+/* ============================================================================
+   6c. The layers colour marks: years, notes, and the four houses
+   ============================================================================ */
+
+/* Round two's five rule groups, and they are one block on purpose: they are the only rules in this file
+   that spend a colour, they are read together, and a layout pass that has to move them can move them in
+   one piece. The tokens they spend are declared with the other marks at the head of §1. Nothing here
+   touches the 原文: no rule below matches anything inside `<ol class="zj-src">` except the 句讀 mark that
+   was already there. */
+
+/* ---- YEARS. The book dates itself twice over: in the book's own frame (威烈王二十三年, and the 卷次 that
+   cites it) and in the western year a modern reader counts in (前403). Only the second is marked, and the
+   mark is what says so — a reader scanning 背景 can pick out the years the argument turns on without
+   reading the paragraph, and can see at a glance which numbers are NOT years: the 卷 numbers and figure
+   numbers beside them stay ink.
+
+   `[data-date]` is a hook and not a container: it goes on the element that already holds the sentence
+   (`<p data-date>` in 背景), and `.zj-yr` wraps the year itself inside it, so the paragraph's other
+   numerals are untouched. The year column of the 年表 figure carries no hook at all, because its rows
+   already have the class for it. */
+.zj [data-date] .zj-yr,
+.zj .tb-zjt .zjt-row-year {
+  color: var(--zj-date-colour);
+}
+
+/* The rail's rows are buttons: pressed, hovered or not, the year stays the year. The figure's own rules
+   repaint `.zjt-row-year` to --ink when its row is selected, which would take the gold off the one year
+   the reader has chosen; this restates the register at a specificity that rule cannot reach, rather than
+   changing how selection reads — the selected row is already marked by its ground and its seal inset, and
+   the frame reports the same computed colour for the selected row's year as for the other six. */
+.zj .tb-zjt .zjt-row[aria-pressed="true"] .zjt-row-year {
+  color: var(--zj-date-colour);
+}
+
+/* The 干支, beside the year in the 年表's reading panel. It is the second half of the same date — a reader
+   told 前403年 and 戊寅 is being given one date in two calendars — so it belongs to the same layer, and the
+   rule that keeps it from being a third colour is that it takes the same one. Both values pass: the
+   figure's own --ink-faint is 5.16:1 on the panel's --paper-2 and the date colour is 5.19:1 there. */
+.zj .tb-zjt .zjt-gan {
+  color: var(--zj-date-colour);
+}
+
+/* ---- TEXTUAL CRITICISM, against interpretation. A note that a witness disagrees and says which reading
+   this book took (異文、異說、底本、兩存) takes 青; a note that says what the passage means stays --ink-soft.
+   The difference is apparatus information — it tells the reader whether the text in front of them is being
+   questioned or explained — and the note carries no label saying so: a note labelled 「校勘」 would be a
+   fifth rubric on a page that has four, and the colour says it. The hook is `data-note="textual"` on the
+   `<aside>` that already exists, and it is set on the notes that open 异文, 异说, or by naming the 底本. */
+.zj .tb-margin-note[data-note="textual"] {
+  color: var(--zj-note-textual);
+  border-top-color: var(--zj-note-textual);
+}
+
+/* Folded into the column below 1400px the note trades its top rule for a 2px left rule, so the accent
+   moves to that edge with it — the same statement drawn for a note that is no longer in the margin. */
+@media (max-width: 1399.98px) {
+  .zj .tb-margin-note[data-note="textual"] {
+    border-left-color: var(--zj-note-textual);
+  }
+}
+
+/* ---- THE FOUR HOUSES, three of them spent for the first time. What each colour carries, one line:
+
+     魏  violet    a name of the house of 魏 — 魏斯, 魏桓子, and in chapter 1 the 氏 itself
+     趙  coral     the house of 趙 — 趙氏, 趙簡子, 趙襄子, 趙籍
+     韓  leaf      the house of 韓 — 韓康子, 韓虔
+     智  ink-faint the house of 智, and the grey is the information: it is the one of the four that was
+                   annihilated at 晉陽, so the family that goes quiet is the family that is drawn quiet
+
+   Where they are spent is every place the book ENUMERATES the houses rather than naming one inside a
+   sentence:
+
+     the 氏 column of 背景's character table  (chapter 1)  — the key, and the only place all three sit in
+                                                            one column beside their men;
+     the 字 list of 字詞                       (chapter 1)  — three glyphs of fourteen, and the entry is
+                                                            the one that teaches which is a 氏;
+     the 世系 paragraphs of 背景               (chapter 2)  — the passage that joins the three names of
+                                                            前403年 to their fathers and sons;
+     the glossary entries for a house          (all)       — the `data-state` attribute
+                                                            `src/components/term.js` sets from the
+                                                            chapter's own glossary.js, so the colour
+                                                            cannot drift from what the page says.
+
+   Deliberately NOT marked, and these are findings rather than omissions:
+     the 原文, which is the text and stays ink — chapter 2's 世系 block names all four houses and lives
+     inside `<ol class="zj-src">`, which is why --zj-state-zhi is still spent nowhere;
+     the sorting activity, where colouring a card by whose it is would colour the answer — 安邑 is 魏's
+     capital and 平陽 is 韓's, and those cards belong to the 地名 bin;
+     chapter 2's 72-entry 字詞 list as a whole, which is one alphabetical column of people, places and
+     offices where a colour on every fourth line is a texture rather than a key.
+
+   A state colour is reached through one attribute, so the hook on the page is `data-state="wei"` and not
+   a class per house per element.
+
+   Why the attribute is written TWICE in each selector, which looks like a mistake and is not. The
+   attribute is the hook and the element it lands on already has a colour rule of its own: chapter 1's 字
+   glyphs are `.zj .zj-lex__glyph { color: var(--ink) }` — (0,2,0), the same weight as `.zj
+   [data-state="wei"]` and stated 90 lines LATER in this file, so at equal specificity the later rule wins
+   and the glyph stayed ink. Measured: the element matched the selector (`el.matches('.zj
+   [data-state="wei"]')` was true) and the paint was still #1d1a17, which is the shape of failure a
+   screenshot cannot tell from "the rule is not there". The second `[data-state]` is one more unit of
+   specificity and nothing else: it matches whenever the first one does. A rule that named the lexicon
+   class instead would fix the one element in front of it and go on losing to the next one. */
+.zj [data-state="wei"][data-state] {
+  color: var(--zj-state-wei);
+}
+
+.zj [data-state="zhao"][data-state] {
+  color: var(--zj-state-zhao);
+}
+
+.zj [data-state="han"][data-state] {
+  color: var(--zj-state-han);
+}
+
+.zj [data-state="zhi"][data-state] {
+  color: var(--zj-state-zhi);
+}
+
+/* The glossary's head-words, stated separately because their hook lives in another file and a reader of
+   this file should be able to see that it exists. `src/components/term.js` builds `<dt id="term-<ref>">`
+   for every registered entry and sets `data-state` beside that id from the chapter's own glossary.js, so
+   an entry that IS one of the houses, or names a member of one, is coloured without this stylesheet
+   guessing at a ref. These four rules are redundant with the four above by construction — a `dt` is an
+   element like any other and `[data-state]` matches it — and they are here as the named home for the
+   hook, so that the contract between the two files is written in one place instead of inferred. The
+   selector is the one the coordinator asked for; the attribute's values are the spelling above. */
+.zj tb-glossary dt[data-state="wei"] {
+  color: var(--zj-state-wei);
+}
+
+.zj tb-glossary dt[data-state="zhao"] {
+  color: var(--zj-state-zhao);
+}
+
+.zj tb-glossary dt[data-state="han"] {
+  color: var(--zj-state-han);
+}
+
+.zj tb-glossary dt[data-state="zhi"] {
+  color: var(--zj-state-zhi);
+}
+
+/* ---- One word of the shared sheet's English, on a page that is not in English. `tb-sort` writes
+   `All sorted.` into an empty tray through `::after` (src/styles/components.css), and a reader who
+   finishes chapter 2's sort meets an English sentence in the middle of a Chinese page. The shell's own
+   strings are reachable from a page, but a `content` in another book's stylesheet is not, so the sentence
+   is replaced here. `.zj` is (0,1,0) on top of the shared (0,2,2), and this file loads after it, so the
+   later rule wins on both counts; the selector is otherwise the shared one, character for character. */
+.zj tb-sort .tb-sort__tray:empty::after {
+  content: "都归好了。";
+}
+
+/* ============================================================================
    7. The lexicon list in 字詞
    ============================================================================ */
 
-/* A ruled table of the chapter's own 字 and 詞, on the shared glossary's two-column pattern: the
-   head-word hangs in its own column and every gloss starts on one edge, so thirty entries can be
-   scanned down rather than read through. */
+/* A table of the chapter's own 字, each cell the button that opens its card.
+   What stood here until this round was a ruled two-column table of head-word and gloss, and the gloss was
+   a hand-written second copy of what the card says. It had drifted: measured against the lexicon the card
+   is built from, the chapter's 16 written glosses differ from the card in 16 of 16 rows, and the 詞性
+   label beside the head-word differs in 7 of the 14 字 (the list writes 名 where the card writes 专名).
+   Two authorities for one word is the defect; the section now holds one, and it is the card — so the 16
+   `<dd>` and the 14 詞性 spans are gone from `ch01-san-jia-fen-jin/index.html` on purpose, and the
+   head-words, their readings and the `data-state` hook on 魏 趙 韓 are untouched. The lead line above the
+   list is what tells a reader the characters are clickable, and it already did.
+   The grid is what the deletion buys: one line a character, eight cells across the desktop measure, so
+   fourteen characters are two rows instead of fourteen. */
 .zj .zj-lex {
   display: grid;
-  grid-template-columns: var(--space-20) minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+  gap: var(--space-1) var(--space-4);
   margin: var(--space-6) 0 var(--space-10);
+  padding: 0;
+  list-style: none;
+  max-width: var(--measure);
 }
 
-.zj .zj-lex dt,
-.zj .zj-lex dd {
-  margin: 0;
-  padding: var(--space-3) 0;
-  border-top: 1px solid var(--rule);
-}
-
-.zj .zj-lex dt:first-of-type,
-.zj .zj-lex dt:first-of-type + dd {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.zj .zj-lex__head {
+/* One character and its reading, on one baseline, in every cell alike — the reading starts at the same x
+   in each column rather than shifting with the width of the glyph above it. The row is the tap target. */
+.zj .zj-lex li {
   display: flex;
   align-items: baseline;
   gap: var(--space-2);
-}
-
-/* The head-word's three parts sit on one baseline, in three fixed columns: the reading starts on the
-   same x on every row, and so does the 詞性. Laid out as a flex row they each shifted with the width
-   of the pinyin above them and the column of readings read as a ragged edge. */
-.zj .zj-lex dt {
-  display: grid;
-  grid-template-columns: auto 3.6rem minmax(0, 1fr);
-  align-items: baseline;
-  gap: var(--space-1) var(--space-2);
+  min-width: 0;
+  padding: var(--space-1) 0;
 }
 
 .zj .zj-lex__glyph {
@@ -736,40 +1139,6 @@
   font-size: var(--zj-ui);
   color: var(--ink-faint);
   white-space: nowrap;
-}
-
-.zj .zj-lex__pos {
-  font-family: var(--font-ui);
-  font-size: var(--zj-rubric-size);
-  font-weight: 500;
-  letter-spacing: var(--zj-rubric-track);
-  color: var(--ink-faint);
-}
-
-.zj .zj-lex dd {
-  font-size: var(--zj-trans-size);
-  line-height: 1.7;
-  color: var(--ink-soft);
-}
-
-@media (max-width: 599.98px) {
-  .zj .zj-lex {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .zj .zj-lex dt {
-    padding-bottom: 0;
-    border-top: 1px solid var(--rule);
-  }
-
-  .zj .zj-lex dd {
-    padding-top: var(--space-1);
-    border-top: 0;
-  }
-
-  .zj .zj-lex dt:first-of-type {
-    border-top: 0;
-  }
 }
 
 /* ============================================================================
@@ -1068,24 +1437,12 @@
   color: var(--ink-faint);
 }
 
-/* The shell writes this one in English (`src/shell.js`, "In this chapter") and a page cannot replace
-   an element's text from CSS, so the label is drawn by CSS on this book's pages only: the shared
-   `p` keeps its box, its position and its border, the English run is set to zero size, and the
-   Chinese rubric is generated in front of it. The `<nav>` carries `aria-label="本章目錄"` from the
-   page's own markup, so the navigation keeps its name; the English text node is still in the
-   accessibility tree, which is the one cost of not editing another worker's file. */
-.zj .tb-rail__title {
-  font-size: 0;
-}
-
-.zj .tb-rail__title::before {
-  content: "本章目錄";
-  font-family: var(--font-ui);
-  font-size: var(--zj-rubric-size);
-  font-weight: 500;
-  letter-spacing: var(--zj-rubric-track);
-  color: var(--ink-faint);
-}
+/* The rail title used to be drawn here: `src/shell.js` wrote "In this chapter", a page cannot replace an
+   element's text from CSS, so the element's own text went to zero size and 本章目录 was generated in
+   front of it. `SHELL_WORDS.zh` now writes 本章目录 itself, so the substitution would print the same
+   words twice — once painted, once exposed to assistive technology, which `font-size: 0` does not
+   remove from the accessibility tree. One source, and it is the component's. The rubric typography is
+   the `.zj .tb-rail__title` entry above; the colour was already `--ink-faint` in `layout.css`. */
 
 /* ============================================================================
    10. The components this book uses
@@ -1115,31 +1472,12 @@
   color: var(--ink-faint);
 }
 
-/* The rubric above a check is written by `src/components/check.js` as "Question <n>" — English no page
-   can reach, because the number is inside the same text node. A counter draws the same number in
-   Chinese without editing another worker's file: the element's own text goes to zero size and the
-   rubric is generated in front of it. The English text node stays in the DOM and in the accessibility
-   tree, which is the one cost of not editing that file. */
-.zj main {
-  counter-reset: zj-question;
-}
-
-.zj tb-check {
-  counter-increment: zj-question;
-}
-
-.zj tb-check .tb-check__label {
-  font-size: 0;
-}
-
-.zj tb-check .tb-check__label::before {
-  content: "問題 " counter(zj-question);
-  font-family: var(--font-ui);
-  font-size: var(--zj-rubric-size);
-  font-weight: 500;
-  letter-spacing: var(--zj-rubric-track);
-  color: var(--ink-faint);
-}
+/* The rubric above a check used to be counted here: `src/components/check.js` wrote "Question <n>", the
+   number is inside the same text node so no page could reach the word, and a CSS counter drew 问题 N in
+   Chinese over a zero-sized text node. `CHECK_WORDS.zh` writes 第1题 itself now — the form Chinese
+   exercises use — so the counter, the zero size and the generated copy are all gone: one source, the
+   component's, and nothing doubled for a screen reader. The rubric typography is the
+   `.zj tb-check .tb-check__label` entry above, and its colour is set just above this comment. */
 
 .zj tb-check .tb-check__opt {
   font-size: var(--zj-trans-size);
@@ -1381,5 +1719,112 @@
 
   .zj .zj-chnav__link--next {
     text-align: left;
+  }
+}
+
+/* ============================================================================
+   14. The 字詞 list: the index of first characters
+   ============================================================================ */
+
+/* What was wrong, in the reader's words: *"72 entries, 5,863px tall, in one unbroken column, with no
+   grouping, index or jump. I read about 20 of 72 and scrolled the rest. The sentence that actually
+   unlocked chapter 2 — 本章里「智伯」「智襄子」「智瑤」是同一个人，不是三个人。 — is buried in the back
+   half of it."* The list is not too long to exist; it is too long to enter.
+
+   The entry is a run of single characters, one per run of head-words that begin with it, built by
+   `TbGlossary` from the glossary the chapter registered (`src/components/term.js`). It is the one
+   device that fits this data, and the measurements that chose it are:
+
+     - the list has NO order a reader can scan. `localeCompare` sorts Han by ICU's radical-and-stroke
+       order, not by pinyin, so chapter 2 comes out 三版 不如 二心 人臣 代成君 … 飲器 驂乘 魏斯 魏桓子.
+       Nothing about a head-word tells a reader where it will be, and the fix has to supply the order
+       rather than lean on one (out/wordlist/order.mjs).
+     - a heading per run is the wrong size for this data, and it makes the list longer rather than
+       shorter. Measured by inserting one rubric heading before the first entry of every run
+       (out/wordlist/headings.mjs): 59 runs take chapter 2 from 5,263 px to 7,931 px, and 30 runs take
+       chapter 3 from 2,088 px to 3,445 px — headings that repeat the first character of the head-word
+       underneath them.
+     - two columns shorten it by about a quarter and charge every definition for it. Emulated with the
+       list split into two 419 px columns and a 6.5rem head-word column (out/wordlist/twocol.mjs, frames
+       in out/wordlist/twocol/): chapter 2's 5,263 px becomes 3,845 px, and the definition column goes
+       from 838 px to about 315 px — eighteen characters to a line, narrower than any other column in
+       the book at that width. A quarter off a wall is still a wall, and this one is paid on every entry
+       of it, so it is not spent. The section is long because 72 entries of real prose are long; what a
+       reader needs is a way out of it, which is this index.
+
+   Nothing is hidden: the index is added above the list, the list below it is the same `<dl>` it always
+   was, and every entry keeps its `id="term-<ref>"`, its `data-state` and its place in the sort. */
+
+/* 首字 — the rubric that says what the run of single characters is, set in the device §3 sets every
+   rubric in. Without it the run reads as a line of stray characters. */
+.zj .tb-gloss__index {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-1);
+  max-width: var(--measure);
+  margin: var(--space-6) 0 var(--space-8);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--rule);
+}
+
+.zj .tb-gloss__index-label {
+  font-family: var(--font-ui);
+  font-size: var(--zj-rubric-size);
+  font-weight: 500;
+  letter-spacing: var(--zj-rubric-track);
+  color: var(--ink-faint);
+  margin-right: var(--space-2);
+}
+
+/* A link is a character, not a chip: no ground, no border, and the pointer and the focus ring carry the
+   affordance, which is how a character in the 原文 behaves. The padding is the tap target — 29.8 × 25.5
+   px, past the 24 px floor — and the ground appears on hover and on focus so the reader can see which
+   character the pointer is on in a run of 59 of them. */
+.zj .tb-gloss__index a {
+  display: inline-block;
+  padding: 0 var(--space-1);
+  border-radius: 2px;
+  font-family: var(--font-display);
+  font-size: var(--zj-trans-size);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.zj .tb-gloss__index a:hover,
+.zj .tb-gloss__index a:focus-visible {
+  color: var(--ink);
+  background: var(--paper-3);
+}
+
+/* The focus ring is the seal — one of the three places §1 allows the accent, and the same mark a
+   character takes when the reader arrives by keyboard. */
+.zj .tb-gloss__index a:focus-visible {
+  outline: 2px solid var(--seal);
+  outline-offset: 1px;
+}
+
+/* How many entries begin with this character — on the runs of more than one only, because that is where
+   the reader's question is. 智⁶ is six entries about one family, and 智伯, 智襄子 and 智瑤 are three of
+   them; on chapter 2 five characters out of 59 carry a number at all, so the index stays a run of
+   glyphs and not a table. */
+.zj .tb-gloss__index sup {
+  font-family: var(--font-ui);
+  font-size: 0.6em;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--ink-faint);
+  margin-left: 1px;
+}
+
+/* On a phone the index is the whole navigation: the list is 8,527 px there, and 59 characters take
+   215 px — seven wrapped lines — which is the one block in this section a thumb has to hit. They take
+   the step the 字 and 詞 themselves are set at, because 17 px is the smallest type in the book. */
+@media (max-width: 599.98px) {
+  .zj .tb-gloss__index a {
+    font-size: var(--zj-src-size);
+    line-height: 1.6;
   }
 }
