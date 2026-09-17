@@ -1082,6 +1082,41 @@
   color: var(--zj-state-zhi);
 }
 
+/* ---- WHICH WORDS ARE 通鑑's. The owner, reading the published book: *"Just make it perfectly clear what
+   came from the book what didn't it, everywhere."* On this page "the book" is 資治通鑑, and the first
+   halting answer was already in the markup: every run of 通鑑's words carries `lang="zh-Hant"`, the 原文
+   and every quotation of it, and `test/lexicon.test.js` proves each marked run IS a quotation of the
+   corpus. What was missing is that `lang` is invisible. A quotation in 背景 was Traditional and otherwise
+   identical to the sentence around it, so a reader could not see where 司馬光 stopped and this book
+   started — the same complaint, one layer down, as the one that produced §5's "原文 holds the text and
+   nothing else".
+
+   So the mark is the quotation setting the design of record already specified and nothing had implemented:
+   the text face at `--zj-quoted-size` in `--ink-soft`, which is what makes a quotation read as a
+   quotation. It is a step DOWN, and that is the point — the 原文 is the primary object at full ink and the
+   full body size, and a quotation of it inside the book's own argument is evidence being cited, so it is
+   set a step quieter. The contrast between the two is the thing a reader sees.
+
+   What is deliberately NOT added: an underline, because in this book a solid hairline under a word already
+   means "a 詞 you can open" (§5, `tb-term`), and two meanings on one mark is one meaning lost; a paper
+   tint, because nothing on this page is drawn on a fill but the card; and a colour, because the four hues
+   here are the houses and the gold is a year. Style, not paint.
+
+   The selectors are explicit and exclude three regions rather than inheriting everywhere:
+     - `<ol class="zj-src">`, the 原文 itself, where the text is not a quotation and keeps full size;
+     - `.zj-card`, the lexicon popover, whose own `通鑑用例` and `在这一章` runs are laid out by §8;
+     - `tb-figure`, whose quotes are styled by each figure module against its own stage.
+   `:not(.zj-src *)` and `:not(tb-figure *)` are Selectors-4 complex arguments; the gates run a current
+   Chromium, and `npm run check` reads the markup rather than the stylesheet, so a browser that did not
+   support them would show the quotes unstyled rather than failing a gate. The 原文 is checked to be
+   unaffected by its own rule in `test/provenance.test.js`'s sibling, `test/lexicon.test.js`, which reads
+   the page's 原文 against the corpus character for character. */
+.zj .tb-text :is(p, li, aside, blockquote, figcaption, td, th, dd) [lang="zh-Hant"]:not(.zj-src *):not(.zj-card *):not(tb-figure *),
+.zj .tb-text :is(p, li, aside, blockquote, figcaption, td, th, dd)[lang="zh-Hant"]:not(.zj-src *):not(.zj-card *):not(tb-figure *) {
+  font-size: var(--zj-quoted-size);
+  color: var(--ink-soft);
+}
+
 /* ---- One word of the shared sheet's English, on a page that is not in English. `tb-sort` writes
    `All sorted.` into an empty tray through `::after` (src/styles/components.css), and a reader who
    finishes chapter 2's sort meets an English sentence in the middle of a Chinese page. The shell's own

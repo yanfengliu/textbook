@@ -27,6 +27,13 @@
 // source), because at that size they are the difference between a figure and a cropped one.
 import { h } from './lib/svg.js';
 
+// The fields of a step that hold 資治通鑑's own words rather than this figure's. A reader is told which
+// is which by the mark the stylesheet puts on `lang="zh-Hant"`, and a checker reads this list to know
+// what the figure claims — a 通鑑 sentence in a field that is not here is a quotation the book never
+// says is one. `test/provenance.test.js` holds both directions. `source` and `asideLabel` are the
+// citation, not the text: they name the work rather than quoting it.
+export const QUOTED_FIELDS = ['quote', 'aside'];
+
 export const meta = {
   kind: 'zj-split',
   title: '三家分晋：从灭智到命侯',
@@ -97,7 +104,10 @@ const STEPS = [
     asideLabel: '异说',
     aside: '一说前349年再分晋静公残余食邑；通鉴系于此年。',
     zhiNote: '智氏已灭，其田分入三家。',
-    dukeNote: '魏、韓、趙共廢晉靖公為家人而分其地。',
+    // The band note is this figure's own sentence about the house of 晋. The 通鑑 line that says the
+    // same thing is the step's `quote`, printed once with its citation; putting it here as well would
+    // print 通鑑's words a second time with nothing beside them to say whose they are.
+    dukeNote: '晋君被废为家人，公室余地尽分，晋亡。',
     mark: '',
     commanded: false,
   },
@@ -443,7 +453,7 @@ export function mount(root, ctx) {
   const year = h('span', { class: 'zjs-year', text: STEPS[0].yearLabel });
   const frame = h('span', { class: 'zjs-frame' });
   const event = h('p', { class: 'zjs-event', text: STEPS[0].event });
-  const quote = h('blockquote', { class: 'zjs-quote', text: `「${STEPS[0].quote}」` });
+  const quote = h('blockquote', { class: 'zjs-quote', lang: 'zh-Hant', text: `「${STEPS[0].quote}」` });
   const note = h('p', { class: 'zjs-note', text: STEPS[0].note });
   const asideLabel = h('span', { class: 'zjs-aside-label', text: STEPS[0].asideLabel });
   const asideText = h('p', { class: 'zjs-aside-text', text: STEPS[0].aside });
@@ -486,6 +496,9 @@ export function mount(root, ctx) {
     note.textContent = s.note;
     asideLabel.textContent = s.asideLabel;
     asideText.textContent = s.aside;
+    // `臣光曰` is 司馬光's own words and the label above it says so; an `异说` note is this figure
+    // talking. The mark follows the label, which is the attribution the reader is already given.
+    asideText.lang = s.asideLabel === '臣光曰' ? 'zh-Hant' : '';
     mark.textContent = s.mark;
     mark.hidden = !s.mark;
     source.textContent = s.source;

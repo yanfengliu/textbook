@@ -200,6 +200,20 @@ Four decisions inside the conversion that were **not** mechanical, recorded beca
 
 **Where the `lang` attributes are.** The page declares `<html lang="zh-Hans">`, and every element that carries the text declares `lang="zh-Hant"`: each `<ol class="zj-src">` block in the markup, each `.zj-trans__src` copy, each `.zj-quote` example, each prose quotation the book sets off with 「」, and — built by `tongjian/data/card.js` — the card's glyph, its 通鑑用例 and its 在這一章 clauses. A screen reader is the reader this is for: without the attribute it reads 為 with a Mandarin-Simplified voice, and the two-script page is exactly the case the attribute exists for.
 
+### Which words are 通鑑's, and what makes that visible
+
+The script rule above is half an answer, and the owner said so: *"Just make it perfectly clear what came from the book what didn't it, everywhere."* `lang="zh-Hant"` records which run is 通鑑's, but an attribute is invisible, so a quotation in 背景 was Traditional and otherwise identical to the sentence around it.
+
+Three things carry it now, and `test/provenance.test.js` holds all three:
+
+1. **The setting.** `tongjian/zj.css` sets every `lang="zh-Hant"` run inside the book's prose at `--zj-quoted-size` (0.95em) in `--ink-soft` — the treatment `docs/design/tongjian.md` specified for a quotation inside an argument and nothing had implemented. The 原文 is excluded and keeps full ink and full size, so a reader sees the text the book reads and the text the book quotes at two different weights. No underline (that already means "a 詞 you can open"), no tint, no colour.
+2. **Every quotation, not most of them.** Twenty-one runs that were 通鑑's own words printed as the book's own sentence — 「臣光曰」, 「以人事知之」, 「城不浸者三版」, 「三家分智氏之田」, 「智伯之臣」, 「才德兼亡」, 「保障」 and the rest — now carry the mark. The gate finds them by comparing every 「…」 run in a page's prose against `corpus.js`, so a new unmarked quotation is a red run rather than a thing to notice.
+3. **The key**, one sentence on `tongjian/index.html`: 繁体字都是《资治通鉴》自己的话，简体字都是本书自己的话. A chapter does not repeat it. A mark whose meaning is never stated is decoration.
+
+**The figures declare their own.** 通鑑 quoted inside a figure is built by JavaScript, where no page-side scan can see it, so each `src/figures/zj-*.js` exports `QUOTED_FIELDS` — the names of the object fields that hold whole 通鑑 句 — and the gate checks the declaration in both directions: a field holding a 句 must be named, and a named field must hold one. `quote` is 通鑑's sentence and `quoteAt`/`source` is its citation; `zj-split`'s `aside` is declared because one step's aside is 司馬光's own 臣光曰; a year's `season` (著雍攝提格) is a **name** of the year rather than a sentence of the book's, and is deliberately not declared. The element each module builds for the text carries `lang="zh-Hant"` too, for the stylesheet and for a screen reader.
+
+**What is not gated, and why.** A quotation from another work — 史記, 戰國策, 胡三省注, 韋昭注 — carries no attribute, because each one is named in the sentence that quotes it (《史記·刺客列傳》作「豫让拔剑三跃而击之」…). That is a property of the prose, not of an attribute a checker can read, and it is stated rather than implied. A one-character quotation is outside the gate's bound: a single Han character in 「」 is far more often the book naming a word it is about (「命」, 「恒」, 「版」) than quoting 通鑑.
+
 ### Note length, because the card has to fit
 
 The card worker measured every card on the three chapters at 1440 px and 390 px by opening it. Thirty-two still scrolled at 1440 px, and the cause was not the layout but `note` length: the notes behind those cards ran to 107, 63, 57, 53 characters against a lexicon whose median is far shorter. The 32 shown notes were rewritten — **428 characters cut, worst first** — keeping every source attribution, every 反切 and every variant reading, and cutting only words:

@@ -76,10 +76,69 @@ Grouped by the file the gate lives in, because that is how they are looked up. S
 - [a chapter's page id names its book](#pages-a-chapters-page-id-names-its-book-testpagestestjs) · [the gates visit every chapter that exists](#pages-the-gates-visit-every-chapter-that-exists-testpagestestjs) — the same test, hardened twice: discovery, then book-qualified ids. Read both before quoting a `SHOT_PAGES` or `DEVICE_PAGES` value from an older entry, because unqualified ids now match nothing.
 - [no authored page writes markup into a `content=` attribute](#unit-no-authored-page-writes-markup-into-a-content-attribute-testmetatestjs).
 - [a Chinese page's chrome is Chinese, and in the page's own script](#strings-a-chinese-pages-chrome-is-chinese-and-in-the-pages-own-script-teststringstestjs) · [the 原文 and its quotations are Traditional, everything else Simplified](#script-the-原文-and-its-quotations-are-traditional-everything-else-simplified-testlexicontestjs) — the paired book's script rules.
+- Bound, quoted from the header and restated here because it is the part a later reader will want: *"A one-character quotation"* is outside the check, because a single Han character in 「」 is far more often the book naming a word it is about (「命」, 「恒」, 「版」) than quoting 通鑑; a quotation with one character changed or re-punctuated until it is no longer a substring stops being 通鑑 and this file says nothing about it; **whether the mark RENDERS as something a reader notices** is not proved here — the file reads markup and data, not pixels, and the run's frames are the evidence for that half; and a quotation of another work is not gated at all, because 史記, 戰國策, 胡三省注 and 韋昭注 are named in the sentence that quotes them, which is a fact about prose rather than an attribute a checker can read. On the figure side the predicate is narrower on purpose — identity with a **whole 句** — because a figure's fields are short labels as well as sentences: `courtNote: '天子之命'` is a label the figure wrote that happens to occur inside a 句 of the 禮論, and a substring predicate failed on it. A figure field holding a **fragment** of a 句 is therefore not seen, and a fragment in the book's prose is, which is where a fragment is quoted.
 - [the study system's arithmetic](#scheduler-and-store-the-study-systems-arithmetic-testschedulertestjs-teststoretestjs) — scheduler and store, 42 tests.
 - [the flags that keep chromium's crash dialog off the desktop](#browser-quiet-the-flags-that-keep-chromiums-crash-dialog-off-the-desktop-testbrowser-quiettestjs) — and see the defect register, 2026-09-16, for the round where this test was green while the preload never ran.
 
 `# Six gates that were shipped unproved (2026-09-16)` below is a batch heading, not a claim: it marks six proofs written after the fact for gates that had already reached main.
+
+## provenance: a quotation of 通鑑 the page does not mark is invisible, and this is what makes it visible (`test/provenance.test.js`)
+
+Taken on the working tree based on `main` at `0806283`, which also carried a large amount of another session's uncommitted work (biology chapters 4–7 as untracked directories, `tools/*`, and the standing docs). **None of it is touched by this entry**: the five files mutated here are this session's own, and each was restored byte for byte, sha256 recorded below. Captures, UTF-8, under the ignored `out/provproof/`: `arm-a-red.txt`, `arm-b-red.txt`, `arm-b2-red.txt`, `arm-c1-red.txt`, `arm-c2-red.txt`, `arm-d-red.txt`, `green.txt`.
+
+- **The defect it was written for, and the fix it landed.** The owner, reading the published second book: *"Just make it perfectly clear what came from the book what didn't it, everywhere."* The book already recorded which run is 資治通鑑's — `lang="zh-Hant"` on every 原文 block and every quotation, held by `test/lexicon.test.js` — but **an attribute is invisible**, and the rule held only where an author had remembered it. Twenty-one runs of 通鑑's own words were printed in 背景 and 思考 as if the book had written them: 「臣光曰」, 「以人事知之」, 「城不浸者三版」, 「三家分智氏之田」, 「智伯之臣」, 「才德兼亡」, 「保障」 among them. One sentence went further and *contradicted the page*: chapter 2's 背景 said of the 前376 entry 「所以这里只转述，不引原文」, while figure 2.1 four lines below quotes it with its citation. The fix is the mark made visible (`--zj-quoted-size` in `--ink-soft`, the treatment `docs/design/tongjian.md` had specified and nothing had implemented), the twenty-one runs marked, that sentence rewritten, and this gate.
+- Claim (the test's own header): **every 「…」 run in a chapter page's prose whose text is verbatim 通鑑 sits inside an element carrying `lang="zh-Hant"`**; each `src/figures/zj-*.js` exports `QUOTED_FIELDS` naming exactly the object fields that hold whole 通鑑 句, checked in both directions, and sets `lang: 'zh-Hant'` where it builds the quotation; and `tongjian/index.html` carries the key to the mark in a `<p class="… zj-key …">`.
+- Bound, quoted from the header and restated here because it is the part a later reader will want: *"A one-character quotation"* is outside the check, because a single Han character in 「」 is far more often the book naming a word it is about (「命」, 「恒」, 「版」) than quoting 通鑑; a quotation with one character changed or re-punctuated until it is no longer a substring stops being 通鑑 and this file says nothing about it; **whether the mark RENDERS as something a reader notices** is not proved here — the file reads markup and data, not pixels, and the run's frames are the evidence for that half; and a quotation of another work is not gated at all, because 史記, 戰國策, 胡三省注 and 韋昭注 are named in the sentence that quotes them, which is a fact about prose rather than an attribute a checker can read. On the figure side the predicate is narrower on purpose — identity with a **whole 句** — because a figure's fields are short labels as well as sentences: `courtNote: '天子之命'` is a label the figure wrote that happens to occur inside a 句 of the 禮論, and a substring predicate failed on it. A figure field holding a **fragment** of a 句 is therefore not seen, and a fragment in the book's prose is, which is where a fragment is quoted.
+- **Arm A — the defect itself, on the real file.** `lang="zh-Hant"` removed from one of the twenty-one runs it was added to (`tongjian/ch01-san-jia-fen-jin/index.html`, the 背景 sentence 「接着是另一段「臣光曰」」). `node --test --experimental-test-isolation=none test/provenance.test.js` — failure, exit 1:
+
+  ```text
+  AssertionError [ERR_ASSERTION]: 1 quotation(s) of 通鑑 are printed as if the book had written them. A run of 通鑑's
+  words in the book's own prose must carry lang="zh-Hant" — that attribute is what the stylesheet marks it with and
+  what a screen reader reads it with. See docs/design/tongjian.md, "Which words are the book's".
+        tongjian\ch01-san-jia-fen-jin\index.html: 「臣光曰」 is 通鑑's own text and is not marked lang="zh-Hant" — a
+        reader cannot tell it from the book's own sentence (unmarked: 臣光曰)
+  ```
+
+  Restored byte for byte: sha256 `56DFC9829C3216E5E14D48FFC50FE28346EE800E85FFACBE8D302B9BF57FBFD5` before and after.
+- **Arm B — a figure prints 通鑑 without declaring it.** `'aside'` removed from `QUOTED_FIELDS` in `src/figures/zj-split.js`, whose step 2 aside is 司馬光's own 臣光曰 sentence. Failure, exit 1:
+
+  ```text
+  AssertionError [ERR_ASSERTION]: src\figures\zj-split.js: `aside` holds 通鑑's own words (「故三晉之列於諸侯，非三晉之壞禮，乃天子自壞之也。」) but is not named in QUOTED_FIELDS, so the figure prints 通鑑 without the book saying it is 通鑑
+  ```
+
+  Restored: sha256 `6AC9B6DBC60FB9D0423D0EC7230817F72A43D41CB73FF486300C27550AD64D4F` before and after.
+- **Arm B2 — a declaration nothing carries, the other direction.** `'nothingCarriesThis'` added to `QUOTED_FIELDS` in `src/figures/zj-timeline.js`. Failure, exit 1:
+
+  ```text
+  AssertionError [ERR_ASSERTION]: src\figures\zj-timeline.js: QUOTED_FIELDS names `nothingCarriesThis`, which no row of the figure defines — a declaration nothing carries is a claim the data does not support
+  ```
+
+  Restored: sha256 `93F24A33979DE3F5A456D2B9810E4360DCBFE808409CF1A4C08FDBA4C6A8EC61` before and after.
+- **Arm C1 — and the proof found a hole in the gate itself, which is the reason to write one.** The key's class renamed `zj-key` → `zj-key-removed` in `tongjian/index.html`. **The first version of this check stayed GREEN**, exit 0: it matched the class with `\bzj-key\b`, and `-` is a word boundary, so `zj-key-removed` is a match. The check was rewritten to read the class attribute as whitespace-separated tokens, and the same mutation then failed, exit 1:
+
+  ```text
+  AssertionError [ERR_ASSERTION]: tongjian/index.html carries no <p class="… zj-key …">, so a reader is never told what the mark means
+  ```
+
+  Restored: sha256 `D5C446E790273CE29529C44CC100EBB881AD1C6A2D9D86CD9DD3C486F212FEFA` before and after. **The green arm is recorded rather than deleted**: a gate whose first proof is green on the mutation it was written for is a gate that checks the wrong string.
+- **Arm C2 — the key stops naming one of the two scripts.** 简体字都是本书自己的话 → 其余的字都是本书自己的话. Failure, exit 1:
+
+  ```text
+  AssertionError [ERR_ASSERTION]: the key does not name both scripts, which is the distinction it exists to state: 「本书的体例：繁体字都是《资治通鉴》自己的话——原文，以及正文各节里引自《通鉴》的句子；其余的字都是本书自己的话——译文、背景、思考和注释。引自别的书（《史记》《战国策》、胡三省注、韦昭注等）的句子，都在引号边说清是哪一部。」
+  ```
+
+  Restored byte for byte, same sha256 as arm C1.
+- **Arm D — the denominator, because "checked nothing" must not read as "found nothing".** The page-discovery regex in the test itself changed so that no chapter directory matches. Failure, exit 1:
+
+  ```text
+  AssertionError [ERR_ASSERTION]: no chapter page was found, so nothing was checked — the page list must not go quietly empty
+  ```
+
+  Two further denominators are asserted the same way and not mutated here: `checkedRuns > 0` (a run that finds no 通鑑 quotation in any page's prose fails) and `quotations > 0` on the figure side. Restored: sha256 `ED54E69584111A1980CE87C6C15D388AB4A236C7F5BEC309556BF5B70C3BDD04` before and after.
+- **The green run, with its denominators, so a later reader can tell it ran.** `provenance: 3 chapter page(s), 8 原文 block(s) left to test/corpus.test.js, 48 marked run(s), 48 通鑑 quotation(s) in prose checked; 0 unmarked` · `figures: 3 module(s), 5 declared field(s), 10 通鑑 quotation(s) in figure data` · `key: 110 character(s) on the contents page`. The 48 and the 48 are not a coincidence and not a check: 48 marked runs, and 48 「…」 runs in prose that are verbatim 通鑑 — the numbers agree because the second is now a subset of the first, which is the whole claim.
+- **What it does not prove.** Everything under Bound above, and three more things this entry's own numbers make visible. **The mark's pixels.** `npm run shot` passes on the four tongjian pages at three viewports and both themes (24 loads, 0 problems) and the before/after frames were looked at, but no gate measures that a reader *notices* the step down; `npm run legible` cannot either — it names `zj-split`, `zj-timeline` and `zj-words` in its `DEFERRED` list, so `LEGIBLE_KINDS=zj-*` prints NOT VISITED and compares 0 glyph runs. **The prose's own contrast** is not measured by anything: it rests on `--ink-soft` being the token the book already measured at 5.59:1 on `--paper`, and the rule deliberately excludes `.zj-src`, `.zj-card` and `tb-figure`, so what it paints is 21 runs in 背景, 思考 and the 字词 lead. **A quotation on a page this gate does not read** — the `data-alt`/`data-why`/`data-note` apparatus, the `lab/` figure page, and the card popover, which is built by `tongjian/data/card.js` from `lexicon.js` rather than from a page's markup — is outside the page scan; the card is covered the other way round, by `test/lexicon.test.js` requiring every `lang="zh-Hant"` run it builds to be a corpus quotation.
+- **The lesson underneath, and it is the same one as *sitting*'s.** A check that reads a fact the page already carries (`lang`, a declared field, a class) proves the fact is *recorded*; it cannot prove the fact is *shown*. This gate is the recorded half, deliberately, and the visible half is a person looking at the frames — which is why the design doc's sentence about it says the mark is style and not paint.
+
 
 ## shot: no character is drawn by a face the page never loaded (`tools/shot.js`, the font census)
 

@@ -31,6 +31,19 @@
 // panel's note and `mini` (h < 300) its attribution, which is what a 480x270 stage can hold.
 import { h } from './lib/svg.js';
 
+// The fields of a row that hold 資治通鑑's own words rather than this figure's. `quote` is the sentence
+// the stylesheet marks with `lang="zh-Hant"` and `quoteAt` is its citation — the citation names the work
+// rather than quoting it, so it is not here. `scope` is the 卷首 line in the head, which belongs to the
+// 卷 rather than to any one year. A year's `season` (著雍攝提格, 玄黓困敦) is a name of the year rather
+// than a sentence of the book's, and `body` writes the book's own sentence around it.
+// `test/provenance.test.js` holds both directions of this declaration.
+export const QUOTED_FIELDS = ['quote', 'scope'];
+
+// 通鑑's own 卷首 line: it says what span the 卷 covers, and the figure prints it above the year column.
+// The legend under it is where a reader is told that this line, like the 周纪年, is 通鑑's own text and
+// that the 西元 and 干支 beside them were added later.
+const SCOPE = { scope: '起著雍攝提格，盡玄黓困敦，凡三十五年' };
+
 export const meta = {
   kind: 'zj-timeline',
   title: '周纪一的年表',
@@ -338,7 +351,7 @@ export function mount(root, ctx) {
 
   const head = h('div', { class: 'zjt-head' }, [
     h('p', { class: 'zjt-title', text: '年表 · 周纪一' }),
-    h('p', { class: 'zjt-scope', text: '起著雍攝提格，盡玄黓困敦，凡三十五年' }),
+    h('p', { class: 'zjt-scope', lang: 'zh-Hant', text: SCOPE.scope }),
   ]);
   // The head says which register each part of a date belongs to, because the figure's whole claim is that
   // they are not the same thing.
@@ -375,7 +388,7 @@ export function mount(root, ctx) {
   const ganNoneEl = h('span', { class: 'zjt-gan-none' });
   const eventEl = h('p', { class: 'zjt-event' });
   const frameEl = h('p', { class: 'zjt-frame' });
-  const quoteEl = h('blockquote', { class: 'zjt-quote' });
+  const quoteEl = h('blockquote', { class: 'zjt-quote', lang: 'zh-Hant' });
   const quoteAtEl = h('p', { class: 'zjt-quote-at' });
   const bodyEl = h('p', { class: 'zjt-body-text' });
   const noteLabelEl = h('span', { class: 'zjt-note-label' });

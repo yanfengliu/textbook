@@ -40,6 +40,12 @@
 // makes at 480x300 — where the cells shrink, the 卷次 captions go, and the panel tightens.
 import { h } from './lib/svg.js';
 
+// The fields of a line that hold 資治通鑑's own words rather than this figure's. `text` is the 句 the
+// 字格 is built from, which is the book's received text; `source` is its citation, which names the 卷
+// rather than quoting it. The stylesheet marks the line with `lang="zh-Hant"` and a screen reader reads
+// the glyphs with the voice they need. `test/provenance.test.js` holds both directions.
+export const QUOTED_FIELDS = ['text'];
+
 export const meta = {
   kind: 'zj-words',
   title: '字与词',
@@ -341,7 +347,7 @@ export function mount(root, ctx) {
   const lineCells = LINES.map((line) => cellsOf(line.text));
   const glyphs = [];
   const linesets = LINES.map((line, li) => {
-    const lineEl = h('div', { class: 'zjw-line', role: 'group', 'aria-label': line.text });
+    const lineEl = h('div', { class: 'zjw-line', lang: 'zh-Hant', role: 'group', 'aria-label': line.text });
     lineCells[li].forEach((cell, ci) => {
       if (cell.punct) {
         lineEl.append(h('span', { class: 'zjw-cell zjw-cell--punct', 'aria-hidden': 'true', text: cell.ch }));

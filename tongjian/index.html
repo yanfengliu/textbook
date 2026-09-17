@@ -63,6 +63,13 @@
   .book__dek { font-size: var(--text-lg); color: var(--ink-soft); max-width: 30rem; line-height: 1.7; margin: 0; }
   .book__dek + .book__dek { margin-top: var(--space-4); }
 
+  /* The key to the two scripts. It is the one thing a reader has to be told once, and this page is where
+     the design of record says such a thing lives — a chapter does not repeat it. It reads as apparatus
+     rather than as another sentence of the dek: a hairline above it, a step down in size, and the two
+     words that carry the rule in ink. */
+  .book .zj-key { border-top: 1px solid var(--rule); padding-top: var(--space-4); margin-top: var(--space-6); font-size: var(--text-base); line-height: 1.75; }
+  .book .zj-key b { color: var(--ink); font-weight: 600; }
+
   /* One chapter to a ruled line, the number in the margin. Same furniture as the biology book's contents
      page, set for Han: no uppercase, no negative tracking, and the rubric tracked rather than capitalised. */
   .unit { margin-top: var(--space-16); }
@@ -99,6 +106,7 @@
     <h1>资治通鉴 · 周纪一</h1>
     <p class="book__dek">司马光从西元前四〇三年写起。那一年，周天子把晋国的三个大夫封为诸侯——一个他认为不该发生的承认，成了这部书的第一句话。</p>
     <p class="book__dek">这里印的是原文，旁边是现代汉语翻译。<em>每一个字、每一个词都可以点开</em>：读音、词性、在这个句子里的意思，以及它在《通鉴》其他地方怎么用。例子都是书里的原句，不是为课本编的句子。</p>
+    <p class="book__dek zj-key">本书的体例：<b>繁体字都是《资治通鉴》自己的话</b>——原文，以及正文各节里引自《通鉴》的句子；<b>简体字都是本书自己的话</b>——译文、背景、思考和注释。引自别的书（《史记》《战国策》、胡三省注、韦昭注等）的句子，都在引号边说清是哪一部。</p>
   </header>
 
   <section class="unit">
