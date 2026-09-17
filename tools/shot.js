@@ -17,6 +17,18 @@
 // Bound: three viewports, two themes, one pinned time, one renderer (SwiftShader unless SHOT_GPU=1);
 // SHOT_PAGES, SHOT_VIEWPORTS and SHOT_THEMES trim the matrix and a trimmed run proves only its part, and
 // a value naming no page, viewport or theme stops the run rather than emptying it (tools/lib/trim.js).
+//
+// The directory is the run. `out/shots/` is emptied before the first frame is written, the way every
+// gate empties its own directory, so after a run each file in it is from that run and nothing from an
+// earlier one sits beside them under a name a reader would take as current. That is also why two runs in
+// one tree destroy each other: on 2026-09-16 the 24 acceptance frames of a green run were deleted by a
+// second run before anybody could look at them, and only the log survived, which no exit status showed.
+// SHOT_LABEL=<name> writes to `out/shots-<name>/` instead, emptied the same way, so a second run keeps
+// its own frames beside the first one's rather than over them — the same shape as `tools/inspect.js
+// --label`, which is where the rule was already written for a tool with the same problem. A run with no
+// label writes `out/shots/` exactly as it always did. The name is 1 to 32 characters of a-z, 0-9,
+// underscore or hyphen, so the directory is always one of this tool's own; anything else stops the run
+// before it empties anything at all.
 // It proves the pages load and lay out; it says nothing about whether the pixels are right, which is
 // what the screenshots it writes are for. A visual defect inside a figure that throws nothing passes
 // this gate. The caption-word check knows English and Chinese (`en`, `zh`, `zh-Hans`, `zh-Hant`) and
@@ -60,7 +72,19 @@ import { startServer } from './serve.js';
 import { launch, collectErrors, openPage, ACTION_TIMEOUT_MS, PAGES, VIEWPORTS, THEMES } from './lib/browser.js';
 import { trim, PAGE_HINT } from './lib/trim.js';
 
-const OUT = 'out/shots';
+// The run's own directory, and the rule that keeps two runs from sharing one. A label is validated
+// before anything below runs, because `rmSync(OUT)` at the foot of this file is what a mistyped name
+// must never reach: the check `tools/inspect.js` makes with its `--label`, in this tool's own shape (an
+// environment variable rather than an argument, like SHOT_PAGES). An empty SHOT_LABEL means unset, the
+// same convention `tools/lib/trim.js` gives an empty trimming variable.
+const OUT_DIR = 'out/shots';
+const LABEL_RE = /^[a-z0-9][a-z0-9_-]{0,31}$/;
+const label = process.env.SHOT_LABEL || null;
+if (label !== null && !LABEL_RE.test(label)) {
+  console.error(`SHOT_LABEL="${label}" is not usable as a directory name; use 1 to 32 characters of a-z, 0-9, underscore or hyphen, starting with a letter or digit. A run with no SHOT_LABEL empties ${OUT_DIR}/ before it writes, so a second run in this tree deletes the first one's frames; give the second run a label of its own and it writes ${OUT_DIR}-<label>/ instead. What would satisfy this: SHOT_LABEL=after, SHOT_LABEL=worker-2, or no SHOT_LABEL at all.`);
+  process.exit(2);
+}
+const OUT = label === null ? OUT_DIR : `${OUT_DIR}-${label}`;
 const gpu = process.env.SHOT_GPU === '1';
 const themes = trim('SHOT_THEMES', THEMES, { noun: 'theme' });
 const viewports = trim('SHOT_VIEWPORTS', VIEWPORTS, { idOf: (v) => v.id, noun: 'viewport' });
@@ -130,7 +154,7 @@ function figureWordFor(lang) {
 // tags from each chapter's glossary.js:
 //   ch01  [data-state="wei"]×2  [data-state="zhao"]×2  [data-state="han"]×2  [data-date]×2
 //   ch02  [data-state="wei"]×3  [data-state="zhao"]×7  [data-state="han"]×2  [data-state="zhi"]×6
-//         — 3 in markup plus 15 through the glossary's `state` — [data-date]×4, [data-note="textual"]×7
+//         — 3 in markup plus 15 through the glossary's `state` — [data-date]×6, [data-note="textual"]×7
 //   ch03  [data-state="zhi"]×1 (the glossary), [data-note="textual"]×1
 // The book's contents page, and every page of the other book, declares none and is not asked.
 //
@@ -152,6 +176,13 @@ function figureWordFor(lang) {
 // says what each number is made of. The numbers were measured on the RENDERED DOM on 2026-09-19 at all
 // three viewports of this gate — out/gatefix/census.mjs, 9 loads, the same count at 390, 1024 and 1440 px,
 // because the markup is the same at every width — and each agrees with what the page's sources declare.
+//
+// Re-measured afterwards, 18 loads (both themes as well as all three viewports), because that first census
+// was taken before chapter 2's 世系 and 年代 paragraphs landed: the page carried `[data-date]` six times
+// where this table asked for four, so two marked years could have gone with the gate still green — the
+// partial loss this floor exists to catch, in the book whose year marks were the defect. That floor is 6
+// now. The other eleven rows were re-read against the rendered pages in the same run and every one of them
+// matched its floor exactly, so no other number moved.
 // A hook whose floor is missing or is not a whole number of marks ≥ 1 fails the run rather than falling
 // back to presence, which is the check this table replaced.
 //
@@ -174,7 +205,7 @@ const HOOK_CENSUS = {
       { sel: '[data-state="zhao"]', floor: 7, where: 'the 世系 paragraph, and six 趙 head-words in the glossary' },
       { sel: '[data-state="han"]', floor: 2, where: 'the 世系 paragraph, and 韓康子 in the glossary' },
       { sel: '[data-state="zhi"]', floor: 6, where: 'six 智 head-words in the glossary, the house the 原文 names' },
-      { sel: '[data-date]', floor: 4, where: 'the four 背景 paragraphs that carry years' },
+      { sel: '[data-date]', floor: 6, where: 'the six 背景 paragraphs that carry years' },
       { sel: '[data-note="textual"]', floor: 7, where: 'the seven notes that question the text, six in 原文 and one in 背景' },
     ],
   },
