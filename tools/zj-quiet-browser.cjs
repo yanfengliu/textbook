@@ -11,10 +11,21 @@
 // rendered and closed cleanly, so the dialog is not raised by starting a browser. It comes from a crash
 // inside one, which is what these flags suppress.
 //
-// Used through NODE_OPTIONS=--require=./tools/zj-quiet-browser.cjs, which applies before any ESM import,
-// so every `chromium.launch()` in the process is covered without editing the gate that calls it. The
-// shared gate files (`tools/lib/browser.js`, `tools/shot.js`) are deliberately not changed by this round:
-// another worker owns them, and the second book does not need to edit them to ship.
+// Applied by `--require ./tools/zj-quiet-browser.cjs` on each `node` invocation — every browser-launching
+// script in package.json carries it, and `tools/test.js`'s spawner prepends it to each gate it runs, so the
+// gates inherit it. `--require` is evaluated before any ESM import, which is what makes ONE preload cover
+// every `chromium.launch()` in the process without editing the gate that calls it — including launches
+// that do not go through `tools/lib/browser.js`, such as the WebKit and Firefox arms in `tools/devices.js`.
+//
+// **It used to say `NODE_OPTIONS=--require=…`, and nothing in this repository ever set `NODE_OPTIONS`.** So
+// the mitigation was inert in every run: measured 2026-09-16 (`out/gpu/preload-engaged.mjs`), a plain
+// `node tools/devices.js` read back a 52-argument chromium command line with all three flags absent and no
+// preload in the process's own execArgv, while this file and the unit test asserting its flag list stayed
+// green. The flags were right; the wiring was missing, and a comment naming the wrong mechanism is what a
+// reader would have trusted. Recorded in docs/learning/defect-register.md.
+//
+// `.cjs` is spelled out because it has to be: this package is `"type": "module"`, and `--require
+// ./tools/zj-quiet-browser.cjs` without the extension fails with MODULE_NOT_FOUND on Node 24 (measured).
 const QUIET_ARGS = ['--noerrdialogs', '--disable-crash-reporter', '--disable-features=Crashpad'];
 
 // Appends to the caller's args rather than replacing them: a gate's own flags (`--enable-unsafe-swiftshader`

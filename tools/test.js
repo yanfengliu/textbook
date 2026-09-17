@@ -16,9 +16,30 @@ import { fileURLToPath } from 'node:url';
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const posix = (path) => path.split(sep).join('/');
 
+// Every gate below is spawned with the quiet-browser preload ahead of its script.
+//
+// Why here and not in `tools/lib/browser.js`. `tools/zj-quiet-browser.cjs` patches `chromium.launch()`
+// on playwright's own browser type, so ONE preload covers every launch in a process — including the
+// launches that do not go through `lib/browser.js`, such as `tools/devices.js`'s WebKit and Firefox
+// arms. Putting the three flags into `launch()` instead would cover only this repository's helper and
+// leave those unquiet, and two mechanisms merging one flag list drift apart. So the wrapper stays the
+// only place the flags are written, and the wiring is what makes it load.
+//
+// It did not load. Measured 2026-09-16 (`out/gpu/quiet-engaged.mjs`): a plain `node tools/devices.js`
+// read back a 53-argument chromium command line with `--noerrdialogs --disable-crash-reporter
+// --disable-features=Crashpad` all absent and `NODE_OPTIONS` unset, because nothing in this repository
+// ever set it — the mitigation the wrapper exists for was inert in every run, while the unit test that
+// asserts the wrapper's flag list stayed green (it says in its own header that it cannot see a patch
+// that fails to apply). Recorded in docs/learning/defect-register.md.
+//
+// `.cjs` is spelled out because it has to be: this package is `"type": "module"`, and `--require
+// ./tools/zj-quiet-browser` fails with MODULE_NOT_FOUND on Node 24 (measured). Forward slashes so the
+// argument is the same string on Windows as anywhere else.
+const QUIET_PRELOAD = `--require=${posix(join(ROOT, 'tools', 'zj-quiet-browser.cjs'))}`;
+
 function run(label, args) {
   console.log(`\n== ${label} ==`);
-  const result = spawnSync(process.execPath, args, { stdio: 'inherit' });
+  const result = spawnSync(process.execPath, [QUIET_PRELOAD, ...args], { stdio: 'inherit' });
   if (result.status !== 0) {
     console.error(`FAIL: ${label} exited with ${result.status ?? result.signal}`);
     process.exit(result.status || 1);
