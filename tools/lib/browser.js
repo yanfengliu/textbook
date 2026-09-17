@@ -105,16 +105,19 @@ export async function rendererLine(browser, args = []) {
 
 // WHICH of the two silent outcomes happened. The wrapper's `catch` covers an unresolvable playwright, so
 // "the patch ran and found nothing to patch" and "the patch never ran" are otherwise the same log line.
-// `__zjQuiet` is the marker it sets on each browser type it patches, so:
-//   engaged  — at least one type carries it: the preload ran AND found playwright.
-//   absent   — no type carries it: the preload did not run, or it ran and could not resolve playwright.
+// `__zjQuiet` is the marker it sets on each browser type it patches, and it sits ON the type
+// (`chromium.__zjQuiet`), not under it — reading `chromium[name].__zjQuiet` looked for `chromium.chromium`
+// and reported "absent" on a run whose quiet flags were plainly on the command line. It appeared in a real
+// gate log as `preload absent (…) | args as launched (8 of 56) … noerrdialogs …`, which is a line
+// contradicting itself. This module imports chromium only, so the marker is reported for chromium.
+//   engaged — the preload ran AND found playwright.
+//   absent  — it did not run, or it ran and could not resolve playwright.
 // The second is still two states in one word, and telling them apart needs the wrapper to record a marker
 // before its `require` — left as owed in the defect register rather than guessed at here.
 function preloadState() {
-  for (const name of ['chromium', 'firefox', 'webkit']) {
-    if (chromium?.[name]?.__zjQuiet) return `engaged (__zjQuiet on ${name})`;
-  }
-  return 'absent (no __zjQuiet marker on chromium, firefox or webkit)';
+  return chromium?.__zjQuiet
+    ? 'engaged (__zjQuiet marker on the chromium browser type)'
+    : 'absent (no __zjQuiet marker on the chromium browser type; it did not run, or it could not resolve playwright)';
 }
 
 // The in-page half of the probe, a named function so the failure path can be exercised on a page that
