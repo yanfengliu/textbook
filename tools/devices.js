@@ -1,7 +1,8 @@
 // npm run devices: load every page on a matrix of real emulated devices and check the things that
 // break between one screen and another.
 //
-// Claim: on each device below, every page loads with no console error, page error or failed request;
+// Claim: on each device a page is loaded on — which devices those are is derived from the page, below —
+// the page loads with no console error, page error or failed request;
 // the document does not scroll sideways; the header is there, every control in it is fully inside the
 // viewport and at least 24 px on its smallest side, and the leftmost and the rightmost control each sit
 // on the header's own padding for that side rather than adrift — the LEFT corner and the right corner
@@ -27,11 +28,53 @@
 // The screenshots in out/devices/ are for the beauty question. The device list is a sample of shapes,
 // not of products: it covers small phone, phone, Android phone, phone landscape, tablet portrait,
 // tablet landscape, small laptop, desktop and wide desktop — nine — which is where the layout's
-// breakpoints actually are. It presses the controls it checks — the contents button, one link in the
+// breakpoints actually are. A page is loaded on the ones it needs rather than on all nine: a device is a
+// shape here, and the rule that turns a page's own subjects into its load set is below. It presses the
+// controls it checks — the contents button, one link in the
 // drawer, every glossary term, a tap outside the drawer — and nothing else: no check option, no sort
 // control and no figure control, which are tools/flow.js's and tools/drive.js's questions.
 // DEVICE_PAGES, DEVICE_ONLY, DEVICE_ENGINES and DEVICE_THEMES trim the run, a trimmed run proves only
 // its part, and a value naming nothing stops the run rather than emptying it (tools/lib/trim.js).
+//
+// The matrix is DERIVED from what each page carries, not run whole. A page is loaded on one device per
+// SHAPE it can exercise, and a shape is the layout band the width falls in together with the input the
+// page's own controls are pressed with — so a page that carries none of a device's subject is no longer
+// loaded on it. `matrixFor` below states the rule and the three things that decide a load; the run prints
+// the matrix it derived before it loads anything. Measured 2026-09-19 on this tree: nine shapes over every
+// page was 107 loads and 25 minutes of a 36-minute chain, and the derived matrix is 62 loads with the same
+// verdicts on every (device, page) pair it kept.
+//
+// What is NOT derived, deliberately: the themes and the engines. A dark page is a different rendering with
+// its own failures, and the two shapes either side of the drawer breakpoint on WebKit and Gecko are where
+// the owner's real-phone defects were reproducible. Cutting either would be a relaxation, not a fix.
+//
+// Where the run writes: out/devices/ unless DEVICE_LABEL names a directory, in which case
+// out/devices-<label>/, emptied the same way — the shape tools/inspect.js's --label has, so a second run in
+// one tree can be kept beside the first instead of on top of it. This gate, shot, drive, narrow and sweep3d
+// all empty their own directory as they start, so two runs of one of them in a shared tree destroy each
+// other's evidence; the label is what makes the second run keepable. The run prints the directory it
+// emptied. A frame is `<engine>-<device>-<page>-<theme>.png` with the page's book separator flattened to a
+// hyphen, so every frame is one file in that directory for one load of the report, and no engine's
+// rendering stands in for another's under one name.
+//
+// What the summary says about scope: the pages it judged, by name, and — when the tree holds pages this run
+// did not reach, because DEVICE_PAGES or DEVICE_ENGINES narrowed it — which ones were outside it. A scoped
+// green that a reader can mistake for a repository-wide one is the failure that line is for; the session of
+// 2026-09-19 had to work it out by hand from the page ids in the output.
+//
+// Bound, for the derived matrix. Two devices are one shape when they sit in the same layout band and press
+// with the same input, and the representative of a shape is its narrowest device, so a defect that lives at
+// one width inside a band and not at that width — 390 or 412 px rather than 320, 768 rather than 750 — is
+// not seen by this gate. Those widths are not unwatched, only unwatched here: `npm run shot` loads every
+// page at 390, 1024 and 1440, `npm run narrow` and `npm run flow` drive a 390 px stage, and
+// `DEVICE_ONLY=phone,phone-android,tablet,desktop-wide` puts the old matrix back for one run. What the
+// derivation keeps is what makes this gate worth its time: touch against mouse, the drawer below the
+// breakpoint against the rail above it, every glossary term on the page, and the paired book's
+// reading-column floor at both ends of its band. A book's own stylesheet may add rungs inside a band —
+// tongjian/zj.css does, at 380, 900, 1100, 1200, 1480 and 1600 px — and there the class's narrowest device
+// is loaded and the wider ones are not, which is the same cost this bound names. The guard beside the band
+// table fails by name if the cut points ever stop agreeing with DRAWER_BELOW: that is the one coarsening
+// that would silently lose a whole suite, because the drawer and the rail would land in one shape.
 //
 // Bound, for the corner and width checks added on 2026-09-19. The corner checks measure the controls
 // that actually render (a control with no box at all is skipped) and compare against the header's own
@@ -60,7 +103,16 @@ import { startServer } from './serve.js';
 import { WEBGL_ARGS, collectErrors, PAGES, BOOKS } from './lib/browser.js';
 import { trim, PAGE_HINT } from './lib/trim.js';
 
-const OUT = 'out/devices';
+// Where this run's evidence goes. `out/devices/` for a single run, unchanged; `out/devices-<label>/` when
+// DEVICE_LABEL names one, emptied the same way, so a second run in a shared tree keeps its frames and its
+// report.json instead of taking the first run's. Same name rule and same shape as tools/inspect.js's
+// `--label`, so the directory is always one of this tool's own.
+const LABEL = process.env.DEVICE_LABEL || null;
+if (LABEL !== null && !/^[a-z0-9][a-z0-9_-]{0,31}$/.test(LABEL)) {
+  console.error(`DEVICE_LABEL="${LABEL}" is not usable as a directory name; use 1 to 32 characters of a-z, 0-9, underscore or hyphen, starting with a letter or digit. What would satisfy this: DEVICE_LABEL=before, which writes out/devices-before/ beside the default out/devices/.`);
+  process.exit(2);
+}
+const OUT = LABEL === null ? 'out/devices' : `out/devices-${LABEL}`;
 
 // Each entry is a shape the layout has to survive. `touch` devices are emulated as phones and tablets
 // (touch events, mobile user agent, coarse pointer); the rest are ordinary desktop browsers.
@@ -85,8 +137,10 @@ const MIN_TARGET = 24;
 
 // Three engines, not one. Emulating an iPhone in Chromium gives you an iPhone's SIZE and an iPhone's
 // INPUT, and Blink's layout — but a real iPhone runs WebKit, and the owner's four defects were found on
-// a real phone. So the phone and desktop shapes are re-run on WebKit and Gecko over the two pages that
-// between them carry everything this gate checks, while Chromium carries the full device matrix.
+// a real phone. So the two shapes either side of the drawer breakpoint are re-run on WebKit and Gecko over
+// the two pages that between them carry everything this gate checks, while Chromium carries every shape
+// each page needs; `crossOf` below takes that pair from the page's own load set rather than from a list
+// here, so it cannot name a shape the derived matrix no longer loads.
 // Widening every engine to every device and page would triple a gate that is already the slowest in
 // the chain for a thin return: the engines differ in layout and input handling, not in how many screen
 // sizes exist.
@@ -100,13 +154,14 @@ const ENGINES = [
   { id: 'firefox', launch: () => firefox.launch(), full: false },
 ];
 
-// What the two secondary engines run: the shapes either side of the drawer breakpoint, over the library
-// and one chapter, which between them carry everything the suites below check — the header, which every
-// page has, and the rail, the glossary terms and the text column, which a chapter has. Page ids are
-// book-qualified (see `discoverBooks`), so this names one chapter rather than whichever chapter 1
-// happens to match first. Today is not here: its study surfaces are `npm run sitting`'s, on Chromium
-// only, and nothing below presses them.
-const CROSS_DEVICES = ['phone', 'desktop'];
+// Which pages the two secondary engines run: the library and one chapter, which between them carry
+// everything the suites below check — the header, which every page has, and the rail, the glossary terms
+// and the text column, which a chapter has. Page ids are book-qualified (see `discoverBooks`), so this
+// names one chapter rather than whichever chapter 1 happens to match first. Today is not here: its study
+// surfaces are `npm run sitting`'s, on Chromium only, and nothing below presses them. WHICH shapes they run
+// is not named here: `crossOf` below takes the two either side of the drawer breakpoint out of each page's
+// own derived load set, so a named pair can never fall out of the matrix and leave these engines with
+// nothing to load.
 const CROSS_PAGES = ['library', 'biology/ch01'];
 
 // The selectors the suites read, in one place, so a rename fails by name below.
@@ -143,6 +198,25 @@ const MIN_WIDE_SHARE = 50;
 const widthOf = (device) => device.use.viewport?.width ?? 0;
 const isInBand = (device) => widthOf(device) >= WIDE_FROM && widthOf(device) <= WIDE_TO;
 const describeDevice = (device) => `${device.id} (${widthOf(device)} px)`;
+// The layout's own widths, and the bands between them. Inside one band no rule of the SHARED stylesheets
+// changes, so two viewports in one band differ only where a book's own stylesheet says so — the
+// approximation the derivation below makes, and the header's bound costs it out. The cut points are read
+// off src/styles/: 480 (layout.css:606), 600 (layout.css:597, typography.css:365, components.css:830), 800
+// (layout.css:401 and :470 — the drawer, and with it the header's own padding and breadcrumb), 1000
+// (layout.css:389, the rail's width) and 1400 (layout.css:318, where the third column appears). Nothing
+// there answers `(pointer: …)` or `(hover: …)`, so a page lays out as a function of its width alone: the
+// input a device has decides how this gate presses, never how the page renders.
+const BREAKPOINTS = [480, 600, 800, 1000, 1400];
+// 800 has to be one of them or the derivation is wrong. A band that straddled it would put a device with a
+// drawer and a device with a rail in one shape, and a shape keeps its narrowest member — so the rail side
+// would lose its load and the toggle-absent check with it, without a word. That is the one coarsening this
+// table cannot survive, so the run stops on it by name.
+if (!BREAKPOINTS.includes(DRAWER_BELOW)) {
+  console.error(`BREAKPOINTS ${BREAKPOINTS.join(', ')} does not include DRAWER_BELOW (${DRAWER_BELOW}), so a band straddles the drawer breakpoint. Such a band holds a device with a drawer and a device with a rail as one shape, and the derivation keeps only the narrower of the two, so the rail side would lose its load and the check that the drawer button is gone above ${DRAWER_BELOW} px with it. What would satisfy this: put ${DRAWER_BELOW} back in BREAKPOINTS in tools/devices.js.`);
+  process.exit(1);
+}
+// How many of them the width has reached. 0 is a small phone; 5 is 1400 px and up.
+const bandOf = (device) => BREAKPOINTS.filter((b) => widthOf(device) >= b).length;
 const IN_BAND_DEVICES = DEVICES.filter(isInBand);
 // The pages the floor can apply to: a chapter of a paired book, which is what `pairedPage` below decides
 // per load. `shapeOf` is declared below and hoists.
@@ -167,6 +241,69 @@ function shapeOf(pageDef) {
   return BOOKS.some((b) => b.id === pageDef.id) ? 'book' : 'chapter';
 }
 
+// ---------------------------------------------------------------------------------------------------
+// The matrix, derived from what each page carries.
+//
+// A page is loaded on ONE DEVICE PER SHAPE it can exercise, and a shape is a layout band together with an
+// input. Three statements decide a load, and each is a fact about the checks above rather than a taste:
+//
+// 1. ONE DEVICE PER SHAPE, because a second device in the same shape buys a load and no verdict. Two
+//    viewports in one band differ by nothing the shared stylesheets say (BREAKPOINTS above), and two
+//    devices that press the same way drive every control here the same way, so each measure in this file
+//    reads the same number on both. Nine shapes over every page was 107 loads on the tree of 2026-09-19,
+//    most of them measuring what the load before them had already measured.
+// 2. THE INPUT SEPARATES SHAPES ONLY WHERE SOMETHING IS PRESSED. The drawer button, a link in it, its
+//    outside tap and every glossary term are pressed with the device's own input, and the product branches
+//    on it: src/components/term.js opens a card on hover only where `(pointer: coarse)` is false, because a
+//    tap is a hover and a click in one gesture and the hover used to win (defect register, 2026-09-12). A
+//    page whose only subject is the header has nothing to press, and no stylesheet here asks about the
+//    pointer, so touch and mouse at one width are one shape for it.
+// 3. THE FLOOR TAKES BOTH ENDS OF ITS BAND. A chapter of PAIRED_BOOKS is loaded at the narrowest and the
+//    widest device inside WIDE_FROM–WIDE_TO, because the floor is a SHARE of the viewport and the share
+//    falls as the window grows: 58.2% at 1440 px and 52.8% at 1920 px against a 50% floor, so the top of
+//    the band is the case nearest the edge.
+//
+// The device that represents a shape is its NARROWEST member, because every horizontal measure here is
+// worst at the narrowest width: the header control that shrank under 24 px did it at 320 px (defect
+// register, 2026-09-19), and an overflowing sort control and an overflowing table both ran off a phone.
+// What this costs is in the header's bound.
+const shapeKey = (device, presses) => (presses ? `${bandOf(device)}/${device.kind}` : `${bandOf(device)}`);
+const byWidth = (a, b) => widthOf(a) - widthOf(b);
+
+// The devices one page is loaded on, and which kind of page it is in the rule's own words. `presses` is
+// whether the page has anything this gate presses — the drawer button and its link, its outside tap, and
+// every glossary term — which is EXPECT's rail and terms, the two subjects that take the device's input.
+function matrixFor(pageDef) {
+  const expect = EXPECT[shapeOf(pageDef)];
+  const presses = Boolean(expect.rail || expect.terms);
+  const paired = PAIRED_BOOKS.includes(String(pageDef.id).split('/')[0]) && shapeOf(pageDef) === 'chapter';
+  const held = new Map();
+  for (const device of DEVICES) {
+    const key = shapeKey(device, presses);
+    const shown = held.get(key);
+    if (!shown || widthOf(device) < widthOf(shown)) held.set(key, device);
+  }
+  const devices = DEVICES.filter((d) => [...held.values()].includes(d));
+  if (paired) {
+    // The other end of the floor's band. The narrowest device in it already represents the shape, so this
+    // adds the widest one and only when it is a different device.
+    const widest = DEVICES.filter(isInBand).sort(byWidth).at(-1);
+    if (widest && !devices.includes(widest)) devices.push(widest);
+  }
+  return { kind: !presses ? 'header-only page' : paired ? 'paired-column chapter' : 'chapter', devices: devices.sort(byWidth) };
+}
+
+// The two shapes either side of the drawer breakpoint: the narrowest below it and the widest at or above
+// it, taken from the page's own load set rather than named. A named pair is a list that can fall out of the
+// derived matrix, and a WebKit-only run over a pair that is not in it would load nothing at all — the
+// zero-load guard at the end of this file is the backstop for exactly that, and this is what keeps it from
+// ever firing on a page that exists.
+function crossOf(devices) {
+  const below = devices.filter((d) => widthOf(d) < DRAWER_BELOW).sort(byWidth);
+  const above = devices.filter((d) => widthOf(d) >= DRAWER_BELOW).sort(byWidth);
+  return [below[0], above[above.length - 1]].filter(Boolean);
+}
+
 // Firefox rejects isMobile; strip it and keep the viewport, touch and scale factor.
 function contextFor(engineId, device) {
   const use = { ...device.use };
@@ -175,12 +312,39 @@ function contextFor(engineId, device) {
 }
 
 const themes = trim('DEVICE_THEMES', ['light', 'dark'], { noun: 'theme', unset: ['light'] });
-const wanted = trim('DEVICE_ONLY', DEVICES, { idOf: (d) => d.id, noun: 'device' });
+// DEVICE_ONLY names devices directly and turns the derivation off for the run: it is how a probe asks for a
+// shape the matrix spends no load on — DEVICE_ONLY=phone,phone-android,tablet,desktop-wide is the old
+// nine-shape matrix by hand — and every name in it still has to exist. Unset it is the empty list, which is
+// the whole signal that the derived matrix carries this run, so nothing here reads the variable itself.
+const named = trim('DEVICE_ONLY', DEVICES, { idOf: (d) => d.id, noun: 'device', unset: [] });
 const pages = trim('DEVICE_PAGES', PAGES, { idOf: (p) => p.id, noun: 'page', hint: PAGE_HINT });
 const engines = trim('DEVICE_ENGINES', ENGINES, { idOf: (e) => e.id, noun: 'engine' });
+// What a page is loaded on: the devices DEVICE_ONLY named, or the shapes its own subjects need.
+const devicesFor = (pageDef) => (named.length ? named : matrixFor(pageDef).devices);
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
+console.log(`emptied ${OUT}/${LABEL === null ? ' (the default run directory)' : ` — DEVICE_LABEL=${LABEL}, so the default out/devices/ is untouched`}`);
+
+// What this run will load, page shape by page shape, before it loads anything: the derivation's own report,
+// so a reader of a trimmed run sees which shapes a page was given and the reason it was given them, rather
+// than inferring both from the lines below. A page is missing from these lines only if DEVICE_PAGES or
+// DEVICE_ENGINES left it out, and the summary says so in the same words.
+{
+  const shapeList = (devices) => devices.map((d) => `${d.id} ${widthOf(d)}/${d.kind}`).join(', ');
+  if (named.length) console.log(`matrix: DEVICE_ONLY named ${named.length} device(s), so the derived matrix is off for this run and every page is loaded on them: ${shapeList(named)}`);
+  const groups = new Map();
+  for (const pageDef of pages) {
+    const { kind } = matrixFor(pageDef);
+    const devices = devicesFor(pageDef);
+    const key = `${kind}: ${devices.map((d) => d.id).join(',')}`;
+    if (!groups.has(key)) groups.set(key, { kind, devices, pages: [] });
+    groups.get(key).pages.push(pageDef.id);
+  }
+  for (const g of groups.values()) {
+    console.log(`matrix: ${g.pages.length} ${g.kind}(s) on ${g.devices.length} of ${DEVICES.length} shape(s) — ${shapeList(g.devices)}: ${g.pages.join(', ')}`);
+  }
+}
 
 const server = await startServer({ port: 0, quiet: true });
 let browser = null;
@@ -197,9 +361,13 @@ async function press(page, locator, kind) {
 
 try {
   for (const engine of engines) {
-    // The full matrix on Chromium; the two shapes either side of the drawer breakpoint on the others.
-    const engineDevices = engine.full ? wanted : wanted.filter((d) => CROSS_DEVICES.includes(d.id));
+    // Chromium loads every shape a page needs; the secondary engines load the two either side of the drawer
+    // breakpoint, over the library and one chapter. Both come from the page's own load set, so a page's
+    // shapes decide the run rather than a list beside it.
     const enginePages = engine.full ? pages : pages.filter((p) => CROSS_PAGES.includes(p.id));
+    const shapesFor = (pageDef) => (engine.full ? devicesFor(pageDef) : crossOf(devicesFor(pageDef)));
+    const deviceIds = new Set(enginePages.flatMap((p) => shapesFor(p).map((d) => d.id)));
+    const engineDevices = DEVICES.filter((d) => deviceIds.has(d.id));
     if (!engineDevices.length || !enginePages.length) continue;
     browser = await engine.launch();
     try {
@@ -207,7 +375,17 @@ try {
       for (const theme of themes) {
         const context = await browser.newContext(contextFor(engine.id, device));
         for (const pageDef of enginePages) {
+          // The page decides: a device this engine runs for one page is not loaded on a page that carries
+          // none of its subject.
+          if (!shapesFor(pageDef).some((d) => d.id === device.id)) continue;
           const where = `${engine.id} ${device.id} ${pageDef.id}${themes.length > 1 ? ` ${theme}` : ''}`;
+          // The frame's own name. The ENGINE is in it because the secondary engines load the same device and
+          // page Chromium does: without it, `phone-small-library-light.png` held whichever engine wrote last,
+          // and WebKit's and Gecko's renderings stood in for Blink's under a name that claimed to be both.
+          // The page id is book-qualified, so its slash is flattened too: left in,
+          // `phone-small-biology/ch01.png` writes into a subdirectory named after a device and a book, which
+          // is not what the run's own summary describes. tools/inspect.js flattens it for the same reason.
+          const pageName = pageDef.id.replaceAll('/', '-');
           const expect = EXPECT[shapeOf(pageDef)];
           const page = await context.newPage();
           page.setDefaultTimeout(120_000);
@@ -546,7 +724,7 @@ try {
               counts.width += `, and ${FLOOR} was NOT exercised — it belongs to a chapter of ${PAIRED_BOOKS.join(', ')} (${FLOOR_PAGES.join(', ')}), not to this page`;
             }
 
-            await page.screenshot({ path: `${OUT}/${device.id}-${pageDef.id}-${theme}.png`, fullPage: false });
+            await page.screenshot({ path: `${OUT}/${engine.id}-${device.id}-${pageName}-${theme}.png`, fullPage: false });
           } catch (err) {
             found.push(err.message.split('\n')[0]);
           }
@@ -584,25 +762,44 @@ writeFileSync(`${OUT}/report.json`, JSON.stringify(report, null, 2));
 
 // A run that loaded nothing is `tools/lib/trim.js`'s failure one level up, and that file cannot see it:
 // each variable names something that exists, and the two lists still meet in no load at all. `DEVICE_ONLY`
-// can only be checked against the full matrix and `DEVICE_ENGINES` against the engine list, so the empty
-// cross-product is invisible from either side. It is not a hypothetical: the secondary engines run two
-// shapes over two pages (CROSS_DEVICES/CROSS_PAGES above), so a WebKit run over a 資治通鑑 chapter names
-// eight valid devices and a valid page and runs none of them, printing "0 load(s) … all clean".
+// can only be checked against the device list and `DEVICE_ENGINES` against the engine list, so the empty
+// cross-product is invisible from either side. It is not a hypothetical: the secondary engines run the two
+// shapes either side of the drawer breakpoint over two pages (CROSS_PAGES above and `crossOf`), so a WebKit
+// run over a 資治通鑑 chapter names three valid engines and a valid page and runs neither, printing
+// "0 load(s) … all clean".
 if (!loads) {
   const engineNames = engines.map((e) => e.id).join(', ');
   const pageNames = pages.map((p) => p.id).join(', ');
   console.error(`
-FAIL: this run loaded no page at all, so not one check in this file ran, and "all clean" over zero loads is the shape of a gate that did not run. DEVICE_ENGINES=${engineNames} and DEVICE_PAGES=${pageNames} meet in no load: chromium runs the whole matrix, and the other engines run ${CROSS_DEVICES.join(' and ')} over ${CROSS_PAGES.join(' and ')} only (CROSS_DEVICES/CROSS_PAGES in tools/devices.js). What would satisfy this: name an engine and a page that meet, or drop one of the two variables.`);
+FAIL: this run loaded no page at all, so not one check in this file ran, and "all clean" over zero loads is the shape of a gate that did not run. DEVICE_ENGINES=${engineNames} and DEVICE_PAGES=${pageNames} meet in no load: chromium loads every shape a page needs, and each other engine loads the two shapes either side of the drawer breakpoint over ${CROSS_PAGES.join(' and ')} only (CROSS_PAGES and crossOf in tools/devices.js). What would satisfy this: name an engine and a page that meet, or drop one of the two variables.`);
   process.exit(1);
 }
 
-// Report what actually ran, not what was configured. `wanted.length` was printed here and it is the
-// device list, not the run: a WebKit-only run over two shapes announced "across 9 devices". A gate that
-// overstates its own coverage is the same failure as a gate that checks nothing, one step later.
+// Report what actually ran, not what was configured. This line used to print `wanted.length` — the
+// configured device list, not the run — so a WebKit-only run over two shapes announced "across 9 devices".
+// The same overstatement is still available from the derived matrix or from DEVICE_ONLY, so it is computed
+// from `report`, which is what ran. A gate that overstates its own coverage is the same failure as a gate
+// that checks nothing, one step later.
 const ran = new Set(report.map((r) => `${r.engine}/${r.device}`));
 const engineIds = [...new Set(report.map((r) => r.engine))].join(", ");
 const pageCount = new Set(report.map((r) => r.page)).size;
-const coverage = `${loads} load(s) over ${ran.size} engine-device pair(s) (${engineIds}) on ${pageCount} page(s)`;
+const ranDevices = [...new Set(report.map((r) => r.device))].map((id) => DEVICES.find((d) => d.id === id)).filter(Boolean);
+const coverage = `${loads} load(s) over ${ran.size} engine-device pair(s) (${engineIds}) on ${pageCount} page(s)${named.length ? `, DEVICE_ONLY=${named.map((d) => d.id).join(',')} — the derived matrix is off for this run` : ''}`;
+
+// Which pages this run judged, and which pages of the tree it did not. A run scoped by DEVICE_PAGES proves
+// those pages and no others, and a green summary that does not say so reads as a repository-wide verdict:
+// the session of 2026-09-19 had a scoped green in front of it and had to work the scope out by hand from
+// the page ids in the load lines. So the summary names the pages that were judged and, when the tree holds
+// pages this run never loaded, names those and says they were outside it. The engines are the second way to
+// fall outside — only Chromium carries every page — and the same sentence carries that too.
+const judged = [...new Set(report.map((r) => r.page))];
+const outside = PAGES.filter((p) => !judged.includes(p.id)).map((p) => p.id);
+const scope = pages.length < PAGES.length
+  ? `DEVICE_PAGES selected ${pages.map((p) => p.id).join(', ')}`
+  : `DEVICE_ENGINES selected ${engines.map((e) => e.id).join(', ')}, and only ${ENGINES.filter((e) => e.full).map((e) => e.id).join(', ')} loads every page`;
+const pagesLine = outside.length
+  ? `judged ${judged.length} of the tree's ${PAGES.length} page(s): ${judged.join(', ')}. OUTSIDE THIS RUN, so this is not a repository-wide verdict: ${outside.join(', ')} — ${scope}`
+  : `judged every page in the tree (${PAGES.length}): ${judged.join(', ')}`;
 
 // Did the width floor run, and if not, what would have made it run? The per-load line carries the same
 // answer for its own page; this line carries it for the run, because a reader of the summary — which is
@@ -617,17 +814,19 @@ const floorLine = floorRan.length
   : `the ${MIN_WIDE_SHARE}% reading-column floor was NOT exercised by this run, and a floor that did not run is not a floor that passed. It applies to ${FLOOR_PAGES.join(', ')} at a ${WIDE_FROM}–${WIDE_TO} px viewport, which in this matrix is ${IN_BAND_DEVICES.map(describeDevice).join(' and ')} — ${
     !pages.some((p) => FLOOR_PAGES.includes(p.id))
       ? `no chapter of ${PAIRED_BOOKS.join(', ')} was in this run (DEVICE_PAGES selected ${pages.map((p) => p.id).join(', ')})`
-      : !wanted.some(isInBand)
-        ? `no device in this run is that wide (DEVICE_ONLY selected ${wanted.map((d) => d.id).join(', ')})`
-        : `both were selected, and the engines are why it did not run: only ${ENGINES.filter((e) => e.full).map((e) => e.id).join(', ')} carries the full device matrix, and the others run ${CROSS_DEVICES.join('/')} over ${CROSS_PAGES.join('/')}`
+      : !ranDevices.some(isInBand)
+        ? `no device this run loaded is that wide (it loaded ${ranDevices.map((d) => d.id).join(', ') || 'none'}${named.length ? `, because DEVICE_ONLY named ${named.map((d) => d.id).join(', ')}` : ''})`
+        : `both were selected, and the engines are why it did not run: only ${ENGINES.filter((e) => e.full).map((e) => e.id).join(', ')} carries the full device matrix, and the others load the two shapes either side of the drawer breakpoint over ${CROSS_PAGES.join('/')} only`
   }`;
 
 if (problems.length) {
   console.error(`
 FAIL: ${problems.length} problem(s) over ${coverage}; see ${OUT}/report.json
-floor:  ${floorLine}`);
+pages:   ${pagesLine}
+floor:   ${floorLine}`);
   process.exit(1);
 }
 console.log(`
 devices: ${coverage}, all clean; screenshots in ${OUT}/
+pages:   ${pagesLine}
 floor:   ${floorLine}`);
