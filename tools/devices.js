@@ -135,6 +135,37 @@ const DRAWER_BELOW = 800;
 // WCAG 2.2 target size (minimum) is 24 by 24 CSS pixels.
 const MIN_TARGET = 24;
 
+// How long each phase of a load may take, in one place, because a single inherited number cannot say
+// which phase was slow. `page.setDefaultTimeout(120_000)` used to be the only budget on a load: it
+// covered the navigation, the handshake, the font wait, every one of the six suites and the capture,
+// and the string the run printed for a stall in any of them was Playwright's own
+// `page.screenshot: Timeout 120000ms exceeded` — which names the screenshot whether or not the
+// screenshot is what stalled. Measured 2026-09-19, on this tree: `page.screenshot` is three waits under
+// one `progress.race` (playwright-core coreBundle.js:20857 screenshotPage, :20912 the all-frames
+// prepare, :20916 `document.fonts.ready` in the utility world, :44556 the CDP capture), so the font
+// wait and the raster capture produce the identical string. The phases also want different sizes: the
+// capture is local work whose worst measured value is 3.35 s over 68 rounds, while `goto` is a network
+// wait that went from 2 s to 20 s when the machine was oversubscribed with 64 burners on 32 cores.
+//
+// So each phase gets its own budget and its own message, and NO PHASE'S BUDGET IS LOOSER THAN THE 120 s
+// IT HAD BEFORE — every number below is the same or tighter, so this change cannot turn a green load
+// red that would have been green, and cannot make a red one take longer to report. The capture's 45 s
+// is 13.4 times the worst capture measured on this tree (3348 ms, out/devtime/README.md), and the
+// suites' 60 s is 13 times the longest whole `tongjian` load measured (7.3 s, the gate's own tuple).
+// A budget tighter than the work needs is a false red, which is why each one carries its own margin
+// here rather than one number being halved.
+const CAPTURE_BUDGET_MS = 45_000;
+const SUITE_BUDGET_MS = 60_000;
+const FONTS_BUDGET_MS = 30_000;
+const NETWORK_BUDGET_MS = 120_000;
+
+// The marker `runPhase` puts in front of its own message, so the catch below can tell a phase budget
+// that fired from any other failure and not wrap the same sentence twice. It is stripped before the
+// message is printed, so nothing in the run's output carries it. A plain word rather than an invisible
+// one on purpose: a control character in a tracked file made `tools/shot.js` unreadable to the edit
+// tool, and `test/control-chars.test.js` fails one (docs/policies/local-rules.md).
+const PHASE_TIMEOUT_FLAG = 'phase-budget: ';
+
 // Three engines, not one. Emulating an iPhone in Chromium gives you an iPhone's SIZE and an iPhone's
 // INPUT, and Blink's layout — but a real iPhone runs WebKit, and the owner's four defects were found on
 // a real phone. So the two shapes either side of the drawer breakpoint are re-run on WebKit and Gecko over
@@ -388,9 +419,47 @@ try {
           const pageName = pageDef.id.replaceAll('/', '-');
           const expect = EXPECT[shapeOf(pageDef)];
           const page = await context.newPage();
-          page.setDefaultTimeout(120_000);
+          // What this load is, in one phrase, for a budget message to name. Built here rather than from
+          // `where` alone because `where` names the theme only when more than one runs.
+          const thisLoad = `${engine.id} at ${device.id} (${widthOf(device)} px, ${device.kind}) on ${pageDef.id}${themes.length > 1 ? `, ${theme} theme` : ''}`;
+          page.setDefaultTimeout(NETWORK_BUDGET_MS);
           const errors = collectErrors(page);
           const found = [];
+          // Which phase of the load is running, so a thrown timeout can name it. Every phase below sets
+          // this before its own awaits; `why` is the closing sentence of the message and says what the
+          // budget is for, because "what would satisfy this" is the half of an error the reader needs.
+          let phase = 'the load';
+          let why = `What would satisfy this: the phase must finish inside its budget in tools/devices.js, or the budget must be raised there with the measurement that says so.`;
+          // Run one phase of the load, bound it by the budget it is given, and fail naming it. This is the
+          // whole mechanism, and it is deliberately one function with no companion: a budget is enforced by
+          // the clock below rather than by threading a timeout option through every Playwright call.
+          //
+          // That is the smaller correct change, and it is smaller because of what the first version cost.
+          // Handing the budget to the calls as well needed a helper for options-carrying calls
+          // (`goto`, `screenshot`, `locator.count`) and another for argument-carrying ones
+          // (`evaluate`, `waitForFunction`), and that layer produced two bugs of its own inside twenty
+          // minutes — `Too many arguments` from an argument slot Playwright counts, and a helper renamed
+          // at its definition and not everywhere — both caught by this change's own phase message. The
+          // page's default timeout is 120 s and stays there as the backstop it always was; the budget a
+          // reader cares about is the one in the message, and every phase below carries one.
+          //
+          // The 5 ms of slack keeps Playwright's own rejection the one that is reported when both fire:
+          // its message carries the API call that timed out, which is evidence this one should not throw
+          // away. A call that never returns at all lands here instead of hanging the gate. The work
+          // promise is caught rather than abandoned, so a budget that fires does not leave an unhandled
+          // rejection behind it.
+          const runPhase = (budget, work) => {
+            let timer = null;
+            const started = Date.now();
+            const running = Promise.resolve().then(work);
+            running.catch(() => {});
+            return Promise.race([
+              running,
+              new Promise((_, fail) => {
+                timer = setTimeout(() => fail(new Error(`${PHASE_TIMEOUT_FLAG}the ${phase} did not finish within ${budget} ms (it had run ${Date.now() - started} ms when this was written) in ${thisLoad}; ${why}`)), budget + 5);
+              }),
+            ]).finally(() => clearTimeout(timer));
+          };
           // What the width floor did on this load, in one word for the report and one sentence on the
           // line: 'exercised' means its two shares were compared against MIN_WIDE_SHARE, and anything else
           // says why they were not. A trimmed run whose every load says one of the others is a run whose
@@ -400,15 +469,69 @@ try {
           // cannot read like one that checked everything.
           const counts = { controls: 0, drawer: false, terms: 0, column: false, prose: 0, wide: 0, share: null, pair: null, width: 'not measured' };
           try {
-            await page.goto(`${server.url}${pageDef.path}?theme=${theme}`, { waitUntil: 'load', timeout: 120_000 });
-            await page.waitForFunction(() => window.__textbook?.state === 'ready', null, { timeout: 120_000 });
-            await page.evaluate(() => document.fonts?.ready);
+            // --- the four phases of the load, each under its own budget and each saying its own name ---
+            //
+            // The order is the order it has always been. What is new is that a stall in any of them is
+            // reported as that phase rather than as whatever Playwright call happened to be in flight.
+            // The width every measure below is read against: the context's own viewport when it has one,
+            // and otherwise the device's declared width.
+            const width = page.viewportSize()?.width ?? device.use.viewport?.width ?? 0;
+            phase = 'navigation';
+            why = `What would satisfy this: ${NETWORK_BUDGET_MS} ms is the budget for the page's load event at ${device.id}, which is a network wait — the fonts come from Google Fonts and the 3D figures from jsdelivr, so it is the budget that legitimately scales with how busy the network is rather than with the machine. It is unchanged from the single default timeout this gate ran under before, so a load that fails here failed before.`;
+            await runPhase(NETWORK_BUDGET_MS, () => page.goto(`${server.url}${pageDef.path}?theme=${theme}`, { waitUntil: 'load', timeout: NETWORK_BUDGET_MS }));
+
+            // The handshake (see the header): `window.__textbook.state` becomes 'ready' when the shell
+            // has mounted. This is the page's own JavaScript plus, under ?eager=1, every figure — so it is
+            // renderer work, and its budget is the network one because it runs while fonts are still
+            // arriving.
+            phase = 'the ready handshake (`window.__textbook.state` never became "ready")';
+            why = `What would satisfy this: the shell must mount and set window.__textbook.state to 'ready' within ${NETWORK_BUDGET_MS} ms. The figure states read at the moment of failure are printed beside this message, so a figure stuck in 'loading' is visible rather than inferred. This budget is unchanged from the single default timeout this gate ran under before.`;
+            // `page.waitForFunction` does accept a timeout option, but the budget is enforced by the timer
+            // above for every phase alike, so the call sites stay uniform and there is no second mechanism
+            // to get wrong.
+            await runPhase(NETWORK_BUDGET_MS, () => page.waitForFunction(() => window.__textbook?.state === 'ready', null, { timeout: NETWORK_BUDGET_MS })).catch(async (err) => {
+              // The handshake is the one phase whose failure has a second question in it: which figure
+              // never reached a state. The read happens here, inside the failure path, so a healthy load
+              // pays nothing for it and a page that will not answer the probe still reports the phase.
+              const figures = await page.evaluate(() => Object.fromEntries(Object.entries(window.__textbook?.figures ?? {}).map(([k, v]) => [k, v.state]))).catch((probe) => `could not be read: ${probe.message.split('\n')[0]}`);
+              // The phase marker is kept at the front of the message: this detail is appended AFTER the
+              // sentence runPhase wrote, and the catch below keys the marker on the first characters, so
+              // a marker pushed into the middle would make the same message report itself twice.
+              const detail = ` Figure states at that moment: ${JSON.stringify(figures)}.`;
+              throw err.message.startsWith(PHASE_TIMEOUT_FLAG)
+                ? new Error(`${PHASE_TIMEOUT_FLAG}${err.message.slice(PHASE_TIMEOUT_FLAG.length)}${detail}`)
+                : new Error(`${err.message}${detail}`);
+            });
+
+            // The font wait, hoisted out of the screenshot and given a name. This is the one phase whose
+            // old attribution was provably wrong: `page.screenshot` waits for `document.fonts.ready`
+            // itself, in the utility world (coreBundle.js:20916), and reports a stall there as a
+            // screenshot timeout. Asking for it here means the wait happens where the message can name
+            // it. It is normally already resolved — the navigation above cannot finish before the
+            // stylesheets do, and this page declares 204 faces — so the budget is small and a stall here
+            // is a fact about the page's fonts, not about the capture.
+            phase = 'the font wait (`document.fonts.ready` never resolved)';
+            why = `What would satisfy this: every font the page asks for must finish loading. This is not the screenshot's budget — the same wait happens inside page.screenshot, which is why a stall there used to be reported as a screenshot timeout — and ${FONTS_BUDGET_MS} ms is roughly 4000 times what this wait has measured (2 to 7 ms) since the navigation cannot complete before the stylesheets do.`;
+            await runPhase(FONTS_BUDGET_MS, () => page.evaluate(() => document.fonts?.ready));
             await page.waitForTimeout(300);
 
-            const width = page.viewportSize()?.width ?? device.use.viewport?.width ?? 0;
-
             // --- the document must not scroll sideways ---
-            const doc = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
+            // From here to the screenshot, the phases are the suites' own names, each stated before its
+            // group so a stall inside one is reported as that group rather than as "the load". They share
+            // SUITE_BUDGET_MS because they are the same kind of work on the same settled page — evaluates,
+            // locators and presses — and each group's own assertions name which check failed; the budget
+            // only has to say which phase of the load the time went.
+            phase = 'the header and sideways-scroll phase';
+            why = `What would satisfy this: these are DOM reads on an already-loaded page, and ${SUITE_BUDGET_MS} ms is 13 times the longest whole load this gate has measured (7.3 s, the tongjian/phone-landscape tuple). The reads themselves cannot be slow; a budget firing here means the renderer stopped answering, which is the diagnosis this message exists to make possible.`;
+            // This one cannot carry its budget through a call option: `page.evaluate` takes the page
+            // function and one argument and NOTHING else in Playwright 1.61.1 (types.d.ts:186 —
+            // `evaluate<R>(pageFunction, arg?: any)`), so its timeout comes only from the page's own
+            // default. `runPhase`'s timer is therefore what bounds this read. Both mutations that taught
+            // me so are worth keeping: `undefined` in the argument slot and `{}` in it each return
+            // `Too many arguments`, because Playwright counts the arguments it is passed — and the second
+            // of those two was caught by this change's own phase message, on the first run after it was
+            // written, which is the evidence that the change does what it claims.
+            const doc = await runPhase(SUITE_BUDGET_MS, () => page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth })));
             if (doc.scrollWidth > doc.clientWidth + 1) found.push(`the page scrolls sideways: ${doc.scrollWidth} px of content in a ${doc.clientWidth} px viewport`);
 
             // --- the header is there, and every control in it inside the viewport and big enough to hit ---
@@ -476,7 +599,9 @@ try {
             }
 
             // --- the contents drawer, on a chapter page ---
-            const hasRail = await page.locator(SEL.rail).count();
+            phase = 'the contents-drawer phase';
+            why = `What would satisfy this: the drawer is opened, dismissed by an outside tap and by a link, each with the device's own input, and each waits 650 ms for the animation. ${SUITE_BUDGET_MS} ms bounds the whole interaction rather than each press inside it, and every further call in this group runs on the page's own ${NETWORK_BUDGET_MS} ms default because tightening those is not what this change is for.`;
+            const hasRail = await runPhase(SUITE_BUDGET_MS, () => page.locator(SEL.rail).count());
             if (expect.rail && !hasRail) found.push(`nothing matches ${SEL.rail} on this chapter page, so the contents drawer was not checked at all`);
             if (hasRail) {
               counts.drawer = true;
@@ -564,7 +689,9 @@ try {
             }
 
             // --- anything that pops over the text must stay on screen ---
-            const terms = await page.locator(SEL.term).count();
+            phase = 'the glossary-popover phase';
+            why = `What would satisfy this: every term on the page is pressed and its popover measured, 90 ms apart, and the count is printed on the load's own line. ${SUITE_BUDGET_MS} ms bounds the whole walk; a failure inside it names the term it was reading, because the loop builds that label for its own messages.`;
+            const terms = await runPhase(SUITE_BUDGET_MS, () => page.locator(SEL.term).count());
             counts.terms = terms;
             if (expect.terms && !terms) found.push(`nothing matches ${SEL.term} on this chapter page, so no glossary popover was opened`);
             if (terms) {
@@ -603,11 +730,13 @@ try {
             }
 
             // --- one column, one set of edges ---
+            phase = 'the text-column phase';
+            why = `What would satisfy this: two evaluates that read the rendered boxes of the prose and the wide figures, and compare their edges. ${SUITE_BUDGET_MS} ms against reads that measure in single-digit milliseconds.`;
             // The blocks of a chapter should line up. They did not: the opener sat outside the text
             // column so its title ran 38 px past the prose, the hero figure's breakout landed 38 px past
             // every other wide figure, and `--measure: 66ch` resolved against each element's own font,
             // so a small-caps label and body prose ended 88 px apart on the same page.
-            const cols = await page.evaluate((sel) => {
+            const cols = await runPhase(SUITE_BUDGET_MS, () => page.evaluate((sel) => {
               const main = document.querySelector(sel);
               if (!main) return null;
               const round = (n) => Math.round(n);
@@ -625,7 +754,7 @@ try {
                 wide.push({ what: `${el.tagName.toLowerCase()}#${el.id || ''}`, l: round(r.left), r: round(r.right) });
               }
               return { prose, wide };
-            }, SEL.main);
+            }, SEL.main));
             counts.column = Boolean(cols);
             if (expect.column && !cols) found.push(`nothing matches ${SEL.main} on this chapter page, so the text column's edges were not measured`);
             if (cols) {
@@ -724,9 +853,29 @@ try {
               counts.width += `, and ${FLOOR} was NOT exercised — it belongs to a chapter of ${PAIRED_BOOKS.join(', ')} (${FLOOR_PAGES.join(', ')}), not to this page`;
             }
 
-            await page.screenshot({ path: `${OUT}/${engine.id}-${device.id}-${pageName}-${theme}.png`, fullPage: false });
+            // --- the capture, and the one phase whose old message was actively misleading ---
+            //
+            // This call is a screenshot, a font wait and an all-frames evaluate under one Playwright
+            // timeout, so its own failure string says "screenshot" for a stall in any of the three
+            // (coreBundle.js:20857 screenshotPage, :20912 the prepare, :20916 `document.fonts.ready`).
+            // The font wait is now asked for above, by name; what is left under this budget is the
+            // prepare evaluate and the raster capture. The budget is local-sized on purpose: over 68
+            // measured rounds at the shape this gate used to fail on, the capture ran 68–3348 ms with a
+            // median of 107–185, so 45 s is 13.4 times the worst one ever recorded, while the phases
+            // above — which wait on the network and the renderer's start-up — keep the 120 s they had.
+            phase = 'the capture (`page.screenshot`: the all-frames prepare evaluate and the raster capture — the font wait is the phase above, not this one)';
+            why = `What would satisfy this: the screenshot has to return within ${CAPTURE_BUDGET_MS} ms. Measured on this tree, 68 rounds of this call at 750x342 with deviceScaleFactor 3 took 107-185 ms at the median and 3348 ms at the worst (out/devtime/README.md), so a budget firing here is not a slow render — it is the renderer or the browser process not answering at all, and the shape is not the cause (a 5.18 MP desktop capture measured 620 ms at its worst). Raising this number is not the fix; a run that reaches it has a browser to diagnose.`;
+            await runPhase(CAPTURE_BUDGET_MS, () => page.screenshot({ path: `${OUT}/${engine.id}-${device.id}-${pageName}-${theme}.png`, fullPage: false, timeout: CAPTURE_BUDGET_MS }));
           } catch (err) {
-            found.push(err.message.split('\n')[0]);
+            // The load failed, and the message has to say WHERE. Every phase above sets `phase` and `why`,
+            // so a Playwright rejection — `page.screenshot: Timeout 45000ms exceeded`, whose own words name
+            // the API call rather than the wait inside it — is reported with the phase it happened in
+            // wrapped around it. `runPhase`'s own messages already carry both, so they are not wrapped
+            // twice. This is the whole point of the change: the failure that started it was recorded as a
+            // screenshot timeout, and a screenshot is three waits that report identically
+            // (coreBundle.js:20916 the font wait, :20912 the prepare, :44556 the capture).
+            const line = err.message.split('\n')[0];
+            found.push(line.startsWith(PHASE_TIMEOUT_FLAG) ? line.slice(PHASE_TIMEOUT_FLAG.length) : `${line} — thrown while this load was in ${phase}. ${why}`);
           }
           for (const e of errors) found.push(e);
           loads += 1;
