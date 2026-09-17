@@ -92,6 +92,8 @@ So a number in a design record, a plan or a comment names three things, or it is
 
 This cannot become a gate, and saying so is the point. A comment that names its instrument is still a comment; whether the instrument is the right one for the claim is a question for a person reading it.
 
+**`Measure-Object -Line` counts non-blank lines, and it is the instrument a reader reaches for first.** Found 2026-09-20, when a count in `docs/policies/local-rules.md` was nearly corrected from a true number to a false one: the check `test/control-chars.test.js` is **412 lines**, and `Get-Content <file> | Measure-Object -Line` reports **379**. Both numbers are real and they are different populations — 412 raw newlines, 412 objects from `Measure-Object` without `-Line`, 379 lines with any content on them, because that file holds **33 blank lines**. Nothing in the output says which population was counted, so the wrong number looks exactly as authoritative as the right one, and it is wrong by the blank-line count. The instrument for the number of lines in a file is a raw newline count or `[System.IO.File]::ReadAllLines($path).Count`; reach for `Measure-Object -Line` only when non-blank lines are the thing you mean, and say so when you quote it.
+
 ## A file a tool refuses to read is a defect in the tree
 
 Found 2026-09-19. `tools/shot.js` held literal U+0000 and U+001F characters, so the `edit` tool refused the whole file as binary and a worker who had found a real bug in it could not fix it. The characters were doing real work — a NUL joining two fields into one map key, and a character class for invisible characters — and both are now written as `\u0000` and `\u001f` escapes, which mean the same thing (`e400821`).
