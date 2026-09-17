@@ -269,3 +269,167 @@ The owner read the published site and found chapter 1 announcing that chapter 2 
 - **Whether this intermittent is one defect or several.** The same gate has an older, separate intermittent recorded above (`tapping a glossary term opened no definition`), and the two have never been seen together.
 
 **A candidate mechanism now exists, and it is a candidate, not a cause.** `tools/zj-quiet-browser.cjs` exists to suppress chromium's `0x80000003` crash dialog — the modal recorded in this file on 2026-09-12 — and a modal window raised by the browser process is exactly the mechanism that would hold a screenshot call until a budget fires and then be reported as a screenshot timeout. Nothing in the gate path sets the `NODE_OPTIONS` preload that engages that suppression when `npm test` runs, which is a separate finding owned by another worker and recorded separately; if it holds, it is a candidate explanation for the hang this entry could not reproduce, and settling it needs a run that observes the dialog, not another reading of this file.
+
+
+Scratch fragment for `docs/learning/defect-register.md`, written 2026-09-16 by the worker that measured both
+findings. `out/` is ignored, so this commits nothing; a follow-up appends it. Shape follows the register's
+existing entries: symptom, root cause, what is measured rather than assumed, and what now checks it.
+
+Both findings are the same class, which is why they are one fragment: **a guarantee this repository believed
+it had and did not.** In one case nothing read which rasterizer drew a frame; in the other nothing loaded the
+mechanism that suppresses a crash dialog, and the file that carried the claim named an environment variable
+that no script ever set.
+
+---
+
+## 2026-09-16 — no gate said which rasterizer drew the frame, and the gate's frames depend on it
+
+**Symptom.** A scratch probe read the WebGL renderer out of a chromium launched exactly as the gates launch
+one and got `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)` —
+a CPU rasterizer, on a machine carrying an **RTX 4090**. The whole suite was rendering 3D frames in software
+and no gate's output said so, because no gate read the renderer string at all. A green `sweep3d` reporting
+ninety rendered frames was equally consistent with either rasterizer.
+
+**What was measured rather than argued** (all under ignored `out/gpu/`, nine gate arms, `renderer.json`,
+`arm*.log`, `perkind-*.json`, `compare-*.txt`):
+
+| Question | Answer |
+|---|---|
+| Can this chromium reach the GPU? | **Yes, with one flag.** `--use-angle=d3d11` alone produces `ANGLE (NVIDIA, NVIDIA GeForce RTX 4090 (0x00002684) Direct3D11 vs_5_0 ps_5_0, D3D11)`. Neither headful nor `--headless=new` is needed, and `--use-gl=angle` is redundant. The mechanism is that `--enable-unsafe-swiftshader` is what **pins** the software fallback: without it ANGLE takes the default backend and reaches the device. So `GPU_ARGS` in `tools/lib/browser.js` was already correct, and the `gpu = false` default was the only thing keeping the CPU path. |
+| What is the GPU worth? | `npm run sweep3d` medians **101.1 s → 52.1 s (1.94×)** over nine arms, `ok=90 fail=0` in every one. The four GPU arms sat inside 10% (48.4/48.5/52.1/53.7 s) while the CPU arms ranged 61.1–155.4 s, so the faster condition is the stable one and the spread is CPU-side contention, not a confound in the comparison. Per kind, raster 757.4 → 160.5 ms and frame total 1643.2 → 922.9 ms. |
+| Do the frames match? | **No, and they are not supposed to.** Two CPU runs: 180/180 byte-identical, max Δ 0. Two GPU runs: 119/180 identical, 61 differing by max Δ 1–2. CPU against GPU on the settled figures (`cell3d`, `dna3d`, `water3d`): mean \|Δluma\| 0.12–0.66, `>8 delta` under 1% on 11 of 12 pairs, worst row `cell3d-light-03-bare` at 0.66 / 1.35% / max Δ 86. Inspected at full size with an 8×-amplified difference (`diff-*.png`): composition, geometry, camera, colours, labels and counts identical, the difference tracing each silhouette — the MSAA signature, matching `antialias: true` at `src/figures/lib/three-common.js:58`. |
+| Where does the frame time actually go? | **Readback, not raster.** 762.4 of 922.9 ms per frame on the GPU, 885.8 of 1643.2 ms on the CPU — the screenshot barely moved between them, and it is the same ~180 ms whether a view changed or not. The raster gain cannot move the gate much, and the real lever is the readback nobody has looked at. |
+
+**Decision: the default does not change, and the reason is byte-reproducibility.** 1.94× was declined because
+the CPU path produces 180/180 identical frames and the GPU path does not. "Every frame is a pure function of
+its clock and the reader's actions" is exactly the promise that a screenshot is the same frame every run, and
+a 1–2/255 jitter is a real price against that promise. The speed stays reachable per tool through the
+existing `PERF_GPU` / `SHOT_GPU` / `SWEEP_GPU`, so nothing is lost to a developer who wants the fast loop.
+Two weaker reasons were offered during the round and are recorded here as **not** the basis: "the gate-level
+effect is swamped by contention" (false — the arms resolve it, and the CPU column is the noisy one) and "CI
+has no GPU" (true, but it is an argument about where the flags run, not about whether the trade is good).
+
+**Now checked by.** `tools/lib/browser.js` prints one line per launch naming the rasterizer, its vendor, and
+the flags chromium was really started with, read back from the running browser's own argv through CDP. It is
+**report-only**: SwiftShader is not a failure, because CI has no GPU and a check naming a device would be red
+there for being correct. It fails only when no renderer string can be read at all, since then the instrument
+is broken and silence would read as agreement. Both failure branches were proved to fire: no WebGL context
+(`--disable-webgl`) and a context reporting no renderer (prototype-stubbed `getParameter`), each producing
+`cannot read the WebGL renderer, so this run cannot say which rasterizer drew its frames` —
+`out/gpu/renderer-red.mjs`, 2 of 2 branches, 0 unexpected reds. That proof took three attempts, and the first
+two are worth recording: `addInitScript` overriding `HTMLCanvasElement.prototype.getContext` **never took**
+(the native function was still there afterwards), so the "red proof" was passing by measuring the healthy
+browser twice, and the second attempt stubbed one context instance while the probe made its own canvas.
+
+---
+
+## 2026-09-16 — the crash-dialog mitigation was inert in every run, and its own comment named the reason
+
+**Symptom.** `tools/zj-quiet-browser.cjs` exists to keep chromium's `0x80000003` modal crash dialog off the
+desktop (the 2026-09-12 entry below). It was never loaded. `test/browser-quiet.test.js` asserted its flag
+list and merge function and was green, so the repository read as covered.
+
+**Root cause, in the repository's own words.** The wrapper's header said it was applied "through
+`NODE_OPTIONS=--require=./tools/zj-quiet-browser.cjs`, which applies before any ESM import" — and **nothing in
+this repository set `NODE_OPTIONS`.** Every script was a plain `node tools/<gate>.js`, `tools/test.js` spawned
+gates with `spawnSync(process.execPath, args, { stdio: 'inherit' })` and no `env`, and no workflow set it. The
+unit test's own header named the limit honestly and then deferred the effect to a probe: "this half cannot see
+a patch that silently fails to apply. It proves the intent, the flag list, and the merge function. The probe
+proves the effect" (`test/browser-quiet.test.js:20-21`) — and the probe, `tools/zj-quiet-browser-probe.js`, is
+"run deliberately" and applied the patch by hand at line 31, so it passed whether or not anything was wired.
+So the limitation was documented for the test and the effect was deferred to a check the gates never run.
+
+**Measured.** `node out/gpu/preload-engaged.mjs`, same machine, same tree: with no `NODE_OPTIONS` the process's
+own `execArgv` carries no preload, no `__zjQuiet` marker is on any of the three browser types, and the running
+chromium's command line is **52 arguments with all three flags absent** — `--noerrdialogs`,
+`--disable-crash-reporter`, `--disable-features=Crashpad` missing. Through an npm script after the fix: the
+preload is in `execArgv`, all three types are marked, and the command line is 55 arguments **with all three
+present**.
+
+**Fix.** The wrapper stays the only place the flags are written; the wiring is what makes it load.
+`package.json` gives every browser-launching script `node --require ./tools/zj-quiet-browser.cjs` (18 of 19;
+`audit` is `npm`, and the check asserts that exemption rather than assuming it), and `tools/test.js`'s spawner
+prepends the same `--require` to each gate it runs so the whole chain inherits it. Adding the flags to
+`launch()` instead was rejected on purpose: one preload covers every launch in the process — including
+`tools/devices.js`'s WebKit and Firefox arms, which do not go through `tools/lib/browser.js` — and two
+mechanisms merging one flag list drift apart. `.cjs` is spelled out because the package is `"type": "module"`
+and `--require ./tools/zj-quiet-browser` fails with MODULE_NOT_FOUND on Node 24 (measured). `npm run unit` is
+still 175 pass / 0 fail, because the wrapper's `require('playwright')` is inside a `try`/`catch`.
+
+**Now checked by.** Two things, and the second is the one that covers the class:
+1. Every launch line now prints `preload engaged|absent` and the argv chromium really received, filtered to
+   the flags that matter. A run whose line carries `noerrdialogs disable-crash-reporter
+   disable-features=Crashpad` is positive evidence the preload engaged; their absence is equally visible. No
+   probe is needed to tell the two apart, in any gate, on any run. Proved in a real gate log: wired
+   `preload engaged … args as launched (8 of 56) … noerrdialogs disable-crash-reporter
+   disable-features=Crashpad`, unwired `preload absent … (5 of 53)` with none of the three.
+2. `out/gpu/wiring-check.mjs` derives which scripts need the preload (a target that imports playwright,
+   directly or through `lib/browser.js`) and fails any that does not carry it. Green on the tree: 18 of 18
+   browser-launching scripts wired. Red when the wiring is removed: **13 problems** with every script
+   stripped, and **1 problem** when only `sweep3d` is unwired — naming the script, the file it launches, and
+   the flag to add. Its first version mis-parsed `--require=./tools/zj-quiet-browser.cjs` as the *target* of
+   seven scripts and accused them of being unwired; the fix drops flag words before choosing the target, and
+   that mistake is recorded because a check that cannot parse what it judges reports on itself. **Owed to
+   gate-proofs.md:** promoting this from a scratch probe into `test/browser-quiet.test.js`, where it would be
+   seen by `npm run unit`, with its own mutation proof.
+
+**Still owed, stated rather than implied.** `tools/zj-quiet-browser.cjs:40-44`'s `catch` covers an
+unresolvable playwright so that a plain Node run still works — correct — but it means **"the patch ran and
+could not resolve playwright" and "the patch never ran" produce the same log line.** The new argv read
+narrows it: `__zjQuiet` on the chromium type proves the patch ran *and* found playwright, and genuinely
+present quiet flags prove the merge reached the browser. What it cannot distinguish is the middle case, where
+the preload loaded but resolved nothing. Closing that needs the wrapper to record a marker *before* its
+`require`, which was not done here.
+
+---
+
+## Pointer, and a candidate not a cause
+
+The crash-dialog defect itself (the modal window, `0x80000003`, why it outlives the Node process, and why no
+gate can observe it) is the **2026-09-12 entry, "a browser crash dialog read as the gate misbehaving"** —
+`docs/learning/defect-register.md` line 54. That entry's own row says the mitigation is "preloaded through
+`NODE_OPTIONS=--require`", which is the sentence this fragment corrects: the mechanism was designed, tested in
+isolation, and never connected. The two entries should be read together, and this one does not replace it.
+
+**Is the wiring gap the cause of the unreproduced `devices` hang? A candidate, explicitly not a cause.**
+Nobody has reproduced that hang, and the two are consistent in shape: a gate that runs chromium with the
+dialog suppression inert could sit until a 120 s timeout and then be reported as a screenshot timeout, which
+is what a modal window would look like from inside the gate. But **no measurement here connects them** — all
+nine of this round's arms ran to completion with the mitigation unwired, and no dialog appeared, so
+"unwired" is not sufficient on its own to produce the hang. What would settle it: the next time it is
+reproduced, capture (a) the launch line from the gate log, which now says whether the preload engaged, and
+(b) `tasklist` for a `chrome-headless-shell.exe` with a modal window. If the hang recurs *with* the line
+reading `preload engaged`, the wiring is eliminated and the cause is inside chromium. If it recurs with
+`absent`, look first at whether the preload was bypassed — a gate run through a path that does not honour
+`--require`, or a spawner that does not inherit it. Until one of those is observed, this stays a candidate.
+
+---
+
+## What could not be established
+
+- **Whether the other gates' verdicts survive under the GPU rasterizer.** Only `sweep3d` was authorised and
+  run: four GPU arms, 90/90 frames, zero errors, and its limits sit far from any marginal value. `shot`,
+  `narrow`, `drive` and `devices` were never run under `--use-angle=d3d11`. `npm test` is ten steps and stops
+  at the first red one, so a single marginal measurement going red under a different rasterizer would cost
+  more time than the 49 s the change saves.
+- **The CPU baseline on a quiet machine.** Every arm ran at 90–100% CPU load with another session's chromium
+  processes on the box. The GPU arms' tight clustering and the CPU arms' 2.5× spread make the direction
+  certain, but no CPU arm isolates the renderer from contention, so 101.1 s is a median under load and not a
+  clean baseline.
+- **Whether the mid-run commit changed anything measured.** HEAD advanced `fcae416` → `0865e896` during the
+  round and `git status` grew from 13 to 14 modified files. All six figure modules and both gate files
+  (`tools/sweep3d.js`, `tools/lib/browser.js`) hash identically at start and end, and
+  `git log fcae416..HEAD -- <those files>` is empty, so the A/B variable held still even though the
+  repository did not.
+- **`npm run devices`, one arm, end to end.** Attempted once as
+  `DEVICE_PAGES=tongjian DEVICE_ONLY=phone-landscape DEVICE_THEMES=light npm run devices` and it exited 1 in
+  0.7 s on a **`SyntaxError: Unexpected token ')'` at `tools/devices.js:742`**, an uncommitted in-flight edit
+  by another session (`git show HEAD:tools/devices.js` parses clean, exit 0). So the preload wiring is proved
+  under `sweep3d` and by `wiring-check.mjs`'s 18-of-18, and **not** under `devices`. The step was yielded to
+  the worker that owns that file rather than worked around.
+- **A `devices` wall time, and any trimmed-gate timings taken during the round** (12.4 s for a
+  `SWEEP_KINDS=water3d` run) — measured at 94–100% load with three gates on the box, so they are recorded
+  here as load-affected and are not evidence about the change.
+- **Whether `--enable-automation` on every launch alters gate behaviour.** It is added because
+  `Browser.getBrowserCommandLine` refuses to answer without it, and it is the only way to read the real argv.
+  `sweep3d` is green with it (90/90, twice), and no other gate has been run since it was added.
