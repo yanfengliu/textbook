@@ -1113,7 +1113,13 @@
    the page's 原文 against the corpus character for character. */
 .zj .tb-text :is(p, li, aside, blockquote, figcaption, td, th, dd) [lang="zh-Hant"]:not(.zj-src *):not(.zj-card *):not(tb-figure *),
 .zj .tb-text :is(p, li, aside, blockquote, figcaption, td, th, dd)[lang="zh-Hant"]:not(.zj-src *):not(.zj-card *):not(tb-figure *) {
-  font-size: var(--zj-quoted-size);
+  /* The floor is deliberate: the step down must never take the book's SMALLEST prose below its own UI
+     size. A marked run in a 註 (`.tb-margin-note`, 1rem, and `--text-sm` folded into the column on a
+     phone) would otherwise be dimmed and shrunk at once — two steps away from its surroundings, on type
+     that had least room to give. Measured on chapter 2 at 1440 px: the marked run is 15.2 px, and at
+     390 px the floor holds it at 13 px where 0.95em alone would give 12.4. A review raised this and the
+     number is why the rule has two clauses instead of one. */
+  font-size: max(var(--zj-quoted-size), 0.8125rem);
   color: var(--ink-soft);
 }
 

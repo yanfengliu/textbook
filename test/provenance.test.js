@@ -12,15 +12,22 @@
 //
 // This file proves, on the pages as shipped:
 //
-//   1. **No quotation of 通鑑 goes unmarked.** Every 「…」 run in a page's prose whose text is verbatim
-//      通鑑 (a substring of the corpus, or one of the four lines the corpus does not carry) is inside an
-//      element carrying `lang="zh-Hant"`. Without this, the mark is whatever an author remembered.
+//   1. **No 「…」 quotation of 通鑑 in a page's prose goes unmarked.** Every run the book brackets with
+//      「」 whose text is verbatim 通鑑 (a substring of the corpus, or one of the two lines the corpus
+//      does not carry) is inside an element carrying `lang="zh-Hant"`. Without this, the mark is whatever
+//      an author remembered. **The predicate is the book's own brackets**, which is the bound and not a
+//      detail: a 通鑑 quotation the book never wrapped in 「」 — set bare in the prose, or bracketed with
+//      『』 — is not seen here, and the one thing this file proves about such a run is the converse, in
+//      `test/lexicon.test.js`: if it is marked, it must be a quotation.
 //   2. **A figure declares which of its fields are 通鑑's words**, and the declaration is exact in both
 //      directions: a field holding a 通鑑 sentence must be declared, and a declared field must hold one.
-//      A figure prints 通鑑 outside the page's markup, so no page-side scan can see it.
-//   3. **The figures' quotation elements take the mark too**, by requiring each module to set
-//      `lang: 'zh-Hant'` where it builds them — the reader's screen reader needs it and so does the
-//      stylesheet.
+//      A figure prints 通鑑 outside the page's markup, so no page-side scan can see it. The scan reads
+//      every literal form — `'…'`, `"…"` and `` `…` `` — because a gate that reads one quoting style is a
+//      gate an author can walk around without meaning to.
+//   3. **The figures' quotation elements take the mark too**, by requiring each module the REGISTRY
+//      registers to set `lang: 'zh-Hant'` where it builds them — the reader's screen reader needs it and
+//      so does the stylesheet. The module list comes from `src/figures/registry.js`, so renaming or
+//      dropping a file makes this run fail rather than cover less.
 //   4. **The key is on the book's contents page**, in an element with a stable class, so that the mark
 //      means something to a reader who does not read the script difference at sight.
 //
@@ -34,6 +41,15 @@
 //     it stops being 通鑑 and this file has nothing to say about it. `test/corpus.test.js` and the
 //     script check hold the marked runs the other way round (a marked run must BE a quotation), so the
 //     two directions together are what make an unmarked quotation hard to hide.
+//   - **A textual note, which is the one place on a page where a quotation is not a citation.** An
+//     `<aside data-note="textual">` discusses the TEXT — a witness reads otherwise, the 底本 lacks these
+//     two characters, the editor supplied them from another edition — so a 「…」 run inside one may be a
+//     reading the received text does not carry. 「不可」 in chapter 2's 異文 note is exactly that: the
+//     corpus prints it because the edition this book follows prints it, and the note's own words say it
+//     is absent from the 底本. Marking it as 通鑑's own words would contradict the note beside it, so
+//     these notes are skipped by the requirement and their marked runs are held by `test/lexicon.test.js`
+//     instead. A quotation in a textual note therefore gets the weaker of the two checks, which is the
+//     honest arrangement and is stated rather than left to be discovered.
 //   - **Whether the mark RENDERS as something a reader notices.** This file reads the markup and the
 //     data, not the pixels; `zj.css` carries the rule and the run's screenshots are the evidence for it.
 //   - **Whether a quotation of another work is attributed.** 史記, 戰國策, 胡三省注 and 韋昭注 are
@@ -48,11 +64,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CORPUS } from '../tongjian/corpus.js';
+import { FIGURES as REGISTRY } from '../src/figures/registry.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(here, '..');
 const TONGJIAN = path.join(root, 'tongjian');
-const FIGURES = path.join(root, 'src', 'figures');
 
 const HAN = /[\u3400-\u4dbf\u4e00-\u9fff]|[\u{20000}-\u{2a6df}]/u;
 const VOID = new Set(['br', 'hr', 'img', 'meta', 'link', 'input', 'source', 'col', 'area', 'base', 'wbr']);
@@ -153,6 +169,11 @@ function proseOf(html) {
     .replace(/<meta\b[^>]*>/gi, m => ' '.repeat(m.length))
     .replace(/<script[\s\S]*?<\/script>/gi, m => ' '.repeat(m.length))
     .replace(/<ol class="zj-src"[\s\S]*?<\/ol>/g, m => ' '.repeat(m.length))
+    // A textual note — 異文, 異說, 底本 — discusses the TEXT, so a 「…」 run inside one may be a reading
+    // the received text does not carry; 「不可」 in chapter 2 is absent from the 底本 and the note says so.
+    // Blanked before the attribute blanking below removes the hook it is selected by. The header states
+    // what this costs: a quotation in a textual note is held by test/lexicon.test.js, the weaker check.
+    .replace(/<aside\b[^>]*\bdata-note="textual"[^>]*>[\s\S]*?<\/aside>/g, m => ' '.repeat(m.length))
     // The figure apparatus — alt text, sort explanations, a note's own label — is the book's prose
     // ABOUT the figure. It is blanked by NAME, because the first quoted string in a tag is usually
     // another attribute's value and blanking that one would leave the apparatus in the scan.
@@ -206,15 +227,24 @@ test('every quotation of 通鑑 in the book\'s prose carries the mark that says 
 });
 
 test('a figure declares which of its fields are 通鑑\'s words, and the declaration is exact both ways', t => {
-  const modules = ['zj-split.js', 'zj-timeline.js', 'zj-words.js']
-    .map(name => path.join(FIGURES, name))
-    .filter(f => fs.existsSync(f));
-  assert.ok(modules.length > 0, 'no figure module was found, so nothing was checked');
+  // The module list comes from the registry, not from a list written here. It used to be three hardcoded
+  // names filtered by `existsSync` with a `> 0` floor, and a review reproduced the hole by renaming
+  // `zj-words.js`: the run reported `2 module(s)` and passed, while this file's own header claimed each of
+  // the three was checked. A gate whose subject list can shrink without a word is a gate that covers less
+  // the day someone renames a file.
+  const kinds = Object.keys(REGISTRY).filter(k => k.startsWith('zj-'));
+  assert.ok(kinds.length > 0, 'the registry holds no zj-* kind, so nothing was checked — the second book\'s figures are registered under that prefix');
+  const modules = kinds.map((kind) => {
+    const url = REGISTRY[kind].url;
+    assert.ok(typeof url === 'string' && url.startsWith('file:'), `registry kind "${kind}" names no module file, so its quotation declaration cannot be read`);
+    return { kind, file: fileURLToPath(url) };
+  });
 
   let declared = 0;
   let quotations = 0;
-  for (const file of modules) {
+  for (const { kind, file } of modules) {
     const rel = path.relative(root, file);
+    assert.ok(fs.existsSync(file), `registry kind "${kind}" points at ${rel}, which is not on disk`);
     const src = fs.readFileSync(file, 'utf8');
     const fields = /export const QUOTED_FIELDS = \[([^\]]*)\]/.exec(src);
     assert.ok(fields, `${rel}: exports no QUOTED_FIELDS, so a checker cannot tell which of its fields are 通鑑's words rather than the figure's own`);
@@ -222,12 +252,13 @@ test('a figure declares which of its fields are 通鑑\'s words, and the declara
     assert.ok(names.size > 0, `${rel}: QUOTED_FIELDS is empty, so no field of it is checked`);
     declared += names.size;
 
-    // Every `name: '…'` in the module, wherever it stands — zj-words' 句 are written one to a line
-    // inside a single-line object, and a line-anchored pattern would read none of them.
+    // Every `name: <literal>` in the module, in all three quoting styles. A review planted a whole 句 in a
+    // double-quoted undeclared field and the single-quote-only scan stayed green, which made this half of
+    // the gate one an author could walk around without meaning to.
     const literals = new Map();
-    for (const m of src.matchAll(/([A-Za-z_$][\w$]*):\s*'([^']*)'/g)) {
+    for (const m of src.matchAll(/([A-Za-z_$][\w$]*)\s*:\s*(['"`])((?:\\.|(?!\2)[^\\])*?)\2/gs)) {
       if (!literals.has(m[1])) literals.set(m[1], []);
-      literals.get(m[1]).push(m[2]);
+      literals.get(m[1]).push(m[3]);
     }
     for (const [name, values] of literals) {
       const quoted = values.filter(v => isTongjianSentence(v));
@@ -248,7 +279,7 @@ test('a figure declares which of its fields are 通鑑\'s words, and the declara
       `${rel}: the element it prints 通鑑 into does not set lang="zh-Hant", so the quotation is unmarked for the stylesheet and for a screen reader`);
   }
 
-  t.diagnostic(`figures: ${modules.length} module(s), ${declared} declared field(s), ${quotations} 通鑑 quotation(s) in figure data`);
+  t.diagnostic(`figures: ${modules.length} registry kind(s) — ${kinds.join(', ')} — ${declared} declared field(s), ${quotations} 通鑑 quotation(s) in figure data`);
   assert.ok(quotations > 0, 'no figure field was found holding 通鑑\'s words, so the declaration was never exercised');
 });
 
