@@ -52,3 +52,34 @@ Two controls make the comparison trustworthy: CPU-vs-CPU is every pixel Δ0 acro
 - **`npm run check` is red** on `biology/ch04-membranes-and-transport`, another session's in-flight chapter, which declares 37 objectives and has no `items.js`. Ten of eleven pages are clean, including all four `tongjian/` pages. Full `npm test` therefore cannot be green on this tree for a reason unrelated to this round.
 - The canon names `docs/learning/lessons-evidence.md` as the recovery route for a retired lesson. It is tracked in **16 repos but not this one**; the pre-retirement text is recoverable from `git show 0865e89:docs/learning/lessons.md`, but the named route reads nothing here.
 - One worktree audit, measured twice and **not atomic**: 61 then 62 linked trees across nine repos, of which 47 held no unique commits and no local changes with none touched in the previous 24 hours, 11 held uncommitted work, and 3 held commits on no `main` — `lego` (+612/−23, silent since 2026-08-07), `idle-life` (+258/−96, silent since 2026-08-08) and `voxel` (a CI change, live). All three branches are also on `origin`, so nothing was unpushed; they are unmerged. None was deleted, because they belong to other repositories and other sessions.
+
+## A figure's own type had never been measured against what is behind it
+
+A chapter-4 worker reported that `gradient-battery`'s voltmeter reading went near-white on near-white in the dark theme, and fixed that one instance. This round was sent to find out whether it was unique. It was not, and the shape of the cause is the useful part.
+
+**The palette has two kinds of colour and they invert against each other.** `ORGANELLES`, `EXTRA_ORGANELLES` and `BASES` are fixed hexes; `ink` and `paper` move with the theme; and the five accents move the *wrong* way — `--coral` is a mid red on a light page and a light salmon on a dark one. So ink over a coral fill is 4.88:1 light and **1.95:1 dark**, paper over the same fill is 3.32:1 light and 7.26:1 dark, and **neither choice reads in both themes**. Ten live pairs across three published chapters came out of it, in `levels`, `scale`, `tree`, `homeostasis`, `bondlab` and `phlab`. The register has the table.
+
+**Not one of them came from a fixed fill**, which is the opposite of what the shape suggests and is why the recommendation in `docs/work/2_rest-of-the-book/plan.md` is not to give those tables a theme variant. A fixed fill with a fixed label — which is what `MEMBRANE` and `src/figures/lib/chem-atoms.js` already carry, and what `gradient-battery` reads as `LIGHT[membranePart('pump').label]` — is the one pair in this palette that cannot invert. What failed was every colour that *does* move: a figure accent spent as 10 px type (3.07–4.36:1 in the light theme, six figures), and ink or paper written over an accent fill.
+
+**The one thing this round could not close** is the element table's `label: 'paper'`. Measured against the palette's own values, paper on a `coral` disc is 3.32:1, on `water` 4.33:1 and on `gold` **2.26:1** in the light theme, all of them fine in the dark. It is live on published chapter 2 and the table is a contract chapter 4 is being written against right now, so it is four floored entries in the gate's `ALLOWED`, printed on every run, with the fix and its cost written up for the integration owner.
+
+### The instrument was wrong three times before it was believed
+
+Each was caught by looking at the frames the gate writes, never at its numbers, and each is now the comment above the code that fixes it.
+
+- **Hiding the text hid the button.** `visibility: hidden` takes an element's background with it, so every pressed control read as paper-on-paper at 1.08:1 — a number about the page behind the button. The glyphs are repainted now, not hidden.
+- **Restoring by `removeProperty` destroyed the author's paint.** `phlab` sets `style="fill:var(--ink)"` on its pH readouts; with the property removed they computed to the initial value, black, and the gate reported five readouts at **1.27:1** that the frame beside them shows in the ink. The inline value and its priority are saved and written back.
+- **A figure that would not hold still.** `prokaryote` reported 1.06:1 for the word `run` because the cell had swum between the two frames: the background frame said `run`, the mask frame said `tumble`. The animation frame is stopped and every running animation finished before the frames are taken, and the DOM is read back afterwards to prove it held still. Asked directly, with `?t=0` and `requestAnimationFrame` stopped, `prokaryote` holds still in its opening state and after each of its eleven controls, so the pinned-clock invariant is intact and the four re-measurements it still needs per theme are a race in the gate's own press-and-measure sequence. The count is printed per figure so it cannot quietly become something else.
+
+### The one that would have been invisible to any other design
+
+A mask read off the figure's own frame is circular. Text the same colour as the fill under it changes no pixel, so the defect being looked for reports as *"this text draws nothing"* — which is exactly how `bondlab`'s δ+ at **1.00:1**, coral on its own coral oxygen, would have read as clean. The gate paints every measured glyph magenta to find out where the glyphs are, and only then reads what is underneath.
+
+### Two things found on the way that are not about colour
+
+- **A CSS rule beats an SVG presentation attribute.** Nine labels in `levels` asked for a colour with `text(…, { fill: C.paper })` and `.tb-levels svg text { fill: var(--ink) }` won every time. Three were live defects; the other six still render in the soft ink, still pass, and are listed in the plan because the author's intent is in the file and is not on the page.
+- **`symbiont` threw on every load.** `const tw = tween({ … done: () => tweens.delete(tw) })` reaches `tw` inside its own temporal dead zone, because `tween()` runs `done` synchronously when it is instant — which is every mount under reduced motion and every gate that pins the clock. It is a `let` declared before the call now. No gate had reported it, because the page error only appears on a figure whose clock is pinned.
+
+### The cost, and what moved it
+
+The gate was 24 minutes before the control loop stopped addressing the toolbar by index. `polymer`, `secretion` and `gradient-battery` rebuild their toolbar when pressed, so a list counted once and addressed as `nth(i)` names indices that no longer exist and each one sits out its whole timeout: six figure-theme pairs at 184.8–187.0 s, all within 2.2 s of each other, which is a timeout signature and not work. The toolbar is re-read before every press and each control addressed by an element handle. **4 min 20 s** for the whole gate now, 9,631 glyph runs over 50 figure/theme pairs, no pair over 16 s.

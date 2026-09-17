@@ -4,7 +4,82 @@ A gate counts only once it has been made to go red by reintroducing the defect i
 
 Auditing a gate means reaching what was measured at the time, never the sentence the gate carries about itself: a gate and its claim can be wrong together and look exactly like a gate that is right.
 
-Every entry names the tree its numbers were taken on. The entries below were all taken on the uncommitted foundation tree of 2026-09-08, before the first commit, so they name files rather than revisions; the first commit carries the same files.
+Every entry names the tree its numbers were taken on. Eight name none: the foundation batch that `7c6f905` added — *sweep3d* through *check: the authored chapter is complete and consistent* — was taken on the uncommitted foundation tree of 2026-09-08, before the first commit, so those name files rather than revisions; the first commit carries the same files.
+
+## Read one entry, not the file
+
+This file is long and gets longer with every gate, and it is **history rather than a rule**. What binds you is the claim in the gate's own header, and `AGENTS.md`'s Gates section lists all ten gates with their bounds. Come here for one of three reasons and read only the entry the index sends you to:
+
+- **You are changing a gate.** Read that gate's entries — *Claim* and *What it does not prove* — so the change does not quietly retire the proof. Behaviour that moves past what the entry measured needs a new proof in the same commit.
+- **You are writing a proof.** Copy the shape below. Reading a neighbouring entry for the form costs forty times as much and gets you the same six headings.
+- **You are auditing a claim.** A gate and the sentence in its header can be wrong together and look exactly like a gate that is right, so the question is always what was measured, never what the header says.
+
+### The shape of an entry
+
+Newest at the top. One `##` per claim, headed `<gate>: <the claim in one line> (<the file that holds it>)`. Inside, in this order:
+
+- **The tree.** The revision, plus any uncommitted work in it the numbers depend on. A number with no tree is not a measurement.
+- **Claim**, quoted from the gate's own header, with the **bound** that header states — the page list, the seed set, the window, the viewport, the include list. A gate proves nothing past its bound.
+- **Why it was needed**, when the gate came from a real defect: what shipped, and for how long.
+- **The mutation, and the exact failure text it produced**, verbatim. A failure written from what the gate *would* say is not a proof. Prefer the real defect on the real file; where only a fixture can reach it, say so.
+- **The restoration.** sha256 of every mutated file before and after, or an empty `git diff`. A proof that leaves the tree changed is a defect.
+- **What it does not prove.** The half that gets read most: it is the standing list of what is still unwatched.
+
+An arm that stays green is a result and is recorded as one — *shot: a Simplified page's figure word* records half a claim that no page in this repository can exercise, and that is the entry's finding.
+
+## Index
+
+Grouped by the file the gate lives in, because that is how they are looked up. Several gates carry more than one entry; where two say the same thing in different words, the line says so.
+
+**`tools/shot.js`** — page loads, fonts, colour marks, figure geometry.
+
+- [every page loads clean and lays out](#shot-every-page-loads-clean-and-lays-out-toolsshotjs) — the base claim: handshake reached, no console error, no failed request, no sideways scroll.
+- [no character is drawn by a face the page never loaded](#shot-no-character-is-drawn-by-a-face-the-page-never-loaded-toolsshotjs-the-font-census) — the font census. Reads the DOM as it stands, so it presses nothing.
+- [a figure's arithmetic reaching the DOM as a negative or as NaN](#shot-a-figures-arithmetic-reaching-the-dom-as-a-negative-or-as-nan-toolsshotjs-auditfiguregeometry) — `auditFigureGeometry`, after `<rect width="-0.1">` shipped to the live site.
+- [no colour hook paints nothing, and no marked target is left without one](#shot-no-colour-hook-paints-nothing-and-no-marked-target-is-left-without-one-toolsshotjs) · [a page may not carry fewer colour hooks than its census says](#shot-a-page-may-not-carry-fewer-colour-hooks-than-its-census-says-toolsshotjs-hook_census--auditcolourhooks) · [the colour-hook check measures the channels its header says it measures](#shot-the-colour-hook-check-measures-the-channels-its-header-says-it-measures-toolsshotjs-auditcolourhooks) — **three holes in one check, found one after another.** Read together: presence, then a floor per page, then which CSS channels the check actually reads. The floor entry also carries the rule that a floor set earlier passes the partial loss it was written for.
+- [a Simplified page's figure word](#shot-a-simplified-pages-figure-word--and-the-half-of-that-claim-no-page-in-the-repository-can-exercise-srccomponentsfigurejs-through-toolsshotjs) — and the Traditional half, which **could not be made red** because no page here is `zh-Hant`. The refusal is the finding.
+
+**`tools/devices.js`** — nine real devices, three engines.
+
+- [the phone shapes also run on WebKit and Gecko](#devices-the-phone-shapes-also-run-on-webkit-and-gecko-toolsdevicesjs) — the engine matrix and why Firefox's phone arm is a narrow viewport.
+- [the leftmost header control is in its corner, and the paired book uses a wide screen](#devices-the-leftmost-header-control-is-in-its-corner-and-the-paired-book-uses-a-wide-screen-toolsdevicesjs) — two checks that had been *added, not proved*, until this entry.
+- [a suite that finds none of its subject on a page that must have it](#devices-a-suite-that-finds-none-of-its-subject-on-a-page-that-must-have-it-toolsdevicesjs) · [a run whose page list and engine list meet in no load fails instead of passing empty](#devices-a-run-whose-page-list-and-engine-list-meet-in-no-load-fails-instead-of-passing-empty-toolsdevicesjs) · [a run says whether the width floor ran](#devices-a-run-says-whether-the-width-floor-ran-and-a-trimmed-run-that-never-reaches-it-says-so-toolsdevicesjs) — **the same lesson three times**: a run that tested nothing must not report success. See also `trim.js` below; `devices` is the only one of the six trimmed gates with a backstop of its own.
+
+**`tools/drive.js`** — every figure's own controls.
+
+- [every figure's own controls do what the figure reports](#drive-every-figures-own-controls-do-what-the-figure-reports-toolsdrivejs) — the base claim.
+- [the helix pick step was green without ever picking anything](#drive-the-helix-pick-step-was-green-without-ever-picking-anything-toolsdrivejs) · [a figure cannot shadow the four names the frame owns](#drive-a-figure-cannot-shadow-the-four-names-the-frame-owns-toolsdrivejs) · [a figure the frame holds no handle for, or whose handle has no `describe()`](#drive-a-figure-the-frame-holds-no-handle-for-or-whose-handle-has-no-describe-toolsdrivejs) — **three forms of a step that asserted nothing**: an assertion satisfied by `undefined`, a figure silently overwriting the frame's own field, and a missing handle read as "nothing shadowed".
+
+**`tools/check-content.js`** — the authored chapter.
+
+- [the authored chapter is complete and consistent](#check-the-authored-chapter-is-complete-and-consistent-toolscheck-contentjs-testcheck-contenttestjs) — the base claim.
+- [a chapter with objectives and no items fails](#check-a-chapter-with-objectives-and-no-items-fails-toolscheck-contentjs) — the rule had been keyed on `items`, so the empty case was the one it skipped.
+- [a figure task's expect is one the grader can evaluate](#check-a-figure-tasks-expect-is-one-the-grader-can-evaluate-toolscheck-contentjs-expectproblems-in-srccomponentstaskjs) — run through the grader's own parser, not a second one.
+- [every item bank is listed on the study page](#check-every-item-bank-is-listed-on-the-study-page-toolscheck-contentjs-checkstudysources).
+- [the closing card points at the next chapter once that chapter is on disk](#check-the-closing-card-points-at-the-next-chapter-once-that-chapter-is-on-disk-toolscheck-contentjs-testcheck-contenttestjs) — the third time these cards were wrong; six rule halves each proved red separately.
+
+**The other browser gates.**
+
+- [`tools/narrow.js`: the figures' phone layouts had no gate at all](#narrow-the-figures-phone-layouts-had-no-gate-at-all-toolsnarrowjs).
+- [`tools/sweep3d.js`: every 3D figure renders a frame from every angle](#sweep3d-every-3d-figure-renders-a-frame-from-every-angle-toolssweep3djs) — the bare canvas with every HTML overlay hidden, and why.
+- [`tools/flow.js`: the reader controls work through real input](#flow-the-reader-controls-work-through-real-input-toolsflowjs).
+- [`tools/subpath.js`: every page, as GitHub Pages serves it](#the-published-subpath-every-page-as-github-pages-serves-it-toolssubpathjs).
+- [`tools/sitting.js`: a reader can finish a sitting, and the page does not claim more than the record supports](#sitting-a-reader-can-finish-a-sitting-and-the-page-does-not-claim-more-than-the-record-supports-toolssittingjs) · [the sitting has to end, and the end summary has to say something per objective](#sitting-the-sitting-has-to-end-and-the-end-summary-has-to-say-something-per-objective-toolssittingjs) — **not the same claim.** The first proves the 2026-09-15 word-and-class hardening; the second proves termination and the per-objective label, which the first does not touch.
+- [`tools/lib/trim.js`: a value that names nothing stops each of the six gates, and does it before the browser](#trim-a-value-that-names-nothing-stops-each-of-the-six-gates-and-does-it-before-the-browser-toolslibtrimjs) — with the measurement that five of the six have no backstop without it.
+- [`src/shell.js`: the handshake waits for every figure](#handshake-the-gates-wait-for-every-figure-srcshelljs-proved-through-toolsshotjs) — every browser gate's only clock.
+
+**`npm run unit`** — the fast checks.
+
+- [the CSS tokens and the JS palette are one table](#palette-the-css-tokens-and-the-js-palette-are-one-table-testpalettetestjs).
+- [one element table for the chapter-2 molecular figures](#unit-one-element-table-for-the-chapter-2-molecular-figures-testelement-tabletestjs) · [one structure table for chapter 3](#unit-one-structure-table-for-chapter-3-and-every-colour-still-derived-from-the-palette-testorganelle-tabletestjs) · [one membrane table](#unit-one-membrane-table-every-colour-derived-every-label-legible-on-its-own-fill-testmembrane-tabletestjs) — **one lesson in three chapters' words**: a shared table duplicated across figure modules drifts, and the fix is one table with a test. The membrane entry adds label contrast on the fill; the element entry also holds the no-`Math.random` check for everything under `src/figures/`.
+- [every figure module parses](#registry-every-figure-module-parses-testregistrytestjs) · [a figure cannot exist without the frame knowing it](#registry-a-figure-cannot-exist-without-the-frame-knowing-it-and-the-frame-cannot-promise-a-figure-that-does-not-exist-testregistrytestjs) — the same test, hardened twice: registration first, then whether the module can execute at all.
+- [a chapter's page id names its book](#pages-a-chapters-page-id-names-its-book-testpagestestjs) · [the gates visit every chapter that exists](#pages-the-gates-visit-every-chapter-that-exists-testpagestestjs) — the same test, hardened twice: discovery, then book-qualified ids. Read both before quoting a `SHOT_PAGES` or `DEVICE_PAGES` value from an older entry, because unqualified ids now match nothing.
+- [no authored page writes markup into a `content=` attribute](#unit-no-authored-page-writes-markup-into-a-content-attribute-testmetatestjs).
+- [a Chinese page's chrome is Chinese, and in the page's own script](#strings-a-chinese-pages-chrome-is-chinese-and-in-the-pages-own-script-teststringstestjs) · [the 原文 and its quotations are Traditional, everything else Simplified](#script-the-原文-and-its-quotations-are-traditional-everything-else-simplified-testlexicontestjs) — the paired book's script rules.
+- [the study system's arithmetic](#scheduler-and-store-the-study-systems-arithmetic-testschedulertestjs-teststoretestjs) — scheduler and store, 42 tests.
+- [the flags that keep chromium's crash dialog off the desktop](#browser-quiet-the-flags-that-keep-chromiums-crash-dialog-off-the-desktop-testbrowser-quiettestjs) — and see the defect register, 2026-09-16, for the round where this test was green while the preload never ran.
+
+`# Six gates that were shipped unproved (2026-09-16)` below is a batch heading, not a claim: it marks six proofs written after the fact for gates that had already reached main.
 
 ## shot: no character is drawn by a face the page never loaded (`tools/shot.js`, the font census)
 
@@ -656,3 +731,34 @@ All six below were on `main` at `f5bd0e9`, pushed, and described in `AGENTS.md` 
   - **The last chapter.** With no later directory in the book, no rule fires, which is what lets chapter 4's card point at `../` for a chapter 5 that does not exist — the href rule would fail a link to a directory that is not there.
   - **The wording, past a list.** The unwritten-phrase half is bounded by six phrases named in `tools/check-content.js` (`in preparation`, `coming soon`, `not yet written`, `being written`, `yet to be written`, `to come`). A card that says it some other way passes that half and is caught by the link half, which does not depend on wording.
   - **Whether the dek is any good.** It checks that the card is not lying about the chapter's existence, not that it describes it well.
+
+## legible: a figure's own type, measured against the pixels behind it, in both themes (`tools/legible.js`)
+
+- Claim: for every registered kind this gate visits, in both themes, at 1000x640, in the figure's opening state and after each of its own visible enabled buttons has been pressed, every glyph the figure puts in the DOM clears WCAG 2.x AA against the surface under it — 4.5:1, or 3:1 where the glyph is RENDERED at 24 px or more (18.66 px at 700 or more).
+- Why it was needed: `src/palette.js` and `src/figures/lib/cell3-colours.js` hold fills that do not move with the theme while `ink` and `paper` do, and the accents move the WRONG way — `--coral` is a mid red on a light page and a light salmon on a dark one, so ink over it is 1.95:1 dark and paper over it 3.32:1 light. `npm run shot` asks whether a page threw; `npm run narrow` and `npm run sweep3d` judge blankness, which pale type on a pale fill passes; `npm run drive` presses real controls in the light theme only and asserts `describe()`. Ten live pairs across three published chapters, listed in `docs/learning/defect-register.md`.
+- Red on two real defects, each reintroduced in the file it was fixed in and each restored to the byte (`sha256` before and after):
+  - **a figure accent spent as type** — `src/figures/tree.js` (`1cc32567a7c428a903328e1f48ba4749dc6117e072a31df22a66c140b09fba57` before and after), `.tr-arrowlabel`'s `var(--water-text)` put back to `var(--water)`, `LEGIBLE_KINDS=tree LEGIBLE_THEMES=light`:
+    - `FAIL: 2 problem(s); the frames that failed are in out/legible/`
+    - `tree light: "mitochondria" is 4.01:1 — #2a7f8f on #f3eee4, which is under 100% of its glyphs — and it is drawn at 10.9 px weight 500, so it needs 4.5:1. Its element is text.tr-arrowlabel, open. A reader in the light theme cannot read it. What would satisfy this: a fill that follows the theme (mix it towards the paper with tint(), so it moves when --paper moves), or one of the book's text accents (--coral-text, --water-text, --leaf-text) in place of the figure accent, rather than a colour invented here or a light-theme ink written out as a hex.`
+    - and the same line for `"chloroplasts"`.
+  - **ink over a fill that moves with the theme in the same direction** — `src/figures/levels.js` (`f530a1e46a67492945b42db832b1ff4cd2c7870d4da9ef7629588b9b5ede3047` before and after), `.lv-onfill` renamed so the three labels written on the frog heart fall back to `.lv-note`'s soft ink, `LEGIBLE_KINDS=levels`. Four lines, and **both themes fail on different words**, which is the shape of the defect:
+    - `levels light: "ventricle" is 3.77:1 — #5c554d on #e9ac93, … after pressing "atriumatriumventricl".`
+    - `levels light: "atrium" is 4.35:1 — #5c554d on #edbda9, … after pressing "atriumatriumventricl".`
+    - `levels dark: "ventricle" is 2.35:1 — #a39d93 on #865340, … after pressing "atriumatriumventricl".`
+    - `levels dark: "atrium" is 3.07:1 — #a39d93 on #6c4537, … after pressing "atriumatriumventricl".`
+    - The state name is worth reading: the frog heart is level 6 of 12, so this pair is **unreachable without pressing a control**, which is why the gate drives the figure's own buttons rather than measuring the opening frame.
+- Red on each of the gate's two safety rails, in `tools/legible.js` (`f84898f5a2caab99fe73005dd219edd07c5c994638e101c13c15d5f61a0675a2` before and after both mutations):
+  - **a deferral that outlived its figure** — `bilayerr` added to `DEFERRED`: `FAIL: DEFERRED in tools/legible.js names 1 kind(s) the registry does not have: bilayerr. A deferral that outlived its figure hides nothing and excuses nothing; delete the name, or fix the spelling.` It exits before a browser is started.
+  - **an allowance nothing spends** — an `ALLOWED` entry for `tree light "mitochondria"` above 3.9, on a pair that now measures 4.84: `FAIL: 2 entr(y/ies) in ALLOWED were never spent, so each one now excuses nothing and hides whatever takes its place:` / `tree light text.tr-arrowlabel "mitochondria" above 3.9 — the mutation` / `Delete each one, or find out why the pair it names is no longer measured. An exception that outlives its subject is how a gate quietly stops covering something.` The second line in that output is the real `phlab` entry, unspent because the run was trimmed — which is why the check is skipped when `LEGIBLE_KINDS` or `LEGIBLE_THEMES` is set, and why the mutation above was run over the whole gate.
+- Three things the instrument got wrong before it was believed, all caught by looking at the frames it writes rather than at its numbers, and all now written into the file as the reason for the code:
+  - **`visibility: hidden` took a button's own background with it**, so every pressed control read as paper-on-paper at 1.08:1 — a number about the page behind the button and not about the button. The glyphs are repainted now, never hidden.
+  - **`removeProperty('fill')` destroyed an authored inline paint.** `phlab` draws its pH readouts with `style="fill:var(--ink)"`; with the property removed they computed to the initial value, black, and the gate reported five readouts at 1.27:1 that the frame beside them shows in the ink. The original inline value and its priority are saved and written back.
+  - **A figure that kept moving between the frames.** `prokaryote` reported 1.06:1 for the word `run` because the cell had swum across the box between the two shots: the background frame said `run`, the mask frame said `tumble`, and the cyan flagellum had moved. The page's animation frame is stopped and every running animation finished before the frames are taken, and the DOM is read again afterwards to prove it held still. Asked directly — `?t=0`, `requestAnimationFrame` stopped — `prokaryote` holds still in its opening state and after each of its eleven controls (`out/legib/pinned.mjs`), so the four re-measurements it still needs per theme are a race in this gate's own press-and-measure sequence and **not** the pinned-clock invariant being broken. The count is printed per figure on every line so that it cannot quietly become one.
+- What it does not prove:
+  - **The eleven figures it does not visit.** `DEFERRED` names chapter 4's eight and the second book's three, with the counts measured on the day it was written: 13 pairs under AA in chapter 4, eleven of them in `gradient-battery`, and 35 in the second book. They are printed on every run. Nothing here covers them.
+  - **The narrow compositions.** One stage size, 1000x640. `levels` hides its plate notes below a 640 px container, so three of the four defects this gate found on it are invisible at 390 px — the reverse is equally possible, and that is `npm run narrow`'s subject, which judges blankness rather than contrast.
+  - **Text a figure paints itself.** A glyph drawn into a canvas or through WebGL is not in the DOM and is not measured; the canvas count is printed per figure so a figure that draws all its type into one cannot read as a clean figure.
+  - **A pair behind a slider, a drag, or a click on the drawing.** `scale`'s ruler tick under the moving lens measured 1.55:1 in the dark theme when a scratch probe swept a 7x5 grid of clicks; this gate presses buttons only.
+  - **A glyph that straddles two fills.** The surface has to be under at least 40% of a glyph's core pixels. Below that the ground is reported as varied and the glyph is not measured, because the surfaces under 10–37% of a glyph here were its halo's rim or a rule crossing it.
+  - **Whether the colour is the RIGHT one**, or the type the right size, or the hover and focus states legible. It measures one pair at a time and says nothing about the design.
+  - **The four `ALLOWED` pairs**, which are the one element table's `label: 'paper'` on a `coral` and a `water` disc: 3.32:1 and 4.33:1 in the light theme. They are floored, printed and recorded, and the decision is in `docs/work/2_rest-of-the-book/plan.md`.

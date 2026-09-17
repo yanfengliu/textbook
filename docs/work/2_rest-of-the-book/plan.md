@@ -3,7 +3,113 @@
 Status: active
 Owner: Integration owner (textbook session, 2026-09-10)
 Created: 2026-09-10
-Updated: 2026-09-11
+Updated: 2026-09-16
+
+## Where this round stands
+
+Updated 2026-09-16. **This section and the chapter table under it are the live state; everything below them is the round's narrative, oldest first, and it is history** — what was believed, what proved false, what a review caught, what a number was before it moved. Read the narrative for the evidence behind a decision, not for what to do next.
+
+Main already carries this round, green or not: the second book's session committed and pushed the whole working tree three times (`6d854cf`, `e6daf7a`, `0482dde`), so every commit after that is an ordinary one. Chapters 2 and 3 are written, figured and banked, and the `biology/index.html` flip that marks them Read sits in the working tree for the next commit. Chapter 4's prose, objectives and eight figure modules are on disk and its item bank is not, which is what `npm run check` is red on. The last full chain ran on `f5bd0e9` — [timed below](#the-full-chain-timed-2026-09-16-on-f5bd0e9) — with three failures from one defect. Six gates reached main before their red proofs; [five have since been proved and the sixth honestly refused](#the-six-proofs-2026-09-16--five-red-one-honestly-refused).
+
+### Open
+
+**Next, the moment `gate-speed` releases the browser gates: remove the 240 ms `transition` and the
+`backdrop-filter: blur(8px)` from `.fig-btn` in `src/styles/components.css`.** `bench-build` measured both as the
+sole reason figure screenshots are not reproducible — six identical runs of one `phlab` drive step gave four
+distinct PNGs mid-transition, and eight fresh page loads gave two distinct PNGs from the blur alone. Removing them
+takes `tools/figure-diff.js`'s mask to about zero and makes every figure gate's frames comparable, which is what
+would let any gate here detect a visual regression for the first time. It is a visible change to 36 accepted
+figures, so it needs a person to look at a sample in both themes. Held only for the gate contention.
+
+
+**Chapter 5 written 2026-09-16** (`biology/ch05-energy-and-metabolism/`, 39 objectives, 46 glossary entries, eight
+figure briefs). **33 prerequisite edges reach back** — 6 to chapter 1, 12 to chapter 2, 3 to chapter 3, 6 to chapter
+4 — against chapter 3's original zero. Its author caught seven errors in its own draft, including a check question
+that stated a free-energy change and an equilibrium constant its own chapter's arithmetic falsifies, and cut one
+prerequisite for pointing downstream. Needs: eight kinds registered, palette additions (it asks for six and names
+which to cut first), figures, item bank.
+
+Two things it found: creating its directory turned chapter 4's closing card red, which is the card rule catching a
+defect the moment it became one — with `ch04-defects`. And Δ (U+0394) is a new symbol on its page, added to the
+`text=` subset, but whether Noto Sans Math carries it is a question only the font census answers and that has not
+been re-run.
+
+Also confirmed obsolete: chapter 4's instruction to add a `FIGURES.md` line to `tools/pages-exclude.txt`. The list
+holds `**/*.md` and `node tools/pages-exclude.js` already prints chapter 5's brief.
+
+
+The round's live checklist. Items closed this round keep their evidence and have moved to [Closed at integration](#closed-at-integration-this-round) at the end of the narrative.
+
+Two couplings cannot be messaged to a running worker in this build, so they are checked here instead:
+
+- [ ] `water3d`'s drive step `pull-a-neighbour-until-it-snaps` went red once (`2 -> 3`) on a run that touched none of its code: it reads a clock-driven count twice on the unpinned clock. With `one-organelle-table`.
+
+- [ ] Four element-colour tables to reconcile to one, with a test: `lib/chem-atoms.js` (soup, bondlab, water3d, waterprops), `lib/mol-draw.js` (phlab, carbonkit, polymer, foldlab), `lib/cell-colours.js` (prokaryote), `lib/cell3-colours.js` (symbiont, cytoskeleton, cilium). Confirmed by both chapter-3 figure workers; each used what its modules import and merged nothing, as briefed.
+
+- [ ] Respawned 2026-09-16 against main after the session-limit kill: `figs-ch03b-finish` (plantcell3d's compare view; verify the other three), `polish-ch02-final-2` (the two open desktop defects; all eight at phone width), `type-verify` (the STIX/Noto Math change was implemented but its glyph readback, byte cost and gates never ran), `items-ch03` (no bank had been written).
+
+- [ ] Move the two red proofs in [reviews/2026-09-16-publish-and-fonts-handoff.md](reviews/2026-09-16-publish-and-fonts-handoff.md) into `docs/learning/gate-proofs.md` once `six-proofs` has landed; they were held out to avoid clobbering it.
+
+- [ ] At integration: add chapter 3's `tb-source` to `today/index.html` (`npm run check` prints the exact element); commit `AGENTS.md` by pathspec for the canon block; run the full chain once.
+
+- [ ] Shared `out/` directories: one worker's gate run empties another's frames mid-read (`figs-ch03a` lost drive and narrow frames twice to `polish-ch02-final`). Workers keep copies in the scratchpad. A per-run directory would fix it and `fix-inspect` argued against it for the instrument; for the gates it is an open question.
+
+- [ ] Chapter 3's item bank: `items-ch03` dispatched 2026-09-15 with objectives final and seven of eight figures on disk; mcq and free first, task items last, every expectation re-run through the grader against the live figure before handoff; `plantcell3d` tasks marked unverified if it has not landed.
+
+- [ ] `symbiont.js` line 89 repeats the false mitochondrial-machinery claim the prose has dropped. Sent to `figs-ch03b`.
+
+- [ ] `gate-expects`'s new rule rejects `2e-7` in chapter 1's `i-resolution-limits-2`. Sent back to it: settle with the grader which side is wrong; if the grader rejects it too, chapter 1 has carried an ungradeable item since it was written.
+
+- [ ] Open observation, two workers now: at pinned `t=0`, PNGs of frames holding a 3D or animated figure differ by a few bytes between runs while pure-SVG frames are byte-identical, and the chapter-2 figure worker showed the SVG markup itself is identical across sessions. Rasteriser or encoder variance rather than figure state, on the evidence so far. Nothing chases it until a gate needs pixel identity.
+
+- [ ] Ignored scratch under `out/` from 10 September (about twenty probe directories, hand-redirected logs) is stale evidence no task needs; delete at the commit, per canon.
+
+- [ ] Bilingual stage 0 (`data-action` on driven controls, `tools/drive.js` and `tools/flow.js` off English labels) once the figure workers have handed off.
+
+- [ ] Chapter 2's item bank names four weak spots its author could not fix from inside: `i-water-solvent-2` grades on half its question; two `soup`/`waterprops` tasks become true on their own as the clock runs, so only the `panel ===` clause proves the reader acted; and `i-molecular-scale-3` asks a phone reader to read a card the narrow `soup` layout does not draw. Decide each. **Decided 2026-09-16:** soup's `narrowAspect` goes from 4/3 to 4/5 in the registry, on the polish worker's probe (protein mid-field, key on one line, the card the question needs); the other three stay as the item author wrote them.
+
+- [ ] `design-pass` left the devlog and defect-register entries to the coordinator deliberately, to avoid clobbering shared newest-first files while four workers were active. Both written 2026-09-11. Its own caution stands: two `devices` failures it saw did not reproduce, because `tools/devices.js` was being rewritten underneath the run.
+
+- [ ] Next-chapter cards, which `npm run check` passes because `../` resolves and the recipe requires the next chapter's directory: **chapter 3's is due now** — it still points at `../` and `biology/ch04-membranes-and-transport/` exists, so repoint it to `../ch04-membranes-and-transport/` when chapter 4 is integrated; **chapter 4's points at `../`** and names chapter 5 in its text, so repoint it to `../ch05-.../` the day chapter 5's directory lands. Chapters 1 and 2 went six days with a card that said the next chapter did not exist.
+
+### Chapters
+
+`—` not started · `author` prose in progress · `build` figures and items in progress · `gate` integrating · `done` committed
+
+| # | Chapter | State | Commit |
+|---|---|---|---|
+| 1 | What is life? | done | 7c6f905 |
+| 2 | The chemistry of life | build | |
+| 3 | Cells | build | |
+| 4 | Membranes and transport | — | |
+| 5 | Energy and metabolism | — | |
+| 6 | Photosynthesis | — | |
+| 7 | Cellular respiration | — | |
+| 8 | DNA | — | |
+| 9 | From genes to proteins | — | |
+| 10 | The cell cycle and mitosis | — | |
+| 11 | Meiosis and inheritance | — | |
+| 12 | Gene regulation | — | |
+| 13 | Biotechnology | — | |
+| 14 | Darwin and natural selection | — | |
+| 15 | Population genetics | — | |
+| 16 | Speciation | — | |
+| 17 | The history and tree of life | — | |
+| 18 | Bacteria and archaea | — | |
+| 19 | Protists | — | |
+| 20 | Fungi | — | |
+| 21 | Plants | — | |
+| 22 | Animals | — | |
+| 23 | Plant structure | — | |
+| 24 | Animal structure and homeostasis | — | |
+| 25 | Nervous systems | — | |
+| 26 | Circulation and gas exchange | — | |
+| 27 | Immunity | — | |
+| 28 | Reproduction and development | — | |
+| 29 | Populations | — | |
+| 30 | Communities | — | |
+| 31 | Ecosystems | — | |
+| 32 | The biosphere and conservation | — | |
 
 ## Problem and outcome
 
@@ -60,6 +166,8 @@ Four checks were found passing without checking anything. All four are now gated
 - `npm run devices` was not one of the steps `npm test` ran.
 
 ### Open, to settle at integration
+
+Open *as of 2026-09-11*, kept as written. The live list is [Open](#open) at the top of this file.
 
 - **Four element-colour tables.** `lib/chem-atoms.js`, `lib/mol-draw.js`, `lib/cell-colours.js` and
   `lib/cell3-colours.js`. The values agree today and nothing proves they will. The repo's one-colour-table
@@ -225,85 +333,303 @@ colour literal outside the print block.
 Dispatched: `gate-fixes` (every gate finding, each proved red; the docs-versus-code items; the `figure.js` word
 table) and `today-furniture` (the study page to the rule, with a contrast sweep).
 
-### Integration checklist, this round
+### Three workers have now reported the same thing: concurrent gate runs destroy each other's evidence
 
-Two couplings cannot be messaged to a running worker in this build, so they are checked here instead:
+`shot`, `drive`, `narrow`, `devices` and `sweep3d` each `rmSync(OUT)` at startup. When two workers run browser gates
+at once, the second wipes the first's frames and report mid-read. Reported by `figs-ch03a` (lost its drive and narrow
+frames twice), by `polish-ch02-final-2`, and now by `publish-and-fonts` (lost `out/shots/report.json` twice).
+
+Exit statuses were never affected, which is why it took three reports to surface: the verdict is right and the
+evidence for it is gone, so a worker that wants to look at what it just proved cannot. The canon's answer is that an
+expensive gate is a resource exactly one worker runs at a time, and I have been enforcing that; but the gates should
+not be silently destructive either, since the rule protects the machine and not the evidence. `fix-inspect` argued
+against per-run directories for the instrument and for clearing, on the grounds that a stale frame is worse than a
+missing one. That argument holds for a person reading one run; it does not hold for two runs at once. A run id in
+the directory name, with a `latest` pointer, would satisfy both. Not yet dispatched.
+
+### Chapter 4 written, 2026-09-16 — the recipe's first test
+
+`biology/ch04-membranes-and-transport/`, eight sections, 37 objectives, 57 glossary entries, eight figure briefs.
+Written against the rewritten recipe, and the difference shows where it was meant to:
+
+- **21 prerequisite edges reach out of the chapter**, covering 20 of its 37 objectives: ten to chapter 2, nine to
+  chapter 3, two to chapter 1. Chapter 3 had **zero** to chapter 2 and it cost a full rework pass.
+- The author **found and fixed five arithmetic errors in its own draft** before handing off, all of the kind the
+  independent review had to catch in chapter 3: a tenfold where the gradient is 35-fold (twice, once inside a key
+  idea), fifteen orders of magnitude for a thirteen-order contrast, sixty times where the chapter's own numbers give
+  forty, and a closing line miscounting its own promises.
+- It paid chapter 3's osmosis debt in the first paragraph of the section that owes it.
+
+Open, and with `ch04-contract`: the eight kinds are unregistered, and the palette wants a chapter-4 set that chapters
+5 and 7 will reuse. Held for later: it is the longest chapter in the book at 12,511 words against chapter 3's 10,274,
+and the author names two paragraphs a trimming pass would not miss.
+
+One trap it passed on, worth keeping: a layout measurement 600 ms after load reported 117 overflowing elements and a
+683 px scroll width at a 390 px viewport; the same measurement at 1800 ms reported zero, because the shell had not
+yet moved the contents drawer off-canvas. Any overflow probe that does not wait on the handshake is measuring the
+page mid-build.
+
+### The recipe is now the thing that stops the rework, 2026-09-16
+
+Three chapters in eight days, twenty-nine to go, and almost none of that was writing: it was rework, because the
+criteria lived in rejection messages rather than in the contract. `docs/design/chapter-recipe.md` is rewritten as
+eight stages with 49 yes/no boxes, and `docs/design/figures-template.md` is new, so a figure worker reads the
+criteria in its own brief. Each item names the pass it would have prevented and the evidence.
+
+It also found the old recipe telling authors to add a chapter to `PAGES` in `tools/lib/browser.js` — wrong since
+chapters became discovered from disk on 2026-09-11. An author following the recipe would have edited a list that no
+longer works that way.
+
+Five things it could not turn into a checkable line, worth keeping visible:
+
+- "Is this panel composed?" and "does this distractor encode a real misconception?" have no operational test. Only
+  the negative, plus who looks, at what resolution, in which themes.
+- Labels cannot be proved not to collide: the state space is unbounded, and collisions appeared at one slider value
+  and not another. The gate-shaped hole is a check that sweeps a figure's controls and diffs label bounding boxes.
+- `tools/pages-exclude.txt` is hand-maintained, so chapter 4's `FIGURES.md` would have deployed to the live site.
+  With `publish-and-fonts`, which derives it and gates it.
+- Nothing proves no glyph is drawn by a system font; the census that proved it was a scratch probe and is gone. Also
+  with `publish-and-fonts`, folded into `npm run shot`.
+
+### The full chain, timed, 2026-09-16 on `f5bd0e9`
+
+Run once by the coordinator with no worker competing, each gate as its own process, wall-clock per step:
+
+| gate | result | time |
+|---|---|---|
+| unit | pass | 2 s |
+| check | pass | 1 s |
+| flow | pass | 4 s |
+| sitting | pass | 21 s |
+| sweep3d | pass | 36 s |
+| narrow | pass | 79 s |
+| shot | **fail** | 93 s |
+| subpath | **fail** | 138 s |
+| drive | pass | 230 s |
+| devices | **fail** | 1479 s |
+
+**Three failures, one defect.** A chapter-3 figure hands the DOM `<rect width="-0.1">` at tablet and desktop, and
+not at phone; it is on main, pushed, and logging console errors on the live site. `shot` sees it at three
+page-loads, `devices` at two, `subpath` at one. With `fix-negative-rect`, which also gates the class, because a
+figure that produced a `NaN` on an attribute the browser ignores silently would still pass everything.
+
+**The slow thing, per the canon directive of 2026-09-15.** `devices` is 25 minutes of a 36-minute chain: 98 loads
+over 13 engine-device pairs on 10 pages, and it grew by a book and two chapters this round without its shape
+changing. `drive` is 230 s, of which `foldlab` alone waits ~40 s on real anneals. Neither is slowness a verdict
+depends on: `devices` re-runs nine shapes over pages whose components are identical, and `drive`'s waits are for a
+search whose result the figure already reports. Next after the proofs, and before this chain is run again.
+
+### The figure bench: designed, and my own diagnosis corrected
+
+[docs/design/figure-bench.md](../../design/figure-bench.md). I told the owner 93 % of figure code was duplicated.
+That was wrong, and the design says so with measurements: 93 % sits outside `src/figures/lib/`, but the genuinely
+absorbable scaffolding is **about 24 % of a figure** — 212 of `osmometer.js`'s 874 lines, accounted for block by
+block with line ranges. Of the code, 10.5 % is CSS, 12.1 % comment and 6.1 % blank. The saving is real but it is
+two hundred lines of nine hundred, not eight hundred.
+
+**Recommendation, accepted: build the bench, make it mandatory from chapter 5, migrate `phlab` alone as the proof,
+and leave the other thirty-five.** The reason is not the edit, it is the re-acceptance: no gate here can see
+composition, so a migrated figure needs a person at 390 px, 3x, in both themes. That cost is not worth paying on a
+figure already accepted.
+
+**Three findings that changed it:**
+
+- **The duplication is my process, not laziness.** A figure worker may not edit a shared file, so each chapter's
+  helper library was created up front by the coordinator and could not reach back into the previous chapter's.
+  That is why `mulberry32` is defined six times. The bench inherits the constraint: it must be one file, finished
+  before workers start, that a worker cannot extend mid-chapter.
+- **`lib/cell-common.js` ships a pill and a rounded progress bar**, both now forbidden by the figure template's own
+  header, and three figures still draw them. A shared component that outlives its design spreads the defect and
+  makes it look sanctioned.
+- **Twelve byte-identical copies of the primary-action rule exist to fight `components.css`**, where
+  `.fig-btn[aria-pressed="true"]` is a fill while the criterion wants `--rule-head` on the edge. Fixing the cause
+  leaves the copies nothing to fight.
+
+**The load-bearing prerequisite is `tools/figure-diff.js`**, not the bench: hash every frame a kind's trimmed runs
+write and compare across a change, so byte-identical frames mean no second look is needed. Without it the honest
+answer to "migrate the thirty-six" is simply no.
+
+Also counted: 12 identical copies of the toolbar divider, 11 of the live-region inline style, 6 of the 0.53-em
+advance estimate, and **three competing readout vocabularies** — 12 figures on `mol-draw`, 4 on `cell-common`, 12
+on their own.
+
+### Chapter 4's eight figures are done, 2026-09-16
+
+`figs-ch04a` landed `bilayer`, `permeability`, `osmometer` and `bulk-transport`: 25 drive steps, 8 narrow frames,
+6 clean page loads of the chapter with 8,625 to 11,341 SVG attributes scanned per load and no negative or `NaN`
+among them. All 36 registered kinds now have a drive recipe; one handoff reports `membrane3d` as missing, and it is
+not — that worker checked before the other's insert landed, and it sits at `tools/drive.js:1647`.
+
+Two of its named imperfections are contracts for the item bank, and were sent to `items-ch04`:
+
+- **`bilayer` can never report `assembly: "vesicle"`.** 34 molecules at 1.16 nm against a 5.7 nm sheet cannot close
+  a ring; about ninety could. Curl closes the rims by capping instead, and the readout says which it did. An item
+  written against that value would never grade.
+- **`bilayer`'s `thicknessNm` is 5.6–6.9, not the chapter's 7**, and is right: it is bare lipid, whose oily core row
+  reads the 3.3 nm §4.1 gives. The 7 nm is a membrane with its proteins.
+
+It also found the deeper reason a gate flakes, now a local rule: **a fixed sleep in a recipe is an assertion about
+how busy the machine is.** With another gate running, `bilayer` advanced 5 s of figure time in 13 s of wall time.
+Every wait in these recipes polls `describe()` instead. This is also why `drive` takes 230 s.
+
+One request for the shared table, not acted on: an LDL receptor has no colour in `MEMBRANE`, and was drawn in the
+book's protein violet. If chapter 5 or 7 wants one, that is a change to `src/palette.js` and mine to assign.
+
+### Chapter 4's transport figures, 2026-09-16, and a class defect they exposed
+
+`figs-ch04b` landed `membrane3d`, `transport-lab`, `pump` and `gradient-battery`: 29 drive steps, 8 narrow frames,
+15 sweep frames, 175 unit tests, and a geometry scan of 38,400 SVG attributes over 64 mounts with no negative or
+`NaN` value. §4.7's claim is now carried by numbers rather than assertion — blocking the pump moves the potential
+0.94 mV in three minutes, blocking the leak moves it 74.65 mV in under half a second, eighty times the movement in a
+two-thousandth of the time, with both markers on one trace.
+
+**Four defects it caught by looking, none of which a green step saw.** The pump never changed shape through its six
+stages, so the one thing the figure exists to show was not happening while the readout said it was. It reached state
+`error` at 390 px only, from a wrap helper indexing an empty array. Removing the tight junction made the glucose
+ratio *rise*, the opposite of the chapter's point, because the leak was smaller than the symporter's flux. And the
+bleached spot could not recover, because at 7 nm it was a third of the patch.
+
+**The class defect, now with `fixed-fill-contrast`.** The `MEMBRANE` label trap generalises: `ORGANELLES`,
+`EXTRA_ORGANELLES`, `MEMBRANE` and `BASES` are all **fixed hexes that do not follow the theme**, while `ink` and
+`paper` do. So any text written in `ink` over a pale fixed fill is right in light and unreadable in dark.
+`gradient-battery` had exactly this, a voltmeter reading near-white on near-white cytoplasm. **Sixteen figure modules
+read an organelle lookup and twelve of them are on published chapters**, so instances may be live now. Fixed by
+mixing the fill towards the paper so it follows the theme, adding no colour.
+
+The underlying question, which that worker is asked to answer with evidence rather than taste: four fixed tables
+against two theme-varying tokens is a design that invites this every time somebody writes on a fill.
+
+### The six proofs, 2026-09-16 — five red, one honestly refused
+
+`six-proofs` landed 222 lines in `docs/learning/gate-proofs.md`. Five gates were made to fail by reintroducing their
+defect and restored to the byte, hashes recorded. The sixth could not be, and saying so is the result:
+
+**`src/components/figure.js`'s Traditional branch cannot be made red, because no page in the repository is
+`zh-Hant`.** Every tracked page is English except the four 資治通鑑 pages, which declare `zh-Hans`. So
+`FIGURE_WORDS['zh-hant']` and `shot`'s own 圖 branch are unreached by every gate, and `test/strings.test.js` asserts
+that the key exists rather than that the lookup reaches it — a check built from the same symbol as the thing it
+checks. The Simplified half **was** proved, using the real pre-fix code from `e6daf7a`. Decision: keep the data,
+since `docs/design/i18n.md` admits a third language without change, but the test must stop implying coverage it does
+not have. Queued.
+
+Three findings from the proving that are worth more than the proofs:
+
+- **Only `devices` has a backstop.** With `trim.js`'s guard disabled, `devices` still fails through its own zero-load
+  check; the other five exit 0 announcing `0 steps over 0 figures passed`. The guard is the only thing standing
+  between those five and a green run that did nothing.
+- **The sitting gate's scope is justified by a number.** With the end summary's labels removed, 0 match inside
+  `.tb-close` while **2 still match elsewhere on the page** — so the page-wide count this replaced would have passed.
+- **A figure that returns nothing cannot reach the branch written for it.** `figure.js` does `mount(…) || {}`, so a
+  falsy return becomes an empty object and lands in the second branch. The first branch catches only a handle whose
+  `describe` is missing. The third branch, a mounted handle differing from the published one, remains unproved.
+
+Also corrected: the organelle table's gate is `test/organelle-table.test.js`, not the element table's. And the
+`unit` bullet no longer pins a count — it states the claim that matters, that `node --test test/` on Node 24 reads no
+test file at all and fails one bogus test named `test`, so a run that touched none of the suite still prints a count.
+The number had been wrong twice.
+
+### Six gates shipped without a red proof, 2026-09-16
+
+The model limit killed `gate-fixes`, `today-furniture` and `one-organelle-table` mid-verification, and the second
+book's session then committed and pushed the tree again (`0482dde`). All three had got further than their last
+messages implied — `tools/lib/trim.js` is real and used by six tools, `CLOSING_CLASS` is exported and read,
+`drive.js` inspects the handle, `learning.css` is 689 lines changed, `cell-colours.js` is deleted into
+`cell3-colours.js` — but **the red proofs were not recorded**, and the canon is that a gate counts only once it has
+been made to go red by reintroducing the defect. `AGENTS.md` now describes all of them as if they were proved.
+
+Unproven, on main, pushed, and live:
+
+| Gate | The claim in its header | Proof |
+|---|---|---|
+| `tools/lib/trim.js`, six tools | a trimming variable naming nothing stops the gate instead of running nothing and passing | none; the one "trim" line in the proofs file is a correction to a quoted command |
+| `tools/sitting.js` | the sitting reaches its end summary within 24 presses, read from `describe().finished`, and that summary carries a label | none; the `sitting` section proves the 2026-09-15 word and class hardening, not this |
+| `tools/drive.js` | a kind the frame holds no handle for, or whose handle has no `describe()`, fails | none |
+| `src/components/figure.js` | `zh-Hans` gets 图 and `zh-Hant` 圖, in the caption and the aria-label | none |
+| `tools/devices.js` | a suite finding none of its subject on a page that must have it fails, from a per-page table | none |
+| `src/figures/lib/cell3-colours.js`, `test/element-table.test.js` | one organelle table, consistent with `ORGANELLES` | none; the one "organelle" line is in the element table's own "what it does not prove" |
+
+### Closed at integration, this round
+
+Closed checklist items, kept for their evidence: each records what a worker handed off, what looking found, and which named imperfections were accepted and why. The live list is [Open](#open) at the top.
 
 - [x] `items-ch02` read `objectives.js` while `fix-ch02` was editing it. Ids were pinned in both briefs; confirm with
+
       `npm run check` that every item still names a live objective, and that items written against `dna-vs-rna` and
+
       `isomers` match what the chapter now teaches.
+
 - [x] (with `type-greek-equation`) `fix-ch02` leaves the chapter's only inline `style=` in place, on the carbonic-acid equation. A displayed equation
+
       wants a class and a place on the baseline grid. Route to whoever owns `components.css` after `design-pass` lands.
+
 - [x] (chapter 2 half, 2026-09-16) `one-element-table`: `lib/chem-atoms.js` keeps the one element table (now with `label` tokens and K, Ca, Mg with sourced radii); `lib/mol-draw.js` derives its CSS from it and re-exports the one `mulberry32`; no figure import changed; every CSS string byte-identical; `test/element-table.test.js` proved red four ways. Chapter 3's organelle pair is with `one-organelle-table`, with the test recipe the worker left. Found and not fixed: `mulberry32` is defined six times under `src/figures/` (pond, pasteur, cell-common, cell3-draw, three-common, and the one true copy); `bondlab.js` carries its own token→CSS map; Cl's covalent radius was 99 in one table and 102 in the other, kept at 99 which `bondlab` reports.
-- [ ] `water3d`'s drive step `pull-a-neighbour-until-it-snaps` went red once (`2 -> 3`) on a run that touched none of its code: it reads a clock-driven count twice on the unpinned clock. With `one-organelle-table`.
-- [ ] Four element-colour tables to reconcile to one, with a test: `lib/chem-atoms.js` (soup, bondlab, water3d, waterprops), `lib/mol-draw.js` (phlab, carbonkit, polymer, foldlab), `lib/cell-colours.js` (prokaryote), `lib/cell3-colours.js` (symbiont, cytoskeleton, cilium). Confirmed by both chapter-3 figure workers; each used what its modules import and merged nothing, as briefed.
-- [ ] Respawned 2026-09-16 against main after the session-limit kill: `figs-ch03b-finish` (plantcell3d's compare view; verify the other three), `polish-ch02-final-2` (the two open desktop defects; all eight at phone width), `type-verify` (the STIX/Noto Math change was implemented but its glyph readback, byte cost and gates never ran), `items-ch03` (no bank had been written).
-- [ ] At integration: add chapter 3's `tb-source` to `today/index.html` (`npm run check` prints the exact element); commit `AGENTS.md` by pathspec for the canon block; run the full chain once.
+
 - [x] `figs-ch03a` handed off 2026-09-15: microscopes, surface-volume, prokaryote, secretion finished, 31 drive steps, 8 narrow frames, 16 matrix frames, recipes in `tools/drive.js` before `cell3d:`. `secretion` rewritten (it had been half empty from default paragraph margins, with pill modifications and 8 px labels). Three `describe()` fields added for the recipes: `clockSeconds`, `cargo`, `membraneFaces`. Its four named imperfections, judged by the coordinator from the worker's kept frames (`scratchpad/drive4`, `matrix2`), 2026-09-15: **secretion wide**, the ~30 px cytoplasm bands above and below the route read as the cell's interior continuing, not as slack — accepted. **secretion at 390 px**, the nucleus at ~65 px and labels at ~7 CSS px, which is ~21 device px on a 3× phone, above the nine-pixel floor — accepted. **prokaryote lysed**, the burst cell filling its pane is the frame's argument — accepted; the envelope paragraph still describes the intact wall while the state line above it says the wall is gone, which is a description of the type rather than the state and is left. **surface-volume above ~50 µm**, microvilli below a pixel at a millimetre is physically true and the numbers change, which is the lesson — accepted. None carried as a defect.
-- [ ] Shared `out/` directories: one worker's gate run empties another's frames mid-read (`figs-ch03a` lost drive and narrow frames twice to `polish-ch02-final`). Workers keep copies in the scratchpad. A per-run directory would fix it and `fix-inspect` argued against it for the instrument; for the gates it is an open question.
+
 - [x] (2026-09-16) `biology/index.html`: chapters 2 and 3 marked Read with links and one-line deks, once `npm run check` passed all ten pages. Their own commits were made impossible by `6d854cf`; they land in the next commit together.
+
 - [x] (2026-09-16) `items-ch03` handed off: 105 items, 45 mcq / 29 task / 31 free, every objective in two formats; all 29 task expectations verified three ways against the running figures (false at mount, false after three idle seconds so no figure's own clock can satisfy one, true after the real controls), through the grader's own parser; fourteen phone-width end states inspected and four goals reworded to the short labels a phone shows. The corrected chapter-3 claims are load-bearing in items, not avoided. Chapter 3's `tb-source` added to `today/index.html` by the coordinator. Figure-side defects it saw, queued for `ch3-phone-fixes` once the organelle-table worker is out of those files: `secretion` stage 7 reads "In the outside the cell."; `prokaryote` at 390 px overprints the archaeal envelope strip's three labels; `cilium` at 390 px clips its section chip at the stage's right edge and its "Sliding, not bending" card overlaps the toolbar; `surface-volume`'s phone labels ("Villi", "Rod", "Disc", "Clock") differ from the goals' desktop names.
-- [ ] Chapter 3's item bank: `items-ch03` dispatched 2026-09-15 with objectives final and seven of eight figures on disk; mcq and free first, task items last, every expectation re-run through the grader against the live figure before handoff; `plantcell3d` tasks marked unverified if it has not landed.
+
 - [x] (2026-09-16) `integration-fixes`: joiners in the polymer button label (visible text only; the aria-label carries none, so the recipe's regex stands) and in chapter 2's item 1337; chapter 3's four `µm⁻¹` cells as `µm<sup>−1</sup>`; `tools/inspect.js` flattens the book-qualified id's slash to a hyphen; `STIX+Two+Math` removed from the seven heads and both stacks. Found and not fixed: the same mixed-face superscript in nine item texts (chapter 3's `items.js` 216, 234, 245; chapter 2's 221, 225, 247, 843, 987, 1007), where `<sup>` markup works because the study page keeps `SUB`/`SUP` — queued for `ch3-phone-fixes`; `docs/design/textbook.md` still named STIX Two Math for relations, corrected by the coordinator.
+
 - [x] (2026-09-16, `type-verify`; handoff in [reviews/2026-09-16-type-verify-handoff.md](reviews/2026-09-16-type-verify-handoff.md)) Greek and ⇌ now drawn by Libertinus Serif, chosen by measuring thirteen faces against Newsreader's x-height and stroke; a page-wide census finds no system-font glyph on any biology page; +43 KB on a chapter with Greek. The design-of-record change is in the focused re-review's scope. Four loose ends with `integration-fixes`. Greek letters (α, β, µ vs μ, Δ) and ⇌ fall out of Newsreader into a substitute face; found by `fix-ch02` in §2.7. With `type-greek-equation`, which also has the "β-" line-break hazard `fix-ch03` found and patched with word joiners.
-- [ ] `symbiont.js` line 89 repeats the false mitochondrial-machinery claim the prose has dropped. Sent to `figs-ch03b`.
-- [ ] `gate-expects`'s new rule rejects `2e-7` in chapter 1's `i-resolution-limits-2`. Sent back to it: settle with the grader which side is wrong; if the grader rejects it too, chapter 1 has carried an ungradeable item since it was written.
+
 - [x] §3.5's key idea reworded to the corrected argument: now ends on "an organelle no cell can build from scratch" in place of fission.
+
 - Handoffs with sources: [reviews/2026-09-15-fix-ch02-handoff.md](reviews/2026-09-15-fix-ch02-handoff.md), [reviews/2026-09-15-fix-ch03-handoff.md](reviews/2026-09-15-fix-ch03-handoff.md).
+
 - [x] `tools/inspect.js` handed back stale frames. Fixed 2026-09-15: directory emptied per run, `--label` for a kept second run, selector in the filename, exit 2 when nothing matched. Two neighbours it looked at: `npm run figure` never clears `out/lab/`, a weaker form (same question always overwrites; a different question's old frame can sit beside it) whose honest fix is a per-kind directory and dropping `--out`, a design change deferred; `npm run perf` hardcodes chapter 1 while three chapters exist.
+
 - [x] `tools/sitting.js` hardened and proved red four ways (translated word, moved class, no labels rendered, no word span); HEAD's gate passed all of them, measured. Two bounds it still has, recorded in its proof: labels collapsed behind "and N more" are not in the DOM, and the word is matched whole.
-- [ ] Open observation, two workers now: at pinned `t=0`, PNGs of frames holding a 3D or animated figure differ by a few bytes between runs while pure-SVG frames are byte-identical, and the chapter-2 figure worker showed the SVG markup itself is identical across sessions. Rasteriser or encoder variance rather than figure state, on the evidence so far. Nothing chases it until a gate needs pixel identity.
-- [ ] Ignored scratch under `out/` from 10 September (about twenty probe directories, hand-redirected logs) is stale evidence no task needs; delete at the commit, per canon.
-- [ ] Bilingual stage 0 (`data-action` on driven controls, `tools/drive.js` and `tools/flow.js` off English labels) once the figure workers have handed off.
+
 - [x] (resolved: `fix-ch02` confirmed all three passages unchanged on its second pass; no items to re-check) **Re-check three chapter-2 items** whose quoted prose was rewritten under the item worker while it wrote: the CO2 "barely interacts" distractor, the buffers explanation, and `i-denaturation-3`'s rubric. `fix-ch02` was still editing that prose afterwards, so they may have moved twice.
+
 - [x] `figs-ch03b-finish` handed off 2026-09-16: symbiont, cytoskeleton, cilium, plantcell3d finished; 38 drive steps, 8 narrow frames, 15 sweep frames, 15 matrix frames, all looked at. On arrival all four **passed every gate**, and looking found seven defects in plantcell3d alone (the comparison table drawn over the animal cell it described; the two animal-only structures never labelled; "follow a plasmodesma" labelling a channel 11 µm off the stage; translucent shells drawing bands through the channel; a card that could not be dismissed and ran under the toolbar on a phone; a slider label wrapping the toolbar over the nucleus labels; a translucent-box readout). Each recipe now demands the thing that was missing. `turgorState` replaces the brief's `state`. Its three named imperfections, judged by the coordinator from the worker's kept frames (`scratchpad/drive1`), 2026-09-16: the sweep's along-the-axis views clipping the cell's ends behind the toolbar is the sweep instrument's own framing distance, not a reader's view — accepted; the symbiont membrane tag sitting close above "Mitochondrion" does not touch it in the two-tested frame — accepted; the cilium's basal-body caption reaching nearly to the stage edge stays inside it — accepted. Frames looked at: plantcell3d compare and follow, cilium beat and at rest, symbiont with two observations tested. None carried as a defect.
+
 - [x] `polish-ch02-final-2` handed off 2026-09-16: all eight looked at narrow at 3× in both themes. Three touched — soup's narrow key band clipped (half-molecules had poked over the rule), waterprops' heat label kept clear of its own line in the close case and its freezing preview drawn to −10 °C so the branch no longer ends mid-air, phlab's tight-pane inset given a 28 px gap with the arrow stacked. water3d's pill and waterprops' label collision had already been fixed by the killed worker. Pre-existing and left: the teal focus ring on soup's canvas after a mouse click; water3d's two interstitial molecules fading to dark brown on dark paper.
-- [ ] Chapter 2's item bank names four weak spots its author could not fix from inside: `i-water-solvent-2` grades on half its question; two `soup`/`waterprops` tasks become true on their own as the clock runs, so only the `panel ===` clause proves the reader acted; and `i-molecular-scale-3` asks a phone reader to read a card the narrow `soup` layout does not draw. Decide each. **Decided 2026-09-16:** soup's `narrowAspect` goes from 4/3 to 4/5 in the registry, on the polish worker's probe (protein mid-field, key on one line, the card the question needs); the other three stay as the item author wrote them.
-- [ ] `design-pass` left the devlog and defect-register entries to the coordinator deliberately, to avoid clobbering shared newest-first files while four workers were active. Both written 2026-09-11. Its own caution stands: two `devices` failures it saw did not reproduce, because `tools/devices.js` was being rewritten underneath the run.
-
-## Status
-
-`—` not started · `author` prose in progress · `build` figures and items in progress · `gate` integrating · `done` committed
-
-| # | Chapter | State | Commit |
-|---|---|---|---|
-| 1 | What is life? | done | 7c6f905 |
-| 2 | The chemistry of life | build | |
-| 3 | Cells | build | |
-| 4 | Membranes and transport | — | |
-| 5 | Energy and metabolism | — | |
-| 6 | Photosynthesis | — | |
-| 7 | Cellular respiration | — | |
-| 8 | DNA | — | |
-| 9 | From genes to proteins | — | |
-| 10 | The cell cycle and mitosis | — | |
-| 11 | Meiosis and inheritance | — | |
-| 12 | Gene regulation | — | |
-| 13 | Biotechnology | — | |
-| 14 | Darwin and natural selection | — | |
-| 15 | Population genetics | — | |
-| 16 | Speciation | — | |
-| 17 | The history and tree of life | — | |
-| 18 | Bacteria and archaea | — | |
-| 19 | Protists | — | |
-| 20 | Fungi | — | |
-| 21 | Plants | — | |
-| 22 | Animals | — | |
-| 23 | Plant structure | — | |
-| 24 | Animal structure and homeostasis | — | |
-| 25 | Nervous systems | — | |
-| 26 | Circulation and gas exchange | — | |
-| 27 | Immunity | — | |
-| 28 | Reproduction and development | — | |
-| 29 | Populations | — | |
-| 30 | Communities | — | |
-| 31 | Ecosystems | — | |
-| 32 | The biosphere and conservation | — | |
 
 ## Notes as they accumulate
 
 - The `drive` gate fails on any registered kind without a recipe, so a chapter's figures cannot land before their recipes do. Writing the recipe from the figure brief, before the figure exists, is the cheaper order.
 - Prerequisites reaching back into earlier chapters are what make the study queue work across the book rather than within one chapter. Chapter 2 onward should use them.
+
+## The colour tables, and whether they are the fault (2026-09-16, the legibility round)
+
+**Short answer: the fixed tables are not the fault. The `label` convention is, and it lives in two places that disagree with each other.**
+
+The round was sent to find out whether `ORGANELLES`, `EXTRA_ORGANELLES`, `MEMBRANE` and `BASES` being fixed hexes, against `ink` and `paper` that move with the theme, is a design that invites an unreadable label every time somebody writes on a fill. Every registered figure was rendered in both themes and every glyph measured against the pixels under it (`npm run legible`, and `docs/learning/defect-register.md` has the full census). The evidence says the opposite of what the shape suggests.
+
+**Not one instance came from a fixed fill.** `ORGANELLES` and `EXTRA_ORGANELLES` are used by sixteen figures across two published chapters, and none of the ten defects the census found was ink or paper over one of their values. The reason is in the table beside them: `MEMBRANE` already carries a `label` field naming the one of `paper` and `ink` that holds AA against each fill, and `src/figures/lib/chem-atoms.js` carries the same field for every element. Both were measured. A FIXED fill with a FIXED label is the one combination in this palette that cannot invert: neither value moves, so a ratio measured once stays true in both themes. `gradient-battery` reads them that way — `LIGHT[membranePart('pump').label]`, the light palette's token deliberately, whatever the page's theme.
+
+**Every instance came from a colour that DOES move.** Two shapes, both of them the theme working against itself:
+
+1. **A figure accent spent as type.** `--coral` is a mid red on a light page and a light salmon on a dark one; as 10 px type on the paper it is 3.07–3.32:1 in the light theme and fine in the dark. Six figures did this (`tree`, `scale`, `homeostasis`, `bondlab`, `polymer`, `foldlab`). `src/styles/tokens.css` already says, in its own comment, that the accents are "tuned for figures, where they sit against each other in large areas" and that `--leaf-text`, `--water-text` and `--coral-text` are the values for small text. The fix in every case was to spend the text token. Nothing new was invented.
+2. **Ink or paper over an accent fill.** Both ends move, and in the same direction, so no single choice reads in both themes: paper on `--coral` is 3.32:1 light and 7.26:1 dark, ink on the same fill is 4.88:1 light and 1.95:1 dark. Mixing the FILL further towards the paper fixes it (`levels`'s ventricle, 74% coral to 52%), or giving the glyph its own ground with the halo `scale` and `tree` already use.
+
+### The recommendation, with its cost
+
+**Do not give `ORGANELLES` and `EXTRA_ORGANELLES` a theme variant.** It would double a table that nothing has gone wrong in, and it would make an organelle a different colour on a dark page from the one on a light page, which `src/figures/lib/cell3-colours.js` already argues against in its own header.
+
+**Do give them the `label` field `MEMBRANE` has**, and state the rule the two existing tables only imply: *a colour a symbol is written on carries the token to write it in, and that token is read from the LIGHT palette, because the fill does not move either.* Today a figure writing on `ORGANELLE_BY_ID.golgi.color` has to work the pair out for itself, and six of them tried and got it wrong somewhere else in the same file. Cost: fifteen entries in `ORGANELLES` and twenty-one in `EXTRA_ORGANELLES`, each measured against `LIGHT.paper` and `LIGHT.ink` — about an hour, and a unit test in the shape of the one that already holds `MEMBRANE`'s labels. It changes no pixel.
+
+**The one element table needs a decision, and it is the only live thing this round could not close.** `src/figures/lib/chem-atoms.js` sets `label: 'paper'` for every coloured disc. Measured against the palette's own values, in the LIGHT theme:
+
+| disc | paper on it, light | paper on it, dark |
+|---|---|---|
+| `violet` (P) | 6.04 | 6.18 |
+| `inkSoft` (C) | 6.86 | 6.67 |
+| `leaf` (the ions) | 4.71 | 7.05 |
+| `water` (N) | **4.33** | 7.58 |
+| `coral` (O) | **3.32** | 7.26 |
+| `gold` (S) | **2.26** | 9.80 |
+
+Three of the six fail AA in the light theme, and the gold is the worst pair either book holds. It is live on published chapter 2 — `bondlab`, `phlab` and `polymer` each draw an oxygen's O in paper on coral — and `npm run legible` carries four `ALLOWED` entries for it, each with its measured ratio and a floor, so a pair that gets worse still fails. **That table is a contract across chapters 2 and 4 and chapter 4's eight figures are being written against it right now, so this round did not touch it.**
+
+The fix that costs no new hue, if the answer is to fix it: push each disc towards the ink for the three that fail, the way `foldlab`'s residue classes were pushed in this round — `tint(C.gold, 55, C.ink)`, `tint(C.water, 86, C.ink)` and `tint(C.coral, 70, C.ink)`, which are `--water-text` and `--coral-text` exactly and a gold in the same family. Measured: paper on them is 5.25, 5.30 and 5.34 in the light theme and 11.54, 8.31 and 8.84 in the dark. Cost: every atom of oxygen, nitrogen and sulfur in the book gets a deeper disc, `test/chem-table.test.js`'s colour assertions move, and the four `ALLOWED` entries come out. The alternative — leaving it — means the book ships three symbols under AA on every molecule it draws, in the theme most readers use.
+
+### One thing to fix that is not about colour at all
+
+`levels` asked for a colour on nine of its labels with a `fill` PRESENTATION ATTRIBUTE, and a CSS rule beats a presentation attribute, so `.tb-levels svg text { fill: var(--ink) }` and `.tb-levels .lv-note { fill: var(--ink-soft) }` won every time. Three of those labels were live defects and are fixed; the other six (`8 protons` in coral, `8 electrons` in water, `arteries`, `veins`) still render in the soft ink and still PASS, so the gate cannot see them and this round left them alone rather than change how a published figure looks on its own judgement. They are listed here because the author's intent is in the file and is not on the page.
 
 ## Outcome
 

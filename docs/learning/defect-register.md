@@ -2,6 +2,57 @@
 
 Every defect the owner reports is recorded here and gated, never only fixed. The entry stays after it becomes a gate: this is the standing list of what the gates could not see, which is where the next defect comes from.
 
+## Read one entry, not the file
+
+**None of these entries is a rule you have to obey.** The rules they produced live where rules live: the gate that now covers a defect states its claim in its own header, `AGENTS.md`'s Gates section lists all ten, and the standing bars the owner set are in [local-rules.md](../policies/local-rules.md). This file is the *evidence* behind those — what the gates could not see, and what it cost. Come here for one of three reasons and read only what the index sends you to:
+
+- **You are writing an entry.** Copy the shape below. Do not read a neighbour for the form.
+- **You are about to claim something is covered.** Find the area in the index and read that entry's "now checked by", including its bound. Four entries here exist because a check was believed to cover something it did not.
+- **You are looking for what is still unwatched in an area you are changing** — figure colour, phone input, fonts, the gates' own wiring. The index groups by area at the end.
+
+Entries are **not in date order**: the file was appended to from both ends over several rounds. The index below is in file order and is the reliable lookup.
+
+### The shape of an entry
+
+One `##` per defect, headed `<date> — <the symptom as a sentence>`. Inside:
+
+- **The symptom in the owner's or the reader's own words**, quoted. Their words, not the diagnosis: *"Sidebar on mobile doesn't work"* is the record, and what it turned out to be is the next paragraph.
+- **How it was found**, including when that was a probe rather than a failing run.
+- **The root cause**, down to the line. Where the cause is a unit error or a wrong assumption, say which.
+- **What the gates could see, and why the answer was nothing.** The reason this file exists.
+- **Now checked by**, as a `| Symptom | Root cause | Now checked by |` table when there are several, and naming the **class** the new check covers rather than the one instance. A check that is added but not yet proved red says so, and points at [gate-proofs.md](gate-proofs.md) once it is.
+- **The lesson underneath**, when several defects share one.
+
+## Index
+
+In file order. Every line is one `##` entry.
+
+| Entry | What the owner or reader saw | Now checked by |
+|---|---|---|
+| [2026-09-10 — four defects on a real phone and a desktop](#2026-09-10--four-defects-on-a-real-phone-and-a-desktop-none-of-which-any-gate-could-see) | drawer dead, toggle out of its corner, glossary popover off screen, inconsistent widths | `npm run devices` — the gate this entry created |
+| [2026-09-11 — the furniture had no vocabulary](#2026-09-11--the-furniture-had-no-vocabulary-so-every-element-reached-for-a-box) | *"If anything is less than supreme quality then don't even bother"* — a standing bar, not one defect | [local-rules.md](../policies/local-rules.md), "Typography and visual design are the product". No gate; a person looks |
+| [2026-09-12 — a browser crash dialog read as the gate misbehaving](#2026-09-12--a-browser-crash-dialog-read-as-the-gate-misbehaving) | a modal `0x80000003` window left on the desktop by a gate run | `tools/zj-quiet-browser.cjs` + `test/browser-quiet.test.js` — **but read the 2026-09-16 entry below, which found the mitigation was never loaded** |
+| [2026-09-12 — the page list only worked while the site had one book](#2026-09-12--the-page-list-only-worked-while-the-site-had-one-book) | found by probe before the second book existed: `ch01` is not unique across two books | `test/pages.test.js`; page ids are book-qualified |
+| [2026-09-12 — a tap is a hover and a click, and the hover got there first](#2026-09-12--a-tap-is-a-hover-and-a-click-and-the-hover-got-there-first) | one glossary term in 172 opened no card on a phone | `npm run devices`. Same area as 2026-09-10 |
+| [2026-09-12 — two figure modules could not load, and the unit suite was green](#2026-09-12--two-figure-modules-could-not-load-and-the-unit-suite-was-green) | a figure rendered as the frame's error box while `unit` reported 117 of 117 | `test/registry.test.js` — a real parse, not a text match |
+| [2026-09-19 — reading it twice found ten defects in the second book](#2026-09-19--reading-it-twice-found-ten-defects-in-the-second-book-and-a-cosmetic-property-was-hiding-a-click) | ten, six of them from a reader-proxy; `display: inline` decided where a click landed | several; the entry's own table. Created the reader-proxy role |
+| [2026-09-16 — the library page showed Chinese in a font it never loaded](#2026-09-16--the-library-page-showed-chinese-in-a-font-it-never-loaded-and-the-machine-hid-it) | found by a new check on its first run, before it was asked to find anything | the font census in `npm run shot` |
+| [2026-09-16 — a figure handed the browser a negative width](#2026-09-16--a-figure-handed-the-browser-a-negative-width-and-the-gate-that-could-prove-it-was-not-the-obvious-one) | `<rect width="-0.1">` on main, pushed, logging console errors live: a pixel subtracted from nanometres | `auditFigureGeometry` in `npm run shot` |
+| [2026-09-16 — rare characters in the 原文 were drawn by the reader's machine](#2026-09-16--rare-characters-in-the-原文-were-drawn-by-the-readers-machine-and-the-page-had-loaded-the-right-fonts) | the page loaded the right fonts and still fell through, 21 code points of 1,937 | the `text=` subset plus the census. Same check as the entry above it, one day on |
+| [2026-09-16 — a finished chapter told readers the next one did not exist, three times](#2026-09-16--a-finished-chapter-told-readers-the-next-one-did-not-exist-three-times) | chapters 1 and 2 said the next was in preparation while it sat finished on disk | `npm run check`'s next-card rule, keyed on the tree rather than the document |
+| [2026-09-19 — `npm run devices` went red on a shape that is not slow](#2026-09-19--npm-run-devices-went-red-on-a-shape-that-is-not-slow-and-could-not-say-which-phase-had-stalled) | one shape timed out and the gate blamed the screenshot. **Not reproduced in four attempts** | the gate now names which phase ran out of time. The hang itself is open |
+| [2026-09-16 — no gate said which rasterizer drew the frame](#2026-09-16--no-gate-said-which-rasterizer-drew-the-frame-and-the-gates-frames-depend-on-it) | every gate's frames came from a CPU rasterizer on a machine with a GPU | a run says which renderer drew it |
+| [2026-09-16 — the crash-dialog mitigation was inert in every run](#2026-09-16--the-crash-dialog-mitigation-was-inert-in-every-run-and-its-own-comment-named-the-reason) | nothing in the repository set `NODE_OPTIONS`, and the test that covered it was green | the preload is wired into every browser gate and a launch says which preload state it is in. **Read with the 2026-09-12 crash-dialog entry, whose claim this one corrects.** Its two closing `###` sections — the pointer, and what could not be established — cover this entry and the rasterizer one together |
+| [2026-09-16 — the ink follows the theme, the fills do not](#2026-09-16--the-ink-follows-the-theme-the-fills-do-not-and-no-gate-had-ever-measured-a-figures-own-type) | a voltmeter reading near-white on near-white cytoplasm in the dark theme | the figures' own type is measured. Sixteen modules read a fixed-hex lookup |
+
+**By area, for when you are changing something and want what is still unwatched there.**
+
+- **Phone and touch** — 2026-09-10 (four defects), 2026-09-12 (tap is a hover).
+- **Fonts and script** — 2026-09-16 (library page), 2026-09-16 (rare 原文 characters).
+- **A figure's own pixels** — 2026-09-16 (negative width), 2026-09-16 (ink and fills). Both are defects a frame-rendering gate looked straight at and could not see.
+- **The gates' own wiring** — 2026-09-12 and 2026-09-16 (crash dialog, twice), 2026-09-16 (rasterizer), 2026-09-19 (`devices` phase), 2026-09-12 (two dead modules, green suite).
+- **Cross-book and cross-chapter facts** — 2026-09-12 (page ids), 2026-09-16 (next-chapter card). Both were invisible to any rule that reads one document.
+
 ## 2026-09-10 — four defects on a real phone and a desktop, none of which any gate could see
 
 The owner read the published site on a phone and reported, in their words: *"Sidebar on mobile doesn't work"*, *"the light dark toggle is not quite at the top right corner"*, *"the glossary tooltip goes off screen on mobile"*, and, on the desktop version, *"I don't like the inconsistent widths among elements (text, animation, quiz cards, etc)"*. They added the diagnosis that mattered most: *"You need to dynamically check for the phone screen layout."*
@@ -383,7 +434,7 @@ the preload loaded but resolved nothing. Closing that needs the wrapper to recor
 
 ---
 
-## Pointer, and a candidate not a cause
+### Pointer, and a candidate not a cause
 
 The crash-dialog defect itself (the modal window, `0x80000003`, why it outlives the Node process, and why no
 gate can observe it) is the **2026-09-12 entry, "a browser crash dialog read as the gate misbehaving"** —
@@ -405,7 +456,7 @@ reading `preload engaged`, the wiring is eliminated and the cause is inside chro
 
 ---
 
-## What could not be established
+### What could not be established — for both 2026-09-16 entries above, the rasterizer one and this one
 
 - **Whether the other gates' verdicts survive under the GPU rasterizer.** Only `sweep3d` was authorised and
   run: four GPU arms, 90/90 frames, zero errors, and its limits sit far from any marginal value. `shot`,
@@ -433,3 +484,40 @@ reading `preload engaged`, the wiring is eliminated and the cause is inside chro
 - **Whether `--enable-automation` on every launch alters gate behaviour.** It is added because
   `Browser.getBrowserCommandLine` refuses to answer without it, and it is the only way to read the real argv.
   `sweep3d` is green with it (90/90, twice), and no other gate has been run since it was added.
+
+## 2026-09-16 — the ink follows the theme, the fills do not, and no gate had ever measured a figure's own type
+
+A worker building chapter 4 reported a defect in `gradient-battery`: the voltmeter's reading sat on the cytoplasm's fill and went **near-white on near-white in the dark theme**. They fixed that one instance by mixing the fill towards the paper so it follows the theme. The question this round was asked was whether that instance was unique. It was not.
+
+**The cause, in two halves.** `src/palette.js` and `src/figures/lib/cell3-colours.js` hold fills that are fixed hexes — `ORGANELLES`, `EXTRA_ORGANELLES`, `BASES`, and everything derived from them — while the tokens written on them are not: `--ink` is `#1d1a17` on a light page and `#e9e4da` on a dark one. Text in `var(--ink)` over a fixed pale fill is therefore correct in one theme and unreadable in the other. The accents are the same trap from the other side: `--coral` is a mid red on a light page and a **light** salmon on a dark one, so ink over it fails dark (1.95:1) and paper over it fails light (3.32:1), and neither choice is right in both.
+
+**What the gates could see.** Nothing. `npm run shot` asks whether a page threw; `npm run narrow` and `npm run sweep3d` judge whether a frame is blank, flat or near-black, which pale type on a pale fill passes perfectly; `npm run drive` presses real controls but runs the light theme only and asserts `describe()`, not pixels; `npm run devices` measures target sizes and edges. `out/colour2/contrast.mjs` does the WCAG arithmetic but over CSS token declarations in `tongjian/zj.css`, not over what a figure paints.
+
+### What measuring found
+
+Every figure rendered in both themes at a 1000×640 stage, driven through its own controls, with each glyph's colour read off the computed style and the surface under it read off a frame taken with the glyphs made transparent. Eight figures over three published chapters, in both themes:
+
+| Figure | Words | Colours | Ratio | Cause |
+|---|---|---|---|---|
+| `levels` (ch01) | `104.5°` on the oxygen | `--ink-soft` on `--coral` | **2.07 light, 1.09 dark** | the label asked for `--paper` with a `fill` ATTRIBUTE and `.tb-levels .lv-note` beat it |
+| `levels` | `ventricle` | `--ink-soft` on `tint(coral, 74)` | **2.87 light, 1.49 dark** | same |
+| `levels` | `atrium` ×2 | `--ink-soft` on `tint(coral, 40)` | 4.35 light, **3.07 dark** | same |
+| `levels` | `O` on the water molecule | `--ink` on `--coral` | 4.88 light, **1.95 dark** | `.tb-levels svg text { fill: var(--ink) }` beat `fill: C.paper` |
+| `scale` (ch01) | every species name | `--leaf` on `--paper-2` | **4.36 light** | a figure accent spent as type |
+| `tree` (ch01) | `mitochondria`, `chloroplasts` | `--water` on `--paper-2` | **4.01 light** | same |
+| `homeostasis` (ch01) | five labels and chips | `--coral` on the paper | **3.07–3.29 light** | same |
+| `bondlab` (ch02) | `δ+` beside a hydrogen | `--coral` on `--coral` | **1.00, both themes** | the glyph was placed straight up and landed on its own molecule's oxygen |
+| `bondlab` | `δ+`, `δ−`, `+` | `--coral` / `--water` on the paper | **2.83–4.33 light** | a figure accent spent as type |
+| `phlab` (ch02) | the charge sign on a carbon | `--ink` on `--ink-soft` | **2.36 light** | ink on the carbon disc's own fill |
+
+Two more were measured and are **not** defects, and both are recorded because they cost time: `pasteur`'s pressed-and-disabled buttons read 2.08:1, which is WCAG 1.4.3's own exemption for an inactive control and this book's deliberate dimming; and `prokaryote`'s swimming readout read 1.06:1 because the figure kept running between the measurement's two frames, so one moment's glyphs were being read against another moment's pixels.
+
+### What it is checked by now
+
+`npm run legible` (`tools/legible.js`), step eight of `npm test`. It renders every registered kind in both themes at 1000×640, in its opening state and after each of its own visible enabled buttons has been pressed, and measures each glyph against the pixels actually under it: a magenta frame gives per-pixel glyph coverage, a transparent frame gives the surface, and the computed `fill`/`color` gives the text. WCAG 2.x AA, 4.5:1 or 3:1 for large text, with the rendered size — not the declared one, because a `font-size: 40px` glyph inside one of `levels`'s thumbnails is six device pixels on screen.
+
+Its bound is in its own header, and the two things it cannot see are already live: text a figure paints into a canvas or through WebGL, and a colour pair only a slider or a click on the drawing reaches (`scale`'s ruler tick under the moving lens is one).
+
+### The thing to notice
+
+A mask read off the figure's own frame would have been circular. Text the same colour as the fill under it changes no pixel, so the very defect being looked for would have read as "this text draws nothing" — which is how `bondlab`'s 1.00:1 `δ+` would have been reported as clean. The gate paints the glyphs magenta to find them, and only then reads what is underneath.
