@@ -14,7 +14,7 @@
 //
 // Clock: one unit per step. 0 = 前453, 1 = 前403 (the year the book opens at), 2 = 前376. `?t=1` pins
 // the middle one. describe() -> { order, steps, year, yearLabel, phase, frame, houses, houseStatus, zhi,
-// jinRemnant, commanded, tier, tiny, reduced }.
+// jinRemnant, quoted, commanded, tier, tiny, reduced }.
 //
 // Three arrangements, chosen from the measured stage — its height as much as its width, because the frame
 // keeps one aspect ratio at every viewport above 800px, so a 1024px laptop gets a 704x440 stage and a
@@ -25,6 +25,35 @@
 //   narrow (h >= 470 and w < 620)  — one column, the full reading, centred in a capped measure;
 // and under 400px of height the plate drops its lineage line and the panel its apparatus (臣光曰 and the
 // source), because at that size they are the difference between a figure and a cropped one.
+//
+// The sentence's citation is a fourth thing, and — as in figure 2.1 — no tier drops it by rule. Whether the
+// volume line under the panel is drawn is MEASURED from the panel's own content (`fitCitation` below:
+// citation and note; the note yields for the attribution; neither fits and the shipped composition stands)
+// and re-taken after the Han webfaces arrive. The three answers were measured on the real chapter page at
+// 390 px by out/zj-cite2/one.mjs, one page load per shape with only the stage's box changed between reads.
+// `content` is where the panel's last drawn block ends and `toolbar` where the controls begin, both from the
+// stage's own top edge, so content past the toolbar is an overlap:
+//   shape    cite/note  content  toolbar  clearance
+//   390x585  1/0        492.5    511.2    +18.7   the note yields: the phone page's own stage
+//   390x620  1/1        532.5    546.2    +13.7   citation and note both drawn
+//   390x560  1/0        473.4    486.2    +12.8   the note yields
+//   380x570  1/0        483.4    496.2    +12.8   the note yields
+//   360x540  0/1        431.0    466.2    +35.2   the citation is off and the `tight` tier has taken the
+//   342x513  0/1        427.4    439.2    +11.8   note off before the fit is asked, so nothing is measured
+//   320x480  0/1        444.4    406.2    -38.7   the panel already overflows by itself; see the bound below
+// `npm run flow`'s `phone-figure-citation` step is the check on the phone load; the same numbers are in the
+// CSS block above the narrow tier.
+//
+// What the measurement does not cover, said here rather than left to be found. Below 545px of stage height
+// the `tight` tier takes the note and the source off by rule, so the fit decides nothing there and those
+// stages are exactly what they were before this change. At 320x480 the panel draws 51.0px past its own box
+// in that unchanged composition and its content ends 38.7px over the toolbar — a reader at that size has the
+// 臣光曰 line and the mark under the stops, which this change neither caused nor repaired and no block
+// yields enough to clear. `npm run narrow` mounts this figure in `lab/`, which loads no Han webfont, so its
+// text wraps shorter than a chapter page's — and this is not a prediction but a measurement: at the same
+// 342x513 stage the lab gives, the fit's own arithmetic clears there and would draw the volume line, while
+// the chapter page at that size does not. The lab's frames are therefore more forgiving than a reader's, and
+// the fit's answer on a lab frame is not evidence of its answer on a phone page.
 import { h } from './lib/svg.js';
 
 // The fields of a step that hold 資治通鑑's own words rather than this figure's. A reader is told which
@@ -256,7 +285,12 @@ const CSS = `
 .tb-zjs .zjs-aside-label { display: block; font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.14em; color: var(--ink-faint); }
 .tb-zjs .zjs-aside-text { margin: 0; font-family: var(--font-text); font-size: var(--text-sm); line-height: 1.6; color: var(--ink-soft); }
 .tb-zjs .zjs-mark { margin: 0; font-size: var(--text-xs); letter-spacing: 0.06em; color: var(--zjs-seal); }
-.tb-zjs .zjs-mark[hidden], .tb-zjs .zjs-aside[hidden] { display: none; }
+.tb-zjs .zjs-mark[hidden], .tb-zjs .zjs-aside[hidden], .tb-zjs .zjs-source[hidden] { display: none; }
+/* The volume line under 臣光曰, and the only place this figure names the work it is quoting: the panel
+   prints 「初命晉大夫魏斯、趙籍、韓虔為諸侯。」 and this says it is 《资治通鉴》卷一's opening sentence. Like
+   figure 2.1's citation it is MEASURED rather than keyed to a stage size — see fitCitation in the module
+   below and the measured block above the narrow tier — because the room it needs depends on how the step's
+   own text wraps, which is a function of the stage's width and of the font once the Han webfaces load. */
 .tb-zjs .zjs-source { margin: 0; font-size: var(--text-xs); letter-spacing: 0.04em; color: var(--ink-faint); }
 
 /* ---------- the stops: the step control, and the three dates with their meanings ---------- */
@@ -315,7 +349,9 @@ const CSS = `
    own words. The lineage, the two band notes, the explanation, the 臣光曰 line and the volume come off:
    at 480x300 the body row is 161px and the plate has to be 147 of it. Every court label is nowrap and a
    step down, because a span that wraps inside itself is what turned the reign year into three lines
-   there. A cut-off line reads as a bug; an absent one does not. */
+   there. A cut-off line reads as a bug; an absent one does not. The volume line stays off at this tier and
+   fitCitation does not re-take the question here: at 480x300 there is no room for it at all, which is what
+   the measured block above the narrow tier records. */
 .tb-zjs[data-tiny="1"] { gap: var(--space-1); }
 .tb-zjs[data-tiny="1"] .zjs-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: var(--space-3); }
 .tb-zjs[data-tiny="1"] .zjs-court { padding: 0.15rem 0.4rem; gap: 0.25rem; }
@@ -348,14 +384,40 @@ const CSS = `
 .tb-zjs[data-tight="1"] .zjs-note { display: none; }
 .tb-zjs[data-tight="1"] .zjs-note { font-size: var(--text-xs); line-height: 1.4; }
 
+/* ---------- the citation, drawn where the panel can hold it ----------
+   The volume line under the panel is the strongest provenance statement this figure makes: the sentence
+   above it is 通鑑's, and without it the reader meets 通鑑's words with nothing saying whose they are. So
+   no tier drops it by rule. Whether it is drawn is MEASURED from the panel's own content — fitCitation
+   in the module below — because the room it needs depends on how the step's own text wraps, which is a
+   function of the stage width and of the loaded font rather than of a tier name. The default in the two
+   compositions that have to earn their room is off; [data-cite="1"] carries more specificity than the rule
+   that hides it, so it needs no order trick beyond sitting after every tier block that names .zjs-source.
+
+   The fit's three answers were measured on 2026-09-17 by out/zj-cite2/one.mjs on the real chapter page at
+   390 px, one page load per shape with only the stage's box changed between reads. The table is in the file
+   header; the shape of it is that at the phone page's own 390x585 the note yields and the citation draws
+   with 18.7px of clearance, at 390x620 and up both are drawn, at 390x560 and 380x570 the note yields, and
+   under 545px of stage height the tight tier has already taken the note off, so the fit is not asked and the
+   composition is the one that shipped. What no answer here repairs is the overlap at the smallest stages:
+   at 320x480 the panel draws 51.0px past its own box with the citation off, 38.7px over the toolbar, so
+   that stage is unchanged by this block and is named in the header rather than silently inherited. Dropping
+   a block never makes room for fewer blocks, so the last answer is a fixed point and this cannot oscillate —
+   a trace at 380x570 shows the decision taken twice and identical both times. :not([hidden]) keeps a step
+   with no sentence of its own from being drawn as an empty line — every step of this figure has one today,
+   so it is the guard rather than a live case. */
+.tb-zjs[data-tier="narrow"] .zjs-source,
+.tb-zjs[data-tier="small"] .zjs-source { display: none; }
+.tb-zjs[data-cite="1"]:not([data-tiny="1"]) .zjs-source:not([hidden]) { display: block; }
+.tb-zjs[data-cite-note="0"] .zjs-note { display: none; }
+
 /* ---------- narrow: one column, the full reading, on a capped measure ----------
    The stage is 390x585 here and the reading — the plate, the date, 通鉴's sentence, the explanation and
-   the 臣光曰 line — comes to about 550px of it. What goes is the volume line, which the figure's own
-   caption carries (the chapter prints 图 1.1 and the volume), and the paddings come in a step. */
+   the 臣光曰 line — comes to about 550px of it. The volume line is no longer one of the things that goes by
+   rule: it is drawn where the panel's own content leaves room for it (fitCitation below, and the measured
+   block above). The paddings come in a step. */
 .tb-zjs[data-tier="narrow"] { width: min(34rem, 100%); inset: 0 auto 0 50%; transform: translateX(-50%);
   gap: var(--space-2); padding: var(--space-3) var(--space-3) var(--space-2); }
 .tb-zjs[data-tier="narrow"] .zjs-folio { display: none; }
-.tb-zjs[data-tier="narrow"] .zjs-source { display: none; }
 .tb-zjs[data-tier="narrow"] .zjs-head { padding-bottom: var(--space-1); }
 .tb-zjs[data-tier="narrow"] .zjs-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto;
   align-content: center; gap: var(--space-2); }
@@ -502,6 +564,7 @@ export function mount(root, ctx) {
     mark.textContent = s.mark;
     mark.hidden = !s.mark;
     source.textContent = s.source;
+    source.hidden = !s.source;
     courtKing.textContent = s.king;
     courtYear.textContent = s.kingYear;
     courtNote.textContent = s.courtNote;
@@ -523,6 +586,9 @@ export function mount(root, ctx) {
       post.hidden = s.key === 'jinyang';
     }
     seats.forEach((b, i) => b.setAttribute('aria-pressed', String(i === order)));
+    // The step decides what the panel holds, so the fit is taken again on every paint, not only on a
+    // resize: a step with no sentence of its own has no citation to place and must not cost its note one.
+    fitCitation();
   }
 
   function go(next, focus = false) {
@@ -551,6 +617,43 @@ export function mount(root, ctx) {
   let tier = null;
   let tiny = null;
   let tight = null;
+
+  // Does everything the panel draws stay clear of the controls below it? The panel's box is not the whole
+  // room it has — a gap separates it from the toolbar, and a line that spills into that empty space is
+  // still read, which the compositions here already rely on (the shipped 390x585 stage draws 2px past its
+  // panel and reads fine). So the test is where the CONTENT ends against where the controls begin:
+  // scrollHeight is the content's own height once it passes the box, and anything that reaches the toolbar
+  // fails. It is read AFTER the data-cite attribute is written, because reading a layout property flushes
+  // style and the rule that draws the citation is what the answer is about.
+  const panelClears = () => panel.getBoundingClientRect().bottom
+    + Math.max(0, panel.scrollHeight - panel.clientHeight) <= toolbar.getBoundingClientRect().top;
+
+  // Whether the volume line under the panel is drawn, MEASURED rather than keyed to a stage size — the
+  // same device, and the same three answers in the same order, as figure 2.1's `fitCitation`. What the
+  // reader must not lose is the attribution of 通鑑's sentence, so the note is what yields for it:
+  //   the panel holds the citation and its note together (390x620 and up);
+  //   the note yields so the attribution can stand (390x585, the stage a reader's phone gives, and 390x560);
+  //   neither fits and the composition is the one that shipped, with the note and no volume line (the lab's
+  //   342x513 and 320x480, and every `small` or `tiny` stage, which have no room for it at all — the ones
+  //   under 545px of height never reach this question, because the `tight` tier takes the note off first).
+  // Dropping a block never makes room for fewer blocks, so the last answer is a fixed point and this cannot
+  // oscillate. A step with no sentence of its own has no citation to place.
+  function fitCitation() {
+    const has = !source.hidden && source.textContent !== '';
+    if (!has || tier !== 'narrow' || tiny || tight) {
+      wrap.dataset.cite = '0';
+      wrap.dataset.citeNote = '1';
+      return;
+    }
+    wrap.dataset.cite = '1';
+    wrap.dataset.citeNote = '1';
+    if (panelClears()) return;
+    wrap.dataset.citeNote = '0';
+    if (panelClears()) return;
+    wrap.dataset.cite = '0';
+    wrap.dataset.citeNote = '1';
+  }
+
   function measure() {
     const r = root.getBoundingClientRect();
     const w = Math.round(r.width);
@@ -559,24 +662,38 @@ export function mount(root, ctx) {
     const nextTier = h < WIDE_MIN_H ? 'small' : (w < NARROW_MAX_W ? 'narrow' : 'wide');
     const nextTiny = h < TINY_H;
     const nextTight = h < TIGHT_H;
-    if (nextTier === tier && nextTiny === tiny && nextTight === tight) return false;
-    tier = nextTier;
-    tiny = nextTiny;
-    tight = nextTight;
-    wrap.dataset.tier = tier;
-    wrap.dataset.tiny = tiny ? '1' : '0';
-    wrap.dataset.tight = tight ? '1' : '0';
-    return true;
+    const changed = !(nextTier === tier && nextTiny === tiny && nextTight === tight);
+    if (changed) {
+      tier = nextTier;
+      tiny = nextTiny;
+      tight = nextTight;
+      wrap.dataset.tier = tier;
+      wrap.dataset.tiny = tiny ? '1' : '0';
+      wrap.dataset.tight = tight ? '1' : '0';
+    }
+    // Re-taken on every measure, not only when a size flag moved: it is a question about the panel's
+    // content and the font it is set in, not about the stage's box alone. It also has to run after the
+    // tier attributes are written, because the rule that draws the citation is keyed on the tier.
+    fitCitation();
+    return changed;
   }
   const ro = new ResizeObserver(() => { if (measure()) paint(); });
   ro.observe(root.closest('.tb-figure__stage') || root);
   measure();
+
+  // The two Han families arrive after this module mounts, and how the step's text wraps is exactly what the
+  // fit above measures, so it is taken again once they are in. `document.fonts.ready` resolves on a page
+  // that loads no webfont too, and `measure` re-reads the stage, so a late font cannot leave a stale answer
+  // standing.
+  let dead = false;
+  document.fonts?.ready?.then(() => { if (!dead) measure(); });
 
   paint();
   ctx.onReady();
 
   return {
     destroy() {
+      dead = true;
       ro.disconnect();
       toolbar.removeEventListener('keydown', onKey);
       root.replaceChildren();
@@ -599,6 +716,12 @@ export function mount(root, ctx) {
         houseStatus: s.key === 'jinyang' ? '晋大夫' : s.key === 'investiture' ? '大夫→诸侯' : '诸侯',
         zhi: '灭',
         jinRemnant: s.key === 'end' ? '亡' : '存',
+        // Whether the row this figure is showing actually carries a quotation of 通鑑's: the panel prints
+        // 「…」 from `quote` at every step of this figure today, and the volume line under it is that
+        // sentence's citation. Published for the same reason figure 2.1 publishes it — the phone load's
+        // `phone-figure-citation` step asks a figure for its citation only when the figure says it is
+        // showing 通鑑's words, so a figure that prints them without saying so is never asked.
+        quoted: Boolean(s.quote),
         commanded: s.commanded,
         tier,
         tiny,

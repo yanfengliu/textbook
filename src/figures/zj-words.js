@@ -33,11 +33,31 @@
 //
 // Clock: one unit per taught word, in WORD_ORDER (0 = 大夫, 1 = 诸侯, 2 = 为后); the clock selects that
 // word's run in the 原文. describe() -> { selection, chars, entryType, pinyin, pos, gloss, mark, line,
-// source, pairs, tier, reduced }.
+// source, pairs, quoted, tier, reduced }.
 //
 // Three arrangements, from the measured stage: wide (two columns), narrow (one column, on a capped
 // measure), and small for a short stage — a phone in landscape or the 800px-window stage the frame
 // makes at 480x300 — where the cells shrink, the 卷次 captions go, and the panel tightens.
+//
+// The citation under each line of the 原文 is a fourth thing, and — as in figure 2.1 — no tier drops it by
+// rule: the figure's whole subject is characters taken out of 通鑑's sentences, and the caption is where
+// those sentences are attributed. Whether it is drawn is MEASURED from the pane's own content
+// (`fitCitation` below: the whole card; the dictionary's note yields; the teaching sentence yields with it;
+// neither fits and the shipped composition stands) and re-taken after the Han webfaces arrive and after
+// every pick. The answers were measured on the real chapter page at 390 px by out/zj-cite2/one.mjs, one page
+// load per shape with only the stage's box changed between reads — the table is in the CSS block above the
+// narrow tier. `npm run flow`'s `phone-figure-citation` step is the check on the phone load.
+//
+// What the measurement does not cover, said here rather than left to be found: at 342x513 (the lab's stage,
+// which `npm run narrow` photographs) and 320x480 the card's content needs more room than the pane's box
+// has with the citations OFF — the panel scrolls 15px and 48px past it, and its content ends 2.2px and
+// 35.2px over the toolbar — so a reader at those sizes has the last line of the teaching sentence under the
+// chips, which this change neither caused nor repaired and which no block yields enough to clear. `npm run
+// narrow` mounts this figure in `lab/`, which loads no Han webfont, so its text wraps shorter than a chapter
+// page's — and this is not a prediction but a measurement: at the same 342x513 stage the lab gives, the fit
+// draws both captions (with the note and the teaching sentence yielded), where the chapter page at that size
+// drops them. The lab's frames are therefore more forgiving than a reader's, and the fit's answer on a lab
+// frame is not evidence of its answer on a phone page.
 import { h } from './lib/svg.js';
 
 // The fields of a line that hold 資治通鑑's own words rather than this figure's. `text` is the 句 the
@@ -271,9 +291,11 @@ const CSS = `
 .tb-zjw[data-tiny="1"] .zjw-gloss { font-size: var(--text-sm); }
 
 /* ---------- narrow: one column, 原文 above the card, on a capped measure ----------
-   A 390px stage holds both halves once the 卷次 captions and the hint come off — the figure opens on a
-   worked example (大夫 taken apart) and the three chips name what else there is, so the hint has done its
-   work by the time the reader is here — and the card's blocks sit one gap closer. */
+   A 390px stage holds both halves once the hint comes off — the figure opens on a worked example (大夫
+   taken apart) and the three chips name what else there is, so the hint has done its work by the time the
+   reader is here — and the card's blocks sit one gap closer. The 卷次 captions under the two lines are no
+   longer one of the things that go by rule: they are drawn where the pane's own content leaves room for
+   them (fitCitation below, and the measured block above). */
 .tb-zjw[data-tier="narrow"] { width: min(34rem, 100%); inset: 0 auto 0 50%; transform: translateX(-50%);
   gap: var(--space-2); padding: var(--space-3) var(--space-3) var(--space-2); }
 .tb-zjw[data-tier="narrow"] .zjw-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: var(--space-2); }
@@ -301,6 +323,41 @@ const CSS = `
    the book's real lexicon a note is one or two lines, and at 656x410 (a 1024px window) that is 47px the
    card does not have. After the tier blocks on purpose: it has their specificity. */
 .tb-zjw[data-short="1"] .zjw-note { display: none; }
+
+/* ---------- the citation, drawn where the source pane can hold it ----------
+   Each line of the 原文 is followed by the citation that says which 卷 and which passage it is, and that
+   line is the only place this figure names the work it is quoting: the reader is picking characters out of
+   通鑑's own sentences, and without it the sentences have no attribution. So no tier drops it by rule.
+   Whether it is drawn is MEASURED from the pane's own content — fitCitation in the module below, which
+   asks the card what height it needs and gives the citation whatever is left — because the room it needs
+   depends on how the sentences and the card's glosses wrap, which is a function of the stage width and of
+   the loaded font rather than of a tier name. The default in the composition that has to earn its room is
+   off; [data-cite="1"] carries more specificity than the rule that hides it, so it needs no order trick
+   beyond sitting after every tier block that names .zjw-caption.
+
+   The fit has three answers in the same order as figure 2.1's, measured on 2026-09-17 by
+   out/zj-cite2/one.mjs and out/zj-cite2/trace.mjs on the real chapter page at 390 px, one page load per
+   shape with only the stage's box changed between reads. Content is where the panel's last drawn block
+   ends and toolbar where the controls begin, both from the stage's own top edge:
+     shape    cite/note/taught  content  toolbar  clearance  answer
+     390x585  1/1/1             526.8    539.6    +12.8      the whole card fits under the citations
+     390x560  1/0/1             501.8    514.6    +12.8      the note yields
+     360x540  1/0/0             481.8    494.6    +12.8      the note yields, and the teaching sentence too
+     342x513  0/1/1             469.8    467.6     -2.2      nothing fits; the shipped composition, 15px over
+     320x480  0/1/1             469.8    434.6    -35.2      nothing fits; the shipped composition, 48px over
+   So A1 is the whole card and is drawn at 390x585; A2 drops the dictionary's note, at 390x560; A3 drops the
+   figure's own teaching sentence as well and is reached at 360x540; A4 is the composition that shipped, with
+   the citations off and the card whole, and it is reached at 342x513 and below. The teaching sentence is a
+   block this figure already drops at a tier under 340px tall, so A3 is a state the figure has rather than
+   one invented
+   here, and the two blocks yield in the order the figure's own tiers already use. Dropping a block never
+   makes room for fewer blocks, so A4 is a fixed point and this cannot oscillate. :not([hidden]) keeps a line
+   with no citation of its own — none today, the guard rather than a live case — from being drawn as an empty
+   line. */
+.tb-zjw[data-tier="narrow"] .zjw-caption, .tb-zjw[data-tier="narrow"] .zjw-hint { display: none; }
+.tb-zjw[data-cite="1"]:not([data-tiny="1"]) .zjw-caption:not([hidden]) { display: block; }
+.tb-zjw[data-cite-note="0"] .zjw-note { display: none; }
+.tb-zjw[data-cite-taught="0"] .zjw-taught { display: none; }
 `;
 
 const cellsOf = (text) => [...text].map((ch) => ({ ch, punct: PUNCT.includes(ch) }));
@@ -408,7 +465,8 @@ export function mount(root, ctx) {
   clear.addEventListener('click', () => { pick = null; paint(); });
   const toolbar = h('div', { class: 'fig-toolbar fig-ui' }, [...chips, clear]);
 
-  wrap.append(h('div', { class: 'zjw-body' }, [sourcePane, card]), toolbar);
+  const body = h('div', { class: 'zjw-body' }, [sourcePane, card]);
+  wrap.append(body, toolbar);
   root.append(wrap);
 
   // ---------- resolving a selection ----------
@@ -499,6 +557,7 @@ export function mount(root, ctx) {
       note.textContent = '';
       example.textContent = '';
       split.hidden = true;
+      fitCitation();
       return;
     }
 
@@ -525,6 +584,7 @@ export function mount(root, ctx) {
       mark.hidden = !teach?.mark;
       taught.textContent = teach?.taught || '';
       taught.hidden = !teach?.taught;
+      fitCitation();
       return;
     }
 
@@ -545,6 +605,10 @@ export function mount(root, ctx) {
       note.textContent = e.chars.map((ch, i) => `${ch}　${glossOf(senseAt(pick.line, pick.from + i).data)}`).join('；');
       example.textContent = '';
     }
+    // What the reader picked changes the card's own height and the length of the run it printed, so the fit
+    // is taken again here as well as on a resize: a run that wraps to three lines can cost the citations
+    // their room, and a one-character card may leave room that the previous word did not.
+    fitCitation();
   }
   function select(li, ci) {
     const cells = lineCells[li];
@@ -605,6 +669,73 @@ export function mount(root, ctx) {
   let tier = null;
   let tiny = null;
   let short = null;
+
+  // How much height the card's own content needs, whatever height the grid row is currently giving it. The
+  // card is a grid item that stretches to its row, so reading its own box is not the answer — the row is
+  // exactly what is being asked about. Each block is measured on its own instead, with the card released
+  // from the row for that one synchronous read and put straight back, inside one task, before the browser
+  // paints: no frame ever shows a released card. The column width does not change while this runs, so every
+  // block wraps exactly as it does on screen. Writing a style property does not run the ResizeObserver, so
+  // this cannot re-enter `measure`; and the height it changes never crosses a tier threshold, so a later
+  // observer pass reads the same tier and does no work.
+  function cardNatural() {
+    const kids = [...card.children];
+    const shown = kids.filter((k) => getComputedStyle(k).display !== 'none');
+    if (!shown.length) return 0;
+    const prevCard = [card.style.height, card.style.alignSelf];
+    card.style.height = 'auto';
+    card.style.alignSelf = 'start';
+    let total = 0;
+    for (const one of shown) total += one.getBoundingClientRect().height;
+    [card.style.height, card.style.alignSelf] = prevCard;
+    const gap = parseFloat(getComputedStyle(card).rowGap) || 0;
+    return total + gap * (shown.length - 1);
+  }
+
+  // Whether the citation under each line of the 原文 is drawn, MEASURED rather than keyed to a stage size —
+  // the same device, and the same three answers in the same order, as figure 2.1's `fitCitation`. What the
+  // reader must not lose is the attribution of the sentences they are picking characters out of, so the
+  // card yields to it — note first, then the teaching sentence — and the citation itself is the last to go:
+  //   the whole card fits under the citations (390x585, the stage a reader's phone gives);
+  //   the dictionary's note yields (360x540);
+  //   neither fits and the composition is the one that shipped, with the card whole and no citation.
+  // Dropping a block never makes room for fewer blocks, so the last answer is a fixed point and this cannot
+  // oscillate. A line with no citation of its own has none to place.
+  function fitCitation() {
+    const first = linesets.length ? linesets[0].querySelector('.zjw-caption') : null;
+    const has = Boolean(first) && !first.hidden && first.textContent !== '';
+    if (!has || tier !== 'narrow' || tiny) {
+      wrap.dataset.cite = '0';
+      wrap.dataset.citeNote = '1';
+      wrap.dataset.citeTaught = '1';
+      return;
+    }
+    // What the pane's blocks need drawn plus what the card's content needs, against the room between the
+    // top of the body and where the toolbar begins. Read after the attribute is written, because reading a
+    // layout property flushes style and the rule that draws the caption is what this is about.
+    const fits = () => {
+      const top = body.getBoundingClientRect().top;
+      const avail = toolbar.getBoundingClientRect().top - top;
+      const gap = parseFloat(getComputedStyle(body).rowGap) || 0;
+      const blocks = [...body.children].filter((c) => getComputedStyle(c).display !== 'none');
+      const cn = cardNatural();
+      const paneWants = blocks.reduce((s, c) => s + (c === card ? cn : c.getBoundingClientRect().height), 0)
+        + gap * Math.max(0, blocks.length - 1);
+      return paneWants <= avail;
+    };
+    wrap.dataset.cite = '1';
+    wrap.dataset.citeNote = '1';
+    wrap.dataset.citeTaught = '1';
+    if (fits()) return;
+    wrap.dataset.citeNote = '0';
+    if (fits()) return;
+    wrap.dataset.citeTaught = '0';
+    if (fits()) return;
+    wrap.dataset.cite = '0';
+    wrap.dataset.citeNote = '1';
+    wrap.dataset.citeTaught = '1';
+  }
+
   function measure() {
     const r = root.getBoundingClientRect();
     const w = Math.round(r.width);
@@ -613,18 +744,30 @@ export function mount(root, ctx) {
     const nextTier = hgt < SHORT_H ? 'small' : (w < ONE_COLUMN_W ? 'narrow' : 'wide');
     const nextTiny = hgt < TINY_H;
     const nextShort = hgt < NOTE_H;
-    if (nextTier === tier && nextTiny === tiny && nextShort === short) return false;
-    tier = nextTier;
-    tiny = nextTiny;
-    short = nextShort;
-    wrap.dataset.tier = tier;
-    wrap.dataset.tiny = tiny ? '1' : '0';
-    wrap.dataset.short = short ? '1' : '0';
-    return true;
+    const changed = !(nextTier === tier && nextTiny === tiny && nextShort === short);
+    if (changed) {
+      tier = nextTier;
+      tiny = nextTiny;
+      short = nextShort;
+      wrap.dataset.tier = tier;
+      wrap.dataset.tiny = tiny ? '1' : '0';
+      wrap.dataset.short = short ? '1' : '0';
+    }
+    // Re-taken on every measure, not only when a size flag moved: it is a question about the card's content
+    // and the font it is set in, not about the stage's box alone. It also has to run after the tier
+    // attributes are written, because the rule that draws the caption is keyed on the tier.
+    fitCitation();
+    return changed;
   }
   const ro = new ResizeObserver(() => { if (measure()) paint(); });
   ro.observe(root.closest('.tb-figure__stage') || root);
   measure();
+
+  // The two Han families arrive after this module mounts, and how the card's glosses wrap is exactly what
+  // the fit above measures, so it is taken again once they are in. `document.fonts.ready` resolves on a page
+  // that loads no webfont too, and `measure` re-reads the stage, so a late font cannot leave a stale answer
+  // standing.
+  document.fonts?.ready?.then(() => { if (!destroyed) measure(); });
 
   // The figure opens on its first taught word rather than on an empty card: the reader's first sight of
   // it should be a worked example — 大夫 taken apart into 大 and 夫 — not the instruction to go and find
@@ -661,6 +804,12 @@ export function mount(root, ctx) {
         line: pick ? pick.line : -1,
         source: src,
         pairs: known,
+        // Whether the row this figure is showing actually carries a quotation of 通鑑's: the 字格 IS one of
+        // the two sentences of 卷一, every character of it pickable, and the citation under it names the
+        // 卷. Published for the same reason figure 2.1 publishes it — the phone load's
+        // `phone-figure-citation` step asks a figure for its citation only when the figure says it is
+        // showing 通鑑's words, so a figure that prints them without saying so is never asked.
+        quoted: LINES.some((l) => Boolean(l.text)),
         tier,
         reduced,
       };

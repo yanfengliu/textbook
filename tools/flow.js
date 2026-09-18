@@ -72,16 +72,21 @@
 // 通鑑's own words, so a figure that prints them without publishing that field is never asked for a
 // citation — the run-level census in `figure-citation-covered` is what stops a green run that compared
 // nothing, by failing a declared kind no page exercised; it presses no control, so a row the reader has to
-// select is not measured (the figure opens on 前403年, whose row carries a citation); it proves a box is
-// drawn and its type is at least the floor, not that the citation is legible against what is under it,
-// which is `npm run legible`'s question where it is asked at all.
+// select is not measured (each figure opens on a row that carries a citation); it proves a box is drawn and
+// its type is at least the floor, not that the citation is legible against what is under it, which is
+// `npm run legible`'s question where it is asked at all.
 //
-// And it knows one figure kind, which is a measured gap rather than a choice: the same defect is still in
-// the book's other two figures — `zj-split`'s `.zjs-source` is `display: none` at `data-tier="narrow"` and
-// `zj-words`'s `.zjw-caption` at `data-tier="narrow"` too, both the citation of a quotation the figure
-// still draws — and neither file is this round's, so neither is asserted here. They are also invisible to
+// It knows THREE figure kinds now, and each is a measurement rather than a rule: `zj-timeline`'s
+// `.zjt-quote-at`, `zj-split`'s `.zjs-source` and `zj-words`'s `.zjw-caption` are drawn only when each
+// figure's own `fitCitation` finds room in its own panel, which is why the element differs by kind and why
+// this table cannot be derived. The two newer ones were the same defect the first was fixed for —
+// `zj-split`'s `.zjs-source` and `zj-words`'s `.zjw-caption` were both `display: none` at
+// `data-tier="narrow"`, which is the composition the 390 px phone page gets — and neither was visible to
 // this step for a second reason: a figure is asked for a citation only when its own `describe()` says it
-// is showing 通鑑's words, and only `zj-timeline` publishes that field.
+// is showing 通鑑's words, and until that round only `zj-timeline` published that field. Both now publish
+// it. What this step still cannot see is a kind whose figure is not mounted on any phone load, and the
+// census is what fails that; and it reads only the opening state of each figure, so a citation that a
+// reader's own selection would move is `npm run drive`'s and the fit's own re-take.
 import { mkdirSync, rmSync, readFileSync } from 'node:fs';
 import { startServer } from './serve.js';
 import { launch, collectErrors, openPage, ACTION_TIMEOUT_MS, BOOKS } from './lib/browser.js';
@@ -277,7 +282,18 @@ function auditMarks({ scope, selectors, regions }) {
 // a private name inside the figure and cannot be derived from anything outside it — so a kind the table
 // does not name that reports a quotation FAILS rather than being skipped, and a declared kind that no
 // page exercises fails the census step at the end of the run.
-const FIGURE_CITATIONS = { 'zj-timeline': '.zjt-quote-at' };
+//
+// Three kinds, one per figure of this book, and each figure's citation is a different element because each
+// figure's panel holds different things: the timeline's citation is a line of its own under the quotation,
+// the split's is the volume line at the foot of the panel, and the words figure hangs one under each
+// sentence of the 原文 it prints. All three are drawn by a measurement the figure takes of its own content
+// rather than by a tier rule, which is what this step is the check on: a figure that hides its citation in
+// a narrow composition meets `npm run flow` here.
+const FIGURE_CITATIONS = {
+  'zj-timeline': '.zjt-quote-at',
+  'zj-split': '.zjs-source',
+  'zj-words': '.zjw-caption',
+};
 
 // The type floor for a citation this check accepts as drawn. AGENTS.md's figure invariant is about nine
 // device pixels, and `flow` loads at deviceScaleFactor 1, so 10 CSS px is that floor rounded up: a
