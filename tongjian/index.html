@@ -89,6 +89,16 @@
   /* The passage itself, quoted in the contents line: it is type, not decoration, and it is what tells a
      reader whether they have met this text before. */
   .chapters .dek q { font-style: normal; quotes: "「" "」"; }
+  /* The key's own page has to show the mark it explains, and this page links no chapter stylesheet, so
+     the rule that marks a quotation inside the book's prose is not here: the three chapter deks quote
+     通鑑's own line in a `q[lang="zh-Hant"]` and nothing sets them apart. The container is already
+     `--ink-soft`, so the mark is the inversion the book uses wherever the prose around a quotation is
+     already the quiet voice — full ink at the container's own size — rather than a second step down.
+     Measured at 1440 px on this page before this rule: all three runs and the `.dek` around them were
+     16 px in rgb(92, 85, 77) in the light theme and rgb(163, 157, 147) in the dark one, i.e. the same
+     size and the same colour to the byte; after it, the runs are rgb(29, 26, 23) and rgb(233, 228, 218)
+     against those same containers, so the step is in ink and the size stays the container's own. */
+  .book .chapters .dek [lang="zh-Hant"] { color: var(--ink); }
   @media (max-width: 599.98px) {
     .chapters a, .chapters .soon { grid-template-columns: 2.2rem minmax(0, 1fr); }
     .chapters .tag { grid-column: 2; margin-top: var(--space-1); }

@@ -52,6 +52,8 @@
 // that the difference is large enough to notice; and text drawn into a canvas has no element to measure.
 // It also cannot see the one defect it was written after that is a statement about which colour a
 // container should keep: a mark that REPAINTS a deliberately coloured container is still a difference.
+// And it visits chapter pages only, so the same mark on `tongjian/index.html`'s own chapter deks, whose
+// page links no chapter stylesheet, is outside it and is held by nothing here.
 import { mkdirSync, rmSync, readFileSync } from 'node:fs';
 import { startServer } from './serve.js';
 import { launch, collectErrors, openPage, ACTION_TIMEOUT_MS, BOOKS } from './lib/browser.js';
@@ -153,10 +155,16 @@ function markRules() {
     .filter((m) => m[1].includes('[lang="zh-Hant"]'))
     .map((m) => ({ selector: m[1].trim().replace(/\s+/g, ' ') }));
   expect(rules.length, 'tongjian/zj.css holds no rule with [lang="zh-Hant"] in its selector, so the rendered-mark audit has no rule to read');
-  // The scope is the part of the selector before the attribute, spaces and all: `[lang=` is where the
-  // rule stops describing containers and starts describing the run. `:is(...)`/`:not(...)` lists would
-  // break the query, so a scope carrying one is refused rather than silently matching the wrong runs.
-  const scope = rules[0].selector.slice(0, rules[0].selector.indexOf('[lang='));
+  // The scope is the ancestor chain at the front of the selector, cut where the rule stops describing
+  // containers and starts describing the run: at `[lang=`, or at the first `:is(`/`:where(`/`:not(` for a
+  // selector that names the containers first. Both shapes are in this stylesheet's history — the
+  // whitelist that was the defect read `.zj .tb-text :is(p, li, …) [lang="zh-Hant"]` — and cutting at
+  // `[lang=` alone read that one as a selector list and refused to run at all, which is a gate reporting
+  // its own parser rather than the page. A scope that is genuinely a list of different ancestors is still
+  // refused rather than silently queried as one of them.
+  const cut = rules[0].selector.search(/\[lang=|:is\(|:where\(|:not\(/);
+  expect(cut > 0, `the first [lang="zh-Hant"] rule's selector "${rules[0].selector}" has no attribute or :is()/:not() to cut its scope at, so the audit cannot query the runs it styles`);
+  const scope = rules[0].selector.slice(0, cut);
   expect(/\s$/.test(scope), `the first [lang="zh-Hant"] rule's scope is "${scope.trim()}", which is not an ancestor selector followed by a space, so the audit cannot query the runs it styles`);
   expect(!scope.includes(','), `the first [lang="zh-Hant"] rule's scope is "${scope.trim()}", a selector list, which the audit cannot read the runs out of`);
   // `:not(R)` and `:not(R *)` name the same region; both are kept out of the run list by the rule, so both
