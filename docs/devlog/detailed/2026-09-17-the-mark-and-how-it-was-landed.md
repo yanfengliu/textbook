@@ -43,3 +43,9 @@ And one more, from the same family, in a worker's hands rather than mine: a proo
 - Chapter 3's citation line: **13 px (a step up on an 11.52 px line) → 11.52 px**.
 - The key page's chapter-dek quotations: **identical to their dek, 1.00:1 → full ink against a soft dek**.
 - The whole gate chain: **unable to run outside the shared tree → 160 unit tests and `check` 10/10 pages in a clean worktree**; `flow` from 7 steps on one book to **37 across four pages**, including a rendered mark-audit that fails a run the page leaves unmarked.
+
+## Two more things, added as the round closed
+
+**A worktree per worker, not one for the round.** I put two workers into the single isolated worktree, and the second one's edits invalidated the first's baseline: a `flow` census of chapter 3 read `40 run(s)` before and `49` after, and the nine were the other worker's newly marked runs. The affected worker measured exactly that, discarded the comparison, and bracketed every later run and red proof with the sha256 of every file the verdict rested on. The work survived; the lesson is that isolation is not a property of the tree, it is a property of who is allowed to write in it.
+
+**The Han-text round-trip trap caught two of us in one round.** A worker corrupted a figure module with a `Get-Content`/`Set-Content -replace` round-trip over Han text — the thing `docs/policies/local-rules.md` forbids — and restored it from `HEAD` after verifying no replacement characters remained. My own instance was a mutation written through `[IO.File]::WriteAllText` with a relative path, which resolved against the .NET working directory and landed in the shared checkout. Same root cause, two faces: **a shell text round-trip is not a safe way to edit non-ASCII text, and a relative path with a .NET file API is not a safe way to target a file.** Both were caught by hashes rather than by reading, which is the only reason either is in the record at all.

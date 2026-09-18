@@ -52,8 +52,36 @@
 // that the difference is large enough to notice; and text drawn into a canvas has no element to measure.
 // It also cannot see the one defect it was written after that is a statement about which colour a
 // container should keep: a mark that REPAINTS a deliberately coloured container is still a difference.
-// And it visits chapter pages only, so the same mark on `tongjian/index.html`'s own chapter deks, whose
-// page links no chapter stylesheet, is outside it and is held by nothing here.
+//
+// It reads the rules out of the sheet that carries them rather than restating them here, and the pages it
+// visits carry them in two different places: a chapter page's mark rule is in `tongjian/zj.css`, and the
+// book's contents page — which links no chapter stylesheet — sets its own in the page's `<style>` block,
+// so that is the sheet the audit is handed there. Either way a sheet holding no such rule fails naming the
+// sheet rather than auditing nothing, and the contents page is visited because it is the page that
+// explains the mark: until this step existed, a later edit dropping its one rule left every gate green.
+//
+// `phone-figure-citation` is the other rendered-page check, and it is the phone's answer to a different
+// defect: at 390 px the second book's figure 2.1 drew 通鑑's sentence with no attribution under it at all
+// — the stacked composition set the citation `display: none`, measured as `12.0 px not drawn` — so a phone
+// printed the source's words with nothing saying whose they were, on the page whose whole subject is where
+// those words come from. The step brings every figure on the phone page into view and requires the
+// citation a quotation-bearing figure draws to be there: present, not hidden, a non-zero box, and at least
+// `CITATION_MIN_PX` tall in type. Its bounds: it visits the second book's 390 px load only, so the desktop
+// and tablet compositions of the same figures are `npm run shot`'s and not this step's; it reads
+// `describe().quoted` to decide whether a figure is showing 通鑑's own words, so a figure that prints them
+// without publishing that field is never asked for a citation — the run-level census in
+// `figure-citation-covered` is what stops a green run that compared nothing, by failing a declared kind no
+// page exercised; it presses no control, so a row the reader has to select is not measured (the figure
+// opens on 前403年, whose row carries a citation); it proves a box is drawn and its type is at least the
+// floor, not that the citation is legible against what is under it, which is `npm run legible`'s question
+// where it is asked at all.
+//
+// And it knows one figure kind, which is a measured gap rather than a choice: the same defect is still in
+// the book's other two figures — `zj-split`'s `.zjs-source` is `display: none` at `data-tier="narrow"` and
+// `zj-words`'s `.zjw-caption` at `data-tier="narrow"` too, both the citation of a quotation the figure
+// still draws — and neither file is this round's, so neither is asserted here. They are also invisible to
+// this step for a second reason: a figure is asked for a citation only when its own `describe()` says it
+// is showing 通鑑's words, and only `zj-timeline` publishes that field.
 import { mkdirSync, rmSync, readFileSync } from 'node:fs';
 import { startServer } from './serve.js';
 import { launch, collectErrors, openPage, ACTION_TIMEOUT_MS, BOOKS } from './lib/browser.js';
@@ -79,6 +107,10 @@ const failures = [];
 let step = 0;
 // Which pages this run actually drove, so the summary distinguishes a two-book run from a one-book one.
 const driven = [];
+// Which of the declared citation-bearing figure kinds the phone loads reached with a quotation on screen,
+// counted per load. `figure-citation-covered` fails a kind this map never saw, because a check whose
+// subject is gone from every page would otherwise pass by comparing nothing.
+const citationExercised = new Map();
 
 // `where` is the page the step ran on. It goes in the printed line, in a failure summary and in the
 // screenshot's own name, so a run of several pages can be read frame by frame; it is the last argument
@@ -141,20 +173,24 @@ async function missingSubject(page, required) {
 }
 
 /**
- * The mark's own rules, READ OUT OF `tongjian/zj.css` rather than restated here: every top-level rule
- * whose selector sets a `[lang="zh-Hant"]` run, the scope they share, and the regions the first of them
- * excludes. A rule that gains an exclusion, changes a channel or moves its scope moves this audit with
- * it, where a copy of the selector here would stay green over the change. A stylesheet with no such rule
- * fails with a named reason rather than auditing nothing.
+ * The mark's own rules, READ OUT OF the stylesheet that carries them rather than restated here: every
+ * top-level rule whose selector sets a `[lang="zh-Hant"]` run, the scope they share, and the regions the
+ * first of them excludes. A rule that gains an exclusion, changes a channel or moves its scope moves this
+ * audit with it, where a copy of the selector here would stay green over the change. A stylesheet with no
+ * such rule fails with a named reason rather than auditing nothing.
+ *
+ * `css` is the sheet's text and `where` names it in every failure, because the two audited pages carry
+ * their rules in different places: a chapter page loads `tongjian/zj.css`, and the contents page links no
+ * chapter stylesheet and sets its rule in its own `<style>` block.
  */
-function markRules() {
-  const css = readFileSync('tongjian/zj.css', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+function markRules(css, where) {
+  const text = css.replace(/\/\*[\s\S]*?\*\//g, '');
   // The outermost rules only: a rule body holds no brace, so `[^{}]+` before one cannot span a
   // declaration, and an at-rule's body (which does hold braces) is skipped rather than misread.
-  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+  const rules = [...text.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
     .filter((m) => m[1].includes('[lang="zh-Hant"]'))
     .map((m) => ({ selector: m[1].trim().replace(/\s+/g, ' ') }));
-  expect(rules.length, 'tongjian/zj.css holds no rule with [lang="zh-Hant"] in its selector, so the rendered-mark audit has no rule to read');
+  expect(rules.length, `${where} holds no rule with [lang="zh-Hant"] in its selector, so the rendered-mark audit has no rule to read`);
   // The scope is the ancestor chain at the front of the selector, cut where the rule stops describing
   // containers and starts describing the run: at `[lang=`, or at the first `:is(`/`:where(`/`:not(` for a
   // selector that names the containers first. Both shapes are in this stylesheet's history — the
@@ -171,6 +207,15 @@ function markRules() {
   // are regions the audit excuses a run for sitting in.
   const regions = [...new Set([...rules[0].selector.matchAll(/:not\(([^)]*)\)/g)].map((m) => m[1].replace(/\s*\*\s*$/, '').trim()))];
   return { selectors: rules.map((r) => r.selector), scope, regions };
+}
+
+/**
+ * Every `<style>` block a page carries in its own markup, concatenated: the sheet such a page owns. The
+ * contents page links the shared sheets but no chapter stylesheet, so this is where its mark rule lives,
+ * and reading it here rather than copying the selector keeps the audit keyed on what the page says.
+ */
+function inlineStyles(html) {
+  return [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]).join('\n');
 }
 
 /**
@@ -224,6 +269,86 @@ function auditMarks({ scope, selectors, regions }) {
     else if (!ink) bad.push({ ...seen, why: `it matches rule ${matched.join(',')} and differs from its container in size alone, so no ink step reaches the reader` });
   }
   return { n: runs.length, per, excluded, bad };
+}
+
+// The attribution each quotation-bearing figure of the second book hangs on its quotation, by kind. A
+// figure says in its own `describe()` whether it is showing 通鑑's own words (`quoted`); this table says
+// which element carries the citation of that kind. It is a hand-list on purpose — the citation's class is
+// a private name inside the figure and cannot be derived from anything outside it — so a kind the table
+// does not name that reports a quotation FAILS rather than being skipped, and a declared kind that no
+// page exercises fails the census step at the end of the run.
+const FIGURE_CITATIONS = { 'zj-timeline': '.zjt-quote-at' };
+
+// The type floor for a citation this check accepts as drawn. AGENTS.md's figure invariant is about nine
+// device pixels, and `flow` loads at deviceScaleFactor 1, so 10 CSS px is that floor rounded up: a
+// citation rendered at 6 px is hidden with extra steps, which is the shape this step exists to refuse.
+const CITATION_MIN_PX = 10;
+
+/**
+ * The in-page half of the phone citation check. For every `<tb-figure>` on the page: a figure whose
+ * `describe()` reports it is showing 通鑑's own words must have the citation its kind declares PRESENT and
+ * DRAWN — not `hidden`, not `display:none` or `visibility:hidden`, a non-zero box, and type at least
+ * `minPx` tall. A quoting figure whose kind the table does not name is a failure, not a skip, so the
+ * table cannot quietly shrink.
+ *
+ * One object rather than two parameters, for the reason `auditMarks` above takes one: a Playwright
+ * `evaluate` passes exactly one argument, so a two-parameter signature reads `table` as the whole argument
+ * and every lookup in it comes back undefined — which is a check reporting "no citation is declared for
+ * this kind" on a kind that is declared.
+ */
+function auditFigureCitations({ table, minPx }) {
+  const figures = [];
+  const bad = [];
+  let quoting = 0;
+  for (const el of Array.from(document.querySelectorAll('tb-figure'))) {
+    const kind = el.getAttribute('kind') || '';
+    const state = el.dataset.state || '';
+    const described = typeof el.describe === 'function' ? el.describe() : null;
+    const shows = Boolean(described && described.quoted);
+    figures.push({ id: el.id, kind, state, quoting: shows });
+    if (!shows) continue;
+    quoting += 1;
+    const selector = table[kind];
+    if (!selector) {
+      bad.push({ id: el.id, kind, why: `it reports it is showing 通鑑's own words and this check declares no citation element for kind "${kind}", so nothing measured the attribution` });
+      continue;
+    }
+    const cite = el.querySelector(selector);
+    if (!cite) {
+      bad.push({ id: el.id, kind, why: `the figure carries no "${selector}" element at all, so the quotation it draws has no attribution to draw` });
+      continue;
+    }
+    const cs = getComputedStyle(cite);
+    const box = cite.getBoundingClientRect();
+    if (cite.hidden || cs.display === 'none' || cs.visibility === 'hidden' || box.width <= 0 || box.height <= 0) {
+      bad.push({ id: el.id, kind, why: `its "${selector}" citation is in the markup but not drawn: display ${cs.display}, visibility ${cs.visibility}, box ${box.width.toFixed(1)}x${box.height.toFixed(1)} at ${cs.fontSize}` });
+      continue;
+    }
+    if (!(Number.parseFloat(cs.fontSize) >= minPx)) {
+      bad.push({ id: el.id, kind, why: `its "${selector}" citation is drawn at ${cs.fontSize}, under the ${minPx}px floor this check sets, so it is present without being readable` });
+    }
+  }
+  return { figures, quoting, bad };
+}
+
+/**
+ * Bring every figure on the page into view and wait for its frame to settle, so a phone step can measure
+ * what a figure draws. The frame mounts on an IntersectionObserver with a 600 px margin, so a figure
+ * below the fold is not merely unmeasured — it is not in the DOM yet. The wait polls the frame's own
+ * `data-state` (ready or error) and never the clock; a figure that never settles is a failure the caller's
+ * `check` records, with the step's own name on it.
+ */
+async function mountFigures(page) {
+  const figures = page.locator('tb-figure');
+  const n = await figures.count();
+  for (let i = 0; i < n; i += 1) {
+    const one = figures.nth(i);
+    const handle = await one.elementHandle();
+    if (!handle) continue;
+    await one.scrollIntoViewIfNeeded();
+    await page.waitForFunction((el) => el.dataset.state === 'ready' || el.dataset.state === 'error', handle, { timeout: 30_000 });
+  }
+  return n;
 }
 
 /**
@@ -399,7 +524,7 @@ try {
     // answered or placed. It is the one step here that is not about a control — it asks whether the page
     // SHOWS whose words a run is, which is what the whole provenance change rests on.
     if (!missing) await check(chapterPage, 'mark-audit', async () => {
-      const spec = markRules();
+      const spec = markRules(readFileSync('tongjian/zj.css', 'utf8'), 'tongjian/zj.css');
       const verdict = await chapterPage.evaluate(auditMarks, spec);
       expect(verdict.n > 0, `${chapter.path}: the reading column ("${spec.scope.trim()}") carries no [lang="zh-Hant"] run at all, so this audit compared nothing`);
       console.log(`     mark-audit [${where}]: ${verdict.n} run(s); per rule, in stylesheet order ${verdict.per.join('/')}; ${verdict.excluded} in a region the first rule excludes; ${verdict.bad.length} not visibly marked`);
@@ -578,6 +703,24 @@ try {
     }, where);
     if (phoneMissing) console.log(`skip ${where} (phone): the step below did not run, because this page is missing "${phoneMissing}"`);
 
+    // The figure's quotation at phone width must carry its attribution where a reader can see it, not
+    // merely in the markup. The figures mount on an IntersectionObserver, so they are brought into view
+    // first; `describe().quoted` is the figure's own statement that it is showing 通鑑's own words, which
+    // is what makes the citation required rather than optional.
+    if (!phoneMissing) await check(chapterPhone, 'phone-figure-citation', async () => {
+      const mounted = await mountFigures(chapterPhone);
+      const verdict = await chapterPhone.evaluate(auditFigureCitations, { table: FIGURE_CITATIONS, minPx: CITATION_MIN_PX });
+      const census = verdict.figures.map((f) => `${f.id}:${f.kind}:${f.state}${f.quoting ? ':quoted' : ''}`).join(', ') || '(none)';
+      console.log(`     phone-figure-citation [${where}]: ${mounted} figure(s) mounted — ${census}; ${verdict.quoting} showing a quotation; ${verdict.bad.length} without a drawn citation`);
+      for (const f of verdict.figures) {
+        if (f.quoting && FIGURE_CITATIONS[f.kind]) citationExercised.set(f.kind, (citationExercised.get(f.kind) || 0) + 1);
+      }
+      const first = verdict.bad[0];
+      expect(!verdict.bad.length, verdict.bad.length
+        ? `${chapter.path} at 390 px: ${verdict.bad.length} figure(s) showing 通鑑's words do not draw the citation that says whose words they are; first: <${first.id}> (${first.kind}) — ${first.why}`
+        : '');
+    }, where);
+
     if (!phoneMissing) await check(chapterPhone, 'phone-drawer', async () => {
       const rail = chapterPhone.locator('.tb-rail');
       const box0 = await rail.boundingBox();
@@ -598,6 +741,43 @@ try {
 
     for (const e of chapterPhoneErrors) failures.push(`${where} phone page error: ${e}`);
     await chapterPhone.close();
+  }
+
+  // The book's contents page, which is where the key to the mark lives. It is not a chapter page, so the
+  // `mark-audit` above never visited it, and the rule that marks its three chapter-dek quotations — set in
+  // the page's own `<style>` block, because this page links no chapter stylesheet — was held by nothing:
+  // a later edit dropping it left every gate green, on the page that explains the mark. `test/provenance.test.js`
+  // proves the key is there; this proves the page SHOWS what the key explains.
+  {
+    const where = second.id;
+    const contents = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+    contents.setDefaultTimeout(ACTION_TIMEOUT_MS);
+    const contentsErrors = collectErrors(contents);
+    await openPage(contents, `${server.url}${second.path}?theme=light`);
+    driven.push(where);
+
+    // About the run rather than about this page, and it runs here because this is the first page after the
+    // chapter loop and a `check` needs a page. See `citationExercised`.
+    await check(contents, 'figure-citation-covered', async () => {
+      const exercised = [...citationExercised.entries()].map(([kind, n]) => `${kind} x${n}`).join(', ') || '(none)';
+      console.log(`     figure-citation-covered [${where}]: exercised ${exercised} of ${Object.keys(FIGURE_CITATIONS).length} declared kind(s)`);
+      const missing = Object.keys(FIGURE_CITATIONS).filter((kind) => !citationExercised.get(kind));
+      expect(!missing.length, `no phone load in this run showed a quotation from ${missing.join(', ')}, so the citation check for ${missing.length === 1 ? 'that kind' : 'those kinds'} never ran — a declared kind no page exercises is a check that cannot fail, which is what it looks like when the figure carrying it is dropped`);
+    }, where);
+
+    const contentsSpec = markRules(inlineStyles(readFileSync('tongjian/index.html', 'utf8')), 'tongjian/index.html <style>');
+    await check(contents, 'mark-audit', async () => {
+      const verdict = await contents.evaluate(auditMarks, contentsSpec);
+      expect(verdict.n > 0, `${second.path}: the audit's own scope ("${contentsSpec.scope.trim()}") carries no [lang="zh-Hant"] run at all, so this audit compared nothing`);
+      console.log(`     mark-audit [${where}]: ${verdict.n} run(s); per rule, in stylesheet order ${verdict.per.join('/')}; ${verdict.excluded} in a region the first rule excludes; ${verdict.bad.length} not visibly marked`);
+      const first = verdict.bad[0];
+      expect(!verdict.bad.length, verdict.bad.length
+        ? `${second.path}: ${verdict.bad.length} of ${verdict.n} marked run(s) is not visibly marked; first: the run "${first.text}" in <${first.container}> — ${first.why}; run ${first.run}, container ${first.within}`
+        : '');
+    }, where);
+
+    for (const e of contentsErrors) failures.push(`${where} page error: ${e}`);
+    await contents.close();
   }
 } finally {
   await browser.close();
