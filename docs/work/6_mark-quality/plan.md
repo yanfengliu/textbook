@@ -79,3 +79,9 @@ One thing a reader of the narrow composition should know: `src/figures/zj-timeli
 - Delete the 13 px floor with its false comment, or restate it honestly and give it a case that binds.
 - Put the independent typographic review on W2's measured frames, and let its verdict decide whether 15.2/16 px is a mark at all.
 - Land the round: merge to main, push, and record the proof in `docs/learning/gate-proofs.md` (staged hunk by hunk — the three standing docs are dirty in the main checkout with another session's round).
+
+## The rendered audit, landed, and exactly how far its proof goes
+
+`tools/flow.js` now carries a **`mark-audit`** step, on every `tongjian` chapter it drives. It walks the rendered page and, for every element carrying `lang="zh-Hant"`, reports which of the stylesheet's three such rules reaches it and whether the run's computed size or colour differs from its container's. At this revision: 37 steps passed, each chapter printing its census and **0 not visibly marked** — ch01 4 runs (2/0/0 by rule, 2 in an excluded region), ch02 73 (15/7/1, 51 excluded), ch03 40 (13/9/0, 18 excluded).
+
+**Its red proof is partial, and is recorded as partial.** Restoring the old container whitelist in `tongjian/zj.css` makes all three chapters fail, and loudly — but not on the defect: the audit refuses to read runs out of a `:is(…)` selector list, so the failure names the selector's shape rather than an unmarked run. The defect itself is proved red by measurement instead, in W6's probe: with the whitelist restored, ch03's option run measures matched false, 17 px, ink identical to its parent — the defect — and with the shipped rule, matched true, 16.15 px, softer than its parent. So the *measurement* is proved and the *gate* has one real red arm and one that is about its own selector reader. **Until an unmarked run makes it fail, this gate does not count** by the repository's own rule, and this plan says so rather than counting a green run.
