@@ -1102,25 +1102,89 @@
    tint, because nothing on this page is drawn on a fill but the card; and a colour, because the four hues
    here are the houses and the gold is a year. Style, not paint.
 
-   The selectors are explicit and exclude three regions rather than inheriting everywhere:
+   The selectors are explicit and exclude six regions rather than inheriting everywhere:
      - `<ol class="zj-src">`, the 原文 itself, where the text is not a quotation and keeps full size;
      - `.zj-card`, the lexicon popover, whose own `通鑑用例` and `在这一章` runs are laid out by §8;
-     - `tb-figure`, whose quotes are styled by each figure module against its own stage.
+     - `tb-figure`, whose quotes are styled by each figure module against its own stage;
+     - `.zj-cite`, the citation line above the 原文, which is already set as a rubric;
+     - `.tb-margin-note` and `tb-check .explain`, the two containers that are already the quiet voice,
+       where the mark inverts instead of stepping down — the rule after this one, and it cannot win
+       without these clauses. The reason is a number rather than an ordering trick: this rule is
+       (0,8,2), and no exception selector can be written above it without restating this rule's whole
+       exclusion chain, so the exception belongs here and the exception rule then wins on its own
+       specificity. Measured with the clauses absent and the exception rule in place after it: a 註 run
+       stayed `--ink-soft` at 15.2 px, which is the review's third defect unchanged.
+   `:not(.zj-src)` and `:not(.zj-card)` are needed AS WELL AS the `*` forms, and that is not
+   redundancy: both of those roots carry `lang` themselves — the `<ol>` is `.zj-src` and the popover is
+   `.zj-card` — and a root is not a descendant of itself, so `:not(.zj-src *)` alone would leave each
+   one marked. That is the job the old whitelist was silently doing, and writing it down is why the
+   whitelist could go.
+   The whitelist was the defect. It read `:is(p, li, aside, blockquote, figcaption, td, th, dd)
+   [lang="zh-Hant"]`, and a run can sit in a container no author of the markup had in mind:
+   `src/components/check.js:74` builds each `<tb-check>` option as a `<button>` from the `<li>`'s own
+   innerHTML and `:82` replaces the `<li>`s, so a quotation in an option ends up in `button > span`
+   inside `div.tb-check__options` and no ancestor matches the whitelist. Measured on chapter 3 at
+   1440 px: 5 marked runs in its options, `matched=0`, 17 px at full ink — printed exactly as the book's
+   own words. `src/components/sort.js:116` builds a `<tb-sort>` card the same way, so the same hole was
+   waiting there. A rule that asks which containers hold a quotation is a rule a component author
+   defeats without knowing it exists, so the reach is now said by what is excluded instead.
    `:not(.zj-src *)` and `:not(tb-figure *)` are Selectors-4 complex arguments; the gates run a current
    Chromium, and `npm run check` reads the markup rather than the stylesheet, so a browser that did not
    support them would show the quotes unstyled rather than failing a gate. The 原文 is checked to be
    unaffected by its own rule in `test/provenance.test.js`'s sibling, `test/lexicon.test.js`, which reads
    the page's 原文 against the corpus character for character. */
-.zj .tb-text :is(p, li, aside, blockquote, figcaption, td, th, dd) [lang="zh-Hant"]:not(.zj-src *):not(.zj-card *):not(tb-figure *),
-.zj .tb-text :is(p, li, aside, blockquote, figcaption, td, th, dd)[lang="zh-Hant"]:not(.zj-src *):not(.zj-card *):not(tb-figure *) {
-  /* The floor is deliberate: the step down must never take the book's SMALLEST prose below its own UI
-     size. A marked run in a 註 (`.tb-margin-note`, 1rem, and `--text-sm` folded into the column on a
-     phone) would otherwise be dimmed and shrunk at once — two steps away from its surroundings, on type
-     that had least room to give. Measured on chapter 2 at 1440 px: the marked run is 15.2 px, and at
-     390 px the floor holds it at 13 px where 0.95em alone would give 12.4. A review raised this and the
-     number is why the rule has two clauses instead of one. */
-  font-size: max(var(--zj-quoted-size), 0.8125rem);
+.zj .tb-text [lang="zh-Hant"]:not(.zj-src):not(.zj-src *):not(.zj-card):not(.zj-card *):not(tb-figure):not(tb-figure *):not(.zj-cite *):not(.tb-margin-note *):not(tb-check .explain *) {
+  /* No floor, and the one that stood here rested on a measurement that is false. It read
+     `max(var(--zj-quoted-size), 0.8125rem)` with the claim "at 390 px the floor holds it at 13 px where
+     0.95em alone would give 12.4". Measured: a 註 is 16 px at 390 px and at 1440 px, in both themes —
+     `src/styles/layout.css:337-345` sets `--text-base` and nothing re-sizes it (374-382 sets margin,
+     padding and border only; 884 is `@media print`) — so a marked run in one is 15.2 px, 12.4 px occurs
+     nowhere, and `--text-sm` is not "folded into the column on a phone". What the floor did do is raise
+     the one run it should never have raised: chapter 3's `.zj-cite` line is 11.52 px
+     (`--zj-rubric-size`, 0.72 rem), so a marked run inside it measured 13 px — a step UP, on the line
+     whose whole design is that it carries the citation and nothing else. `.zj-cite *` is excluded above
+     instead, and the step down is a step down everywhere. */
+  font-size: var(--zj-quoted-size);
   color: var(--ink-soft);
+}
+
+/* Where the container is ALREADY the quiet voice, "quieter" is unavailable and the mark must INVERT:
+   full ink at the container's own size. That is the book's existing device — a lemma is ink and its
+   gloss is not — so it spends no colour and invents nothing.
+   Measured at 1440 px before this rule existed: a marked run in a 註 (`.tb-margin-note`, 16 px,
+   `--ink-soft`) was 15.2 px in the note's OWN colour, so of the mark's two halves one was a step down in
+   size and the other was no step at all; and a marked run in `tb-check .explain`
+   (`src/styles/components.css:812`, 17 px, `--ink-soft`) was 16.15 px in the same colour as the
+   paragraph around it. */
+.zj .tb-text :is(.tb-margin-note, tb-check .explain) [lang="zh-Hant"]:not(.zj-card *) {
+  font-size: 1em;
+  color: var(--ink);
+}
+
+/* A textual note is painted `--zj-note-textual` (青) to say *this note is about the text* — 異文, 異說,
+   底本 — and the mark repainted a run inside it `--ink-soft`. Measured on chapter 2's 異文 note, on
+   「既已委質為臣」: the run was rgb(92, 85, 77) against the note's own rgb(40, 113, 126), and the run's
+   `el.matches()` for the mark rule was true, so it was the paint and not a selector that had gone
+   missing. The note's own statement is therefore broken by exactly the run it is about.
+   So the mark here is not a colour at all: the note keeps its colour and the run is marked by weight,
+   which the page already loads (Noto Serif SC 200–900) and already spends on head-words and glosses.
+   Highest of the three rules, so it needs no ordering trick against the inversion rule above it. */
+.zj .tb-text .tb-margin-note[data-note="textual"] [lang="zh-Hant"]:not(.zj-card *) {
+  color: inherit;
+  font-weight: 500;
+}
+
+/* The citation a prose quotation carries — the rubric the card already hangs on its 通鑑用例
+   (`.zj-card__ex-at`, §8) and each figure hangs on its quote (`quoteAt`), given to the prose because a
+   reader asked why 「魏、韓、趙共廢晉靖公為家人而分其地。」 stood in 背景 rather than in the 原文.
+   Same device and same values as the card's: Hei, `--zj-rubric-size`, `--ink-faint`, tracked, and
+   nowrap so a 卷次 and a year are not broken across two lines. */
+.zj .tb-text .zj-at {
+  font-family: var(--font-ui);
+  font-size: var(--zj-rubric-size);
+  letter-spacing: var(--zj-rubric-track);
+  color: var(--ink-faint);
+  white-space: nowrap;
 }
 
 /* ---- One word of the shared sheet's English, on a page that is not in English. `tb-sort` writes

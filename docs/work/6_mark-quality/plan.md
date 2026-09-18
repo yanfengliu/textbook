@@ -52,6 +52,27 @@ One thing a reader of the narrow composition should know: `src/figures/zj-timeli
 
 **W5's own first proof attempt was a no-op that read as a pass** — the mutation pattern contained `[...]`, a character class in the regular expression it built, which is the same trap that dropped this round's original index line. It caught it by hashing the artifact before and after every arm. Worth keeping: the gate that exists because of that trap found the trap twice.
 
+## Round 6 must carry these, from the measurement table and the flow diagnosis
+
+**From W2's measured acceptance** (48 frames, 4 subjects, 390/1440 × light/dark × 1x/2x/3x; every frame's IHDR is exactly viewport × scale and `devicePixelRatio` read 1/2/3):
+
+- **5 % with no ink step is not a mark, and that is 17 of the book's 42 marked runs.** The numbers: in a paragraph the run is 95.0 % and its ink is 2.36:1 from the container's (6.86:1 against paper versus 16.20:1) — that carries. In a margin note the run is 95.0 % and its ink is **exactly 1.00:1** — the same colour to the byte, because the note is already `--ink-soft`; `tb-check .explain` is identical. W6 is implementing the inversion for both.
+- **The floor binds exactly once in the whole book, and backwards**: chapter 3's `.zj-cite` at 11.52 px → 13 px = **112.8 %**. 41 of 42 runs are a clean 95.0 %. And the note is 1 rem at 390 px as well as 1440 px, so the comment's 390 px claim does not reproduce — W6 deletes both the floor and the claim.
+- **Figure 2.1's quotation is at 120 %**, full ink over the figure's own softened words — the precise inverse of the prose rule. The exclusion is deliberate and the reviewer verified it; what is new is that **the reader is never told the direction changes**. Decide in round 6 whether the figure's header should say so, or whether the panel's primary line should stop being larger than the book's own words on the same stage.
+- **At 390 px figure 2.1's citation is `display:none`**, so on a phone the named 句 stands with no attribution at all. That is a defect in the figure's narrow composition, not in the mark, and the round-5 change is what made the citation the load-bearing device.
+- **The contents page loads no `zj.css`, so it carries no mark.** Its three chapter-dek quotations are `lang="zh-Hant"` at 16.0 px in the same `--ink-soft` as the Simplified words beside them: 100 %, 1.00:1. The key's own page therefore never shows the mark it is explaining.
+- The key itself is 69.4 % of the dek above it, both `--ink-soft` — a large step, and one the page keeps.
+
+**From W3's diagnosis of the red drag** — and it is neither of the two readings I offered:
+
+- The failure was **Playwright's `dragTo`**, not the component and not the step's sequencing: `dragTo` scrolls the drop target into view *with the button already held*, chapter 2's sort is 934 px tall in a 900 px window, the tray slid up under a stationary cursor, and Chromium started the drag on whichever card had just moved into place — `dragstart` on `sort-names-2` while the step had asked for `sort-names-1`. Excluded by measurement, not by reading: a placed card cannot be re-dragged at all (no drag events, `describe` unchanged), and the drop path works on chapter 2 on a fresh load. The fix asserts both ends of the drag are inside the window before the button goes down; the assertion is unchanged and unsoftened, and three consecutive `npm run flow` runs are 34/34.
+- **The same artefact is latent in the biology book's `sort-by-drag` step**, left byte-identical on purpose. It is not exposed only because biology's bins end at y 838 in a 900 px window; it appears the moment that sort grows. Round 6 should either fix that step or extract the shared helper, and say which.
+- It also fixed a bug in a previous version of its own step (asserting the target bin held exactly one card, which failed on ch03 because the preceding step's card was already there).
+
+**Still owed from this round, and it is the biggest one**: the reviewer's rendered check — objective item (2). On the rendered page, every `[lang="zh-Hant"]` inside `.tb-text` outside the excluded regions must be matched by the mark rule and differ from its parent. That is the only check that can see the five options, the citation inversion and the textual-note repaint, and it is why those three survived a whole acceptance pass. `tools/flow.js` is the available home (clean, and it now drives every tongjian chapter); `tools/shot.js` is the natural one and is held by the other session's uncommitted round.
+
+**Two claims elsewhere that this round found stale, neither mine to edit**: `docs/policies/local-rules.md`'s stated measure for `test/control-chars.test.js` (412 lines / 379 non-blank) is now 426 / 393; and `AGENTS.md`'s `npm run unit` clause does not mention `test/standing-docs.test.js`. Both files are dirty in the shared tree with the other session's round.
+
 ## Drafted for the next round
 
 - Give a 通鑑 quotation inside a margin note a treatment that works there — the note is already the soft ink, so the direction available is full ink — and stop repainting a textual note's run out of the note's own colour.
