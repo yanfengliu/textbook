@@ -34,6 +34,21 @@
 //      dropping a file makes this run fail rather than cover less.
 //   5. **The key is on the book's contents page**, in an element with a stable class, so that the mark
 //      means something to a reader who does not read the script difference at sight.
+//   6. **A 通鑑 quotation outside the passage the page reads names the work it came from.** The 原文 is a
+//      selection of passages and a figure or a paragraph may quote an entry outside it — figure 2.1
+//      quotes the 前376 entry while the 原文 does not — so a quotation that is not a substring of the
+//      page's own `<ol class="zj-src" data-corpus="…">` entries must stand in a paragraph that names
+//      通鑑. That is the structural half of the defect the owner hit, whose prose half is check 8: the
+//      design's answer is to make the citation mandatory at the quotation rather than to let the page
+//      assert its own selection in prose four lines above it.
+//   7. **A figure row that prints a `quote` carries a non-empty citation.** Every row of the two figures
+//      that have one does today — `quoteAt` on `zj-timeline`, `source` on `zj-split` — and nothing
+//      required it, so a row added without one printed 通鑑 with the figure's own voice around it.
+//   8. **No sentence may say the book excludes a passage while printing that passage.** The exemplar is
+//      chapter 2's 背景, which said of the 前376 entry 「不在本书的取材范围之内，所以这里只转述，不引原文」
+//      with the entry quoted four lines below in figure 2.1. The sentence now says what the book does; this
+//      holds the shape rather than the instance, so a page that prints a 通鑑 sentence in the same sentence
+//      that claims to exclude it is red.
 //
 // The floor, and how it was measured. Check 2 fires on a bare, unmarked run of **6 or more Han
 // characters** that is verbatim 通鑑. The number is the width of a measured gap, not a taste.
@@ -54,6 +69,16 @@
 // (才德兼亡, 才德全尽), which is the noise the floor exists to keep out.
 //
 // What it cannot see, stated rather than hidden:
+//
+//   - **Whether a page that DOES name the work names it correctly.** Checks 6 and 8 read whether a source
+//     is named, not whether the name is right: 「图 2.1 里引它的原句为证」 is a claim about another element
+//     on the page, and only a person comparing the two can hold it. That is the same class as the false
+//     sentence this round fixed, and it is the bound of a check that reads whose words are whose without
+//     reading whether the words are true.
+//   - **A quotation from another work.** 史記, 戰國策, 胡三省注 and 韋昭注 are named in the sentence that
+//     quotes them and carry no attribute, which the design record states. Check 6 asks a page that quotes
+//     **通鑑** from outside its selection to name the work, so a sentence that names 史記 and quotes 通鑑
+//     still fires — deliberately, because the question is which words the reader is being given.
 //
 //   - **A one-character quotation.** `isTongjianText` requires two characters, because a single Han
 //     character in 「」 is far more often the book naming a word it is about (「命」, 「恒」, 「版」) than
@@ -103,13 +128,53 @@
 //     honest arrangement and is stated rather than left to be discovered.
 //   - **Whether the mark RENDERS as something a reader notices.** This file reads the markup and the
 //     data, not the pixels; `zj.css` carries the rule and the run's screenshots are the evidence for it.
+//   - **Whether a page that DOES name the work names it correctly.** Check 6 reads whether a source is
+//     named, not whether the name is right: 「图 2.1 里引它的原句为证」 is a claim about another element on
+//     the page, and only a person comparing the two can hold it. Same class as the false sentence check 8
+//     was written for, and the bound of a check that reads whose words are whose without reading whether
+//     the words are true.
 //   - **Whether a quotation of another work is attributed.** 史記, 戰國策, 胡三省注 and 韋昭注 are
 //     named in the sentence that quotes them, which is a fact about prose and not about an attribute.
 //
 // Denominator: the run asserts that it found 原文 blocks, marked runs and quotation runs, and prints
 // how many of each it read, so a scan that finds nothing cannot pass as one that found everything. Check
 // 2 prints the corpus runs it read, how many of them were marked, how many sat inside 「」 and how many
-// were bare, so a clean run says which of the three it compared.
+// were bare, so a clean run says which of the three it compared. Check 6 prints the marked runs it read
+// and how many fell outside the page's own selection; check 7 prints the rows it read, how many print a
+// quotation and how many of those cite it, so `0 rows` cannot read as `all rows`; check 8 prints the
+// sentences that claim an exclusion and how many of them print a 通鑑 quotation, so a run that read no
+// sentence of that shape says so.
+//
+// **Check 6's predicate is a measured narrowing, not the whole class, and the sharper form was tried
+// first.** That form — a paragraph must carry a `.zj-at` rubric, a 卷 number or a 年 — fires on 8 marked
+// runs and is wrong on 4 of them: at this revision chapter 2 and chapter 3 each name a
+// passage's place in the book's own order (「原书的次序是「初，智宣子將以瑤為後」一路写到「唯輔果在」」) to
+// discuss that order rather than to quote it, and chapter 2 adds a four-character cross-reference to the
+// three-character title of a section the reader has not reached. The predicate shipped here fires on 13
+// runs and on none of them is the paragraph's silence a page that failed to say where its words came
+// from, because naming the work is what those 13 do. What it cannot see is stated above: a paragraph
+// that names the work and gets the citation wrong.
+//
+// **Check 6 counts a page's own selection only, so a quotation that is ANOTHER chapter's selection looks
+// like a context quotation here.** Every chapter's selection contains 「臣光曰」, so chapter 2's opener, which
+// quotes 智伯之亡也，才勝德也 in one breath with naming the ch03 passage it comes from, is counted as
+// quoted from elsewhere. It is fixed and not merely counted: at this revision the paragraph names 通鑑.
+// The direction that matters is the one that costs nothing, and it is the one this check found the one
+// real defect in — chapter 2's opener was quoted with no source in its paragraph at all.
+//
+// **Check 8 reads a sentence, so a quotation with a 句号 inside it ends the sentence being examined.**
+// That is a bound rather than a hole: the page that prints the quotation is read, and the run inside it
+// is what carries the mark. The arm that proved this check red was written twice before it fired, both
+// times because the claimed defect was in a *different* sentence from the quotation — which is the same
+// shape as the defect, and not the defect.
+//
+// **Check 7's bound is its row parser.** A row is an object written directly in an array, and the parse
+// is bracket-aware rather than brace-depth-only because the first version of it — every object at brace
+// depth 1 — read `zj-words`'s UI label 「由字成词」 as a row: `h('p', { …, text: '由字成词' })` sits inside
+// an `append(…)` whose `)` never opens a brace, so the depth counter loses a level and two stray
+// labels became two phantom rows printing 通鑑. Measured on the three modules: 15 objects, 8 of them
+// rows printing a quotation, all 8 citing it. A module that stops storing its rows in an array stops
+// being read here, and nothing but the printed denominator would say so.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -144,6 +209,8 @@ const OUTSIDE_CORPUS = [
 
 const corpusText = CORPUS.map(e => e.text.join('\n')).join('\n');
 const corpusSentences = new Set(CORPUS.flatMap(e => e.text));
+/** The corpus by id, so a page's `data-corpus` names the text it reads. */
+const byId = new Map(CORPUS.map(e => [e.id, e]));
 /** Is this run of text verbatim 資治通鑑 — a substring of the corpus, or one of the lines named above? */
 const isTongjianText = (s) => s.length >= 2 && (corpusText.includes(s) || OUTSIDE_CORPUS.includes(s));
 
@@ -458,6 +525,265 @@ test('a figure declares which of its fields are 通鑑\'s words, and the declara
 
   t.diagnostic(`figures: ${modules.length} registry kind(s) — ${kinds.join(', ')} — ${declared} declared field(s), ${quotations} 通鑑 quotation(s) in figure data`);
   assert.ok(quotations > 0, 'no figure field was found holding 通鑑\'s words, so the declaration was never exercised');
+});
+
+/**
+ * Every element of the page that carries the 通鑑 mark, as { start, end } into the same html `proseOf`
+ * was given — the offsets matter because the block a run sits in is read from them.
+ */
+function markedSpans(html) {
+  const re = /<(\/?)([a-zA-Z][\w-]*)\b([^>]*?)(\/?)>/g;
+  const stack = [];
+  const spans = [];
+  let m;
+  while ((m = re.exec(html))) {
+    const closing = m[1] === '/';
+    const name = m[2].toLowerCase();
+    if (closing) {
+      for (let i = stack.length - 1; i >= 0; i--) {
+        if (stack[i].name === name) {
+          const el = stack.splice(i, 1)[0];
+          el.end = m.index;
+          if (el.marked) spans.push(el);
+          break;
+        }
+      }
+    } else if (m[4] !== '/' && !VOID.has(name)) {
+      stack.push({ name, marked: /\blang="zh-Hant"/.test(m[3]), start: re.lastIndex, end: html.length });
+    }
+  }
+  return spans;
+}
+
+/** The text of an element, tags stripped — the reader's words and no markup. */
+const textOfSpan = (html, span) => html.slice(span.start, span.end).replace(/<[^>]*>/g, '');
+
+/** The block a run must be cited in: the nearest element a citation could stand in. */
+const CITING_BLOCK = new Set(['p', 'li', 'aside', 'figcaption', 'td', 'th', 'dd', 'h2', 'h3', 'blockquote']);
+
+/**
+ * The block a marked element sits in, as its text before and after that element. `data-alt`, `data-why`,
+ * `aria-label` and `data-note` are cut before the question is asked, because a citation written into one
+ * of them is not text the reader sees and the scan would be reading the author's note as the page's prose.
+ */
+function blockAround(html, span) {
+  let innerStart = html.length;
+  for (const m of html.slice(0, span.start).matchAll(/<([a-zA-Z][\w-]*)\b[^>]*?(\/?)>/g)) {
+    if (m[2] === '/') continue;
+    if (CITING_BLOCK.has(m[1].toLowerCase())) innerStart = m.index;
+  }
+  let innerEnd = html.length;
+  for (const m of html.slice(span.end).matchAll(/<\/([a-zA-Z][\w-]*)>/g)) {
+    if (CITING_BLOCK.has(m[1].toLowerCase())) { innerEnd = span.end + m.index; break; }
+  }
+  const block = `${html.slice(innerStart, span.start)}${html.slice(span.end, innerEnd)}`;
+  return block.replace(/\b(data-alt|data-why|aria-label|data-note)="([^"]*)"/g, '$1=""');
+}
+
+/**
+ * Does this text name 通鑑? Bracketless mentions count, because the pages write 通鑑 without its 書名號
+ * where the sentence already carries one — chapter 2's 異文 note does exactly that. The lookarounds keep
+ * a mention of the book inside another word from counting; no such word exists in this book today, and
+ * the guard is there so that one does not start counting silently.
+ */
+const NAMES_WORK = /《\s*(?:资治通鉴|資治通鑑|通鉴|通鑑)\s*》|(?<![\u4e00-\u9fff])通(?:鉴|鑑)(?![\u4e00-\u9fff])/;
+
+// Check 6: a quotation the page does not read must say whose words these are.
+test('a 通鑑 quotation from outside the passage the page reads names the work it came from', t => {
+  const pages = chapterPages();
+  assert.ok(pages.length > 0, 'no chapter page was found, so nothing was checked — the page list must not go quietly empty');
+
+  const offenders = [];
+  let markedRuns = 0;
+  let inSelection = 0;
+  let outOfSelection = 0;
+  let namesWork = 0;
+  let blankedRuns = 0;
+
+  for (const file of pages) {
+    const rel = path.relative(root, file);
+    const original = fs.readFileSync(file, 'utf8');
+    const html = proseOf(original);
+    // The page's own reading, named by the very attribute `test/corpus.test.js` holds: the entries its
+    // `<ol class="zj-src">` blocks cite. A run that is a substring of one of these is the passage the
+    // page reads, wherever it stands.
+    const selection = [...original.matchAll(/<ol class="zj-src"[^>]*data-corpus="([^"]+)"/g)]
+      .flatMap(m => (byId.get(m[1]) || { text: [] }).text).join('\n');
+
+    for (const span of markedSpans(html)) {
+      const text = textOfSpan(html, span).replace(/\s+/g, '');
+      // Blanking an 原文 block removes its text, so those spans are counted rather than silently
+      // dropped: a page whose blocks the blanking swallowed must say so.
+      if (!text) { blankedRuns++; continue; }
+      markedRuns++;
+      if (selection.includes(text)) { inSelection++; continue; }
+      outOfSelection++;
+      if (NAMES_WORK.test(blockAround(html, span))) { namesWork++; continue; }
+      // The line the run is on: `proseOf` blanks regions to spaces of the same length and keeps every
+      // offset, so the offset into `html` is the offset into `original`.
+      const line = original.slice(0, span.start).split('\n').length;
+      offenders.push(`${rel}:${line}: 「${text.slice(0, 40)}」 is quoted from outside this page's own 原文 selection and the paragraph it stands in never names 通鑑 — a reader is given 通鑑's words with nothing saying whose they are`);
+    }
+  }
+
+  t.diagnostic(`citations: ${pages.length} chapter page(s), ${markedRuns} marked run(s) read in the prose `
+    + `(${blankedRuns} more inside an 原文 block, which this check does not read), ${inSelection} of them part of the page's own `
+    + `selection, ${outOfSelection} quoted from elsewhere and ${namesWork} of those naming the work; ${offenders.length} that do not`);
+  assert.ok(markedRuns > 0, 'no marked run was found, so this run compared nothing');
+  assert.ok(outOfSelection > 0, 'no marked run quoted from outside its page\'s own selection was found, so the citation requirement was never exercised — either the pages changed or this check stopped reading them');
+  assert.equal(offenders.length, 0,
+    `${offenders.length} quotation(s) of 通鑑 stand outside the passage the page reads and never say where they came from. `
+    + `Name the work at the quotation — 《通鉴》卷一, a .zj-at rubric, or the figure field that carries it — or say the sentence `
+    + `in the book's own words. See docs/design/tongjian.md, "Which words are the book's, and which are 通鑑's".\n      ${offenders.slice(0, 20).join('\n      ')}`);
+});
+
+/**
+ * The object literals a figure module is built from, each as a map from field name to its literals.
+ *
+ * A row is an object written directly inside an array — `YEARS`, `STEPS`, `LINES` — which is what
+ * `[` at depth 1 with `{` at depth 0 means. That is deliberately narrower than "every object at depth
+ * 1": a figure's `meta` is not a row, and neither is the `SCOPE` constant, which prints 通鑑 too but
+ * belongs to the 卷 rather than to a year and has no year to cite it to. The bound that costs is stated
+ * in the file header: a module that stops storing its rows in an array stops being read here, and the
+ * denominator printed below is what says so.
+ */
+function rowObjects(src) {
+  const slices = [];
+  let brace = 0;
+  let bracket = 0;
+  let start = -1;
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    if (c === '[') bracket++;
+    else if (c === ']') bracket--;
+    else if (c === '{') {
+      if (brace === 0 && bracket === 1) start = i;
+      brace++;
+    } else if (c === '}') {
+      brace--;
+      if (brace === 0 && start >= 0) { slices.push(src.slice(start, i + 1)); start = -1; }
+    }
+  }
+  return slices.map((row) => {
+    const fields = new Map();
+    for (const m of row.matchAll(/([A-Za-z_$][\w$]*)\s*:\s*(['"`])((?:\\.|(?!\2)[^\\])*?)\2/gs)) {
+      if (!fields.has(m[1])) fields.set(m[1], []);
+      fields.get(m[1]).push(m[3]);
+    }
+    return fields;
+  });
+}
+
+// Check 7: a row that prints a quotation carries the citation for it.
+test('a figure row that prints a 通鑑 quotation carries a non-empty citation for it', t => {
+  const kinds = Object.keys(REGISTRY).filter(k => k.startsWith('zj-'));
+  assert.ok(kinds.length > 0, 'the registry holds no zj-* kind, so nothing was checked');
+
+  const offenders = [];
+  let rows = 0;
+  let quotedRows = 0;
+  let citedRows = 0;
+  const perModule = [];
+
+  for (const kind of kinds) {
+    const file = fileURLToPath(REGISTRY[kind].url);
+    const rel = path.relative(root, file);
+    const src = fs.readFileSync(file, 'utf8');
+    const declared = /export const QUOTED_FIELDS = \[([^\]]*)\]/.exec(src);
+    assert.ok(declared, `${rel}: exports no QUOTED_FIELDS, so a checker cannot tell which of its fields print 通鑑`);
+    const printed = declared[1].split(',').map(x => x.trim().replace(/^'|'$/g, '')).filter(Boolean);
+    assert.ok(printed.length > 0, `${rel}: QUOTED_FIELDS is empty, so no field of it can print a quotation`);
+    let here = 0;
+    let hereQuoted = 0;
+    for (const fields of rowObjects(src)) {
+      here++;
+      // A row that prints a quotation: any declared field holding anything at all. `quote: ''` is a year
+      // with no quotation to give, and is not the row this check is about.
+      const quoted = printed.flatMap(name => (fields.get(name) || []).filter(v => v.trim()).map(v => ({ name, v })));
+      if (!quoted.length) continue;
+      quotedRows++;
+      hereQuoted++;
+      // The citation field goes by whatever the figure's own convention calls it: `quoteAt` on
+      // zj-timeline, `source` on zj-split and zj-words. A row carrying neither is the defect.
+      const cite = [...(fields.get('quoteAt') || []), ...(fields.get('source') || [])].some(c => c.trim());
+      if (cite) { citedRows++; continue; }
+      offenders.push(`${rel}: \`${quoted[0].name}\` prints 「${quoted[0].v.slice(0, 30)}」 and the row carries no non-empty quoteAt or source, so the figure prints 通鑑 with no citation on it`);
+    }
+    rows += here;
+    perModule.push(`${kind} ${hereQuoted}/${here}`);
+  }
+
+  t.diagnostic(`figure citations: ${kinds.length} zj-* module(s) read, ${rows} row(s) seen (printing a quotation / all: ${perModule.join(', ')}), `
+    + `${quotedRows} printing a 通鑑 quotation and ${citedRows} of those carrying a non-empty citation; ${offenders.length} without`);
+  assert.ok(rows > 0, 'no figure row object was found in any module, so the citation requirement was never exercised');
+  assert.ok(citedRows > 0, 'no figure row printing a 通鑑 quotation was found carrying a citation, so this run compared nothing — a check that finds no cited row cannot tell a clean figure from an unread one');
+  assert.equal(offenders.length, 0,
+    `${offenders.length} figure row(s) print a 通鑑 quotation and say nothing about where it came from. Every row that prints `
+    + `one carries the 卷 and the year beside it — quoteAt on zj-timeline, source on zj-split and zj-words.\n      ${offenders.slice(0, 20).join('\n      ')}`);
+});
+
+/**
+ * The page's sentences, as slices of its html — a slice runs from after the previous 句号 to and
+ * including the next one. Split by matching rather than by line, because the markup carries no line
+ * breaks and a sentence that a `<span>` begins on one line of the file is one slice here.
+ */
+function sentencesOf(html) {
+  const out = [];
+  let start = 0;
+  for (let i = 0; i < html.length; i++) {
+    if (html[i] !== '。') continue;
+    out.push(html.slice(start, i + 1));
+    start = i + 1;
+  }
+  if (start < html.length) out.push(html.slice(start));
+  return out;
+}
+
+/**
+ * A sentence that says a passage is kept out of this book. Shipped as written, because a regex over prose
+ * is a claim about wording and the wording is what it reads. The clause is about the BOOK'S OWN reading:
+ * chapter 3 says 「不是神宗序里的原文」 of a phrase that is in 胡三省's 注序, which is about where a
+ * quotation comes from rather than about whether this page prints it, so it is outside the predicate —
+ * and that is the narrowing, measured: see the header.
+ */
+const CLAIMS_EXCLUDED = /不[^。；\n]{0,12}(?:列入|收入|选入|算(?:作|入)|在)[^。；\n]{0,6}(?:原文|引文|引语)|(?:原文|引文|引语)[^。；\n]{0,8}(?:之外|以外|删去)|只转述|不做?引文/;
+
+// Check 8: a page may not say it excludes a passage while printing that passage.
+test('no sentence says the book leaves a passage out while printing that passage', t => {
+  const pages = chapterPages();
+  assert.ok(pages.length > 0, 'no chapter page was found, so nothing was checked — the page list must not go quietly empty');
+
+  const offenders = [];
+  let sentences = 0;
+  let claiming = 0;
+  let printing = 0;
+
+  for (const file of pages) {
+    const rel = path.relative(root, file);
+    const html = proseOf(fs.readFileSync(file, 'utf8'));
+    for (const sentence of sentencesOf(html)) {
+      sentences++;
+      if (!CLAIMS_EXCLUDED.test(sentence)) continue;
+      claiming++;
+      // The same test the rest of the file uses for "whose words are these": marked, verbatim, and long
+      // enough that it is the received text rather than the book naming a word it is about.
+      const quoted = markedSpans(sentence)
+        .map(span => textOfSpan(sentence, span).replace(/\s+/g, ''))
+        .filter(text => [...text].filter(ch => HAN.test(ch)).length >= 4 && isTongjianText(text));
+      if (!quoted.length) continue;
+      printing++;
+      offenders.push(`${rel}: the sentence says this book leaves a passage out and prints 通鑑 in the same breath — 「${quoted[0].slice(0, 40)}」`);
+    }
+  }
+
+  t.diagnostic(`exclusion claims: ${pages.length} chapter page(s), ${sentences} sentence(s) read, ${claiming} claiming the book leaves a `
+    + `passage out, ${printing} of those printing a 通鑑 quotation of 4 or more Han characters in the same sentence`);
+  assert.ok(sentences > 0, 'no sentence was read at all, so this run compared nothing');
+  assert.ok(claiming > 0, 'no sentence claims the book leaves a passage out, so this check never met the shape it is about');
+  assert.equal(offenders.length, 0,
+    `${offenders.length} sentence(s) say this book leaves a passage out and print that passage. Say what the book does with it — name `
+    + `the work and where the words are read — or quote nothing in that sentence. See docs/design/tongjian.md, "Where a quotation comes `
+    + `from another work".\n      ${offenders.join('\n      ')}`);
 });
 
 test('the book\'s contents page states the key to the mark', t => {

@@ -33,9 +33,12 @@
 // The quotation's citation is a third thing, and it is not dropped by any tier. It says whose sentence the
 // quotation is, and this whole figure exists to say where 通鑑's words sit, so whether it is drawn is
 // MEASURED from the panel's own content rather than keyed to a stage size: `fitCitation` below reads the
-// panel against the room it has, and where the panel cannot hold the citation and the note together the
-// note yields. The stages this was measured at, and what a reader's phone does, are in the CSS block that
-// draws it. `npm run flow`'s `phone-figure-citation` step is the check on the phone load.
+// panel against the room it has and takes the first of four answers that clears the controls — citation
+// and note, then the note yields, then the citation, then both — and where even the last of them leaves the
+// content taller than the box, the panel is bounded and scrolls, because a line the reader must scroll for
+// is worth more than a line drawn over a control. The stages this was measured at, and what a reader's
+// phone does, are in the CSS block that draws it. `npm run flow`'s `phone-figure-citation` step is the
+// check on the phone load.
 import { h } from './lib/svg.js';
 
 // The fields of a row that hold 資治通鑑's own words rather than this figure's. `quote` is the sentence
@@ -269,36 +272,51 @@ const CSS = `
    name. The default in the two compositions that have to earn their room is off; [data-cite="1"] carries
    more specificity than the rule that hides it, so it needs no order trick.
 
-   Measured by out/zj-citation/before-after.mjs on one page load with both arms, every row, at 2/3 aspect.
-   The citation is one line of --text-xs (12px) at the leading it inherits (a 21.6px box), and it costs its
-   box plus the panel's own gap. Clearance between the panel's last drawn line and the controls, negative
-   being an overlap, on 前453 (the longest citation) and 前403 (the row the book opens at):
-     390x585 (a 390px phone, full bleed)  前453 +12.8   前403 +12.8  — both blocks drawn, and +12.8 is
-                                                                     what this stage measured before the rule
-     360x540                              前453 +12.8   前403  +9.8  — both drawn
-     350x525                              前453 +12.2   前403 +31.4  — 前403's note yields
-     342x513 (the stage npm run narrow photographs, at the book's own font)  前453 +0.2   前403 +19.4
-     320x480                              前453  +3.8   前403 -42.4
-   The 320x480 column is not this rule's doing: 前403 already drew its note 42.4px over its own controls
-   before it and still does, and the figure has no composition for that stage — the narrowest phone it was
-   built for is 360. Where the citation does fit at 320x480 (前453 and 前376) the fit drops the note and
-   the clearance improves from -8.2px to +3.8px, so the one stage that was drawing over its own buttons is
-   the one this rule made safe rather than worse.
-   The 16/9 stages the strip tier gets, measured by out/zj-citation/strip.mjs with the citation forced on:
-   480x270 — the stage that tier was designed for — has 19.7px clear and the citation needs 25.6px, so it
-   measures -8.3px and the strip keeps the composition it had; 440x247 measures -31.3px and 460x259
-   -19.3px; 500x281 fits at +2.7px and is drawn there.
-   So at the stages a reader's phone actually gives — 360x540 and up, full bleed — the citation and the
-   note are both drawn and the clearance is unchanged from before the rule. Below 360 one of the two has to
-   go, and the citation outranks the note: [data-cite-note="0"] takes the note out to make room for the
-   attribution, which is a content loss on 前403 at stages 350 wide and under and is named here rather than
-   left to be found. Where even that is not enough — 前403 at 320x480 — the citation comes off too, which
-   is the composition that shipped before. :not([hidden]) keeps a year with no quotation of its own — four
-   of the seven — from being drawn as an empty line. */
+   Four answers are tried in the order of what the figure is for, and the fifth is a bound rather than a
+   block: [data-fit="over"] at the foot of this block makes the panel scroll. Instrument: out/zj-overlap/
+   answers.mjs, which forces each answer in the live DOM on the real chapter page — the book's own fonts
+   and tokens, not the lab's — and reads where the panel's content ends against where the controls begin,
+   the same measure panelClears() takes. Clearance in px, negative being an overlap, at 2/3 aspect unless
+   noted, light theme (dark measured identical):
+
+                               citation+note   note yields   citation off   both off   body off
+     320x480  前403 (tallest)       -65.2         -11.2         -40.2        +12.8      +12.8
+     320x480  前453, 前376          -30.2          +5.8          -6.2        +12.8      +12.8
+     342x513  前403                -15.2         +12.8          +9.8        +12.8      +12.8
+
+   The four rows with no quotation of their own measure +12.8 at every one of these stages, whatever is
+   drawn. At 390x585 (a 390px phone, full bleed) and 500x281 (3.8px of it going to the gap) the first
+   answer clears; at 478x268 (an 800px window) the citation comes off and the panel clears by 12.8.
+
+   The 320x480 column is the case this rule was extended for. 前403's blocks measure date 26.6, event 18.2,
+   frame 21.6, quote 21.0, citation 21.6, body 52.2, note 50.4 against a 151.8px panel box with a 12.8px
+   gap to the controls: the citation and the note together overflow by 65.2, the note alone by 40.2, the
+   citation alone by 11.2. So the note yields and then the citation, which leaves the year's own sentence
+   and the body that reads it with 12.8px clear. The note is already the block every smaller composition
+   drops (data-tiny, data-short, data-cite-note), and the body is the modern-Chinese reading of the year, so
+   dropping it would print 通鑑's words untranslated. Both clear at this stage — 52.2 against 50.4 — so that
+   is a decision about which loss is smaller and not a fit that forces it. Where the citation does fit,
+   前453 and 前376 at 320x480, the note still yields and the clearance is +5.8.
+
+   The strip at 440x247 is the case where yielding cannot reach the box. The tier has already dropped the
+   note and the body, the fit drops the citation, and the four blocks left (date 26.6, event 18.2, frame
+   21.6, quote 21.0) measure 107.5px against a 92.5px box: 2.2px of the last line over the controls, and
+   nothing left to drop but a register this figure exists to state. So the panel is bounded instead, and
+   what it cannot hold cannot be drawn past its own box. 440x247 is the strip tier's own narrowest 16/9 box
+   (the tier starts at 440) rather than a device shape: the smallest one a reader meets, an 800px window's
+   480x270, clears by 12.8 with the citation dropped, and 500x281 clears by 3.8 with it drawn. The bound is
+   this same measurement rather than a stage size, and it is taken for every composition, the columns
+   tier included — a stage can be wide and short.
+   :not([hidden]) keeps a year with no quotation of its own — four of the seven — from being drawn as an
+   empty line. */
 .tb-zjt[data-tier="stacked"] .zjt-quote-at,
 .tb-zjt[data-tier="strip"] .zjt-quote-at { display: none; }
 .tb-zjt[data-cite="1"] .zjt-quote-at:not([hidden]) { display: block; }
 .tb-zjt[data-cite-note="0"] .zjt-note { display: none; }
+/* The bound: when every block that may yield has yielded and the panel is still taller than its box, it
+   scrolls rather than drawing over the controls below it. scrollbar-width keeps the bar from eating a
+   measure this stage has none of to spare. */
+.tb-zjt[data-fit="over"] .zjt-panel { overflow-y: auto; scrollbar-width: thin; }
 .tb-zjt .zjt-body-text { margin: 0; font-family: var(--font-text); font-size: var(--text-base); line-height: 1.7;
   color: var(--ink-soft); text-wrap: pretty; }
 .tb-zjt .zjt-note { margin-top: auto; padding-left: var(--space-3); border-left: 2px solid var(--rule-strong); }
@@ -516,35 +534,45 @@ export function mount(root, ctx) {
 
   // Does everything the panel draws stay clear of the controls below it? The panel's box is not the whole
   // room it has — a gap separates it from the toolbar and a line that spills into that empty space is
-  // still read, which the shipped composition already relies on (5.4px at the 342x513 stage, before this
-  // rule existed). So the test is where the CONTENT ends against where the controls begin: scrollHeight
-  // is the content's own height once it passes the box, and anything that reaches the toolbar fails. It is
-  // read AFTER the data-cite attribute is written, because reading a layout property flushes style and the
-  // rule that draws the citation is what the answer is about.
+  // still read, which the shipped composition already relies on (前453 at 342x513 spills 10px into the
+  // 12.8px gap and clears the controls by 2.8px). So the test is where the CONTENT ends against where the
+  // controls begin: scrollHeight is the content's own height once it passes the box, and anything that
+  // reaches the toolbar fails. It is read AFTER the data-cite attributes are written, because reading a
+  // layout property flushes style and the rule that draws the citation is what the answer is about — and
+  // with data-fit off, because the bound's own scrollbar would narrow the panel and change the answer.
   const panelClears = () => panel.getBoundingClientRect().bottom
     + Math.max(0, panel.scrollHeight - panel.clientHeight) <= toolbar.getBoundingClientRect().top;
 
-  // Whether the quotation's citation is drawn, MEASURED rather than keyed to a stage size. Three answers,
-  // in the order of what the figure is for: the panel holds the citation and its note (the stages a
-  // reader's phone gives, 360x540 and up); the note yields so the attribution can stand (350x525, the
-  // lab's 342x513, at 前403); neither fits and the composition is the one that shipped before, with the
-  // note and no attribution (前403 at 320x480, the 480x270 strip). Dropping a block never makes room for
-  // fewer blocks, so the third answer is a fixed point and this cannot oscillate. A row with no quotation
-  // of its own has no citation to place.
+  // Whether the quotation's citation is drawn, MEASURED rather than keyed to a stage size. Four answers are
+  // tried in the order of what the figure is for: the panel holds the citation and its note (the stages a
+  // reader's phone gives, 390x585 and up); the note yields so the attribution can stand (342x513, 350x525);
+  // the citation comes off and the note returns, the composition that shipped before this rule (320x480 on
+  // 前453); and both yield (320x480 on 前403, the tallest row). The fifth answer is not another block but a
+  // BOUND: when even the last of them leaves the content taller than its box the panel scrolls, so what it
+  // cannot hold cannot be drawn over the controls (the strip at 440x247, where the tier has already dropped
+  // the note and the body and only the figure's own registers are left). Dropping a block never makes room
+  // for fewer blocks, so each answer is at most as tall as the one before it and this cannot oscillate. A
+  // row with no quotation of its own has no citation to place, and the `columns` composition draws the
+  // citation whatever this writes — the bound is still taken there, because a stage can be wide and short.
+  const ANSWERS = [['1', '1'], ['1', '0'], ['0', '1'], ['0', '0']];
+
   function fitCitation() {
     const has = !quoteAtEl.hidden && quoteAtEl.textContent !== '';
-    if (!has || (tier !== 'stacked' && tier !== 'strip')) {
-      wrap.dataset.cite = '0';
-      wrap.dataset.citeNote = '1';
+    // The answers are measured with the bound OFF: a scrollbar it adds would narrow the panel and change
+    // the answer being asked about.
+    wrap.dataset.fit = 'ok';
+    if (has && (tier === 'stacked' || tier === 'strip')) {
+      for (const [cite, note] of ANSWERS) {
+        wrap.dataset.cite = cite;
+        wrap.dataset.citeNote = note;
+        if (panelClears()) return;
+      }
+      wrap.dataset.fit = 'over';
       return;
     }
-    wrap.dataset.cite = '1';
-    wrap.dataset.citeNote = '1';
-    if (panelClears()) return;
-    wrap.dataset.citeNote = '0';
-    if (panelClears()) return;
     wrap.dataset.cite = '0';
     wrap.dataset.citeNote = '1';
+    if (!panelClears()) wrap.dataset.fit = 'over';
   }
 
   function measure() {
