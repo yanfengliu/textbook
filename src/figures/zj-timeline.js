@@ -269,23 +269,32 @@ const CSS = `
    name. The default in the two compositions that have to earn their room is off; [data-cite="1"] carries
    more specificity than the rule that hides it, so it needs no order trick.
 
-   Measured by out/zj-citation/fit.mjs over every row at 2/3 aspect (the citation is one 12px line, 16.2px
-   with its 3px panel gap). Clearance between the panel's last drawn line and the controls, negative being
-   an overlap:
-     390x585 (a 390px phone, full bleed) +12.8   360x540 +12.8   430x645 +12.8
-     350x525                             +0.3   348x522  -2.7
-     342x513 (the lab at a 390px viewport, the stage npm run narrow photographs)  -11.7
-     320x480                            -61.5, and -42.3 with the citation off: that stage already drew its
-                                        note over its own controls before this rule existed
-   and on the 16/9 aspect the strip tier gets: 480x270 (the stage that tier was designed for) -2.9,
-   500x281 +8.2, 520x293 +17.3.
-   So at the stages a reader's phone actually gives — 360x540 and up, full bleed — the panel holds the
-   citation and the note together. Below that one of the two must go, and the citation outranks the note:
-   [data-cite-note="0"] takes the note out to make room for the attribution, which is a content loss at
-   the one stage where it happens and is named here rather than left to be found. Where even that is not
-   enough (320x480, the 480x270 strip) the citation comes off too, which is the composition that shipped
-   before this rule. :not([hidden]) keeps a year with no quotation of its own — four of the seven — from
-   being drawn as an empty line. */
+   Measured by out/zj-citation/before-after.mjs on one page load with both arms, every row, at 2/3 aspect.
+   The citation is one line of --text-xs (12px) at the leading it inherits (a 21.6px box), and it costs its
+   box plus the panel's own gap. Clearance between the panel's last drawn line and the controls, negative
+   being an overlap, on 前453 (the longest citation) and 前403 (the row the book opens at):
+     390x585 (a 390px phone, full bleed)  前453 +12.8   前403 +12.8  — both blocks drawn, and +12.8 is
+                                                                     what this stage measured before the rule
+     360x540                              前453 +12.8   前403  +9.8  — both drawn
+     350x525                              前453 +12.2   前403 +31.4  — 前403's note yields
+     342x513 (the stage npm run narrow photographs, at the book's own font)  前453 +0.2   前403 +19.4
+     320x480                              前453  +3.8   前403 -42.4
+   The 320x480 column is not this rule's doing: 前403 already drew its note 42.4px over its own controls
+   before it and still does, and the figure has no composition for that stage — the narrowest phone it was
+   built for is 360. Where the citation does fit at 320x480 (前453 and 前376) the fit drops the note and
+   the clearance improves from -8.2px to +3.8px, so the one stage that was drawing over its own buttons is
+   the one this rule made safe rather than worse.
+   The 16/9 stages the strip tier gets, measured by out/zj-citation/strip.mjs with the citation forced on:
+   480x270 — the stage that tier was designed for — has 19.7px clear and the citation needs 25.6px, so it
+   measures -8.3px and the strip keeps the composition it had; 440x247 measures -31.3px and 460x259
+   -19.3px; 500x281 fits at +2.7px and is drawn there.
+   So at the stages a reader's phone actually gives — 360x540 and up, full bleed — the citation and the
+   note are both drawn and the clearance is unchanged from before the rule. Below 360 one of the two has to
+   go, and the citation outranks the note: [data-cite-note="0"] takes the note out to make room for the
+   attribution, which is a content loss on 前403 at stages 350 wide and under and is named here rather than
+   left to be found. Where even that is not enough — 前403 at 320x480 — the citation comes off too, which
+   is the composition that shipped before. :not([hidden]) keeps a year with no quotation of its own — four
+   of the seven — from being drawn as an empty line. */
 .tb-zjt[data-tier="stacked"] .zjt-quote-at,
 .tb-zjt[data-tier="strip"] .zjt-quote-at { display: none; }
 .tb-zjt[data-cite="1"] .zjt-quote-at:not([hidden]) { display: block; }
@@ -371,7 +380,7 @@ const CSS = `
 
 /* The last block off as the stage gets shorter: a cut-off line reads as a bug, an absent one does not.
    The citation is no longer one of these — it is measured, above — and mini is gone with it: at the
-   480x270 stage it was written for, the measurement keeps the citation off by 2.9px, which is the same
+   480x270 stage it was written for, the measurement keeps the citation off by 8.3px, which is the same
    answer arrived at from the panel's content rather than from a height. */
 .tb-zjt[data-tiny="1"] .zjt-note { display: none; }
 .tb-zjt[data-short="1"] .zjt-note { display: none; }
@@ -517,11 +526,11 @@ export function mount(root, ctx) {
 
   // Whether the quotation's citation is drawn, MEASURED rather than keyed to a stage size. Three answers,
   // in the order of what the figure is for: the panel holds the citation and its note (the stages a
-  // reader's phone gives, 360x540 and up); the note yields so the attribution can stand (the lab's
-  // 342x513 and the narrow band below 350 where the panel cannot hold both); neither fits and the
-  // composition is the one that shipped before, with the note and no attribution (320x480, the 480x270
-  // strip). Dropping a block never makes room for fewer blocks, so the third answer is a fixed point and
-  // this cannot oscillate. A row with no quotation of its own has no citation to place.
+  // reader's phone gives, 360x540 and up); the note yields so the attribution can stand (350x525, the
+  // lab's 342x513, at 前403); neither fits and the composition is the one that shipped before, with the
+  // note and no attribution (前403 at 320x480, the 480x270 strip). Dropping a block never makes room for
+  // fewer blocks, so the third answer is a fixed point and this cannot oscillate. A row with no quotation
+  // of its own has no citation to place.
   function fitCitation() {
     const has = !quoteAtEl.hidden && quoteAtEl.textContent !== '';
     if (!has || (tier !== 'stacked' && tier !== 'strip')) {

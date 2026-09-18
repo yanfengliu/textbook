@@ -62,19 +62,19 @@
 //
 // `phone-figure-citation` is the other rendered-page check, and it is the phone's answer to a different
 // defect: at 390 px the second book's figure 2.1 drew 通鑑's sentence with no attribution under it at all
-// — the stacked composition set the citation `display: none`, measured as `12.0 px not drawn` — so a phone
-// printed the source's words with nothing saying whose they were, on the page whose whole subject is where
-// those words come from. The step brings every figure on the phone page into view and requires the
-// citation a quotation-bearing figure draws to be there: present, not hidden, a non-zero box, and at least
-// `CITATION_MIN_PX` tall in type. Its bounds: it visits the second book's 390 px load only, so the desktop
-// and tablet compositions of the same figures are `npm run shot`'s and not this step's; it reads
-// `describe().quoted` to decide whether a figure is showing 通鑑's own words, so a figure that prints them
-// without publishing that field is never asked for a citation — the run-level census in
-// `figure-citation-covered` is what stops a green run that compared nothing, by failing a declared kind no
-// page exercised; it presses no control, so a row the reader has to select is not measured (the figure
-// opens on 前403年, whose row carries a citation); it proves a box is drawn and its type is at least the
-// floor, not that the citation is legible against what is under it, which is `npm run legible`'s question
-// where it is asked at all.
+// — the stacked composition set the citation `display: none`, measured before the fix as a 0x0 box, with
+// the 12 px type it would have had — so a phone printed the source's words with nothing saying whose they
+// were, on the page whose whole subject is where those words come from. The step brings every figure on
+// the phone page into view and requires the citation a quotation-bearing figure draws to be there:
+// present, not hidden, a non-zero box, and at least `CITATION_MIN_PX` tall in type. Its bounds: it visits
+// the second book's 390 px load only, so the desktop and tablet compositions of the same figures are
+// `npm run shot`'s and not this step's; it reads `describe().quoted` to decide whether a figure is showing
+// 通鑑's own words, so a figure that prints them without publishing that field is never asked for a
+// citation — the run-level census in `figure-citation-covered` is what stops a green run that compared
+// nothing, by failing a declared kind no page exercised; it presses no control, so a row the reader has to
+// select is not measured (the figure opens on 前403年, whose row carries a citation); it proves a box is
+// drawn and its type is at least the floor, not that the citation is legible against what is under it,
+// which is `npm run legible`'s question where it is asked at all.
 //
 // And it knows one figure kind, which is a measured gap rather than a choice: the same defect is still in
 // the book's other two figures — `zj-split`'s `.zjs-source` is `display: none` at `data-tier="narrow"` and
@@ -765,10 +765,14 @@ try {
       expect(!missing.length, `no phone load in this run showed a quotation from ${missing.join(', ')}, so the citation check for ${missing.length === 1 ? 'that kind' : 'those kinds'} never ran — a declared kind no page exercises is a check that cannot fail, which is what it looks like when the figure carrying it is dropped`);
     }, where);
 
-    const contentsSpec = markRules(inlineStyles(readFileSync('tongjian/index.html', 'utf8')), 'tongjian/index.html <style>');
+    // The sheet is read and parsed INSIDE the step, not before it: a page whose rule has been dropped makes
+    // `markRules` throw, and a throw outside a `check` kills the run with a stack trace and no step line —
+    // which is what the red proof for this step found (out/flow-red2.log). A missing rule is a named
+    // failure of the step that needed it.
     await check(contents, 'mark-audit', async () => {
-      const verdict = await contents.evaluate(auditMarks, contentsSpec);
-      expect(verdict.n > 0, `${second.path}: the audit's own scope ("${contentsSpec.scope.trim()}") carries no [lang="zh-Hant"] run at all, so this audit compared nothing`);
+      const spec = markRules(inlineStyles(readFileSync('tongjian/index.html', 'utf8')), 'tongjian/index.html <style>');
+      const verdict = await contents.evaluate(auditMarks, spec);
+      expect(verdict.n > 0, `${second.path}: the audit's own scope ("${spec.scope.trim()}") carries no [lang="zh-Hant"] run at all, so this audit compared nothing`);
       console.log(`     mark-audit [${where}]: ${verdict.n} run(s); per rule, in stylesheet order ${verdict.per.join('/')}; ${verdict.excluded} in a region the first rule excludes; ${verdict.bad.length} not visibly marked`);
       const first = verdict.bad[0];
       expect(!verdict.bad.length, verdict.bad.length

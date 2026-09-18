@@ -44,11 +44,14 @@
 // and the four class names the chapter teaches (才德全尽 / 德胜才 / 才德兼亡 / 才胜德). Those are the
 // book's own vocabulary used as its own subject, and a check that fired on them is noise an author learns
 // to ignore. **6 and above is where every run in the three chapters is a clause of the received text.**
-// The five that stood there are named in `docs/learning/gate-proofs.md`; all five were fixed by
-// bracketing and marking them (Traditional, verbatim). **5 is the band the floor is set above**: it holds
-// two runs, 康子生武子 and 章，武子生虔，, both from chapter 2's own sentence narrating the 世系
-// (「韩康子生武子启章，武子生虔，就是景侯」) rather than a citation. They are named here rather than
-// silently missed, and they are what the floor costs.
+// Five stood there at that revision — chapter 2's opener dek (智伯之亡也，才胜德也), chapter 2's `q-chici`
+// explanation (人馬相食，城降有日), chapter 3's `q-yuren` option (智足以遂其奸), chapter 3's `q-yuren`
+// explanation (愚者雖欲為不善，智不能周，力不能勝) and chapter 3's sort item (智不能周，力不能勝) — and all
+// five were fixed by bracketing and marking them, Traditional and verbatim. **5 is the band the floor is
+// set above**: it holds two runs, 康子生武子 and 章，武子生虔，, both from chapter 2's own sentence narrating
+// the 世系 (「韩康子生武子启章，武子生虔，就是景侯」) rather than a citation, and both are what the floor
+// costs. One character lower still — a floor of 4 — and the class names the chapter teaches are in range
+// (才德兼亡, 才德全尽), which is the noise the floor exists to keep out.
 //
 // What it cannot see, stated rather than hidden:
 //
