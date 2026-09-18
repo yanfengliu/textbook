@@ -73,6 +73,16 @@ One thing a reader of the narrow composition should know: `src/figures/zj-timeli
 
 **Two claims elsewhere that this round found stale, neither mine to edit**: `docs/policies/local-rules.md`'s stated measure for `test/control-chars.test.js` (412 lines / 379 non-blank) is now 426 / 393; and `AGENTS.md`'s `npm run unit` clause does not mention `test/standing-docs.test.js`. Both files are dirty in the shared tree with the other session's round.
 
+## Round 7, and the citation gate that objective item (4) still needs
+
+Round 7 is open with two workers: one closing the **un-「」 class** (a 通鑑 run the book prints bare is invisible to both existing checks, because the page check looks for 「…」 and the script check cannot see a Simplified or script-neutral run — it must measure its predicate's population before committing to it), and one fixing **figure 2.1's citation at 390 px** (measured `12.0 px not drawn`, so on a phone the book prints a sentence of 通鑑's with nothing saying so) and bringing the contents page into `mark-audit`.
+
+Item (4) — a page making a false claim about its own provenance — is still answered by design and not by a check. What would make it a gate is mechanical, and it is the first thing round 8 should take:
+
+**A 通鑑 quotation that is not part of the passage the page reads must name where it comes from.** For every marked run on a page, if the run is not a substring of any of that page's own `data-corpus` entries, then its paragraph — or, for a figure, its row — must carry a source: a `.zj-at` rubric, a `quoteAt`/`source` field, or a 卷/年 in the same paragraph. A page that quotes 通鑑 from outside its selection and says nothing about where the words came from is red. That is the structural half of the defect the owner hit: the false sentence in chapter 2 was prose *asserting* a selection, and the design's answer is that the page no longer needs to assert it because the citation says it at the quotation — so the check makes the citation mandatory instead of optional. It cannot be written in round 7 because `test/provenance.test.js` is owned by the worker closing the un-「」 class.
+
+Two smaller claims worth adding with it, both unchecked today: **a figure row that prints a `quote` must carry a non-empty `quoteAt`** (every row does, and nothing requires it), and **a page's prose may not name itself as excluding a passage while printing it** — the instance rather than the class, but it is the sentence that was false.
+
 ## Drafted for the next round
 
 - Give a 通鑑 quotation inside a margin note a treatment that works there — the note is already the soft ink, so the direction available is full ink — and stop repainting a textual note's run out of the note's own colour.
@@ -89,3 +99,20 @@ One thing a reader of the narrow composition should know: `src/figures/zj-timeli
 ## Correction to the commit message of `c6fdc6f`
 
 That message quotes the key page's measurements wrongly and I am leaving the wrong text in the history rather than force-pushing to fix it. Measured, from the worker's probe (`out/probe-key-mark.mjs`): in the light theme the run is `rgb(29, 26, 23)` against a `.dek` of `rgb(92, 85, 77)`; in the dark theme the run is `rgb(233, 228, 218)` against a dek of `rgb(163, 157, 147)`. Before the rule existed, both sides were identical to the byte in each theme — `16px / rgb(92, 85, 77)` against `16px / rgb(92, 85, 77)` in light. The commit's code, its subject and every gate result are unaffected; only the numbers in its message are wrong.
+
+## A false alarm of mine, and the measurement that killed it
+
+At 3x on a phone the top of every `inspect` frame shows a faint clipped line under the sticky header, and at that scale I read it as English on a Chinese page — which the design record says should not exist beyond two known component strings. **It is not there.** A probe that walks the rendered DOM for text containing two or more Latin letters found **three** runs at 390 px dark and three at 1440 px light, the same three: a `<style>` element's own CSS text (`display: none`, never painted) and the word `Enter` inside two Chinese interface hints (`连点相邻两字…方向键选字，Enter 决定。`), which are expected. The clipped strip is Chinese — the skip link, whose glyph tops the header cuts — and my reading of a 40-pixel strip at 3x was simply wrong.
+
+Kept because it is the same lesson as the round's other findings, one step further out: **a person looking at a frame can misread it, and the frame is not the last word — the measurement is.** The probe was scratch under `out/` and is deleted; the result is this paragraph.
+## Round 11-12: what landed, and what is owed
+
+**Landed.** The un-「」 class is closed on the pages it fires on: the chapter opener's dek (quoting 通鑑's judgement in Simplified), the `q-chici` explanation (「人馬相食，城降有日」), the `q-yuren` option (「智足以遂其奸，勇足以決其暴」), the `q-yuren` explanation (「愚者雖欲為不善，智不能周，力不能勝」) and **all seven `<tb-sort>` cards** now carry the mark. The sort cards are what the typographic reviewer called the gateway the owner's question came in through. `tools/flow.js`'s rendered audit reports **49 runs on chapter 3 (up from 40) with 0 not visibly marked**, which is the audit confirming the new marks are visible rather than merely present in the markup. Figure 2.1's citation is now drawn on a phone — verified in a frame at 390 px dark, where the panel shows the quotation, its citation and its note together, against the reviewer's measurement that it was `12.0 px not drawn`.
+
+**Owed, and not claimed:**
+
+1. **The red proof for the bare-run check.** It is green over the pages it fixed, but no mutation has been recorded to show it can fail. By this repository's own rule the gate does not count until one is.
+2. **The red proof for the figure-citation change**, and the check itself: the `phone-figure-citation` step in `flow` and the contents page brought into `mark-audit` were briefed and not delivered.
+3. **The figure's own numbers to keep**: at 320x480 the note already overlapped the controls by 42.3 px before this rule existed, and `npm run narrow` photographs 342x513, so that composition is unwatched.
+4. **`AGENTS.md`'s `npm run unit` bullet does not name `test/provenance.test.js` or `test/standing-docs.test.js`**, and `docs/policies/local-rules.md`'s stated measure for `test/control-chars.test.js` (412/379) is now 426/393. Both files are dirty in the shared tree with another session's round, and `AGENTS.md` is the owner's own instruction file, so neither was edited unilaterally.
+5. **The citation gate** drafted above — a context quotation must name where it comes from.

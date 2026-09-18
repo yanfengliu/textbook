@@ -15,28 +15,76 @@
 //   1. **No 「…」 quotation of 通鑑 in a page's prose goes unmarked.** Every run the book brackets with
 //      「」 whose text is verbatim 通鑑 (a substring of the corpus, or one of the two lines the corpus
 //      does not carry) is inside an element carrying `lang="zh-Hant"`. Without this, the mark is whatever
-//      an author remembered. **The predicate is the book's own brackets**, which is the bound and not a
-//      detail: a 通鑑 quotation the book never wrapped in 「」 — set bare in the prose, or bracketed with
-//      『』 — is not seen here, and the one thing this file proves about such a run is the converse, in
-//      `test/lexicon.test.js`: if it is marked, it must be a quotation.
-//   2. **A figure declares which of its fields are 通鑑's words**, and the declaration is exact in both
+//      an author remembered.
+//   2. **No run of 通鑑's own words long enough to be a quotation is printed bare either.** A run the
+//      book neither brackets nor marks was invisible to check 1, whose predicate is the book's own
+//      brackets, and — where it is Simplified or script-identical — to `test/lexicon.test.js`'s script
+//      check too, so a reader met a clause of the received text printed as the book's own sentence. That
+//      is the hole the owner's "make it clear what came from the book" instruction left open, and the
+//      predicate here is a length floor measured rather than chosen: see "The floor, and how it was
+//      measured" below.
+//   3. **A figure declares which of its fields are 通鑑's words**, and the declaration is exact in both
 //      directions: a field holding a 通鑑 sentence must be declared, and a declared field must hold one.
 //      A figure prints 通鑑 outside the page's markup, so no page-side scan can see it. The scan reads
 //      every literal form — `'…'`, `"…"` and `` `…` `` — because a gate that reads one quoting style is a
 //      gate an author can walk around without meaning to.
-//   3. **The figures' quotation elements take the mark too**, by requiring each module the REGISTRY
+//   4. **The figures' quotation elements take the mark too**, by requiring each module the REGISTRY
 //      registers to set `lang: 'zh-Hant'` where it builds them — the reader's screen reader needs it and
 //      so does the stylesheet. The module list comes from `src/figures/registry.js`, so renaming or
 //      dropping a file makes this run fail rather than cover less.
-//   4. **The key is on the book's contents page**, in an element with a stable class, so that the mark
+//   5. **The key is on the book's contents page**, in an element with a stable class, so that the mark
 //      means something to a reader who does not read the script difference at sight.
+//
+// The floor, and how it was measured. Check 2 fires on a bare, unmarked run of **6 or more Han
+// characters** that is verbatim 通鑑. The number is the width of a measured gap, not a taste.
+// `out/provenance-bare/probe.mjs` (scratch, taken 2026-09-20 on the three shipped chapters) read every
+// maximal corpus run in the pages' prose — 639 of them, 55 already marked and 73 inside 「」 — and grouped
+// the 566 that were neither by Han-character count. **4 and below is the population this check is not
+// about**: 14 runs at 4, 35 at 3, 264 at 2 — 智伯, 大夫, 卿大夫, 智宣子, 魏桓子, 晋阳, a chapter title,
+// and the four class names the chapter teaches (才德全尽 / 德胜才 / 才德兼亡 / 才胜德). Those are the
+// book's own vocabulary used as its own subject, and a check that fired on them is noise an author learns
+// to ignore. **6 and above is where every run in the three chapters is a clause of the received text.**
+// The five that stood there are named in `docs/learning/gate-proofs.md`; all five were fixed by
+// bracketing and marking them (Traditional, verbatim). **5 is the band the floor is set above**: it holds
+// two runs, 康子生武子 and 章，武子生虔，, both from chapter 2's own sentence narrating the 世系
+// (「韩康子生武子启章，武子生虔，就是景侯」) rather than a citation. They are named here rather than
+// silently missed, and they are what the floor costs.
 //
 // What it cannot see, stated rather than hidden:
 //
 //   - **A one-character quotation.** `isTongjianText` requires two characters, because a single Han
 //     character in 「」 is far more often the book naming a word it is about (「命」, 「恒」, 「版」) than
-//     quoting 通鑑, and no mechanical rule here can tell those apart. Single-character quotations are
-//     therefore outside this check's bound; the same bound is stated in `test/lexicon.test.js`.
+//     quoting 通鑑, and no mechanical rule here can tell those apart. Check 2's floor is the same bound
+//     one band higher: any bare run under 6 Han characters is outside both. The same bound is stated in
+//     `test/lexicon.test.js`.
+//   - **A Simplified rendering of a 通鑑 clause**, which is the class check 2 misses by construction and
+//     the reason it has a floor rather than a switch. Every character of 才德全尽 is Simplified where the
+//     corpus prints 才德全盡, so no substring test can see it; the same holds for 挟才以为善 and for the
+//     世系 clause above. Check 2 reads only the characters the corpus and the page share. The class was
+//     found by the same probe and fixed by hand on 2026-09-20 — chapter 3's sort card now prints its
+//     received-text clauses Traditional and marked — and a page that adds another one will not be caught
+//     here.
+//
+//     **Folding the script away instead of narrowing the floor was tried and measured, and it does not
+//     work.** `out/provenance-bare/probe2.mjs` folds both sides through the same
+//     `test/fixtures/traditional-only.txt` table before comparing, which is what makes 决 match 決, and
+//     then reads the pages as they stood before this round's fixes: at a floor of 6 Han characters it
+//     fires on **12** runs, of which **6 are the book's own Simplified voice** — 尽灭智氏之族 and
+//     魏、韩、赵共废晋 in chapter 1, the 世系 sentence and 相亲之兵待轻敌之人，智氏 in chapter 2,
+//     才胜德谓之小人。 and 才有余而德不足， in chapter 3 — against the 5 the round fixed. **No floor
+//     separates the two classes**: at 7 the book's own 世系 sentence and its explanation still fire at 12
+//     and 11 Han, and they are still the two longest runs of all at a floor of 10. The reason is not
+//     tuning but what the fold erases. The book's line between its own words and 通鑑's **is** the script:
+//     the design defines a quotation as verbatim *character for character*, and verbatim is what makes a
+//     run Traditional. Fold 決 to 决 and 乾 to 干 and the book's own narration of the story is the same
+//     string as the received text, so a predicate on that string measures the book's voice, not its
+//     citations. The table also folds many Traditional forms onto one Simplified form — 乾→干, 後→后 —
+//     so a folded match can be between two characters that were never the same text.
+//   - **A run inside the book's apparatus rather than its prose.** `proseOf` blanks `data-alt`,
+//     `data-why`, `aria-label` and `data-note` before the scan, so a 通鑑 clause inside a sort card's
+//     `data-why` — rendered once the item is placed — is outside check 2 as well as check 1. That is the
+//     same blanking that keeps a figure's own description from being read as prose, and it is why the
+//     floor's population was measured with the same blanking in place.
 //   - **A quotation with one character changed**, or one re-punctuated until it is no longer a substring:
 //     it stops being 通鑑 and this file has nothing to say about it. `test/corpus.test.js` and the
 //     script check hold the marked runs the other way round (a marked run must BE a quotation), so the
@@ -56,7 +104,9 @@
 //     named in the sentence that quotes them, which is a fact about prose and not about an attribute.
 //
 // Denominator: the run asserts that it found 原文 blocks, marked runs and quotation runs, and prints
-// how many of each it read, so a scan that finds nothing cannot pass as one that found everything.
+// how many of each it read, so a scan that finds nothing cannot pass as one that found everything. Check
+// 2 prints the corpus runs it read, how many of them were marked, how many sat inside 「」 and how many
+// were bare, so a clean run says which of the three it compared.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -93,6 +143,58 @@ const corpusText = CORPUS.map(e => e.text.join('\n')).join('\n');
 const corpusSentences = new Set(CORPUS.flatMap(e => e.text));
 /** Is this run of text verbatim 資治通鑑 — a substring of the corpus, or one of the lines named above? */
 const isTongjianText = (s) => s.length >= 2 && (corpusText.includes(s) || OUTSIDE_CORPUS.includes(s));
+
+// The two sources a bare run is looked up in, and the predicate check 2 searches with. `isTongjianText`
+// needs a length guard because `''` is a substring of everything; the search below asks a different
+// question — how far a run can be extended before it stops being 通鑑 — so it starts at 2 and the guard
+// is that start.
+const QUOTE_SOURCES = [corpusText, ...OUTSIDE_CORPUS];
+const isQ = (s) => QUOTE_SOURCES.some(src => src.includes(s));
+
+/** How long a bare run may be before this check stops measuring. Longer than the longest corpus 句. */
+const MAX_QUOTE = 96;
+/** The floor. Its measurement is in the header, under "The floor, and how it was measured". */
+const BARE_FLOOR = 6;
+
+/**
+ * The longest run at `from` that is a verbatim quotation, or 0 if there is none.
+ *
+ * A binary search, because "is a prefix of this text in the corpus" can only fall as the prefix grows:
+ * a prefix of a quotation is a quotation of the same source. So the first length that fails is the
+ * boundary, and the search is over lengths rather than over the corpus.
+ */
+function longestQuotation(text, from) {
+  const max = Math.min(MAX_QUOTE, text.length - from);
+  let lo = 2;
+  let hi = max;
+  let best = 0;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (isQ(text.slice(from, from + mid))) { best = mid; lo = mid + 1; } else hi = mid - 1;
+  }
+  return best;
+}
+
+/**
+ * The prose as one flat string, with each character's offset in the html it came from.
+ *
+ * The offsets matter twice: `markerDepth` is asked at them for the mark, and a failure message names the
+ * line the run is on. Tags contribute no character, so a run the markup splits across a `<span>` is one
+ * run here — which is the point, since the mark is what splits it.
+ */
+function flattenProse(html) {
+  const raw = [];
+  let text = '';
+  let i = 0;
+  let m;
+  const re = /<(\/?)([a-zA-Z][\w-]*)\b([^>]*?)(\/?)>/g;
+  while ((m = re.exec(html))) {
+    for (let k = i; k < m.index; k++) { text += html[k]; raw.push(k); }
+    i = re.lastIndex;
+  }
+  for (let k = i; k < html.length; k++) { text += html[k]; raw.push(k); }
+  return { text, raw };
+}
 
 /**
  * Is this WHOLE field a 句 of 通鑑? The figure side asks a narrower question than the page side, and it
@@ -177,7 +279,11 @@ function proseOf(html) {
     // The figure apparatus — alt text, sort explanations, a note's own label — is the book's prose
     // ABOUT the figure. It is blanked by NAME, because the first quoted string in a tag is usually
     // another attribute's value and blanking that one would leave the apparatus in the scan.
-    .replace(/\b(data-alt|data-why|aria-label|data-note)="[^"]*"/g, '$1=""');
+    //
+    // Blanked to the same LENGTH rather than to `name=""`. A shorter replacement moves every offset after
+    // it, and check 2 reports the line a bare run is on by counting newlines up to that offset — so the
+    // failure would name the wrong line, and the wrong line is a failure message that cannot be acted on.
+    .replace(/\b(data-alt|data-why|aria-label|data-note)="([^"]*)"/g, (m, name, body) => `${name}="${' '.repeat(body.length)}"`);
 }
 
 test('every quotation of 通鑑 in the book\'s prose carries the mark that says so', t => {
@@ -224,6 +330,74 @@ test('every quotation of 通鑑 in the book\'s prose carries the mark that says 
     `${offenders.length} quotation(s) of 通鑑 are printed as if the book had written them. A run of 通鑑's words in the `
     + `book's own prose must carry lang="zh-Hant" — that attribute is what the stylesheet marks it with and what a screen `
     + `reader reads it with. See docs/design/tongjian.md, "Which words are the book's".\n      ${offenders.slice(0, 20).join('\n      ')}`);
+});
+
+test('a run of 通鑑\'s own words long enough to be a quotation carries the mark, bracketed or not', t => {
+  // The sibling check above is bounded by the book's own brackets, and the bound is not a detail: a
+  // 「」-less quotation is invisible to it, and where the run is Simplified or happens to be identical in
+  // both scripts it is invisible to `test/lexicon.test.js`'s script check too. So this check reads the
+  // page's prose for verbatim corpus text wherever it stands, and asks whether the mark is on it.
+  //
+  // The predicate is a length floor and not a switch, and the floor's measurement is in the file header.
+  // In one line: names, offices, places and the terms the chapters teach are 4 Han characters or fewer
+  // (measured: the longest is 才德兼亡 at 4), every run at 6 or more is a clause of the received text, and
+  // 5 is the band between them, named there rather than hidden.
+  const pages = chapterPages();
+  assert.ok(pages.length > 0, 'no chapter page was found, so nothing was checked — the page list must not go quietly empty');
+
+  const offenders = [];
+  let read = 0;
+  let markedRuns = 0;
+  let bracketedRuns = 0;
+  let shortBareRuns = 0;
+
+  for (const file of pages) {
+    const rel = path.relative(root, file);
+    const original = fs.readFileSync(file, 'utf8');
+    const html = proseOf(original);
+    const depthAt = markerDepth(html);
+    const { text, raw } = flattenProse(html);
+    const brackets = [...text.matchAll(/「[^「」]*」/g)].map(m => [m.index, m.index + m[0].length]);
+
+    // Every maximal corpus run in this page's prose, found by extending each position as far as the
+    // corpus allows and then dropping a run that another run contains. The sort is by start, longest
+    // first, so the sweep below keeps the outermost run at each place.
+    const intervals = [];
+    for (let i = 0; i < text.length; i++) {
+      const len = longestQuotation(text, i);
+      if (len >= 2) intervals.push([i, i + len]);
+    }
+    intervals.sort((a, b) => a[0] - b[0] || b[1] - a[1]);
+    let reach = -1;
+    for (const [a, b] of intervals) {
+      if (b <= reach) continue;
+      reach = b;
+      const run = text.slice(a, b);
+      const han = [...run].filter(ch => HAN.test(ch)).length;
+      if (han < 2) continue;
+      read++;
+      // Every Han character of the run, not just its first: a run can begin inside the mark and leave it.
+      let marked = false;
+      for (let k = a; k < b; k++) if (HAN.test(text[k]) && depthAt(raw[k]) > 0) marked = true;
+      if (marked) { markedRuns++; continue; }
+      if (brackets.some(([x, y]) => a >= x && b <= y)) { bracketedRuns++; continue; }
+      if (han < BARE_FLOOR) { shortBareRuns++; continue; }
+      const line = original.slice(0, raw[a]).split('\n').length;
+      offenders.push(`${rel}:${line}: 「${run}」 is 通鑑's own text, verbatim in tongjian/corpus.js, and is printed bare — no `
+        + `「」 and no lang="zh-Hant" — so a reader reads it as the book's own sentence`);
+    }
+  }
+
+  t.diagnostic(`bare runs: ${pages.length} chapter page(s), ${read} maximal 通鑑 run(s) read in the prose — `
+    + `${markedRuns} marked, ${bracketedRuns} inside 「」 and unmarked (check 1's population), ${shortBareRuns} bare and under `
+    + `${BARE_FLOOR} Han characters (the floor's population); ${offenders.length} bare and at or above it`);
+  assert.ok(read > 0, 'no run of 通鑑\'s own words was found in any page\'s prose, so this run compared nothing');
+  assert.ok(markedRuns > 0, 'no marked run was found, so the scan is not reading the pages it claims to');
+  assert.equal(offenders.length, 0,
+    `${offenders.length} run(s) of 通鑑's own words are printed in the book's prose with neither the 「」 that would mark them as `
+    + `a citation nor the lang="zh-Hant" that says whose they are. Either bracket and mark the run in the Traditional script, `
+    + `exactly as tongjian/corpus.js prints it, or say it in the book's own words. See docs/design/tongjian.md, "Which words `
+    + `are the book's".\n      ${offenders.slice(0, 20).join('\n      ')}`);
 });
 
 test('a figure declares which of its fields are 通鑑\'s words, and the declaration is exact both ways', t => {

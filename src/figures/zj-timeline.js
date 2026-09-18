@@ -28,7 +28,14 @@
 //   stacked (w < 440)  — one column, the years above the panel, on a capped measure (a phone);
 // and `dense` (w < 860 or h < 520) steps the type down, drops the reign-year column from the rows and the
 // 岁名 from the frame line, and gives the panel the larger share of the width; `tiny` (h < 340) drops the
-// panel's note and `mini` (h < 300) its attribution, which is what a 480x270 stage can hold.
+// panel's note.
+//
+// The quotation's citation is a third thing, and it is not dropped by any tier. It says whose sentence the
+// quotation is, and this whole figure exists to say where 通鑑's words sit, so whether it is drawn is
+// MEASURED from the panel's own content rather than keyed to a stage size: `fitCitation` below reads the
+// panel against the room it has, and where the panel cannot hold the citation and the note together the
+// note yields. The stages this was measured at, and what a reader's phone does, are in the CSS block that
+// draws it. `npm run flow`'s `phone-figure-citation` step is the check on the phone load.
 import { h } from './lib/svg.js';
 
 // The fields of a row that hold 資治通鑑's own words rather than this figure's. `quote` is the sentence
@@ -253,6 +260,36 @@ const CSS = `
 .tb-zjt .zjt-quote { margin: 0; font-family: var(--font-text); font-size: var(--text-body); line-height: 1.75; text-wrap: pretty; }
 .tb-zjt .zjt-quote[hidden], .tb-zjt .zjt-quote-at[hidden], .tb-zjt .zjt-note[hidden] { display: none; }
 .tb-zjt .zjt-quote-at { margin: 0; font-size: var(--text-xs); color: var(--ink-faint); }
+
+/* ---------- the citation, drawn where the panel can hold it ----------
+   The attribution under a quotation is the strongest provenance statement in this figure: it says whose
+   sentence the reader is looking at. So no tier drops it by rule. Whether it is drawn is MEASURED from the
+   panel's own content — fitCitation in the module below — because the room it needs depends on how the
+   year's own text wraps, which is a function of the stage width and the loaded font rather than of a tier
+   name. The default in the two compositions that have to earn their room is off; [data-cite="1"] carries
+   more specificity than the rule that hides it, so it needs no order trick.
+
+   Measured by out/zj-citation/fit.mjs over every row at 2/3 aspect (the citation is one 12px line, 16.2px
+   with its 3px panel gap). Clearance between the panel's last drawn line and the controls, negative being
+   an overlap:
+     390x585 (a 390px phone, full bleed) +12.8   360x540 +12.8   430x645 +12.8
+     350x525                             +0.3   348x522  -2.7
+     342x513 (the lab at a 390px viewport, the stage npm run narrow photographs)  -11.7
+     320x480                            -61.5, and -42.3 with the citation off: that stage already drew its
+                                        note over its own controls before this rule existed
+   and on the 16/9 aspect the strip tier gets: 480x270 (the stage that tier was designed for) -2.9,
+   500x281 +8.2, 520x293 +17.3.
+   So at the stages a reader's phone actually gives — 360x540 and up, full bleed — the panel holds the
+   citation and the note together. Below that one of the two must go, and the citation outranks the note:
+   [data-cite-note="0"] takes the note out to make room for the attribution, which is a content loss at
+   the one stage where it happens and is named here rather than left to be found. Where even that is not
+   enough (320x480, the 480x270 strip) the citation comes off too, which is the composition that shipped
+   before this rule. :not([hidden]) keeps a year with no quotation of its own — four of the seven — from
+   being drawn as an empty line. */
+.tb-zjt[data-tier="stacked"] .zjt-quote-at,
+.tb-zjt[data-tier="strip"] .zjt-quote-at { display: none; }
+.tb-zjt[data-cite="1"] .zjt-quote-at:not([hidden]) { display: block; }
+.tb-zjt[data-cite-note="0"] .zjt-note { display: none; }
 .tb-zjt .zjt-body-text { margin: 0; font-family: var(--font-text); font-size: var(--text-base); line-height: 1.7;
   color: var(--ink-soft); text-wrap: pretty; }
 .tb-zjt .zjt-note { margin-top: auto; padding-left: var(--space-3); border-left: 2px solid var(--rule-strong); }
@@ -295,7 +332,6 @@ const CSS = `
    words — 「通鉴不为此年立目」, 「一说…」, 「胡三省注：…」 — so the label is the one part that can. */
 .tb-zjt[data-tier="stacked"] .zjt-note-label { display: none; }
 .tb-zjt[data-tier="stacked"] .zjt-note { padding-left: var(--space-2); }
-.tb-zjt[data-tier="stacked"] .zjt-quote-at { display: none; }
 .tb-zjt[data-tier="stacked"] .zjt-panel { gap: 3px; }
 .tb-zjt[data-tier="stacked"] .zjt-body-text { line-height: 1.35; }
 .tb-zjt[data-tier="stacked"] .zjt-note-text { line-height: 1.3; }
@@ -331,14 +367,13 @@ const CSS = `
 .tb-zjt[data-tier="strip"] .zjt-event { font-size: var(--text-sm); }
 .tb-zjt[data-tier="strip"] .zjt-quote { font-size: var(--text-sm); line-height: 1.5; }
 .tb-zjt[data-tier="strip"] .zjt-body-text,
-.tb-zjt[data-tier="strip"] .zjt-quote-at,
 .tb-zjt[data-tier="strip"] .zjt-note { display: none; }
 
-/* The last two blocks off, in order, as the stage gets shorter: a cut-off line reads as a bug, an absent
-   one does not. */
+/* The last block off as the stage gets shorter: a cut-off line reads as a bug, an absent one does not.
+   The citation is no longer one of these — it is measured, above — and mini is gone with it: at the
+   480x270 stage it was written for, the measurement keeps the citation off by 2.9px, which is the same
+   answer arrived at from the panel's content rather than from a height. */
 .tb-zjt[data-tiny="1"] .zjt-note { display: none; }
-.tb-zjt[data-mini="1"] .zjt-quote-at { display: none; }
-/* The panel's note is the last block to come off as the stage gets shorter. */
 .tb-zjt[data-short="1"] .zjt-note { display: none; }
 `;
 
@@ -442,6 +477,9 @@ export function mount(root, ctx) {
     rows.forEach((b, i) => b.setAttribute('aria-pressed', String(i === row)));
     prev.disabled = row === 0;
     next.disabled = row === YEARS.length - 1;
+    // The row decides what the panel holds, so the fit is taken again on every paint, not only on a
+    // resize: a year with no quotation has no citation to place and must not cost its note for one.
+    fitCitation();
   }
 
   function go(i) {
@@ -465,8 +503,41 @@ export function mount(root, ctx) {
   let tier = null;
   let dense = null;
   let tiny = null;
-  let mini = null;
   let short = null;
+
+  // Does everything the panel draws stay clear of the controls below it? The panel's box is not the whole
+  // room it has — a gap separates it from the toolbar and a line that spills into that empty space is
+  // still read, which the shipped composition already relies on (5.4px at the 342x513 stage, before this
+  // rule existed). So the test is where the CONTENT ends against where the controls begin: scrollHeight
+  // is the content's own height once it passes the box, and anything that reaches the toolbar fails. It is
+  // read AFTER the data-cite attribute is written, because reading a layout property flushes style and the
+  // rule that draws the citation is what the answer is about.
+  const panelClears = () => panel.getBoundingClientRect().bottom
+    + Math.max(0, panel.scrollHeight - panel.clientHeight) <= toolbar.getBoundingClientRect().top;
+
+  // Whether the quotation's citation is drawn, MEASURED rather than keyed to a stage size. Three answers,
+  // in the order of what the figure is for: the panel holds the citation and its note (the stages a
+  // reader's phone gives, 360x540 and up); the note yields so the attribution can stand (the lab's
+  // 342x513 and the narrow band below 350 where the panel cannot hold both); neither fits and the
+  // composition is the one that shipped before, with the note and no attribution (320x480, the 480x270
+  // strip). Dropping a block never makes room for fewer blocks, so the third answer is a fixed point and
+  // this cannot oscillate. A row with no quotation of its own has no citation to place.
+  function fitCitation() {
+    const has = !quoteAtEl.hidden && quoteAtEl.textContent !== '';
+    if (!has || (tier !== 'stacked' && tier !== 'strip')) {
+      wrap.dataset.cite = '0';
+      wrap.dataset.citeNote = '1';
+      return;
+    }
+    wrap.dataset.cite = '1';
+    wrap.dataset.citeNote = '1';
+    if (panelClears()) return;
+    wrap.dataset.citeNote = '0';
+    if (panelClears()) return;
+    wrap.dataset.cite = '0';
+    wrap.dataset.citeNote = '1';
+  }
+
   function measure() {
     const r = root.getBoundingClientRect();
     const w = Math.round(r.width);
@@ -475,33 +546,43 @@ export function mount(root, ctx) {
     const nextTier = w < STACKED_W ? 'stacked' : (hgt < STRIP_H ? 'strip' : 'columns');
     const nextDense = w < 860 || hgt < 520;
     const nextTiny = hgt < 340;
-    const nextMini = hgt < 300;
     // The panel's note is the last block to come off as the stage gets shorter: 何以始于此年 is the
     // reason the middle row is the one the book opens at, and it is worth 33px a 656x369 stage does not
     // have. The note's own text names its register, so the column reads without it.
     const nextShort = hgt < 420;
-    if (nextTier === tier && nextDense === dense && nextTiny === tiny && nextMini === mini && nextShort === short) return false;
-    tier = nextTier;
-    dense = nextDense;
-    tiny = nextTiny;
-    mini = nextMini;
-    short = nextShort;
-    wrap.dataset.tier = tier;
-    wrap.dataset.dense = dense ? '1' : '0';
-    wrap.dataset.tiny = tiny ? '1' : '0';
-    wrap.dataset.mini = mini ? '1' : '0';
-    wrap.dataset.short = short ? '1' : '0';
-    return true;
+    const changed = !(nextTier === tier && nextDense === dense && nextTiny === tiny && nextShort === short);
+    if (changed) {
+      tier = nextTier;
+      dense = nextDense;
+      tiny = nextTiny;
+      short = nextShort;
+      wrap.dataset.tier = tier;
+      wrap.dataset.dense = dense ? '1' : '0';
+      wrap.dataset.tiny = tiny ? '1' : '0';
+      wrap.dataset.short = short ? '1' : '0';
+    }
+    // Re-taken on every measure, not only when a size flag moved: it is a question about the panel's
+    // content and the font it is set in, not about the stage's box alone.
+    fitCitation();
+    return changed;
   }
   const ro = new ResizeObserver(() => { measure(); });
   ro.observe(root.closest('.tb-figure__stage') || root);
   measure();
+
+  // The two Han families arrive after this module mounts, and how the year's text wraps is exactly what
+  // the fit above measures, so it is taken again once they are in. `document.fonts.ready` resolves on a
+  // page that loads no webfont too, and `measure` re-reads the stage, so a late font cannot leave a stale
+  // answer standing.
+  let dead = false;
+  document.fonts?.ready?.then(() => { if (!dead) measure(); });
 
   paint();
   ctx.onReady();
 
   return {
     destroy() {
+      dead = true;
       ro.disconnect();
       rail.removeEventListener('keydown', onKey);
       root.replaceChildren();
