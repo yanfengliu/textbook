@@ -223,7 +223,7 @@ The owner, after the two-script rule had been in the book for a day: *"Just make
 
 Three things were added, and each answers a different half of the question.
 
-**The mark is the quotation setting §"The type system" already specified.** That table has carried a row for 原文 quoted inside prose since the prototype — "same face, 0.95 em, `--ink-soft` — a quotation inside an argument should read as a quotation" — and the token `--zj-quoted-size` was declared for it and used by nothing. `zj.css` now implements it: `[lang="zh-Hant"]` inside the book's prose is set a step down and a step softer, except in the two containers that are already the quiet voice, where it inverts and steps *up* — see *The mark's reach, and the three places it inverts* below. **It is a step DOWN, and that is the point.** The 原文 stays at full ink and the full body size, because it is the primary object; a quotation of it inside the book's own argument is evidence being cited, and the contrast between the two settings is what a reader sees.
+**The mark is the quotation setting §"The type system" already specified.** That table has carried a row for 原文 quoted inside prose since the prototype — "same face, 0.95 em, `--ink-soft` — a quotation inside an argument should read as a quotation" — and the token `--zj-quoted-size` was declared for it and used by nothing. `zj.css` now implements it: `[lang="zh-Hant"]` inside the book's prose is set a step down and a step softer, except in the two containers that are already the quiet voice, where it inverts and steps *up* — see *The mark's reach, and where it inverts* below. **It is a step DOWN, and that is the point.** The 原文 stays at full ink and the full body size, because it is the primary object; a quotation of it inside the book's own argument is evidence being cited, and the contrast between the two settings is what a reader sees.
 
 What is deliberately not added: **an underline**, because a solid hairline under a word already means "a 詞 you can open" (`tb-term`), and one mark with two meanings is one meaning lost; **a paper tint**, because nothing on this page is drawn on a fill but the lexicon card; and **a colour**, because the four hues here are the houses and the gold is a year. What carries the meaning is style, not paint.
 
@@ -233,7 +233,7 @@ What is deliberately not added: **an underline**, because a solid hairline under
 
 **One place on a page where a quotation is not a citation, and it is exempt.** An `<aside data-note="textual">` discusses the text itself — a witness reads otherwise, the 底本 lacks these two characters, an editor supplied them from another edition — so a 「…」 run inside one may be a reading the received text does not carry. Chapter 2's 異文 note is exactly that case: it says 「不可」 is absent from the 底本, and the corpus prints it because the edition this book follows prints it. **Marking it as 通鑑's own words would contradict the note standing beside it**, which is the defect shape this section exists to remove, so those notes are outside the gate's requirement and their marked runs are held by `test/lexicon.test.js` instead — the weaker of the two checks, said here rather than left to be found. The first draft of the fix did mark it, and a review caught it; the note is the reason the exemption exists rather than a tidy-up of one page.
 
-### The mark's reach, and the three places it inverts
+### The mark's reach, and where it inverts
 
 The mark landed, and an independent typographic review measured the rendered page. Five things were wrong, and four of them were one shape: the rule was written about the containers its author had in mind rather than about the run.
 
@@ -250,6 +250,7 @@ The mark landed, and an independent typographic review measured the rendered pag
 **A prose quotation now carries a citation rubric.** The mark says whose words a run is; it does not say why the book quotes rather than reads it, which is the question the owner was asking when they wanted to know why 「魏、韓、趙共廢晉靖公為家人而分其地。」 stood in 背景 rather than in the 原文. The card already hangs a 卷次 on each of its 通鑑用例 as a rubric and each figure hangs `quoteAt` on its quotation; prose quotations had no such mark. `.zj .tb-text .zj-at` is that device — Hei, `--zj-rubric-size`, `--ink-faint`, tracked, `nowrap` — and chapter 2's 背景 uses it once, on the year that entry is filed under: 《通鉴》要到 **周安王二十六年**（前376）才记下「…」.
 
 **Still open, measured and not fixed in this round.** The contents page loads no `zj.css` at all, so the key's own page never shows the mark it explains: its three chapter-dek quotations are 16 px in the same `--ink-soft` as the Simplified words beside them — 100 % of the size and an ink step of 1.00:1. The device for it is the same inversion the 註 takes, in the contents page's own `<style>` block, and it belongs to the round that owns that page.
+
 ### Where a quotation comes from another work
 
 《史記》《戰國策》、胡三省注 and 韋昭注 are quoted in this book, and 通鑑's own words must not be confused with theirs — 豫讓's 拔劍三躍 is 史記's scene, not 通鑑's, and a reader who takes it for 通鑑 has been misled by the page rather than by the sources.
