@@ -666,6 +666,6 @@ test('Chapter checks: where the correct option is shown does not give it away, a
   if (placements.length !== total) problems.push(`${placements.length} check(s) were shown of the ${total} on disk`);
   if (!(answered.right > 0 && answered.wrong > 0)) problems.push(`the clicks carried ${answered.right} right and ${answered.wrong} wrong answers; they must carry both for this to have tested either`);
   for (const m of moved) problems.push(`the order depends on where the page is served, not on the page: ${m}`);
-  if (JSON.stringify(onFirst) === JSON.stringify(onSecond)) problems.push(`one eight-option check with the id "q1" shows the same order, ${JSON.stringify(onFirst)}, on biology/ch01-what-is-life and on biology/ch02-chemistry-of-life: the order is keyed by the id without its page, so every chapter's q1 shares one order`);
+  if (JSON.stringify(onFirst) === JSON.stringify(onSecond)) problems.push(`one eight-option check with the id "q1" shows the same order, ${JSON.stringify(onFirst)}, on biology/ch01-what-is-life and on biology/ch02-chemistry-of-life. The order must depend on the page as well as the id, or every chapter's q1 shares one; src/components/check.js seeds it with pageOf() and the id.`);
   assert.deepEqual(problems, [], `where a chapter check shows its correct option gives it away, or the order is not the page's own:\n  ${problems.join('\n  ')}`);
 });
