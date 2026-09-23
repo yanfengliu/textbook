@@ -56,7 +56,7 @@ Grouped by the file the gate lives in, because that is how they are looked up. S
 - [every figure's own controls do what the figure reports](#drive-every-figures-own-controls-do-what-the-figure-reports-toolsdrivejs) — the base claim.
 - [the helix pick step was green without ever picking anything](#drive-the-helix-pick-step-was-green-without-ever-picking-anything-toolsdrivejs) · [a figure cannot shadow the four names the frame owns](#drive-a-figure-cannot-shadow-the-four-names-the-frame-owns-toolsdrivejs) · [a figure the frame holds no handle for, or whose handle has no `describe()`](#drive-a-figure-the-frame-holds-no-handle-for-or-whose-handle-has-no-describe-toolsdrivejs) — **three forms of a step that asserted nothing**: an assertion satisfied by `undefined`, a figure silently overwriting the frame's own field, and a missing handle read as "nothing shadowed".
 - [a press the figure threw away, because finishing a glide had removed the node it landed on](#drive-a-press-the-figure-threw-away-because-finishing-a-glide-had-removed-the-node-it-landed-on-toolsdrivejs-scale-recipe-srcfiguresscalejs) — `scale drag-the-lens-left` was handed on as flaky and was red 17 runs of 20; the defect was in `src/figures/scale.js`.
-- [atp3d's ladder is drawn the chapter's way up, its verdict names what is phosphorylated, and up moves the marker up](#drive-atp3ds-ladder-is-drawn-the-chapters-way-up-its-verdict-names-what-is-phosphorylated-and-up-moves-the-marker-up-toolsdrivejs-atp3d-recipe) — three steps that read the ladder's drawn text rather than describe(), which reports ids and is the same whichever way up the rail is drawn or the controls run. Four arms, all red.
+- [atp3d's ladder is drawn the chapter's way up, its verdict names what is phosphorylated, and up moves the marker up](#drive-atp3ds-ladder-is-drawn-the-chapters-way-up-its-verdict-names-what-is-phosphorylated-and-up-moves-the-marker-up-toolsdrivejs-atp3d-recipe) — four steps that read the ladder's drawn text rather than describe(), which reports ids and is the same whichever way up the rail is drawn or the controls run. Seven arms, all red, and the chapter-table parse proved on two mutations.
 
 **`tools/check-content.js`** — the authored chapter.
 
@@ -113,39 +113,74 @@ Grouped by the file the gate lives in, because that is how they are looked up. S
 
 ## drive: atp3d's ladder is drawn the chapter's way up, its verdict names what is phosphorylated, and up moves the marker up (`tools/drive.js`, `atp3d` recipe)
 
-Taken in the worktree `textbook-atp-ladder` (branch `atp-ladder`) on `c8c9f27`, with `tools/drive.js` as the next commit has it (sha256 `f0bf4b7b134abddb8d6e889407d503ff13ca5ce184649d53b4979263c47b0e65`: the same steps, with the verdict checked class-first). Every arm edits `src/figures/atp3d.js` by exact text replacement, each needle found exactly once, and puts it back byte for byte: sha256 `b2c097fcbc55847e9c636c562a92743ad731aca1dd59e45fa1843e3c2985e93e` (the CRLF working copy) before and after all four arms.
+Taken in the worktree `textbook-atp-ladder` (branch `atp-ladder`) on `c5777c1`: `tools/drive.js` blob `75797555`, `src/figures/atp3d.js` blob `5fc20847`. Every arm edits `src/figures/atp3d.js` by exact text replacement, each needle found exactly once, runs `DRIVE_KINDS=atp3d npm run drive`, and puts the file back byte for byte. The working copy's sha256 was `0165fc2a01b54f1d2c29fa4d616c5433d2abd40e81523da6ba6f4131ba16e2ba` (CRLF) before and after all seven arms. An earlier round of four arms ran on `c8c9f27`, with this recipe before the independent review. The seven below replace it.
 
-- **Why it was needed.** Figure 5.3's ladder can be wrong in three ways while every describe() assertion in the recipe holds, because describe() reports the donor and target as ids and says nothing about where they are drawn. The rail itself was drawn upside down until 2026-09-17, and was turned over with no gate to hold it. On 2026-09-23 a brief said it still was, and it took a probe of the drawn SVG to show it was not. The Donor and Target ranges counted rungs from the top, so ArrowUp, and a button a screen reader announced as "Donor, step up", moved the marker one rung **down** the rail. And the verdict read "Phosphoenolpyruvate can phosphorylate ATP", putting the phosphate onto the compound the transfer makes, where §5.3 says a compound above ATP can "hand a phosphate to ADP and so make ATP". The last two were on the live site from `5e9c981`.
-- **Claim**, from the three steps' own comments. `the-ladder-works-out-the-transfer-itself`: End on the Donor range reaches phosphoenolpyruvate and Home reaches glucose 6-phosphate. In both states no text on the rail matches `phosphorylate (ATP|phosphoenolpyruvate|1,3-bisphosphoglycerate|<word> [N-]phosphate)`. The verdicts read "can phosphorylate ADP and make ATP: −31.4 kJ/mol" and "cannot phosphorylate ADP to make ATP: +16.7 kJ/mol". `the-rail-runs-the-way-up-the-chapter-prints-it`: the eight rung figures fall from the most negative at the top. Every row of §5.3's table, parsed out of the chapter's own HTML, is drawn at its number and below the row before it. `up-on-the-controls-is-up-on-the-rail`: ArrowUp on each range at 1000x640, and the button named "Donor, one rung up" or "Target, one rung up" at 390x844, move that marker to the rung drawn directly above it. The down key and the down button bring it back, and the buttons show ↑ and ↓.
-- **Bound.** The light theme. Two verdict states, one "can" and one "cannot", because both come from one template. Donor and Target start at heights 3 and 1, so both have a rung either side. The steps read the ladder pane's DOM text, so a rung drawn in the right place with invisible type passes, and the screenshots are the check for that. The pattern was checked against all 56 ordered pairs outside the gate (below).
-- **Arm A: the controls count from the top again** (`heightOf` and `atHeight` made the identity, as the ranges were until 2026-09-23):
+- **Why it was needed.** Figure 5.3's ladder can be wrong in several ways while every describe() assertion holds, because describe() reports the donor and target as ids and says nothing about what is drawn.
+  - The rail was drawn upside down until 2026-09-17, and was turned over with no gate to hold it. On 2026-09-23 a brief said it still was, and it took a probe of the drawn SVG to show it was not.
+  - The Donor and Target ranges counted rungs from the top. So ArrowUp, and a button a screen reader announced as "Donor, step up", moved the marker one rung **down** the rail.
+  - The verdict read "Phosphoenolpyruvate can phosphorylate ATP", putting the phosphate onto the compound the transfer makes. §5.3 says a compound above ATP can "hand a phosphate to ADP and so make ATP".
+  - The rail was headed "RELEASED ON HYDROLYSIS" over a column of negative numbers, and the table beside it said "It releases −61.9 kJ/mol". §5.3's column is headed "ΔG°′ of hydrolysis (kJ/mol)".
+  - A verdict that wrapped to three lines lost its end without a word: "…which is" with "uphill." gone, at a 272 px stage.
+  - Everything in this list except the upside-down rail was on the live site from `5e9c981`.
+- **Claim**, from the four steps' own comments.
+  - `the-ladder-works-out-the-transfer-itself`: the rail is headed "ΔG°′ of hydrolysis, kJ/mol". The table beside it names "Its ΔG°′ of hydrolysis" twice and says "releases" nowhere. Home on the Donor range reaches glucose 6-phosphate, and End then reaches phosphoenolpyruvate. In each of three states, no text on the rail matches `phosphorylate (ATP|phosphoenolpyruvate|1,3-bisphosphoglycerate|<word> [N-]phosphate)`, and the verdict reads, case and all:
+    - "Glucose 6-phosphate cannot phosphorylate ADP to make ATP under standard conditions: +16.7 kJ/mol, uphill."
+    - "Phosphoenolpyruvate can phosphorylate ADP and make ATP: −31.4 kJ/mol."
+    - "Phosphoenolpyruvate can phosphorylate glucose and make glucose 6-phosphate: −48.1 kJ/mol."
+  - `the-rail-runs-the-way-up-the-chapter-prints-it`: the eight rung figures fall from the most negative at the top. Every row of §5.3's table, parsed out of the chapter's own HTML, is drawn at its number and below the row before it.
+  - `up-on-the-controls-is-up-on-the-rail`: ArrowUp on each range at 1000x640, and the button named "Donor, one rung up" or "Target, one rung up" at 390x844, move that marker to the rung drawn directly above it. The down key and button bring it back. The buttons show ↑ and ↓. After every press, the word "donor" sits on the rung printed with the donor's own `rungKj`.
+  - `the-verdict-is-drawn-whole-however-long`: at 390x844, fructose 6-phosphate to 1,3-bisphosphoglycerate, the longest verdict there is, is drawn whole under the rail, and on at least three lines. If a later layout fits it on two, the step fails rather than pass without testing anything.
+- **Bound.**
+  - The light theme.
+  - Three verdict states at 1000x640 and one at 390 px.
+  - The class pattern was run over all 56 ordered pairs outside the gate (below).
+  - The steps read the ladder pane's DOM text, so a rung drawn in the right place with invisible type passes, and the screenshots are the check for that.
+  - The lab's stage is 48 px narrower than the chapter page's below 800 px, where a wide figure is `100vw`. What the chapter page does at 320–390 px was measured once outside the gate (below).
+- **Arm A: the ranges count from the top again** (`heightOf` and `atHeight` made the identity):
   ```text
-  FAIL atp3d the-ladder-works-out-the-transfer-itself: End on the Donor slider should reach the top rung, phosphoenolpyruvate; it reached g6p
+  FAIL atp3d the-ladder-works-out-the-transfer-itself: Home on the Donor slider should reach the bottom rung, glucose 6-phosphate; it reached pep
   FAIL atp3d up-on-the-controls-is-up-on-the-rail: ArrowUp on the Donor slider should move the donor one rung UP the rail as drawn, from rung 4 to rung 3 counting from the top; it went to rung 5
+  FAIL atp3d the-verdict-is-drawn-whole-however-long: heights 1 and 6 should put the donor on fructose 6-phosphate and the target on 1,3-bisphosphoglycerate; they put them on bpg and f6p
   ```
-- **Arm B: the two step buttons swap glyphs and names but keep their directions**, so the button that says up steps down:
+- **Arm B: the two step buttons swap glyphs and names but keep their directions**, so the button that says up steps down. Only the 390 px half sees it, because the keyboard never touches the buttons:
   ```text
   FAIL atp3d up-on-the-controls-is-up-on-the-rail: the button "Donor, one rung up" should move the donor one rung up the rail as drawn, from rung 5 to rung 4 counting from the top; it went to rung 6
   ```
-  Only the 390 px half of the step sees this. The keyboard never touches the buttons.
-- **Arm C: the rail upside down** (`TOP_KJ` and `BOTTOM_KJ` swapped, the rail as it was drawn until 2026-09-17):
+- **Arm C: the rail upside down** (`TOP_KJ` and `BOTTOM_KJ` swapped):
   ```text
   FAIL atp3d the-rail-runs-the-way-up-the-chapter-prints-it: from the top of the rail down, the rung figures read -13.8, -15.9, -20.9, -30.5, -43, -43.1, -49.4, -61.9; §5.3's table runs from the most negative at the top
   FAIL atp3d up-on-the-controls-is-up-on-the-rail: ArrowUp on the Donor slider should move the donor one rung UP the rail as drawn, from rung 4 to rung 3 counting from the top; it went to rung 5
   ```
-  `the-ladder-works-out-the-transfer-itself` stays green under this arm, and is right to: it reads which compound End reaches, not where that compound is drawn.
-- **Arm D: the old verdict template** (`can phosphorylate ${target.name}`):
+- **Arm D: the old verdict template** (`can phosphorylate ${target.name}`). The second failure is the shorter sentence wrapping to two lines, so the whole-verdict step reads a different sentence:
   ```text
-  FAIL atp3d the-ladder-works-out-the-transfer-itself: the rail says "phosphorylate ATP": a rung is what a transfer makes, not what it phosphorylates; the rail's text ends "-phosphate -15.9 Fructose 6-phosphate -13.8 Glucose 6-phosphate Phosphoenolpyruvate can phosphorylate ATP: −31.4 kJ/mol."
+  FAIL atp3d the-ladder-works-out-the-transfer-itself: the rail says "phosphorylate ATP": a rung is what a transfer makes, not what it phosphorylates; the rail's text ends "Fructose 6-phosphate -13.8 Glucose 6-phosphate donor Glucose 6-phosphate cannot phosphorylate ATP: +16.7 kJ/mol, uphill."
+  FAIL atp3d the-verdict-is-drawn-whole-however-long: under the rail at 390 px the verdict should read "Fructose 6-phosphate cannot phosphorylate 3-phosphoglycerate to make 1,3-bisphosphoglycerate under standard conditions: +33.5 kJ/mol, uphill."; the lines there read ["Fructose 6-phosphate cannot phosphorylate","1,3-bisphosphoglycerate: +33.5 kJ/mol, uphill.", …]
   ```
-- **The pattern over every pair.** A one-off script lifted `LADDER`, `inSentence` and `transferWords` out of `atp3d.js` and the pattern out of `drive.js` as text. It built all 56 ordered pairs' verdicts both ways: 56 of 56 old verdicts matched and 0 of 56 new ones did. The longest verdict is 124 characters.
-- **Green:** `drive: 10 steps over 1 figures passed`, and the same 10 again after the reorder.
+- **Arm E: the verdict cut at two lines again**, as `lay()` and `verdictLines` did until 2026-09-23:
+  ```text
+  FAIL atp3d the-verdict-is-drawn-whole-however-long: under the rail at 390 px the verdict should read "Fructose 6-phosphate cannot phosphorylate 3-phosphoglycerate to make 1,3-bisphosphoglycerate under standard conditions: +33.5 kJ/mol, uphill."; the lines there read ["Fructose 6-phosphate cannot phosphorylate 3-phosphoglycerate to","make 1,3-bisphosphoglycerate under standard conditions: +33.5","The transfer runs t…]
+  ```
+- **Arm F: the old heading, "RELEASED ON HYDROLYSIS, kJ/mol":**
+  ```text
+  FAIL atp3d the-ladder-works-out-the-transfer-itself: the rail should be headed "ΔG°′ of hydrolysis, kJ/mol", as §5.3's table heads its column; its first line reads "RELEASED ON HYDROLYSIS, kJ/mol"
+  ```
+- **Arm G: the old rows, "It releases":**
+  ```text
+  FAIL atp3d the-ladder-works-out-the-transfer-itself: the table beside the rail should name the quantity, "Its ΔG°′ of hydrolysis", once for the donor and once for the target; it reads ["THE LADDER","Donor","PEP","It releases","-61.9 kJ/mol","Target","ATP","It releases", …]
+  ```
+- **The pattern over every pair.** A one-off script lifted `LADDER`, `inSentence` and `transferWords` out of `atp3d.js`, and the pattern out of `drive.js`, as text. It built all 56 ordered pairs' verdicts both ways: the pattern matched 56 of 56 old verdicts and 0 of 56 new ones. The longest verdict is 150 characters.
+- **The chapter parse.** The same kind of script ran `chapterLadder` on the chapter and on two in-memory mutations:
+  - The chapter as it is: five rows.
+  - A `<tr class="reserve">`: still five rows. The committed `<tr>` pattern read four and dropped creatine phosphate without a word.
+  - One row left unclosed: it throws "§5.3's table has 5 <tr> and 4 of them could be read as rows", where the old pattern read four in silence.
+- **Green:** `drive: 11 steps over 1 figures passed`, and 61 of 61 steps over the nine figures built on the bench, since the bench's slider changed.
 - **What it does not prove.**
   - The dark theme.
-  - Any verdict but the two it reads.
-  - The Row stepper. Its "step up" moves the highlight to the next row, which is down the ledger, and nothing here claims otherwise.
-  - The ladder at 320 px. There the top four rungs overprint in every state, measured before and after this change; that is a composition problem no step here reaches.
-  - Which face draws ↑ and ↓. Measured once outside the gate with the census's own call: Inter (web), from the page's `text=` subset, a file the page fetches only when the ladder opens at a phone's width.
+  - Verdicts other than the four it reads.
+  - The Row stepper. Its "step up" moves the highlight to the next row, which is down the ledger. Nothing here claims otherwise.
+  - The chapter page below 800 px. Measured once outside the gate, over nine pairs at 320, 360, 375 and 390 px, before and after this change: no text in the ladder pane overprints another, and the pane's size and the states that show the rule line are identical before and after. At 320 px that means the opening state only, because the rest never had room for it.
+  - The lab at 320 px, a 272 px stage no reader gets. There the top four rungs overprint in every state, before and after.
+  - Which face draws ↑, ↓ and ΔG°′. Measured once outside the gate with the census's own call: Inter (web). The arrows come from the page's `text=` subset, a file fetched only when the ladder opens at a phone's width.
 
 ## flow / mark-audit: every marked run on a second-book chapter page is visibly marked, on the rendered page (`tools/flow.js`, `mark-audit`)
 
