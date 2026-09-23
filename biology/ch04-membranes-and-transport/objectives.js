@@ -16,8 +16,8 @@
 //   `lipids-not-polymers`   — saturated against unsaturated tails, which is what sets fluidity (§4.2)
 //   `protein-levels`        — a transmembrane helix is a fold with its greasy side out (§4.2)
 //   `polar-bonds`           — what makes a molecule polar is what decides whether it crosses (§4.3)
-//   `water-solvent`         — the hydration shell an ion would have to abandon (§4.3), and what a
-//                             dissolved solute does to the water around it (§4.4)
+//   `water-solvent`         — the hydration shell an ion would have to abandon (§4.3), and what it is
+//                             for a solute to be dissolved at all, which is what osmosis counts (§4.4)
 //   `ion-formation`         — an ion has a charge, so it feels the voltage as well as the gradient (§4.3)
 //   `weak-bonds-matter`     — a carrier binds its cargo the way an enzyme binds a substrate, which is
 //                             why it has a finite number of sites and therefore saturates (§4.5)
@@ -62,7 +62,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'membrane-evidence',
-    statement: 'Say what the Gorter and Grendel monolayer measurement showed and what freeze-fracture added, and explain which model of the membrane each one ruled out.',
+    statement: 'Say what the Gorter and Grendel monolayer measurement showed and what freeze-fracture added, and explain which model of the membrane freeze-fracture ruled out.',
     prereqs: ['bilayer-properties', 'em-tradeoff'],
     teaches: { sections: ['bilayer'], figures: [] },
     level: 'explain',
@@ -108,7 +108,9 @@ export const OBJECTIVES = [
     id: 'membrane-asymmetry',
     statement: 'Explain why the two faces of a membrane differ and stay different, and say why the sugars of the glycocalyx can only be on the outside.',
     prereqs: ['membrane-fluidity', 'secretory-route'],
-    teaches: { sections: ['mosaic'], figures: ['fig-membrane'] },
+    // Figure 4.8 as well as 4.2: its Follow a patch control is where a reader watches a vesicle's lumen
+    // face become the cell's outer face, and `i-membrane-asymmetry-2` is set in it.
+    teaches: { sections: ['mosaic'], figures: ['fig-membrane', 'fig-bulk'] },
     level: 'explain',
   },
 
@@ -152,7 +154,7 @@ export const OBJECTIVES = [
   // ---- 4.4 Water follows the solute ----
   {
     id: 'osmosis-mechanism',
-    statement: 'Explain osmosis as the diffusion of water, and say why adding a solute lowers the tendency of water to leave.',
+    statement: 'Explain why water crosses a membrane into a solution when nothing attracts it, and say why adding a solute lowers the tendency of water to leave.',
     prereqs: ['passive-transport', 'water-solvent'],
     teaches: { sections: ['osmosis'], figures: ['fig-osmosis'] },
     level: 'explain',
@@ -181,7 +183,10 @@ export const OBJECTIVES = [
   {
     id: 'osmoregulation',
     statement: 'Explain the three ways of living with osmosis — a wall, continuous bailing, and holding the surrounding fluid isotonic — and say which organisms use which.',
-    prereqs: ['tonicity-animal', 'homeostasis'],
+    // One prerequisite per strategy that has an objective of its own: the wall is `tonicity-walled`,
+    // holding the fluid isotonic is `tonicity-animal` and `homeostasis`. Bailing has no objective; it is
+    // §4.4's margin note and Chapter 1's paramecia.
+    prereqs: ['tonicity-animal', 'tonicity-walled', 'homeostasis'],
     teaches: { sections: ['osmosis'], figures: ['fig-osmosis'] },
     level: 'explain',
   },
