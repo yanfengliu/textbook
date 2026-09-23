@@ -2754,21 +2754,22 @@ const RECIPES = {
       expect(d.transferPossible === true, `phosphoenolpyruvate should be able to phosphorylate ADP: ${JSON.stringify({ donor: d.donor, target: d.target, rung: d.rungKj })}`);
       // The verdict, as the rail prints it. §5.3: a compound above ATP can "hand a phosphate to ADP and
       // so make ATP". It printed "can phosphorylate ATP" until 2026-09-23: the phosphate put onto the
-      // thing it makes.
-      let said = (await ladderTexts(h)).map((t) => t.s).join(' ');
-      expect(/phosphoenolpyruvate can phosphorylate ADP and make ATP: −31\.4 kJ\/mol/i.test(said), `the verdict should say phosphoenolpyruvate phosphorylates ADP and makes ATP, −31.4 kJ/mol; the rail's text ends ${JSON.stringify(said.slice(-150))}`);
+      // thing it makes. The class first, then the sentence: no rung is ever the thing phosphorylated,
+      // because a rung is what a transfer MAKES. The pattern matches all eight names — ATP, the two long
+      // ones and the five that end "phosphate" — and none of the molecules that really take a phosphate.
+      const verdictSays = async (sentence, text) => {
+        const said = (await ladderTexts(h)).map((t) => t.s).join(' ');
+        const onto = /phosphorylate (?:ATP|phosphoenolpyruvate|1,3-bisphosphoglycerate|\S+ (?:\d-)?phosphate)\b/i.exec(said);
+        expect(!onto, `the rail says "${onto?.[0]}": a rung is what a transfer makes, not what it phosphorylates; the rail's text ends ${JSON.stringify(said.slice(-120))}`);
+        expect(sentence.test(said), `the verdict should say ${text}; the rail's text ends ${JSON.stringify(said.slice(-120))}`);
+      };
+      await verdictSays(/phosphoenolpyruvate can phosphorylate ADP and make ATP: −31\.4 kJ\/mol/i, 'that phosphoenolpyruvate can phosphorylate ADP and make ATP, −31.4 kJ/mol');
       await donor.press('Home');
       d = await until(h, (x) => x.donor === 'g6p', 5_000);
       expect(d.donor === 'g6p', `Home on the Donor slider should reach the bottom rung, glucose 6-phosphate; it reached ${d.donor}`);
       expect(d.transferPossible === false, `glucose 6-phosphate must not be able to phosphorylate ADP: ${JSON.stringify({ donor: d.donor, rung: d.rungKj })}`);
       expect(d.rungKj > -30.5, `it sits below ATP on the ladder, so it releases less: ${d.rungKj}`);
-      said = (await ladderTexts(h)).map((t) => t.s).join(' ');
-      expect(/glucose 6-phosphate cannot phosphorylate ADP to make ATP: \+16\.7 kJ\/mol/i.test(said), `the verdict should say glucose 6-phosphate cannot phosphorylate ADP to make ATP, +16.7 kJ/mol; the rail's text ends ${JSON.stringify(said.slice(-150))}`);
-      // The class and not the two sentences: no rung is ever the thing phosphorylated, because a rung is
-      // what the transfer MAKES. Every one of the eight names matches this — ATP, the two long ones, and
-      // the five that end "phosphate" — and none of the molecules that really take the phosphate does.
-      const onto = /phosphorylate (?:ATP|phosphoenolpyruvate|1,3-bisphosphoglycerate|\S+ (?:\d-)?phosphate)\b/i.exec(said);
-      expect(!onto, `the rail says "${onto?.[0]}": a rung is what a transfer makes, not what it phosphorylates`);
+      await verdictSays(/glucose 6-phosphate cannot phosphorylate ADP to make ATP: \+16\.7 kJ\/mol/i, 'that glucose 6-phosphate cannot phosphorylate ADP to make ATP, +16.7 kJ/mol');
     }],
     ['the-rail-runs-the-way-up-the-chapter-prints-it', async (h) => {
       // §5.3's table, top to bottom, is the rail top to bottom: every compound it lists is drawn at the
