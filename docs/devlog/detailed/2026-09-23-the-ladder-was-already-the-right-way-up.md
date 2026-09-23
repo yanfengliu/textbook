@@ -1,6 +1,6 @@
 # 2026-09-23 — the ladder was already the right way up
 
-Branch `atp-ladder` off `5e9c981`, commits `c8c9f27` … `c5777c1` and the docs after them. One figure, `src/figures/atp3d.js`'s ladder scene, and the bench's stepper. The brief named two defects and neither was there. The real ones were one step to the side of each, and the review of the first fix found more.
+Branch `atp-ladder` off `5e9c981`, commits `c8c9f27` … `790dbae` and the docs after them. One figure, `src/figures/atp3d.js`'s ladder scene, and the bench's stepper. The brief named two defects and neither was there. The real ones were one step to the side of each, and the review of the first fix found more.
 
 ## The rail was not upside down, and the brief that said so was stale
 
@@ -40,7 +40,7 @@ Branch `atp-ladder` off `5e9c981`, commits `c8c9f27` … `c5777c1` and the docs 
 - `the-ladder-works-out-the-transfer-itself` checks the heading, the rows and three verdicts. The class pattern matched 56 of 56 old verdicts and 0 of 56 new ones.
 - `up-on-the-controls-is-up-on-the-rail` presses ArrowUp and ArrowDown at 1000x640 and each step button at 390x844, and reads which rung the marker was drawn on.
 - `the-verdict-is-drawn-whole-however-long` holds the longest verdict at 390 px.
-- Seven arms turned these red.
+- Nine arms turned these red, on `790dbae`.
 
 **Notes:** ↑ and ↓ are drawn by Inter from the page's second, `text=`-subset stylesheet. That file is fetched only when the ladder opens at a phone's width. The bench observes its toolbar, so a reflow when it arrives is re-measured.
 
@@ -52,7 +52,7 @@ Branch `atp-ladder` off `5e9c981`, commits `c8c9f27` … `c5777c1` and the docs 
 
 **Result:** At 1100 px the donor and target words stood at x = 248.1 and 333.1 against the fallback face. They moved to 250.3 and 342.2 when the fonts arrived, and the pane's markup was then byte-identical to the control. At 390 px the words sit at the right edge and nothing moved. The bench already redraws every figure on `document.fonts.ready` (`handle()`), which is the re-lay-out `scale.js` does for itself. A redraw of the ladder measures again.
 
-**Reasoning:** No second handler was added, because it would do exactly what the bench does. A note at the measurement in `atp3d.js` now says where the redraw lives and what was measured, so the next reader does not raise the same alarm. What the bench's promise cannot cover is a font load that starts after it took the promise. No face the ladder pane uses is first requested by the pane: pressing "Ladder" on the untouched tree changed no face's status.
+**Reasoning:** No second handler was added, because it would do exactly what the bench does. A note at the measurement in `atp3d.js` now says where the redraw lives and what was measured, so the next reader does not raise the same alarm. What the bench's promise cannot cover is a font load that starts after it took the promise. Pressing "Ladder" on the untouched tree changed no face's status. On this branch it can bring in the page's `text=` subset of Inter, for the ΔG°′ and the arrows, but what the ladder measures is the Latin names, which the ledger and toolbar set first.
 
 ## What the review caught
 
@@ -66,7 +66,7 @@ The review ran instead as a fresh-context read-only subagent over `5e9c981..3292
 
 - **The verdict's "cannot" denied what cells do.** Once the acceptor was named, "ATP cannot phosphorylate creatine" was flatly false: that is how resting muscle recharges §5.3's reserve, and §5.2 says a ΔG°′ a little above zero runs when the concentrations allow. It now says "under standard conditions", and ends ", uphill." to stay short.
 - **A layout claim was false.** The comment said the 320 px pile-up was a reader's problem. The lab's stage is 48 px narrower than the chapter page's below 800 px, where a wide figure is `100vw`. Measured on the chapter page at 320, 360, 375 and 390 px, over nine pairs, before and after: no text overprints anywhere. The 272 px stage only the lab has is where four rungs overprint, before and after alike.
-- **A wider toolbar button.** That same measurement found ↑ and ↓ 2.5 px wider than + and −. On a 320 px phone this pushed the two steppers onto separate rows, and the ladder lost 34 px and its rule line. A figure-scoped padding put the buttons at 25.7 px against 25.8. After that, every pane size and every state that shows the rule matched the untouched tree.
+- **A wider toolbar button.** That same measurement found ↑ and ↓ 2.5 px wider than + and −. On a 320 px phone this pushed the two steppers onto separate rows, and the ladder lost 34 px and its rule line. A figure-scoped padding first put the buttons at 25.7 px against 25.8. The second round moved the fix into the bench (below).
 - **Wrong comments.** The rule line is not carried by the ledger at a phone's width, where the ledger is hidden. No verdict wraps to three lines at the narrowest wide stage. Both were stated in comments and are corrected.
 - **Gaps in the gate.** The verdict's no-cut fix had no gate: there is now a step for it. End was pressed with the donor already at the top: Home now comes first. The narrow loop lacked the end-of-rail guard, and a marker drawn one rung off its own compound would have passed: both are now checked. The only verdicts tested had ATP as the target, so a sugar-target verdict is checked now, case-sensitively. The chapter parse silently dropped rows that carry attributes: it now reads them, and fails when any `<tr>` cannot be read.
 - **The bench.** `set(v)` handed the raw number to `valueText`. It now reads the clamped value back off the input.
@@ -77,8 +77,28 @@ The review ran instead as a fresh-context read-only subagent over `5e9c981..3292
   - The Row stepper's "step up", which moves the highlight down the ledger.
   - AGENTS.md's line for `npm run drive`, which does not yet say it reads drawn text for this figure.
 
+## What the second round caught
+
+**Timestamp:** 2026-09-23 11:23–11:36 (re-review of `32927ac..12552ed`), 11:36–12:40 (fixes, `790dbae`)
+
+**Action:** The same subagent re-reviewed the fixes. It found no blockers, five should-fix findings and seven nits. Five of its eight first-round findings were resolved.
+
+- **The rule took back the verdict's clause.** The rule line and the table's note still said, flatly, "a compound cannot hand a phosphate to anything above it". On a phone that sentence sat directly under "ATP cannot phosphorylate creatine … under standard conditions". Both now carry the clause, from one constant. Drive step 7 fails any "cannot" on the stage that does not name standard conditions (arm H).
+- **A comment named the wrong width.** It said the shorter ", uphill." kept the longest verdict to two lines at 390 px. That saving happens at 700–712 px; on a phone the longest takes three lines with either ending.
+- **A doc number was stale.** The longest verdict is 141 characters, not 150; 150 was the old ending.
+- **Merge order.** §5.3's column is renamed only on `origin/fix-ch05`, so `atp-ladder` must not reach main before it.
+- **The full gate chain has not run.** The brief leaves `npm test` to the integration worker, and that is recorded rather than done.
+- **The fix belonged in the bench.** The first fix restyled bench chrome from a figure's CSS, and won only by coming later in the file. The step button's width now lives in `components.css`: 1.6rem at a phone's width, whatever the glyph, with a selector that wins by specificity. Measured on the chapter page, the arrow buttons are 25.6 px and the toolbar is 97 px on four rows at 320 px. Pane sizes and rule presence are identical to the untouched tree in all 36 measured states. Narrow output for all nine bench figures is identical, line for line, to the run before.
+- **The target marker was unchecked.** describe() gains `targetKj`, and both marker words are now held to their own compound's rung (arm I).
+- **No 390 px frames.** Steps 9 and 10 now photograph their 390 px states. The harness's own screenshot is taken after the viewport is restored.
+- **Kept.**
+  - "Can" carries no clause. A negative ΔG°′ shows a transfer is possible; no ΔG°′ can show one is impossible in a cell. The comment now says so.
+  - `set()` still hands `format` and `onInput` the number it was given. Changing what nine figures' `onInput` receives is not this change's to make, and the comment now says that too.
+
 ## Still open
 
+- **Merge `fix-ch05` with or before this branch.** The figure's heading and rows name the quantity as the renamed column does.
 - **The Row stepper.** Its "step up" moves the highlight to the next row, which is down the ledger. This is the same kind of label-against-picture mismatch. It is left alone because no one has decided which way a table's rows run.
 - **The rung figures are hyphen-minus.** `n1()` prints "-61.9" where `signed()` and the chapter print "−61.9".
-- **The lab at 320 px** is a 272 px stage no reader gets, and there the rail cannot fit.
+- **Nothing gates the chapter page below 390 px,** where a wide figure's stage is the whole screen. The measurements above are a probe's.
+- **The lab at 320 px** is a 272 px stage, which on the chapter page means a 272 px screen, and there the rail cannot fit.
