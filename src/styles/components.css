@@ -946,9 +946,10 @@ tb-sort .tb-sort__bin h5 {
    in an 800px window. Shorter labels only move the width where it happens.
 
    Now each part asks for a width (see .name and .choose below), and the choices move to a line of their own
-   when the two together are wider than the tray. So a name is never squeezed into a ribbon beside the
-   buttons. `npm run shot` fails a name narrower than its longest word, and a name that wraps into a ribbon
-   (the text-box block in tools/shot.js). */
+   when the two together are wider than the tray, on every row of the sort at once. So a name is never
+   squeezed into a ribbon beside the buttons. `npm run shot` fails a name narrower than its longest word, a
+   name that wraps into a ribbon, and a sort whose rows split between the two layouts (the text-box block
+   in tools/shot.js). */
 tb-sort .tb-sort__item {
   display: flex;
   flex-wrap: wrap;
@@ -986,9 +987,10 @@ tb-sort .tb-sort__item:active {
        at the same width. With no floor each row asked for its own width, and chapter 2's rows split between
        the two layouts from 600 to 626px and from 846 to 896px, measured in 2px steps; 852 and 896 are
        iPhones held sideways.
-   Bound: a sort mixing short names with names wider than the floor still asks for different widths row by
-   row, so over a narrow band of widths some of its rows may stack and others not. No sort in either book
-   does: every name is narrower than 137px or wider than 470px. */
+   A sort mixing short names with names wider than the floor still asks for different widths row by row,
+   so over a band of widths some of its rows would stack and others not. No sort in either book does today
+   (every name is narrower than 137px or wider than 470px), and sort.js rules it out: once any row's
+   choices have gone under its name, it sets data-stacked, and every row's go (the rule below). */
 tb-sort .tb-sort__item .name {
   flex: 1 1 21rem;
   min-width: 11.5rem;
@@ -998,6 +1000,13 @@ tb-sort .tb-sort__item .name {
   font-size: var(--text-base);
   line-height: 1.4;
   color: var(--ink);
+}
+
+/* One layout for the whole sort (watchRows in src/components/sort.js): the name takes the whole line, as
+   on a phone, and the choices go under it. */
+tb-sort[data-stacked] .tb-sort__item .name {
+  flex-basis: 100%;
+  max-width: none;
 }
 
 /* One hairline box for the three choices, divided, rather than three pills. This is a control and is

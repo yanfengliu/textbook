@@ -9,8 +9,8 @@
 // nothing to paint, a target of a hook's rule with no hook above it, or a page that rebuilds while an
 // attribute is off — see the hook block below), no geometric attribute in a mounted figure's SVG that is
 // negative where SVG forbids it or is not a finite number (see the geometry block below), no reader
-// component's text box narrower than its own longest word and no name still to sort wrapping into a ribbon
-// narrower than 15 em (see the text-box block below), no character
+// component's text box narrower than its own longest word, no name still to sort wrapping into a ribbon
+// narrower than 15 em, no sort whose rows split in two layouts (see the text-box block below), no character
 // anywhere on the page drawn by a face the page did not load through `@font-face` (see the font block
 // below), no `<tb-sitting>` still unbooted when the shutter opens and none missing from a page that must
 // carry one (see the sitting block below) — and — on a page whose
@@ -608,7 +608,10 @@ function auditFigureGeometry({ page: pageId, viewport, theme }) {
 //     characters. It sits between the two with room on either side, so the rule is not the stylesheet's own
 //     number read back. It is the sort's alone, because the sort is the component whose own layout decides
 //     how wide a wrapped name is, and a floor fitted to it does not fit the others: a check's answers keep
-//     17.8 em at 390 px and 13.4 em on a 320 px phone, by design, where a sort's names keep 16.8 em.
+//     17.8 em at 390 px and 13.4 em on a 320 px phone, by design, where a sort's names keep 16.8 em;
+//   · and a sort whose rows split between the two layouts, the choices beside some names and under others
+//     (ROWS_AGREE). Each row's flex wrap decides for itself, so a sort mixing short names with middling ones
+//     split over a band of widths until sort.js began setting `data-stacked` for all of them at once.
 //
 // The subjects are TEXT_BOXES below, each keyed on the component that makes it required: a component on
 // the page that yields none of a required subject fails, so a renamed class stops the run instead of
@@ -640,6 +643,11 @@ const TEXT_BOXES = [
   // Not required: whether a sitting opens on a choice question is the plan's decision, not the page's.
   { host: 'tb-sitting', sel: '.tb-opt > span:not(.k)', label: 'answer', count: 'sitting answer', optional: true },
 ];
+// A component whose rows each set a second part beside the first or under it: every row of one component
+// must make the same choice.
+const ROWS_AGREE = [
+  { host: 'tb-sort', row: '.tb-sort__tray .tb-sort__item', first: '.name', second: '.choose', what: 'names', parts: 'choices', fix: 'watchRows in src/components/sort.js setting data-stacked once any row\'s choices go under its name, and the tb-sort[data-stacked] rule in src/styles/components.css' },
+];
 
 /**
  * Every reader text box in TEXT_BOXES on the page, measured against its own words. Runs inside the page
@@ -647,7 +655,7 @@ const TEXT_BOXES = [
  * first eight, and a count of the rest), `found` the full count, and `counts` one entry per subject whose
  * component is on the page, `{ count, measured, hidden }`.
  */
-function auditTextBoxes({ page: pageId, viewport, theme, subjects, ribbonEm }) {
+function auditTextBoxes({ page: pageId, viewport, theme, subjects, rowsAgree, ribbonEm }) {
   const started = performance.now();
   const where = `${pageId} ${viewport} ${theme}`;
   const r1 = (x) => Math.round(x * 10) / 10;
@@ -660,6 +668,24 @@ function auditTextBoxes({ page: pageId, viewport, theme, subjects, ribbonEm }) {
   const problems = [];
   const counts = [];
   const entries = [];
+
+  // Read before anything below takes a box out of flow.
+  for (const r of rowsAgree) {
+    for (const host of document.querySelectorAll(r.host)) {
+      if (!host.getClientRects().length) continue;
+      const rows = [...host.querySelectorAll(r.row)].map((row) => {
+        const first = row.querySelector(r.first)?.getBoundingClientRect();
+        const second = row.querySelector(r.second)?.getBoundingClientRect();
+        return { text: row.querySelector(r.first)?.textContent.replace(/\s+/g, ' ').trim() ?? '', under: !!(first && second && second.top >= first.bottom - 1) };
+      });
+      const under = rows.filter((x) => x.under);
+      const beside = rows.filter((x) => !x.under);
+      if (under.length && beside.length) {
+        problems.push(`${where}: ${named(host)} sets the ${r.parts} of ${under.length} of its ${rows.length} ${r.what} under the name (${quote(under[0].text)}) and the other ${beside.length} beside it (${quote(beside[0].text)}). One component takes one layout for every row, or its column of ${r.parts} zigzags down the page. What would satisfy this: ${r.fix}.`);
+      }
+    }
+  }
+
   for (const s of subjects) {
     const hosts = [...document.querySelectorAll(s.host)];
     if (!hosts.length) continue;
@@ -1080,7 +1106,7 @@ try {
           // Printed on every line, including the clean ones: `0 SVG attr(s)` is a scan that compared
           // nothing, and a scan that compared nothing must not read as a scan that found nothing.
           geomNote = `, ${geometry.attributes} SVG attr(s) over ${geometry.elements} element(s) in ${geometry.kinds.length} figure(s)`;
-          textBoxes = await page.evaluate(auditTextBoxes, { page: pageDef.id, viewport: vp.id, theme, subjects: TEXT_BOXES, ribbonEm: RIBBON_EM });
+          textBoxes = await page.evaluate(auditTextBoxes, { page: pageDef.id, viewport: vp.id, theme, subjects: TEXT_BOXES, rowsAgree: ROWS_AGREE, ribbonEm: RIBBON_EM });
           problems.push(...textBoxes.problems);
           // Printed on every line: a page with a component and `0 sort name(s)` is a check that compared
           // nothing, and a page with none of the components says so rather than printing nothing.
