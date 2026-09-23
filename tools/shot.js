@@ -8,7 +8,9 @@
 // fewer times than its census says, a rule that matches its element and loses the cascade, a hook with
 // nothing to paint, a target of a hook's rule with no hook above it, or a page that rebuilds while an
 // attribute is off — see the hook block below), no geometric attribute in a mounted figure's SVG that is
-// negative where SVG forbids it or is not a finite number (see the geometry block below), no character
+// negative where SVG forbids it or is not a finite number (see the geometry block below), no reader
+// component's text box narrower than its own longest word and no name still to sort wrapping into a ribbon
+// narrower than 15 em (see the text-box block below), no character
 // anywhere on the page drawn by a face the page did not load through `@font-face` (see the font block
 // below), no `<tb-sitting>` still unbooted when the shutter opens and none missing from a page that must
 // carry one (see the sitting block below) — and — on a page whose
@@ -582,6 +584,177 @@ function auditFigureGeometry({ page: pageId, viewport, theme }) {
 }
 
 // ------------------------------------------------------------------------------------------------
+// Reader components: a text box narrower than its own words
+// ------------------------------------------------------------------------------------------------
+//
+// Found on the live site on 2026-09-23, with every gate green. `<tb-sort>` set each name in a grid track
+// beside its choices, `minmax(0, 1fr) minmax(0, auto)`, and grid sizes the auto track first, to the choices'
+// whole row, so the name got what was left. Chapter 5's name track was 0 px wide at 1024 and 1440 px, and
+// each observation ran one word to a line, 358 to 717 px tall; chapter 4's was 18.8 and 60.4 px; chapter
+// 3's was 148 and 190 px, a ribbon of 22 to 28 characters a line. Nothing above could see it: the document
+// did not overflow, every glyph was drawn in a loaded face, and no figure was involved. The frames this gate
+// wrote showed it, and a frame is a check only when somebody looks at it.
+//
+// So every text box a reader component sets beside a sibling it can lose width to is measured, and fails
+//   · when it is narrower than its own longest word, or its content runs out of it (`scrollWidth` past
+//     `clientWidth`). The longest word is the box's min-content width, laid out by the browser's own line
+//     breaker with `overflow-wrap` and `word-break` at normal and hyphens manual: a Han line is judged by
+//     its own break opportunities and a Latin one by its words, and a box allowed to break a word mid-way
+//     is still judged against the whole word;
+//   · and, for a name still to sort, when it wraps in less than RIBBON_EM ems a line. The layout gives a
+//     name that wraps 21 em or more (21rem beside its choices, the whole tray under them: 21.2 em at 390 px),
+//     and chapter 3's names had 9.3 em at 1024 px and 11.9 em at 1440 before the fix. 15 em is 240 px of the
+//     name's 16 px face, 35 characters of Newsreader at the 6.77 px it advances on these names, or 15 Han
+//     characters. It sits between the two with room on either side, so the rule is not the stylesheet's own
+//     number read back. It is the sort's alone, because the sort is the component whose own layout decides
+//     how wide a wrapped name is, and a floor fitted to it does not fit the others: a check's answers keep
+//     17.8 em at 390 px and 13.4 em on a 320 px phone, by design, where a sort's names keep 16.8 em.
+//
+// The subjects are TEXT_BOXES below, each keyed on the component that makes it required: a component on
+// the page that yields none of a required subject fails, so a renamed class stops the run instead of
+// measuring nothing, and every clean line prints how many boxes it measured. A new component joins by a
+// row here. A subject is a box set beside a sibling it can lose width to; a box alone on its line has the
+// whole line, and no sibling can squeeze it.
+//
+// How it measures. Every box's width is read first. Then all of them are taken out of flow together for
+// two layouts — `position: absolute` at `width: min-content`, then at `max-content` — and every style
+// attribute is put back in the same evaluation, so no frame is painted in between and the screenshot
+// cannot see it. Batching is sound because an absolutely positioned box's intrinsic width depends on its
+// own content and inherited style, never on its siblings; one box at a time would force two layouts of the
+// whole page per box. It costs 7 to 18 ms a load on a chapter.
+//
+// Bound. The gate's three widths: the layout between them is not measured, and that is where chapter 2's
+// sort collapsed too, 10.8 px in an 800 px window against 186.8 px at 1024. It reads the page as it stands
+// after the handshake and presses nothing, so a placed card, an answered question and every popover are
+// outside it — measured on 2026-09-23, the second book's character card runs its unbound-sense note out of
+// the card at 390 px, and this check cannot see it (docs/learning/gate-proofs.md). It judges width and
+// nothing else: a box that holds its words and reads badly for another reason passes.
+const RIBBON_EM = 15;
+const TEXT_BOXES = [
+  { host: 'tb-sort', sel: '.tb-sort__tray .tb-sort__item .name', label: 'name still to sort', count: 'sort name', ribbon: true, fix: 'the choices going under the name whenever the two do not fit side by side — .tb-sort__item and .name in src/styles/components.css' },
+  { host: 'tb-sort', sel: '.tb-sort__item .choose button', label: 'choice', count: 'sort choice' },
+  { host: 'tb-sort', sel: '.tb-sort__bin h5', label: 'bin heading', count: 'sort bin heading' },
+  { host: 'tb-check', sel: '.tb-check__opt > span:not(.k)', label: 'answer', count: 'check answer' },
+  { host: 'tb-glossary', sel: 'dt', label: 'term', count: 'glossary term' },
+  { host: 'tb-glossary', sel: 'dd', label: 'definition', count: 'glossary definition' },
+  // Not required: whether a sitting opens on a choice question is the plan's decision, not the page's.
+  { host: 'tb-sitting', sel: '.tb-opt > span:not(.k)', label: 'answer', count: 'sitting answer', optional: true },
+];
+
+/**
+ * Every reader text box in TEXT_BOXES on the page, measured against its own words. Runs inside the page
+ * and returns { problems, found, boxes, counts, ms }, with `problems` already phrased for the report (the
+ * first eight, and a count of the rest), `found` the full count, and `counts` one entry per subject whose
+ * component is on the page, `{ count, measured, hidden }`.
+ */
+function auditTextBoxes({ page: pageId, viewport, theme, subjects, ribbonEm }) {
+  const started = performance.now();
+  const where = `${pageId} ${viewport} ${theme}`;
+  const r1 = (x) => Math.round(x * 10) / 10;
+  const named = (host) => `<${host.tagName.toLowerCase()}${host.id ? ` id="${host.id}"` : ''}>`;
+  const quote = (text) => `"${text.length > 48 ? `${text.slice(0, 47)}…` : text}"`;
+  const OUT_OF_FLOW = ['position:absolute', 'min-width:0', 'max-width:none', 'padding:0', 'border:0', 'overflow-wrap:normal', 'word-break:normal', 'hyphens:manual'].map((d) => `${d} !important`).join(';');
+  const takeOut = (e, width) => e.el.setAttribute('style', `${e.saved === null ? '' : `${e.saved};`}${OUT_OF_FLOW};width:${width} !important`);
+  const putBack = (e) => (e.saved === null ? e.el.removeAttribute('style') : e.el.setAttribute('style', e.saved));
+
+  const problems = [];
+  const counts = [];
+  const entries = [];
+  for (const s of subjects) {
+    const hosts = [...document.querySelectorAll(s.host)];
+    if (!hosts.length) continue;
+    let measured = 0;
+    let hidden = 0;
+    for (const host of hosts) {
+      // A component the page does not render at this width has nothing laid out to measure.
+      if (!host.getClientRects().length) continue;
+      let mine = 0;
+      for (const el of host.querySelectorAll(s.sel)) {
+        const cs = getComputedStyle(el);
+        if (!el.getClientRects().length || cs.visibility === 'hidden') {
+          hidden += 1;
+          continue;
+        }
+        const rect = el.getBoundingClientRect();
+        entries.push({
+          s, host, el, saved: el.getAttribute('style'),
+          content: rect.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth),
+          height: rect.height,
+          fontSize: parseFloat(cs.fontSize),
+          lineHeight: parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2,
+          scrollWidth: el.scrollWidth,
+          clientWidth: el.clientWidth,
+          text: el.textContent.replace(/\s+/g, ' ').trim(),
+        });
+        mine += 1;
+      }
+      if (!mine && !s.optional) {
+        problems.push(`${where}: ${named(host)} is on the page and none of its ${s.label}s (\`${s.sel}\`) could be measured, so this check compared nothing for it. The class was renamed, or the component stopped building that part; what would satisfy this is the selector in TEXT_BOXES in tools/shot.js naming what the component builds now, rather than the row being dropped.`);
+      }
+      measured += mine;
+    }
+    counts.push({ count: s.count, measured, hidden });
+  }
+
+  try {
+    for (const e of entries) takeOut(e, 'min-content');
+    for (const e of entries) e.word = e.el.getBoundingClientRect().width;
+    for (const e of entries) e.el.style.setProperty('width', 'max-content', 'important');
+    for (const e of entries) e.line = e.el.getBoundingClientRect().width;
+  } finally {
+    for (const e of entries) putBack(e);
+  }
+
+  // The word itself, for the message: the width above is the verdict, and this only says which word it is.
+  // Measured with the box back at min-content, where every word stands on a line of its own.
+  const widestWord = (e) => {
+    let best = '';
+    let bestWidth = 0;
+    takeOut(e, 'min-content');
+    try {
+      const walker = document.createTreeWalker(e.el, NodeFilter.SHOW_TEXT);
+      const range = document.createRange();
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        for (const m of n.data.matchAll(/\S+/g)) {
+          range.setStart(n, m.index);
+          range.setEnd(n, m.index + m[0].length);
+          const w = range.getBoundingClientRect().width;
+          if (w > bestWidth) {
+            bestWidth = w;
+            best = m[0];
+          }
+        }
+      }
+    } finally {
+      putBack(e);
+    }
+    return best;
+  };
+
+  for (const e of entries) {
+    const overflows = e.scrollWidth > e.clientWidth + 1;
+    if (e.word > e.content + 0.5 || overflows) {
+      const word = widestWord(e);
+      problems.push(`${where}: ${named(e.host)}'s ${e.s.label} ${quote(e.text)} is ${r1(e.content)} px wide, and its longest word needs ${r1(e.word)} px${word ? ` ("${word}")` : ''}, so its words stand one to a line and run out of the box${overflows ? ` (scrollWidth ${e.scrollWidth} > clientWidth ${e.clientWidth})` : ''}, ${r1(e.height)} px tall. What would satisfy this: ${e.s.fix ?? 'a layout that gives the box at least its longest word — find what its row gave the width to, a track sized to a sibling\'s content or a sibling that cannot shrink'}; never a smaller type size or a word broken mid-way.`);
+      continue;
+    }
+    if (e.s.ribbon && e.line > e.content + 0.5) {
+      const em = e.content / e.fontSize;
+      if (em < ribbonEm) {
+        const lines = Math.round(e.height / e.lineHeight);
+        const perLine = Math.round((e.content * [...e.text].length) / e.line);
+        problems.push(`${where}: ${named(e.host)}'s ${e.s.label} ${quote(e.text)} wraps at ${r1(e.content)} px, ${em.toFixed(1)} em, in ${lines} lines of about ${perLine} characters. A name that wraps keeps at least ${ribbonEm} em a line (${r1(ribbonEm * e.fontSize)} px at this size); narrower, it is a ribbon beside its choices. What would satisfy this: ${e.s.fix ?? 'a wider box'}, rather than a narrower name.`);
+      }
+    }
+  }
+  // A sort's eight names failing together is one finding and reads as one; a glossary of seventy would
+  // bury the report. The first eight say which component and which box, and the count says how far it goes.
+  const shown = problems.slice(0, 8);
+  if (problems.length > shown.length) shown.push(`${where}: and ${problems.length - shown.length} more reader text box(es) like the ones above.`);
+  return { problems: shown, found: problems.length, boxes: entries.length, counts, ms: Math.round(performance.now() - started) };
+}
+
+// ------------------------------------------------------------------------------------------------
 // Fonts: a character drawn by a face the page never loaded
 // ------------------------------------------------------------------------------------------------
 //
@@ -872,6 +1045,8 @@ try {
         let fontNote = '';
         let hooking = { measured: 0, targets: 0, declared: 0, census: [], unread: 0 };
         let geometry = { found: 0, elements: 0, attributes: 0, kinds: [] };
+        let textBoxes = { boxes: 0, counts: [], ms: 0 };
+        let textNote = '';
         let fonts = { runs: 0, codePoints: 0, faces: [], measured: 0 };
         let sittingNote = '';
         const started = Date.now();
@@ -905,6 +1080,13 @@ try {
           // Printed on every line, including the clean ones: `0 SVG attr(s)` is a scan that compared
           // nothing, and a scan that compared nothing must not read as a scan that found nothing.
           geomNote = `, ${geometry.attributes} SVG attr(s) over ${geometry.elements} element(s) in ${geometry.kinds.length} figure(s)`;
+          textBoxes = await page.evaluate(auditTextBoxes, { page: pageDef.id, viewport: vp.id, theme, subjects: TEXT_BOXES, ribbonEm: RIBBON_EM });
+          problems.push(...textBoxes.problems);
+          // Printed on every line: a page with a component and `0 sort name(s)` is a check that compared
+          // nothing, and a page with none of the components says so rather than printing nothing.
+          textNote = textBoxes.counts.length
+            ? `, text boxes against their words: ${textBoxes.counts.map((c) => `${c.measured} ${c.count}(s)${c.hidden ? ` (${c.hidden} hidden)` : ''}`).join(', ')} (${textBoxes.ms} ms)`
+            : ', no reader text boxes';
           const captions = await page.evaluate(() => ({
             lang: document.documentElement.getAttribute('lang') || '',
             nums: [...document.querySelectorAll('tb-figure figcaption .fig-num')].map((n) => ({
@@ -939,14 +1121,14 @@ try {
         for (const e of errors) problems.push(e);
         await page.close();
         const ms = Date.now() - started;
-        const entry = { page: pageDef.id, viewport: vp.id, theme, ms, figures: Object.fromEntries(Object.entries(figures).map(([k, v]) => [k, { kind: v.kind, state: v.state, drawCalls: v.drawCalls, triangles: v.triangles }])), hooks: hooking, geometry, fonts, problems };
+        const entry = { page: pageDef.id, viewport: vp.id, theme, ms, figures: Object.fromEntries(Object.entries(figures).map(([k, v]) => [k, { kind: v.kind, state: v.state, drawCalls: v.drawCalls, triangles: v.triangles }])), hooks: hooking, geometry, textBoxes, fonts, problems };
         report.push(entry);
         if (problems.length) {
           failures += 1;
           console.log(`FAIL ${label} (${ms} ms)`);
           for (const p of problems) console.log(`  ${p}`);
         } else {
-          console.log(`ok   ${label} (${ms} ms, ${Object.keys(figures).length} figures ready${sittingNote}${captionNote}${hookNote}${geomNote}${fontNote})`);
+          console.log(`ok   ${label} (${ms} ms, ${Object.keys(figures).length} figures ready${sittingNote}${captionNote}${hookNote}${geomNote}${textNote}${fontNote})`);
         }
       }
     }
