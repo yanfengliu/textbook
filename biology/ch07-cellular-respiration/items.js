@@ -48,9 +48,11 @@
 //
 // Bound: every item is answerable from this chapter and the sections it cites. Where a question needs a
 // number the chapter does not give, the question gives it, and it was checked against the source named:
-//   pyruvate/lactate −0.19 V and oxaloacetate/malate −0.17 V (i-redox-ladder-1, -2), and trimethylamine
-//     oxide/trimethylamine +0.13 V (i-anaerobic-respiration-1): Thauer, Jungermann & Decker, Bacteriol.
-//     Rev. 41:100 (1977), the table the chapter's own acceptor potentials come from.
+//   pyruvate/lactate −0.19 V and oxaloacetate/malate −0.17 V (i-redox-ladder-1, -2): the standard
+//     tables of biochemical reduction potentials, which give −0.185 and −0.166.
+//   trimethylamine oxide/trimethylamine +0.13 V (i-anaerobic-respiration-1): Thauer, Jungermann & Decker,
+//     Bacteriol. Rev. 41:100 (1977), the table the chapter's own acceptor potentials come from, and
+//     Table 1 of "Adaptation of Vibrio cholerae to hypoxic environments", Front. Microbiol. (2020).
 //   stearate's eighteen carbons (i-other-fuels-1) is its formula; the rest of that item is the chapter's
 //     own palmitate arithmetic applied to it.
 // Five cases the chapter never mentions rest on a fact from outside it, each checked:
@@ -78,7 +80,8 @@
 //     exists; a fed body burns its surplus protein every day; and it is a fatty acid, not a whole fat,
 //     that an animal cannot turn into sugar. A thylakoid's force is "mostly" pH, not all of it.
 //   A yeast's fermentation gives two CO2 and two ethanol per glucose. The two shuttles are named for
-//     heart, liver, skeletal muscle and insect flight muscle only.
+//     heart, liver, skeletal muscle and insect flight muscle only: which one the brain relies on is
+//     disputed, and McKenna et al., Biochem. Pharmacol. 71:399 (2006), put malate–aspartate first.
 //
 // Twenty-two objectives have their third item reserved for a task, because the reader can do in the
 // figure what the objective asks and the figure's describe() can say whether they did. The task pass
@@ -251,7 +254,7 @@ export const ITEMS = [
         why: 'Scales the organelle up instead of folding it, which is the move Section 3.2 rules out: a bigger mitochondrion gains volume faster than surface, so it has less membrane for each unit of fuel, not more.' },
       { text: 'The flight muscle cell is packed with mitochondria whose cristae are so dense the matrix is nearly squeezed out; the fat cell has few, loosely folded.', correct: true },
     ],
-    explain: 'The chapter\'s heart and liver, pushed to an extreme. Hummingbird flight muscle has among the highest mitochondrial content and the most densely packed cristae measured in any vertebrate, because its ATP demand per unit of volume is among the highest there is. The folding follows the demand, not the fuel.',
+    explain: 'The chapter\'s heart and liver, pushed to an extreme. In hummingbird flight muscle the mitochondria fill about a third of each fibre, and their inner membranes are packed more densely than in any mammalian muscle, close to the most a mitochondrion could hold, because the muscle\'s ATP demand per unit of volume is among the highest there is. The folding follows the demand, not the fuel.',
   },
   {
     id: 'i-cristae-area-3',
@@ -1061,7 +1064,7 @@ export const ITEMS = [
     id: 'i-synthase-reversible-1',
     objective: 'synthase-reversible',
     kind: 'mcq',
-    question: 'A bacterium living with no oxygen and no other terminal acceptor makes all its ATP by glycolysis and fermentation. Yet it keeps a proton gradient across its membrane, which it needs to drive the transporters that bring its food in. Where does the gradient come from?',
+    question: 'A bacterium living with no oxygen and no other terminal acceptor makes all its ATP by glycolysis and fermentation. Yet it keeps a proton gradient across its membrane, which it needs to hold its internal pH and to drive the transporters that bring its food in. Where does the gradient come from?',
     options: [
       { text: 'It cannot have one: a proton gradient needs an electron transport chain, and with no acceptor there is none running.',
         why: 'Treats the chain as the only thing that can build a gradient. ATP synthase is an ATP-driven proton pump named for the direction we care about, and with ATP in hand and no gradient pushing it, it runs as a pump.' },
