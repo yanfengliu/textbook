@@ -19,7 +19,12 @@
 // whether the transfer can happen and by how much, so §5.3's "takes from above, gives below" is a thing
 // the reader tries rather than a sentence. THE MOST NEGATIVE IS AT THE TOP, which is the order §5.3's
 // own table is printed in and the only order those four words are true in; drawLadder says why at
-// length, and a later chapter that remounts this scene inherits the direction with it.
+// length, and a later chapter that remounts this scene inherits the direction with it. `npm run drive`
+// reads the drawn rail against that table, so the direction is a gate and not only this paragraph.
+// UP ON THE CONTROLS IS UP ON THE RAIL: the Donor and Target ranges count rungs from the BOTTOM, so the
+// button with the up arrow, ArrowUp and a drag to the right all move a marker toward phosphoenolpyruvate.
+// And the verdict names the molecule a donor PHOSPHORYLATES, which is never the rung it makes: the
+// phosphate goes onto ADP to make ATP, as §5.3 puts it, not onto ATP. See RUNGS and transferWords.
 // CHAPTER 6 AND CHAPTER 7 ARE EXPECTED TO ASK FOR THE LADDER:
 // it is reached by `scene: 'ladder'` alone, so a later chapter mounts this kind with a different opening
 // scene instead of keeping a copy of it.
@@ -56,7 +61,9 @@
 // WHAT THE BENCH DOES FOR THIS FIGURE, and the one thing it still does not. The ledger row, the donor
 // and the target are STEPPERS: six and eight stops on a 4.4rem track is about ten pixels a stop, which
 // is not a control a finger can place, so at a phone's width the track gives way to a pair of step
-// buttons and the range stays underneath as the accessible control. The sentences under the table are
+// buttons and the range stays underneath as the accessible control. The donor's and the target's
+// buttons are ↑ and ↓, named "one rung up" and "one rung down", because on a ladder "+" says nothing
+// about which way the marker goes — and it went the wrong way. The sentences under the table are
 // given to `readout.note()` whole and wrapped there. The three overlay buttons are `b.toggle`s, so the
 // bench keeps their aria-pressed rather than this file setting it after every change. The rules between
 // the toolbar's groups look after themselves, because each one lives in the group it opens — in the
@@ -113,16 +120,53 @@ const LEDGER = [
 const LEDGER_TOTAL = round(LEDGER.reduce((a, r) => a + r.kj, 0), 1); // -30.5, and a test of the table
 
 // Standard free energy of hydrolysis, kJ/mol. The five in bold are §5.3's own table.
+//
+// `acceptor` is the rung without its phosphate: the molecule a donor PHOSPHORYLATES to make that rung.
+// A transfer from donor to target is donor–P + acceptor → donor + target, which is why its free energy
+// is the donor's number minus the target's. The verdict used to say "Phosphoenolpyruvate can
+// phosphorylate ATP" and "ATP can phosphorylate Glucose 6-phosphate", putting the phosphate onto the
+// thing it makes; §5.3 says a compound above ATP can "hand a phosphate to ADP and so make ATP".
 const LADDER = [
-  { id: 'pep', name: 'Phosphoenolpyruvate', short: 'PEP', kj: -61.9 },
-  { id: 'bpg', name: '1,3-bisphosphoglycerate', short: '1,3-BPG', kj: -49.4 },
-  { id: 'acetylp', name: 'Acetyl phosphate', short: 'Acetyl-P', kj: -43.1 },
-  { id: 'creatinep', name: 'Creatine phosphate', short: 'Creatine-P', kj: -43.0 },
-  { id: 'atp', name: 'ATP', short: 'ATP', kj: -30.5, currency: true },
-  { id: 'g1p', name: 'Glucose 1-phosphate', short: 'Glucose 1-P', kj: -20.9 },
-  { id: 'f6p', name: 'Fructose 6-phosphate', short: 'Fructose 6-P', kj: -15.9 },
-  { id: 'g6p', name: 'Glucose 6-phosphate', short: 'Glucose 6-P', kj: -13.8 },
+  { id: 'pep', name: 'Phosphoenolpyruvate', short: 'PEP', kj: -61.9, acceptor: 'pyruvate' },
+  { id: 'bpg', name: '1,3-bisphosphoglycerate', short: '1,3-BPG', kj: -49.4, acceptor: '3-phosphoglycerate' },
+  { id: 'acetylp', name: 'Acetyl phosphate', short: 'Acetyl-P', kj: -43.1, acceptor: 'acetate' },
+  { id: 'creatinep', name: 'Creatine phosphate', short: 'Creatine-P', kj: -43.0, acceptor: 'creatine' },
+  { id: 'atp', name: 'ATP', short: 'ATP', kj: -30.5, currency: true, acceptor: 'ADP' },
+  { id: 'g1p', name: 'Glucose 1-phosphate', short: 'Glucose 1-P', kj: -20.9, acceptor: 'glucose' },
+  { id: 'f6p', name: 'Fructose 6-phosphate', short: 'Fructose 6-P', kj: -15.9, acceptor: 'fructose' },
+  { id: 'g6p', name: 'Glucose 6-phosphate', short: 'Glucose 6-P', kj: -13.8, acceptor: 'glucose' },
 ];
+
+// A rung's name inside a sentence: "glucose 6-phosphate", but "ATP" and "1,3-bisphosphoglycerate" as
+// they are. The rail's own labels keep their capitals; they begin a line.
+const inSentence = (name) => (/^[A-Z]{2}/.test(name) ? name : name.charAt(0).toLowerCase() + name.slice(1));
+
+// What the transfer does, in §5.3's terms and with the phosphate going onto the right molecule.
+// "can phosphorylate ADP and make ATP"; "cannot phosphorylate ADP to make ATP". The verdict under the
+// rail and the sentence a screen reader hears are both built from this, so they cannot disagree.
+const transferWords = (target, possible) => (possible
+  ? `can phosphorylate ${target.acceptor} and make ${inSentence(target.name)}`
+  : `cannot phosphorylate ${target.acceptor} to make ${inSentence(target.name)}`);
+
+// THE DONOR AND TARGET CONTROLS COUNT RUNGS FROM THE BOTTOM. A range input's value goes UP with
+// ArrowUp, with PageUp, with a drag to the right and with the stepper's up button, and the rail's up is
+// the top of the stage, where phosphoenolpyruvate is. Until 2026-09-23 the value was the rung's place
+// in LADDER, counted from the top, so every one of those moved the marker one rung DOWN the rail —
+// including a button a screen reader announced as "Donor, step up". `height` is the value the control
+// holds and `LADDER` index is what the figure means by it; these two functions are the only place the
+// two meet. `npm run drive` presses ArrowUp and the up button and reads where the marker was drawn.
+const RUNGS = LADDER.length;
+const heightOf = (index) => RUNGS - 1 - index;
+const atHeight = (value) => RUNGS - 1 - Number(value);
+const RUNG_STEPS = Object.freeze({
+  down: { glyph: '↓', name: 'one rung down' },
+  up: { glyph: '↑', name: 'one rung up' },
+});
+// What a screen reader says for the value: the compound and where it stands, rather than a bare index.
+const rungText = (value) => {
+  const i = atHeight(value);
+  return `${LADDER[i].name}, rung ${i + 1} of ${RUNGS} from the top`;
+};
 
 const START_MM = { atpMM: 5, adpMM: 0.5, phosphateMM: 5 };
 
@@ -635,15 +679,18 @@ function build(root, ctx) {
     format: (v) => (Number(v) >= 100 ? `${Math.round(Number(v))}` : Number(v).toFixed(1)),
     onInput: (v) => { s[key] = Number(v); draw(); b.announce(); },
   }));
+  // Valued by height on the rail, so that up is up: see RUNGS above.
   const donorSlider = b.stepper('Donor', {
-    min: 0, max: LADDER.length - 1, step: 1, value: START.donorIndex,
-    format: (v) => LADDER[Number(v)].short,
-    onInput: (v) => { s.donorIndex = Number(v); draw(); b.announce(); },
+    min: 0, max: RUNGS - 1, step: 1, value: heightOf(START.donorIndex),
+    format: (v) => LADDER[atHeight(v)].short,
+    steps: RUNG_STEPS, valueText: rungText,
+    onInput: (v) => { s.donorIndex = atHeight(v); draw(); b.announce(); },
   });
   const targetSlider = b.stepper('Target', {
-    min: 0, max: LADDER.length - 1, step: 1, value: START.targetIndex,
-    format: (v) => LADDER[Number(v)].short,
-    onInput: (v) => { s.targetIndex = Number(v); draw(); b.announce(); },
+    min: 0, max: RUNGS - 1, step: 1, value: heightOf(START.targetIndex),
+    format: (v) => LADDER[atHeight(v)].short,
+    steps: RUNG_STEPS, valueText: rungText,
+    onInput: (v) => { s.targetIndex = atHeight(v); draw(); b.announce(); },
   });
   b.divide();
 
@@ -742,8 +789,8 @@ function build(root, ctx) {
     mmSliders[0].set(START.atpMM);
     mmSliders[1].set(START.adpMM);
     mmSliders[2].set(START.phosphateMM);
-    donorSlider.set(START.donorIndex);
-    targetSlider.set(START.targetIndex);
+    donorSlider.set(heightOf(START.donorIndex));
+    targetSlider.set(heightOf(START.targetIndex));
     runCtl.set(false);
     spin.hold(orbit, clock.now());
     userZoomed = false;
@@ -877,22 +924,25 @@ function build(root, ctx) {
     const target = LADDER[s.targetIndex];
     const dg = round(donor.kj - target.kj, 1);
     const possible = dg < 0;
+    // The verdict names what is phosphorylated and what that makes (transferWords, above): "Phospho-
+    // enolpyruvate can phosphorylate ADP and make ATP". It said "can phosphorylate ATP" until 2026-09-23.
     const verdict = s.donorIndex === s.targetIndex
       ? 'Donor and target are the same compound, so there is nothing to transfer.'
       : possible
-        ? `${donor.name} can phosphorylate ${target.name}: ${signed(dg, 1)} kJ/mol.`
-        : `${donor.name} cannot phosphorylate ${target.name}: ${signed(dg, 1)} kJ/mol, which is uphill.`;
+        ? `${donor.name} ${transferWords(target, true)}: ${signed(dg, 1)} kJ/mol.`
+        : `${donor.name} ${transferWords(target, false)}: ${signed(dg, 1)} kJ/mol, which is uphill.`;
     // The rule that decides it. At a phone's width the ladder has the whole stage and the ledger is not
     // beside it, so the sentence the ledger carried there is set here, under the verdict. It is §5.3's
     // own sentence, because that is the one a reader carries away from the section — and now that the
     // rail runs the table's way it is true of the picture it is printed under. It said "releases more /
     // releases less" while the rail was upside down: true either way up, and therefore saying nothing
-    // about the rail the reader is looking at.
+    // about the rail the reader is looking at. The second one said "cannot phosphorylate anything above
+    // it", which is the verdict's old mistake in general form; §5.3's verb is "hand a phosphate to".
     const rule = !narrow || s.donorIndex === s.targetIndex
       ? null
       : possible
         ? 'A compound takes a phosphate from anything above it and gives one to anything below.'
-        : 'The transfer runs the other way: a compound cannot phosphorylate anything above it.';
+        : 'The transfer runs the other way: a compound cannot hand a phosphate to anything above it.';
 
     // The geometry, solved rather than assumed, and this is the fix for the overlap above. The foot's
     // height is a line count; the line count depends on the type size; the type size depends on what
@@ -901,7 +951,14 @@ function build(root, ctx) {
     // the spread simply ran past the pane and was drawn over whatever was under it. So the type is
     // shrunk to what the rail can afford, and if even the smallest type will not fit, the rule is given
     // up and the rail measured again — the numbers are never the thing dropped.
-    // The wide geometry is untouched: its rail is three times as tall and its foot is the verdict alone.
+    // NOR IS THE VERDICT. Its lines used to be cut at two, like the rule's, and a verdict that wrapped to
+    // three lost its end without a word: measured 2026-09-23 at a 272 px stage, "Fructose 6-phosphate
+    // cannot phosphorylate 1,3-bisphosphoglycerate: +33.5 kJ/mol, which is" — the "uphill." gone. Naming
+    // the acceptor made every verdict longer, and the longest now wraps to three at 390 px too. So every
+    // line of the verdict is laid out and drawn, and only the rule, which the ledger also carries, is
+    // ever cut or given up.
+    // The wide geometry keeps its two lines of foot under the rail. A third line — the longest verdict on
+    // a stage not far over 700 px — is taken out of the rail rather than drawn over its foot.
     let size;
     let top;
     let bottom;
@@ -909,15 +966,18 @@ function build(root, ctx) {
     if (!narrow) {
       size = clamp2(Math.min(w * 0.024, hgt * 0.03), 8.4, 10.8);
       top = pad + size * 2.4;
-      bottom = hgt - size * 2.6;
       foot = wrapText(verdict, w - pad * 2, Math.min(size, 10));
+      bottom = hgt - size * 2.6 - Math.max(0, foot.length - 2) * (size + 2);
     } else {
       const MIN = 9;
       const MAX = 11.2;
       const want = Math.min(w * 0.028, hgt * 0.055);
       const lay = (parts, sz) => {
         const lines = [];
-        for (const part of parts) lines.push(...wrapText(part, w - pad * 2, sz).slice(0, 2));
+        parts.forEach((part, k) => {
+          const wrapped = wrapText(part, w - pad * 2, sz);
+          lines.push(...(k === 0 ? wrapped : wrapped.slice(0, 2)));
+        });
         const t = pad + sz * 2.4;
         const bt = Math.max(t + 1, hgt - 3 - lines.length * (sz + 2.6));
         return { lines, top: t, bottom: bt, afford: (bt - t) / (LADDER.length * 1.35), size: sz };
@@ -1001,6 +1061,15 @@ function build(root, ctx) {
         // Measured off the glyphs, not estimated. `fit` uses a per-character advance to CHOOSE a size,
         // which is the right tool for that and the wrong one for laying something out against the end of
         // the word: the names here run from "ATP" to "1,3-bisphosphoglycerate".
+        // BEFORE THE WEBFONT ARRIVES this measures the fallback face, and the donor and target words are
+        // placed against it. That is not left standing: the bench redraws every figure on it when
+        // `document.fonts.ready` settles (bench.js, handle()), and this redraw measures again — the same
+        // re-lay-out `scale.js` does for itself. Measured 2026-09-23 with every fonts.gstatic.com response
+        // held back and the ladder opened with the mouse while Inter was still loading: the words stood
+        // at x = 248.1 and 333.1, moved to 250.3 and 342.2 when the fonts came in, and the ladder pane's
+        // markup was then byte-identical to a run that had the fonts first, at 1100 and 390 px.
+        // What that does not cover is a font load that STARTS after the bench took its promise. No face
+        // this pane uses is first requested by it — the ledger and the toolbar set the same Inter first.
         nameWidth = el?.getComputedTextLength?.() || 0;
       }
       if (isDonor || isTarget) {
@@ -1044,7 +1113,8 @@ function build(root, ctx) {
       });
     }
     if (!narrow) {
-      foot.slice(0, 2).forEach((line, i) => {
+      // Every line: `bottom` above left the room for all of them.
+      foot.forEach((line, i) => {
         ladderPane.text(pad, hgt - 3 - (foot.length - 1 - i) * (size + 2), line, {
           class: possible ? 'at-name' : 'at-note', 'font-size': n1(Math.min(size, 10)),
           style: possible ? `fill:${INK.leaf}` : undefined,
@@ -1055,7 +1125,7 @@ function build(root, ctx) {
     // Narrow: the verdict, then the rule under it if the rail could spare the room. Every line is drawn
     // — `foot` is the list the rail was measured against, so there is no line here the pane has not
     // already been solved to hold.
-    const verdictLines = wrapText(verdict, w - pad * 2, size).slice(0, 2).length;
+    const verdictLines = wrapText(verdict, w - pad * 2, size).length;
     foot.forEach((line, i) => {
       const isVerdict = i < verdictLines;
       ladderPane.text(pad, hgt - 3 - (foot.length - 1 - i) * (size + 2.6), line, {
@@ -1104,7 +1174,7 @@ function build(root, ctx) {
         ? 'Donor and target are the same compound, so there is nothing to transfer.'
         : d.transferPossible
           ? 'A compound takes a phosphate from anything above it and gives one to anything below. That is the whole of ATP’s qualification for the job.'
-          : 'The transfer runs the other way: a compound cannot phosphorylate anything above it.');
+          : 'The transfer runs the other way: a compound cannot hand a phosphate to anything above it.');
       return r.fill(room);
     }
 
@@ -1223,8 +1293,11 @@ function build(root, ctx) {
     };
   }
   b.onDescribe(state);
+  // The ladder's sentence says what the transfer does in the verdict's own words (transferWords), so a
+  // reader who hears it rather than sees it is told the same chemistry: which molecule the phosphate
+  // goes onto, and what that makes.
   b.onAnnounce((d) => (d.scene === 'ladder'
-    ? `The ladder. ${LADDER[s.donorIndex].name} releases ${n1(d.rungKj)} kilojoules per mole and ${LADDER[s.targetIndex].name} releases ${n1(LADDER[s.targetIndex].kj)}, so the transfer ${d.transferPossible ? 'can happen' : 'cannot happen'}.`
+    ? `The ladder. ${LADDER[s.donorIndex].name} releases ${n1(d.rungKj)} kilojoules per mole and ${inSentence(LADDER[s.targetIndex].name)} releases ${n1(LADDER[s.targetIndex].kj)}, so ${s.donorIndex === s.targetIndex ? 'there is nothing to transfer' : `${inSentence(LADDER[s.donorIndex].name)} ${transferWords(LADDER[s.targetIndex], d.transferPossible)}`}.`
     : `ATP, ${d.hydrolysed ? 'hydrolysed' : 'intact'}. The ledger totals ${n1(d.ledgerTotalKj)} kilojoules per mole, and at ${n1(d.atpMM)}, ${n1(d.adpMM)} and ${n1(d.phosphateMM)} millimoles per litre the true value is ${n1(d.deltaGKj)}.${d.ledgerRow ? ` The row shown is ${d.ledgerRow}.` : ''}`));
 
   // ---------------------------------------------------------------- drawing and the handle
@@ -1285,6 +1358,8 @@ function build(root, ctx) {
   //   rungKj            what the selected donor releases on hydrolysis, negative; more negative is
   //                     HIGHER on the rail. Turning the ladder the right way up changed no field here —
   //                     the rungs' order was never in describe(), only in where drawLadder put them.
+  //                     Nor did turning the Donor and Target controls round (2026-09-23): `donor` and
+  //                     `target` are ids, and the height a range holds is not reported.
   //   transferPossible  computed from the two rungs, never set by the sliders
   //   t                 seconds since mount or since Reset, three decimals
   //   playing           whether the slow turn is on; it opens still

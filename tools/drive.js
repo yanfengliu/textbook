@@ -9,8 +9,13 @@
 // Every step works at absolute coordinates, so the stage is scrolled into view before the recipe runs.
 // Bound: one viewport (1000x640), the light theme, the steps listed, and describe()'s own account of
 // state, not the pixels; a control that reports the right state and draws the wrong thing passes, which
-// is what the screenshots are for. A kind with no recipe fails, so a new figure cannot land undriven,
-// and a kind whose describe() uses one of the frame's four names (id, kind, number, state) fails too,
+// is what the screenshots are for. Two recipes go past that bound on purpose and say so where they do:
+// `feedback-pathway` and `atp3d` each drive a control that exists only at a phone's width at 420 or
+// 390 px and put the viewport back, and `atp3d` reads its ladder's drawn text — the rail's order against
+// §5.3's own table, and which rung a marker is drawn on after a press — because every field describe()
+// reports for that scene is the same whichever way up the rail is drawn or the controls run.
+// A kind with no recipe fails, so a new figure cannot land undriven, and a kind whose describe() uses
+// one of the frame's four names (id, kind, number, state) fails too,
 // as does one the frame holds no handle for or whose handle has no describe(): the ownership check
 // inspects the figure's own describe(), and a subject it cannot find is a failure, not a clean result.
 // DRIVE_KINDS=<a,b> trims the run to those kinds, a trimmed run proves only its part, and a name that
@@ -31,7 +36,7 @@
 // phase, and its `stain` field reads 'purple' from the first of four stain steps, so a poll would leave
 // during the crystal violet and stop proving that the thick wall holds the dye through the alcohol.
 // Giving that figure a phase or a clock in describe() would take 11.4 s off this gate.
-import { mkdirSync, rmSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { startServer } from './serve.js';
 import { launch, collectErrors, openPage, ACTION_TIMEOUT_MS } from './lib/browser.js';
 import { trim } from './lib/trim.js';
@@ -137,6 +142,42 @@ const stable = async (h, read, budgetMs, eps = 0.05) => {
 const ensureRunning = async (h) => {
   if (!(await h.describe()).playing) await h.button(/^Run|^Release/).click();
   expect((await h.describe()).playing === true, 'the figure would not start running');
+};
+
+// `atp3d`'s ladder, read off the DRAWING. describe() says which compound is the donor and which the
+// target and nothing about where either is drawn, so a rail printed upside down, or controls that move a
+// marker the wrong way along it, pass every describe() assertion in that recipe — both have happened.
+// These read the ladder pane's own text: the eight rung figures (`.at-num`), the compounds' names, the
+// verdict under the rail, and the words "donor" and "target", which sit on their rung's own line.
+const ladderTexts = (h) => h.stage.locator('.tb-pane-ladder text').evaluateAll((ts) => ts.map((t) => ({
+  s: t.textContent, y: Number(t.getAttribute('y')), cls: (t.getAttribute('class') || '').split(' '),
+})));
+// Which rung a marker word is on, counted from the TOP of the rail as drawn; -1 when it is not drawn.
+// Counted afresh from each drawing, because the narrow rail is re-solved whenever the verdict under it
+// changes length, so a rung's y in one state is not its y in the next.
+const rungOfWord = async (h, word) => {
+  const texts = await ladderTexts(h);
+  const ys = texts.filter((t) => t.cls.includes('at-num')).map((t) => t.y).sort((a, b) => a - b);
+  const at = texts.find((t) => t.s === word);
+  return at ? ys.indexOf(at.y) : -1;
+};
+// §5.3's own table of phosphate compounds, read out of the chapter, as [{ name, kj }] in the order it is
+// printed. It is the authority for which way up the ladder runs, and it is parsed rather than typed here
+// so the check is the chapter's word against the figure's drawing, not the figure's LADDER against itself.
+const chapterLadder = () => {
+  const path = 'biology/ch05-energy-and-metabolism/index.html';
+  const html = readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
+  const start = html.indexOf('<section id="atp">');
+  const end = start < 0 ? -1 : html.indexOf('</section>', start);
+  if (start < 0 || end < 0) throw new Error(`${path} has no complete <section id="atp">, so §5.3's table of phosphate compounds could not be read`);
+  const body = /<tbody>([\s\S]*?)<\/tbody>/.exec(html.slice(start, end));
+  if (!body) throw new Error(`${path}'s <section id="atp"> has no <tbody>, so §5.3's table of phosphate compounds could not be read`);
+  const rows = [...body[1].matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map((m) => [...m[1].matchAll(/<td>([\s\S]*?)<\/td>/g)].map((c) => c[1].replace(/<[^>]+>/g, '').trim()));
+  const table = rows.map(([name, kj]) => ({ name, kj: Number(String(kj).replace('−', '-')) }));
+  if (table.length < 3 || table.some((r) => !r.name || !Number.isFinite(r.kj))) {
+    throw new Error(`${path}: §5.3's table of phosphate compounds read as ${JSON.stringify(table)}; it needs at least three rows, each a name and a number in kJ/mol`);
+  }
+  return table;
 };
 
 // Each recipe is a list of [name, async (h) => {}] steps. `h` gives the step the page, the stage, the
@@ -2706,15 +2747,98 @@ const RECIPES = {
       await h.button(/^Ladder/).click();
       expect((await until(h, (x) => x.scene === 'ladder', 5_000)).scene === 'ladder', 'the ladder scene did not open');
       const donor = h.stage.getByRole('slider', { name: 'Donor' });
-      await donor.fill('0');
-      await atValue(h, donor, 0);
+      // End and Home rather than a number: the range holds a HEIGHT on the rail, so End is the top rung.
+      await donor.press('End');
       let d = await until(h, (x) => x.donor === 'pep', 5_000);
+      expect(d.donor === 'pep', `End on the Donor slider should reach the top rung, phosphoenolpyruvate; it reached ${d.donor}`);
       expect(d.transferPossible === true, `phosphoenolpyruvate should be able to phosphorylate ADP: ${JSON.stringify({ donor: d.donor, target: d.target, rung: d.rungKj })}`);
-      await donor.fill('7');
-      await atValue(h, donor, 7);
+      // The verdict, as the rail prints it. §5.3: a compound above ATP can "hand a phosphate to ADP and
+      // so make ATP". It printed "can phosphorylate ATP" until 2026-09-23: the phosphate put onto the
+      // thing it makes.
+      let said = (await ladderTexts(h)).map((t) => t.s).join(' ');
+      expect(/phosphoenolpyruvate can phosphorylate ADP and make ATP: −31\.4 kJ\/mol/i.test(said), `the verdict should say phosphoenolpyruvate phosphorylates ADP and makes ATP, −31.4 kJ/mol; the rail's text ends ${JSON.stringify(said.slice(-150))}`);
+      await donor.press('Home');
       d = await until(h, (x) => x.donor === 'g6p', 5_000);
+      expect(d.donor === 'g6p', `Home on the Donor slider should reach the bottom rung, glucose 6-phosphate; it reached ${d.donor}`);
       expect(d.transferPossible === false, `glucose 6-phosphate must not be able to phosphorylate ADP: ${JSON.stringify({ donor: d.donor, rung: d.rungKj })}`);
       expect(d.rungKj > -30.5, `it sits below ATP on the ladder, so it releases less: ${d.rungKj}`);
+      said = (await ladderTexts(h)).map((t) => t.s).join(' ');
+      expect(/glucose 6-phosphate cannot phosphorylate ADP to make ATP: \+16\.7 kJ\/mol/i.test(said), `the verdict should say glucose 6-phosphate cannot phosphorylate ADP to make ATP, +16.7 kJ/mol; the rail's text ends ${JSON.stringify(said.slice(-150))}`);
+      // The class and not the two sentences: no rung is ever the thing phosphorylated, because a rung is
+      // what the transfer MAKES. Every one of the eight names matches this — ATP, the two long ones, and
+      // the five that end "phosphate" — and none of the molecules that really take the phosphate does.
+      const onto = /phosphorylate (?:ATP|phosphoenolpyruvate|1,3-bisphosphoglycerate|\S+ (?:\d-)?phosphate)\b/i.exec(said);
+      expect(!onto, `the rail says "${onto?.[0]}": a rung is what a transfer makes, not what it phosphorylates`);
+    }],
+    ['the-rail-runs-the-way-up-the-chapter-prints-it', async (h) => {
+      // §5.3's table, top to bottom, is the rail top to bottom: every compound it lists is drawn at the
+      // number it gives, each one lower down than the one before. And all eight rung figures fall from
+      // the most negative at the top. The rail ran the other way until 2026-09-17, drawn by the same
+      // numbers, and no gate could see it: describe() reports ids, which do not move when the rail does.
+      const table = chapterLadder();
+      const texts = await ladderTexts(h);
+      const figures = texts.filter((t) => t.cls.includes('at-num')).sort((a, b) => a.y - b.y);
+      const values = figures.map((t) => Number(t.s.replace('−', '-')));
+      expect(figures.length === 8, `the rail should draw eight rung figures; it drew ${figures.length}`);
+      expect(values.every((v, i) => i === 0 || v > values[i - 1]), `from the top of the rail down, the rung figures read ${values.join(', ')}; §5.3's table runs from the most negative at the top`);
+      let above = null;
+      for (const row of table) {
+        const name = texts.find((t) => t.s === row.name && !t.cls.includes('at-num'));
+        expect(name, `§5.3's table lists ${row.name}, and the rail draws no rung with that name`);
+        const nearest = figures.reduce((best, t) => (Math.abs(t.y - name.y) < Math.abs(best.y - name.y) ? t : best));
+        const drawn = Number(nearest.s.replace('−', '-'));
+        expect(Math.abs(drawn - row.kj) < 0.05, `§5.3's table gives ${row.name} ${row.kj} kJ/mol, and the rail draws it at ${drawn}`);
+        expect(!above || name.y > above.y, `§5.3's table puts ${above?.name} above ${row.name}, and the rail draws ${row.name} at y=${name.y}, above ${above?.name} at y=${above?.y}: it runs the other way up`);
+        above = { name: row.name, y: name.y };
+      }
+    }],
+    ['up-on-the-controls-is-up-on-the-rail', async (h) => {
+      // A control that says up moves its marker UP THE RAIL AS DRAWN, toward phosphoenolpyruvate, and
+      // down moves it down. Until 2026-09-23 the Donor and Target ranges counted rungs from the top, so
+      // ArrowUp and a button a screen reader called "Donor, step up" both moved the marker one rung down.
+      // Read off the drawing, never off the range's number: which rung a number means is what is tested.
+      const pairs = [['Donor', 'donor'], ['Target', 'target']];
+      // Both markers in the middle of the rail and apart, so either direction has a rung to go to.
+      for (const [name, value] of [['Donor', 3], ['Target', 1]]) {
+        const slider = h.stage.getByRole('slider', { name });
+        await slider.fill(String(value));
+        await atValue(h, slider, value);
+      }
+      const press = async (word, act) => {
+        const before = (await h.describe())[word];
+        await act();
+        await until(h, (x) => x[word] !== before, 5_000);
+        return rungOfWord(h, word);
+      };
+      for (const [name, word] of pairs) {
+        const slider = h.stage.getByRole('slider', { name });
+        const from = await rungOfWord(h, word);
+        expect(from > 0 && from < 7, `the ${word} should start away from both ends of the rail; it is on rung ${from + 1} from the top`);
+        const up = await press(word, () => slider.press('ArrowUp'));
+        expect(up === from - 1, `ArrowUp on the ${name} slider should move the ${word} one rung UP the rail as drawn, from rung ${from + 1} to rung ${from} counting from the top; it went to rung ${up + 1}`);
+        const back = await press(word, () => slider.press('ArrowDown'));
+        expect(back === from, `ArrowDown on the ${name} slider should move the ${word} back down to rung ${from + 1}; it went to rung ${back + 1}`);
+      }
+      // The step buttons exist only at a phone's width, so they are pressed there, with the mouse.
+      await h.page.setViewportSize({ width: 390, height: 844 });
+      try {
+        const d = await until(h, (x) => x.layout === 'narrow', 10_000);
+        expect(d.layout === 'narrow', `a 390 px viewport should put the figure in its narrow layout: ${d.layout}`);
+        for (const [name, word] of pairs) {
+          const upButton = h.stage.getByRole('button', { name: `${name}, one rung up` });
+          const downButton = h.stage.getByRole('button', { name: `${name}, one rung down` });
+          const shows = [(await upButton.textContent()).trim(), (await downButton.textContent()).trim()];
+          expect(shows[0] === '↑' && shows[1] === '↓', `"${name}, one rung up" should show ↑ and "${name}, one rung down" ↓; they show ${JSON.stringify(shows)}`);
+          const from = await rungOfWord(h, word);
+          const up = await press(word, () => upButton.click());
+          expect(up === from - 1, `the button "${name}, one rung up" should move the ${word} one rung up the rail as drawn, from rung ${from + 1} to rung ${from} counting from the top; it went to rung ${up + 1}`);
+          const back = await press(word, () => downButton.click());
+          expect(back === from, `the button "${name}, one rung down" should move the ${word} back down to rung ${from + 1}; it went to rung ${back + 1}`);
+        }
+      } finally {
+        await h.page.setViewportSize({ width: 1000, height: 640 });
+        await until(h, (x) => x.layout === 'wide', 10_000);
+      }
     }],
     ['reset-returns-it-to-the-state-it-mounted-in', async (h) => {
       // Not /^Reset/: this figure has a `Reset view` as well, and a control is found by its accessible
