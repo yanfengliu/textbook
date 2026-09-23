@@ -97,6 +97,50 @@ test('a check with two correct answers, or none, or no explanation fails', () =>
   assert.deepEqual(checkDocument(page({ figures: GOOD_FIGURE, body: check('<li data-correct>a</li><li>b</li>') }), { glossary: GLOSSARY, kinds: KINDS }), []);
 });
 
+// ---- an option named by where it is written (found 2026-09-23, when the checks were shuffled) ----------
+// Seven check explanations said "the last option" or 「前两个选项…第三个」. Once the order is drawn
+// (src/components/choice-order.js), those words point at whichever option the draw put there.
+test('a check that names an option by where it is written fails, in its explanation or in an option, naming the words', () => {
+  const check = (opts, explain) => `<tb-check id="q7"><p class="question">Q?</p><ul class="options">${opts}</ul><p class="explain">${explain}</p></tb-check>`;
+  const fire = (opts, explain) => checkDocument(page({ figures: GOOD_FIGURE, body: check(opts, explain) }), { glossary: GLOSSARY, kinds: KINDS });
+  const OPTS = '<li data-correct>a</li><li>b</li><li>c</li>';
+  const cases = [
+    ['The carriers in the last option are real.', '"the last option"'],
+    ['The third option is a belief a reader can hold, and the first two options are not.', '"The third option", "the first two options"'],
+    ['Option B confuses rate with equilibrium.', '"Option B"'],
+    ['Neither choice (c) nor the rest is right.', '"choice (c)"'],
+    ['前两个选项只是换立场或改事实，第三个是拿时代攻击发言人。', '"前两个选项"'],
+    ['B项把定义换成了自己的定义。', '"B项"'],
+  ];
+  for (const [explain, words] of cases) {
+    const f = fire(OPTS, explain);
+    assert.equal(f.length, 1, `${explain}\n${f.join('\n')}`);
+    assert.ok(f[0].includes('<tb-check id="q7">\'s explanation') && f[0].includes(`(${words})`), f[0]);
+    assert.ok(f[0].includes('src/components/choice-order.js') && f[0].includes('Name the option by what it says'), f[0]);
+  }
+  for (const [option, words] of [['All of the above.', '"All of the above"'], ['Both A and B.', '"Both A and B"'], ['以上都不对。', '"以上都不对"']]) {
+    const f = fire(`<li data-correct>a</li><li>b</li><li>${option}</li>`, 'Why.');
+    assert.equal(f.length, 1, `${option}\n${f.join('\n')}`);
+    assert.ok(f[0].includes('<tb-check id="q7">\'s option 3 as written') && f[0].includes(`(${words})`), f[0]);
+  }
+});
+
+test('prose that only sounds like a position passes: a reason, an alternative, the other options, a named substance', () => {
+  // Each of these is ordinary prose this book writes, and the rule must not make an author reword it.
+  const check = (explain) => `<tb-check id="q8"><p class="question">Q?</p><ul class="options"><li data-correct>a</li><li>b</li></ul><p class="explain">${explain}</p></tb-check>`;
+  for (const explain of [
+    'The first answer is that the atmosphere changed; the second is that the chemistry may not allow better.',
+    'A cell with no oxygen has a second option: fermentation.',
+    'Substance B has not reached equilibrium, and Inhibitor A is outcompeted.',
+    'Carbon (C) makes up 18.5% of the body by mass.',
+    'The carriers are real, but the question is about a bare bilayer.',
+    '其余三个选项都是后世常说的意思，但都不是这一句的定义。',
+    '这是本书第三章，DNA项目的记录在后面。',
+  ]) {
+    assert.deepEqual(checkDocument(page({ figures: GOOD_FIGURE, body: check(explain) }), { glossary: GLOSSARY, kinds: KINDS }), [], explain);
+  }
+});
+
 test('a sort item naming a bin that does not exist, or without a why, fails', () => {
   const sort = (items) => `<tb-sort id="s"><ul class="bins"><li data-bin="x">X</li><li data-bin="y">Y</li></ul><ul class="items">${items}</ul></tb-sort>`;
   let fails = checkDocument(page({ figures: GOOD_FIGURE, body: sort('<li data-bin="z" data-why="w">thing</li><li data-bin="x" data-why="w">two</li>') }), { glossary: GLOSSARY, kinds: KINDS });
@@ -248,6 +292,22 @@ test('a number in scientific notation is a number: chapter 1 shipped `lensMetres
   // A stray letter after a number is still a word, and still an error the parser names.
   const f = checkTask('x < 2ee');
   assert.ok(f.some((m) => m.includes('has trailing "ee"')), f.join('\n'));
+});
+
+test('a bank item that names an option by where it is written fails, in its explanation, an option or a why', () => {
+  // Today draws each asking's order (src/components/choice-order.js), so a bank's words are held to the
+  // same rule as a check's.
+  const bank = (third) => checkChapterData({ objectives: [OBJ], items: [MCQ('i-a-1'), MCQ('i-a-2'), third], sections: ['s1'], figures: [], file: 'ch/objectives.js', itemsFile: 'ch/items.js' });
+  let f = bank({ ...MCQ('i-a-3'), explain: 'The first option is the textbook picture; the last option is a slip.' });
+  assert.equal(f.length, 1, f.join('\n'));
+  assert.ok(f[0].startsWith('ch/items.js: item "i-a-3"\'s explanation') && f[0].includes('("The first option", "the last option")'), f[0]);
+  f = bank({ ...MCQ('i-a-3'), options: [{ text: 'right', correct: true }, { text: 'wrong', why: 'Unlike option A, this ignores the charge.' }, { text: 'None of the above.', why: 'w' }] });
+  assert.equal(f.length, 2, f.join('\n'));
+  assert.ok(f.some((x) => x.includes('item "i-a-3"\'s why for option 2 as written') && x.includes('("option A")')), f.join('\n'));
+  assert.ok(f.some((x) => x.includes('item "i-a-3"\'s option 3 as written') && x.includes('("None of the above")')), f.join('\n'));
+  // A free-response item has no options to point at, and there "the first answer" is a section's first
+  // reason: it is not read.
+  assert.deepEqual(bank({ id: 'i-a-3', objective: 'a', kind: 'free', question: 'q', rubric: ['r'], explain: 'The first answer is a statement about history, and the first option is ours to choose.' }), []);
 });
 
 // ---- every item bank is listed on the study page (found 2026-09-11: chapter 2's 105 items were not) ----

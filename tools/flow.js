@@ -4,11 +4,17 @@
 // Claim: real clicks, key presses and a drag drive the shipped components to the states asserted, and
 // no console or page error is left behind. On the biology chapter: (1) clicking a wrong option in the
 // first check marks it wrong, reveals the correct one and the explanation, and disables the options;
-// (2) pressing Enter on a keyboard-focused option in the second check answers it; (3) placing a sort
-// card by its button moves it into that bin with a verdict and a reason, and dragging a card onto a
-// bin does the same; (4) a glossary term opens its definition on click and closes on Escape; (5) the
-// header toggle switches the theme and the figures are told; (6) at phone width the menu button opens
-// the contents drawer and a link in it closes it.
+// (2) pressing Enter on the keyboard-focused correct option in the second check answers it right; (3)
+// placing a sort card by its button moves it into that bin with a verdict and a reason, and dragging a
+// card onto a bin does the same; (4) a glossary term opens its definition on click and closes on Escape;
+// (5) the header toggle switches the theme and the figures are told; (6) at phone width the menu button
+// opens the contents drawer and a link in it closes it.
+//
+// Every step, on both books, picks a check's option by `data-correct`, never by where it stands: the
+// options are shown in an order drawn per page (src/components/choice-order.js), so "the first option"
+// is whichever option the draw put first. Until 2026-09-23 the two biology steps pressed `nth(0)` and
+// `nth(1)`, which were a wrong and the right option only because chapter 1 was written that way; under
+// the draw, chapter 1's q2 shows a wrong option second.
 //
 // The second book is driven too, and every one of its steps is structural. Every `tongjian` chapter on
 // disk is loaded and its first `<tb-check>` is answered by a wrong option and, on a fresh load, by
@@ -415,8 +421,11 @@ try {
   await check(page, 'check-wrong-answer', async () => {
     const q = page.locator('#q1');
     await q.scrollIntoViewIfNeeded();
-    await q.locator('.tb-check__opt').nth(0).click();
+    const wrong = q.locator('.tb-check__opt:not([data-correct="1"])').first();
+    const chosen = (await wrong.textContent()).trim();
+    await wrong.click();
     expect(await q.getAttribute('data-answered') === 'wrong', 'the check did not record a wrong answer');
+    expect((await q.locator('.tb-check__opt.is-wrong').textContent()).trim() === chosen, 'the option marked wrong is not the one that was clicked');
     expect(await q.locator('.tb-check__opt.is-wrong').count() === 1, 'the chosen option is not marked wrong');
     expect(await q.locator('.tb-check__opt.is-correct').count() === 1, 'the correct option is not revealed');
     expect(await q.locator('.explain').isVisible(), 'the explanation is not shown');
@@ -427,7 +436,7 @@ try {
   await check(page, 'check-keyboard-answer', async () => {
     const q = page.locator('#q2');
     await q.scrollIntoViewIfNeeded();
-    await q.locator('.tb-check__opt').nth(1).focus();
+    await q.locator('.tb-check__opt[data-correct="1"]').focus();
     await page.keyboard.press('Enter');
     expect(await q.getAttribute('data-answered') === 'right', `Enter on the correct option gave data-answered="${await q.getAttribute('data-answered')}"`);
     expect((await q.locator('.tb-check__verdict').textContent()).includes('Right'), 'the verdict text is missing');
