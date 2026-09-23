@@ -10,6 +10,15 @@
 // One multiple-choice question. Choosing an option marks it right or wrong, reveals the correct one,
 // shows the explanation, and announces the result through a live region. Options are real buttons,
 // so the keyboard works without any extra handling.
+//
+// The options are not shown in the order they are written. The chapters' checks were written with the
+// correct option at B or C in 34 of 36, so pressing B was right 21 times in 36. They are shown in an
+// order drawn by displayOrder() (src/components/choice-order.js), and the letters follow the screen: A
+// is always the option at the top. The draw is seeded by the check's id qualified by its page, because
+// every chapter numbers its checks q1 to q5. A check records nothing, so the same page always draws the
+// same order. An explanation must therefore name an option by what it says, never by where it stands
+// ("the last option", 「前两个选项」); `npm run check` fails one that does.
+import { displayOrder } from './choice-order.js';
 
 // The words this component says, per language. The verdict is the one moment the component addresses
 // the reader directly, and it was the literal English `Right.` / `Not quite.` on a page whose every
@@ -50,6 +59,17 @@ function checkWords() {
   return { ...(CHECK_WORDS[lang] ?? CHECK_WORDS.en), ...(window.__textbook?.strings?.check || {}) };
 }
 
+// The page a check is on, as the folders of its book and its chapter, such as
+// "biology/ch04-membranes-and-transport". It is read off the last two folders of the page's own address,
+// so the site served at the root and the site published under /textbook/ draw the same order, and a
+// query or a hash changes nothing. Bound: a chapter page is `<book>/<chapter>/index.html`, and no other
+// page carries a check. A check on a page at another depth could draw a different order at the two
+// addresses; nothing else would change.
+function pageOf() {
+  const path = new URL(document.URL).pathname.replace(/\/index\.html?$/i, '/');
+  return path.split('/').filter(Boolean).slice(-2).join('/');
+}
+
 export class TbCheck extends HTMLElement {
   connectedCallback() {
     if (this.__built) return;
@@ -66,12 +86,23 @@ export class TbCheck extends HTMLElement {
     list.className = 'tb-check__options';
     list.setAttribute('role', 'group');
     const letters = 'ABCDEFGH';
-    const buttons = options.map((li, i) => {
+    // `order[shown]` is the authored index of the option shown at position `shown`. A check with no id
+    // is keyed by its number on the page, which is as stable as the page.
+    const order = displayOrder(`${pageOf()}#${this.id || `q${n}`}`, 0, options.length);
+    const buttons = order.map((authored, shown) => {
+      const li = options[authored];
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'tb-check__opt';
+      // `data-correct` follows the option, not the position: it is what marks the answer below, and it
+      // is how tools/flow.js finds the right and the wrong option to press.
       b.dataset.correct = li.hasAttribute('data-correct') ? '1' : '';
-      b.innerHTML = `<span class="k">${letters[i]}</span><span>${li.innerHTML}</span>`;
+      const k = document.createElement('span');
+      k.className = 'k';
+      k.textContent = letters[shown];
+      const text = document.createElement('span');
+      text.innerHTML = li.innerHTML;
+      b.append(k, text);
       list.append(b);
       return b;
     });

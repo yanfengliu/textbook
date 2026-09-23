@@ -16,12 +16,16 @@
 // (expectProblems in src/components/task.js — a clause no figure state can satisfy fails here, not
 // in a sitting); and every chapter that has an items.js is listed as a tb-source, under the chapter
 // id the store files it by, on every page that carries a <tb-sitting>, and at least one page does.
+// No multiple-choice question names an option by where it is written: not a <tb-check>'s explanation
+// or its options, and not a multiple-choice item's explanation, its options or their whys
+// (optionPositionWords(), below).
 //
 // Bound: it reads the authored HTML with a small tolerant tokenizer, not the rendered DOM, so it knows
 // nothing about what the scripts produce (numbering, popovers, figure content) and nothing about
 // pixels. The tokenizer handles the markup this repo writes; it is not an HTML5 parser. The expect
 // check knows the grammar and not the figure: a path a figure does not report is found only by
-// grading against that figure's describe().
+// grading against that figure's describe(). The option-position rule knows the phrasings in
+// OPTION_POSITION and no others; its own comment lists what it cannot see.
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve, posix } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -34,6 +38,50 @@ const RAW = new Set(['script', 'style']);
 // bound of that half of the card rule: a card that says it some other way passes here and is caught by
 // the href half, which does not depend on wording.
 const UNWRITTEN = ['in preparation', 'coming soon', 'not yet written', 'being written', 'yet to be written', 'to come'];
+
+// The ways a sentence names a multiple-choice option by where it is written rather than by what it says.
+// No reader sees the written order. Today has shown options in a drawn order since 2026-09-22, and the
+// chapters' checks since 2026-09-23 (src/components/choice-order.js). So "the last option" points at
+// whichever option the draw put last, and an explanation can tell a reader the right option is the
+// mistake. Seven check explanations said it this way when the checks were first shuffled: biology
+// chapter 4 q2, chapter 5 q1 to q5, and 通鑑 chapter 3's q-bianjie (「前两个选项…第三个」).
+//
+// Bound: these phrasings and no others. Each is narrow on purpose, because the rule reads explanations
+// and a whole-word "first" or 第一个 is ordinary prose there. "The first two options" is seen; "the last
+// is wrong", "the first two", "the one above" and a bare 第三个 are not. Nor is "answer" with an ordinal:
+// this book writes "the first answer" for the first reason a section gives. An explanation flagged for
+// one phrase is usually reworded whole, which takes such a phrase with it: chapter 5's q4 says "The last
+// is wrong" in the sentence after "The first option". The rule reads a check's explanation and options and
+// a bank's explanations, options and whys. It does not read a question's stem, which may say "the
+// options below" of all of them at once.
+const OPTION_POSITION = [
+  // "the last option", "The third option", "the first two options", "the second choice"
+  /\bthe\s+(?:first|second|third|fourth|fifth|sixth|seventh|eighth|last|final|penultimate|middle)\s+(?:(?:two|three|four)\s+)?(?:option|choice)s?\b/gi,
+  // "option B", "options B and C", "choice (c)", "answer D": a letter names a place on the screen
+  /\b(?:[Oo]ptions?|[Cc]hoices?|[Aa]nswers?)\s+(?:[A-H]|\([A-Ha-h]\))(?![\w-])/g,
+  // "both A and B", "neither B nor C"
+  /\b(?:[Bb]oth|[Ee]ither|[Nn]either)\s+[A-H]\s+(?:and|or|nor)\s+[A-H]\b/g,
+  // "all of the above", "none of the above", "the options below"
+  /\b(?:all|none|both|neither|either|each|any)\s+of\s+the\s+(?:above|below)\b|\b(?:option|choice|answer)s?\s+(?:above|below)\b/gi,
+  // 第三个选项, 前两个选项, 后两个选项, 最后一个选项, 第二个答案
+  /(?:第[一二三四五六七八]|前[两二三四]|后[两二三四]|最后一)个(?:选项|答案)/g,
+  // 选项B, B项 (not the A of "DNA项目")
+  /选项\s*[A-HＡ-Ｈ]|(?<![A-Za-zＡ-Ｚａ-ｚ])[A-HＡ-Ｈ]\s*项/g,
+  // 以上选项, 上述各项, 以上都不对, 以上皆是
+  /(?:以上|上述)(?:选项|各项|几项)|以上(?:都|皆|均)(?:对|是|不对|不是|错|正确|不正确)/g,
+];
+
+// Every phrase in `text` that names an option by where it is written, pattern by pattern.
+function optionPositionWords(text) {
+  const found = [];
+  for (const re of OPTION_POSITION) for (const m of String(text ?? '').matchAll(re)) found.push(m[0]);
+  return found;
+}
+
+// What an author is told when the rule fires: what was found, why it is wrong, and what would pass.
+function optionPositionMessage(what, found) {
+  return `${what} names an option by where it is written (${found.map((f) => `"${f}"`).join(', ')}). Options are shown in a drawn order (src/components/choice-order.js), so these words point at whichever option the draw put there. Name the option by what it says.`;
+}
 
 // Tokenise HTML into a tree of { tag, attrs, children, text }. Text nodes are { text }.
 export function parseHtml(html) {
@@ -191,7 +239,16 @@ export function checkDocument(html, { glossary = {}, kinds = [], objectives = []
     if (options.length < 2) fail(`<tb-check id="${id}"> needs at least two options, has ${options.length}`, c);
     const correct = options.filter((o) => o.attrs['data-correct'] !== undefined).length;
     if (correct !== 1) fail(`<tb-check id="${id}"> needs exactly one data-correct option, has ${correct}`, c);
-    if (!findAll(c, (n) => hasClass(n, 'explain')).length) fail(`<tb-check id="${id}"> has no .explain`, c);
+    const explains = findAll(c, (n) => hasClass(n, 'explain'));
+    if (!explains.length) fail(`<tb-check id="${id}"> has no .explain`, c);
+    for (const e of explains) {
+      const found = optionPositionWords(textOf(e));
+      if (found.length) fail(optionPositionMessage(`<tb-check id="${id}">'s explanation`, found), e);
+    }
+    options.forEach((o, i) => {
+      const found = optionPositionWords(textOf(o));
+      if (found.length) fail(optionPositionMessage(`<tb-check id="${id}">'s option ${i + 1} as written`, found), o);
+    });
   }
 
   // sorts
@@ -359,6 +416,14 @@ export function checkChapterData({ objectives = [], items = [], sections = [], f
       for (const o of options) {
         if (!o.correct && !o.why) failItem(`item "${id}" has a distractor with no "why"; a distractor must say what choosing it reveals`);
       }
+      const explained = optionPositionWords(it.explain);
+      if (explained.length) failItem(optionPositionMessage(`item "${id}"'s explanation`, explained));
+      options.forEach((o, i) => {
+        const text = optionPositionWords(o?.text ?? o?.html ?? o?.label ?? o);
+        if (text.length) failItem(optionPositionMessage(`item "${id}"'s option ${i + 1} as written`, text));
+        const why = optionPositionWords(o?.why);
+        if (why.length) failItem(optionPositionMessage(`item "${id}"'s why for option ${i + 1} as written`, why));
+      });
     } else if (it.kind === 'task') {
       if (!it.figure) failItem(`item "${id}" is a task with no figure`);
       else if (figures.length && !figures.includes(it.figure)) failItem(`item "${id}" sets a task on figure "${it.figure}", which the chapter does not have`);
