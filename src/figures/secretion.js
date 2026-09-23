@@ -264,6 +264,12 @@ const CSS = (s) => `${panelCss(s)}
 export function mount(root, ctx) {
   const scope = 'tb-sec';
   const reduced = Boolean(ctx.reducedMotion);
+  // A pinned clock is not advanced by any control. `?t=` pins every figure on the page and the gates take
+  // their frames that way, so a figure that starts running on a press is only still for as long as nothing
+  // presses it — which is what `npm run shot` was relying on without saying so. Written as a function
+  // rather than read once because the frame may pin a figure that mounted unpinned. `undefined` counts as
+  // unpinned as well as `null`: a ctx that omits the field must leave the figure playable for a reader.
+  const pinned = () => ctx.pinnedTime !== null && ctx.pinnedTime !== undefined;
   let palette = ctx.palette;
   let theme = ctx.theme;
   let t = ctx.pinnedTime ?? 0;
@@ -441,6 +447,12 @@ export function mount(root, ctx) {
     draw();
   }
   function setPlaying(v) {
+    // Refused before the reduced-motion branch, because that branch's cut to the end of the route would
+    // move the clock too. The intent is refused rather than recorded: that is this repo's settled shape
+    // for a pinned Play (`playing = next && ctx.pinnedTime === null` in bilayer, bulk-transport,
+    // osmometer, permeability and polymer), and a button reading Pause over a journey that is not moving
+    // is the worse of the two lies. Stopping is never refused, so setTime() and step() still call in.
+    if (v && pinned()) return;
     if (v && reduced) {
       // Nothing moves on its own under reduced motion: Play is a cut to the end of the route.
       playing = false;

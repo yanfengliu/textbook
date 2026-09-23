@@ -150,4 +150,65 @@ So: **poll what the next step touches, not only what this step asserts on.** If 
 
 **And polling for "stopped" without first requiring "started" is not a wait, it is a coin toss.** A press hands its work to the browser; for a frame or two the element has not begun moving, two consecutive reads agree at the position it started from, "stable" is true, and the poll leaves holding exactly what the press was supposed to change. Measured 2026-09-17: replacing the drawer's 650 ms sleeps in `tools/devices.js` with a stability poll produced six `tapping outside the drawer did not close it (x 0)` failures on loads that had passed for as long as that gate had existed, and every one of them read as a product defect. The shape that works is **moved, then stopped**: keep the reading taken before the press, require the element to move away from it, and only then wait for it to settle.
 
+**And "moved" has to be measured against where the thing rests, which means the reading may not be rounded.** `Math.round` on a poll's own reading throws away exactly the information that says "still moving". Measured 2026-09-17 on the drawer in `tools/devices.js`: its ease spends the last ~90 ms of 400 travelling its last ~2 px, so **22 of 400 polls (5.5 %) left one rounded pixel short of rest**. That short reading becomes the next wait's `from`, which disarms the *moved* guard for the only position that matters — and that guard fires on **55 of those 400 polls**. Replaying the same recorded readings with a `from` one pixel short leaves **20 of 200 polls holding an open drawer**: `following a link left the drawer open over the text (x 0)`.
+
+So **a poll compares the artefact's exact value and the messages round, never the other way round**, and the reading a wait is armed with comes from the same reader the poll uses. A third condition is cheap and worth having: two equal readings only mean "stopped" if a rendered frame separated them, so read `document.timeline.currentTime` in the same evaluate and require it to differ.
+
+**How it was found matters as much as what it was.** The failure would not reproduce at the gate — twenty consecutive runs were green. So it was measured one level down, with a probe running the identical sequence 100 times on one page: 400 polls against the 2 a gate run performs. Causation was then proved by replaying the **recorded readings of green runs** with only `from` varied, so nothing else could account for it. When a flake will not reproduce, raise the sample rate at the mechanism rather than running the whole gate again.
+
+**And a figure genuinely in motion cannot be caught still at all.** Where the first three traps are about polling the wrong thing, this one is about there being nothing to poll: `cilium`'s readout is measured against its own running clock, so no wait makes the two agree. The answer is to read both in the same instant, or to pin the clock, not to wait longer.
+
 The same round produced the companion trap, from the worker that made the change: **a threshold a poll leaves at is a different number from the same threshold a sleep happened to overshoot.** A `waitForTimeout(6000)` was landing near a ratio of 1.3; the poll that replaced it left at 1.202, and the step's next assertion demanded a drop of 0.15 from a value whose floor is 1.114. The step was unreachable and the change looked like a product failure.
+
+## A gate's exemption list must print what it measured, not what it was told
+
+`npm run pinned` shipped with a `KNOWN` list of figures whose clocks were expected to move, and one entry was simply wrong: it recorded that `pump`'s Ouabain control stepped the pump cycle on its own. Measured on a fresh mount, with the guard in place and with it removed, only Run ever moved it. The entry came from the gate's **first** version, which pressed a kind's controls in document order on one page — so Run was already running when Ouabain was pressed, and the gate attributed Run's motion to Ouabain.
+
+The entry then sat in the file reading like a fact. Anyone auditing the gate would have found a plausible sentence with no way to tell it from a measurement.
+
+**So an exemption prints the measurement that justifies it, on every run.** Not the reason it was added, and not a sentence someone wrote once: the numbers the gate itself just observed for that entry. An exemption that cannot restate its own evidence is a claim, and a claim in an exemption list is indistinguishable from a finding.
+
+The same round produced the reason this matters twice over: the gate's first version **reported green over the exact defect it was written to catch**, for the same ordering reason. A fixture that ends early, an exemption that was never measured, and a check that agrees with itself are one family.
+
+## A Playwright locator that matches nothing does not fail. It waits.
+
+Measured 2026-09-17. `tools/legible.js` counted a figure's visible buttons once, then addressed each by index. `polymer` **hides** one control rather than removing it (`btnForm.style.display = 'none'` when the family is not sugar), so it shows nine buttons at open and eight after a press. The stale index then matched nothing — and `isEnabled()` on a locator that matches nothing does not throw. It waits, and with no timeout of its own it waits `ACTION_TIMEOUT_MS`, which this repository sets to **180 seconds**, before the surrounding `.catch()` shrugs.
+
+One stale index, one 180-second wait, 185 seconds for the pair. A/B on the same tree: element handles with a 1-second bound gave 5.2 s; the index loop gave 185.0 s. **Both arms reported the same nine states**, which is why the cost never looked like missing work and why "the figure is pinned-clean and still slow" was true and still missed it.
+
+So: **bound every Playwright call that can legitimately match nothing**, and never let `ACTION_TIMEOUT_MS` be the bound for an existence question. A control that is present answers in milliseconds. Prefer element handles taken once over re-resolving by index, because an index is a claim about a list that may have changed underneath you.
+
+The general form, which this file already states about return values: a call that cannot find its subject hands back something the next line uses without complaint. Here that something is time.
+
+## Retest an inherited blocker before repeating it, and check what the repo says about it
+
+The 185-second figure above was **a day stale when it was handed on**, and the fix it described was already in the file. Worse, two documents in this repository disagreed about the same gate by a factor of four — one said 24 minutes, the gate's own header said 4 minutes 7 seconds — and both were being quoted in briefs at the same time.
+
+The canon already says a blocker you inherited is a claim like any other. This adds where to look: **a gate's own header is the closest thing to the truth**, because it is edited by whoever last changed the gate, and a number in a plan or a handoff is a snapshot of a tree that has since moved. When the two disagree, measure, then fix whichever is wrong.
+
+## Demonstrate a gate's bound, do not merely state it
+
+The canon says name the bound in the gate's own header. This repository's practice goes one step further, and the step is cheap.
+
+`test/use-before-declared.test.js` landed on 2026-09-17 finding **zero** real instances across 56 modules — the three it was written for had already been fixed. Its red proof therefore had to come from mutations, and it added a third arm that is worth copying: it reintroduced **the one real instance this repository has actually shipped**, verbatim (`const tw = tween({ … done: () => tweens.delete(tw) })`, `symbiont.js`, 2026-09-16), and recorded that the check stays **green** on it, because that read is inside a closure and the walk is scope-exact.
+
+So the header does not say "it cannot see closures" as an assertion. It says so with an example that is known to have happened here, and the proof file carries the exit code.
+
+**A stated bound is a claim. A demonstrated bound is a measurement.** When you write a gate, find a real defect it does **not** catch and put that in the proof beside the one it does. A future reader deciding whether to trust the gate needs the shape of its blind spot more than the shape of its coverage, and the two look identical from a green run.
+
+The same worker also mutated its own **false-alarm fixture** to prove that fixture was load-bearing, which is the same move pointed at the test rather than the product: a fixture nobody can make fail is not holding anything.
+
+## A figure that opts out of a shared class name is invisible to every gate that keys on it
+
+`membrane3d` **named** its control bar `.m3-bar` instead of `.fig-toolbar` until 2026-09-17. That one difference hid it from two gates in one week:
+
+- `npm run sweep3d` hides overlays by class before measuring the bare canvas, so the figure was **never covered at all** and passed with its renderer replaced by a blank clear — the exact defect that gate was hardened against in 2026-09-10.
+- `npm run narrow`, once it began measuring toolbars, read `0 px in 0 rows`, which is indistinguishable from a figure that has no controls.
+
+Neither gate was wrong. Both were asking a reasonable question of a shared vocabulary, and one figure was not speaking it.
+
+**So the fix is the figure, not the gates.** Teaching each check about the exception repairs the checks that exist and leaves the next one broken, and nobody remembers to add an exception to a gate written three months later. The shared names in `components.css` — `.fig-toolbar`, `.fig-btn`, `.tb-figure__stage`, the bench's pane classes — are a contract with every present and future check, and a figure keeps its own look by scoping its styles under its own root class, which is already the convention.
+
+The general shape, which this file states elsewhere about return values and about locators: **a check that cannot find its subject must say so rather than score it.** Both gates now do. But a subject that renames itself will keep finding checks that have not learned to say it yet, so the cheaper discipline is to not rename.
+
+The figure was moved to `.fig-toolbar` on 2026-09-17, keeping its own layout scoped under its root class, and the move changed no pixel: the labelled frames are byte-identical before and after. A sweep of all 44 figures found **no other private toolbar class** — every other figure writes `fig-toolbar` itself, takes it from `lib/three-common.js`'s `createStage`, or takes it from the bench.

@@ -1,5 +1,6 @@
 // Shared Playwright helpers for the gates, and the one list of pages they visit.
 import { chromium } from 'playwright';
+import { cacheExternal } from './net-cache.js';
 import { readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -155,27 +156,96 @@ export function collectErrors(page) {
   return errors;
 }
 
+// A promise that never settles: what `readySignal` falls back to once its signal is no longer usable.
+const NEVER = new Promise(() => {});
+
+// Wake as soon as the page says it is ready, and never later than the cap.
+//
+// Why a promise and not an event, and how the already-fired race is handled: `window.__textbook` is
+// built in src/shell.js's constructor, and `whenReady()` hands back a promise created THERE and resolved
+// once, in `_check()`, at the same instant `state` becomes 'ready'. A promise is a latch, not an event:
+// awaiting one that has already resolved resolves immediately. So the usual way this change goes
+// wrong — the signal fires before the listener attaches, and the listener then waits for a second firing
+// that never comes — cannot happen against `whenReady()`, and nothing new has to be emitted for it.
+// The listener is also attached lazily, only after a first check has found the page not ready, so a page
+// that is already ready when we look never pays for it.
+//
+// Three things can still go wrong, and all three fall back to the old 100 ms rhythm rather than hanging:
+//   - `window.__textbook` does not exist yet (the shell's module has not run). `arm()` polls for it IN
+//     THE PAGE, which costs no round trip; until it appears the cap is what wakes the loop.
+//   - The execution context goes away (a navigation, a closed page). The evaluate rejects, the signal is
+//     retired, and the loop is a plain 100 ms poll again.
+//   - The signal resolves but the state read back is not 'ready' — only reachable if the page navigated
+//     between the two — so the caller retires it and the loop reverts to the cap.
+// This is a change to WHEN the loop looks, never to WHAT it accepts: the break below still reads
+// `window.__textbook.state` and still breaks only on 'ready', so a figure stuck in 'loading' holds the
+// gate exactly as it did, and the timeout still fires with the same message.
+function readySignal(page) {
+  let armed = null;
+  let fired = false;
+  return {
+    fired: () => fired,
+    /** Resolve as soon as the page's handshake promise does, or after capMs, whichever comes first. */
+    wait(capMs) {
+      if (armed === null) {
+        armed = page.evaluate(() => new Promise((resolve) => {
+          const arm = () => {
+            if (!window.__textbook?.whenReady) return false;
+            window.__textbook.whenReady().then(resolve);
+            return true;
+          };
+          if (!arm()) {
+            const id = setInterval(() => { if (arm()) clearInterval(id); }, 10);
+          }
+        })).then(() => { fired = true; }, () => { armed = NEVER; });
+      }
+      // Never rejects: a broken signal must fall back to the poll, not fail the page load.
+      return Promise.race([armed, page.waitForTimeout(capMs)]);
+    },
+    retire() { armed = NEVER; fired = false; },
+  };
+}
+
 // Load a page and wait for the handshake (src/shell.js sets window.__textbook.state to 'ready' once
 // the shell is mounted and, under ?eager=1, every figure is ready or in error). Resolves with the
 // figures' descriptions. Fails fast when a script request fails rather than at the timeout.
+//
+// The loop below reads the handshake, but it is woken by `readySignal` above rather than by a fixed
+// sleep, so a page that becomes ready 3 ms into the wait is seen at 3 ms and not at 100. Measured on
+// 2026-09-17: 245 of 342 page loads across eight gates needed more than one check, and `npm run pinned`
+// — 775 lab mounts — waited a mean of 109 ms per load after the page was already ready, 75.9 s over the
+// run. This gave 42 s of that back. See docs/learning/gate-proofs.md for the arms and the red proof.
+//
+// The external fetches are routed through the run's memory here, in the one function every gate uses to
+// open a page, rather than at each gate's own `newPage`. Two reasons: a gate added later is covered
+// without anybody remembering to cover it, which is the shape docs/policies/local-rules.md calls "a
+// check must not depend on being remembered"; and the routing has to be installed BEFORE `goto`, which
+// is exactly where this function stands. `tools/devices.js` does not come through here — it drives three
+// engines through its own contexts — so it installs the cache itself. See tools/lib/net-cache.js for what
+// the cache does and, more importantly, for what it stops proving.
 export async function openPage(page, url, { timeoutMs = 120_000 } = {}) {
+  await cacheExternal(page);
   let failedRequest = null;
   const onFailed = (req) => {
     if (!failedRequest && /\.(m?js)(\?|$)/.test(req.url())) failedRequest = `${req.url()} (${req.failure()?.errorText ?? 'unknown'})`;
   };
   page.on('requestfailed', onFailed);
+  const ready = readySignal(page);
   try {
     await page.goto(url, { waitUntil: 'load', timeout: timeoutMs });
     const deadline = Date.now() + timeoutMs;
     while (true) {
       const state = await page.evaluate(() => window.__textbook?.state ?? null);
       if (state === 'ready') break;
+      // The signal said ready and the state does not agree, so it is answering for a page that is no
+      // longer here. Fall back to the cap rather than spin on a promise that has already settled.
+      if (ready.fired()) ready.retire();
       if (failedRequest) throw new Error(`a script failed to load: ${failedRequest}`);
       if (Date.now() > deadline) {
         const figures = await page.evaluate(() => Object.fromEntries(Object.entries(window.__textbook?.figures ?? {}).map(([k, v]) => [k, v.state])));
         throw new Error(`page did not become ready within ${timeoutMs} ms; figure states: ${JSON.stringify(figures)}`);
       }
-      await page.waitForTimeout(100);
+      await ready.wait(100);
     }
   } finally {
     page.off('requestfailed', onFailed);

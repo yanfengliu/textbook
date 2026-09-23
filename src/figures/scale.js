@@ -207,7 +207,7 @@ const CSS = `
 .tb-scale .sc-size { font-size: 10.5px; fill: var(--ink-soft); }
 .tb-scale .sc-tick { font-size: 11.5px; fill: var(--ink-soft); }
 .tb-scale .sc-band { font-size: 11px; font-weight: 500; }
-.tb-scale .is-near .sc-name, .tb-scale text.is-near { fill: var(--leaf); font-weight: 600; }
+.tb-scale .is-near .sc-name, .tb-scale text.is-near { fill: var(--leaf-text); font-weight: 600; }
 .tb-scale .sc-lens { cursor: grab; outline: none; }
 .tb-scale .sc-lens:focus-visible .sc-focus { stroke: var(--leaf); stroke-width: 2; }
 .tb-scale.is-dragging .sc-lens { cursor: grabbing; }
@@ -230,7 +230,7 @@ const CSS = `
 .tb-scale.is-narrow .sc-tick { font-size: 10.5px; }
 .tb-scale.is-narrow .sc-band { font-size: 11.5px; font-weight: 600; }
 .tb-scale.is-narrow .sc-halo { stroke-width: 3px; }
-.tb-scale.is-narrow .sc-inline { font-size: 10.5px; font-weight: 600; fill: var(--leaf); }
+.tb-scale.is-narrow .sc-inline { font-size: 10.5px; font-weight: 600; fill: var(--leaf-text); }
 .tb-scale.is-narrow .sc-track { cursor: grab; }
 .tb-scale.is-narrow.is-dragging .sc-track { cursor: grabbing; }
 .tb-scale.is-narrow .fig-card {
@@ -477,8 +477,13 @@ export function mount(root, ctx) {
     }
 
     // Drag the lens by its glass or handle, or tap the ruler to send it there.
-    function down(e, x) {
-      const onLens = lensG.contains(e.target);
+    //
+    // `onLens` is decided by the caller, BEFORE any glide is finished, and never re-derived here. The
+    // lens's interior is redrawn with replaceChildren() on every repaint, so a press that landed on the
+    // ruler line or a tick INSIDE the lens is a detached node the moment the glide finishes, and
+    // `lensG.contains(e.target)` answers no about a node that is no longer anywhere — which dropped the
+    // press entirely. See onDown below for the measurement.
+    function down(e, x, y, onLens) {
       if (!onLens && e.target !== track) return null;
       const offset = onLens ? xOf(u) - x : 0;
       if (!onLens) setU(uOf(x));
@@ -846,9 +851,20 @@ export function mount(root, ctx) {
   }
   const onDown = (e) => {
     if (e.button !== undefined && e.button !== 0) return;
+    // WHAT WAS PRESSED IS READ FIRST, before the glide is finished, and this order is the fix rather
+    // than a tidy-up. `glide.finish()` runs the tween's last update, which calls setU, which repaints —
+    // and the wide layout's repaint rebuilds the lens's interior with `inner.replaceChildren()`. So a
+    // press that landed on the ruler line, a tick or a label drawn inside the lens targeted a node that
+    // finishing the glide had just thrown away, `lensG.contains(e.target)` said no about a detached
+    // node, `down()` returned null, and the press was dropped: grabbing the lens while it was still
+    // gliding did nothing at all. Measured 2026-09-17 through `DRIVE_KINDS=scale npm run drive` —
+    // `drag-the-lens-left` failed 17 of 20 runs, and the pointerdown the figure had just handled read
+    // back `stillInDocument: false, defaultPrevented: false` (out/scaleprobe/probe2.mjs). The three runs
+    // that passed were the ones where the glide had ended before the press arrived.
+    const onLens = layout.lens.contains(e.target);
     if (glide) glide.finish();
     const p = svgPoint(e);
-    const d = layout.down(e, p.x, p.y);
+    const d = layout.down(e, p.x, p.y, onLens);
     if (!d) return;
     e.preventDefault();
     dragging = { id: e.pointerId, ...d };

@@ -34,21 +34,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The trim below runs tools/pages-exclude.js, so this job needs the repository's own Node rather
+      # than whatever the runner image happens to ship. A version mismatch here would read as the trim
+      # failing.
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
       # No `enablement: true`: that input needs a token other than GITHUB_TOKEN, so Pages is turned on
       # for the repository out of band instead (`gh api -X POST repos/<owner>/textbook/pages`).
       - uses: actions/configure-pages@v6
 
       # The checkout is disposable, so the site is made by deleting what is not the site rather than by
-      # copying what is. tools/pages-exclude.txt is the one list; tools/subpath.js reads the same file,
-      # so the tree proved locally and the tree deployed here cannot drift apart.
+      # copying what is. tools/pages-exclude.txt is the one list, and tools/pages-exclude.js is the one
+      # matcher: `npm run subpath` and test/publish.test.js call it too, so the tree proved locally and
+      # the tree deployed here cannot drift apart — not over the list, and not over what a pattern in it
+      # means. The list is matched HERE rather than by `rm`, because the entries are globs now
+      # (**/*.md keeps every chapter's FIGURES.md off the site without anybody naming it) and neither
+      # `rm` nor `xargs` expands one — they would have deleted nothing and published the lot.
       # .git and .github are dropped by upload-pages-artifact itself, whatever this list says.
       - name: Trim the checkout to the site
         shell: bash
         run: |
           set -euo pipefail
-          excludes=$(grep -v '^[[:space:]]*$' tools/pages-exclude.txt)
-          echo "removing:"; echo "$excludes" | sed 's/^/  /'
-          echo "$excludes" | xargs -r rm -rf
+          # Written to a file rather than piped: a pipeline exits with its last stage's status, so
+          # `node … | xargs rm -rf` would report xargs's success over a matcher that failed.
+          node tools/pages-exclude.js --print0 . > /tmp/pages-exclude.0
+          echo "removing:"; tr '\0' '\n' < /tmp/pages-exclude.0 | sed '/^$/d;s/^/  /'
+          xargs -0 -r rm -rf < /tmp/pages-exclude.0
           # A missing file here means the trim ate the site, which must fail the deploy rather than
           # publish a blank page.
           for required in index.html .nojekyll biology/index.html biology/ch01-what-is-life/index.html src/shell.js; do

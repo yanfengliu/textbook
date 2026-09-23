@@ -32,7 +32,7 @@
 //     would drag the mean below the number the chapter states.
 import { alpha, mix } from '../palette.js';
 import {
-  mulberry32, hash2, clamp, clamp01, lerp, ramp, ELEMENTS, WATER,
+  mulberry32, hash2, clamp, clamp01, lerp, ramp, ELEMENTS, WATER, atomAccent,
   bondLifePs, bondDuty, phaseOf, formatTime, formatTempC,
 } from './lib/chem-atoms.js';
 
@@ -353,7 +353,19 @@ function buildColours(palette, theme) {
   // water on it is a deep coral, so a mid grey protein is the brightest thing in the frame and the
   // figure's subject changes. The value is set against the *water*, not against the paper.
   const proteinBase = dark ? mix(p.inkSoft, p.paper, 0.70) : mix(p.inkSoft, p.paper3, 0.55);
-  for (const [el, token] of [['C', p.inkSoft], ['O', p.coral], ['N', p.water], ['S', p.gold]]) {
+  // The element's colour comes from the one table. It was written out here by hand as
+  // [['C', p.inkSoft], ['O', p.coral], ['N', p.water], ['S', p.gold]] — a fourth place the element colours
+  // lived, after lib/chem-atoms.js, lib/mol-draw.js and bondlab's own token map, and the only one of the
+  // four that no check could have caught. Nothing here was illegible: no symbol is written on these 1150
+  // spheres. What it was, was a copy that could drift, and on 2026-09-17 it did.
+  //
+  // `atomAccent` and not `atomColours().fill`, deliberately: the deepened disc value exists to carry a
+  // symbol and there is no symbol here, so it would only drain the hue this figure is made of. Measured
+  // with tools/figure-diff.js — `atomColours().fill` moved 4.6% of the narrow frame by up to 11 levels
+  // and turned the sulfur speckles from gold to brown. This spelling is pixel-identical to the list it
+  // replaced, which the same tool confirmed.
+  for (const el of PROTEIN_ELS) {
+    const token = atomAccent(p, el);
     // How much of the element's own colour survives. Carbon is half the protein, so it stays nearly
     // neutral and the coloured quarter reads as a tint across it rather than as confetti.
     const hue = el === 'C' ? 0.08 : 0.13;
@@ -521,6 +533,12 @@ export function mount(root, ctx) {
   let colours = buildColours(palette, theme);
   const reduced = Boolean(ctx.reducedMotion);
 
+  // A pinned clock is not advanced by any control. `?t=` pins every figure on the page and the gates take
+  // their frames that way, so the line below was only true until something pressed Play — which is what
+  // `npm run pinned` presses. Written as a function rather than read once because the frame may pin a
+  // figure that mounted unpinned. `undefined` counts as unpinned as well as `null`: a ctx that omits the
+  // field must leave the water playable for a reader.
+  const pinned = () => ctx.pinnedTime !== null && ctx.pinnedTime !== undefined;
   let t = ctx.pinnedTime ?? 0;
   let playing = !reduced && ctx.pinnedTime === null;
   let visible = true;
@@ -560,13 +578,20 @@ export function mount(root, ctx) {
        The eyebrow is a label, not text to read, and at --text-xs letterspaced it out-shouted the
        number underneath it. */
     .tb-soup .sp-read i { display: block; font-style: normal; font-size: 0.625rem; font-weight: 600;
-      letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-faint); line-height: 1.2; }
+      /* --ink-soft, not --ink-faint: this eyebrow sits over the canvas rather than over the page, and on
+         the dark drop it measured 4.25:1 (2026-09-16, npm run legible). It is still a label and still
+         quieter than the number under it, which is --ink. */
+      letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-soft); line-height: 1.2; }
     .tb-soup .sp-read b { display: block; font-family: var(--font-display); font-size: var(--text-lg);
       font-weight: 500; color: var(--ink); font-variant-numeric: lining-nums tabular-nums;
       line-height: 1.06; margin-top: 0.1rem; }
     .tb-soup .sp-read span { display: block; font-size: var(--text-xs); color: var(--ink-soft);
       line-height: 1.3; margin-top: 0.1rem; text-wrap: pretty; }
-    .tb-soup .sp-read em { display: block; font-size: var(--text-xs); color: var(--ink-faint); font-style: normal;
+    /* --ink-soft for the same reason the eyebrow above it takes it, and found the same way: this line
+       sits over the canvas, and on the dark drop --ink-faint measured 4.31:1 (2026-09-17, npm run
+       legible — 11% of its pixels under the bar where the wash thins over a molecule). --ink-soft is
+       5.5:1 on that ground. It is still the quietest line in the readout; the ink above it is --ink. */
+    .tb-soup .sp-read em { display: block; font-size: var(--text-xs); color: var(--ink-soft); font-style: normal;
       margin-top: 0.5rem; line-height: 1.45; white-space: pre-line;
       font-variant-numeric: lining-nums tabular-nums; }
     .tb-soup .fig-card { max-width: min(17rem, 50%); }
@@ -1514,6 +1539,11 @@ export function mount(root, ctx) {
   }
 
   function setPlaying(next) {
+    // Starting is refused while the clock is pinned, and refused rather than recorded: that is this
+    // repo's settled shape (secretion, gradient-battery, bilayer, polymer), and a button reading Pause
+    // over water that is not moving is the worse of the two lies. Stopping is never refused, so
+    // setTime() still calls in. The Space key comes through here too.
+    if (next && pinned()) return;
     playing = next;
     setLabel(btnPlay, playing ? 'Pause' : 'Play');
     if (playing) schedule();

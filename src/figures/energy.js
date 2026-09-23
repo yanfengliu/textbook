@@ -18,6 +18,7 @@
 // instead. Toolbar: Energy, Matter, Both. describe() -> { mode, energyParticles, matterParticles,
 // layout }.
 import { el, h, text, C, tint, uid, polar, clamp } from './lib/svg.js';
+import { INK } from './lib/mol-draw.js';
 
 export const meta = { kind: 'energy', title: 'Energy flows, matter cycles', needsWebGL: false, aspect: 16 / 9 };
 
@@ -35,7 +36,11 @@ const HYSTERESIS = 16;
 
 const leafDark = 'color-mix(in srgb, var(--leaf) 82%, var(--ink))';
 const goldDark = 'color-mix(in srgb, var(--gold) 72%, var(--ink))';
-const goldText = 'color-mix(in srgb, var(--gold) 62%, var(--ink))'; // --gold is a figure colour; at label
+// The gold as TYPE comes from the one table that holds it, not from a second copy written here: this
+// file's own `color-mix(… 62% …)` measured 4.22:1 on --paper-2 in the light theme, and INK.gold was
+// moved to 55% for it (2026-09-16, npm run legible). Two spellings of one value drift apart, and this
+// one had. --gold is a figure colour; at label
+const goldText = INK.gold;
 const coralDark = 'color-mix(in srgb, var(--coral) 72%, var(--ink))'; // sizes it needs the ink in it
 const soil = 'var(--paper-3)';
 const soilDark = 'color-mix(in srgb, var(--ink-soft) 30%, var(--paper-3))';

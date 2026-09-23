@@ -882,7 +882,10 @@ const CSS = (s) => `${panelCss(s)}
 .${s} .mi-swatch { display: inline-block; width: 0.62em; height: 0.62em; border-radius: 50%; vertical-align: baseline; margin-right: 0.15em; border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); }
 .${s} .mi-state { position: absolute; top: var(--space-4); right: var(--space-2); z-index: 1; display: inline-flex; align-items: center; gap: 0.45em; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(6px); }
 .${s} .mi-state::before { content: ""; width: 0.55em; height: 0.55em; border-radius: 50%; background: var(--leaf); }
-.${s} .mi-state[data-live="false"] { color: var(--coral-text); border-color: color-mix(in srgb, var(--coral) 45%, var(--rule)); }
+/* The warning chip takes the FULL paper, not the 88% of it the live chip floats on: it is the one state
+   whose words are written in an accent, and --coral-text over 88% paper on the specimen measured 4.27:1
+   in the light theme (2026-09-16). On the paper it is 5.34:1. */
+.${s} .mi-state[data-live="false"] { color: var(--coral-text); background: var(--paper); border-color: color-mix(in srgb, var(--coral) 45%, var(--rule)); }
 .${s} .mi-state[data-live="false"]::before { background: var(--coral); }
 .${s} .mi-chanwrap[hidden] { display: none; }
 .${s} .mi-seen { font-size: 11px; line-height: 1.35; color: var(--ink-soft); margin: 0; }

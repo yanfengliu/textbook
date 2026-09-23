@@ -1,3 +1,21 @@
+# What is NOT the site. The repository is the site — there is no build step — so the published tree is
+# made by deleting this from a disposable checkout. This file is the one list: .github/workflows/pages.yml
+# deploys what survives it, `npm run subpath` serves what survives it, and test/publish.test.js asserts
+# what survives it. All three read it through tools/pages-exclude.js, so they cannot disagree about a
+# pattern's meaning.
+#
+# Syntax, honoured identically by all three because there is one matcher:
+#   · one pattern per line; a blank line, or a line whose first non-space character is #, is a comment
+#   · a path is relative to the repository root and uses / — never a leading / and never a backslash
+#   · a pattern with no wildcard is a literal path: it and everything under it goes
+#   · * matches any run of characters inside one path segment; ? matches one; ** crosses segments, and
+#     a ** followed by a slash may match zero of them, so **/*.md catches README.md at the root too
+#
+# Adding a chapter must never mean remembering to add a line here. Name the CLASS of file that is not
+# the site, not the instance: the two chapter briefs used to be listed one at a time, which meant
+# chapter 4's brief — and every chapter's after it — would have deployed to the live site.
+
+# Tooling, tests, dependencies and the reader's own record: none of it is fetched by a page.
 node_modules
 out
 test
@@ -6,10 +24,14 @@ docs
 progress
 package.json
 package-lock.json
-AGENTS.md
-CLAUDE.md
 .gitignore
 .nvmrc
 .claude
-biology/ch02-chemistry-of-life/FIGURES.md
-biology/ch03-cells/FIGURES.md
+
+# No Markdown is the site. The pages fetch none of it — verified 2026-09-16 by searching every
+# published .html, .js and .css for a .md path, which found only prose references inside comments.
+# This is what keeps a chapter's FIGURES.md, an author's notes and a data directory's README off the
+# live site without anybody having to name them: biology/ch02-chemistry-of-life/FIGURES.md and
+# biology/ch03-cells/FIGURES.md were listed by hand before, and tongjian/README.md — 37 KB of
+# transcription provenance, with links into docs/ that this trim deletes — was shipping.
+**/*.md

@@ -127,7 +127,11 @@ const VERDICT = {
 };
 
 const CSS = `
-.tb-symbiont { --sy-gold: color-mix(in srgb, var(--gold) 66%, var(--ink));
+/* 50%: one step deeper than INK.gold's 55% in src/figures/lib/mol-draw.js, because this one is written
+   on the table's PRESSED row rather than on the page. At the 66% it started at it is #8f7422 — 3.87:1 on
+   --paper-2 and 3.37:1 on that row; at 55% it is 4.48:1 there, still under AA; at 50% it is 4.99:1
+   (measured 2026-09-16, npm run legible). */
+.tb-symbiont { --sy-gold: color-mix(in srgb, var(--gold) 50%, var(--ink));
   position: absolute; inset: 0; display: grid; box-sizing: border-box;
   padding: 0.35rem 0.7rem var(--sy-pad, 3rem); gap: 0.3rem 0.9rem; font-family: var(--font-ui);
   grid-template-columns: minmax(0, 51fr) minmax(0, 49fr);
@@ -157,7 +161,10 @@ const CSS = `
   padding: 0.3rem 0.3rem 0.3rem 0.42rem; cursor: pointer; }
 .tb-symbiont .sy-row:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); }
 .tb-symbiont .sy-row:focus-visible { outline: 2px solid var(--water); outline-offset: -2px; }
-.tb-symbiont .sy-row[aria-pressed="true"] { background: color-mix(in srgb, var(--ink) 7%, transparent);
+/* 4%, not 7%: the row's own flag and verdict are written in --sy-gold and --coral-text, and over a 7%
+   ink ground those measured 4.22:1 and 4.29:1 in the light theme (2026-09-16). The row is also marked by
+   its left border, so the ground does not have to carry the state on its own. */
+.tb-symbiont .sy-row[aria-pressed="true"] { background: color-mix(in srgb, var(--ink) 4%, transparent);
   border-left-color: var(--ink); }
 .tb-symbiont .sy-row[data-same="yes"] { border-left-color: var(--gold); }
 .tb-symbiont .sy-obs { font-size: var(--text-xs); line-height: 1.3; text-wrap: pretty; }
@@ -696,7 +703,12 @@ export function mount(root, ctx) {
     btnOpen.setAttribute('aria-pressed', String(on));
     const from = cutP[kind];
     const to = on ? 1 : 0;
-    const tw = tween({
+    // `let`, declared before the call, because `tween()` runs `done` SYNCHRONOUSLY when it is instant —
+    // which is every mount under reduced motion and every run of a gate that pins the clock. With `const`
+    // the callback reached `tw` inside its own temporal dead zone and the page threw
+    // "Cannot access 'tw' before initialization" on load, found by npm run legible on 2026-09-16.
+    let tw;
+    tw = tween({
       duration: OPEN_MS,
       instant: instant(),
       update: (p) => { cutP[kind] = from + (to - from) * p; biteFor(kind, cutP[kind]); },

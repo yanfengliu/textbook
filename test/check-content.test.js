@@ -122,6 +122,59 @@ test('a TODO left in the page fails, and a broken href fails', () => {
   assert.ok(fails.some((f) => f.includes('"#nowhere"')), fails.join('\n'));
 });
 
+// ---- the closing card points at the next chapter once that chapter is on disk ----------------------
+// Third time this has been wrong. Chapters 1 and 2 told readers the next chapter was in preparation for
+// six days while it sat finished beside them; chapter 3 then pointed at the book page and called chapter
+// 4 unwritten while chapter 4 was being written. `href="../"` resolves to a directory that exists, so the
+// href rule can never see it: the card has to be checked against the tree.
+const CARD = (href, dek, strong = '4 · Membranes and transport') =>
+  `<a class="tb-next" href="${href}"><span class="tb-label">Next</span><strong>${strong}</strong><span class="dek">${dek}</span></a>`;
+const NEXT = { dir: 'ch04-membranes-and-transport', number: 4, path: 'biology/ch04-membranes-and-transport' };
+const DEK = 'What a membrane is made of, and what crosses it.';
+const card = (html, nextChapter = NEXT) => checkDocument(page({ figures: GOOD_FIGURE, body: html }), { glossary: GLOSSARY, kinds: KINDS, nextChapter });
+
+test('a card pointing at the book page while the next chapter is on disk fails, naming the directory and the href to write', () => {
+  const f = card(CARD('../', DEK));
+  assert.equal(f.length, 1, f.join('\n'));
+  assert.ok(f[0].includes('does not point at the next chapter'), f[0]);
+  assert.ok(f[0].includes('biology/ch04-membranes-and-transport/'), f[0]);
+  assert.ok(f[0].includes('write href="../ch04-membranes-and-transport/"'), f[0]);
+});
+
+test('a card pointing at the next chapter passes, with or without the trailing slash or the index.html', () => {
+  for (const href of ['../ch04-membranes-and-transport/', '../ch04-membranes-and-transport', '../ch04-membranes-and-transport/index.html']) {
+    assert.deepEqual(card(CARD(href, DEK)), [], `href="${href}" must pass`);
+  }
+});
+
+test('a card that still calls the next chapter unwritten fails, however it is pointed', () => {
+  // The half the href rule cannot catch: someone repoints the link and leaves the dek behind.
+  const f = card(CARD('../ch04-membranes-and-transport/', `${DEK} In preparation; the book page lists every chapter.`));
+  assert.equal(f.length, 1, f.join('\n'));
+  assert.ok(f[0].includes('"in preparation"') && f[0].includes('is on disk'), f[0]);
+  for (const phrase of ['Coming soon.', 'Not yet written.', 'Still being written.']) {
+    assert.ok(card(CARD('../ch04-membranes-and-transport/', `${DEK} ${phrase}`)).length === 1, `"${phrase}" must fail`);
+  }
+});
+
+test('a card announcing a chapter number that is not the one on disk fails', () => {
+  const f = card(CARD('../ch04-membranes-and-transport/', DEK, '5 · Energy and metabolism'));
+  assert.ok(f.some((x) => x.includes('announces chapter 5') && x.includes('follows this one on disk is 4')), f.join('\n'));
+});
+
+test('with no next chapter on disk the rule does not fire: the last chapter\'s card points at the book page and is right to', () => {
+  // Chapter 4's own card points at `../` because chapter 5 does not exist, and the href rule would fail a
+  // link to a directory that is not there. A rule that failed this would make the last chapter unfixable.
+  assert.deepEqual(card(CARD('../', 'Why some reactions run by themselves.', '5 · Energy and metabolism'), null), []);
+  assert.deepEqual(card(CARD('../', 'In preparation.', '5 · Energy and metabolism'), null), []);
+});
+
+test('a chapter page with no card at all is not failed by this rule', () => {
+  // The 資治通鑑 chapters carry no closing card. Requiring one is a decision about that book, not a
+  // defect this rule saw, so it says nothing.
+  assert.deepEqual(card(''), []);
+});
+
 test('the tokenizer nests custom elements and keeps text', () => {
   const doc = parseHtml('<section id="s"><h2>T</h2><tb-figure kind="pond"><figcaption>Cap <em>x</em></figcaption></tb-figure><script>if (a < b) {}</script></section>');
   const fig = findAll(doc, (n) => n.tag === 'tb-figure')[0];

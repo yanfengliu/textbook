@@ -45,13 +45,22 @@ In file order. Every line is one `##` entry.
 | [2026-09-16 — the crash-dialog mitigation was inert in every run](#2026-09-16--the-crash-dialog-mitigation-was-inert-in-every-run-and-its-own-comment-named-the-reason) | nothing in the repository set `NODE_OPTIONS`, and the test that covered it was green | the preload is wired into every browser gate and a launch says which preload state it is in. **Read with the 2026-09-12 crash-dialog entry, whose claim this one corrects.** Its two closing `###` sections — the pointer, and what could not be established — cover this entry and the rasterizer one together |
 | [2026-09-16 — the ink follows the theme, the fills do not](#2026-09-16--the-ink-follows-the-theme-the-fills-do-not-and-no-gate-had-ever-measured-a-figures-own-type) | a voltmeter reading near-white on near-white cytoplasm in the dark theme | the figures' own type is measured. Sixteen modules read a fixed-hex lookup |
 | [2026-09-17 — the book could not say which of its words were 通鑑's](#2026-09-17--the-book-could-not-say-which-of-its-words-were-通鑑s) | *"Just make it perfectly clear what came from the book what didn't it, everywhere."* — 21 runs of 通鑑's words printed as the book's own sentences, and one sentence contradicting the figure below it | `test/provenance.test.js` — the mark, the figure declarations and the key. **The claim about the page itself is still ungated** |
+| [2026-09-17 — a gate was failing because it was slow](#2026-09-17--a-gate-was-failing-because-it-was-slow-which-is-the-clearest-case-for-the-rule) | found on the frozen baseline: `npm run devices` red, both failures `page.screenshot: Timeout 45000ms exceeded` on the second book's contents page, and no product defect behind either | no new check: the same gate, green once it was fast — 1661.5 s → 379.1 s, 62 of 62 clean. **It is the evidence for the owner's rule that slowness is a defect** |
+| [2026-09-17 — two figures started running when something pressed Play, with the clock pinned](#2026-09-17--two-figures-started-running-when-something-pressed-play-with-the-clock-pinned-and-every-gate-that-photographs-them-was-green) | found by probe from a gate-timing anomaly: `secretion` ran 0.983 s of clock and `gradient-battery` a simulated minute, both at `?t=0` | `npm run pinned` — the gate this entry created. **Six more figures still break it and are listed by name in `tools/pinned.js`** |
+| [2026-09-17 — a sort choice ran off the smallest phone](#2026-09-17--a-sort-choice-ran-off-the-smallest-phone-and-every-other-gate-was-looking-at-390-px) | found by `npm run devices` the day chapter 5 landed: a 298.8 px sort segment in a 266.8 px column, 5 px of sideways scroll at 320 px | `npm run devices` at `phone-small` — **the repository's only 320 px viewport** |
+| [2026-09-17 — a figure's toolbar took ten rows on a phone, two presses from the only state any gate measured](#2026-09-17--a-figures-toolbar-took-ten-rows-on-a-phone-two-presses-from-the-only-state-any-gate-measured) | found by a worker looking at a frame: `enzyme-kinetics` at 390 px, toolbar 320 px of a 456 px stage, readout drawn over the graph, the lane a 40 px sliver | `npm run narrow`, which now opens what a reader can open. **It found `atp3d` on its first full run** |
+| [2026-09-17 — twenty-three unreadable labels](#2026-09-17--twenty-three-unreadable-labels-and-the-rule-that-could-not-see-most-of-them) | found by instrumenting `npm run legible`: it reported one problem where there were twenty-three, and `bondlab` skipped 44 of 48 glyph runs in the light theme and 48 of 48 in the dark | `npm run legible`, which now judges a glyph against the worst pixel under its core instead of a colour it could name |
+| [2026-09-17 — a press on the scale's lens was dropped while it was still gliding](#2026-09-17--a-press-on-the-scales-lens-was-dropped-while-it-was-still-gliding-and-it-looked-like-a-flaky-gate) | a gate step red 17 runs of 20 — and underneath it, a reader's grab on a gliding lens doing nothing | `npm run drive`'s `scale` recipe, which now starts its own glide and asserts the figure's own verdict on the press. **The class is one figure wide; the entry says so** |
 
 **By area, for when you are changing something and want what is still unwatched there.**
 
-- **Phone and touch** — 2026-09-10 (four defects), 2026-09-12 (tap is a hover).
+- **Phone and touch** — 2026-09-10 (four defects), 2026-09-12 (tap is a hover), 2026-09-17 (a sort choice at 320 px). The last one is also the note that only one device in the whole chain is narrower than 390 px.
 - **Fonts and script** — 2026-09-16 (library page), 2026-09-16 (rare 原文 characters).
 - **A figure's own pixels** — 2026-09-16 (negative width), 2026-09-16 (ink and fills). Both are defects a frame-rendering gate looked straight at and could not see.
-- **The gates' own wiring** — 2026-09-12 and 2026-09-16 (crash dialog, twice), 2026-09-16 (rasterizer), 2026-09-19 (`devices` phase), 2026-09-12 (two dead modules, green suite).
+- **A figure's clock** — 2026-09-17 (Play under a pinned clock). Six figures still break it; `tools/pinned.js` names them and `npm run pinned` prints them every run. Read that entry before assuming a figure's frame is reproducible after a press.
+- **A figure's own layout at a phone's width** — 2026-09-17 (a toolbar of ten rows). The one entry whose lesson is about *when* a gate looks rather than *where*: every measurement in the chain was of a figure's opening state.
+- **The gates' own wiring** — 2026-09-12 and 2026-09-16 (crash dialog, twice), 2026-09-16 (rasterizer), 2026-09-19 (`devices` phase), 2026-09-12 (two dead modules, green suite), 2026-09-17 (the dropped press: the one entry here whose defect was already turning a gate red, in a disguise that got it retried).
+- **A press that arrives while something is moving** — 2026-09-17 (the scale's lens). Read it before assuming a drag recipe covers a figure: it is the only step in `tools/drive.js` that owns its own timing window and asserts the figure's own verdict on a press, and the entry names what that leaves uncovered.
 - **Cross-book and cross-chapter facts** — 2026-09-12 (page ids), 2026-09-16 (next-chapter card). Both were invisible to any rule that reads one document.
 
 ## 2026-09-10 — four defects on a real phone and a desktop, none of which any gate could see
@@ -545,3 +554,195 @@ The defect was real and it was two defects under one complaint.
 | Chapter 2's 背景: 「所以这里只转述，不引原文」, four lines above a figure that quotes the entry. | The sentence was written when the 年表 did not yet quote the 前376 line, and was not revisited when it did. Nothing reads a page's claims about itself. | **Nothing.** The sentence is fixed; no gate compares what a chapter says about its own selections with what the chapter prints. This is the entry's open half and it is named rather than implied. |
 
 **The lesson underneath.** Two of these three are one lesson, and it is `sitting`'s: **a check that reads a fact the page already carries proves the fact is recorded, never that it is shown.** `lang` was recorded, gated, and invisible; the fix was to spend a token that had been declared for exactly this and never used. The third is a different one: a page can hold a true quotation and a false sentence about it at the same time, and no corpus can tell you that, because the corpus is the thing the sentence is wrong about.
+
+## 2026-09-17 — a gate was failing because it was slow, which is the clearest case for the rule
+
+The owner's directive of 2026-09-15: *anything slow on the critical path is a defect to identify and fix, not a cost to schedule around.* This is the cleanest evidence the repository has for it.
+
+`npm run devices` was **red** on the frozen baseline, and its two failures were not product defects. Both were `page.screenshot: Timeout 45000ms exceeded` on the second book's contents page. The gate's own message says that shape is the browser process failing to answer rather than a slow render. **It was failing because it was slow.**
+
+After the round's cuts the same gate runs 1661.5 s → 379.1 s and is **62 of 62 clean**. Nothing about the page changed.
+
+| gate | before | after |
+|---|---|---|
+| devices | 1661.5 s | 379.1 s |
+| drive | 542.9 s | 322.8 s |
+| shot | 145.4 s | 95.5 s |
+| subpath | 115.6 s | 106.6 s |
+| narrow | 95.3 s | 79.7 s |
+| sweep3d | 36.8 s | 34.2 s |
+| sitting | 20.6 s | 19.8 s |
+| flow | 3.7 s | 3.4 s |
+| **chain** | **4076 s** | **about 2480 s** |
+
+**What made the difference was not what anyone predicted.** Converting the gate's fixed sleeps to polls bought 6 %. Pinning the figures' clocks bought 6.6×: a chapter page mounts nine animated figures, and every simulated tap waits for its element to hold still across animation frames, so some 1,400 glossary presses were queueing behind a page doing continuous work.
+
+The residual, stated because it is a real cut: animation-induced layout shift is now watched at one device shape rather than nine, with one unpinned load per run kept on the smallest phone as a token, and the run prints which load that was.
+
+**And the thing the round was sent to fix is no longer the biggest thing wrong.** `npm run legible`, added during this same round, is now 58 % of the chain on its own.
+
+## 2026-09-17 — two figures started running when something pressed Play, with the clock pinned, and every gate that photographs them was green
+
+**The symptom, in the words it was reported in.** Not a reader's words: this one arrived as a timing anomaly in a gate. *"Each of its six figure-theme runs takes about 185 seconds against under 10 for the other 66, and those times are deterministic, reproducing within half a second across two full runs hours apart on a frozen tree."* The three figures named were `polymer`, `secretion` and `gradient-battery` — the three with a Run or Play control. The hypothesis attached to it was the right one: `tools/legible.js` loads the lab at `?t=0` and then presses every visible button, including Play, and every Playwright action afterwards waits for its element to hold still across animation frames.
+
+**How it was found.** By probe, before anything was changed. `lab/?kind=<k>&theme=light&eager=1&t=0`, one real click on the figure's own Play or Run control, `describe()` read twice a second apart, through `tools/drive.js`'s own opener and helpers rather than a fresh harness. The numbers, with the clock pinned at `t=0`:
+
+| kind | press | `describe()` after 1.0 s |
+|---|---|---|
+| `secretion` | Play the journey | `t: 0 → 0.983` |
+| `gradient-battery` | Run | `cellMinutes: 0 → 1.02`, `t: 0 → 1.017`, and the whole sodium/glucose/potential model with them |
+| `polymer` | Play | **nothing changed** — `playing` stayed `false`, `t` stayed `0` |
+
+So the invariant was broken in two of the three suspects and not in the third, and the 185 s is therefore **not** one cause across all three. `polymer` was already guarded and is still slow; that half of the report was handed back rather than chased here.
+
+**The root cause, down to the line.**
+
+- `src/figures/secretion.js`, `setPlaying(v)`: it guarded `reduced` and nothing else. `playing = Boolean(v)` was reached with the clock pinned, `schedule()` started the loop, and `frame()` — whose own guard is `if (destroyed || !playing || !visible) return;` — added real elapsed time to `t` on every animation frame.
+- `src/figures/gradient-battery.js`, `setRunning(on)`: the module read **nothing at all** of `ctx.pinnedTime`; the string did not appear in the file. `running = on` started `kick()`, and `frame()` ran `advance(dt * CELL_SECONDS_PER_WATCHED)` at a simulated minute per watched second.
+
+Both files carried a comment asserting the property they did not have. `gradient-battery`'s `setTime` was headed *"Nothing advances on its own: the cell moves only while Run is on, so pinning the clock redraws"*, and its module header said the same. Both sentences were true only until something pressed Run — which is the shape `gate-proofs.md` opens with, a claim and its subject wrong together and indistinguishable from a claim that is right.
+
+**What the gates could see, and why the answer was nothing.**
+
+- `npm run shot` is the gate that *depends* on this invariant — it photographs every page at `?t=0` and fails on overflow, console errors and figures in `error` — and it **presses nothing**. Every frame it has ever taken of these two figures was still because nothing had started them, not because they could not start.
+- `npm run drive` presses every control these figures have, and opens the lab **unpinned**. Several of its recipes assert that a clock *did* move (`polymer play-and-pause` demands `t > 1.5`). Its contract is the opposite one, so it could not have noticed.
+- `npm run narrow`, `npm run sweep3d` and `npm run devices` mount figures but do not press a figure's play control; `devices` states in its own header that it presses no figure control at all.
+- No unit test covers it: the property is about a module's behaviour under a `ctx` field, and nothing mounted a figure and pressed it.
+
+So the invariant that makes a screenshot reproducible was held by five figures' source code and by no check, and two figures had drifted out of it — one of them (`gradient-battery`) written without ever having been in it.
+
+**Now checked by.**
+
+| Symptom | Root cause | Now checked by |
+|---|---|---|
+| a figure runs its clock after a press although the page pinned it, so its frame in `out/shots/` depends on what was pressed before it | `setPlaying`/`setRunning` reached the animation loop with no `ctx.pinnedTime` guard | **`npm run pinned` (`tools/pinned.js`), added by this entry** — every kind in the registry, every enabled button pressed once on a freshly mounted pinned figure, failing any figure still advancing after two untouched windows |
+| a figure that drifts with the clock pinned and *nothing* pressed | — not observed; checked because it is what `npm run shot` rests on most directly | the same gate's mount check, which is not quarantined for anyone |
+| a figure written from now on that never had the guard | `gradient-battery` shipped with no mention of `ctx.pinnedTime` | the same gate needs **no recipe** — a new kind is covered the day it appears in the registry |
+
+The check covers the **class**, not the two instances: it is the whole registry, and it found six more figures breaking the same invariant that this round was not scoped to change — `pond`, `homeostasis`, `pasteur`, `soup`, `waterprops` and `pump`. Those are not skipped. Each is pressed and measured like the rest, listed by name in `tools/pinned.js`'s `KNOWN` and printed by every run, and **the gate fails if one of them stops moving**, so the list cannot rot into a silent exception: whoever fixes one deletes its entry in the same commit. Proved red in [gate-proofs.md](gate-proofs.md).
+
+**Two things the gate's own construction had to be corrected for, and both are the file's recurring shape.**
+
+1. **Its first version reported `secretion` as clean with the defect deliberately put back.** It pressed a kind's buttons in order on one page, so by the time it reached Play the earlier presses had walked the journey to its end; Play started a route that was already over and stopped within a frame. A fixture that ends early, measuring a figure with nothing left to do, reporting green over the exact defect it was written for. Every control is now pressed on a figure that has just mounted.
+2. **A single measurement window cannot tell a clock from a transition.** With one window, seven more figures looked broken — `cell3d`, `cilium`, `plantcell3d` (labels easing in), `water3d` (a held molecule easing out), `prokaryote` (a lysis animation), `atp3d` (a camera easing back) and `surface-volume` (a diffusion clock reaching its end). They all stop; a clock never does. The gate gives a figure that moved a second window and fails only what is still moving in it, and prints the settling ones so the distinction is visible rather than assumed.
+
+**The lesson underneath.** *A gate that never exercises the input path cannot see anything living in it.* `npm run shot` is the gate this invariant exists for, it loads the pinned page, and it presses nothing — so for every figure it photographs, "still" and "not yet started" were the same picture, and it reported the second as the first with full confidence. The same sentence covers `AGENTS.md`'s existing rule about harnesses that set state directly. The pair to hold together: the gate that *depends* on a property is very often the one that cannot check it, because checking it means doing the thing the gate was built not to do.
+
+## 2026-09-17 — a sort choice ran off the smallest phone, and every other gate was looking at 390 px
+
+*Appended at the end rather than at the top, the way the entry above it was, because several workers were writing into this file at once on 2026-09-17 and an append cannot collide. Written by a different worker from the one that fixed it: the fix landed while this file was open elsewhere, so the numbers below come from that worker's handoff, and what this worker verified for itself is stated where it differs.*
+
+**The symptom.** No reader reported this one. `npm run devices` found it at `phone-small` — Playwright's iPhone SE, 320 px — the day chapter 5 got its sort figure, and the check that fires is that gate's page-level one (`tools/devices.js`): `the page scrolls sideways: <scrollWidth> px of content in a <clientWidth> px viewport`. What a reader would have had is the whole chapter sliding left and right under a thumb, with a strip of blank paper down the right at every scroll position.
+
+**How it was found.** By the gate, on its first run over a chapter that had never been loaded at 320 px before. Measured by the worker that fixed it: the segment reading **Exergonic, and waiting on an enzyme** came out **298.8 px** inside a **266.8 px** column, putting its right edge at **325.4 px** in a 320 px viewport — 5 px of sideways scroll on the document.
+
+**The root cause, down to the line.** `tb-sort .tb-sort__item .choose button` in `src/styles/components.css` carried `white-space: nowrap`. That button is a flex item of `.choose` (`display: flex; flex-wrap: wrap; max-width: 100%`), and **a flex item's `min-width` computes to `auto`, whose used value is the item's min-content width**. With `nowrap` a run of text has no soft-wrap opportunity at all, so its min-content width is *the whole sentence* — the floor under the segment was the full 298.8 px, and no amount of `max-width: 100%` on the box above it can shrink an item below its own min-width floor. The two shorter choices in the same group shrank; this one could not, so the flex line overflowed its column and the page with it.
+
+Fixed in the same rule with `white-space: normal; min-width: 0`: `normal` gives the text wrap opportunities so its min-content width becomes its longest word, and `min-width: 0` removes the auto floor outright. A segment now wraps only where it did not fit, and where it fits its box is unchanged.
+
+**What the gates could see, and why the answer was nothing until chapter 5 existed.** Two things had to be true in the same load, and until this chapter landed they never were.
+
+- **The label has to be long enough.** The longest sort label in each chapter, counted on this tree: chapter 1 *"It depends"* (10 characters), chapter 2 *"Keeps out of water"* (18), chapter 3 *"Tight junction"* (14), chapter 4 *"Facilitated diffusion"* (21), chapter 5 *"Exergonic, and waiting on an enzyme"* (**35**). Only the last is long enough to overflow, and it is worse than its character count suggests because the segment is uppercased with 0.06em tracking.
+- **The viewport has to be 320 px.** Every other page gate in the chain loads at 390 px or wider — `npm run shot` at 390, 1024 and 1440, `npm run subpath` at 390 and 1440, `npm run narrow` at a 390 px stage, `npm run flow` at 1440 and 390. **The only 320 px eye in the repository is `npm run devices`'s `phone-small`.** The shared stylesheet gives a biology chapter's text column 84% of the viewport on a phone, which `npm run devices` prints on every chapter line (verified by this worker on `biology/ch02`: `reading column 84% of 320 px`). That is 268.8 px at 320 and 339 px at 390 — so a 298.8 px segment fits at 390 and cannot fit at 320, and the four gates that load at 390 were all looking straight at a page that was fine.
+
+**Now checked by.**
+
+| Symptom | Root cause | Now checked by |
+|---|---|---|
+| a sort choice runs off the right edge and puts sideways scroll on a 320 px phone | `white-space: nowrap` on a flex item, whose `min-width: auto` floor is then the whole sentence | `npm run devices`'s sideways-scroll check at `phone-small` (320 px), which is what found it. It covers the **class** *anything that overflows a chapter page at 320 px*, not this one label |
+| the same chapter shipping a longer label later, or a new chapter shipping one | the defect needs the longest label **and** the narrowest phone in one load | the same check, and it needs no list: `tools/devices.js` derives its matrix from the tree, so a chapter is loaded at `phone-small` the day its page exists |
+| the same `nowrap`-on-a-flex-item trap somewhere that does **not** overflow a 320 px page | the same two lines | **nothing.** The check is a page-level overflow measure; no rule in this repository says anything about `white-space: nowrap` or `min-width: auto`, so a second instance that happens to fit is unwatched. Stated here rather than implied, because this row is the part of the class the new check does not reach |
+
+**The lesson underneath.** *The whole repository has one 320 px eye, and it is one entry in one array.* Four of the six page gates agree on 390 px, so every horizontal defect that only appears below 390 depends on `phone-small` staying in `tools/devices.js`'s device list and on the derivation keeping the narrowest device of each band — which that file already argues for, in those words, because every horizontal measure is worst at the narrowest width. This is the first defect that argument actually caught. The companion half is that a defect can need two independent things at once — a long enough string and a narrow enough screen — so a gate that has had one of them for months proves nothing about the day it first gets both.
+
+## 2026-09-17 — a figure's toolbar took ten rows on a phone, two presses from the only state any gate measured
+
+*Appended at the end, like the two entries above it, because several workers were writing into this file on 2026-09-17. Written by the worker that built the gate, not by the one that fixed the figure: the numbers describing the figure's own state come from that worker's handoff and its `out/lab/ek-crowd-*.png` frames, and everything about what the gates could and could not see was measured by this worker on the tree of 2026-09-17.*
+
+**The symptom, in the words of the worker who saw it.** At 390 px `enzyme-kinetics` reached a state where its toolbar took **ten rows** — 320 px of a 456 px stage, seven tenths of the figure — the readout was drawn over the graph, the axis caption overran, and the lane, which is what the figure is about, was a 40 px sliver. No reader reported it; the figure had not shipped. What a reader would have had is a control panel with a strip of drawing above it, and two pieces of type on top of each other.
+
+**How it was found.** By a worker looking at a rendered frame while building the figure, which is the part worth recording. It was reachable by pressing two buttons — **Conditions**, then **Cases**, with an inhibitor chosen — and every one of the four gates that had ever loaded that figure was green on it.
+
+**The root cause.** Nineteen controls, a 301.6 px bar and nothing bounding how many rows they could take. Two independent disclosures — Conditions holding the temperature and pH sliders, Cases holding six named enzymes — could both be open at a width where either alone fills the bar, and the bench does what it is told: `applyLayout` sets `--tb-pad` to the toolbar's own measured height, so a toolbar that grows eats the grid from below until the panes reach `paneBox`'s 40x30 floor and their contents start overlapping. Nothing in `src/figures/lib/bench.js` says how tall a toolbar may be, and nothing should — what a figure gives up is the figure's decision. What was missing was anybody checking the answer.
+
+**What the gates could see, and why the answer was nothing.** This is the part that matters, because the figure was not unwatched. It was watched six ways.
+
+- **`npm run narrow` is the only gate in the repository that mounts a figure at a 390 px stage**, and it measured the **opening state**: ready, a frame that is not blank, flat or near-black, at least one control present and pressable. It did press one control — the first enabled button not already `aria-pressed` — and asked only that the figure still reported `ready` afterwards. It took no measurement after that press at all. Every defect above lives behind a press, so the gate written for the narrow layouts was looking at the one state in which they are never crowded.
+- **`npm run drive`** presses every control a figure has, and runs one viewport, 1000x640. At desktop width both disclosures open at once **by design** and the toolbar fits, so the state it drives is the state that works.
+- **`npm run legible`** presses every visible enabled button once, at 1000x640: the wrong width, and the wrong question — it measures the contrast of a glyph against the pixels under it, and a label drawn over another label can have perfect contrast. Its own header already says the narrow compositions are `npm run narrow`'s.
+- **`npm run shot`** loads chapter pages at 390 px and presses nothing. Its overflow check is on the **document**; a figure crowding inside its own stage moves no pixel outside it, because `.tb-figure__stage` is `overflow: hidden`.
+- **`npm run devices`** presses no figure control at all, and says so in its own header.
+- **`npm run pinned`** presses every enabled button on a freshly mounted figure — the closest thing in the chain to this defect's shape — and asks only whether the clock moved, at the lab's own width.
+- **No unit test**, because the property is the geometry of a layout in a browser at one width, and nothing mounts a figure outside the page gates.
+
+So the chain had exactly one 390 px eye on a figure's own stage, and that eye was shut after the first frame. `docs/policies/local-rules.md` already names the shape from the other side — a fixture that ends early — and this is the same thing in time rather than in space: a check whose bound is the opening state, reporting confidently on everything after it.
+
+**Now checked by.**
+
+| Symptom | Root cause | Now checked by |
+|---|---|---|
+| a figure's toolbar swallows the stage at 390 px in a state a reader can reach | nothing bounded the toolbar's height, and the state needed two presses | **`npm run narrow`, extended 2026-09-17**: it presses every visible enabled `aria-pressed` button in the figure's `.fig-toolbar`, once each in DOM order, again if the press hid controls, re-reading the toolbar each round, and measures the opening state and every state a press reaches. The toolbar may not exceed **55%** of the stage's height — the worst share any figure in the book legitimately reaches is `coupling-bench` at 51%, and the defect was 58% with only the mutual exclusion removed and 70% as first seen |
+| a pane's drawing lands on another pane's drawing, or on a control | the panes shrank to `paneBox`'s 40x30 floor under a toolbar that kept growing | the same gate, in the same states: the union of each pane's rendered SVG children against every other pane's and against every visible control, with both edges of the intersection over 4 px so a halo'd label is not a collision |
+| the same crowding in any **other** figure, now or later | — not one instance but the class | the same check, and it needs no list: it runs over `KINDS`, so a figure is covered the day it is registered. **It found one on its first full run**: `atp3d`'s `ladder` pane is drawn over its `ledger` pane, 245x17 px, in both themes, one press from the opening state — the rungs and the ledger's rows written on top of each other, and a verdict sentence across both |
+| the same crowding behind a disclosure that is an **action button** rather than a toggle | the candidate rule is `aria-pressed`, and an action carries none | **nothing.** Demonstrated rather than stated: the same defect, with the two disclosures turned into `b.action` buttons, leaves the gate **green, exit 0** (`gate-proofs.md`, arm B). Stated here rather than implied, because this row is the part of the class the new check does not reach |
+| a drawing that runs off the stage instead of onto something | the stage is `overflow: hidden`, so it is clipped and collides with nothing | **nothing.** Also demonstrated: `enzyme-kinetics` with its x-axis captions drawn 300 px right loses its entire x scale and the gate is **green, exit 0** (`gate-proofs.md`, arm C) |
+
+Proved red on the real defect, and both blind spots proved green beside it, in [gate-proofs.md](gate-proofs.md).
+
+**The cost of the fix, recorded because it is a real one.** At a phone's width the two panels are now mutually exclusive: opening Conditions closes Cases and the other way about. **So on a phone a reader can no longer see the temperature and pH sliders and the six named cases at once.** That is a loss, not a tidy-up. What pays for it is that the readout prints the temperature, the pH and the loaded case in every state, so nothing a closed panel holds is unknown, and either panel is one press away; at desktop width both are open together and nothing changed. Six rows instead of ten was bought with that, with short labels on the four inhibitors, and with the concentration slider moved into the conditions group. The figure's own header carries the arithmetic.
+
+**The lesson underneath.** *A gate that measures only the opening state is measuring the one state the reader is in for a second.* It is the sibling of this file's existing lesson about a gate that never exercises the input path: there the gate could not see a defect because it pressed nothing, here it pressed once and then stopped looking. Both are bounds nobody had written down, and both looked exactly like coverage from a green run. The general form: **a check has a bound in time as well as in space, and the state a figure opens in is the least interesting one it has.**
+
+## 2026-09-17 — twenty-three unreadable labels, and the rule that could not see most of them
+
+`npm run legible` reported **one** problem. The honest number was twenty-three, and twenty-two of them were invisible to the rule it was using, not to the eye.
+
+The old rule needed a colour it could name: the commonest 16-level bucket under a glyph had to cover at least 40 % of that glyph's core pixels, or the run was skipped as "varied ground". A radial gradient never offers one, so **`bondlab` skipped 44 of 48 glyph runs in the light theme and 48 of 48 in the dark**, and reported one finding for a figure in which every element symbol was below the bar.
+
+| Symptom | Root cause | Now checked by |
+|---|---|---|
+| Element symbols unreadable on their own atoms, and the gate green | `sphere()` lays a 62 % white specular over a coloured disc and writes the symbol in `paper`, so the symbol sits on white. The gate could not read a ground that was a gradient. | The rule is an **order statistic**: a glyph's ratio is the one at least 95 % of its core pixels beat, measured against the actual pixel beneath it, rounded up so a single pixel can never fail a label. The 40 % share is demoted from a rule to a printed counter, so the class stays visible instead of hiding in a skip count. |
+
+**Anti-aliasing cannot produce a false failure**, which is what makes the new rule safe: a blended pixel's ratio lies between the two surfaces it blends, so it can never be worse than the worse of them. Every failure stands on a real surface. The rounding was chosen by measurement, not taste: with `floor`, one pixel of fifteen failed a label whose other pixels reached 11.70:1.
+
+**The fix for the gradient class was one change reaching eight findings**, and the obvious version was proved impossible first. Shrinking or softening the highlight cannot work — the symbol reaches about 0.7 of the disc's radius, and the arithmetic says the wash may be at most about 2 % white before `paper` on nitrogen's fill drops under 4.5:1. The highlight had to **stop** rather than soften: it is now masked off the middle of the disc and reads as an upper-left rim. `bondlab`'s "varied ground" count went from 44 and 48 to **zero**.
+
+The other fourteen straddled two grounds, which the 40 % share let through by naming the lighter one — a label lying across a rule, a chart line, or a field of water dots. Those took the paper-ground halo two figures already used, or a move, because **a label that crosses a rule is a composition problem before it is a contrast problem**.
+
+### Two instrument notes worth keeping
+
+- **Magnifying a figure by transforming its live stage corrupts it.** Figures that re-measure their own panes react to the transform; one strip re-rendered into an 8,288-unit viewBox. Clone the stage into an inert overlay instead.
+- **`npm run perf` loads chapter 1 only.** With five chapters and 56 figures it can no longer answer "what did this cost", and the frame cost of the mask above is therefore unmeasured and recorded as such.
+
+## 2026-09-17 — a press on the scale's lens was dropped while it was still gliding, and it looked like a flaky gate
+
+*Appended at the end, like the entries above it. Written by the worker that closed the `<tb-sitting>` handshake hole, from the handoff of the worker that found and fixed the defect; the numbers describing the figure come from that worker's probe, and the state of `src/figures/scale.js` and `tools/drive.js` described here was read off the tree of 2026-09-17.*
+
+**The symptom, as it was seen.** A gate step that would not hold still: `DRIVE_KINDS=scale npm run drive`'s `drag-the-lens-left` failed **17 runs of 20** with nothing changed between them, and passed the other three. What a reader has — the part nobody was looking for, and the reason this is an entry rather than a note — is that **pressing the lens while it is still gliding does nothing at all**. The grab is dropped, the lens carries on coasting, and a second press works. The lens glides after every jump, so that window is open after every single use of the figure.
+
+**How it was found.** By chasing a flaky gate step, and that disguise is the part worth recording. Seventeen red runs in twenty read as timing noise in Playwright, in a figure nobody had reported anything about; a step that red gets retried, not read.
+
+**The root cause, down to the line.** `src/figures/scale.js`'s `onDown` called `glide.finish()` **before** asking what had been pressed. `finish()` runs the tween's last update, which calls `setU`, which repaints — and the wide layout's repaint rebuilds the lens's interior with `inner.replaceChildren()`. So a press that landed on the ruler line, a tick or a label *inside* the lens was holding a node that finishing the glide had just thrown away. `lensG.contains(e.target)` then answers **no**, correctly, about a detached node; `down()` returned `null`; the handler returned without `preventDefault()`; the press was gone. The defect was the order of two statements, and the fix is the hit read before the glide is finished.
+
+Measured on both arms, one press each way (`out/scaleprobe/probe2.mjs`):
+
+| when the press arrives | `stillInDocument` | `figureTookIt` |
+|---|---|---|
+| mid-glide, no settle | `false` | `false` |
+| after a 400 ms settle | `true` | `true` |
+
+**What the gates could see, and why the answer was nothing.** The figure was not unwatched, and one gate was even going red at it.
+
+- **`npm run drive` is the only gate that drags this figure**, and it *did* fail — 17 times in 20. But it asserted the **outcome**, `lensMetres` after the drag, and not the figure's own verdict on the press. An outcome a later press also produces cannot tell a dropped press from a slow one, so the red carried no diagnosis and read as flakiness.
+- **The step inherited its glide from the step before it** rather than starting one, so how much of the 280 ms window was left when the press arrived depended on how many round trips the previous assertions had spent. That is what made the failure a rate instead of a fact: with the defect in place the step was red only **5 of 10** while it inherited its window, and **10 of 10** once it starts its own.
+- **No other gate presses a figure control while anything is animating.** `npm run narrow` presses on an opening frame; `npm run pinned` presses under a pinned clock, where nothing is gliding; `npm run legible` measures pixels rather than pressing for an effect; `npm run shot`, `npm run devices` and `npm run subpath` press no figure control at all.
+- **No unit test**, and there could not be one of the usual kind: the property is "a `pointerdown` whose target was detached by a repaint two statements earlier", which needs a real event, a real SVG and a tween actually running.
+
+**Now checked by.**
+
+| Symptom | Root cause | Now checked by |
+|---|---|---|
+| a press on the lens during its glide is dropped | the hit test ran after a repaint that detached the press's target | **`npm run drive`'s `scale` recipe, hardened 2026-09-17**: the step **starts its own 280 ms glide** immediately before the press, so it owns the window instead of inheriting whatever the previous step left, and it asserts `window.__scaleTookPress === true` — the figure's own `defaultPrevented` on the pointerdown it has just handled — **before** it looks at the outcome. 20 of 20 green with the fix; 10 of 10 red with the defect reintroduced, against 5 of 10 for the same defect while the step inherited its window |
+| the same dropped press in any **other** figure | a `pointerdown` handler that reads `e.target` after something has repainted | **nothing beyond `scale`.** The bound the fixing worker gave, written down because it is the half the new check does not reach: `scale.js` is the only one of the 44 figures that both listens for `pointerdown` and reads `e.target`, so the class is confined *today* — but **no other drag recipe in `tools/drive.js` asserts the figure's own verdict on a press**, so a figure that grows a target-based hit test tomorrow is uncovered from the day it is written |
+
+**The lesson underneath.** *A flaky gate step is a defect report wearing the one disguise that makes people retry it instead of reading it.* Underneath that sit two things this file already says from other directions. An assertion on the **outcome** cannot see a dropped **input**, because the outcome is reachable without the input path the defect lives in — the same shape as a harness that assigns state directly and is then blind to the path it skipped. And a step whose timing window is **inherited from its neighbour** has no bound anybody can state, so its failure rate is a property of the step above it: 5 of 10 and 10 of 10 are the same defect, measured through two different windows.

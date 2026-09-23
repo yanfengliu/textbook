@@ -23,14 +23,16 @@ The chapter draws atoms in five figures, so they should agree, the way chapter 1
 |---|---|
 | Carbon | `inkSoft` |
 | Hydrogen | `paper3` fill with a `ruleStrong` outline |
-| Oxygen | `coral` |
-| Nitrogen | `water` |
+| Oxygen | `coral`, the disc drawn at its text value |
+| Nitrogen | `water`, the disc drawn at its text value |
 | Phosphorus | `violet` (the book's information colour, and phosphate is DNA's backbone) |
-| Sulfur | `gold` |
-| Na, K, Ca, Cl, Mg and other ions | `leaf`, always with the symbol written on them |
+| Sulfur | `gold`, the disc drawn at its text value |
+| Na, K, Ca, Cl, Mg and other ions | `leaf`, the disc drawn at its text value, always with the symbol written on them |
 | Covalent bond | solid `ink` |
 | Hydrogen bond | dashed `inkFaint` |
 | Ionic attraction | dotted `gold` |
+
+"The disc drawn at its text value" means the element keeps its hue and its token — an oxygen is the coral one — but the disc is filled with `--coral-text` rather than `--coral`, because the symbol written on it is `paper` and a `paper` symbol on the bare accent is 3.32:1 in the light theme, under WCAG AA's 4.5:1. It is 2.26:1 on `gold` and 4.33:1 on `water`, and no palette token clears the bare accent in both themes, because the disc and the symbol both move with the theme and in the same direction. The `-text` values move with the paper instead, so one label reads on both: 5.34, 5.25, 5.23 and 5.66 in the light theme and 8.84, 11.54, 8.30 and 7.80 in the dark. The recipe is `deepen` in `src/figures/lib/chem-atoms.js`, the four percentages are `--*-text` in `src/styles/tokens.css` and `TEXT_MIX` in `src/palette.js`, and `test/element-table.test.js` measures every element's symbol on its own disc in both themes.
 
 Charge is never colour alone: a partial charge is a δ+ / δ− glyph, a full charge a + / −. Sizes in the molecular figures are to scale within a figure, and the scale is stated on the stage (a bar in nanometres or picometres).
 

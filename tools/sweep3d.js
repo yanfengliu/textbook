@@ -9,10 +9,12 @@
 //
 // Bound: it detects an absent frame, not a wrong one. A cell rendered upside down, mislabelled, or with
 // the nucleus outside the membrane passes it; the person reading out/sweep/ is the check for that. The
-// measure is taken on the WebGL canvas alone, with every HTML overlay (labels, toolbar, chips, cards)
-// hidden through the .sweep-bare class: the first version measured the whole stage, and a figure whose
-// render was replaced by a clear still passed because fifteen labels and three buttons vary enough to
-// look like a frame (proved 2026-09-10, docs/learning/gate-proofs.md). The labelled frame is still
+// measure is taken on the WebGL canvas alone, with every HTML overlay (labels, toolbar, chips, cards,
+// a bench figure's non-canvas panes, and membrane3d's own readout, curve, labels and leaders) hidden through
+// the .sweep-bare class — see BARE_SELECTORS below: the first version measured the whole stage, and a
+// figure whose render was replaced by a clear still passed because fifteen labels and three buttons vary
+// enough to look like a frame (proved 2026-09-10, and again for the panes 2026-09-17,
+// docs/learning/gate-proofs.md). The labelled frame is still
 // written beside the bare one for a person to look at. The renderer is SwiftShader unless SWEEP_GPU=1.
 // SWEEP_VIEWS=<n> trims the azimuth count for CI; SWEEP_KINDS=<a,b> trims the run to those kinds, a
 // trimmed run proves only its part, and a name that is not a WebGL kind stops the run rather than
@@ -40,6 +42,39 @@ const azimuths = Number(process.env.SWEEP_VIEWS || 4);
 // the layout rather than the render, so it sits at 0.985, still far below the 0.999 an empty frame
 // gives. The mutation proof in docs/learning/gate-proofs.md was re-run at this value.
 const LIMITS = { darkFraction: 0.5, minStd: 6, dominantFraction: 0.985, minMean: 8 };
+
+// What the bare frame hides, which is everything on the stage that is not the render. Each entry is one
+// way a figure in this repository puts HTML or SVG over its canvas.
+//
+// The last entry is the one that was missing, and it is the reason this list is a list rather than a
+// string inside the call below. A figure built on `src/figures/lib/bench.js` draws its chrome in PANES —
+// grid cells of the bench's own — and a pane is not a label, a toolbar, a chip or a card, so nothing
+// here hid it: `atp3d`'s ledger is a six-row typographic table filling a third of the stage, and a
+// render replaced by a clear would have left it standing and passed every measure below. `membrane3d`
+// has the same shape in `.m3-read`, `.m3-curve` and `.m3-labels`, and its toolbar was `.m3-bar` rather
+// than `.fig-toolbar`, so none of those were hidden either — which was the whole of its cover, and it
+// passed with its renderer replaced by a clear. That toolbar is now `.fig-toolbar` like every other
+// figure's (src/figures/membrane3d.js), so the entry that named its private class has gone from this
+// list: the fix is that a figure cannot opt out of the name every gate keys on, not that every gate
+// learns one more private name. Its four remaining `.m3-*` entries are the panes it draws over the
+// canvas, and they have no shared name to take.
+//
+// The bench's rule is written the safe way round: hide every pane and then show back the ONE marked
+// `tb-gl` (BENCH_GL_CLASS in bench.js), so a pane added to a 3D figure later is hidden by default
+// instead of being measured as if it were the render, and a figure that forgets to declare its canvas
+// fails loudly with a blank frame. test/bench.test.js holds the two names together.
+const BARE_SELECTORS = [
+  '.sweep-bare .fig-label',
+  '.sweep-bare .fig-toolbar',
+  '.sweep-bare .fig-chip',
+  '.sweep-bare .fig-card',
+  '.sweep-bare .tb-figure__placeholder',
+  '.sweep-bare .m3-read',
+  '.sweep-bare .m3-curve',
+  '.sweep-bare .m3-labels',
+  '.sweep-bare .m3-leaders',
+  '.sweep-bare .tb-bench .tb-pane:not(.tb-gl)',
+];
 
 function judge(stats) {
   const bad = [];
@@ -72,7 +107,7 @@ try {
         await page.close();
         continue;
       }
-      await page.addStyleTag({ content: '.sweep-bare .fig-label, .sweep-bare .fig-toolbar, .sweep-bare .fig-chip, .sweep-bare .fig-card, .sweep-bare .tb-figure__placeholder { visibility: hidden !important; }' });
+      await page.addStyleTag({ content: `${BARE_SELECTORS.join(', ')} { visibility: hidden !important; }` });
       const info = figures[id];
       if (!info || info.state !== 'ready') {
         failures += 1;

@@ -38,17 +38,24 @@ Grouped by the file the gate lives in, because that is how they are looked up. S
 - [a figure's arithmetic reaching the DOM as a negative or as NaN](#shot-a-figures-arithmetic-reaching-the-dom-as-a-negative-or-as-nan-toolsshotjs-auditfiguregeometry) — `auditFigureGeometry`, after `<rect width="-0.1">` shipped to the live site.
 - [no colour hook paints nothing, and no marked target is left without one](#shot-no-colour-hook-paints-nothing-and-no-marked-target-is-left-without-one-toolsshotjs) · [a page may not carry fewer colour hooks than its census says](#shot-a-page-may-not-carry-fewer-colour-hooks-than-its-census-says-toolsshotjs-hook_census--auditcolourhooks) · [the colour-hook check measures the channels its header says it measures](#shot-the-colour-hook-check-measures-the-channels-its-header-says-it-measures-toolsshotjs-auditcolourhooks) — **three holes in one check, found one after another.** Read together: presence, then a floor per page, then which CSS channels the check actually reads. The floor entry also carries the rule that a floor set earlier passes the partial loss it was written for.
 - [a Simplified page's figure word](#shot-a-simplified-pages-figure-word--and-the-half-of-that-claim-no-page-in-the-repository-can-exercise-srccomponentsfigurejs-through-toolsshotjs) — and the Traditional half, which **could not be made red** because no page here is `zh-Hant`. The refusal is the finding.
+- [the Today frame was a coin toss between a booted page and one showing none of its study surface](#shot-the-today-frame-was-a-coin-toss-between-a-booted-page-and-one-showing-none-of-its-study-surface-toolsshotjs) — a race between the handshake and `<tb-sitting>`'s boot, not the record `npm run sitting` writes. This gate's own wait came first, and the handshake's sitting term later replaced it.
+
+**`src/shell.js`** — the handshake every page gate waits on, so a proof here is a proof about all of them at once.
+
+- [the handshake does not resolve until every `<tb-sitting>` has booted](#shell-the-handshake-does-not-resolve-until-every-tb-sitting-has-booted-and-shot-devices-and-subpath-all-inherit-it-srcshelljs-2026-09-17) — at the end of the file. Read it before touching `_check()`, and before quoting anything this repository says about a `/today/` frame: until 2026-09-17 three gates photographed and measured that page mid-boot, and `npm run devices` and `npm run subpath` said nothing about it at all.
 
 **`tools/devices.js`** — nine real devices, three engines.
 
 - [the phone shapes also run on WebKit and Gecko](#devices-the-phone-shapes-also-run-on-webkit-and-gecko-toolsdevicesjs) — the engine matrix and why Firefox's phone arm is a narrow viewport.
 - [the leftmost header control is in its corner, and the paired book uses a wide screen](#devices-the-leftmost-header-control-is-in-its-corner-and-the-paired-book-uses-a-wide-screen-toolsdevicesjs) — two checks that had been *added, not proved*, until this entry.
 - [a suite that finds none of its subject on a page that must have it](#devices-a-suite-that-finds-none-of-its-subject-on-a-page-that-must-have-it-toolsdevicesjs) · [a run whose page list and engine list meet in no load fails instead of passing empty](#devices-a-run-whose-page-list-and-engine-list-meet-in-no-load-fails-instead-of-passing-empty-toolsdevicesjs) · [a run says whether the width floor ran](#devices-a-run-says-whether-the-width-floor-ran-and-a-trimmed-run-that-never-reaches-it-says-so-toolsdevicesjs) — **the same lesson three times**: a run that tested nothing must not report success. See also `trim.js` below; `devices` is the only one of the six trimmed gates with a backstop of its own.
+- [the drawer's wait leaves when the drawer has stopped, not when two rounded readings agree](#devices-the-drawers-wait-leaves-when-the-drawer-has-stopped-not-when-two-rounded-readings-agree-toolsdevicesjs-settled) — `settled()`, after a red about one run in five that twenty runs of the gate would not reproduce; the cause was measured one level down, in the poll.
 
 **`tools/drive.js`** — every figure's own controls.
 
 - [every figure's own controls do what the figure reports](#drive-every-figures-own-controls-do-what-the-figure-reports-toolsdrivejs) — the base claim.
 - [the helix pick step was green without ever picking anything](#drive-the-helix-pick-step-was-green-without-ever-picking-anything-toolsdrivejs) · [a figure cannot shadow the four names the frame owns](#drive-a-figure-cannot-shadow-the-four-names-the-frame-owns-toolsdrivejs) · [a figure the frame holds no handle for, or whose handle has no `describe()`](#drive-a-figure-the-frame-holds-no-handle-for-or-whose-handle-has-no-describe-toolsdrivejs) — **three forms of a step that asserted nothing**: an assertion satisfied by `undefined`, a figure silently overwriting the frame's own field, and a missing handle read as "nothing shadowed".
+- [a press the figure threw away, because finishing a glide had removed the node it landed on](#drive-a-press-the-figure-threw-away-because-finishing-a-glide-had-removed-the-node-it-landed-on-toolsdrivejs-scale-recipe-srcfiguresscalejs) — `scale drag-the-lens-left` was handed on as flaky and was red 17 runs of 20; the defect was in `src/figures/scale.js`.
 
 **`tools/check-content.js`** — the authored chapter.
 
@@ -61,19 +68,32 @@ Grouped by the file the gate lives in, because that is how they are looked up. S
 **The other browser gates.**
 
 - [`tools/narrow.js`: the figures' phone layouts had no gate at all](#narrow-the-figures-phone-layouts-had-no-gate-at-all-toolsnarrowjs).
+- [`tools/narrow.js`: it opens what a reader can open, and the two shapes it still cannot see](#npm-run-narrow-opens-what-a-reader-can-open-and-the-two-shapes-it-still-cannot-see-2026-09-17) — every state a toolbar toggle reaches, after `enzyme-kinetics` crowded its stage two presses from the opening state.
 - [`tools/sweep3d.js`: every 3D figure renders a frame from every angle](#sweep3d-every-3d-figure-renders-a-frame-from-every-angle-toolssweep3djs) — the bare canvas with every HTML overlay hidden, and why.
+- [`tools/sweep3d.js`: the WebGL canvas alone, after the bench's panes reopened the hole the 2026-09-10 proof closed](#npm-run-sweep3d-measures-the-webgl-canvas-alone--the-benchs-panes-reopened-the-hole-the-2026-09-10-proof-closed-2026-09-17) — `atp3d` with its render replaced by a clear passed until the bench's panes were hidden too.
+- [`tools/sweep3d.js`: `membrane3d`'s bar takes the shared class, and the mutation that used to pass now fails](#sweep3d-membrane3ds-bar-takes-the-shared-class-and-the-mutation-that-used-to-pass-now-fails-2026-09-17) — its toolbar was `.m3-bar`, not `.fig-toolbar`, so the bare frame never hid it and the figure was never covered.
 - [`tools/flow.js`: the reader controls work through real input](#flow-the-reader-controls-work-through-real-input-toolsflowjs).
 - [`tools/subpath.js`: every page, as GitHub Pages serves it](#the-published-subpath-every-page-as-github-pages-serves-it-toolssubpathjs).
 - [`tools/sitting.js`: a reader can finish a sitting, and the page does not claim more than the record supports](#sitting-a-reader-can-finish-a-sitting-and-the-page-does-not-claim-more-than-the-record-supports-toolssittingjs) · [the sitting has to end, and the end summary has to say something per objective](#sitting-the-sitting-has-to-end-and-the-end-summary-has-to-say-something-per-objective-toolssittingjs) — **not the same claim.** The first proves the 2026-09-15 word-and-class hardening; the second proves termination and the per-objective label, which the first does not touch.
 - [`tools/legible.js`: a figure's own type, measured against the pixels behind it, in both themes](#legible-a-figures-own-type-measured-against-the-pixels-behind-it-in-both-themes-toolslegiblejs) — every glyph's contrast against the pixels under it, in both themes.
+- [`tools/legible.js`: what a green run was actually measuring on `bondlab`](#legible-what-a-green-run-was-actually-measuring-on-bondlab-toolslegiblejs) — 44 of 48 glyph runs skipped as varied ground in the light theme, and one finding reported for a figure whose O, N and S were all under the bar.
+- [`tools/legible.js`: a glyph judged against the worst pixel under it, not against a colour the gate could name](#legible-a-glyph-judged-against-the-worst-pixel-under-it-not-against-a-colour-the-gate-could-name-toolslegiblejs) — the order statistic that replaced the 40% dominant-colour rule; the old rule survives only as a counter.
+- [`tools/legible.js`: the six 185 s pairs were one hidden button, and the number outlived its defect by a day](#legible-the-six-185-s-pairs-were-one-hidden-button-and-the-number-outlived-its-defect-by-a-day-toolslegiblejs) — a stale button index waiting out the 180 s action timeout; the inherited 185 s did not reproduce when retested.
+- [`tools/pinned.js`: no control starts a figure whose clock is pinned](#pinned-no-control-starts-a-figure-whose-clock-is-pinned-toolspinnedjs) — the base claim, proved on `polymer`, `secretion` and `gradient-battery` with each figure's guard deleted.
+- [`tools/pinned.js`: the six figures that were on the outstanding list, and the sliders and keys the gate could not reach](#pinned-the-six-figures-that-were-on-the-outstanding-list-and-the-sliders-and-keys-the-gate-could-not-reach-toolspinnedjs) — the `KNOWN` list emptied, and the gate widened from buttons to sliders and keys.
+- [`tools/pinned.js`: eight processes, one verdict, and the three ways a shard could have vanished](#pinned-eight-processes-one-verdict-and-the-three-ways-a-shard-could-have-vanished-toolspinnedjs) — safe to shard because it counts animation frames, not milliseconds: 410 s as one process, 80 s as eight.
 - [`tools/lib/trim.js`: a value that names nothing stops each of the six gates, and does it before the browser](#trim-a-value-that-names-nothing-stops-each-of-the-six-gates-and-does-it-before-the-browser-toolslibtrimjs) — with the measurement that five of the six have no backstop without it.
 - [`src/shell.js`: the handshake waits for every figure](#handshake-the-gates-wait-for-every-figure-srcshelljs-proved-through-toolsshotjs) — every browser gate's only clock.
+- [`tools/lib/browser.js`: `openPage` waits on the page's own readiness promise](#openpage-waits-on-the-pages-own-readiness-promise-and-the-handshake-still-holds-the-gate-the-two-ways-it-must-2026-09-17) — the 100 ms poll replaced by the handshake's own latch. Carries what the poll actually cost, per gate, measured; the five scenarios that keep the two failure paths red with the same words; and the measurement that `npm run shot` does not reproduce itself run to run.
+- [the gates after the sleeps came out: six proofs that speeding a gate up did not empty it](#the-gates-after-the-sleeps-came-out-six-proofs-that-speeding-a-gate-up-did-not-empty-it-toolsdrivejs-toolsdevicesjs-toolsshotjs-toolssubpathjs-toolslibnet-cachejs) — `drive`, `devices`, `shot`, `subpath` and `tools/lib/net-cache.js`, each mutated in a frozen copy after the round cut its waits or cached its fetches.
 
 **`npm run unit`** — the fast checks.
 
 - [the CSS tokens and the JS palette are one table](#palette-the-css-tokens-and-the-js-palette-are-one-table-testpalettetestjs).
 - [one element table for the chapter-2 molecular figures](#unit-one-element-table-for-the-chapter-2-molecular-figures-testelement-tabletestjs) · [one structure table for chapter 3](#unit-one-structure-table-for-chapter-3-and-every-colour-still-derived-from-the-palette-testorganelle-tabletestjs) · [one membrane table](#unit-one-membrane-table-every-colour-derived-every-label-legible-on-its-own-fill-testmembrane-tabletestjs) — **one lesson in three chapters' words**: a shared table duplicated across figure modules drifts, and the fix is one table with a test. The membrane entry adds label contrast on the fill; the element entry also holds the no-`Math.random` check for everything under `src/figures/`.
+- [a symbol on a fill is legible, and the colour it takes cannot be resolved through the theme](#element-table-organelle-table-membrane-table-a-symbol-on-a-fill-is-legible-and-the-colour-it-takes-cannot-be-resolved-through-the-theme-testelement-tabletestjs-testorganelle-tabletestjs-testmembrane-tabletestjs) — `element-table`, `organelle-table` and `membrane-table`, after chapter 2 shipped an O at 3.32:1, an N at 4.33:1 and an S at 2.26:1.
 - [every figure module parses](#registry-every-figure-module-parses-testregistrytestjs) · [a figure cannot exist without the frame knowing it](#registry-a-figure-cannot-exist-without-the-frame-knowing-it-and-the-frame-cannot-promise-a-figure-that-does-not-exist-testregistrytestjs) — the same test, hardened twice: registration first, then whether the module can execute at all.
+- [a guard on a binding that does not exist yet, and a name nothing declares](#use-before-declared-a-guard-on-a-binding-that-does-not-exist-yet-and-a-name-nothing-declares-testuse-before-declaredtestjs) — `if (x)` above its own `const` throws instead of skipping, and so does `x?.set()`.
 - [a chapter's page id names its book](#pages-a-chapters-page-id-names-its-book-testpagestestjs) · [the gates visit every chapter that exists](#pages-the-gates-visit-every-chapter-that-exists-testpagestestjs) — the same test, hardened twice: discovery, then book-qualified ids. Read both before quoting a `SHOT_PAGES` or `DEVICE_PAGES` value from an older entry, because unqualified ids now match nothing.
 - [no authored page writes markup into a `content=` attribute](#unit-no-authored-page-writes-markup-into-a-content-attribute-testmetatestjs).
 - [a Chinese page's chrome is Chinese, and in the page's own script](#strings-a-chinese-pages-chrome-is-chinese-and-in-the-pages-own-script-teststringstestjs) · [the 原文 and its quotations are Traditional, everything else Simplified](#script-the-原文-and-its-quotations-are-traditional-everything-else-simplified-testlexicontestjs) — the paired book's script rules.
@@ -953,3 +973,733 @@ All six below were on `main` at `f5bd0e9`, pushed, and described in `AGENTS.md` 
   - **A glyph that straddles two fills.** The surface has to be under at least 40% of a glyph's core pixels. Below that the ground is reported as varied and the glyph is not measured, because the surfaces under 10–37% of a glyph here were its halo's rim or a rule crossing it.
   - **Whether the colour is the RIGHT one**, or the type the right size, or the hover and focus states legible. It measures one pair at a time and says nothing about the design.
   - **The four `ALLOWED` pairs**, which are the one element table's `label: 'paper'` on a `coral` and a `water` disc: 3.32:1 and 4.33:1 in the light theme. They are floored, printed and recorded, and the decision is in `docs/work/2_rest-of-the-book/plan.md`.
+
+## element-table, organelle-table, membrane-table: a symbol on a fill is legible, and the colour it takes cannot be resolved through the theme (`test/element-table.test.js`, `test/organelle-table.test.js`, `test/membrane-table.test.js`)
+
+- **The tree.** `0806283`, plus uncommitted work: this round's own changes to `src/palette.js`, `src/figures/lib/chem-atoms.js`, `src/figures/lib/cell3-colours.js`, `src/figures/lib/mol-draw.js`, `src/figures/lib/svg.js`, `src/figures/bondlab.js`, `src/figures/soup.js`, `src/figures/levels.js`, `src/styles/tokens.css` and `tools/legible.js`, and several other workers' in-flight chapter-4 and chapter-5 work in the same tree. Node v24.18.1.
+- **Claim**, from the three headers. `element-table`: every element's symbol clears 4.5:1 against its own disc **in both themes**, the deepened disc is the same recipe in `tokens.css` and in `TEXT_MIX`, and only `lib/chem-atoms.js` and `lib/mol-draw.js` turn an element's `token` into a colour. `organelle-table` and `membrane-table`: no field in `ORGANELLES`, `EXTRA_ORGANELLES` or `MEMBRANE` holds a palette token NAME, every `symbolColor` clears 4.5:1 against its own fill, and a `null` is allowed only where neither neutral clears.
+  - **Bound.** Text, exports and arithmetic. Never pixels and never the reader's eye. The element check measures both themes because an element's disc is a token and moves; the organelle and membrane checks measure once because their fills are fixed hexes and one measurement therefore *is* both themes. WCAG's large-text exemption is deliberately not applied in any of the three — see what it cost, below. The derivation rule is textual over `src/figures/**` and sees `.token`/`.outline` being read; a module that copies a hex, or builds the token name at run time, is not seen.
+- **Why it was needed.** Two different defects that look like one.
+  - The element table set `label: 'paper'` on every coloured disc and that pair had never been measured in the light theme. Published chapter 2 shipped an O at **3.32:1**, an N at **4.33:1** and an S at **2.26:1**. Measuring all thirteen palette tokens against those three discs in both themes showed the label could not be fixed at all: the disc and the symbol both move with the theme and in the same direction, so `contrast(paper, fill)` multiplied by `contrast(ink, fill)` stays near constant and nothing clears 4.5:1 in both. The fill had to move, to the accent's `-text` value, which moves *with* the paper.
+  - `MEMBRANE` held `label: 'ink'` — a token NAME — over fills that are fixed hexes, so `ctx.palette[part.label]` would have drawn near-white on a mid-tone fill in the dark theme. Nothing was bitten, because chapter 4's two figure workers were warned by hand; a warning is not a gate. Chapter 5's `METABOLISM` had already solved it with a fixed `symbolColor`, and that shape is now the rule in all four tables.
+- **The mutation, and the exact failure text it produced.** Twelve, applied and reverted one at a time by a script that re-read each file afterwards; the abridged failure text, verbatim:
+  - **ORGANELLES holds a token name again** — `symbolColor: LIGHT.ink` to `symbolColor: 'ink'` on `golgi`: `the ORGANELLES literal in src/palette.js carries symbolColor: 'ink', and "ink" is a palette token NAME. Over a fill that is a fixed hex a token name reads right in one theme and inverts in the other, because the token moves and the fill does not.`
+  - **a stated colour that does not clear** — `chromatin`'s `null` to `LIGHT.ink`: `ORGANELLES's "chromatin": a symbol in #1d1a17 on its own fill #8d74c4 is 4.48:1, under WCAG AA's 4.5:1. The other neutral gives 3.62:1 ...`
+  - **a null on a fill a neutral would have carried** — `golgi` to `null`: `ORGANELLES's "golgi" has symbolColor null, meaning neither neutral clears 4.5:1 on #c9a227 — and LIGHT.ink gives 7.16:1, which does. A null is for a fill with no answer, not for one nobody measured ...`
+  - **the worse of two neutrals** — `ribosome` `LIGHT.paper` to `LIGHT.ink`: `a symbol in #1d1a17 on its own fill #5c554d is 2.36:1 ... The other neutral gives 6.86:1`.
+  - **the same two, on the other table** — `EXTRA_ORGANELLES`'s `microtubule` `null` to `L.ink`: `a symbol in #1d1a17 on its own fill #5a8184 is 4.05:1 ... The other neutral gives 4.00:1`; and the field deleted from `wallLine`: `EXTRA_ORGANELLES's "wallLine" has symbolColor undefined; it is a colour, six lower-case hex digits, or null where neither neutral clears`.
+  - **MEMBRANE holds a token name again** — `pump`: `the MEMBRANE literal in src/palette.js carries symbolColor: 'paper', and "paper" is a palette token NAME ...`; and `cholesterol` `LIGHT.paper` to `LIGHT.ink`: `a symbol in #1d1a17 on its own fill #6e5245 is 2.44:1, under WCAG AA's 4.5:1. The other neutral, paper (#faf7f1), gives 6.64:1`.
+  - **the element table loses `deepen`**, which is the published defect put straight back — on oxygen: `O: its symbol in #faf7f1 on its own disc #d9663d is 3.32:1 in the light theme, under WCAG AA's 4.5:1. Both the disc and the symbol are palette tokens here, so both move with the theme and no single label clears a bare accent in both — the disc takes the accent's -text value instead (deepen in ELEMENTS), which moves WITH the paper.` — and on sulfur, the same line at **2.26:1**.
+  - **the two copies of the recipe drift apart** — `--gold-text` 55% to 60% in `tokens.css`: `--gold-text is 60% of --gold in tokens.css and TEXT_MIX.gold is 0.45, which is 55%. An SVG figure would then draw one colour and a canvas figure another, for the same atom on the same page.`
+  - **`deepen` on a token with no `-text` value** — added to phosphorus: `no deepened CSS token for palette key "violet"; lib/svg.js's C holds leafText, waterText, coralText, goldText, and tokens.css declares a --*-text for those four accents only.` It throws at module load rather than falling back to the accent and shipping the defect it was asked to fix.
+- **The restoration.** The script re-read every mutated file after each revert and compared it to the bytes captured before the run: `files not byte-identical to their pre-run state: none`. The same pattern was used for the two instrumented gate runs below.
+- **What it does not prove.**
+  - **That a figure draws with the field.** These are text and arithmetic. `palette[part.symbolColor]` is `undefined` rather than wrong, so a figure that still resolves it through the theme draws nothing — which `drive`, `narrow` and `legible` see and a text check does not.
+  - **The five fills with no answer.** `chromatin` (4.48), `roughER` (4.33), `chloroplast` (4.23), `microtubule` (4.05) and `intermediateFilament` (4.04) carry `symbolColor: null`. Nothing writes on any of them today. The null is measured and the test goes red if a neutral would have worked, but no fill was moved, so the book still has five surfaces a symbol cannot be written on.
+  - **There is deliberately no check that the stated colour is the BETTER of the two neutrals**, because with this palette it could never go red and a rule nothing can falsify is not a rule: `LIGHT.paper` and `LIGHT.ink` are 15.9:1 apart, so for any fill between them one clearing 4.5:1 forces the other under 3.54:1. "Clears AA" and "is the better neutral" are one claim here.
+  - **Sulfur's disc was never rendered.** The worst pair in the book, 2.26:1, is not reachable in any state the gates visit: the only labelled sulfur disc is `carbonkit`'s sulfhydryl group, which needs a free bond and was refused in both themes when the gate pressed it, and `soup`'s sulfur spheres carry no symbol. It was a latent defect, not a live one; oxygen and nitrogen were live.
+
+## legible: what a green run was actually measuring on `bondlab` (`tools/legible.js`)
+
+- **The tree.** As above, `0806283` plus this round's uncommitted work.
+- **The finding, which is worth more than the fix.** With the element table corrected, `LEGIBLE_KINDS=bondlab` still failed one line: `bondlab light: "O" is 3.32:1 — #faf7f1 on #d9663d`. `#d9663d` is the bare coral. `src/figures/bondlab.js` held a **third** derivation of the element colours — `const TOKEN = { coral: C.coral, ... }` indexed by `ELEMENTS[sym].token` — which read the table faithfully and was wrong anyway, because `token` is not the colour to draw once `deepen` exists. Three hand-drawn water vignettes wrote `C.coral` as a literal and were not reading the table at all. `src/figures/soup.js` held a fourth, `[['C', p.inkSoft], ['O', p.coral], ...]`.
+- **What the gate was actually measuring there, counted rather than assumed.** The gate was instrumented to print every glyph run by selector, bar and outcome, with `bondlab` reverted to its pre-fix state — the state the number describes. Light theme, 48 `.bl-sym` runs over 16 states:
+  - **44 SKIPPED**, reason `the ground under its glyphs is varied`.
+  - **4 judged at 4.5:1, and all four FAILED at 3.32.**
+  - **0 exempt by size.** The 6 runs the summary line counts at the large-text bar are `.bl-symdark`, hydrogen's symbol on its pale disc, at 14.16:1.
+  - Dark theme: the same 44 skipped, and the 4 measured pass at 7.26.
+  - So **92% of this figure's element symbols were not measured at all**, and the gate reported `1 problem` for a figure in which every O, N and S was at 3.32, 4.33 or 2.26 to one. The reason is `sphere()`: bondlab draws its atoms as radial gradients, and a gradient is a varied ground, which is this gate's own stated bound. **A figure drawn in gradient spheres is invisible to the legibility gate.** The skip count was printed on every run and read by nobody as "this figure's subject is unmeasured".
+  - The hypothesis this replaced — that WCAG's large-text exemption was hiding them — was wrong, and was wrong in a way only counting could show. It is recorded because the shape is right even where the instance was not: the same pair is a pass at 18.66 px weight 700 and a failure at 18.0, so a figure can carry its contrast on its type sizes. Each summary line now prints `N of M at the large-text bar` for that reason. `carbonkit` is 61 of 646, `foldlab` 22 of 545, `phlab` 15 of 393.
+- **The gate that covers it now.** Not this one: 44 of those 48 runs are still skipped and always will be. `test/element-table.test.js` measures all eleven elements in both themes from the table, in under a second, and its derivation rule fails any module but `chem-atoms` and `mol-draw` that reads `.token` or `.outline`. Red proof, with `bondlab` restored to its `TOKEN` map: `an element's colour is derived outside lib/chem-atoms.js and lib/mol-draw.js: bondlab.js reads .token off an element record / bondlab.js reads .outline off an element record`.
+- **`ALLOWED` is now empty**, and the gate fails an entry that is never spent, so it cannot quietly refill. The four it held were one decision; the pairs they covered now measure 5.34, 5.23 and 5.25 in the light theme against 8.84, 8.30 and 11.54 in the dark.
+- **The restoration.** Both instrumented runs reverted `tools/legible.js` and `src/figures/bondlab.js` in a `finally` and re-read them: `both files restored byte-identical: True`.
+- **What it does not prove.**
+  - **Nothing about the other figures' skipped glyphs.** The instrumented count was taken on `bondlab` only. Every figure that draws type over a gradient or a rule has the same hole, and the per-figure skip count is the only signal.
+  - **The `large` count is a signal, not a check.** Nothing fails because a figure leans on the large-text bar; the line only says so.
+  - **Chapter 4's eight figures and the second book's three are still `DEFERRED`** and were not visited.
+
+## the gates after the sleeps came out: six proofs that speeding a gate up did not empty it (`tools/drive.js`, `tools/devices.js`, `tools/shot.js`, `tools/subpath.js`, `tools/lib/net-cache.js`)
+
+- **The tree.** `d778606` plus the uncommitted working tree of 2026-09-16 23:00, frozen as a byte copy in the worker's scratchpad and held still for every run below; only `tools/` moved between the arms, and `git status` over `src`, `biology`, `tongjian`, `test`, `today`, `index.html` and `lab` was empty before and after. Node 24.18.1, chromium through SwiftShader, nothing else running.
+- **Why these six.** The round removed 215 s of `waitForTimeout` from `tools/drive.js` (263.9 s → 48.9 s over 165 new polls), replaced the drawer and glossary waits in `tools/devices.js`, pinned that gate's figure clocks, and routed the external fetches through `tools/lib/net-cache.js`. Every one of those is a gate doing less work, and a gate doing less work is indistinguishable from a gate checking less until its own defect is put back. Each mutation below is the one `gate-proofs.md` already records for that gate, except the cache's, which is new because the claim is new.
+- **Every mutation was applied inside the frozen copy, never in the repository** (`docs/policies/local-rules.md`, "Prove a gate red on a file no running worker owns"): three of the six are in `src/`, where four workers were active that night. Each file's sha256 is equal before and after, printed by the runner.
+
+| # | gate | mutation | failure, verbatim | exit | file restored |
+|---|---|---|---|---|---|
+| 1 | drive | `setMode(next)` in `src/figures/energy.js` ignores its argument and always sets `'both'` | `FAIL energy matter-mode: mode is {"mode":"both","energyParticles":12,"matterParticles":13,…}` | 1 | `a40003b08bcc1e7d` → `a40003b08bcc1e7d` |
+| 2 | net-cache | the library page's first font stylesheet points at `fonts.googleapis.invalid` | `requestfailed: https://fonts.googleapis.invalid/css2?family=Fraunces… (net::ERR_NAME_NOT_RESOLVED)` | 1 | `a1109abeb597a889` → `a1109abeb597a889` |
+| 3 | shot | a `<div style="width:2000px;height:2px">` at the top of the library's `<main>` | `the document overflows horizontally: scrollWidth 2038 > viewport 390` | 1 | `a1109abeb597a889` → `a1109abeb597a889` |
+| 4 | subpath | one `href="/src/styles/tokens.css"` in the library page | `http://127.0.0.1:52642/src/styles/tokens.css (a root-only path: it would 404 under /textbook/)`, on 4 of 48 loads | 1 | `a1109abeb597a889` → `a1109abeb597a889` |
+| 5 | devices | `src/shell.js` removes `.tb-rail` at mount | `nothing matches .tb-rail on this chapter page, so the contents drawer was not checked at all` | 1 | `11ac61c1685909e0` → `11ac61c1685909e0` |
+| 6 | devices | `src/components/term.js` stops clamping the popover into the viewport | `a glossary definition hangs 234 px off the left edge (term 1 of 31 ("Biology"))`, 31 of 31 terms | 1 | `6f9864d05aceab2b` → `6f9864d05aceab2b` |
+
+- **Green controls, same commands, unmutated:** `drive: 3 steps over 1 figures passed`, `shot: 1 page loads clean`, and `devices: 1 load(s) … all clean` — each exit 0.
+- **Number 2 is the one that had to be written.** The cache's whole risk is that it turns an unreachable CDN into a hit or a silence. It does not: the first fetch for a URL goes to the real network, and when that fetch fails nothing is cached and the request is handed back to the browser to make and to fail for itself, so the error a gate reports is the browser's own and the word in it is `ERR_NAME_NOT_RESOLVED`.
+- **Number 6 is the one the round's own change could most easily have emptied.** The glossary suite's `waitForTimeout(90)` became a poll, and a poll that leaves early measures a popover that is not there yet. It still names every term.
+- **What these six do not prove.**
+  - **That the 165 new polls in `tools/drive.js` each wait for the right thing.** Six mutations cannot cover 216 steps. What covers them is that the gate is green over all 216 with 591 assertions unchanged — the count before and after is identical, and the only assertion text that changed is one message that named a seven-second wait that no longer elapses — plus the three regressions the conversion itself produced and which are now fixed and commented where they stand (`levels` arrow-right, `bilayer` curl, `cilium` beat, and `gradient-battery`'s tight junction, found by the coordinator).
+  - **That `devices` still sees what it saw with figures running.** It does not, and that is a stated cut rather than an oversight: one load per run stays unpinned and the run's `running:` line says which. The rest of that crossing is gone.
+  - **Anything about `npm run legible`.** Untouched by this round beyond the cache, still 1435.8 s, and now 58% of the chain on its own.
+  - **That a step is sound because it is green.** `membrane3d click-a-molecule-and-follow-it` failed about **one run in three** on the real tree, and the sleep was neither the cause nor the cure: the step clicked one point blind and demanded the thing it hit diffuse, while a quarter of that sheet's proteins are tethered (`tethered: i % 4 === 1`, `src/figures/membrane3d.js`) and the figure's own header says a tethered protein does not move at all. A probe sampling `describe()` every 200 ms for 8 s established the figure was fine — its clock advances 69 µs of simulated time in 8 s of wall time and `lateralSwaps` climbs from 32,000 to 280,000 — so the step was asserting against correct behaviour. It now sweeps until it picks something that can diffuse and names what it picked when it fails: 12 consecutive green runs of that step where it had been failing one in three. Same shape as `dna3d`'s `click-a-rung` above, found the same way, two rounds apart. One further run in that batch reported a failure this grep did not name and did not recur in the twelve after it; it is unexplained and recorded as such.
+  - **That a cold network cannot still move a number.** It can, and it did: `npm run shot` measured 145.4 s as the first browser gate of a cold session and 108.3 s on a warm one with the cache off. The cache's own worth is the 15.9 s between 108.3 s and 92.4 s, measured with `NET_CACHE` as the only variable, three arms each way, the cached arm winning whether it ran first or second.
+
+## pinned: no control starts a figure whose clock is pinned (`tools/pinned.js`)
+
+*Appended at the end rather than at the top, where this file's "newest first" order would put it, because several workers were writing into it at once on 2026-09-17 and an append cannot collide. It has no row in the index above for the same reason. Both are for whoever next reflows the file.*
+
+- **The tree.** `0806283` plus the uncommitted working tree of 2026-09-17, in the shared checkout at `C:\Users\38909\Documents\github\textbook` with other workers active in it. The two files this proof mutates are ones this worker owns and no other worker held; `tools/drive.js` was being edited by another worker throughout and was not touched. Node 24.18.1, chromium through SwiftShader.
+
+- **Claim**, from the gate's own header: *"for each kind in the registry, loading `lab/?kind=<k>&theme=light&eager=1&t=0` and pressing each of the figure's enabled buttons once through Playwright's real mouse leaves describe() reporting the same thing across an untouched window after every press, and across an untouched window before any press at all."* That is `AGENTS.md`'s *"nothing advances on its own while `ctx.pinnedTime` is set"*.
+
+  **Bounds, from the same header.** One viewport (1000x640), the light theme, **buttons only** — a range input, a drag and a key press are not pressed, so a clock a slider can start is outside it. **One press per mount**, so a clock that starts only on a combination of presses is outside it. A window is 12 animation frames with a 150 ms floor, so a transition shorter than one window is not seen and one that settles within two is reported rather than failed. `frameMs`, `drawCalls`, `triangles` and `fps` are not compared, because they report on the last frame drawn rather than on the figure's state. `PINNED_KINDS=<a,b>` trims it and a trimmed run proves only its part.
+
+- **Why it was needed.** `npm run shot` photographs every page at `?t=0` and presses nothing, so it had never distinguished a figure that cannot start from one that nothing had started. `npm run drive` presses every control and opens the lab unpinned, and several of its recipes assert that a clock *did* move. Measured before the fix, at `?t=0`, one press, one second: `secretion` advanced `t: 0 → 0.983`, and `gradient-battery` advanced `cellMinutes: 0 → 1.02` with its whole model. `gradient-battery` never mentioned `ctx.pinnedTime` at all. Recorded in [defect-register.md](defect-register.md), 2026-09-17.
+
+- **The mutation, and the exact failure text it produced.** The real defect on the real files — each figure's guard deleted and nothing else changed — run as `PINNED_KINDS=polymer,secretion,gradient-battery node --require ./tools/zj-quiet-browser.cjs tools/pinned.js`, exit **1**:
+
+| # | file | mutation | failure, verbatim |
+|---|---|---|---|
+| 1 | `src/figures/secretion.js` | `if (v && pinned()) return;` in `setPlaying` replaced by a comment | `secretion: a control starts it with the clock pinned … after "Play the journey": t: 0.183 -> 0.383` |
+| 2 | `src/figures/gradient-battery.js` | `running = on && !pinned();` in `setRunning` replaced by `running = on;` | `gradient-battery: a control starts it with the clock pinned … after "Run": naInsideMM: 12.08 -> 12.15; glucoseLumenMM: 4.951 -> 4.901; glucoseCellMM: 5.039 -> 5.078; glucoseRatio: 1.018 -> 1.036` |
+
+  Both failures carry the same second line: *"Guard the figure's play/run control on ctx.pinnedTime, as bilayer, bulk-transport, osmometer, permeability, polymer, secretion and gradient-battery do, and press it here again."* `polymer`, unmutated in the same run, reported `ok` — it was already guarded, and it is this proof's negative control.
+
+- **The first version of this gate did not go red on mutation 1, and that is the part of this proof worth reading.** It pressed a kind's buttons in DOM order on one page, and by the time it reached "Play the journey" the earlier presses had walked `secretion`'s journey to the end of its route; Play then started a journey that was already over and stopped itself within one frame, which the gate read as a transition settling. Verbatim, from that run: `ok    secretion            11 button(s)` — green, with the defect in the file. The gate now remounts the page before every press, and the button list is read once from a fresh mount so index *i* is the same control every time. The mutation above was re-applied after that change, which is where the red in the table comes from.
+
+- **The restoration.** Both files restored from byte copies taken before the mutation and re-read: `src/figures/secretion.js` `f58f2fb47cecd57d`, `src/figures/gradient-battery.js` `f843d8c8e1c64462` — the same digests the fixed files carry now. `grep -c "RED PROOF"` is `0` in both. `DRIVE_KINDS=polymer,secretion,gradient-battery node tools/drive.js` is **25 of 25 steps green** on the restored tree, unchanged recipes.
+
+- **The green run, and what it says out loud.** The full gate over all 44 kinds: `44 kind(s), 316 press(es), 381 untouched window(s) of 12 animation frames each.` `PASS`, exit 0, 105 s. It prints, every run, the **six figures that still break the invariant** and are not in this round's scope — `pond`, `homeostasis`, `pasteur`, `soup`, `waterprops`, `pump` — and it prints the twelve transitions that settled within a window. A kind in that `KNOWN` list that stops moving **fails the gate**, so the list is an outstanding set that cannot rot into a silent exception.
+
+- **What it does not prove.**
+  - **Nothing about the six listed figures.** They are measured and named, not fixed. `pond`, `homeostasis`, `pasteur`, `soup` and `waterprops` are one shape — `setPlaying` guards reduced motion and not `ctx.pinnedTime` — and `pump` is `gradient-battery`'s, plus a second control (`Ouabain`) that steps the pump cycle on its own.
+  - **Nothing about a slider, a drag or a key.** `soup`, `waterprops` and `pasteur` all have range inputs, and `Space` toggles play on most of these figures. The gate presses buttons only. A clock started by a key press would pass it.
+  - **Nothing about combinations.** One press per mount is what makes the gate honest about `secretion`; it is also what puts "press A then B" out of reach.
+  - **Nothing about the pixels.** The subject is `describe()`. A figure whose reported state is frozen and whose drawing is not would pass — `npm run shot` and the screenshots in `out/pinned/` are what a person looks at.
+  - **That two pinned frames are byte-identical.** They are not, and it is not this defect. `npm run figure -- <kind> --t 3.5` run twice gives `secretion` the same sha256 both times, and gives `polymer` and `gradient-battery` frames differing on 80 and 51 pixels of 396,984 and 567,392 (0.02 % and 0.009 %), maximum channel delta **2**, confined to one text band near the toolbar, with `describe()` byte-identical across the pair. That is font rasterisation, and `polymer` — untouched by this round — shows it too, so it predates this work and belongs to whoever owns frame-level reproducibility.
+  - **That this is why `npm run legible` takes 185 s on these figures.** Two of the three are fixed and the third, `polymer`, was never broken: it reported `playing: false` and `t: 0` after Play with the clock pinned, before any change here. So the timing anomaly is not one cause across the three, and its remainder was handed back rather than chased.
+
+
+## pinned: the six figures that were on the outstanding list, and the sliders and keys the gate could not reach (tools/pinned.js)
+
+*Appended at the end rather than at the top, for the same reason the entry above it was: several workers were writing into this file on 2026-09-17 and an append cannot collide. No row in the index above.*
+
+- **The tree.** `0806283` plus the uncommitted working tree of 2026-09-17, in the shared checkout at `C:\Users\38909\Documents\github\textbook` with other workers active in it. The six figures this proof mutates are ones this worker owns; `src/figures/lib/bench.js`, the chapter-5 figures, `tools/drive.js` and `tools/legible.js` were held by others and were not touched. Node 24.18.1, chromium through SwiftShader (`ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero)))`).
+
+- **Claim**, from the gate's own header after this round: *"for each kind in the registry, loading `lab/?kind=<k>&theme=light&eager=1&t=0` and then working each of the figure's enabled controls once through Playwright's real mouse and real keyboard — every visible button clicked, every visible range input driven to its maximum, its minimum and one page-step above its minimum by End, Home and PageUp on the control itself, and every element the figure makes focusable sent each key in KEYS — leaves describe() reporting the same thing across an untouched window after every one of them, and across an untouched window before any of them."* That is `AGENTS.md`'s *"nothing advances on its own while `ctx.pinnedTime` is set"*.
+
+  **Bounds, from the same header.** One viewport (1000x640), the light theme, **one action per fresh mount**, and **no drag, no modifier, no wheel, and no pointer anywhere but a button** — so a clock only a drag on the stage, a Shift+key or a pinch can start is outside it. A range is driven to **three values**, so a figure that misbehaves only at a value between them is outside it. A key the figure neither cancels nor answers within two animation frames is read as ignored and is not measured. A window is 12 animation frames with a 150 ms floor, and a figure still changing in the **eighth** window is moving, so a transition shorter than one window is not seen and one that settles inside eight is reported rather than failed. `frameMs`, `drawCalls`, `triangles` and `fps` are not compared. `PINNED_KINDS=<a,b>` trims it and a trimmed run proves only its part.
+
+- **Why it was needed.** The round that wrote this gate measured nine figures breaking the invariant, fixed two, and left six on the gate's `KNOWN` list, printed by name on every run. All six are photographed by `npm run shot` at `?t=0`. Five shared `secretion`'s shape — `setPlaying` guarded `ctx.reducedMotion` and not `ctx.pinnedTime`, or guarded nothing at all — and `pump` shared `gradient-battery`'s. The `KNOWN` list is empty as of this entry.
+
+- **The mutation, and the exact failure text it produced.** The real defect on the real files — each figure's guard removed and nothing else changed — one kind per run, `PINNED_KINDS=<kind> node --require ./tools/zj-quiet-browser.cjs tools/pinned.js`, each exit **1**. Every figure was caught twice, by the button and by the Space key, which are different paths into the same guard:
+
+| # | file | mutation | failure, verbatim |
+|---|---|---|---|
+| 1 | `src/figures/pond.js` | `if (next && pinned()) return;` deleted from `setPlaying` | `after "Play the pond": t: 1.383 -> 1.583` · `after Space on "Pond water under a microscope: param": t: 1.417 -> 1.617` |
+| 2 | `src/figures/homeostasis.js` | the same line deleted | `after "Play the simulation": t: 13.833 -> 15.832` · `after Space on "Core body temperature over the last ": t: 14.166 -> 16.166` |
+| 3 | `src/figures/pasteur.js` | the same line deleted, leaving the reduced-motion refusal under it | `after "Play the days": day: 1.38 -> 1.58; cloudA: 0.088 -> 0.15; cloudB: 0.088 -> 0.15` · `after Space on "Two swan-neck flasks of broth on a b": day: 1.42 -> 1.62` |
+| 4 | `src/figures/soup.js` | the same line deleted | `after "Play": t: 1.383 -> 1.583; bonds: 945 -> 942; bondsPerWater: 3.52 -> 3.53` · `after Space on "A window into liquid water at molecu": t: 1.75 -> 2` |
+| 5 | `src/figures/waterprops.js` | the same line deleted | `after "Play": t: 1.383 -> 1.583; heat.joulesAdded: 3192 -> 3292; heat.waterC: 27.6 -> 27.9; heat.comparisonC: 91.1 -> 93.3` |
+| 6 | `src/figures/pump.js` | `running = on && !pinned();` in `setRunning` replaced by `running = on;` | `after "Run": cellMinutes: 1.4 -> 1.6; t: 1.4 -> 1.6` · `after Space on "The sodium–potassium pump in a patch": cellMinutes: 1.43 -> 1.63` |
+
+  Each failure carries the same second line: *"Guard the figure's play/run control on ctx.pinnedTime, as bilayer, bulk-transport, homeostasis, osmometer, pasteur, permeability, polymer, pond, pump, secretion, soup, waterprops and gradient-battery do, and work it here again. The guard goes BEFORE any reduced-motion branch, because that branch's cut to a final state moves the clock too."*
+
+- **The two new arms have their own proofs, because a button press cannot reach either.** Both were delivered as defects that only the new arm can see, on figures whose buttons stayed guarded and green in the same run:
+
+| arm | mutation | failure, verbatim | what the button sweep said |
+|---|---|---|---|
+| slider | `src/figures/pasteur.js`, the scrubber's `onRange` handler: `setPlaying(false)` replaced by `playing = true; schedule();`, which skips the guard rather than removing it | `pasteur: … after PageUp on the "Day" slider: day: 4.42 -> 4.62` | all four buttons `ok` |
+| key | `src/figures/pond.js`, the Space branch of `onKey`: `setPlaying(!playing)` replaced by `playing = true; schedule();` | `pond: … after Space on "Pond water under a microscope: param": t: 0.217 -> 0.417` | the one button `ok` |
+
+  **The slider proof says something about the three values, too.** Only `PageUp` caught it. `End` put the scrubber at day 30, where `pasteur`'s clock stops of its own accord within a window and reads as a settling transition; `Home` put it at day 0, where the scrubber already was, so the value did not change, the figure answered nothing, and the gate skipped it by design. A two-value sweep of the ends would have gone green over a defect a reader meets on the first drag.
+
+- **The judgement rule had to change, and the five figures that proved it.** With the two-window rule the gate had been written with, the first full run of the key arm failed `cell3d`, `dna3d`, `water3d`, `cilium` and `plantcell3d` — every 3D figure whose camera an arrow key nudges. None of them is broken: a damped camera converges over about four windows and then stops dead. Sampled fifteen windows after one `ArrowRight` on `dna3d`, `view.theta` moved `-2.8e-2`, then `-3.8e-3`, then `-6.0e-4`, then **nothing at all for eleven more windows**; `cell3d`, `cilium` and `plantcell3d` all stopped by the third. A rule that calls two windows of change a clock cannot tell an easing from one, and it reports the wrong figure with exactly the confidence it reports the right one. The gate now takes windows until one holds still, up to `MAX_WINDOWS = 8`, and every mutation above was re-run against that final rule — which is why the clocks in the table are further along than one window's worth: the gate watched eight of them before saying so. **This moves the rule the entry above was proved under**, and that entry's two mutations — `secretion`'s Play and `gradient-battery`'s Run — are the same shape as the six here: a clock that never settles, which fails at eight windows exactly as it failed at two. They were not re-mutated, because both files were another worker's; the six re-proofs above are the evidence that the shape still goes red under the new cap.
+
+- **The restoration.** Every mutated file was restored from a byte copy taken before the mutation and re-checked by digest in the same command; the run prints `restored <file>` only when the digest matches. sha256, first 16, of the six as they now stand: `pond` `086f101b2161b123`, `homeostasis` `fefe5a549a576566`, `pasteur` `bd5681cb059d9318`, `soup` `f74057241260056b`, `waterprops` `31875144770e2511`, `pump` `00aa648b7b0dc51a`. `git diff --numstat` over the five tracked ones is `11/0` for `pond`, `pasteur` and `waterprops` — the guard and its comment, nothing else — and `21/5` and `29/3` for `homeostasis` and `soup`, whose other hunks are two other workers' in-flight changes (a `--coral-text` swap and `soup`'s move onto `atomAccent`), both intact.
+
+- **The green runs.** The full gate over all 44 kinds: `44 kind(s), 775 mount(s), 337 press(es), 927 key(s), 897 untouched window(s) of 12 animation frames each.` `PASS`, exit 0, **7 min 26 s** — against about 3 min for the button-only gate it replaces, which is the price of 927 key presses and 731 fresh mounts, one per action that changed anything. The six alone: `PASS`, 33 s. `DRIVE_KINDS=pond,homeostasis,pasteur,soup,waterprops,pump node tools/drive.js` is **27 of 27 steps green**, recipes unchanged, including the three that assert a clock *did* move after Play — they open the lab unpinned, where the guard is inert. `NARROW_KINDS=<the same six> node tools/narrow.js` is **12 of 12 frames green**. `npm run figure -- <kind> --t 3.5` run twice gives **byte-identical** frames for all six (sha256 of the pair equal, six for six); the few-dozen-pixel text-band difference recorded in the entry above is a `drive`/`narrow` toolbar effect and does not appear in a lab frame.
+
+- **What it does not prove.**
+  - **Nothing about a drag, a modifier or the wheel.** `soup` picks a molecule with a pointer, `water3d` holds one, and every 3D figure orbits on drag. A clock started by a drag on the stage, by `Shift`+arrow — several figures read `e.shiftKey` for a bigger step — or by a wheel is outside this gate. `KEY_WORDS` prints a note when a control's own label names a modifier, and no label does today.
+  - **Nothing about a slider value between the three it visits**, and nothing about a second slider position on the same mount: each is its own fresh mount, and a defect needing two positions in a row is out of reach.
+  - **Nothing about a key handled without `preventDefault` whose answer takes longer than two frames.** That key is read as ignored and never measured. Every keyboard handler in `src/figures` cancels the keys it binds today; a figure that stops doing so loses this arm silently.
+  - **Nothing about a transition that ends inside eight windows.** A press that starts a clock which runs for a second and stops is reported under "settled", not failed. The cap traded that away to stop calling damped cameras clocks.
+  - **Nothing about reduced motion.** The gate runs without it. `homeostasis`'s episode buttons jump the clock 90 s under `?reduce=1`, and that jump is now behind the same guard — by reading, not by measurement, because no gate in this repository loads a figure with reduced motion and a pinned clock at once.
+  - **Nothing about the pixels.** The subject is `describe()`. A figure whose reported state is frozen and whose drawing is not would pass.
+  - **That `pump`'s Ouabain control ever stepped its cycle on its own.** The `KNOWN` entry said it did. On a fresh mount it does not, with the guard removed or in place — the claim came from the first version of the gate, which pressed a kind's buttons in order on one page, so Run was already running when Ouabain was pressed. The entry was written from a measurement the gate no longer makes, and it sat in the file for a day reading as fact. The outstanding list now prints what the run measured under each entry it carries.
+
+## `npm run sweep3d` measures the WebGL canvas alone — the bench's panes reopened the hole the 2026-09-10 proof closed (2026-09-17)
+
+- **The claim in the gate's own header, and the part that had stopped being true.** The measure is taken on the WebGL canvas with every HTML overlay hidden through `.sweep-bare`, because the first version measured the whole stage and a figure whose render was replaced by a clear still passed — fifteen labels and three buttons vary enough to look like a frame (the 2026-09-10 entry above). That gate hid overlays by **class**: `.fig-label`, `.fig-toolbar`, `.fig-chip`, `.fig-card`, `.tb-figure__placeholder`. A figure built on `src/figures/lib/bench.js` draws its chrome in **panes** — grid cells of the bench's own — and a pane is none of those five, so nothing hid it. `atp3d`'s ledger is a six-row typographic table filling a third of its stage. `membrane3d` never went on the bench and was never covered either: its toolbar is `.m3-bar`, not `.fig-toolbar`, and its readout, its rate curve, its labels and its leader lines are `.m3-read`, `.m3-curve`, `.m3-labels` and `.m3-leaders`.
+
+- **The mutation, which is the 2026-09-10 mutation repeated on the two figures.** The render replaced by a clear and nothing else changed — `renderer.render(three, camera)` → `renderer.clear()` in `src/figures/atp3d.js:810`, and `renderer.render(scene, camera)` → `renderer.clear()` in `src/figures/membrane3d.js:830` — then `SWEEP_KINDS=<kind> node tools/sweep3d.js`, once against the five-selector list the gate had and once against the list it has now.
+
+| kind | hidden-selector list | exit | frames | the first frame's measure |
+|---|---|---|---|---|
+| `atp3d` | the five it had | **0 — passed** | 15 of 15 `ok` | `std 11.29`, `dominantFraction 0.935`, `mean 236.4`, `darkFraction 0` |
+| `atp3d` | with `.tb-bench .tb-pane:not(.tb-gl)` | **1 — failed** | 15 of 15 `FAIL` | `std 1.29`, `dominantFraction 0.987` |
+| `membrane3d` | the five it had | **0 — passed** | 15 of 15 `ok` | `std 12.21`, `dominantFraction 0.942`, `mean 236.9`, `darkFraction 0` |
+| `membrane3d` | with its four own classes | **1 — failed** | 15 of 15 `FAIL` | — |
+
+  The failure text, verbatim, on every frame of the failing runs: `luminance spread 1.29 is under 6: the frame is flat` and `one colour fills 98.7% of the frame, over the 98.5% allowed: the frame is blank`. The passing runs are the hole: a renderer that draws nothing, and a gate that says `ok   atp3d light theta=0.00 phi=0.45 d=32.5` fifteen times. The two numbers to keep are `std 11.29` and `std 1.29` — one order of magnitude, all of it supplied by a table of type that the gate was reading as a render.
+
+- **Which way round the marker goes, and why that is the whole of the fix.** The mark is on the **canvas** (`BENCH_GL_CLASS = 'tb-gl'`, written by `bench.pane(name, { as: 'canvas', gl: true })`) and the gate hides every pane **without** it. Marking the chrome instead would have left the next pane added to a 3D figure measured as if it were the render, and nobody would have found out; this way that pane is hidden by default, and a figure that forgets to declare its canvas fails loudly with a blank frame instead of passing quietly. `bench.pane` refuses `gl: true` on an SVG pane, because there the mark would hide the whole figure from the bare measure.
+
+- **What holds the two names together.** Nothing else could: `tb-gl` carries no rule in `src/styles/components.css` on purpose, so the stylesheet check that guards every other bench class cannot see it. `test/bench.test.js`'s **"the sweep measures the WebGL canvas alone: its bare frame hides every bench pane that is not it"** reads `src/figures/lib/bench.js` for the class being written into a pane's `class` attribute, reads `tools/sweep3d.js` for `.tb-bench .tb-pane:not(.tb-gl)` in its selector list, and reads that the gate injects the list it declares rather than some other string. Proved red three ways: renaming the constant in `bench.js` (fails on the first assertion), deleting the pane entry from `BARE_SELECTORS` (fails on the second, naming the selector the gate must hide), and leaving the old inline string in the `addStyleTag` call while `BARE_SELECTORS` sat unused above it (fails on the third).
+
+- **The restoration.** Both figure files were restored from byte copies taken in the same command as the mutation and re-checked by digest: `sha256sum -c` printed `src/figures/atp3d.js: OK` and `src/figures/membrane3d.js: OK`. `tools/sweep3d.js` was restored from its own copy and re-read: eleven selectors, and `SWEEP_KINDS=atp3d,membrane3d node tools/sweep3d.js` is **30 frames, exit 0** on the restored tree.
+
+- **What it does not prove.** It is still an absent-frame detector and not a wrong-frame detector: the bound in the gate's header is unchanged, and `out/sweep/` is still a person's job. It proves nothing about the **labelled** frame written beside the bare one, which still carries all the chrome by design. It says nothing about the four 3D figures that are neither on the bench nor `membrane3d` — `cell3d`, `dna3d`, `water3d`, `cilium`, `plantcell3d` draw their labels as `.fig-label` and were covered by the 2026-09-10 list, but that is read from their source, not measured here, because this round mutated two renderers and not seven. And it is bounded by SwiftShader at 1000x640: `SWEEP_GPU=1` is a different rasterizer and these numbers were not taken there.
+
+## legible: a glyph judged against the worst pixel under it, not against a colour the gate could name (`tools/legible.js`)
+
+- **The tree.** `0806283` plus the uncommitted working tree of 2026-09-17, with several other workers' chapter-4 and chapter-5 files in flight beside it. Node v24.18.1, chromium through SwiftShader, 1000x640. This round changed `tools/legible.js`, this file and `AGENTS.md`'s `legible` bullet, and nothing else; `src/figures/bondlab.js` was mutated for the red proof and restored to the byte.
+- **What changed, and why the old claim was weaker than it read.** The claim's words are the same — every glyph in the DOM clears WCAG 2.x AA against the surface under it — but "the surface" used to mean *a colour the gate could name*: the commonest 16-level bucket had to hold at least 40% of a glyph's core pixels, and a glyph that offered no such colour was reported as standing on "varied ground" and NOT measured. A radial gradient never offers one. `bondlab` draws its atoms as lit spheres, and of its 48 `.bl-sym` glyph runs **44 were skipped, 4 were measured, and all 4 failed** — the gate reported one problem for a figure whose every O, N and S was under the bar (the entry above this one counted it). It is now an order statistic instead: every core pixel gets its own ratio against the actual pixel under it in the transparent frame, and the glyph's ratio is the one at `ceil(0.05 x n)` of the sorted list — **the ratio at least 95% of its core pixels beat**.
+- **What "worst case" means, stated, because the number is only as good as its definition.** At most 5% of a glyph's core pixels may be worse than the number reported, and never fewer than one, because the count is rounded UP: a single pixel can never fail a label. That 5% is where a hairline rule crossing a stem lives. Antialiasing cannot get into it at all — an antialiased pixel is a blend of the two surfaces either side of an edge, so its ratio lies BETWEEN theirs and can never be worse than the worse one — so every failure reported stands on a real surface that real pixels of the glyph stand on. The rounding was chosen from measurement, not taste: with `floor`, `scale` dark's "Human egg" failed at 4.14:1 on the strength of **one** pixel out of 15 while the rest of the glyph reached 11.70:1, and `bondlab` dark printed the same "H" twice because two surfaces a byte apart fell either side of a quantisation step. With `ceil`, 26 findings became 23 and nothing carrying weight moved: every remaining one has 9% to 96% of its core pixels under the bar.
+- **The 40% rule is not deleted, it is demoted to a counter.** `VARIED_SHARE` decides nothing now; it counts the runs the old rule would have refused, and every summary line prints `N on varied ground`. That is what makes the before/after a measurement rather than a story.
+- **Skips before and after, per figure, over the whole registry (66 pairs, 33 kinds, 11 deferred).** Only five pairs ever had a varied-ground skip, and one figure had 94% of them:
+
+  | pair | varied-ground skips, before | measured on varied ground, after | glyph runs compared |
+  | --- | --- | --- | --- |
+  | `bondlab` dark | 48 | 48 | 444 -> 492 |
+  | `bondlab` light | 44 | 44 | 448 -> 492 |
+  | `soup` dark | 3 | 3 | 21 -> 24 |
+  | `cell3d` light | 2 | 2 | 33 -> 35 |
+  | `plantcell3d` light | 1 | 1 | 105 -> 106 |
+  | **total** | **98** | **98** | **15,178 -> 15,281** |
+
+  The other 61 pairs had none, which is itself the finding: the blind spot was not spread thin across the book, it was one figure's drawing technique, and the per-figure skip count had been printing it on every run since the gate was written. The remaining skips are unchanged in kind — 310 -> 313 runs with no core pixel, the three being `prokaryote` dark, the figure this gate already records as racing its own press-and-measure sequence.
+- **Red proof, on the defect the brief named.** `src/figures/bondlab.js` (`f9e3bad1ebb5ea67d11bd4bef31df21869e639bf41af2945970c72eaff26b51a` before and after), the three `WATER_O()` water oxygens at lines 408, 738 and 759 put back to the literal `C.coral` a worker had removed the day before. Both arms ran on that same mutated file, differing only in the surface rule, the second arm being the live gate and the first a copy of it with the dominant-surface block restored (`out/legib/make-oldrule.py` builds it; it reproduces the unmutated baseline exactly, 448/44 light and 444/48 dark, 0 under bar).
+  - **Old rule: 1 problem.** `bondlab light: "O" is 3.32:1 — #faf7f1 on #d9663d` — the one water oxygen drawn as a FLAT disc. 44 runs skipped light, 48 dark; `bondlab dark` green.
+  - **New rule: 11 problems**, 9 light and 2 dark, 0 skipped. The flat 3.32:1 disc is still there; beside it the same mutation's LIT oxygen at **1.78:1 on #ebae98**, with 100% of its 43 core pixels under the bar, which the old rule could not see because a lit sphere is a gradient. And with them the seven that were there before the mutation and are there now: `N` 1.87, `O` 2.06, `Na` 2.15, `Cl` 2.15, `C` 2.19 and 2.34 in the light theme, `H` 2.28 in the dark.
+  - **A thing the proof caught in the gate itself.** The first version of the new rule keyed the per-figure report on the paint alone, having dropped the surface because a per-pixel byte moves between states. That collapsed the flat 3.32:1 disc INTO the lit 1.78:1 sphere and printed one line for two different grounds — the old rule's single finding would have disappeared from the report while getting worse. The surface is back in the key, quantised 8 levels to the channel. It cost one duplicate line (`bl-symdark` "H" at 2.14 and 2.15 on adjacent buckets, since resolved by the `ceil` rounding) and that is the cheap failure of the two.
+- **What the whole registry turned up: 1 problem before, 23 after, over 14 of the 66 pairs.** Read off the frames the gate writes, not off its numbers; two were magnified and looked at (`out/legib/zoom-N.png`, `out/legib/zoom-nend.png`). None was argued away.
+  - **Nine are the gradient class**, all `bondlab` element symbols on lit spheres: `sphere()` lays a 62% white specular over the disc and the symbol is `paper`, so the pair is legible everywhere except under the highlight. The 12.5 px `N` on the nitrogen badge has the upper-left of its stroke swallowed; 96% of its 68 core pixels are under 4.5:1 while the best reaches 5.04:1.
+  - **Thirteen are labels straddling two grounds**, which the 40% share let through by naming the lighter one: `levels` (4), `foldlab` (4), `polymer` (2), `metabolic-map` (2), `phlab` (1), `soup` (1). `polymer`'s "N end" sits astride the strip's own rule with a third of its glyphs on it, 3.91:1 light and 3.88:1 dark.
+  - **One, `free-energy` light's "exergonic" at 4.36:1 on the bare paper, was already red before this round touched anything** — the only problem the 2026-09-17 baseline run reported.
+  - All 23 are in `ALLOWED` with the ratio they were measured at, a floor 0.05 below it, the share of core pixels under the bar and the best pixel in the glyph. Every one prints on every green run. None was fixed here: every file they name belonged to another worker on the day.
+  - **What holds the 21 entries honest is the run itself.** `ALLOWED.find` matches on (kind, theme, element, words), so two entries agreeing on those four would both be satisfied by the first row and the second would never be spent — and the gate fails an entry nothing spends. The first draft had three such pairs, where one label fails on two grounds (`bondlab`’s `N` on the small badge and on the bench sphere); they are one entry each now, floored at the lower ratio, and the two green runs spending all 23 findings against 21 entries is the proof that none is dead.
+- **Cost.** Green runs measure 340.7-347.1 s over 66 pairs, against 339.7 s for the rule it replaced — about **2%** for 98 runs that were not being looked at — 15,280 to 15,284 runs compared, no pair over 11.4 s. The handful of runs of spread between green runs is `prokaryote` dark, which this file already records as racing this gate’s own press-and-measure sequence.
+
+## legible: the six 185 s pairs were one hidden button, and the number outlived its defect by a day (`tools/legible.js`)
+
+- **The claim under test, inherited: "`npm run legible` is 1435 s and 1114 s of that is six pairs waiting; `polymer` at 185 s with 9 states is the reproduction."** Retested first, because a blocker's whole effect is to stop work. **It does not reproduce.** `LEGIBLE_KINDS=polymer LEGIBLE_THEMES=light` is **4.9 s** with 9 states, and the full chain on the same tree is **339.7 s over 66 pairs with no pair over 10.7 s**. The number was a day stale: the control-loop fix it describes was already in the file the brief pointed at, and the gate's own header already said so (`4 min 7 s ... it was 24 min before the control loop stopped addressing the toolbar by index`). Two documents in the same repository disagreed by a factor of four and both were being quoted.
+- **The mechanism, proved rather than inferred, because the inherited account of it was wrong.** The gate's comment said `polymer` "rebuilds its toolbar when pressed". It does not: `src/figures/polymer.js` builds its nine buttons once and only edits their words. What happens is that one control is HIDDEN — `src/figures/polymer.js:450`, `btnForm.style.display = family === 'sugar' ? '' : 'none'`. Counted directly (`out/legib/visible-count.mjs`, which exists because neither `npm run drive` nor `npm run pinned` reports how many controls are visible after each press):
+  - `polymer`: **9** visible buttons at open, and pressing "Two amino acids" leaves **8**. Index 8 — the last index a list counted at open would hold — now matches nothing.
+  - `secretion`: **11** at open, and "Pulse-chase" leaves **5**. Six indices stale at once.
+  - A Playwright locator that matches nothing does not fail, it WAITS. `isEnabled()` with no timeout of its own waits the page default, `ACTION_TIMEOUT_MS` in `tools/lib/browser.js`, which is **180 s**, and then `.catch(() => false)` turns it into a shrug. One stale index, one 180 s wait, 185 s for the pair, deterministically, every run.
+- **A/B, same tree, same figures, this loop against the index loop it replaced** (`out/legib/make-indexarm.py` builds the second arm from the live file, changing the loop and nothing else; it is a reconstruction from the header's own description, because `tools/legible.js` is untracked, there are no worktrees and no earlier copy survives on this machine):
+
+  | pair | handles, `isEnabled` bounded at 1 s | `nth(i)`, `isEnabled` at the 180 s page default |
+  | --- | --- | --- |
+  | `polymer` light | 5.2 s | **185.0 s** |
+  | `polymer` dark | 5.2 s | **185.2 s** |
+  | `secretion` light | 8.1 s | **186.6 s** |
+  | `secretion` dark | 8.0 s | **186.2 s** |
+
+  Those four numbers sit inside the 184.8–187.0 s band the original measurement reported, and `polymer` reports its **9 states in both arms** — which is why the cost never looked like missing work and why the figure could be called "pinned-clean and still slow". It was pinned-clean. The clock was never the variable.
+- **Why bounding the timeout would have been the wrong fix**, and is recorded because the shape recurs: a control that exists answers `isEnabled` in milliseconds, so a shorter bound would have made the gate fast and left it pressing an index that names nothing — the same silent no-op, at 1 s instead of 180. The addressing is what changed; the bound came down as well, and only as a backstop.
+- **What these two entries do not prove.**
+  - **That the 23 findings are all there is.** They are what one stage size, one press per button and text-in-the-DOM can reach. The gate's bounds are unchanged: no narrow composition, no slider, no click on the drawing, nothing painted into a canvas or by WebGL, and the eleven `DEFERRED` figures — chapter 4's eight and the second book's three — were not visited.
+  - **That 5% is the right tolerance.** It is a judgement, stated in the file and measured against the alternatives at the two ends: the literal extreme pixel condemned a plainly readable 15-pixel label, and nothing in the registry separates 5% from 10% except two findings at 9% and 10% of their core pixels.
+  - **That the figures are fixed.** Not one was touched. All 23 sit in `ALLOWED`, floored so a regression still fails, and printed on every run until somebody who owns those files decides them.
+  - **That anything outside `legible` got faster.** The chain's other ten steps were not measured here, and the 58% share the brief quoted was computed against a 1435 s `legible` that no longer exists.
+
+## use-before-declared: a guard on a binding that does not exist yet, and a name nothing declares (`test/use-before-declared.test.js`)
+
+- **The claim under test, measured in plain node v24.18.1 rather than remembered.** A guard written `if (x)` on a binding whose `let` or `const` is below it does not skip when the value is missing, and the `?.` a reader adds to make the line safe changes nothing, because optional chaining tests for null and undefined and a binding in its dead zone is in neither state:
+
+  | written | what it does |
+  | --- | --- |
+  | `function f() { if (x) return 'skipped'; const x = 1; }` | `ReferenceError: Cannot access 'x' before initialization` |
+  | `function f() { x?.set(1); const x = { set() {} }; }` | `ReferenceError: Cannot access 'x' before initialization` |
+  | `function f() { return nothingDeclaresThis; }` | `ReferenceError: nothingDeclaresThis is not defined` |
+  | `(null)?.set` | returns `undefined`, no throw — which is the whole misreading |
+
+  So the second line is worse than the first: it reads as defended, it is not, and the defence is the thing that hides it.
+- **What the gate reads, and why it says so out loud.** 56 modules under `src/figures/` and `src/figures/lib/`, as text: **68,688 identifier reads against 11,284 positional `let`/`const` bindings**, 205 ms, no browser. Those two numbers move with every edit to a figure — they were 68,696 and 11,285 twenty minutes later, while another worker was in `enzyme-kinetics` — so the gate asserts floors and prints the counts rather than pinning them. A run that read nothing would pass both checks in silence, so a third test asserts the corpus is on disk (at least 40 modules, more than 10,000 reads, more than 2,000 bindings) and every run prints the three counts. A fourth runs the scanner over a fixture holding one of each defect and a second fixture holding the patterns most likely to be mistaken for them — a mutually recursive pair of module consts, a closure over a binding declared below it, a destructured parameter with a default, a template's `${}`, a regex literal, a getter, a label — and requires exactly the two findings and no others.
+- **Live corpus on the day it was written: zero.** All three of 2026-09-17's instances had already been fixed by the worker that found them, and nothing else in the 56 modules trips either check. The three findings the first draft did NOT have were false alarms and are the reason the scanner is shaped the way it is: `beads.map((b) => b.y)` standing above a `for (const b of beads)` is two different `b`s, so a parameter is a binding and not a read, and `lib/bench.js:959`'s `outer:` label is not a read of anything.
+- **Red, by reintroducing the defect in a real figure at a real site.** `src/figures/symbiont.js`, `setOpen()` at line 710 — the function that carries the repo's one documented instance of this class, from 2026-09-16. Each mutation was applied, the gate run, and the file written back inside one process; the file is `sha256:0d2a4e8a27bf517f` (first 16 hex of the digest), 42,094 bytes, before each mutation and after each restore. Bytes, not `git checkout`, because the tree held four other workers' uncommitted work.
+
+  | mutation | change | exit | what the gate said |
+  | --- | --- | --- | --- |
+  | **A** | the module's own guard `if (tw.running) tweens.add(tw);` moved above its `let tw;` — nothing else altered | **1** | `2 dead-zone read(s) in 56 figure modules`, then `src/figures/symbiont.js:710  tw is read here, and its let/const is at line 711 of the same function body` — once for each of the two reads on that line |
+  | **B** | the 2026-09-16 instance verbatim: `const tw = tween({ … done: () => tweens.delete(tw) })` | **0** | **green** — the blind spot proved rather than asserted |
+  | **C** | `tweens.add(tw)` → `tweens.add(twHandle)` | **1** | `1 undeclared name(s)`, then `src/figures/symbiont.js:717  twHandle is read here and this module declares it nowhere — no import, no const/let/var, no function, no class, no parameter` |
+
+- **Mutation B is the important row.** The one instance of this class anybody in this repository has actually shipped is the one the gate cannot see, because the read sits inside a callback and a callback that runs later may legitimately close over a binding declared further down — which is how half of every module is written. Flagging that shape would cost more false alarms than the class is worth, so it is not flagged, and the file says so in its header instead of implying coverage it does not have. `npm run legible` is what caught the real one, by loading the page.
+- **The false-alarm fixture is load-bearing too, proved the same way.** A scanner of this shape fails by inventing findings, not only by missing them, and a fixture nobody has made go red is a fixture that might be asserting nothing. Two mutants of the scanner, run in the repo so their relative paths resolve, then deleted: dropping the class body from the function-boundary rule makes the clean fixture report `field = COUNT` as a dead-zone read (`{ line: 14, declLine: 15 }`), and dropping `]` from the method-head test makes it report the `a` of `[KEY](a) { … }` as one. Both mutants leave all 56 real modules green, which is the point — the corpus would not have caught either, and the two fixes were guesses until the fixture held them.
+- **What a green run here does not prove.**
+  - **That the modules are correct.** From the worker that asked for this check: it would have caught the *reference* bug of 2026-09-17 and not the *rate-law* bug of the same afternoon, which mattered more. It is not a type checker and not a linter.
+  - **That a name is in scope.** The undeclared check is file-wide: it reports a name nothing in the module declares, not a name declared in the wrong place. Resolving that exactly would cost more false alarms than the class is worth.
+  - **That anything dynamic was looked at.** A computed property, a name assigned by another module, a name inside a string or a template's literal text: all invisible. So is a binding actually named `get`, `set`, `of`, `as`, `from`, `async` or `await`, which the tokenizer surrenders to the keyword list on purpose.
+  - **That the browser-global list is complete.** `KNOWN_GLOBALS` is a fixed list, and a legitimate global missing from it is a red gate on good code. `HTMLButtonElement`, read by `zj-split` and `zj-timeline`, was the one this corpus was missing; the failure message names the identifier and says to add it there rather than to silence it at the call site.
+  - **That `src/` is covered.** Two directories are: `src/figures/*.js` and `src/figures/lib/*.js`. Nothing under `src/components/`, `today/`, `tools/` or the book pages is read.
+
+## `openPage` waits on the page's own readiness promise, and the handshake still holds the gate the two ways it must (2026-09-17)
+
+- **The tree.** `0806283` plus the uncommitted working tree of 2026-09-17 — chapters 4 and 5, their seventeen new figures, `tools/legible.js`, `tools/pinned.js` and `tools/lib/net-cache.js`, none of them committed. Every number below was taken on **byte copies of that tree**, frozen at 02:47 and junctioned to the one `node_modules`, because the live tree had a dozen workers writing to it and two arms that differ by more than the variable under test are not an A/B. The copy was byte-identical to the live tree at the moment it was taken: 218 files, one sha256 over the manifest, `df68f4d43004be46`. The two arms differ in exactly one file — `diff -rq` over the two trees prints one line, `tools/lib/browser.js`. Both arms carry the same measurement instrumentation (a `readyAt` stamp in `src/shell.js`'s `_check`, a per-load JSON line in `openPage`), so it is not the variable either, and none of it is in the live tree.
+
+- **Claim, from `AGENTS.md`:** *"The handshake is the gates' only clock. `window.__textbook.state` becomes `ready` when the shell has mounted and, under `?eager=1`, every `<tb-figure>` on the page has registered and reached `ready` or `error`."* That line is unchanged by this work and still true: what changed is when `openPage` looks, not what it accepts. **Bound:** Chromium on SwiftShader at the gates' own viewports; `tools/devices.js` and the WebKit and Firefox arms do not come through `openPage` at all.
+
+- **The cost, measured before anything was changed, because a 100 ms bound is not 100 ms spent.** `openPage` in `tools/lib/browser.js` polled `window.__textbook.state` every 100 ms, so the question was not the bound but how many loads ever reach a second check. Instrumented on a frozen byte copy of the tree — one JSON line per load carrying the number of checks and `lateMs`, the gap between the wall-clock instant `src/shell.js` set `state = 'ready'` and the instant this process saw it — over eight gates and 342 loads, plus `npm run pinned`'s 775:
+
+| gate | loads | needed a 2nd check | mean `lateMs` on those | recoverable |
+|---|---|---|---|---|
+| `flow` | 2 | 0 | — | 0 ms |
+| `sitting` | 4 | 0 | — | 0 ms |
+| `sweep3d` | 14 | 14 | 254 ms | 3.6 s |
+| `drive` | 44 | 30 | 114 ms | 3.4 s |
+| `subpath` | 52 | 36 | 78 ms | 2.8 s |
+| `legible` | 66 | 52 | 114 ms | 5.9 s |
+| `shot` | 72 | 49 | 66 ms | 3.2 s |
+| `narrow` | 88 | 64 | 115 ms | 7.3 s |
+| **`pinned`** | **775** | **698** | **109 ms** | **75.9 s** |
+
+  So the answer is: it is real but it is concentrated. Two thirds of loads (245 of 342 outside `pinned`) do reach a second check, and the mean wait after readiness is over the 100 ms bound rather than under it — the sleep overshoots and a busy main thread delays the round trip that follows — but a page gate's whole quantisation is 3-7 s inside a 40-450 s run. `npm run pinned` is the one gate where it matters, because 775 lab mounts of the same page land on the wrong side of the 100 ms edge 90% of the time.
+
+- **The change.** The 100 ms sleep becomes `Promise.race([signal, page.waitForTimeout(100)])`, where `signal` is one `page.evaluate` resolving on `window.__textbook.whenReady()`. **The already-fired race cannot happen, and that is a property of the signal rather than of any handling:** `whenReady()` hands back a promise built in the shell's constructor and resolved once, in `_check()`, at the instant `state` becomes `'ready'` — a latch, not an event — so a listener that attaches afterwards resolves immediately. Nothing new is emitted, and `src/shell.js` and `src/components/figure.js` are untouched. The 100 ms sleep stays as the cap under it, so every other check in the loop — the failed-script check, the deadline, the `state` read that is the actual verdict — fires on exactly the schedule it did before. The signal decides only **when to look**, never **what is accepted**.
+
+- **What it bought, each gate's two arms run back to back on frozen byte copies of one tree, junctioned to one `node_modules`, differing in exactly one file (`diff -rq` over the two trees prints one line, `tools/lib/browser.js`).**
+
+| gate | openPage wait, before → after | gate wall clock, before → after |
+|---|---|---|
+| `flow` | 500 → 490 ms | 3.88 → 3.86 s |
+| `sitting` | 409 → 437 ms | 19.7 → 19.7 s |
+| `sweep3d` | 6.8 → 6.6 s | 39.2 → 38.6 s |
+| `drive` | 8.5 → 6.7 s | 456 → 460 s |
+| `subpath` | 23.7 → 22.8 s | 121.7 → 121.5 s |
+| `legible` | 13.9 → 10.7 s | 344 → 339 s |
+| `shot` | 34.3 → 31.5 s | 117.3 → 115.6 s |
+| `narrow` | 17.2 → 13.3 s | 96.8 → 93.5 s |
+| **`pinned`** | **146.2 → 104.2 s (−29%)** | **448.3 → 418.5 s (−6.6%)** |
+
+  The eight page gates together: 105.4 → 92.6 s of `openPage`, against 1199 → 1192 s of wall clock — **about 1%, which is noise in a twenty-minute chain**. `npm run pinned` alone gives back 42 s of waiting and 30 s of clock. `npm run devices` gains nothing and was never in the population: it does not come through `openPage`, and its own wait is already `page.waitForFunction`, which polls in the page per animation frame.
+
+- **Why half the quantisation survives.** After the change `pinned`'s mean lateness is 46 ms, not 0: between the page resolving its promise and this process reading `state` back there are two CDP round trips, taken at the exact moment the page's main thread is busiest (a figure's first frames under SwiftShader). Removing the second — having the signal hand back the state it read rather than re-reading it — is the remaining ~20 ms per load, and it was declined here: the state read after the wake is the verdict, and the handshake is on AGENTS.md's high-risk list.
+
+- **Red proof, five scenarios, both arms, verbatim.** `harness:` nothing in this repository can answer it — `shot`, `drive`, `narrow`, `pinned`, `inspect` and `figure` all call `openPage` on a page that is expected to become ready, so they exercise the success path only, and nothing here can put a figure into a state it will not leave. The probe builds the failing pages itself and calls the same `openPage` every gate calls, at `timeoutMs = 2000`.
+
+  BEFORE — `tools/lib/browser.js` with the 100 ms sleep, verbatim:
+
+```
+A never ready (2102 ms)
+  page did not become ready within 2000 ms; figure states: {"fig-never":"loading"}
+B figure stuck in loading (2423 ms)
+  page did not become ready within 2000 ms; figure states: {"fig-stuck":"loading","fig-pond":"ready","fig-homeostasis":"ready","fig-levels":"ready","fig-scale":"ready","fig-cell":"ready","fig-dna":"ready","fig-energy":"ready","fig-tree":"ready","fig-pasteur":"ready"}
+D no window.__textbook at all (2081 ms)
+  page did not become ready within 2000 ms; figure states: {}
+E signal fires, state disagrees (2082 ms, 20 state read(s))
+  page did not become ready within 2000 ms; figure states: {"fig-liar":"loading"}
+C control, unmodified page (491 ms)
+  NO THROW — the load was accepted, so this proof is green and the check is not holding
+```
+
+  AFTER — woken by the page's promise, verbatim:
+
+```
+A never ready (2100 ms)
+  page did not become ready within 2000 ms; figure states: {"fig-never":"loading"}
+B figure stuck in loading (2414 ms)
+  page did not become ready within 2000 ms; figure states: {"fig-stuck":"loading","fig-pond":"ready","fig-homeostasis":"ready","fig-levels":"ready","fig-scale":"ready","fig-cell":"ready","fig-dna":"ready","fig-energy":"ready","fig-tree":"ready","fig-pasteur":"ready"}
+D no window.__textbook at all (2101 ms)
+  page did not become ready within 2000 ms; figure states: {}
+E signal fires, state disagrees (2089 ms, 21 state read(s))
+  page did not become ready within 2000 ms; figure states: {"fig-liar":"loading"}
+C control, unmodified page (497 ms)
+  NO THROW — the load was accepted, so this proof is green and the check is not holding
+```
+
+  `diff` over the two arms' output is five lines, all of them the millisecond figure the probe prints for itself. Every thrown message is character for character what it was. **A** is a page whose `whenReady()` never resolves: the new code's signal arms and never fires, and only the cap can end the load — so it proves the fallback rather than assuming it. **B** is chapter 1 under `?eager=1` with one extra figure registered on the shell's own object, in `'loading'` and never settled, registered from the **setter** for `window.__textbook` so the proof does not depend on winning a race; the shell's own `_check` is what refuses to go ready. **D** is a page with no handshake object at all, which is what a page whose shell module never ran looks like. **C** is the control: the same chapter unmodified must still load, and does, in half a second.
+
+- **E is the branch the old code did not have, and it was made to go red.** The signal resolves but `state` disagrees — reachable only if the page went away between the two — so the loop must retire the signal or spin on a settled promise. `state` is a getter that counts its own reads, so the spin is a number and not an inference: **21 reads with the guard, 3551 with `if (ready.fired()) ready.retire();` deleted**, over the same 2 s. The mutated file was restored from a byte copy taken in the same command and re-checked by digest (`28ae4b24f5ade771`).
+
+- **The frames the gates photograph, and the control that was needed to read them.** Local rule *"A wait in a gate must poll the artefact, never the wall clock"* warns that a sleep may be doing a second, unwritten job; here that job would be up to 100 ms of accidental settling before each screenshot. Arm against arm, `out/shots` differed in 27 of 73 files, `out/narrow` in 15 of 176, `out/sweep` in 1 of 211 — which reads as exactly that defect until the control is run. **Two runs of the *same* arm differ in 27 of 73 and 15 of 176**: the same counts, but a *different subset of files each time*, which is the signature of run-to-run noise and not of a systematic effect. `out/sweep` is the one that reproduces itself byte for byte across two control runs (211 of 211) — and on its single disagreeing frame, `atp3d-light-00.png`, the **after** arm agrees with both controls and the before arm is the odd one out; the bare frame the gate actually measures, `atp3d-light-00-bare.png`, is identical in all four. So the change moves no pixel that the gates were holding still. **What this does not prove, and is worth its own round: `npm run shot` is not byte-reproducible run to run** — 27 of 73 frames change between two runs of an unchanged tree. Decoded, most of it is rounding: `library-phone-dark.png` differs in 0.77% of its pixels at a **maximum delta of 1/255**, which no eye and no threshold can see. Two are not rounding. `biology/ch02-desktop-light.png` differs in 0.007% of 55 million pixels at a max delta of 74, localised. And `today-desktop-dark.png` came back 1440x900 in one run and 1440x1446 in another — the Today page reads the study record, and `npm run sitting` clears and rewrites that record between gates, so the page is genuinely stateful and its frame is not a fixed target at all. Whatever else is true, a hash comparison over `out/shots` cannot be used as a regression signal as the tree stands.
+
+- **What it does not fix, with the number that says so: `npm run pinned` is still seven minutes.** 448 s → 418 s is 6.6%, and one action per mount is not what makes it expensive — the 775 loads cost 146 s, of which only 76 s was ever quantisation, and the other 300 s is the gate watching: 897 untouched windows of 12 animation frames with a 150 ms floor, plus 927 key probes. What does make it affordable is that the 44 kinds are independent, which the gate's own `PINNED_KINDS` already expresses. Measured on the same tree, splitting the kinds round-robin across concurrent processes and changing not one line of `tools/pinned.js`: **1 process 418 s, 4 processes 144 s (2.9x), 8 processes 81 s (5.2x)**, every shard exit 0, and the shards' totals sum to exactly the single run's work — 44 kinds, 775 mounts, 337 presses, 927 keys (897 windows at 4 shards, 889 at 8, which is the settling variance the gate already has). The gate survives it because it counts **animation frames** and not milliseconds, which is the property `docs/policies/local-rules.md` asked for precisely so a loaded machine could not change a verdict. 32 logical CPUs; 8 shards is not a ceiling this measured.
+
+- **The restoration, and what actually landed.** Every mutated file was restored from a byte copy taken in the same command and re-checked by digest; the scratch trees are scratch and are gone. In the repository itself the change is **one file and one removed line**: `diff` between the bytes `tools/lib/browser.js` held before this work and the bytes it holds now removes exactly `await page.waitForTimeout(100);` and adds `readySignal` with its comment, `const ready = readySignal(page);`, the `retire` guard and `await ready.wait(100);`. `src/shell.js`, `src/components/figure.js` and `AGENTS.md` are byte-identical to what they were (`11ac61c168590905`, `065bee440fb738fd`, and AGENTS.md changed only by other hands). On the live tree with the change in place: `npm run unit` 207 of 207, and `flow`, `sitting`, `sweep3d`, `shot`, `narrow`, `subpath` all exit 0.
+
+- **What it does not prove.** Nothing about `tools/devices.js`, which does not use `openPage`. Nothing about the three non-Chromium engines, for the same reason. Nothing about a machine with a GPU rasterizer: every number here is SwiftShader, and the residual lateness is round-trip time on a busy main thread, which a faster raster would shorten. And nothing about the `drive` and `legible` reds standing in the tree at the time — `scale drag-the-lens-left` failed in the before arm and passed in the after arm with no change that could touch a drag, so it is flaky; `legible` failed with the same 15 contrast problems in both arms. Neither is this change's, and neither was fixed by it.
+
+## `npm run narrow` opens what a reader can open, and the two shapes it still cannot see (2026-09-17)
+
+- **The tree.** `0806283` plus the uncommitted working tree of 2026-09-17 — chapters 4 and 5 and their seventeen new figures, none of it committed, with a dozen workers writing to it. Node v24.18.1, Playwright 1.61.1, Chromium on SwiftShader (`ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero)), SwiftShader driver)`, which every run prints for itself). The gate after this work is `tools/narrow.js` **sha256:f4c3348e287e7567**, 30,078 bytes, and every arm below was run against exactly those bytes. (The arms were run twice: once at sha256:1b71a3018ca49f41, then again after two comment-only edits, and `diff` over the two runs' output with the digest lines removed is empty.)
+
+- **Where the proofs were run, and why not in the tree.** `src/figures/enzyme-kinetics.js` is where this defect lives and it was **held by another worker** the whole time this was written. `docs/policies/local-rules.md`, *"Prove a gate red on a file no running worker owns"*, says a gate proof is never urgent enough to race a writer. So every arm ran on a **byte copy** of the tree in the scratchpad, `node_modules` junctioned to the live one, and only the copy was ever written to. Each arm prints the digest of both files it could have mutated, the copy was restored from bytes held in the same process, and the live tree's own digests were read at the end of the run: `enzyme-kinetics.js` **sha256:178c7159e6c8bc84**, 52,511 bytes, unchanged from before the first arm to after the last.
+
+- **Claim, from the gate's own header:** at a 390 px stage, in both themes, every registered figure reaches `ready`, draws a frame that is not blank, flat or near-black, keeps a control reachable and pressable, stays ready after it is pressed — and **in the opening state and in every state the toolbar's own toggles can open**, its toolbar stays under 55% of the stage's height and, on a figure built on `src/figures/lib/bench.js`, no pane's drawing lands on another pane's drawing or on a control.
+
+- **How it decides what a reader can open, because that decision is the gate.** Nothing in this repository declares a disclosure: the bench has no disclosure primitive, and `enzyme-kinetics` builds its two out of `b.toggle` plus `node.style.display`. So one is found by trying. A candidate is a **visible, enabled `button` inside the figure's `.fig-toolbar` carrying an `aria-pressed` attribute** — a control whose press is a state the reader can leave on. Each is pressed once in DOM order, pressed a second time if the press made fewer controls visible, and the toolbar is re-read each round because a press can reveal a toggle that was not there before. Actions are deliberately not pressed: none of them reveals a control, and `Reset` destroys the state the sweep has built.
+
+- **Why the bar is 55%.** Measured, not chosen: over all 44 registered kinds in both themes on this tree, the widest toolbar any figure legitimately reaches is **`coupling-bench` at 217 px of a 428 px stage, 51%, seven rows** — its Pump scene, five sliders and four buttons, looked at at 3x in `out/narrow/coupling-bench-light-opened.png` and drawing nothing on anything. The defect is 58% with the mutual exclusion alone removed and was 320/456 px, **70%**, as the worker first saw it. Every run prints the five widest toolbars it measured, so the headroom is a number the next reader can check rather than a sentence.
+
+- **Five arms, one variable each, verbatim.** The control is the tree as it ships; A is the defect; B and C are the two blind spots; B′ is the control **for** B, which is what turns a stated bound into a measured one.
+
+| arm | the one thing that changed | exit | what the gate said |
+| --- | --- | --- | --- |
+| **control** | nothing | **0** | `ok enzyme-kinetics light: … 13 press(es) over 15 state(s), 3 pane(s), worst toolbar 200/456 px (44%) in 6 row(s) holding 14 of the stage's 15 control(s)` |
+| **A** | `openOnly`'s `if (!b.narrow) return;` → `if (true) return;`, so the two disclosures are non-exclusive again | **1** | two problems, both below |
+| **B** | A, plus the two disclosures built with `b.action` instead of `b.toggle`, so neither carries `aria-pressed` | **0** | **green** — `4 press(es) over 6 state(s) … worst toolbar 132/456 px (29%) in 4 row(s)` |
+| **B′** | B's tree, with the gate's candidate rule widened to `.fig-toolbar button:visible` | **1** | the same two problems, word for word |
+| **C** | the pristine figure, with its x-axis captions drawn 300 px to the right so they leave the stage | **0** | **green** — identical to the control, `13 press(es) over 15 state(s) … 200/456 px (44%) in 6 row(s)` |
+
+  Arm A, verbatim:
+
+```
+FAIL enzyme-kinetics light: stage 342 px, 10 button(s), 1 slider(s), 14 press(es) over 16 state(s), 3 pane(s), worst toolbar 264/456 px (58%) in 8 row(s) holding 20 of the stage's 21 control(s)
+FAIL: 2 problem(s) over 1 narrow frame(s):
+  enzyme-kinetics light: the toolbar is 264 px of a 456 px stage (58%, over the 55% allowed) in 8 row(s) of 20 control(s) — reached by pressing "No inhibitor, the plain curve" then "Competitive, a molecule that takes the a" then "Non-competitive, a molecule that binds e" then "Irreversible, a molecule that bonds cova" then "Conditions, show or hide the temperature" then "Cases, show or hide the named enzymes an"
+  enzyme-kinetics light: the pane "graph" is drawn over the pane "readout", 324x11 px of overlap — reached by pressing "No inhibitor, the plain curve" then "Competitive, a molecule that takes the a" then "Non-competitive, a molecule that binds e" then "Irreversible, a molecule that bonds cova" then "Conditions, show or hide the temperature" then "Cases, show or hide the named enzymes an"
+```
+
+  The second line is the reported symptom in the gate's own words — *the readout was drawn over the graph* — and the gate names which pane, by how much, and the presses that got there. **A is 264 px and eight rows, not the 320 px and ten rows the worker measured**, because only one of the three parts of that figure's fix was removed: the short inhibitor labels and the regrouped concentration slider are still in place, and they are worth two rows between them.
+
+- **B is the row that matters, and it is the bound this gate would otherwise only assert.** The defect in B is the same defect, still two presses from the opening state, still a reader's to reach — B′ proves exactly that, on the same tree, by widening the one line that chooses candidates and getting A's two complaints back character for character. What changed between A and B is nothing about the crowding and everything about the label: `b.action` writes no `aria-pressed`, the sweep never presses it, and the gate reports **green with the defect present**. A disclosure that does not say whether it is open is an accessibility slip a figure can make with one of the bench's four control makers, and this gate cannot see its consequences.
+
+- **C is the other kind of blind spot: the measure rather than the search.** The two collision checks ask whether one thing is drawn **on** another. `.tb-figure__stage` is `overflow: hidden`, so a drawing that runs off the stage lands on nothing — it is simply gone. With `graph.text(X(s), …)` moved 300 px right, `enzyme-kinetics` loses **every number on its x axis** and keeps its ticks; the frame in `out/narrow/enzyme-kinetics-light.png` shows a graph with an unlabelled scale and a sliver of one glyph at the right edge, and the gate exits 0 with numbers identical to the control's. That is one half of the original report — *the axis caption overran* — and it is the half this gate does not hold.
+
+- **A third bound, this one found by the gate and then closed.** The crowding measure is keyed on `.fig-toolbar`. `membrane3d` builds its own two-row bar under `.m3-bar`, so the first full run reported it as `worst toolbar 0/342 px (0%) in 0 row(s)` and passed — which is byte-for-byte what a figure with no controls reports. That is `docs/policies/local-rules.md`'s *"a check must fail when its subject is missing"*, so a stage carrying visible controls of which none is inside a `.fig-toolbar` is now a failure naming the count and the selector, and **every line prints how many of the stage's controls the toolbar measure held**. The partial case is deliberately not a failure and is visible instead: `zj-words` 4 of 27, `permeability` 7 of 16, `bondlab` 3 of 15, `prokaryote` 2 of 14, `carbonkit` 5 of 12, `secretion` 5 of 12, `cytoskeleton` 6 of 11, `symbiont` 4 of 11 — controls a figure draws outside its bar, which neither the sweep nor the height measure reaches.
+
+- **The live corpus on the day it was written: 88 frames, 44 kinds, 474 states, 298 presses, and two findings.**
+
+```
+narrow: 88 frames at 390 px across 44 figures; 474 state(s) measured, 298 press(es) over 74 of 88 mount(s), 18 of them on the bench (the only ones the two collision checks can read)
+narrow: the five widest toolbars measured — coupling-bench light 217/428 px (51%) in 7 row(s) of 9; coupling-bench dark 217/428 px (51%) in 7 row(s) of 9; atp3d light 162/342 px (47%) in 5 row(s) of 14; atp3d dark 162/342 px (47%) in 5 row(s) of 14; enzyme-kinetics light 200/456 px (44%) in 6 row(s) of 14
+FAIL: 4 problem(s) over 88 narrow frame(s):
+  membrane3d light: 9 control(s) are on the stage and none of them is inside a ".fig-toolbar", so the toolbar measures 0 px in 0 rows — which is exactly what a figure with no controls measures. Put the bar in a ".fig-toolbar" (every other figure's is), or teach this gate the class it uses — reached by nothing: this is the opening state
+  membrane3d dark: …
+  atp3d light: the pane "ladder" is drawn over the pane "ledger", 245x17 px of overlap — reached by pressing "Ladder, eight phosphate compounds ranked"
+  atp3d dark: …
+```
+
+  **`atp3d` is a real one and it is not this round's to fix.** One press from the opening state — the Ladder scene — its eight rungs and their labels are drawn straight through the ledger's rows, and its verdict sentence across both: `out/narrow/atp3d-light-crowd.png`, looked at at 3x, has *Phosphoenolpyruvate*, *1,3-bisphosphoglycerate*, the axis figures −43.0, −49.4 and −61.9 and the ledger's `Donor  PEP` row occupying the same band of pixels. The file was another worker's at the time, so it is reported rather than repaired. 14 of the 88 mounts took **0 presses** and say so on their own lines: `pond`, `scale` and `carbonkit` declare no `aria-pressed` control at all, and `levels`, `prokaryote`, `zj-timeline` and `membrane3d` have some that are not visible, not enabled, or not in a `.fig-toolbar` at 390 px.
+
+- **What a green run here does not prove.**
+  - **That the narrow layouts are any good.** Not legibility, not type size, not contrast — `npm run legible` owns the last and states its own bound. The frames are at 3x for a person; `-opened.png` is the widest state each sweep reached and `-crowd.png` is the state that failed, and both exist because no measure here judges a layout.
+  - **That the crowded state was reached.** The search is greedy: one press per candidate per round, three rounds, forty presses. A state that needs two specific presses **in the other order**, or needs a press already undone, is not visited. `enzyme-kinetics`'s own mutual exclusion is that shape — *Conditions open + inhibitor* and *Cases open + inhibitor* are two states and the sweep holds whichever it reaches second.
+  - **That the collision checks looked at your figure.** They read panes, so they read the **9 bench kinds of 44** — `phlab` and chapter 5's eight, 18 of the 88 mounts, printed on the census line. For the other 35 a toolbar floating over the artwork is the design, and `pond`'s is.
+  - **Anything at another width.** 390 px, one stage, one shape. The same crowding at 320 px is `npm run devices`'s, and `npm run devices` presses no figure control.
+  - **Anything about furniture inside one pane.** The checks are pane against pane and pane against control. `coupling-bench`'s *3 Na⁺ out, 2 K⁺ in* label sits over one of its own ion chips in the frame above, inside a single pane, and nothing here looks at that.
+  - **That a press did the right thing.** The sweep asserts nothing about what a control does. That is `npm run drive`'s question, at desktop width, with a recipe per kind.
+
+## devices: the drawer's wait leaves when the drawer has stopped, not when two rounded readings agree (`tools/devices.js`, `settled`)
+
+*Appended at the end rather than at the top, where this file's "newest first" order would put it, because several workers were writing into it at once on 2026-09-17 and an append cannot collide. It has no row in the index above for the same reason. Both are for whoever next reflows the file.*
+
+- **The tree.** `0806283` plus the uncommitted working tree of 2026-09-17, in the shared checkout at `C:\Users\38909\Documents\github\textbook` with other workers active in it. The only file this round changed is `tools/devices.js`; `src/shell.js`, the file the mutations below use, was `sha256:11ac61c1685909e0` and unmodified in `git status` before each one and after each one — the same digest the six-proofs entry above records for it, so it is byte-identical to the tree that proof was taken on. Node 24.18.1, chromium through SwiftShader.
+- **Claim**, from the function's own doc: a wait leaves only when the thing it measures *has moved away from where the press found it, and then held still across a frame the browser actually rendered*. Three conditions, and the doc names the measurement behind each. **Bound:** this is a claim about the six `settled()` call sites in `tools/devices.js` — the layout settle after the fonts, the drawer's four, and the glossary popover's — and nothing else. `tools/drive.js`'s 165 polls read `describe()` and are untouched; the numbers below are the drawer's `transform` transition at one device (`phone-small`, 320 px) on one page (`biology/ch02`) in chromium, and no other transition in the repository was measured.
+
+**Why it was needed.** `npm run devices` was failing **about one run in five** with no defect present, always on the same line: `following a link left the drawer open over the text (x 0)`, page `biology/ch02`. A gate that fails intermittently teaches everyone who sees it to re-run a red, and a re-run red is how a real defect gets dismissed.
+
+**The reported rate did not reproduce at the gate.** `DEVICE_PAGES=biology/ch02 node tools/devices.js`, twenty consecutive runs on this tree with other workers' browsers running beside them: **20 green, 0 red.** So the gate-level rate measured here is 0/20, not 1/5, and what follows was measured one level down instead — at the poll.
+
+**The instrument.** `out/pollprobe/poll-probe.mjs` (ignored path), which copies `settled()` **verbatim** and drives the identical drawer sequence — open, tap outside, reopen, follow a link — a hundred times on one loaded page, recording every reading the poll takes together with `document.timeline.currentTime`. It stands in for `tools/devices.js` itself, which is the instrument that owns this poll; no shipped instrument samples a poll's own readings (`perf` measures frame time, `figure` pins one frame, `inspect` captures viewport frames, `review` reads the study record). 100 cycles is 400 polls, against 2 per gate run.
+
+**The cause, with a number on each link of the chain.** Measured over 400 polls of the unmutated, unfixed gate:
+
+| link | measurement |
+|---|---|
+| The drawer's ease is `cubic-bezier(0.2, 0.7, 0.2, 1)` over 400 ms (`src/styles/tokens.css`), which spends its last ~90 ms travelling its last ~2 px. Two readings one poll apart therefore **round** to the same integer while the box is still sliding. | **22 of 400 settles (5.5%) returned a value one rounded pixel short of rest** — `x -1` where the drawer opens to 0, `x -271` where it closes to -272. A second run of the same probe: 17 of 400. |
+| That short reading is the next thing the gate reads, so it becomes the **next** wait's `from`. | `staleOpenSettle` 3 and 2 over two runs: the reopen wait itself landed short, and the `beforeLink` read that follows it was still short. |
+| `from` is the guard that stops a poll leaving at the position the press has not moved yet — and it is load-bearing every seventh poll. | **55 of 400 polls (13.75%)** saw two consecutive readings agree at exactly `from` and kept polling only because of it. |
+| With `from` one pixel off, that guard no longer matches, so the poll leaves on the first pair of reads at the un-moved position. Replaying the **same recorded readings** with a `from` one rounded pixel short: | **20 of 200 polls (10%) leave holding `x 0, w 272`** — an open drawer, which is the reported message verbatim. |
+
+So the failure is not a race between the press and the browser; it is **a wait that rounded its own measurement** and then handed the rounded value to the next wait as the thing it must move away from. Three of the same family were found the same week (`docs/policies/local-rules.md`, the sleep-to-poll section); this is the fourth, and it is the one the earlier fix left behind, because *moved, then stopped* is only true if "moved" is measured against where the thing actually rests.
+
+**A mechanism that was ruled out, because it looked like the obvious one.** Two readings taken inside a single rendered frame are equal whatever the box is doing, and `document.timeline.currentTime` — the clock the transition runs on — is frozen between rendering updates. Measured: **0 of 5,092 pairs taken inside a poll shared a frame**, while **35 of 100** pairs made of a poll's last reading and the read immediately after it did. Real, and not this defect. It is closed anyway because the clock costs nothing to carry in an evaluate that was happening regardless.
+
+**The change.** Every `read` handed to `settled` now returns `{ v, frame }` from one evaluate; `v` is the **exact** box and the assertions round only where they print; `settled` requires the pair to be equal, to differ from `from`, and to carry different frames. One reader per subject (`railRead` for the drawer, `popRead` for the glossary popover) so a `from` taken with a different or a rounded reader cannot silently disarm the guard.
+
+**Green, and the cause gone, measured the same way.**
+
+| arm | settle landings over 400 polls | short of rest |
+|---|---|---|
+| before | `{0: 193, -272: 185, -1: 7, -271: 15}` | **22** |
+| before, second run | `{0: 193, -272: 190, -271: 10, -1: 7}` | **17** |
+| after | `{0: 200, -272: 200}` | **0** |
+| after, second run | `{0: 200, -272: 200}` | **0** |
+
+`guardSaved` stays at 52–68 of 400 after the fix, so guard 1 is still firing every seventh poll rather than having been made unreachable. `DEVICE_PAGES=biology/ch02 node tools/devices.js`, twenty consecutive runs after the change: **20 green, 0 red**, identical counts on every load (53 terms, 82 prose blocks, 8 wide) and 53.9 s against 52.1 s for one run, so nothing was traded for it.
+
+**Red, by reintroducing the defect the check exists for.** Both mutations are in `src/shell.js`, applied and written back inside one process (`out/pollprobe/mutate.py`), the run trimmed to one load (`DEVICE_PAGES=biology/ch02 DEVICE_ONLY=phone-small DEVICE_ENGINES=chromium`) so the mutation window is seconds. The script refuses to run at all if `git status --porcelain src/shell.js` is not empty.
+
+| mutation | exit | what the gate said, verbatim |
+|---|---|---|
+| **The 2026-09-10 defect itself**: `rail.addEventListener('click', …) → setDrawer(false)` removed, so a link in the drawer stops closing it | **1** | `following a link left the drawer open over the text (x 0)`, plus `the page was left locked after the drawer closed, so nothing scrolls any more`, and then `locator.tap: Timeout 120000ms exceeded` in the glossary phase — which is a reader's own experience of that defect: the drawer sits over the terms and nothing under it can be tapped |
+| **The one this file already records for this gate** (six proofs, row 5): `rail?.remove()` after `const rail = document.querySelector('.tb-rail')` | **1** | `nothing matches .tb-rail on this chapter page, so the contents drawer was not checked at all`, on a line reading `4 header control(s), no drawer, 53 term(s), …` |
+
+**The restoration.** `src/shell.js` `sha256:11ac61c1685909e0` before and after **each** mutation, printed by the runner, with `git status --porcelain src/shell.js` empty before and after both. Bytes rather than `git checkout`, because the tree holds several other workers' uncommitted work.
+
+**What this does not prove.**
+
+- **That the gate's reported 1-in-5 was this.** It was not reproduced at the gate: 0 of 20 runs before the change. What was reproduced is the mechanism, at the poll, with a number on every link — and the message the replay produces is the reported one verbatim. If `npm run devices` fails on that line again, this entry is wrong and the trail the probe records is how to find out.
+- **That the other five waits in this file were failing.** They were not observed failing. They share the reader and the rule, so they are covered by construction, not by measurement — except the drawer's outside tap, which the replay shows would leave on an open drawer just as often.
+- **That the fix reaches WebKit or Gecko's timing.** `document.timeline.currentTime` returns a number in all three engines (checked directly: chromium 0, webkit 20, firefox 23.1 on a blank page), and the full `npm run devices` is green on all three. Every number above is chromium's.
+- **That a transition elsewhere in the repository is safe.** The ease, the duration and the travel that make this defect are the drawer's. A shorter transition, or one with a slower tail, has a different rounding window, and nothing here measured one.
+- **That the probe is the gate.** It copies `settled()` and the drawer sequence; it does not load five shapes, take screenshots, or run the other suites. Its cycles run back to back on one page, where the gate's run once on a freshly loaded one.
+
+## drive: a press the figure threw away, because finishing a glide had removed the node it landed on (`tools/drive.js` scale recipe, `src/figures/scale.js`)
+
+`scale drag-the-lens-left` was handed on as flaky: it had failed in one arm of an A/B and passed in the other, across a change that cannot touch a drag.
+
+**It is not flaky, and the first measurement said so.** Twenty consecutive `DRIVE_KINDS=scale node tools/drive.js` on the tree as found: **3 passed, 17 failed**. The wall times separate as cleanly as the verdicts — every passing run 2 s, every failing run 6–7 s — and the 5 s between them is exactly the step's own `until` budget expiring, so the failure was never the drag going somewhere wrong. It was the drag doing nothing at all:
+
+```
+FAIL scale drag-the-lens-left: dragging to the left end did not reach the metre scale:
+  {"lensMetres":0.00008,"nearest":"hair","id":"lab-scale","kind":"scale","number":"0.1","state":"ready"}
+```
+
+`0.00008` is where the `ArrowLeft` in the step above had left it. Nothing moved.
+
+**What it was not.** The obvious reading — the press missed the lens, because the recipe takes the lens's box while the lens is still gliding — is wrong, and a probe standing in for the gate (`out/scaleprobe/probe.mjs`, header naming `tools/drive.js`) ruled it out: the pointerdown landed **inside** `.sc-lens` (`{"tag":"path","inLens":true}`) and the drag still moved nothing.
+
+**The cause**, from a listener added after the figure's own, on the same element in the same phase, so it runs second and reads the figure's verdict (`out/scaleprobe/probe2.mjs`). The figure calls `preventDefault()` only when its layout's `down()` returned a mover, so `defaultPrevented` *is* that verdict:
+
+| settle before the press | pointerdown target, once the figure had handled it | lensMetres after the drag |
+|---|---|---|
+| none — the recipe's own timing | `{"target":"path.","stillInDocument":false,"stillInLens":false,"figureTookIt":false}` | 0.00008 → **0.00008** |
+| 400 ms | `{"target":"circle.","stillInDocument":true,"stillInLens":true,"figureTookIt":true}` | 0.00008 → **1.96** |
+
+`stillInDocument: false` is the whole defect. `onDown` called `glide.finish()` **before** asking whether the press had been on the lens; finishing runs the tween's last `update`, which calls `setU`, which repaints, and the wide layout's repaint rebuilds the lens's interior with `inner.replaceChildren()`. A press that landed on the ruler line, a tick or a label drawn *inside* the lens had therefore targeted a node that finishing the glide had just thrown away — so `lensG.contains(e.target)` answered no about a detached node, `down()` returned null, and the press was dropped. The three runs that passed are the ones where the glide had already ended, or where the press happened to land on one of lensG's direct children (the glass, the ring, the handle), which the repaint does not replace.
+
+That the lens was genuinely still gliding when the recipe read its box was measured in the same probe: four reads of the lens's centre, 60 ms apart, gave **482.66, 470.35, 467.83, 467.83** — still moving for about two of them, settled by the third.
+
+**So this is a product defect, not a gate one.** A reader who presses the lens while it is gliding — after Next, Prev, or an arrow key — loses that press. No gate could see it: `npm run pinned` presses one control per fresh mount and never presses during a transition, and `npm run shot` presses nothing.
+
+**The fix** (`src/figures/scale.js`): `onDown` reads `layout.lens.contains(e.target)` **before** `if (glide) glide.finish()`, and passes it to `layout.down(e, x, y, onLens)`, which no longer re-derives it. The narrow layout was never affected — its `down` reads only the y of the press.
+
+**The gate.** The step keeps pressing mid-glide *on purpose* — that is the window the defect lives in — and now asserts the figure's own verdict before it asserts the outcome, because a press that was silently dropped and a press that worked are otherwise told apart only by where the lens ends up, and a press that lands on the track ends up in the same place. `null` back from the listener fails too: no pointerdown reached the svg, so the step measured nothing.
+
+**Red, by reintroducing the defect verbatim.** The mutation is the two lines swapped back — `if (glide) glide.finish()` above the read of what was pressed, which is the order the file had. `src/figures/scale.js` `sha256:aec4bc09f54e9cbf` before and after, written back from the bytes read first.
+
+| the step's shape | runs red, with the defect back |
+|---|---|
+| pressing inside the glide the step above happened to leave running | **5 of 10** |
+| pressing inside a 280 ms glide the step starts itself, immediately before the press | **10 of 10** |
+
+The first row is why the second exists. A step that inherits its window competes with every round trip between the previous step's poll and its own press — installing the listener alone took it from 17 of 20 down to 2 of 5 — so the step now presses an arrow key of its own and drags a few milliseconds into the glide that starts. Verbatim, every time:
+
+```
+FAIL scale drag-the-lens-left: the figure did not take the press on the lens: its pointerdown handler
+  returned without calling preventDefault(), which is what it does when down() found nothing under the
+  pointer. A press that arrives while the lens is gliding must still be taken — finishing the glide
+  repaints the lens and detaches the node the press targeted, so the hit has to be read before the glide
+  is finished (src/figures/scale.js, onDown)
+```
+
+**Green.** Twenty consecutive `DRIVE_KINDS=scale node tools/drive.js` with the fix and the final recipe: **20 green, 0 red**, all four steps ok in every run, every run 2 s.
+
+**What this does not prove.**
+
+- **That no other figure drops a press this way.** The class is "a pointer handler that repaints before it asks what was pressed", and `scale.js` is the only figure in `src/figures/` that both listens for `pointerdown` and reads `e.target` at all (checked across all 44). The new assertion covers `scale` and nothing else: no other drag recipe reads the figure's verdict, so a figure that grows a target-based hit test tomorrow is uncovered.
+- **That the reader-facing defect is gone everywhere it showed.** What was measured is the wide layout in the lab at 1000x640. The narrow layout was read and is immune — its `down` never looks at `e.target` — but it was not driven.
+- **That this was the A/B failure that was handed on.** That run was not reproduced as such; what was reproduced is a step failing 17 of 20 times on the tree as found, with a cause that explains both the failures and the passes.
+
+## shot: the Today frame was a coin toss between a booted page and one showing none of its study surface (`tools/shot.js`)
+
+`npm run shot`'s Today frames were not reproducible, and the reading handed on was that `npm run sitting` rewrites the record the page reads, so a frame taken in the chain and a frame taken alone are different pictures.
+
+**That reading does not survive measurement, and the disproof is three facts.** The record lives in `localStorage`, which is per browser context and does not outlive a gate's process. The server-side mirror is off under automation: `shouldPost()` in `src/learning/store.js` returns false when `navigator.webdriver` is true, and `progress/` is still empty after a sitting run. And the decisive one — **two `SHOT_PAGES=today` runs with nothing whatever between them already differed**, on a tree hashed identical before and after each arm:
+
+| frame | run A | run B | run C (after a sitting) | A bytes | B bytes | C bytes |
+|---|---|---|---|---|---|---|
+| today-desktop-dark | `53573c6b` | `228401ec` | `53573c6b` | 102,349 | 163,667 | 102,349 |
+| today-desktop-light | `b97a934f` | `b97a934f` | `96749327` | 161,949 | 161,949 | 101,208 |
+| today-phone-dark | `6b68f03c` | `4f8b9965` | `4f8b9965` | 80,141 | 153,818 | 153,818 |
+| today-tablet-dark | `d2d9a69b` | `46271856` | `d2d9a69b` | 155,764 | 86,138 | 155,764 |
+
+Two sizes, not a drift: every frame is either ~80–102 KB or ~154–164 KB, and which one it is has no relation to whether a sitting ran.
+
+**The cause.** Six loads of `/today/?eager=1&t=0` in one process came back **1446 px high once and 900 px high five times**; the short ones carried the page's heading and intro and none of the sitting. The handshake this gate waits on covers the shell and, under `?eager=1`, every `<tb-figure>`. It says nothing about `<tb-sitting>`, whose `connectedCallback` starts an async boot — a dynamic import of `objectives.js` and `items.js` for every chapter it lists, then a fetch of each chapter's `index.html` — and only then paints. The handshake and that boot are a race, and the gate was photographing whichever won. The one load that rendered was the **first**: it fetched the fonts over the real network and gave the boot time; every load after it was served from the run's own memory and beat the boot. So the gate's cache was deciding what the page looked like.
+
+**The fix** (`tools/shot.js`): before anything below it measures or photographs, every `<tb-sitting>` on the page is waited for **in the page and in animation frames**, until its `.tb-standing` section holds anything at all — `paintStanding()` fills it on the good path and `fail()` fills it with a `.tb-unavailable` panel on the bad one, so the wait ends on both rather than hanging on a page that has honestly given up. A page that MUST carry one (`today`) and carries none fails, and a sitting that never boots fails naming what it reported. Every line prints what it waited for, so `0 sitting(s)` cannot read as a page that had settled.
+
+**Green, and the fix is what does it — both arms on the same machine, back to back.**
+
+| arm | runs | frames identical |
+|---|---|---|
+| the wait removed | G, H, nothing between them | **3 of 6 differ** — 80,141 vs 153,818, 86,138 vs 155,764, 154,369 vs 85,041 |
+| the wait in place | D, E, then a sitting, then F | **6 of 6 identical across all three**, D = E = F byte for byte |
+
+The wait itself costs **0 or 1 animation frames** on a warm run (2 loads at 0, 4 at 1, in each of D, E and F), which is why it needed the A/B rather than the number: a one-frame wait that removes a two-state outcome looks like doing nothing.
+
+**Red, by holding the boot open.** A route in the gate's own file delays `**/items.js` by 20 s, longer than the 600-frame cap, so the sitting cannot finish. Both arms are one load, `SHOT_PAGES=today SHOT_VIEWPORTS=phone SHOT_THEMES=light`.
+
+| arm | exit | what the gate said, verbatim |
+|---|---|---|
+| the wait in place | **1** | `FAIL today phone light (10398 ms)` / `<tb-sitting> 1 of 1 had still rendered nothing into its .tb-standing section after 600 animation frames (it reports 0 step(s) from 0 item(s)). Its boot imports objectives.js and items.js for every chapter it lists and then fetches each chapter's index.html; one of those never settled, so this frame would have been a photograph of a page that had not finished loading.` |
+| the wait removed, same delay | **0** | `ok   today phone light (392 ms, 0 figures ready, 0 sitting(s), …)` — and it wrote the frame: **40,833 bytes** against 153,658 for the booted page |
+
+That second row is the half that matters. Before this check the gate was green over a Today page that had loaded none of its subject, and the only trace was a smaller file nobody was diffing.
+
+**What this does not prove.**
+
+- **That the frame is now a picture of a *determined* sitting.** The wait pins that the sitting has BOOTED, not what it planned. Nothing in `src/components/mastery.js` or `src/learning/scheduler.js` calls `Math.random`, and from an empty record the plan is the calibration set, so the plan is in fact the same every run — but that is a property of those files, and this wait does not enforce it.
+- **That the page is fixed.** This is a gate-side answer to a page-side race. The root fix is for the handshake to cover `<tb-sitting>` the way it covers `<tb-figure>` (`src/shell.js`), which is high-risk, reviewed work and was not this round's to make. Until then every other gate that loads `/today/` — `npm run devices`, `npm run subpath` — still races.
+- **That no other page has an element outside the handshake.** Only `<tb-sitting>` was looked for. Any future custom element that paints from an async boot has the same hole, and this check knows nothing about it.
+- **That the 1-in-2 was ever seen as a failure.** It never failed the gate. It was only ever a frame that differed, which is why it survived as long as it did.
+
+## pinned: eight processes, one verdict, and the three ways a shard could have vanished (`tools/pinned.js`)
+
+`npm run pinned` was 410 s of the chain, and its 44 kinds are independent: each is its own page, its own mount, its own judgement. It now runs as `PINNED_SHARDS` processes of the same file, eight by default, each given its slice through the `PINNED_KINDS` the gate already had.
+
+**Why this gate can be sharded when a gate normally cannot.** It judges a figure in **animation frames**, not milliseconds — `FRAMES = 12` per untouched window, with a millisecond floor under it only for a figure driven by a timer. A figure advances its clock as frames arrive, so a figure sharing a machine with seven other chromiums gets the same number of chances to move as one on an idle machine. A gate with a wall clock in its judgement would have been made to lie by its own parallelism.
+
+**Measured, three arms back to back, on a tree hashed identical before and after each one** (`src/figures/*.js`, `src/figures/lib/*.js`, `src/components/figure.js`, `src/shell.js`, `lab/index.html`, `tools/pinned.js` — `22d4061239494451` at every bracket). 32 logical CPUs, SwiftShader.
+
+| `PINNED_SHARDS` | wall | exit | kinds | mounts | presses | keys | windows |
+|---|---|---|---|---|---|---|---|
+| 1 (the reference run, in this process) | **410 s** | 0 | 44 | 776 | 338 | 927 | 898 |
+| 8 (the default) | **80 s** | 0 | 44 | 776 | 338 | 927 | 890 |
+| 16 | **73 s** | 0 | 44 | 776 | 338 | 927 | 884 |
+
+**The work is identical and the windows are not, and that is the right result.** Kinds, mounts, presses and keys are what the run *does*, and they match to the unit across all three arms. `windows` is what the run *observed* — `stillMoving` stops at the first window whose reading holds still — so a settling transition that needs two windows on one run and one on another moves that count. 898 / 890 / 884 over 44 kinds is that, not lost work; had mounts or presses drifted, a shard would have skipped something.
+
+**Is 8 a ceiling? No, but it is past the knee.** 410 → 80 s is 5.1x; 80 → 73 s is another 9% for twice the browsers and twice the memory. The wall time is the slowest shard's: at 8 the shards landed between 37 s and 80 s, at 16 between 41 s and 73 s — the per-shard time stopped falling as the shard count rose, which is the CPU saturating. The floor is one kind, because no shard can finish before the most expensive figure in it.
+
+**Red, three mutations, each one a way a shard could have gone missing.** `PINNED_SHARDS=2 PINNED_KINDS=scale,levels,tree,pond`, so each arm is about 34 s. Every mutation is applied to `tools/pinned.js` and written back from the bytes read before it; `sha256:21e608a256fae631` before and after all three.
+
+| mutation | exit | what the run said, verbatim |
+|---|---|---|
+| shard 2 prints no totals record and **exits 0** | **1** | `shard 2 finished: exit 0 in 34 s`, then `shard 2 (levels, tree) printed no ##pinned-shard-totals record, so there is nothing to say it worked its 2 kind(s) at all — an exit status alone cannot tell a shard that passed from one that did nothing.` and `the shards report 2 kind(s) between them and 4 were dispatched, so the run did not cover its population.` |
+| shard 2 fails | **1** | `shard 2 (levels, tree) exited 1; its output is above. Run it alone with: PINNED_SHARDS=1 PINNED_KINDS=levels,tree npm run pinned` |
+| shard 2's record claims one kind fewer than it was given | **1** | `shard 2 was given 2 kind(s) — levels, tree — and reports having worked 1, so 1 of them went unmeasured while the shard exited 0.` and the population line again |
+
+The first row is the one the shard exists to survive: **the shard exited 0 and the run still went red.** A chain that cannot tell "passed" from "did not run" is what this repository keeps unpicking, and adding seven more processes is seven more places for it to happen.
+
+**Green after all of it.** `npm run pinned` with no variables set: exit 0 in 82 s, 8 shards, `44 kind(s), 776 mount(s), 338 press(es), 927 key(s)`, and 8 of 8 totals records read back by the parent.
+
+**What this does not prove.**
+
+- **That the shard is why any figure passes or fails.** No verdict changed: the same 44 kinds were clean at 1, 8 and 16. That the frame-counted window is what makes this safe is an argument from the gate's construction plus the identical counts, not an experiment that made a figure fail under load.
+- **That 8 is right on another machine.** Every number here is one machine, 32 logical CPUs, SwiftShader. On four cores, eight shards contend; `PINNED_SHARDS` is the dial and `1` is always the reference.
+- **That a hung shard is caught.** A shard that never exits hangs the run, exactly as a hung page hangs the single-process gate. There is no wall-clock reaper, deliberately: the bound on a stuck page is Playwright's `ACTION_TIMEOUT_MS`, and a second timer over the top would be a wall clock deciding a verdict.
+- **That the parent's output is complete on a signal.** Ctrl-C kills the children and exits 130 with whatever had been relayed. That path was written, not measured.
+
+## sweep3d: `membrane3d`'s bar takes the shared class, and the mutation that used to pass now fails (2026-09-17)
+
+- **What this is a proof of.** The 2026-09-17 entry above closed the sweep's hole for `atp3d` by hiding the bench's panes, and named `membrane3d`'s as still open: its toolbar was `.m3-bar`, not `.fig-toolbar`, so the bare frame never hid it and the figure was never covered at all. The same one difference had just been found a second time, by `npm run narrow`, whose crowding measure is keyed on `.fig-toolbar` and read `worst toolbar 0/342 px (0%) in 0 row(s) holding 0 of the stage's 9 control(s)` — byte-for-byte what a figure with no controls measures. The fix chosen was not a third exception. The figure's bar is now `.fig-toolbar` like every other figure's, the layout the shared rule does not fit is set back under `.tb-mem3d` in the figure's own CSS, and `.sweep-bare .m3-bar` has gone from `BARE_SELECTORS` because nothing wears that class any more. What follows is the coverage that buys, measured rather than assumed.
+
+- **The mutation, and the control arm that makes it a measurement.** `renderer.render(scene, camera)` → `renderer.clear()` at `src/figures/membrane3d.js:844`, nothing else changed, then `SWEEP_KINDS=membrane3d node tools/sweep3d.js`. The control arm is the same mutation on the same file with the bar's three names put back to `.m3-bar` — the figure exactly as it was before this change — run against the selector list the gate has **today**, which no longer names it.
+
+| the bar's class | exit | frames | the first frame's measure |
+|---|---|---|---|
+| `.m3-bar` — the figure as it was | **0 — passed** | 15 of 15 `ok` | `std 10.99`, `dominantFraction 0.960`, `mean 237.3`, `darkFraction 0` |
+| `.fig-toolbar` — the figure as it is | **1 — failed** | 15 of 15 `FAIL` | `std 1.29`, `dominantFraction 0.987` |
+
+  The failure text, verbatim, on every frame of the failing run: `luminance spread 1.29 is under 6: the frame is flat` and `one colour fills 98.7% of the frame, over the 98.5% allowed: the frame is blank`, with the dark frame reading `luminance spread 1.02`. The passing arm is the hole with a number on it: nine controls in two rows supply `std 10.99` where the render itself supplies `std 40.6`, and a quarter of the render's variety is far more than enough to clear a bar set at 6. A renderer drawing nothing, and the gate saying `ok   membrane3d light theta=0.00 phi=0.45 d=47.0` fifteen times.
+
+- **The restoration.** `src/figures/membrane3d.js` was copied before the mutation and restored from that copy, checked by digest rather than by reading it: `sha256 7aaf45814f6d25fecb3f1762a683fc2bc964023b93e2d9a0d5ccbc48e71ffbf0` before the mutation and again after the restore. On the restored tree `SWEEP_KINDS=atp3d,membrane3d node tools/sweep3d.js` is **30 frames, exit 0**, and `membrane3d`'s first frame reads `std 40.62`, `dominantFraction 0.679`, `mean 213.6` — the render, measured on its own.
+
+- **What `npm run narrow` says either side of it.** Before: `FAIL membrane3d light: … worst toolbar 0/342 px (0%) in 0 row(s) holding 0 of the stage's 9 control(s)`, with the complaint naming the selector. After: `ok   membrane3d light: … worst toolbar 132/342 px (39%) in 5 row(s) holding 9 of the stage's 9 control(s)`, and the same in the dark theme. The 39% is a real bar measured for the first time, under that gate's 55% limit.
+
+- **That the class move changed no pixels.** The labelled 390 px frames `npm run narrow` writes are byte-identical across the change: `sha256:61bc24f56020962f` light and `48df67d65058925a` dark, before and after. The **bare** frames are not, and that is exactly the point — before the change the bare frame hashed the same as the labelled one (`61bc24f56020962f`), because `.narrow-bare` hides `.fig-toolbar` and there was none to hide; after it, light goes to `9d7d98abda6cb108`. One digest says the reader sees the same figure, the other says the gates now see a different one.
+
+- **What it does not prove.** Nothing about figures that put *some* controls outside a `.fig-toolbar` — `zj-words` 4 of 27, `permeability` 7 of 16, `bondlab` 3 of 15, `prokaryote` 2 of 14 and the rest are the PARTIAL split both gates print and neither fails, and none of them was mutated here. Nothing new about the sweep's own bound: it remains an absent-frame detector, `out/sweep/` remains a person's job, and these fifteen frames are SwiftShader at 1000x640. And `npm run legible` still does not visit `membrane3d` at all — it sits on that gate's `DEFERRED` list with chapter 4's other seven figures — so `LEGIBLE_KINDS=atp3d,membrane3d` measured `atp3d` alone, and said so on the run.
+
+## shell: the handshake does not resolve until every `<tb-sitting>` has booted, and `shot`, `devices` and `subpath` all inherit it (`src/shell.js`) (2026-09-17)
+
+- **The tree.** HEAD `0806283`, plus the uncommitted work of several workers in a shared tree — two chapters landed between the first arm here and the last, so every arm names the tree it ran on. The files this proof depends on, by sha256 prefix at the end of the work: `src/shell.js 1080476fd1a2f839`, `tools/shot.js 6bc2078c690ae24c`, `tools/devices.js 7eb8e8bc203811f2`, `tools/subpath.js 3a92f87330590d7e`, `today/index.html f2727920969dfa4c`, `src/components/mastery.js 9994de9f7ff375d8`. `npm run subpath` prints a digest of the tree it mirrored and it is quoted per arm below; the A/B arms that are compared frame for frame were taken on one digest each, and where the digests of two arms differ the comparison is stated as being between *runs of the same command*, never between the two shells.
+
+- **Claim**, from `src/shell.js`'s header: *"`window.__textbook.state` is 'loading' until the shell has mounted, every `<tb-sitting>` on the page has booted, and, under `?eager=1`, every figure has reached ready or error."* A `<tb-sitting>` has booted when its `.tb-standing` section holds anything at all, which is where both of `TbSitting.boot()`'s exits lead — `paintStanding()` on the good path, `fail()`'s `.tb-unavailable` panel on the bad one.
+
+  **Bound**, and it is a real one. This makes a frame a picture of a **booted** sitting, not of a **determined** one: nothing here pins the plan. (The plan is in fact the same every run — nothing in `src/components/mastery.js` or `src/learning/scheduler.js` calls `Math.random`, and the plan from an empty record is the calibration set — but that is a property of those files, not something this term enforces, and it is a property that could be lost without this term noticing.) The term is a **conjunct added to** the existing contract, not a change to it: the shell-mounted clause and the `?eager=1` figure clause are byte-for-byte what they were, and the proof that the figure clause still behaves is the second red shape below. On a page with no `<tb-sitting>` the term is vacuously true and no `MutationObserver` is constructed, and the "unaffected" arm below measures that rather than asserting it. The term is deliberately **not** behind `?eager=1`, because `tools/devices.js` does not pass it.
+
+- **Why it was needed.** `<tb-sitting>`'s `connectedCallback` starts an async boot — a dynamic import of `objectives.js` and `items.js` for every chapter it lists, then a `fetch` of each chapter's `index.html` — and only then paints. The handshake said nothing about it, so the boot and the handshake were a race, and three gates photographed and measured whichever won. **Measured on a still tree, three runs of one command with nothing between them:**
+
+  | gate | frame | run 1 | run 2 | run 3 |
+  |---|---|---|---|---|
+  | `SUBPATH_PAGES=today`, tree `93ad9f35ccba32e1` | `today-desktop-dark.png` | 102,349 | 163,667 | **50,734** |
+  | " | `today-desktop-light.png` | 161,949 | **50,720** | **50,720** |
+  | " | `today-phone-dark.png` | **40,789** | 80,141 | **40,789** |
+  | " | `today-phone-light.png` | 153,658 | 153,658 | 153,658 |
+  | `DEVICE_PAGES=today` | `chromium-tablet-landscape-today-light.png` | **109,658** | 193,829 | 193,829 |
+
+  Only `today-phone-light` held still, and it is the **first load of each run** — the one that fetches the fonts over the real network and so gives the boot time to finish. Every load after it was served from the run's own memory and beat the boot. **The gate's cache was deciding what the page looked like.** 80,141 bytes is the third state worth naming: not the booted page and not the stub, but a sitting caught part-way through painting. The 109,658-byte `devices` frame was looked at: it carries the header, the kicker, the title and the dek, and **none** of the study surface — no "Where you stand", no question, no options — and `npm run devices` called it `ok`, with the line `0 header control(s)… no text column` beside it.
+
+- **The mutation.** Hold every `items.js` request forever, so no `<tb-sitting>` can ever reach `paintStanding()` *or* `fail()` — `page.route('**/items.js', () => {})`, one temporary line added to each of the three gates before its navigation and removed afterwards. An **abort** would not have done: `mastery.js` catches a failed `import()` and goes down the `fail()` path, which fills `.tb-standing`, so an aborted bank boots the sitting. Only a request that never settles holds it.
+
+  The control arm removes the four lines of the term from `_check()` and changes nothing else in the file — `describeSittings()`, `sittingBooted()` and `_watchSittings()` all stay — so the two arms differ by the term and by nothing else.
+
+  | gate, trimmed to one load where it could be | term present | term deleted from `_check()` |
+  |---|---|---|
+  | `SHOT_PAGES=today SHOT_VIEWPORTS=phone SHOT_THEMES=light` | **exit 1**, 120,937 ms, **no frame written** | **exit 1**, 945 ms, frame written at **40,833 bytes** |
+  | `DEVICE_PAGES=today DEVICE_ONLY=desktop DEVICE_ENGINES=chromium` | **exit 1**, 120,754 ms | **exit 0**, 843 ms, frame written at **50,720 bytes** |
+  | `SUBPATH_PAGES=today` (4 loads) | **exit 1**, 482,807 ms, 4 of 4 loads failed, **0 frames written** | **exit 0**, 2,727 ms, 4 frames at 40,833 / 40,789 / 50,720 / 50,734 bytes |
+
+  The control arm is the hole with a number on it: with the study page's question bank hanging forever, `npm run devices` and `npm run subpath` both **pass in under three seconds** and file a photograph of a page that has not started.
+
+- **The failure text, verbatim.** `npm run shot`, and each of `subpath`'s four loads:
+
+  ```
+  FAIL today phone light (120409 ms)
+    page did not become ready within 120000 ms; figure states: {}
+  ```
+
+  `npm run devices`, which does not go through `openPage` and carries its own phase budget — the sitting half of the detail is new, and it is what makes an unbooted sitting diagnosable rather than inferable from an empty figure list:
+
+  ```
+  the the ready handshake (`window.__textbook.state` never became "ready") did not finish within 120000 ms
+  (it had run 120013 ms when this was written) in chromium at desktop (1440 px, mouse) on today; What would
+  satisfy this: the shell must mount, every <tb-sitting> must boot, and window.__textbook.state must become
+  'ready' within 120000 ms. … Figure states at that moment: {}. Sittings at that moment:
+  [{"index":0,"booted":false,"steps":0,"items":0}].
+  ```
+
+  (The doubled "the the" is pre-existing: `runPhase` writes `the ${phase}` and this phase's name already begins with "the". Recorded, not fixed — `tools/devices.js` had other workers in it.)
+
+  And the control arm's failure in `npm run shot`, which is the proof that the gate-side census still has teeth after its own wait was removed:
+
+  ```
+  FAIL today phone light (381 ms)
+    <tb-sitting> 1 of 1 had still rendered nothing into its .tb-standing section, and the page had ALREADY
+    reported window.__textbook.state === 'ready'. That is the handshake's sitting term not running:
+    src/shell.js's _check() must hold 'loading' until every <tb-sitting> has booted. It reports 0 step(s)
+    from 0 item(s).
+  ```
+
+- **The second red shape: a page that never becomes ready still fails with the same text.** The existing route, untouched by this work: hold `**/src/figures/pond.js` forever on a chapter page under `?eager=1`, so one figure stays in `loading`. Both arms — the shell as it now is, and `git show HEAD:src/shell.js` — `SHOT_PAGES=biology/ch01 SHOT_VIEWPORTS=phone SHOT_THEMES=light`:
+
+  ```
+  FAIL biology/ch01 phone light (120455 ms)
+    page did not become ready within 120000 ms; figure states: {"fig-pond":"loading","fig-homeostasis":"ready",
+    "fig-levels":"ready","fig-scale":"ready","fig-cell":"ready","fig-dna":"ready","fig-energy":"ready",
+    "fig-tree":"ready","fig-pasteur":"ready"}
+  ```
+
+  Both arms exit 1, at 120,455 ms and 120,458 ms, and the message line is **byte-identical**: `sha256 4dfe03bf809203c2a18b1c1cf85d9c77f3acff3d6dbb94418855215ddfe557f5` on both. Eight figures reach `ready` and the ninth holds the page, which is the figure clause of the contract behaving exactly as before.
+
+- **The unaffected arm: a page with no `<tb-sitting>`.** `SHOT_PAGES=library,biology/ch01 SHOT_VIEWPORTS=phone SHOT_THEMES=light`, with the term and with the term deleted, on one tree:
+
+  | | frame sha256 | load |
+  |---|---|---|
+  | `library-phone-light.png` | `6292678546b3a2d3…` both arms | 450 ms vs 470 ms |
+  | `biology/ch01-phone-light.png` | `a74b1de47995c991…` both arms | 1,370 ms vs 1,372 ms |
+
+  Byte-identical frames, and a load time the term does not move. `0 sitting(s)` is printed on those lines, which is the other half: a census that counted nothing must not read like a page that settled.
+
+- **Green, and reproducible, which is the whole point.** After the change, on the trees named:
+
+  | command | runs | result |
+  |---|---|---|
+  | `SHOT_PAGES=today node tools/shot.js` | 3 | exit 0; all 6 frames byte-identical across all three runs (`228401ec b97a934f 4f8b9965 e42ccb5e d2d9a69b 7d85472f`), each line reading `1 sitting(s) booted (6 step(s) from 537 item(s))` |
+  | `DEVICE_PAGES=today node tools/devices.js` | 3 | exit 0; all 4 frames byte-identical across all three runs |
+  | `SUBPATH_PAGES=today node tools/subpath.js` | 3 | exit 0; all 4 frames byte-identical across all three runs, tree `96de91ec825f464e` |
+  | `npm run unit` | 1 | exit 0, 207 of 207 |
+  | `SITTING_THEMES=light npm run sitting` | 1 | exit 0, 2 sittings completed, `finished: true` both — the gate whose page this is, unbroken by the term |
+
+  The Today frame was looked at at native resolution rather than counted: `out/shots-id-a/today-phone-light.png` carries the header, the kicker and the dek, then **"Where you stand"** with the calibration lede, then **"A short calibration · 1 of 6 · Explain · Multiple choice"** with its question and four options and the "I already know this" button. That is the page the three gates now photograph, and it is the page none of them reliably photographed before.
+
+- **The decision about `tools/shot.js`'s own wait: it was removed.** It waited on its own copy of the `booted` predicate in animation frames, capped at 600 frames. Duplicated waiting is harmless; a second implementation of the criterion is not, and `shot` was the only gate that had one — `devices` and `subpath` had nothing at all. What stayed in `shot` is the **census**, which says the three things the handshake cannot: that the page whose subject this is still carries a `<tb-sitting>` at all (the term is vacuously true on a page that lost the element, so something must notice); that the shell still exposes `describeSittings()`; and that every sitting reads back booted **after** the handshake resolved, which is the assertion that the term ran — it is what produced the control arm's failure text above. It reads the shell's predicate rather than keeping one of its own, deliberately.
+
+- **The restoration.** The mutation was one line per gate, marked `// MUTATION-PROOF`, and it is gone: `grep -rn "MUTATION-PROOF\|MUTATE_HOLD" tools/ src/` returns nothing, and all four files parse under `node --check`. `src/shell.js` was swapped between three variants during the arms (the version being proved, `git show HEAD:src/shell.js`, and the term-deleted control), each restored from a digest-checked copy; it is back at `sha256 1080476fd1a2f839858d305960e8c8e68177ce7e473fed69767ad227fcc6b535`, the version every green run above was taken on. Every file in the repository is still CRLF (395 of 395 lines in `src/shell.js`, 963 of 963 in `tools/shot.js`), checked because two of these edits were made by a script.
+
+- **What it does not prove.**
+
+  - **That the plan is pinned.** Stated above as the bound and repeated here because it is the thing a reader will assume: this says the sitting has painted, not that it painted the same thing. A change that made the queue depend on wall clock or on a random draw would leave every measurement above green and every Today frame irreproducible again.
+  - **That a sitting which throws inside `boot()` between `build()` and `paintStanding()` is handled well.** It is handled *safely* — the page stays in `loading` and the caller's timeout fires — but the message a reader gets is the generic one, and `npm run shot` will also have logged the console error. No arm here threw from inside `plan()`.
+  - **That the observer is the cheap implementation.** `_watchSittings()` observes `document.documentElement` with `childList` and `subtree` and is disconnected the instant the page is ready. On `/today/` that is about one callback, and on every other page it is never constructed — but "about one" is an argument from when `paintStanding()` and `renderStep()` run relative to each other, not a count anybody took.
+  - **That `/today/` is the only page this will ever apply to.** It is the only page in the repository carrying a `<tb-sitting>` today (`grep -rn "tb-sitting" --include=*.html`), so every number here is one page, one element.
+  - **That the other gates which load `/today/` were checked.** `npm run sitting` was run and is green; `npm run flow`, `npm run narrow`, `npm run pinned`, `npm run legible`, `npm run drive` and `npm run sweep3d` do not visit it. The full `npm test` chain was **not** run: the tree was shared with several workers mid-change, and a trimmed run of each affected gate was the instruction.
+  - **That the `devices` frames cover Today's study surface.** They do not and are not meant to: `npm run devices` presses no check option and no figure control, and Today's study surfaces belong to `npm run sitting`, on Chromium only. What changed here is that the layout `devices` measures on that page is now the layout of a page that exists.

@@ -37,7 +37,8 @@ export function hashString(str) {
 
 // The one element table is ELEMENTS in lib/chem-atoms.js. Each record there names the atom's fill, its
 // outline and the colour of the symbol written on it as palette token names (`token`, `outline`,
-// `label`), which the canvas and WebGL figures resolve through ctx.palette. The SVG figures need the same
+// `label`), plus `deepen` where the fill is drawn at the token's `-text` value rather than the token
+// itself, which the canvas and WebGL figures resolve through ctx.palette. The SVG figures need the same
 // three colours as CSS expressions, so they are derived here from those names and never restated: a
 // token renamed or recoloured there moves every atom in the chapter, and test/element-table.test.js
 // fails if this map and that table ever disagree. Physics (radii, electronegativity, mass) stays in
@@ -46,15 +47,24 @@ export function hashString(str) {
 // svg.js's C shortens two palette keys; every other key is its own name there.
 const CSS_KEY = { inkSoft: 'soft', inkFaint: 'faint' };
 
-// The CSS expression for a palette token name: cssOf('inkSoft') is 'var(--ink-soft)'.
-export function cssOf(token) {
-  const css = C[CSS_KEY[token] ?? token];
-  if (!css) throw new Error(`no CSS token for palette key "${token}"; lib/svg.js's C holds ${Object.keys(C).join(', ')}`);
+// The CSS expression for a palette token name: cssOf('inkSoft') is 'var(--ink-soft)'. With `deep`, the
+// token's `-text` form instead: cssOf('coral', true) is 'var(--coral-text)'. That is what an element
+// record's `deepen` asks for — a disc drawn at the accent's text value, because the accent itself cannot
+// carry a `paper` symbol in both themes. Only the four accents tokens.css gives a `-text` form have one,
+// and asking for any other fails here rather than falling back to the accent and shipping the defect.
+export function cssOf(token, deep = false) {
+  const key = CSS_KEY[token] ?? token;
+  const css = C[deep ? `${key}Text` : key];
+  if (!css) {
+    throw new Error(deep
+      ? `no deepened CSS token for palette key "${token}"; lib/svg.js's C holds ${Object.keys(C).filter((k) => k.endsWith('Text')).join(', ')}, and tokens.css declares a --*-text for those four accents only. An element record asking for \`deepen\` on another token needs that token's -text value added to both first`
+      : `no CSS token for palette key "${token}"; lib/svg.js's C holds ${Object.keys(C).join(', ')}`);
+  }
   return css;
 }
 
 export const ELEMENT_CSS = Object.freeze(Object.fromEntries(Object.entries(ELEMENTS).map(([sym, e]) => [
-  sym, Object.freeze({ symbol: e.symbol, fill: cssOf(e.token), stroke: cssOf(e.outline), label: cssOf(e.label) }),
+  sym, Object.freeze({ symbol: e.symbol, fill: cssOf(e.token, e.deepen), stroke: cssOf(e.outline, e.deepen), label: cssOf(e.label) }),
 ])));
 
 export function element(sym) {
@@ -79,9 +89,29 @@ export function atom(x, y, sym, r, { charge = null, label = true, fontScale = 1,
     const fs = r * (e.symbol.length > 1 ? 1.08 : 1.28) * fontScale;
     g.append(text(x.toFixed(2), (y + fs * 0.35).toFixed(2), e.symbol, { anchor: 'middle', fill: e.label, 'font-size': fs.toFixed(2), 'font-weight': 600, class: 'mol-sym' }));
   }
-  if (charge) {
+  // The charge is drawn only where it is not being FLOORED, which is the same kind of rule the symbol
+  // above takes. `fs` is `max(8, r * 0.95)`, so on an atom smaller than about 8.4 units the glyph is
+  // wider than the atom's own radius and there is nowhere beside the disc for it to sit: phlab's twelve
+  // bicarbonate icons draw their atoms at about 5 units and the minus sign measured 2.36:1 in the light
+  // theme and 2.12:1 in the dark one, half on the carbon, at a size no reader can resolve anyway
+  // (measured 2026-09-16, npm run legible). The molecules meant to be READ — bondlab's water pair,
+  // polymer's monomers — are well above it and keep their charges. A figure that needs the charge on a
+  // small icon should say it in the label beside it, as phlab's HCO₃⁻ heading already does.
+  if (charge && r * 0.95 >= 8) {
     const fs = Math.max(8, r * 0.95);
-    g.append(text((x + r * 0.92).toFixed(2), (y - r * 0.72).toFixed(2), charge, { anchor: 'middle', fill: C.ink, 'font-size': fs.toFixed(2), 'font-weight': 700, class: 'mol-charge' }));
+    // The charge sits on a paper badge, because it half sits on the disc it belongs to: measured
+    // 2026-09-16, 44% of its pixels were on a carbon's --ink-soft fill in the light theme and 57% in the
+    // dark one, and ink on ink-soft is 2.36:1 and 2.12:1. Both the ink and the disc follow the theme in
+    // the SAME direction, so no ink colour reads on both; the badge gives the glyph its own ground,
+    // which is what bondlab already draws for its own charges. A halo stroke alone was tried first and
+    // left 44% of the glyph's own pixels still on the disc at these sizes (npm run legible).
+    const bx = x + r * 0.92;
+    const by = y - r * 0.72;
+    g.append(el('circle', { cx: bx.toFixed(2), cy: (by - fs * 0.33).toFixed(2), r: (fs * 0.66).toFixed(2), fill: C.paper }));
+    g.append(text(bx.toFixed(2), by.toFixed(2), charge, {
+      anchor: 'middle', fill: C.ink, 'font-size': fs.toFixed(2), 'font-weight': 700, class: 'mol-charge',
+      stroke: C.paper, 'stroke-width': (fs * 0.34).toFixed(2), 'paint-order': 'stroke', 'stroke-linejoin': 'round',
+    }));
   }
   if (title) g.append(el('title', { text: title }));
   return g;
@@ -152,7 +182,11 @@ export const INK = Object.freeze({
   water: 'var(--water-text)',
   coral: 'var(--coral-text)',
   violet: tint(C.violet, 86, C.ink),
-  gold: tint(C.gold, 62, C.ink),
+  // 55, not 62: at 62 this is #886e21, which is 4.22:1 on --paper-2 in the light theme, and it is the
+  // value `energy` writes its heat labels in (measured 2026-09-16, npm run legible). 55 is 4.86:1 light
+  // and 10.63:1 dark. Gold is the accent the light theme carries worst — the raw --gold is 2.26:1 on the
+  // paper — so it needs more of the ink than the others do.
+  gold: tint(C.gold, 55, C.ink),
 });
 
 // ---------------------------------------------------------------- the shared readout

@@ -166,15 +166,45 @@ tb-figure[data-width="bleed"] figcaption {
   transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
 
+/* The primary action, told by the head rule on its edge and the weight of its ink, never by a fill.
+   Twelve figure modules declare this rule byte-for-byte in their own CSS; a figure on the bench sets
+   `data-primary` instead and does not write the rule, so it cannot render a primary as a fill.
+
+   ITS POSITION IS LOAD-BEARING. It sits above :hover deliberately, so hovering a primary still lightens
+   its edge the way hovering any other control does — the twelve copies are all (0,2,0) selectors in a
+   figure's own <style>, which :hover at (0,3,0) already beats, and moving this below :hover would change
+   the hovered appearance of every primary in the book. */
+.tb-figure__stage .fig-btn[data-primary] {
+  background: var(--paper);
+  border-color: var(--rule-head);
+  font-weight: 600;
+}
+
 .tb-figure__stage .fig-btn:hover {
   background: var(--paper);
   border-color: var(--ink-faint);
 }
 
+/* A control that is ON. It was a solid --leaf-text pill with paper-coloured text, which is the one thing
+   the figure brief says a control may never be: "the primary action looks primary, told by --rule-head
+   on its edge and the ink's weight, never by a fill" (docs/design/figures-template.md, Controls). The
+   rule is about the primary action and it holds just as hard here — a filled green pill in a row of
+   outlined ones is application chrome, and it is the same defect `lib/cell-common.js`'s .cl-mini spreads
+   to three chapter-3 figures.
+
+   Off: a hairline of --rule-strong, ink at 500, the paper showing through.
+   On:  the head rule on the edge, doubled by a 1px inset ring, and the ink at 600. Three quiet signals,
+        no fill, and it cannot be mistaken for the primary action beside it, which takes the same edge
+        once and no ring.
+
+   It stays BELOW :hover deliberately: both are (0,3,0), so this wins, and a control that is on keeps
+   saying so while the pointer is over it. test/bench.test.js holds the no-fill half of this. */
 .tb-figure__stage .fig-btn[aria-pressed="true"] {
-  background: var(--leaf-text);
-  color: var(--paper);
-  border-color: var(--leaf-text);
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--rule-head);
+  box-shadow: inset 0 0 0 1px var(--rule-head);
+  font-weight: 600;
 }
 
 .tb-figure__stage .fig-range {
@@ -235,6 +265,229 @@ tb-figure[data-width="bleed"] figcaption {
   margin: 0;
   font-size: var(--text-xs);
   color: var(--ink-soft);
+}
+
+/* ── The figure bench ──────────────────────────────────────────────────────────────────────────────
+   The chrome for a figure built on src/figures/lib/bench.js: the grid, its panes, the toolbar's groups
+   and divider, the two-width labels, and the readout's typographic register. One stylesheet for the
+   page rather than one <style> per mounted figure, and one place to change when the design changes —
+   which is the whole reason the bench exists. `src/figures/lib/cell-common.js`'s panelCss encoded
+   September's design, outlived it, and three figures still draw pills from it.
+
+   Every class below is listed in BENCH_CLASSES in bench.js, and test/bench.test.js fails a class the
+   bench emits that this block does not declare, so the two cannot drift apart in silence.
+
+   There is deliberately no border, no border-radius, no box-shadow and no fill behind text in this
+   block. The figure stage is the only drawn rectangle in the book (docs/design/figures-template.md). */
+
+.tb-figure__stage .tb-bench {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  box-sizing: border-box;
+  /* The bottom padding is the toolbar's own measured height, set by the bench after it lays out, so
+     nothing can be drawn under the controls. The fallback only covers the first frame. */
+  padding: var(--tb-pad-block, 0.35rem) var(--tb-pad-inline, 0.45rem) var(--tb-pad, 3rem);
+  font-family: var(--font-ui);
+}
+
+/* The grid template and each pane's cell are set inline by bench.compose(), because they are the two
+   things that change when the stage crosses the figure's own narrow threshold. */
+.tb-figure__stage .tb-bench .tb-pane {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+
+.tb-figure__stage .tb-bench .tb-pane > svg,
+.tb-figure__stage .tb-bench .tb-pane > canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.tb-figure__stage .tb-bench svg text {
+  font-family: var(--font-ui);
+}
+
+/* Controls are grouped by what they do, with space between the groups and none inside one. b.divide()
+   is the only way to get that space, so grouping is the only shape the toolbar can take. */
+.tb-figure__stage .tb-bench .tb-toolbar {
+  justify-content: flex-start;
+}
+
+.tb-figure__stage .tb-bench .tb-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.tb-figure__stage .tb-bench .tb-sep {
+  width: 1px;
+  min-height: 1.45rem;
+  align-self: center;
+  margin: 0 var(--space-1);
+  background: var(--rule-strong);
+}
+
+/* One accessible name at every width. The bench writes both labels and an aria-label that is always the
+   long one, so a recipe finds the control by the words on it and a reader hears the same word on a
+   phone — four chapter-3 goals had to be reworded when a figure's phone labels turned out to be
+   different words from its desktop ones. */
+.tb-figure__stage .tb-bench .tb-short {
+  display: none;
+}
+
+.tb-figure__stage .tb-bench .tb-slider {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  padding: 0.18rem 0.4rem;
+}
+
+.tb-figure__stage .tb-bench .tb-slider input {
+  width: 4.4rem;
+}
+
+.tb-figure__stage .tb-bench .tb-val {
+  color: var(--ink);
+  font-weight: 600;
+  font-variant-numeric: lining-nums tabular-nums;
+  text-align: right;
+}
+
+/* A stepper is a slider with a second way of being operated, not a second control: the range input is
+   still there, still the accessible control, and still what a recipe addresses. At a phone's width the
+   track gives way to a pair of step buttons, because a 4.4rem track carrying twenty-one stops is about
+   three pixels a stop and no finger can place that. The buttons do not exist at desktop width, where the
+   track does the job better. */
+.tb-figure__stage .tb-bench .tb-step {
+  display: none;
+  padding: 0.2rem 0.38rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.tb-figure__stage .tb-bench.is-narrow .tb-stepper .tb-step {
+  display: inline-block;
+}
+
+.tb-figure__stage .tb-bench.is-narrow .tb-stepper > input {
+  display: none;
+}
+
+/* A segmented choice: at a phone's width the buttons of one choice share their edges and lose the gaps
+   between them, so a group of n costs one control's worth of space rather than n, and reads as one
+   control. `display: contents` at desktop width means the wrapper is not there at all and the buttons
+   sit exactly where they did. */
+.tb-figure__stage .tb-bench .tb-seg {
+  display: contents;
+}
+
+/* No `align-items: center`, which is what it had: a segment whose label wraps to two lines is then taller
+   than its neighbours and stands proud of the strip like a card pushed out of a row — `enzyme-kinetics`'s
+   "Non-competitive" did exactly that at 390 px. Stretched, every segment is the height of the tallest and
+   the strip stays one control. It wraps by SEGMENT as well, so four choices that do not fit one line
+   become two lines of segments rather than one line of stacked words. */
+.tb-figure__stage .tb-bench.is-narrow .tb-seg {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tb-figure__stage .tb-bench.is-narrow .tb-seg .fig-btn {
+  border-radius: 0;
+  margin-left: -1px;
+}
+
+.tb-figure__stage .tb-bench.is-narrow .tb-seg .fig-btn:first-child {
+  margin-left: 0;
+  border-start-start-radius: 999px;
+  border-end-start-radius: 999px;
+}
+
+.tb-figure__stage .tb-bench.is-narrow .tb-seg .fig-btn:last-child {
+  border-start-end-radius: 999px;
+  border-end-end-radius: 999px;
+}
+
+/* A pressed segment has to win the shared edge, or its neighbour's plain rule is drawn over it. */
+.tb-figure__stage .tb-bench.is-narrow .tb-seg .fig-btn[aria-pressed="true"] {
+  position: relative;
+  z-index: 1;
+}
+
+/* The readout, set as a reference table and not as a dashboard: a title in the small-caps register over
+   a rule, label/value rows on hairlines, figures right-aligned in lining and tabular numerals so a
+   column lines up on the decimal. The bench's readout() emits <text> and <line> and nothing else, so
+   there is no path from a row to a pill, a bar or a bordered box. */
+.tb-figure__stage .tb-bench .tb-rt-title,
+.tb-figure__stage .tb-bench .tb-rt-head {
+  fill: var(--ink-faint);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tb-figure__stage .tb-bench .tb-rt-head {
+  letter-spacing: 0.08em;
+}
+
+.tb-figure__stage .tb-bench .tb-rt-key {
+  fill: var(--ink-soft);
+}
+
+.tb-figure__stage .tb-bench .tb-rt-val {
+  fill: var(--ink);
+  font-weight: 600;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.tb-figure__stage .tb-bench .tb-rt-note {
+  fill: var(--ink-faint);
+}
+
+/* Four corner brackets when the pane holds the keyboard. A ring round the pane reads as a card drawn
+   round the artwork, which is what a book does not do, and it is on screen in every driven screenshot
+   because the recipes focus the pane. */
+.tb-figure__stage .tb-bench .tb-focus {
+  opacity: 0;
+}
+
+.tb-figure__stage .tb-bench svg:focus-visible {
+  outline: none;
+}
+
+.tb-figure__stage .tb-bench svg:focus-visible .tb-focus {
+  opacity: 1;
+}
+
+/* The narrow composition. The grid itself is bench.compose()'s narrow template; what is left is the
+   chrome tightening up so that eleven controls still fit a 342 px bar, and the short label taking over
+   from the long one. */
+.tb-figure__stage .tb-bench.is-narrow .tb-toolbar,
+.tb-figure__stage .tb-bench.is-narrow .tb-group {
+  gap: 0.3rem;
+}
+
+.tb-figure__stage .tb-bench.is-narrow .tb-sep {
+  display: none;
+}
+
+.tb-figure__stage .tb-bench.is-narrow .fig-btn {
+  padding: 0.28rem 0.5rem;
+}
+
+.tb-figure__stage .tb-bench.is-narrow .tb-long {
+  display: none;
+}
+
+.tb-figure__stage .tb-bench.is-narrow .tb-short {
+  display: inline;
 }
 
 /* On a narrow screen a figure that can fill any shape gets a taller stage (registry narrowAspect), and a
@@ -737,7 +990,16 @@ tb-sort .tb-sort__item .choose button {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   line-height: 1.2;
-  white-space: nowrap;
+  /* A choice too long for the screen wraps inside its own segment rather than pushing the page sideways.
+     It used to be `white-space: nowrap`, and a flex item's min-width floor is its min-content width — so
+     with nowrap that floor was the WHOLE SENTENCE, and the segment could not shrink however narrow the
+     screen. Chapter 5's "Exergonic, and waiting on an enzyme" came out 298.8 px inside a 266.8 px column
+     and put 5 px of sideways scroll on the page at 320 px, which `npm run devices` found and no other
+     gate did. The track above it can already shrink (minmax(0, auto)) and the box is max-width: 100%;
+     this is the last of the three that could not. Nothing else moves: a segment only wraps where it did
+     not fit, and where it fits its box is unchanged. */
+  white-space: normal;
+  min-width: 0;
   /* Grow to fill the row. Without it a wrapped last segment left the rest of its row showing the
      container's divider colour as a grey block; with it the segments always tile the box exactly. */
   flex: 1 1 auto;

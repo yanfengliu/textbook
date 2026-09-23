@@ -96,6 +96,12 @@ export function mount(root, ctx) {
   const reduced = Boolean(ctx.reducedMotion);
   const rand = mulberry32(SEED);
 
+  // A pinned clock is not advanced by any control. `?t=` pins every figure on the page and the gates take
+  // their frames that way, so the line below was only true until something pressed Play — which is what
+  // `npm run pinned` presses. Written as a function rather than read once because the frame may pin a
+  // figure that mounted unpinned. `undefined` counts as unpinned as well as `null`: a ctx that omits the
+  // field must leave the panels playable for a reader.
+  const pinned = () => ctx.pinnedTime !== null && ctx.pinnedTime !== undefined;
   let t = ctx.pinnedTime ?? 0;
   let playing = !reduced && ctx.pinnedTime === null;
   let visible = true;
@@ -1261,6 +1267,11 @@ export function mount(root, ctx) {
   });
 
   function setPlaying(next) {
+    // Starting is refused while the clock is pinned, and refused rather than recorded: that is this
+    // repo's settled shape (secretion, gradient-battery, bilayer, polymer), and a button reading Pause
+    // over panels that are not moving is the worse of the two lies. Stopping is never refused, so
+    // setTime() still calls in. The Space key comes through here too.
+    if (next && pinned()) return;
     playing = next;
     setLabel(btnPlay, playing ? 'Pause' : 'Play');
     if (playing) schedule();

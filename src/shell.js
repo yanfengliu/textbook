@@ -1,9 +1,11 @@
 // The page shell: header, reading progress, the chapter rail built from the page's own sections,
 // theme, and the handshake the gates wait on (window.__textbook).
 //
-// Handshake: window.__textbook.state is 'loading' until the shell has mounted and, under ?eager=1,
-// every figure has reached ready or error. window.__textbook.whenReady() resolves then.
-// window.__textbook.figures maps figure id -> { kind, state, number, error?, handle? }.
+// Handshake: window.__textbook.state is 'loading' until the shell has mounted, every <tb-sitting> on the
+// page has booted, and, under ?eager=1, every figure has reached ready or error.
+// window.__textbook.whenReady() resolves then.
+// window.__textbook.figures maps figure id -> { kind, state, number, error?, handle? };
+// window.__textbook.describeSittings() reports the sittings the handshake waited for.
 
 const SUN = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
 const MOON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>';
@@ -11,6 +13,22 @@ const MENU = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h
 
 const params = new URLSearchParams(location.search);
 const EAGER = params.get('eager') === '1';
+
+// ---------- <tb-sitting>, the other thing on a page that is not there yet ----------
+//
+// A <tb-sitting> has booted when its `.tb-standing` section holds anything at all.
+//
+// Read off the DOM rather than reported to the shell, because the element lives in
+// src/components/mastery.js and tells the shell nothing: <tb-figure> registers itself through the frame,
+// this does not. So the shell asks the page what it can see, and the criterion is the element's own two
+// exits rather than a private flag. TbSitting.boot() either reaches paintStanding(), which fills
+// `.tb-standing`, or gives up through fail(), which fills it with a `.tb-unavailable` panel. **Both fill
+// it**, which is what makes it safe to wait on: a sitting that has honestly given up releases the
+// handshake instead of hanging it, and only a boot that neither paints nor fails holds the page in
+// 'loading' — which is the right answer, and is reported by the caller's existing timeout.
+function sittingBooted(el) {
+  return Boolean(el.querySelector('.tb-standing')?.firstElementChild);
+}
 
 class Textbook {
   constructor() {
@@ -21,6 +39,7 @@ class Textbook {
     this._resolveReady = null;
     this._ready = new Promise((resolve) => { this._resolveReady = resolve; });
     this._shellMounted = false;
+    this._sittingWatch = null;
   }
 
   whenReady() {
@@ -47,9 +66,33 @@ class Textbook {
     return out;
   }
 
+  // What the sitting term above waited for, so a gate can print it without re-deriving `booted` — the
+  // second implementation is the thing that drifts. The shell's own three fields are spread LAST, so a
+  // sitting cannot report an `index`, `booted` or `readable` of its own and quietly replace the
+  // handshake's answer: the same rule <tb-figure> lives under for id, kind, number and state.
+  describeSittings() {
+    return [...document.querySelectorAll('tb-sitting')].map((el, index) => {
+      let own = null;
+      // describe() reads fields build() creates, so it throws on an element that has not been upgraded
+      // or has not reached build(). That is a state worth reporting, not one worth crashing a gate over.
+      try { own = el.describe ? el.describe() : null; } catch { own = null; }
+      return { ...(own || {}), readable: own !== null, index, booted: sittingBooted(el) };
+    });
+  }
+
   _shellReady() {
     this._shellMounted = true;
     this._check();
+  }
+
+  // Nothing calls back when a sitting paints — it is not the shell's element and it reports nothing — so
+  // the shell watches the document for it. Armed only at the moment a sitting is found pending, and
+  // dropped as soon as the page is ready, so a page with no <tb-sitting> never constructs an observer at
+  // all and /today/ pays for about one callback.
+  _watchSittings() {
+    if (this._sittingWatch) return;
+    this._sittingWatch = new MutationObserver(() => this._check());
+    this._sittingWatch.observe(document.documentElement, { childList: true, subtree: true });
   }
 
   _check() {
@@ -62,6 +105,21 @@ class Textbook {
       const pending = Object.values(this.figures).filter((f) => f.state !== 'ready' && f.state !== 'error');
       if (pending.length) return;
     }
+    // An added term, and only a term: nothing above this line changed, so `ready` still means the shell
+    // mounted and, under ?eager=1, every figure reached ready or error. What is new is that a page
+    // carrying a <tb-sitting> must also have booted it.
+    //
+    // NOT behind EAGER, deliberately. `tools/devices.js` loads /today/ without ?eager=1 and waits on this
+    // same state, so a term gated on EAGER would leave the one gate that photographs a phone still racing
+    // the boot it is meant to be told about. On a page with no <tb-sitting> the term is vacuously true and
+    // nothing is built, so every page but /today/ becomes ready at exactly the instant it did before.
+    const sittings = document.querySelectorAll('tb-sitting');
+    if (![...sittings].every(sittingBooted)) {
+      this._watchSittings();
+      return;
+    }
+    this._sittingWatch?.disconnect();
+    this._sittingWatch = null;
     this.state = 'ready';
     this._resolveReady();
   }

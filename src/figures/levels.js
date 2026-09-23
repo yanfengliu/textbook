@@ -16,8 +16,13 @@ const coralDark = 'color-mix(in srgb, var(--coral) 70%, var(--ink))';
 
 // ---------- shared drawing pieces ----------
 
+// The caption under a plate, which runs the full width of the drawing and so crosses whatever the plate
+// has drawn down there: the frog's legs on the organ-system plate, the pond bank on the ecosystem one.
+// It takes the halo for that reason — measured 2026-09-17, it was 3.70:1 light and 3.19:1 dark over the
+// organ system's pale green and 4.37:1 dark over the ecosystem's mud. On the plates whose caption sits on
+// the bare paper the halo is the paper and cannot be seen.
 function note(g, str, y = 188) {
-  g.append(text(0, y, str, { anchor: 'middle', class: 'lv-note' }));
+  g.append(text(0, y, str, { anchor: 'middle', class: 'lv-note lv-halo' }));
 }
 
 function clipCircle(g, ns, r) {
@@ -175,9 +180,9 @@ function drawAtom(g) {
     const [x, y] = polar(0, 0, 158, i * 60 + 30);
     g.append(el('circle', { cx: x, cy: y, r: 7.5, fill: C.water }));
   }
-  g.append(text(52, -60, '8 protons', { class: 'lv-note lv-note-small', fill: C.coral }));
+  g.append(text(52, -60, '8 protons', { class: 'lv-note lv-note-small lv-coral' }));
   g.append(text(52, -44, '8 neutrons', { class: 'lv-note lv-note-small' }));
-  g.append(text(118, 118, '8 electrons', { class: 'lv-note lv-note-small', fill: C.water }));
+  g.append(text(118, 118, '8 electrons', { class: 'lv-note lv-note-small lv-water' }));
   note(g, 'an oxygen atom: a nucleus and two shells of electrons');
 }
 
@@ -197,8 +202,14 @@ function drawMolecule(g) {
   const [bx, by] = [Math.sin(a) * ra, 30 - Math.cos(a) * ra];
   g.append(el('path', { d: `M${ax} ${ay} L0 30 L${bx} ${by}`, stroke: C.paper, 'stroke-width': 1.6, fill: 'none', opacity: 0.9 }));
   g.append(el('path', { d: `M${-Math.sin(a) * 30} ${30 - Math.cos(a) * 30} A30 30 0 0 1 ${Math.sin(a) * 30} ${30 - Math.cos(a) * 30}`, stroke: C.paper, 'stroke-width': 1.6, fill: 'none', opacity: 0.9 }));
-  g.append(text(0, 22, '104.5°', { anchor: 'middle', class: 'lv-note lv-note-small', fill: C.paper }));
-  g.append(text(0, 80, 'O', { anchor: 'middle', class: 'lv-atomlabel', fill: C.paper }));
+  // The angle sits on the oxygen's own coral, which no label colour clears in both themes: the ink is
+  // 4.88:1 light and 1.95:1 dark, the paper 3.32:1 light and 7.26:1 dark. So it takes the halo `scale`
+  // and `tree` already use for a label over a drawing, and reads on --paper-2 in both (6.14:1). The
+  // letter on the disc is the one element table's own rule — paper on a coloured disc
+  // (src/figures/lib/chem-atoms.js) — stated as a class here, because a `fill` attribute loses to
+  // `.tb-levels svg text` and the O had been drawn in the ink: 1.95:1 on a dark page.
+  g.append(text(0, 22, '104.5°', { anchor: 'middle', class: 'lv-note lv-note-small lv-halo' }));
+  g.append(text(0, 80, 'O', { anchor: 'middle', class: 'lv-atomlabel' }));
   g.append(text(-hx, hy + 8, 'H', { anchor: 'middle', class: 'lv-atomlabel lv-atomlabel-h' }));
   g.append(text(hx, hy + 8, 'H', { anchor: 'middle', class: 'lv-atomlabel lv-atomlabel-h' }));
   note(g, 'a water molecule, H₂O: two hydrogens bonded to one oxygen');
@@ -342,7 +353,11 @@ function tube(g, d, width, fill, edge) {
 
 function drawHeart(g) {
   const atrium = tint(C.coral, 40);
-  const ventricle = tint(C.coral, 74);
+  // 52, not 74. `tint()` follows the theme, but at 74 the fill is mid-luminance in BOTH themes, and
+  // the ink over it measured 6.76:1 light and 3.16:1 dark — the word vanished on a dark page. Mixed
+  // further towards the paper it is 8.90:1 and 4.98:1, and it still reads a clear step deeper than
+  // the atria's 40. No new colour: the same coral, further into the paper.
+  const ventricle = tint(C.coral, 52);
   const vessel = tint(C.coral, 56);
   // veins bringing blood in (behind)
   tube(g, 'M-124 -150 C-110 -128 -96 -112 -84 -96', 14, tint(C.water, 55), C.water);
@@ -358,9 +373,12 @@ function drawHeart(g) {
   // one ventricle
   g.append(el('path', { d: 'M-92 -14 C-102 60 -50 150 8 154 C62 150 102 60 92 -14 C92 -40 -92 -40 -92 -14 Z', fill: ventricle, stroke: C.coral, 'stroke-width': 3, 'stroke-linejoin': 'round' }));
   g.append(el('path', { d: 'M-60 10 C-30 40 -10 90 8 128', stroke: coralDark, 'stroke-width': 2, fill: 'none', opacity: 0.55 }));
-  g.append(text(-66, -58, 'atrium', { anchor: 'middle', class: 'lv-note lv-note-small', fill: C.ink }));
-  g.append(text(68, -56, 'atrium', { anchor: 'middle', class: 'lv-note lv-note-small', fill: C.ink }));
-  g.append(text(36, 62, 'ventricle', { anchor: 'middle', class: 'lv-note lv-note-small', fill: C.paper }));
+  // `lv-onfill`, not a `fill` attribute: `.tb-levels .lv-note` is a CSS rule and beats a presentation
+  // attribute, so the ink these three asked for never reached the page and all three were drawn in
+  // --ink-soft — 4.35:1, 4.35:1 and 2.87:1 in the light theme, 3.07:1 and 1.49:1 in the dark one.
+  g.append(text(-66, -58, 'atrium', { anchor: 'middle', class: 'lv-note lv-note-small lv-onfill' }));
+  g.append(text(68, -56, 'atrium', { anchor: 'middle', class: 'lv-note lv-note-small lv-onfill' }));
+  g.append(text(36, 62, 'ventricle', { anchor: 'middle', class: 'lv-note lv-note-small lv-onfill' }));
   g.append(text(-150, -178, 'to the body', { anchor: 'start', class: 'lv-note lv-note-small' }));
   g.append(text(150, -160, 'from the body', { anchor: 'end', class: 'lv-note lv-note-small' }));
   note(g, 'a frog heart: two atria, one ventricle');
@@ -414,8 +432,15 @@ function drawSystem(g) {
   g.append(el('ellipse', { cx: -9, cy: -66, rx: 10, ry: 8, fill: tint(C.coral, 45), stroke: C.coral, 'stroke-width': 1.5 }));
   g.append(el('ellipse', { cx: 9, cy: -66, rx: 10, ry: 8, fill: tint(C.coral, 45), stroke: C.coral, 'stroke-width': 1.5 }));
   g.append(el('path', { d: 'M-16 -60 C-16 -36 -6 -24 0 -22 C6 -24 16 -36 16 -60 Z', fill: tint(C.coral, 76), stroke: C.coral, 'stroke-width': 1.8 }));
-  g.append(text(150, -96, 'arteries', { anchor: 'start', class: 'lv-note lv-note-small', fill: C.coral }));
-  g.append(text(150, -80, 'veins', { anchor: 'start', class: 'lv-note lv-note-small', fill: C.water }));
+  // x = 120 and not 150: the plate's rim is a circle of radius 206 about the origin, which at y = -96 is
+  // at x = 182, and "arteries" set from 150 ran to 192 — its last two letters outside the plate with the
+  // rim drawn through them. Measured 2026-09-17: 4.02:1, 11% of the word's pixels on the rim's own grey.
+  // The word is moved off the rule rather than given a ground, because a label crossing the edge of its
+  // own plate is a composition fault first. At 120 it ends at 162, and the rim is at x = 176 at the
+  // highest point the word reaches, so it is clear of it over its whole height; the two words stay a
+  // legend for the two colours in the drawing beside them.
+  g.append(text(120, -96, 'arteries', { anchor: 'start', class: 'lv-note lv-note-small lv-coral' }));
+  g.append(text(120, -80, 'veins', { anchor: 'start', class: 'lv-note lv-note-small lv-water' }));
   g.append(text(-186, -96, 'heart', { anchor: 'start', class: 'lv-note lv-note-small' }));
   g.append(el('path', { d: 'M-150 -92 L-20 -66', stroke: C.faint, 'stroke-width': 1 }));
   note(g, 'the circulatory system: heart, arteries and veins reach every part', 198);
@@ -509,8 +534,26 @@ const CSS = `
 .tb-levels svg text { font-family: var(--font-ui); fill: var(--ink); }
 .tb-levels .lv-note { fill: var(--ink-soft); font-size: 12.5px; }
 .tb-levels .lv-note-small { font-size: 11.5px; }
-.tb-levels .lv-atomlabel { font-family: var(--font-display); font-size: 40px; font-weight: 500; }
-.tb-levels .lv-atomlabel-h { font-size: 28px; }
+/* A fill ATTRIBUTE on one of these texts does nothing: a CSS rule beats a presentation attribute, so
+   '.tb-levels svg text' and '.tb-levels .lv-note' win over text(..., { fill: C.paper }). Nine labels were
+   written that way and were drawn in the ink or the soft ink instead. A label that needs a colour of its
+   own takes a class here, and no text() call in this file passes a fill any more, so the file and the
+   page cannot disagree again. */
+.tb-levels .lv-atomlabel { font-family: var(--font-display); font-size: 40px; font-weight: 500; fill: var(--paper); }
+.tb-levels .lv-atomlabel-h { font-size: 28px; fill: var(--ink); }
+/* On a coloured fill, stated after .lv-note so it wins the cascade at the same specificity. */
+.tb-levels .lv-onfill { fill: var(--ink); }
+/* Four notes name a thing the plate has already coloured — the protons and the arteries in coral, the
+   electrons and the veins in water — and asked for that colour with a dead fill attribute. They are keyed
+   to the drawing here instead, which is the whole reason a reader can read the plate without a legend.
+   The -text values and not the accents: --coral as 11.5px type on the paper is 3.32:1 in the light theme,
+   and spending a figure accent on type was the commonest defect the 2026-09-16 legibility census found,
+   in six figures. --coral-text is 5.34:1 light and 8.84:1 dark, --water-text 5.24:1 and 8.27:1. */
+.tb-levels .lv-coral { fill: var(--coral-text); }
+.tb-levels .lv-water { fill: var(--water-text); }
+/* The halo scale and tree use for a label over a drawing: the glyph gets its own ground, so the fill
+   under it stops deciding whether the word can be read. */
+.tb-levels .lv-halo { paint-order: stroke; stroke: var(--paper-2); stroke-width: 3px; stroke-linejoin: round; }
 .tb-levels .lv-panel { position: absolute; left: 51%; top: 11%; width: 45%; pointer-events: none; }
 .tb-levels .lv-kicker { font-size: max(9px, 1.15cqw); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); font-variant-numeric: lining-nums tabular-nums; }
 .tb-levels .lv-title { font-family: var(--font-display); font-weight: 500; font-size: max(18px, 4.2cqw); line-height: 1.05; letter-spacing: -0.015em; color: var(--ink); margin: 0.15em 0 0.3em; font-variation-settings: "SOFT" 50, "WONK" 0; }
@@ -524,7 +567,7 @@ const CSS = `
 .tb-levels .lv-thumb[aria-pressed="true"] { border-color: var(--leaf); outline: 2px solid var(--leaf); outline-offset: -1px; }
 .tb-levels .lv-thumb:focus-visible { outline: 2px solid var(--water); outline-offset: 2px; }
 .tb-levels .lv-thumb svg { display: block; width: 100%; height: 100%; }
-.tb-levels .lv-thumb .lv-note { display: none; }
+.tb-levels .lv-thumb .lv-note, .tb-levels .lv-thumb .lv-atomlabel { display: none; }
 .tb-levels .lv-range { flex: 1 1 6rem; max-width: 22rem; margin: 0 0.25rem; }
 @container (max-width: 640px) {
   .tb-levels .lv-strip { display: none; }

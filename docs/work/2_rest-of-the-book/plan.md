@@ -13,6 +13,55 @@ Main already carries this round, green or not: the second book's session committ
 
 ### Open
 
+**Candidate gate, awaiting one worker's judgement: a static check for use-before-declaration across
+`src/figures/**`.** A `const` declared below a guard that reads it is not defended by `if (x)` — the reference
+throws rather than evaluating falsy, so the guard reads as handled and is a landmine. Found in `enzyme-kinetics.js`
+(one live, two latent: `presetCtl`, `inhibitorCtl`). The class is invisible to everything the repo runs: `node
+--check` sees only syntax, and a page gate reaches the path only if it runs on load. 44 modules, ~35,000 lines, and
+a throw during mount puts an error box where a figure should be. Cheap as a unit test, no browser.
+
+
+**The bench's round two, specified by its first real user. Dispatch the moment `figs-ch05b` releases
+`src/figures/lib/bench.js`.** Four chapter-5 figures were built on it and its author ranked what it lacks:
+
+1. **A stepper and a segmented control — "worth more than every other extension combined."** The bench offers only
+   `slider` and `button`, so five sliders take five rows of a 390 px toolbar and eleven buttons take five more. That
+   is what costs `free-energy` and `activation-barrier` most of their stage on a phone, and `FIGURES.md` asks for
+   steppers by name for 5.1 and 5.2.
+2. **`readout().note()` does not wrap.** One `<text>` element, so a sentence longer than the column runs off the
+   stage. All four figures carry an identical ten-line `noteLines()` helper. The bench already knows the column width.
+3. **No disclosure control.** §5.6 needs one, so the figure sets `slider.node.style.display` directly — reaching into
+   the bench's own DOM, which is exactly what it exists to prevent.
+4. **`narrowUnit` is unreachable from a slider that uses `format`**, so a computed value cannot drop its unit at
+   narrow. Worked around by reading `b.narrow` inside `format`, which then needs a `lastNarrow` flag in `onDraw`
+   because there is no layout hook. A `b.onLayout(fn)` removes both workarounds.
+5. **Table fitting is left to the figure**, and the build-measure-rebuild loop is written four times.
+6. `b.choice` has no unselected state; a `b.action` toggle's `aria-pressed` is the figure's to maintain.
+
+**Also for chapter 5's prose owner**, a knowing departure the figure author declared: `enzyme-kinetics` models the
+temperature factor as **reversible**, where §5.6 says the fall past the optimum is largely irreversible. It is
+reversible so the slider can be swept both ways, which is the only way to see the curve's shape, and that shape is
+the figure's subject; §5.5 models the loss one-way. Stated in the module header. Either the prose gains a clause or
+the figure gains a note.
+
+
+**Next, once `gate-speed` releases `tools/legible.js`: the legibility gate is blind to any figure drawn in
+gradients, and that is its largest bound.** Measured 2026-09-17 on `bondlab`: of its 48 `.bl-sym` glyph runs, **44
+were skipped as "varied ground", 4 were measured, all 4 failed, and 0 were exempt by size.** The gate reported "1
+problem" for a figure in which *every* element symbol was below the bar. The cause is `sphere()` — bondlab draws its
+atoms as radial gradients, and the gate requires a clean surface under at least 40 % of a glyph's core pixels, which
+a gradient never provides.
+
+My own hypothesis, that the large-text exemption was hiding them, was **wrong**; the count disproved it. The
+exemption is real elsewhere (`carbonkit` 61 of 646, `foldlab` 22 of 545) and is worth printing, but it was not what
+hid `bondlab`.
+
+The fix is available and the gate already has what it needs: it renders a transparent-glyph frame, so it holds the
+actual surface pixels under every glyph. Judging worst-case contrast against the extreme pixel in the glyph's
+footprint, rather than requiring a uniform surface, would cover gradients, photographs and any textured ground.
+Until then, every gradient-drawn figure in the book is unchecked and the gate says so only as a skip count.
+
+
 **Next, the moment `gate-speed` releases the browser gates: remove the 240 ms `transition` and the
 `backdrop-filter: blur(8px)` from `.fig-btn` in `src/styles/components.css`.** `bench-build` measured both as the
 sole reason figure screenshots are not reproducible — six identical runs of one `phlab` drive step gave four

@@ -5,10 +5,23 @@
 // literal hex here, a second structure table anywhere under src/figures/, and an id that `ORGANELLES`
 // already colours, so a chapter cannot give a structure the book has coloured a second colour.
 //
-// Same shape as an `ORGANELLES` entry, { id, name, color, role }, so labels and click cards read from
-// one place. `organelle(id)` and `colourOf(id)` look up both tables. The ids are the ones the chapter
-// brief lists (biology/ch03-cells/FIGURES.md, "Palette additions this chapter needs") plus the
+// Same shape as an `ORGANELLES` entry, { id, name, color, symbolColor, role }, so labels and click cards
+// read from one place. `organelle(id)` and `colourOf(id)` look up both tables. The ids are the ones the
+// chapter brief lists (biology/ch03-cells/FIGURES.md, "Palette additions this chapter needs") plus the
 // prokaryote's own layers (peptidoglycan, wallLine, lps, sLayer, flagellarMotor).
+//
+// `symbolColor` is the colour a symbol written ON the fill takes — the one of `LIGHT.paper` and
+// `LIGHT.ink` that holds WCAG AA (4.5:1) against it — and it is the COLOUR, never the name of a palette
+// token. That spelling is what makes the theme mistake unmakeable: a token name over a fill that does not
+// move with the theme reads right on one paper and inverts on the other, which is the shape of every one
+// of the ten defects the 2026-09-16 legibility census found. `ctx.palette[o.symbolColor]` is undefined by
+// construction, and test/organelle-table.test.js fails a token name anywhere in this table.
+//
+// `symbolColor: null` means NEITHER neutral clears 4.5:1 on that fill, so a symbol written there needs
+// its own ground — the halo `scale` and `tree` use — or the fill has to move. Three are null here,
+// measured: chloroplast (paper 3.83, ink 4.23), microtubule (4.00, 4.05) and intermediateFilament
+// (4.04, 4.01). Nothing writes on any of the three today. The test goes red on a null where a neutral
+// would have worked and red on a stated colour that does not clear, so the null cannot be laziness.
 //
 // Two workers built this chapter's figures in parallel and each kept a table of its own; this file is
 // the two folded into one, every recipe kept as it was. The pair disagreed twice, and both
@@ -44,42 +57,49 @@ export const EXTRA_ORGANELLES = Object.freeze([
     id: 'wall',
     name: 'Cell wall',
     color: wall,
+    symbolColor: L.ink,
     role: 'Cellulose microfibrils in a sugar matrix, laid down outside the membrane. It resists turgor pressure and holds the plant up.',
   },
   {
     id: 'middleLamella',
     name: 'Middle lamella',
     color: mix(wall, L.coral, 0.45),
+    symbolColor: L.ink,
     role: 'A layer of pectin glueing one cell wall to the next — the same substance that sets jam.',
   },
   {
     id: 'vacuole',
     name: 'Central vacuole',
     color: vacuole,
+    symbolColor: L.ink,
     role: 'One large store of water and solutes. It fills the cell cheaply, generates turgor, and does a lysosome’s digesting.',
   },
   {
     id: 'tonoplast',
     name: 'Tonoplast',
     color: mix(vacuole, L.ink, 0.3),
+    symbolColor: L.paper,
     role: 'The vacuole’s own membrane, with the pumps that drive solutes in and water after them.',
   },
   {
     id: 'chloroplast',
     name: 'Chloroplast',
     color: chloroplast,
+    symbolColor: null,
     role: 'Captures light and builds sugar from carbon dioxide. It has two membranes, its own circular DNA and bacterial ribosomes.',
   },
   {
     id: 'thylakoid',
     name: 'Thylakoid',
     color: mix(chloroplast, L.ink, 0.35),
+    symbolColor: L.paper,
     role: 'Flattened discs stacked into grana, holding the chlorophyll and the machinery that captures light.',
   },
   {
     id: 'plasmodesma',
     name: 'Plasmodesma',
     color: mix(O.membrane.color, L.coral, 0.75),
+    symbolColor: L.ink,
     role: 'A channel through the wall lined with plasma membrane, joining the cytoplasm of one cell to the next.',
   },
   // ----- the cytoskeleton (cytoskeleton, cilium) -----
@@ -87,24 +107,28 @@ export const EXTRA_ORGANELLES = Object.freeze([
     id: 'microtubule',
     name: 'Microtubule',
     color: mix(O.cytoskeleton.color, L.water, 0.5),
+    symbolColor: null,
     role: 'A hollow tube 25 nm across, built from thirteen rows of tubulin. It resists compression and carries motor traffic.',
   },
   {
     id: 'actin',
     name: 'Actin filament',
     color: mix(O.cytoskeleton.color, L.coral, 0.5),
+    symbolColor: L.ink,
     role: 'Two twisted strands of actin, 7 nm across. It bears tension, and myosin walks along it.',
   },
   {
     id: 'intermediateFilament',
     name: 'Intermediate filament',
     color: mix(O.cytoskeleton.color, L.violet, 0.25),
+    symbolColor: null,
     role: 'A rope of coiled proteins 8–12 nm across. It bears tension and has no polarity, so no motor walks on it.',
   },
   {
     id: 'motor',
     name: 'Motor protein',
     color: mix(L.violet, L.ink, 0.15),
+    symbolColor: L.paper,
     role: 'Turns the energy in ATP into steps along a filament, always in one direction.',
   },
   // ----- the prokaryote (prokaryote) -----
@@ -114,6 +138,7 @@ export const EXTRA_ORGANELLES = Object.freeze([
     id: 'peptidoglycan',
     name: 'Cell wall',
     color: mix(L.gold, L.paper3, 0.5),
+    symbolColor: L.ink,
     role: 'A mesh of sugar chains outside the membrane that holds the cell\'s shape and takes the pressure of the water flooding in.',
   },
   {
@@ -121,6 +146,7 @@ export const EXTRA_ORGANELLES = Object.freeze([
     id: 'wallLine',
     name: 'Wall mesh',
     color: mix(L.gold, L.ink, 0.42),
+    symbolColor: L.paper,
     role: 'The cross-linked strands of the wall.',
   },
   {
@@ -129,6 +155,7 @@ export const EXTRA_ORGANELLES = Object.freeze([
     id: 'lps',
     name: 'Lipopolysaccharide',
     color: mix(O.membrane.color, L.gold, 0.45),
+    symbolColor: L.ink,
     role: 'Sugar chains on the outer face of a gram-negative outer membrane; a barrier to drugs, and what your immune system reads as danger.',
   },
   {
@@ -136,6 +163,7 @@ export const EXTRA_ORGANELLES = Object.freeze([
     id: 'sLayer',
     name: 'S-layer',
     color: mix(L.leaf, L.paper3, 0.45),
+    symbolColor: L.ink,
     role: 'A lattice of interlocking protein subunits that many archaea wear instead of a wall.',
   },
   {
@@ -143,6 +171,7 @@ export const EXTRA_ORGANELLES = Object.freeze([
     id: 'capsule',
     name: 'Capsule',
     color: mix(L.water, L.paper3, 0.62),
+    symbolColor: L.ink,
     role: 'A slippery polysaccharide coat that helps a cell stick to surfaces and makes it hard for an immune cell to grip.',
   },
   {
@@ -151,6 +180,7 @@ export const EXTRA_ORGANELLES = Object.freeze([
     id: 'nucleoid',
     name: 'Nucleoid',
     color: mix(L.violet, L.ink, 0.18),
+    symbolColor: L.paper,
     role: 'The region where a prokaryote\'s circular chromosome sits, with no membrane around it.',
   },
   {
@@ -158,6 +188,7 @@ export const EXTRA_ORGANELLES = Object.freeze([
     id: 'plasmid',
     name: 'Plasmid',
     color: mix(L.violet, L.paper3, 0.45),
+    symbolColor: L.ink,
     role: 'A small ring of DNA that copies itself independently and can pass from cell to cell.',
   },
   {
@@ -165,6 +196,7 @@ export const EXTRA_ORGANELLES = Object.freeze([
     id: 'pilus',
     name: 'Pilus',
     color: mix(L.inkSoft, L.water, 0.3),
+    symbolColor: L.paper,
     role: 'A short protein filament used to stick to surfaces, and in one specialised form to pass a plasmid to another cell.',
   },
   {
@@ -172,6 +204,7 @@ export const EXTRA_ORGANELLES = Object.freeze([
     id: 'flagellum',
     name: 'Flagellum',
     color: mix(L.water, L.ink, 0.35),
+    symbolColor: L.paper,
     role: 'A stiff helical propeller of protein, spun by a rotary motor in the membrane.',
   },
   {
@@ -180,6 +213,7 @@ export const EXTRA_ORGANELLES = Object.freeze([
     id: 'flagellarMotor',
     name: 'Motor',
     color: mix(L.gold, L.coral, 0.4),
+    symbolColor: L.ink,
     role: 'The rings of protein in the membrane that turn the filament, driven by protons flowing into the cell.',
   },
 ]);

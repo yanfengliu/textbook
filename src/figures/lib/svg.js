@@ -60,6 +60,15 @@ export const C = Object.freeze({
   coral: 'var(--coral)',
   violet: 'var(--violet)',
   gold: 'var(--gold)',
+  // The four accents pushed towards the ink. tokens.css declares them and states the recipe; they are for
+  // small type on the paper, and for a solid fill that carries paper-coloured text — an atom's disc with
+  // its symbol written on it. The accent itself cannot do that second job: both the fill and the symbol
+  // move with the theme and in the same direction, so `--paper` on `--coral` is 3.32:1 light and 7.26:1
+  // dark and no token clears 4.5:1 in both. These move WITH the paper, so one choice reads in both.
+  leafText: 'var(--leaf-text)',
+  waterText: 'var(--water-text)',
+  coralText: 'var(--coral-text)',
+  goldText: 'var(--gold-text)',
 });
 
 export function tint(colour, pct, base = 'var(--paper)') {

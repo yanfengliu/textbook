@@ -31,10 +31,25 @@
      at 12px on paper they fall short of WCAG AA, and --coral badly. Because --ink flips with the theme the
      one expression darkens on paper and lightens on dark. Ratios on --paper / --paper-2 / the accent's own
      soft tint: leaf 5.64 / 5.22 / 4.91 light, 7.79 / 7.17 / 6.23 dark; water 5.24 / 4.84 / 4.58 light,
-     8.27 / 7.62 / 6.53 dark; coral 5.34 / 4.94 / 4.68 light, 8.84 / 8.14 / 7.08 dark. */
+     8.27 / 7.62 / 6.53 dark; coral 5.34 / 4.94 / 4.68 light, 8.84 / 8.14 / 7.08 dark.
+
+     "A solid fill carrying paper-coloured text" is the case the one element table hit. A disc filled with
+     the accent ITSELF and a symbol written on it in --paper is a pair whose two ends both move with the
+     theme and in the same direction, so no one choice reads in both: measured 2026-09-17, --paper on
+     --coral is 3.32:1 light and 7.26:1 dark, and --ink on the same disc is 4.88:1 and 1.95:1. Not one of
+     the thirteen palette tokens clears 4.5:1 on coral, water or gold in both themes. Filling the disc
+     with the accent's -text value instead fixes both themes at once, because -text moves WITH the paper:
+     --paper on it is 5.34 light and 8.84 dark for coral, 5.23 / 8.30 for water, 5.25 / 11.54 for gold,
+     5.66 / 7.80 for leaf. src/figures/lib/chem-atoms.js draws the O, N, S and ion discs that way; the
+     percentages below are stated a second time as TEXT_MIX in src/palette.js, for the canvas and WebGL
+     figures that cannot use a CSS expression, and test/element-table.test.js fails when the two drift.
+
+     --gold-text was added for that disc and is 55% rather than 86%: gold is the palest accent, and at 86%
+     --paper on it is 2.88:1. On --paper / --paper-2 it is 5.25 / 4.86 light and 11.54 / 10.63 dark. */
   --leaf-text: color-mix(in srgb, var(--leaf) 86%, var(--ink));
   --water-text: color-mix(in srgb, var(--water) 86%, var(--ink));
   --coral-text: color-mix(in srgb, var(--coral) 70%, var(--ink));
+  --gold-text: color-mix(in srgb, var(--gold) 55%, var(--ink));
 
   /* Soft tints of the accents, for fills behind text */
   --leaf-soft: rgba(47, 125, 79, 0.11);

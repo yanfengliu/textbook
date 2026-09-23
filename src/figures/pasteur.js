@@ -487,6 +487,12 @@ function narrate(t, actions, s) {
 export function mount(root, ctx) {
   const ns = uid('ps');
   const reduced = Boolean(ctx.reducedMotion);
+  // A pinned clock is not advanced by any control. `?t=` pins every figure on the page and the gates take
+  // their frames that way, so a figure that starts running on a press is only still for as long as nothing
+  // presses it. Written as a function rather than read once because the frame may pin a figure that
+  // mounted unpinned. `undefined` counts as unpinned as well as `null`: a ctx that omits the field must
+  // leave the days playable for a reader.
+  const pinned = () => ctx.pinnedTime !== null && ctx.pinnedTime !== undefined;
   let t = clamp(ctx.pinnedTime ?? 0, 0, DAYS);
   let playing = false;
   let visible = true;
@@ -607,6 +613,11 @@ export function mount(root, ctx) {
   }
 
   function setPlaying(next) {
+    // The pinned check comes first, before the reduced-motion refusal and before the rewind below:
+    // pressing Play at the end of the run sets `t = 0`, so even a refused-looking start moved the clock
+    // on a pinned page. Refused rather than recorded, as in secretion and gradient-battery. Stopping is
+    // never refused, so setTime(), the scrubber and the arrow keys still call in.
+    if (next && pinned()) return;
     if (reduced && next) return;
     playing = next;
     btnPlay.textContent = playing ? 'Pause' : 'Play';

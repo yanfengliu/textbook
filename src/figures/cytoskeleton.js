@@ -165,20 +165,34 @@ function buildFilament(kind, trackNm, k, rng, { drug = null, dim = false } = {})
     // Thirteen protofilaments seen side on: five rows of 8 nm α/β dimers, each row offset along the
     // lattice, in a hollow tube whose lumen is paler than its walls.
     const rows = 5;
+    // HAIRLINE is the gap that makes neighbouring dimers read as separate tiles. It is in pixels while
+    // the lattice is in nanometres, so the two are only comparable after the multiplication by k, and a
+    // tile narrower than the hairline has nothing left to draw. The guard below was in nanometres alone
+    // (`s1 - s0 < 1.2`), which cannot see the hairline: the 1.8 nm remnant at the plus end of the third
+    // row is 0.65 px wide once the track is 224 px for 400 nm — a tablet's narrow stage — and
+    // 0.65 − 0.7 is a negative width, which the browser refuses. The row height has the same shape: at a
+    // stage that has not been measured yet, 2r/rows is a fifth of a pixel and the hairline is more than
+    // all of it. So both are worked out in pixels, at the precision actually written to the attribute,
+    // and a tile with no room left is not drawn. The tube rect above still carries the filament, which
+    // is the whole of what a lattice at that scale could show anyway.
+    const HAIRLINE = 0.7;
+    const tileH = Number(((2 * r) / rows - HAIRLINE).toFixed(1));
     for (const [a, b] of live) {
       g.append(el('rect', { x: (a * k).toFixed(1), y: (-r).toFixed(1), width: ((b - a) * k).toFixed(1), height: (2 * r).toFixed(1), rx: (r * 0.28).toFixed(1), fill: tint(col, 24) }));
+      if (!(tileH > 0)) continue; // a row of dimers is thinner here than the gap that would separate them
       for (let row = 0; row < rows; row += 1) {
         const yTop = -r + (row * 2 * r) / rows;
-        const hgt = (2 * r) / rows;
         const offset = (row * 0.9) % 8; // the three-start helix, seen as a stagger between rows
         const inner = row > 0 && row < rows - 1;
         for (let s = a - offset; s < b; s += 8) {
           const s0 = Math.max(a, s);
           const s1 = Math.min(b, s + 8);
-          if (s1 - s0 < 1.2) continue;
+          if (s1 - s0 < 1.2) continue; // under a seventh of a dimer is not a dimer
+          const tileW = Number(((s1 - s0) * k - HAIRLINE).toFixed(1));
+          if (!(tileW > 0)) continue; // and this one is narrower than the gap around it
           const beta = Math.round((s + offset) / 8) % 2 === 0;
           g.append(el('rect', {
-            x: (s0 * k).toFixed(1), y: yTop.toFixed(1), width: ((s1 - s0) * k - 0.7).toFixed(1), height: (hgt - 0.7).toFixed(1),
+            x: (s0 * k).toFixed(1), y: yTop.toFixed(1), width: tileW, height: tileH,
             rx: 1.2, fill: tint(col, inner ? (beta ? 44 : 30) : (beta ? 94 : 74)),
           }));
         }

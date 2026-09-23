@@ -36,6 +36,61 @@ export const FIGURES = Object.freeze({
   cilium: { url: new URL('./cilium.js', import.meta.url).href, title: 'The 9+2 axoneme', needsWebGL: true, aspect: 16 / 10, narrowAspect: 1 },
   plantcell3d: { url: new URL('./plantcell3d.js', import.meta.url).href, title: 'A plant cell', needsWebGL: true, aspect: 16 / 10, narrowAspect: 1 },
 
+  // Chapter 4, Membranes and transport. Registered from the chapter's brief
+  // (biology/ch04-membranes-and-transport/FIGURES.md, the table at its head) before the modules exist, so
+  // that eight figure workers can start at once without eight edits to this one file, and so that
+  // `npm run figure -- <kind>`, `npm run drive` and `tools/check-content.js` have something to address —
+  // the order the second book's three kinds below were added in, for the same reason.
+  //
+  // While a module is missing, `npm run unit` is red on the first registered kind that has no file
+  // (`test/registry.test.js`, "every registered kind has a module exporting meta and mount"). That red is
+  // true and is the point of the test: the frame may not promise a figure that does not exist. It reports
+  // ONE kind at a time, because the assertion throws inside the loop, so it is not a count of what is
+  // left. The gate goes green when the eighth module lands, and no commit that touches code can be made
+  // until it does.
+  //
+  // `aspect` and `narrowAspect` are the brief's, not invented here. Three of these carry a real second
+  // composition for a phone rather than a scaled-down first one — `permeability` (a nine-item species
+  // list, three sliders and a log flux bar cannot share a 390 px stage), `transport-lab` (a curve bending
+  // over is unreadable in a 90 px column, so the three lanes stack and the graph moves below them) and
+  // `gradient-battery` (the bars, voltmeter and energy panel move into one column under the cell, and the
+  // trace that shows the delay after the pump is blocked keeps full width). The other five shrink
+  // honestly, and each says in the brief what it re-stacks.
+  bilayer: { url: new URL('./bilayer.js', import.meta.url).href, title: 'Let go, and watch a membrane happen', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 5 },
+  membrane3d: { url: new URL('./membrane3d.js', import.meta.url).href, title: 'A patch of membrane, turned over and set running', needsWebGL: true, aspect: 16 / 10, narrowAspect: 1 },
+  permeability: { url: new URL('./permeability.js', import.meta.url).href, title: 'One species at a time, against a bare bilayer', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 5 },
+  osmometer: { url: new URL('./osmometer.js', import.meta.url).href, title: 'The same two solutions, three times over', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 5 },
+  'transport-lab': { url: new URL('./transport-lab.js', import.meta.url).href, title: 'Two designs, one graph', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
+  pump: { url: new URL('./pump.js', import.meta.url).href, title: 'One cycle at a time, and what it costs', needsWebGL: false, aspect: 16 / 10, narrowAspect: 4 / 5 },
+  'gradient-battery': { url: new URL('./gradient-battery.js', import.meta.url).href, title: 'The battery charged, and spent', needsWebGL: false, aspect: 16 / 10, narrowAspect: 3 / 4 },
+  'bulk-transport': { url: new URL('./bulk-transport.js', import.meta.url).href, title: 'Four ways to move what will not fit', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 5 },
+
+  // Chapter 5, Energy and metabolism. Registered from the chapter's brief
+  // (biology/ch05-energy-and-metabolism/FIGURES.md, the table at its head) before the modules exist, for
+  // the reason chapter 4's block above gives: eight figure workers start at once instead of eight edits
+  // landing on this one file, and `npm run figure -- <kind>`, `npm run drive` and tools/check-content.js
+  // have something to address while they write. `test/registry.test.js` is red until the eighth module
+  // lands, and it names ONE missing kind at a time because the assertion throws inside its loop.
+  //
+  // The titles are the brief's own headline phrases, word for word, because a title here is the figure's
+  // `aria-label` and the text of its placeholder before the module loads — it is a name a screen reader
+  // reads aloud, not a caption.
+  //
+  // `aspect` and `narrowAspect` are the brief's. Five carry a real second composition for a phone rather
+  // than a scaled-down first one — `free-energy`, `activation-barrier`, `enzyme-kinetics`,
+  // `feedback-pathway` and `metabolic-map` — and each of the five draws a graph or a many-node map beside
+  // a scene, which is the shape that never survives a 390 px stage. The other three shrink honestly and
+  // say in the brief what they re-stack. `atp3d` is the chapter's only WebGL figure and so
+  // `npm run sweep3d`'s only chapter-5 entry.
+  'entropy-ledger': { url: new URL('./entropy-ledger.js', import.meta.url).href, title: 'Order costs, and the bill is visible', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 5 },
+  'free-energy': { url: new URL('./free-energy.js', import.meta.url).href, title: 'Which way does it go, and why that is not fixed', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
+  atp3d: { url: new URL('./atp3d.js', import.meta.url).href, title: 'The molecule, split and accounted for', needsWebGL: true, aspect: 16 / 10, narrowAspect: 1 },
+  'coupling-bench': { url: new URL('./coupling-bench.js', import.meta.url).href, title: 'Couple it, or merely put it nearby', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 5 },
+  'activation-barrier': { url: new URL('./activation-barrier.js', import.meta.url).href, title: 'The barrier moves; the two ends do not', needsWebGL: false, aspect: 16 / 9, narrowAspect: 4 / 5 },
+  'enzyme-kinetics': { url: new URL('./enzyme-kinetics.js', import.meta.url).href, title: 'Sweep it yourself, then try to beat the inhibitor', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
+  'feedback-pathway': { url: new URL('./feedback-pathway.js', import.meta.url).href, title: 'A loop, and what happens when you cut it', needsWebGL: false, aspect: 16 / 10, narrowAspect: 3 / 4 },
+  'metabolic-map': { url: new URL('./metabolic-map.js', import.meta.url).href, title: 'The hourglass, and the ladder under it', needsWebGL: false, aspect: 16 / 10, narrowAspect: 4 / 5 },
+
   // 《资治通鉴》 卷一 周纪一 — the second book. Its figures are about a text and a history, not a
   // specimen: where the three states sat and when, what a character becomes when it joins another, and
   // which year the book chose to begin at. Each was added here by the integration owner from the

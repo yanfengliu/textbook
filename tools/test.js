@@ -1,6 +1,7 @@
 // npm test: the unit tests, then the content check, then the page shots, then the reader flows, then the
-// figure controls, then a study sitting, then the figures at phone width, then nine emulated devices,
-// then the 3D sweep, then the site as GitHub Pages will serve it. Ten steps.
+// figure controls, then those same controls with the clock pinned, then a study sitting, then the figures
+// at phone width, then every figure's own type measured against what is behind it, then nine emulated
+// devices, then the 3D sweep, then the site as GitHub Pages will serve it. Twelve steps.
 // Each step runs as its own process with inherited stdio; the first non-zero exit stops the run and is
 // reported by name, so a red run always says which gate went red. There is no pipe anywhere in this
 // file: a pipeline reports its last stage's status, not the gate's.
@@ -141,8 +142,30 @@ run('content check (tools/check-content.js)', ['tools/check-content.js']);
 run('page shots (tools/shot.js)', ['tools/shot.js']);
 run('reader flows (tools/flow.js)', ['tools/flow.js']);
 run('figure controls (tools/drive.js)', ['tools/drive.js']);
+// Straight after drive, because the two are one pair: drive presses every figure's controls with the clock
+// RUNNING and asserts what each one does, and this presses them with the clock PINNED and asserts that
+// none of them starts anything. It is its own file rather than a step inside drive because drive's page is
+// unpinned by contract — several of its recipes assert that a clock DID move — and because this check
+// needs no recipe, which is what lets it cover a figure the day it lands. It defends what `npm run shot`
+// rests on: shot photographs every page at ?t=0 and presses nothing, so before this gate a figure that
+// started on a press was still only for as long as nothing pressed it.
+//
+// It is the one step here that spawns processes of its own: PINNED_SHARDS of them, eight by default,
+// each a copy of tools/pinned.js given its own slice of the kinds. That is safe to do to this gate and
+// not to the others because it judges a figure in ANIMATION FRAMES rather than milliseconds, so seven
+// other chromiums on the machine cannot change its verdict. It is still one command with one verdict:
+// a shard that fails, dies, or exits 0 without reporting its counts fails the step. Because it owns
+// most of the machine while it runs, nothing else should be run beside it.
+run('pinned clocks (tools/pinned.js)', ['tools/pinned.js']);
 run('a study sitting (tools/sitting.js)', ['tools/sitting.js']);
 run('figures at phone width (tools/narrow.js)', ['tools/narrow.js']);
+// After narrow, because it is the same browser on the same lab page one width up, and before the device
+// matrix, which is the slowest of the figure gates. It measures the contrast of every glyph a figure
+// draws against the pixels actually under it, in both themes: the fills in src/palette.js do not move
+// with the theme and `ink` and `paper` do, so type over one of them is right in one theme and
+// unreadable in the other — and blankness, which is what every other figure gate measures, is exactly
+// what pale type on a pale fill passes.
+run('figure legibility (tools/legible.js)', ['tools/legible.js']);
 // The device gate belongs in the chain, not beside it. It was written as the answer to the owner's
 // instruction after four defects they found on a real phone, and a gate that has to be remembered is a
 // gate that does not run: it emulates devices with the input they actually have, where every other gate

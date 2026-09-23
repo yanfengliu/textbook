@@ -7,7 +7,9 @@
 // every id in the document is unique; there is exactly one <h1>, on a chapter page (main[data-chapter])
 // every <h2> is the direct child of a <section id> so the shell can number it, and no heading level is
 // skipped; every "Figure N.M" mentioned in the prose exists and
-// every figure is mentioned at least once; every relative href resolves to a file; every objective's
+// every figure is mentioned at least once; every relative href resolves to a file; the closing
+// <a class="tb-next"> points at the next chapter whenever that chapter's directory is on disk, names its
+// number, and does not call it unwritten; every objective's
 // prerequisites resolve, in this chapter or another, with no cycle inside the chapter; and no TODO,
 // FIXME, XXX or lorem is left in the page. For the study data (checkChapterData, checkStudySources):
 // every figure task's `expect` is one the grader's own parser can evaluate against some figure
@@ -27,6 +29,11 @@ import { expectProblems } from '../src/components/task.js';
 
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
 const RAW = new Set(['script', 'style']);
+
+// The ways a closing card has said "the chapter after this one does not exist yet". The list is the
+// bound of that half of the card rule: a card that says it some other way passes here and is caught by
+// the href half, which does not depend on wording.
+const UNWRITTEN = ['in preparation', 'coming soon', 'not yet written', 'being written', 'yet to be written', 'to come'];
 
 // Tokenise HTML into a tree of { tag, attrs, children, text }. Text nodes are { text }.
 export function parseHtml(html) {
@@ -93,7 +100,7 @@ function hasClass(node, cls) {
 }
 
 // Check one document. Returns an array of failure strings (empty means the document passes).
-export function checkDocument(html, { glossary = {}, kinds = [], objectives = [], file = 'document', resolveHref = null } = {}) {
+export function checkDocument(html, { glossary = {}, kinds = [], objectives = [], file = 'document', resolveHref = null, nextChapter = null } = {}) {
   const fails = [];
   const doc = parseHtml(html);
   const fail = (msg, node) => fails.push(`${file}${node?.line ? `:${node.line}` : ''}: ${msg}`);
@@ -227,6 +234,37 @@ export function checkDocument(html, { glossary = {}, kinds = [], objectives = []
     }
     for (const id of findAll(doc, (n) => n.tag === 'a' && n.attrs.href?.startsWith('#')).map((n) => n.attrs.href.slice(1))) {
       if (id && !ids.has(id)) fail(`href "#${id}" points at no element with that id`);
+    }
+  }
+
+  // The closing card. It is authored by hand and nothing repoints it when the next chapter lands, so it
+  // goes stale silently: chapters 1 and 2 told readers the next chapter was in preparation for six days
+  // while it sat finished on disk beside them, and chapter 3 then did the same for chapter 4. The href
+  // rule alone cannot catch it — `href="../"` resolves to the book page, which exists — so the fact the
+  // card has to be checked against is the tree, not the link.
+  //
+  // Bound: a page that carries an <a class="tb-next">, and only when a later chapter directory exists in
+  // the same book (main() supplies it). The last chapter's card points at the book page and is right to,
+  // so no rule fires there. A chapter with no card at all is not checked — the 資治通鑑 chapters have
+  // none, and requiring one of them is a decision about that book, not a defect this rule saw.
+  if (nextChapter) {
+    // "../ch04-membranes-and-transport/", "../ch04-membranes-and-transport" and ".../index.html" are one
+    // destination; "../" is not.
+    const aim = (h) => posix.normalize(h.replace(/(^|\/)index\.html$/, '$1')).replace(/\/+$/, '');
+    const want = `../${nextChapter.dir}/`;
+    for (const card of findAll(doc, (n) => n.tag === 'a' && hasClass(n, 'tb-next'))) {
+      const href = (card.attrs.href || '').split('#')[0].split('?')[0];
+      if (aim(href) !== aim(want)) {
+        fail(`<a class="tb-next" href="${href}"> does not point at the next chapter, which is on disk at ${nextChapter.path}/; write href="${want}". A reader finishing this chapter is sent somewhere else while the chapter that follows it sits written`, card);
+      }
+      const stated = /^\s*(\d+)/.exec(textOf(findAll(card, (n) => n.tag === 'strong')[0] ?? { text: '' }));
+      if (stated && Number(stated[1]) !== nextChapter.number) {
+        fail(`<a class="tb-next"> announces chapter ${stated[1]} and the chapter that follows this one on disk is ${nextChapter.number} (${nextChapter.path}/)`, card);
+      }
+      const words = textOf(card).toLowerCase();
+      for (const phrase of UNWRITTEN) {
+        if (words.includes(phrase)) fail(`<a class="tb-next"> tells the reader the next chapter is "${phrase}" and ${nextChapter.path}/ is on disk; say what that chapter is about instead`, card);
+      }
     }
   }
 
@@ -404,15 +442,33 @@ async function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   const { KINDS } = await import(pathToFileURL(join(root, 'src/figures/registry.js')).href);
   const pages = [join(root, 'index.html')];
+  // Every chapter directory of every book, by the number in its name, so a page can be told which chapter
+  // follows it — the fact the closing card is checked against. Read from the tree and never from the card.
+  const chapters = new Map();
   for (const book of readdirSync(root)) {
     const dir = join(root, book);
     if (!statSync(dir).isDirectory() || ['node_modules', 'src', 'tools', 'test', 'docs', 'out', 'lab', '.git', '.github'].includes(book)) continue;
     if (existsSync(join(dir, 'index.html'))) pages.push(join(dir, 'index.html'));
     for (const ch of readdirSync(dir)) {
       const cdir = join(dir, ch);
-      if (statSync(cdir).isDirectory() && existsSync(join(cdir, 'index.html'))) pages.push(join(cdir, 'index.html'));
+      if (!statSync(cdir).isDirectory() || !existsSync(join(cdir, 'index.html'))) continue;
+      pages.push(join(cdir, 'index.html'));
+      const n = /^ch(\d+)-/.exec(ch);
+      if (n) {
+        if (!chapters.has(book)) chapters.set(book, []);
+        chapters.get(book).push({ dir: ch, number: Number(n[1]) });
+      }
     }
   }
+  // The chapter that follows this one: the lowest-numbered sibling above it, so a gap in the numbering
+  // does not silently switch the rule off.
+  const nextChapterOf = (rel) => {
+    const [book, ch] = posix.dirname(rel).split('/');
+    const mine = ch && /^ch(\d+)-/.exec(ch);
+    if (!mine) return null;
+    const after = (chapters.get(book) ?? []).filter((c) => c.number > Number(mine[1])).sort((a, b) => a.number - b.number)[0];
+    return after ? { ...after, path: `${book}/${after.dir}` } : null;
+  };
   // Every objective id in the book, so a chapter's prerequisites may reach into another chapter.
   const allObjectiveIds = new Set();
   for (const page of pages) {
@@ -460,6 +516,7 @@ async function main() {
       kinds: KINDS,
       objectives,
       file: rel,
+      nextChapter: nextChapterOf(rel),
       resolveHref: (p) => {
         const target = resolve(dir, p);
         return existsSync(target) && (!statSync(target).isDirectory() || existsSync(join(target, 'index.html')));

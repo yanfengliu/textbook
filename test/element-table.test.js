@@ -24,9 +24,22 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { LIGHT, DARK } from '../src/palette.js';
+import { LIGHT, DARK, TEXT_MIX, textOn } from '../src/palette.js';
 import { ELEMENTS, atomColours } from '../src/figures/lib/chem-atoms.js';
 import { ELEMENT_CSS, element, cssOf } from '../src/figures/lib/mol-draw.js';
+
+// WCAG 2.x relative luminance and contrast ratio, written out here rather than imported, so the colour
+// check below is not the palette agreeing with itself.
+const rgb255 = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+const linear = (c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+const luminance = (hex) => {
+  const [r, g, b] = rgb255(hex).map((v) => linear(v / 255));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (a, b) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
 
 const figuresDir = fileURLToPath(new URL('../src/figures/', import.meta.url));
 const tokensCss = readFileSync(new URL('../src/styles/tokens.css', import.meta.url), 'utf8');
@@ -89,16 +102,101 @@ test('mol-draw derives every element colour from the token chem-atoms declares',
       assert.ok(root.includes(`${cssVar(token).slice(4, -1)}:`), `${sym}.${field} names ${token}, and tokens.css declares no ${cssVar(token).slice(4, -1)} in :root`);
     }
     const css = ELEMENT_CSS[sym];
+    // `deepen` draws the disc at the token's -text value. The element keeps its hue and its token name —
+    // an oxygen is still the coral one and FIGURES.md still says so — but the fill and the outline are
+    // `var(--coral-text)` rather than `var(--coral)`, because a `paper` symbol on the accent itself is
+    // unreadable in the light theme. The dash form is derived here, not read from svg.js's C.
+    const discVar = e.deepen ? `${cssVar(e.token).slice(0, -1)}-text)` : cssVar(e.token);
+    const strokeVar = e.deepen ? `${cssVar(e.outline).slice(0, -1)}-text)` : cssVar(e.outline);
     assert.equal(css.symbol, e.symbol, `${sym}: mol-draw's symbol differs from chem-atoms'`);
-    assert.equal(css.fill, cssVar(e.token), `${sym}: mol-draw fills with ${css.fill}, chem-atoms declares token ${e.token}`);
-    assert.equal(css.stroke, cssVar(e.outline), `${sym}: mol-draw outlines with ${css.stroke}, chem-atoms declares outline ${e.outline}`);
+    assert.equal(css.fill, discVar, `${sym}: mol-draw fills with ${css.fill}, chem-atoms declares token ${e.token}${e.deepen ? ' with deepen' : ''}`);
+    assert.equal(css.stroke, strokeVar, `${sym}: mol-draw outlines with ${css.stroke}, chem-atoms declares outline ${e.outline}${e.deepen ? ' with deepen' : ''}`);
     assert.equal(css.label, cssVar(e.label), `${sym}: mol-draw writes the symbol in ${css.label}, chem-atoms declares label ${e.label}`);
     assert.equal(element(sym), css, `element("${sym}") does not return the derived record`);
     // The palette-side accessor reads the same record, so a canvas figure and an SVG figure agree.
-    assert.deepEqual(atomColours(LIGHT, sym), { fill: LIGHT[e.token], stroke: LIGHT[e.outline], label: LIGHT[e.label] }, `atomColours(LIGHT, "${sym}") disagrees with the record`);
+    const fill = e.deepen ? textOn(LIGHT, e.token) : LIGHT[e.token];
+    const stroke = e.deepen ? textOn(LIGHT, e.outline) : LIGHT[e.outline];
+    assert.deepEqual(atomColours(LIGHT, sym), { fill, stroke, label: LIGHT[e.label] }, `atomColours(LIGHT, "${sym}") disagrees with the record`);
   }
   assert.throws(() => element('Xx'), /chem-atoms/, 'an unknown element must fail naming the one table');
   assert.throws(() => cssOf('notAToken'), /no CSS token/, 'an unknown token must fail rather than draw nothing');
+  assert.throws(() => cssOf('violet', true), /no deepened CSS token/, 'a deepen on a token with no -text value must fail rather than fall back to the accent and ship the defect it was asked to fix');
+});
+
+test('the deepened disc is the same recipe in CSS and in JavaScript, and it is what makes the symbol on it legible', (t) => {
+  // The one recipe in two languages: tokens.css declares `--coral-text: color-mix(in srgb, var(--coral)
+  // 70%, var(--ink))` for the stylesheets, and TEXT_MIX in src/palette.js holds 0.30 for the canvas and
+  // WebGL figures, which cannot write a CSS expression. Nothing compares them but this.
+  const root = tokensCss.slice(tokensCss.indexOf(':root {'), tokensCss.indexOf('}', tokensCss.indexOf(':root {')));
+  for (const [token, fraction] of Object.entries(TEXT_MIX)) {
+    const name = `--${token}-text`;
+    const m = new RegExp(`${name}:\\s*color-mix\\(in srgb,\\s*var\\(--${token}\\)\\s*([0-9.]+)%,\\s*var\\(--ink\\)\\)`).exec(root);
+    assert.ok(m, `src/palette.js's TEXT_MIX names ${token}, and tokens.css's :root declares no ${name} of the form \`color-mix(in srgb, var(--${token}) <pct>%, var(--ink))\`. The two are one recipe in two languages; add it there, or take ${token} out of TEXT_MIX`);
+    assert.equal(
+      Number(m[1]), Math.round((1 - fraction) * 1000) / 10,
+      `${name} is ${m[1]}% of --${token} in tokens.css and TEXT_MIX.${token} is ${fraction}, which is ${Math.round((1 - fraction) * 1000) / 10}%. An SVG figure would then draw one colour and a canvas figure another, for the same atom on the same page`,
+    );
+    t.diagnostic(`${name} ${m[1]}% == TEXT_MIX.${token} ${fraction} -> ${textOn(LIGHT, token)} light, ${textOn(DARK, token)} dark`);
+  }
+
+  // And the reason the recipe is used at all. This is the measurement the four allowances in
+  // tools/legible.js stood in for: every element's symbol on its own disc, in BOTH themes, at the 4.5:1
+  // bar a label-sized glyph has to clear. It was 3.32:1 for oxygen, 4.33:1 for nitrogen and 2.26:1 for
+  // sulfur in the light theme on published chapter 2 until 2026-09-17. Both ends move with the theme
+  // here — unlike ORGANELLES, MEMBRANE and METABOLISM, whose fills are fixed — so both themes are
+  // measured and neither is assumed from the other.
+  const AA = 4.5;
+  const worst = [];
+  for (const sym of Object.keys(ELEMENTS)) {
+    for (const [theme, palette] of [['light', LIGHT], ['dark', DARK]]) {
+      const { fill, label } = atomColours(palette, sym);
+      const ratio = contrast(label, fill);
+      worst.push({ sym, theme, ratio });
+      assert.ok(
+        ratio >= AA,
+        `${sym}: its symbol in ${label} on its own disc ${fill} is ${ratio.toFixed(2)}:1 in the ${theme} theme, under WCAG AA's ${AA}:1. Both the disc and the symbol are palette tokens here, so both move with the theme and no single label clears a bare accent in both — the disc takes the accent's -text value instead (\`deepen\` in ELEMENTS), which moves WITH the paper. Add \`deepen: true\` to ${sym}, and add a --${ELEMENTS[sym].token}-text to tokens.css and TEXT_MIX if that token has none`,
+      );
+    }
+  }
+  assert.equal(worst.length, Object.keys(ELEMENTS).length * 2, `measured ${worst.length} pair(s) against ${Object.keys(ELEMENTS).length} element(s) in two themes; an element or a theme was skipped`);
+  const low = worst.reduce((a, b) => (b.ratio < a.ratio ? b : a));
+  t.diagnostic(`${worst.length} pair(s) measured, worst ${low.sym} ${low.theme} ${low.ratio.toFixed(2)}:1 against a floor of ${AA}:1`);
+});
+
+test('only chem-atoms and mol-draw turn an element token into a colour; every other module goes through the accessors', () => {
+  // The one-table rule above catches a second TABLE. It does not catch a second DERIVATION, and on
+  // 2026-09-17 there were two. `bondlab` held `const TOKEN = { coral: C.coral, … }` with
+  // `fillOf = (sym) => TOKEN[ELEMENTS[sym].token]`, and `soup` held
+  // `[['C', p.inkSoft], ['O', p.coral], ['N', p.water], ['S', p.gold]]`. Both read the table faithfully
+  // and both were wrong the moment the table gained `deepen`, because a field they did not know about
+  // changed what `token` means. Neither is a table by the rule above: one is keyed by token name and the
+  // other is a list of pairs.
+  //
+  // What it cost. bondlab drew every O, N and S on the bare accent — `paper` on coral is 3.32:1, on gold
+  // 2.26:1 — and `npm run legible` was green on almost all of them, because `.bl-sym` is weight 700 and a
+  // glyph at 18.66 px or more is judged against WCAG's large-text bar of 3:1, which 3.32 clears. One
+  // state drew at 18.0 px and failed. The gate was reading a font size, not a colour.
+  //
+  // So the rule is about the DERIVATION and not the table: `.token` and `.outline` are turned into a
+  // colour in exactly two modules, and every figure reads `atomColours()`, `element()` or `cssOf()`.
+  // Bound: it is textual, over `src/figures/**`, and it sees an element record's `.token`/`.outline`
+  // being read at all outside the two. A module that copies a hex, or that resolves the token through a
+  // string it builds at run time, is not seen — this catches the copy of what exists, as the one-table
+  // rule does.
+  const ALLOWED_TO_DERIVE = [ONE_TABLE, 'lib/mol-draw.js'];
+  const readers = [];
+  for (const m of modules) {
+    if (ALLOWED_TO_DERIVE.includes(m.path)) continue;
+    for (const hit of m.src.matchAll(/ELEMENTS\s*(?:\[[^\]]+\]|\.[A-Za-z]+)\s*\.\s*(token|outline)\b/g)) {
+      readers.push(`${m.path} reads .${hit[1]} off an element record`);
+    }
+  }
+  assert.deepEqual(
+    readers,
+    [],
+    `an element's colour is derived outside ${ALLOWED_TO_DERIVE.join(' and ')}:\n  ${readers.join('\n  ')}\nA record's \`token\` is not the colour to draw: \`deepen\` says whether the disc takes the token or the token's -text value, and a module that reads \`token\` on its own silently ignores it. Read the colour through atomColours(palette, sym) for canvas and WebGL, or element(sym) / cssOf(token, deep) for SVG, so there is one derivation and the next field added to the table reaches every figure at once`,
+  );
+  assert.ok(modules.length > 10, `only ${modules.length} module(s) found under src/figures/, so this checked almost nothing`);
 });
 
 test('the table is the colour table in biology/ch02-chemistry-of-life/FIGURES.md', () => {

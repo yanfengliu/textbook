@@ -1,6 +1,6 @@
 # The figure bench — design of record
 
-Status: **proposed**, not built. Nothing in this document exists in the tree; it is a decision to be taken or refused.
+Status: **built, and carrying chapter 5.** `src/figures/lib/bench.js` exists, its chrome is in `src/styles/components.css` under `/* The figure bench */`, `test/bench.test.js` holds both, and `tools/figure-diff.js` was built first as step 0 asked. Eight figures are on it — chapter 5's `entropy-ledger`, `free-energy`, `activation-barrier`, `enzyme-kinetics`, `atp3d`, `coupling-bench`, `feedback-pathway`, `metabolic-map` — and nothing else has been migrated. The recommendation below stands as written; the section **What the first eight users asked for** at the foot records what they found missing and what the bench now does about it.
 
 ## Recommendation
 
@@ -244,3 +244,24 @@ Four things outside it do change, and each is small:
 - **`docs/design/textbook.md`**'s figure-contract section gains a sentence pointing here, and `figures-template.md` gains a line in "What every figure here owes" saying that a new figure is built on the bench and what that means for its brief.
 
 Everything in this section is a gate or a stylesheet. Nothing is a framework, nothing is a build step, and nothing is a dependency.
+
+## What the first eight users asked for
+
+Step 3 said chapter 5's eight figures written on the bench would be the real measurement. They were, and what they measured was a list of things the bench could not do — each of them worked around in the figure and written down. Two of the eight named the same two items first, independently, which is the strongest evidence this document is going to get. What follows is what the bench now does, what it replaced, and how many copies of the workaround went with it.
+
+| # | What the bench now does | What it replaced | Copies deleted |
+|---|---|---|---|
+| 1 | `b.stepper(label, …)` — a slider whose narrow form is a pair of step buttons; `short:` on any slider, so its label takes the chapter's own symbol at phone width while the accessible name stays the words a recipe addresses; `b.choice(…, { segmented: true })`, one strip instead of *n* pills at that width | five sliders taking five rows of a 390 px toolbar, and eleven buttons taking five more | 7 sliders became steppers, 16 choices became strips, 13 sliders took a short label |
+| 2 | `readout().note()` wraps to its column, and `wrapText` is exported for a sentence drawn outside a readout | one `<text>` per note, so a sentence longer than the column ran off the stage | **8** — four named `noteLines`, four `wrapLines`, one per figure |
+| 3 | `readout().draw()` paints nothing below the box it was given, which is the pane's own; `dropped` says when it had to stop | a pane's `<svg>` overflows visibly, so a table with more rows than the pane is tall painted over the toolbar | **4** `note()` closures that added prose only while the table still fitted |
+| 4 | `b.divide()`'s rule lives **inside the group it opens**, a group with no visible control hides itself and its rule with it, and a rule is drawn only between two groups that share a line | a rule on the toolbar, outliving its group and stranded at the end of a wrapped row | **3** copies of `tidyDividers()` |
+| 5 | `only: 'narrow'` / `only: 'wide'` on any control | a figure reading `b.narrow` and setting `style.display` on a control the bench made | 1 |
+| 6 | `format(v, { narrow })` is told which width it is setting, so `narrowUnit` is reachable from a formatted value; `b.onLayout(fn)` fires when the stage crosses the figure's own threshold | a figure reading `b.narrow` inside `format` (where both spans then came out the same) and keeping a `lastNarrow` of its own in `onDraw` | **2** `lastNarrow` flags, **2** `suffix()` helpers, and 5 sliders that asked for a unit and printed none |
+| 7 | `readout().fit(into, build, { levels })` — build the table, measure it, build it again shorter | the same terse-level loop written out | **4** |
+| 8 | `b.toggle(label, onChange, …)` keeps its own `aria-pressed`; `b.choice` may open on `value: null` | `setAttribute('aria-pressed', …)` after every change, in the figure | **11** toggles |
+
+Also: a slider given both `format` and a `unit` is now a refusal rather than a unit dropped in silence, and `b.pane(…, { gl: true })` marks the one surface `npm run sweep3d` measures — see `docs/learning/gate-proofs.md`, 2026-09-17, for the hole that opened and what closed it.
+
+**What it cost and what it bought.** The bench went from 869 lines to 1,149. The eight figures went from 6,654 to 6,440, so the duplication removed is about the size of the code that removed it — which is the wrong way to read it, because the copies were not eight expressions of one idea but eight chances for one of them to be subtly different, and two of them already were (`Math.max(8, …)` against `Math.max(12, …)` in the line breaker). What is measurable and matters more is the stage: at desktop width `atp3d` and `enzyme-kinetics` each got a whole toolbar row back, about 34 and 45 device pixels of stage, because a rule that separated nothing no longer pushes a group onto a new line. At 390 px `free-energy` went from five slider rows to four, and `metabolic-map`'s six choice groups became six strips.
+
+**What is still not there**, recorded the way its users recorded it: a canvas pane has no `focusMark()` — the bench's is an SVG path, so `atp3d` still draws its own focus ring in CSS — and the bench still has no disclosure control, so `enzyme-kinetics`'s **Conditions** and **Cases** remain a pair of toggles the figure wires to `style.display` itself.

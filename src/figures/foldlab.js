@@ -30,11 +30,16 @@ export const meta = { kind: 'foldlab', title: 'Write a sequence, fold it, break 
 
 const MIN_LEN = 16;
 const MAX_LEN = 36;
+// Each disc carries its class letter in --paper, so the fill is the accent pushed TOWARDS THE INK, which
+// is the same recipe the book's own --leaf-text, --water-text and --coral-text are made by. The raw
+// accents are tuned for figures sitting beside each other in large areas, and paper on them measured
+// 2.26:1 (gold) and 4.33:1 (water) in the LIGHT theme on 2026-09-16 (npm run legible) — the gold H was
+// the worst pair in either book. No new hue: every value here is one of the five accents and the ink.
 const TYPE_INFO = {
-  H: { name: 'hydrophobic', colour: C.gold, glyph: 'H' },
-  P: { name: 'polar', colour: C.water, glyph: 'P' },
-  '+': { name: 'positively charged', colour: C.coral, glyph: '+' },
-  '-': { name: 'negatively charged', colour: C.violet, glyph: '−' },
+  H: { name: 'hydrophobic', colour: tint(C.gold, 55, C.ink), glyph: 'H' },
+  P: { name: 'polar', colour: tint(C.water, 86, C.ink), glyph: 'P' },
+  '+': { name: 'positively charged', colour: tint(C.coral, 70, C.ink), glyph: '+' },
+  '-': { name: 'negatively charged', colour: tint(C.violet, 86, C.ink), glyph: '−' },
 };
 // The sequence the bench opens on. Chosen by running the real search over candidates (the harness is
 // in the worker's scratchpad); the number of runs from different starts that reach the same fold is
@@ -68,8 +73,11 @@ const CSS = `${readoutCss('.tb-foldlab')}
 .tb-foldlab .fl-val { fill: var(--ink); font-variant-numeric: lining-nums tabular-nums; font-weight: 600; }
 .tb-foldlab .fl-note { fill: var(--ink-faint); }
 /* Anything set over the water carries the paper with it, so a letter never fights the field it stands
-   in: the two chain ends, the legend at the foot, and the level labels. */
-.tb-foldlab .fl-end, .tb-foldlab .fl-over { stroke: var(--paper); stroke-width: 3px;
+   in: the two chain ends, the legend at the foot, and the level labels.
+   The readout's section heads are in the list because the water's dots run behind the readout column as
+   well — measured 2026-09-17, "The search" was 4.20:1 light and 4.17:1 dark with a dot against its T,
+   and this rule's own stated principle already covered it. */
+.tb-foldlab .fl-end, .tb-foldlab .fl-over, .tb-foldlab .mol-rt-head { stroke: var(--paper); stroke-width: 3px;
   stroke-linejoin: round; paint-order: stroke; }
 .tb-foldlab .fl-end { fill: var(--ink); font-weight: 700; }
 .tb-foldlab .fl-sliders { position: absolute; left: var(--space-3); right: var(--space-3); bottom: var(--fl-slidersbottom, 2.6rem);
@@ -517,7 +525,9 @@ export function mount(root, ctx) {
     const top = 12;
     const rowH = (hgt - top) / rows;
     const r = Math.min(rowH * 0.38, cw * 0.44);
-    seqSvg.append(text(pad, 9, levelsOn ? 'primary · the sequence, which is all the gene specifies' : 'the sequence · click a residue to change it', { class: 'fl-note', 'font-size': 9.6 }));
+    // fl-over: the lattice's water dots show through behind this strip, and this line was 3.85:1 light
+    // and 3.92:1 dark where one of them stood under it (2026-09-17).
+    seqSvg.append(text(pad, 9, levelsOn ? 'primary · the sequence, which is all the gene specifies' : 'the sequence · click a residue to change it', { class: 'fl-note fl-over', 'font-size': 9.6 }));
     for (let i = 0; i < n; i += 1) {
       const info = TYPE_INFO[sequence[i]];
       const row = Math.floor(i / per);
@@ -525,7 +535,11 @@ export function mount(root, ctx) {
       const cx = pad + cw * (col + 0.5);
       const cy = top + rowH * (row + 0.5);
       if (i === selected) seqSvg.append(el('circle', { cx: fmt(cx, 1), cy: fmt(cy, 1), r: fmt(r + 3, 1), fill: 'none', stroke: C.leaf, 'stroke-width': 2 }));
-      seqSvg.append(el('circle', { cx: fmt(cx, 1), cy: fmt(cy, 1), r: fmt(r, 1), fill: tint(info.colour, 55), stroke: info.colour, 'stroke-width': 1.4 }));
+      // 30, not 55. The chip's letter is the INK, and at 55 the fill is a mid tone in both themes — the
+      // ink was 3.28:1 over it on a dark page and the paper 2.24:1 on a light one, so neither colour of
+      // letter read in both (measured 2026-09-16, npm run legible). Mixed further towards the paper the
+      // fill stays near the page in both themes and the ink reads over it in both.
+      seqSvg.append(el('circle', { cx: fmt(cx, 1), cy: fmt(cy, 1), r: fmt(r, 1), fill: tint(info.colour, 30), stroke: info.colour, 'stroke-width': 1.4 }));
       if (r >= 5.6) seqSvg.append(text(cx, cy + r * 0.36, info.glyph, { anchor: 'middle', fill: C.ink, 'font-size': fmt(r * 1.05, 1), 'font-weight': 700 }));
       const hit = el('rect', { x: fmt(pad + cw * col, 1), y: fmt(top + rowH * row, 1), width: fmt(cw, 1), height: fmt(rowH, 1), class: 'fl-hit' });
       hit.addEventListener('click', () => cycleResidue(i));

@@ -222,7 +222,7 @@ const CSS = `
 .tb-tree .tr-title { font-family: var(--font-display); font-size: 26px; font-weight: 500; letter-spacing: -0.01em; font-variation-settings: "SOFT" 40, "WONK" 0; }
 .tb-tree .tr-tip { font-size: 12.5px; font-weight: 500; }
 .tb-tree .tr-note { font-size: 11.5px; fill: var(--ink-soft); }
-.tb-tree .tr-arrowlabel { font-size: 11.5px; font-weight: 500; fill: var(--water); }
+.tb-tree .tr-arrowlabel { font-size: 11.5px; font-weight: 500; fill: var(--water-text); }
 .tb-tree .tr-axis { font-size: 10.5px; fill: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; }
 .tb-tree .tr-halo { paint-order: stroke; stroke: var(--paper-2); stroke-width: 3.5px; stroke-linejoin: round; }
 .tb-tree .tr-group { transition: opacity var(--dur) var(--ease); }

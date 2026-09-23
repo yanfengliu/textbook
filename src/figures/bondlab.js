@@ -31,6 +31,7 @@ import {
   morseRemaining, morseForce, coulombRemaining, coulombForce, COULOMB_KJ_NM,
   THERMAL_KJ_MOL, EPS_WATER, KJ_PER_MOL_NM_TO_PN, mulberry32, clamp,
 } from './lib/chem-atoms.js';
+import { element } from './lib/mol-draw.js';
 
 export const meta = { kind: 'bondlab', title: 'Two atoms and a meter', needsWebGL: false, aspect: 16 / 9 };
 
@@ -50,13 +51,32 @@ const E_MIN = 0.3;
 const E_MAX = 1200;
 const SEED = 20260211;
 
+// The share of a lit sphere's radius that keeps the element's own colour, with the specular highlight
+// faded in only beyond it (`lightDefs` below). 0.72 is the symbol's reach, measured rather than guessed:
+// the widest symbol drawn on a disc here is a two-letter one on a shell diagram's nucleus, set at
+// 0.95 x rNuc with its baseline 0.38 x rNuc below centre, so its ink runs to about 0.57 across and 0.38
+// down — 0.69 of the radius at the corner — and 0.72 clears that with the glyph's own antialiased rim
+// inside it. A smaller value puts white back under the symbols this exists to keep readable.
+const KEEP_R = 0.72;
+
 // Below this stage width the cards move above the bench. Measured: at 560 px the three-column grid gives
 // each card 150 px, and the shell diagram's 11 px labels start colliding with the ring dots.
 const NARROW_W = 640;
 
-const TOKEN = { paper3: C.paper3, inkSoft: C.soft, coral: C.coral, water: C.water, violet: C.violet, gold: C.gold, leaf: C.leaf, ruleStrong: C.ruleStrong };
-const fillOf = (sym) => TOKEN[ELEMENTS[sym].token];
-const strokeOf = (sym) => TOKEN[ELEMENTS[sym].outline];
+// The one element table's colours, as CSS, through mol-draw's accessor. This was a TOKEN map of its own —
+// `{ coral: C.coral, … }` indexed by `ELEMENTS[sym].token` — a third place the element colours lived,
+// after lib/chem-atoms.js and lib/mol-draw.js. It read the table faithfully and was wrong anyway: `token`
+// is not the colour to draw, `deepen` decides whether the disc takes the token or the token's `-text`
+// value, and a map that has never heard of `deepen` drew every O, N and S on the bare accent. `paper` on
+// bare coral is 3.32:1 and on bare gold 2.26:1, and `npm run legible` was green on nearly all of them
+// because `.bl-sym` is weight 700 and a glyph at 18.66 px or more is judged against WCAG's large-text
+// bar of 3:1, which 3.32 clears — one state drew at 18.0 px and failed. The gate was reading a font size.
+// test/element-table.test.js now fails any module but those two that reads `.token` or `.outline`.
+const fillOf = (sym) => element(sym).fill;
+const strokeOf = (sym) => element(sym).stroke;
+// The oxygen of a water molecule, for the three vignettes this figure draws by hand rather than through
+// fillOf. They wrote `C.coral` as a literal and so were not even reading the table.
+const WATER_O = () => element('O').fill;
 
 const SHELL_CAPS = [2, 8, 8];
 const Z = { H: 1, C: 6, N: 7, O: 8, Na: 11, Cl: 17 };
@@ -237,7 +257,15 @@ const CSS = `
 .tb-bondlab .bl-dim, .tb-bondlab .bl-tick { paint-order: stroke; stroke: var(--paper);
   stroke-width: 3px; stroke-linejoin: round; }
 .tb-bondlab .bl-dim { fill: var(--ink-soft); font-variant-numeric: lining-nums tabular-nums; }
-.tb-bondlab .bl-glyph { font-weight: 600; }
+/* The delta glyphs are TYPE, so they take the book's text accents (--coral-text, --water-text) and
+   never the figure accents: --coral on the paper is 3.32:1 at 10 px and --water 4.33:1, both under
+   AA, measured 2026-09-16 by npm run legible. */
+.tb-bondlab .bl-glyph { font-weight: 600; paint-order: stroke; stroke: var(--paper); stroke-width: 3px; stroke-linejoin: round; }
+/* The halo is not decoration. In the In water scene a delta glyph lands on a neighbouring molecule and on
+   the scene's own tinted ground, 80% and 100% of its pixels: 2.13:1 and 4.49:1 measured 2026-09-16. With
+   its own paper ground it reads against one colour in both themes. */
+.tb-bondlab .bl-plus { fill: var(--coral-text); }
+.tb-bondlab .bl-minus { fill: var(--water-text); }
 .tb-bondlab .bl-tick { fill: var(--ink-faint); font-variant-numeric: lining-nums tabular-nums; }
 .tb-bondlab .bl-big { fill: var(--ink); font-family: var(--font-display); font-weight: 500;
   font-variant-numeric: lining-nums tabular-nums; }
@@ -385,7 +413,7 @@ export function mount(root, ctx) {
         const a = k * half;
         svg.append(sphere(cx + Math.sin(a) * d, cy - Math.cos(a) * d + R * 0.35, R * 0.78, C.paper3, C.ruleStrong, 1));
       }
-      svg.append(sphere(cx, cy + R * 0.35, R, C.coral, C.coral, 0.8));
+      svg.append(sphere(cx, cy + R * 0.35, R, WATER_O(), WATER_O(), 0.8));
       svg.append(text(cx, cy + R * 0.35 + R * 0.36, 'O', { anchor: 'middle', class: 'bl-sym', 'font-size': R * 1.05 }));
       host.append(svg);
       return;
@@ -434,6 +462,8 @@ export function mount(root, ctx) {
   // atom's own colour, so one pair of definitions serves every element and both themes.
   const SPEC = uid('bl-spec');
   const SHADE = uid('bl-shade');
+  const KEEP = uid('bl-keep');
+  const KEEP_RAMP = uid('bl-keep-ramp');
   function lightDefs() {
     const spec = el('radialGradient', { id: SPEC, cx: '34%', cy: '30%', r: '62%' }, [
       el('stop', { offset: '0', 'stop-color': '#ffffff', 'stop-opacity': '0.62' }),
@@ -444,14 +474,34 @@ export function mount(root, ctx) {
       el('stop', { offset: '0.45', 'stop-color': '#000000', 'stop-opacity': '0' }),
       el('stop', { offset: '1', 'stop-color': '#000000', 'stop-opacity': '0.30' }),
     ]);
-    return el('defs', {}, [spec, shade]);
+    // The highlight stops before the symbol's box, instead of the symbol fighting it. The disc keeps its
+    // own colour out to KEEP_R of its radius and the white is faded in over the ramp beyond that, so the
+    // sphere is lit along its upper-left rim and the element's colour reads true where its symbol sits.
+    //
+    // It is one mask rather than a second gradient because the specular is centred up and to the LEFT of
+    // the disc and the ground to protect is centred on the disc: no single radial gradient has both
+    // centres, and every attempt to shrink or move the specular instead still bled into the middle.
+    // Measured 2026-09-17: the old specular put 28% white over the centre of every disc, and the element
+    // fills have no room for it. Nitrogen's own fill gives `paper` 4.68:1; that wash took the pixels
+    // under its N to 1.87:1, and the arithmetic says the wash may be at most about 2% white before the
+    // pair drops under 4.5:1. So it is not a highlight to soften — it has to stop.
+    const ramp = el('radialGradient', { id: KEEP_RAMP, cx: '50%', cy: '50%', r: '50%' }, [
+      el('stop', { offset: KEEP_R, 'stop-color': '#000000' }),
+      el('stop', { offset: '1', 'stop-color': '#ffffff' }),
+    ]);
+    // maskContentUnits, so one mask serves every sphere whatever its radius: the rect is the disc's own
+    // bounding box and the gradient inside it is that box's circle.
+    const keep = el('mask', { id: KEEP, maskContentUnits: 'objectBoundingBox' }, [
+      el('rect', { x: '0', y: '0', width: '1', height: '1', fill: `url(#${KEEP_RAMP})` }),
+    ]);
+    return el('defs', {}, [spec, shade, ramp, keep]);
   }
 
   function sphere(x, y, r, fill, stroke, strokeWidth = 1.2) {
     return el('g', {}, [
       el('circle', { cx: x, cy: y, r, fill, stroke, 'stroke-width': strokeWidth }),
       el('circle', { cx: x, cy: y, r, fill: `url(#${SHADE})` }),
-      el('circle', { cx: x, cy: y, r, fill: `url(#${SPEC})` }),
+      el('circle', { cx: x, cy: y, r, fill: `url(#${SPEC})`, mask: `url(#${KEEP})` }),
     ]);
   }
 
@@ -601,7 +651,7 @@ export function mount(root, ctx) {
         d: `M${cx - 9} ${by - 11} L${cx + 3} ${by - 3} L${cx - 3} ${by + 3} L${cx + 9} ${by + 11}`,
         stroke: C.coral, 'stroke-width': 1.8, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
       }));
-      svg.append(text(cx, Math.max(13, by - 20), 'snapped', { anchor: 'middle', class: 'bl-glyph', 'font-size': 11.5, fill: C.coral }));
+      svg.append(text(cx, Math.max(13, by - 20), 'snapped', { anchor: 'middle', class: 'bl-glyph bl-plus', 'font-size': 11.5 }));
     }
 
     // A track from the rest length to the end of the bench, with the rest position, the point where
@@ -695,8 +745,7 @@ export function mount(root, ctx) {
       const gy = r < 17 ? y - r - gs * 0.95 : y - r * 0.80;
       g.append(el('circle', { cx: gx, cy: gy, r: gs * 0.84, fill: C.paper, stroke: charge > 0 ? C.coral : C.water, 'stroke-width': 1.3 }));
       g.append(text(gx, gy + gs * 0.34, glyph, {
-        anchor: 'middle', class: 'bl-glyph', 'font-size': gs.toFixed(1),
-        fill: charge > 0 ? C.coral : C.water,
+        anchor: 'middle', class: `bl-glyph ${charge > 0 ? 'bl-plus' : 'bl-minus'}`, 'font-size': gs.toFixed(1),
       }));
     }
     svg.append(g);
@@ -716,7 +765,7 @@ export function mount(root, ctx) {
       const a = k * half;
       g.append(disc(Math.sin(a) * R * 0.95, -Math.cos(a) * R * 0.95, R * 0.66, C.paper3, C.ruleStrong, 0.7));
     }
-    g.append(disc(0, 0, R * 0.86, C.coral, C.coral, 0.5));
+    g.append(disc(0, 0, R * 0.86, WATER_O(), WATER_O(), 0.5));
     return g;
   }
 
@@ -732,11 +781,14 @@ export function mount(root, ctx) {
       const hx = x + Math.sin(a) * R * 1.05;
       const hy = y - Math.cos(a) * R * 1.05;
       g.append(el('circle', { cx: hx, cy: hy, r: R * 0.7, fill: C.paper3, stroke: C.ruleStrong, 'stroke-width': 1.1 }));
-      g.append(text(hx, hy - R * 0.95, 'δ+', { anchor: 'middle', class: 'bl-glyph', 'font-size': Math.max(9, R * 0.5).toFixed(1), fill: C.coral }));
+      const gs = Math.max(9, R * 0.5);
+      // Along the O->H line, past the hydrogen. Drawn straight up (hy - R * 0.95) it sat ON the
+      // oxygen disc whenever the donor turned a hydrogen sideways, and coral on coral is 1.00:1.
+      g.append(text(hx + Math.sin(a) * R * 0.85, hy - Math.cos(a) * R * 0.85 + gs * 0.35, 'δ+', { anchor: 'middle', class: 'bl-glyph bl-plus', 'font-size': gs.toFixed(1) }));
     }
-    g.append(el('circle', { cx: x, cy: y, r: R * 0.92, fill: C.coral, stroke: C.coral, 'stroke-width': 0.8 }));
+    g.append(el('circle', { cx: x, cy: y, r: R * 0.92, fill: WATER_O(), stroke: WATER_O(), 'stroke-width': 0.8 }));
     g.append(text(x, y + R * 0.34, 'O', { anchor: 'middle', class: 'bl-sym', 'font-size': (R * 0.9).toFixed(1) }));
-    g.append(text(x, y + R * 1.05 + Math.max(11, R * 0.6), 'δ−', { anchor: 'middle', class: 'bl-glyph', 'font-size': Math.max(9, R * 0.5).toFixed(1), fill: C.water }));
+    g.append(text(x, y + R * 1.05 + Math.max(11, R * 0.6), 'δ−', { anchor: 'middle', class: 'bl-glyph bl-minus', 'font-size': Math.max(9, R * 0.5).toFixed(1) }));
     return g;
   }
 

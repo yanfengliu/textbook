@@ -10,7 +10,9 @@
 // attribute is off — see the hook block below), no geometric attribute in a mounted figure's SVG that is
 // negative where SVG forbids it or is not a finite number (see the geometry block below), no character
 // anywhere on the page drawn by a face the page did not load through `@font-face` (see the font block
-// below), and — on a page whose `<html lang>` this gate knows the script of — every figure caption's
+// below), no `<tb-sitting>` still unbooted when the shutter opens and none missing from a page that must
+// carry one (see the sitting block below) — and — on a page whose
+// `<html lang>` this gate knows the script of — every figure caption's
 // number word (`.fig-num`) and the figure's aria-label in that script's word. Fails otherwise and names
 // the page, viewport, theme and the errors.
 //
@@ -783,6 +785,71 @@ async function auditFonts(page, cdp, { page: pageId, viewport, theme }) {
   return { problems, runs: runs.length, codePoints, faces: [...faces].map(([k, v]) => `${k}:${v}`), measured, ms: Date.now() - started, loaded: census.loaded, textNodes: census.textNodes, pseudo: census.pseudo };
 }
 
+// ───────────── the study surface has to have rendered before the shutter opens ─────────────
+//
+// It does, and the shell is what makes it so. `window.__textbook.state` does not become 'ready' until
+// every <tb-sitting> on the page has booted (src/shell.js), so this gate inherits the wait through
+// openPage() and so does every other gate, including the two that load /today/ and never knew they had
+// to — `npm run devices`, which does not even pass ?eager=1, and `npm run subpath`.
+//
+// What this block is now is the census, not the wait. The three things it says that the handshake cannot:
+// that the page whose subject this is still carries a <tb-sitting> at all (the shell's term is vacuously
+// true on a page that lost the element, so something has to notice); that the shell still exposes
+// describeSittings(), which is where the numbers below come from; and that every sitting reads back as
+// booted AFTER the handshake resolved, which is the assertion that the shell's term actually ran — delete
+// the term from _check() and this goes red on the Today page. It reads the shell's own predicate on
+// purpose: a second copy of "booted" living here is the thing that drifts.
+//
+// The history, because it is the reason the term exists. This gate used to wait for the sitting itself,
+// in animation frames, and before that it did not wait at all:
+//
+// Measured 2026-09-17 on a still tree (every file the page is made of hashed identical before and after
+// each arm): two `SHOT_PAGES=today` runs with NOTHING between them already differed on 3 of their 6
+// frames, and the difference was not a rounding one — 102,349 bytes against 163,667 for the same frame.
+// Six loads of /today/ in one process came back 1446 px high once and 900 px high five times, the short
+// ones carrying the page's heading and intro and none of the sitting at all. The first load is the one
+// that rendered: it fetched the fonts over the network and gave the boot time to finish, and every load
+// after it was served from the run's memory and beat the boot. So the gate's own cache decided what the
+// page looked like, and a frame from a fresh run and a frame from a warm one are different pictures.
+//
+// That is ALSO the answer to the order dependency this was looked for under. `npm run sitting` does not
+// reach this gate's frames: the record lives in localStorage, which is per browser context and does not
+// survive a process, and the server-side mirror is off under automation (src/learning/store.js's
+// shouldPost() returns false when navigator.webdriver is true, and progress/ is empty after a sitting
+// run). Both were measured before this was written. The non-reproducibility was never the record.
+//
+// Bound, and it is a real one, and it is the shell's now rather than this file's: the handshake makes the
+// frame a picture of a BOOTED sitting, not of a determined one. It does not pin the plan (nothing in
+// src/components/mastery.js or src/learning/scheduler.js calls Math.random, and the plan from an empty
+// record is the calibration set, so the plan is the same every run — but that is a property of those
+// files, not something the handshake enforces).
+//
+// The pages that MUST carry one. A census that finds nothing to count on the one page whose subject this
+// is would be a check that quietly compared nothing (docs/policies/local-rules.md).
+const SITTING_PAGES = new Set(['today']);
+
+async function readSittings(page, pageId) {
+  const states = await page.evaluate(() => (typeof window.__textbook?.describeSittings === 'function'
+    ? window.__textbook.describeSittings()
+    : null));
+  const problems = [];
+  if (states === null) {
+    problems.push(`window.__textbook.describeSittings() is not a function on this page, so whether the handshake waited for a <tb-sitting> cannot be read. src/shell.js exports it beside describeFigures(); if it was renamed, rename it here too rather than dropping the check, because without it a Today frame is again a photograph of whatever had finished by the time the shutter opened.`);
+    return { problems, found: -1, states: [] };
+  }
+  if (SITTING_PAGES.has(pageId) && !states.length) {
+    problems.push(`this page carries no <tb-sitting> at all, and it is the page whose subject that is. Either the element was renamed or the page lost it, and without it every check below is being made about a page with no study surface on it — and the handshake's own sitting term is vacuously true, so nothing else on the page would say so.`);
+  }
+  for (const [i, s] of states.entries()) {
+    if (!s.booted) {
+      problems.push(`<tb-sitting> ${i + 1} of ${states.length} had still rendered nothing into its .tb-standing section, and the page had ALREADY reported window.__textbook.state === 'ready'. That is the handshake's sitting term not running: src/shell.js's _check() must hold 'loading' until every <tb-sitting> has booted. It reports ${s.steps ?? -1} step(s) from ${s.items ?? -1} item(s).`);
+      continue;
+    }
+    if (!s.readable) problems.push(`<tb-sitting> ${i + 1} of ${states.length} has painted its .tb-standing section but its describe() threw or is missing, so nothing on this line can say how long the sitting is. src/components/mastery.js's describe() reads fields build() creates; a booted sitting must be able to answer it.`);
+  }
+  return { problems, found: states.length, states };
+}
+
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 const server = await startServer({ port: 0, quiet: true });
@@ -806,12 +873,18 @@ try {
         let hooking = { measured: 0, targets: 0, declared: 0, census: [], unread: 0 };
         let geometry = { found: 0, elements: 0, attributes: 0, kinds: [] };
         let fonts = { runs: 0, codePoints: 0, faces: [], measured: 0 };
+        let sittingNote = '';
         const started = Date.now();
         try {
           figures = await openPage(page, `${server.url}${pageDef.path}?eager=1&t=0&theme=${theme}`);
           for (const [id, f] of Object.entries(figures)) {
             if (f.state !== 'ready') problems.push(`figure ${id} (${f.kind}) is in state "${f.state}"${f.error ? `: ${f.error}` : ''}`);
           }
+          const sittings = await readSittings(page, pageDef.id);
+          problems.push(...sittings.problems);
+          // Printed on every line, clean or not: `0 sitting(s)` is a page this census had nothing to
+          // count, and a census that counted nothing must not read as a page that had settled.
+          sittingNote = `, ${sittings.found} sitting(s)${sittings.found > 0 ? ` booted (${sittings.states.map((s) => `${s.steps ?? -1} step(s) from ${s.items ?? -1} item(s)`).join('; ')})` : ''}`;
           const overflow = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
           if (overflow.scrollWidth > overflow.clientWidth + 1) problems.push(`the document overflows horizontally: scrollWidth ${overflow.scrollWidth} > viewport ${overflow.clientWidth}`);
           const census = HOOK_CENSUS[pageDef.id];
@@ -873,7 +946,7 @@ try {
           console.log(`FAIL ${label} (${ms} ms)`);
           for (const p of problems) console.log(`  ${p}`);
         } else {
-          console.log(`ok   ${label} (${ms} ms, ${Object.keys(figures).length} figures ready${captionNote}${hookNote}${geomNote}${fontNote})`);
+          console.log(`ok   ${label} (${ms} ms, ${Object.keys(figures).length} figures ready${sittingNote}${captionNote}${hookNote}${geomNote}${fontNote})`);
         }
       }
     }

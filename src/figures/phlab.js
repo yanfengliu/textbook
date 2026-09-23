@@ -3,7 +3,14 @@
 // reader has chosen. The reader adds acid or base a drop at a time; the three curves separate at once
 // and the buffered ones run flat until their capacity is gone, after which they fall too.
 //
-// Two compositions, chosen by a ResizeObserver on the mount:
+// This is the first figure on `src/figures/lib/bench.js`, migrated as the red-proof that the bench can
+// carry a real one (docs/design/figure-bench.md, step 2). The bench holds the wrapper, the grid of
+// measured panes, the narrow switch, the ResizeObserver and fonts-ready wiring, every control, the live
+// region, the clamped primitives and the handle. What is left below is the chemistry, the three
+// drawings and the sentences — which is the figure. `tools/figure-diff.js` proved the migration
+// byte-identical frame by frame; if you change anything here, run it again.
+//
+// Two compositions, chosen by the bench from one threshold:
 //   wide   — beakers and the window in a left column, the chart filling a taller right column;
 //   narrow — beakers, chart and window stacked, the window at half the token scale so its molecules
 //            stay the size they say they are instead of being scaled down with the stage.
@@ -25,9 +32,10 @@
 // are exact rather than a Henderson-Hasselbalch approximation that would break where it matters most.
 //
 // The figure has no clock of its own: every frame is a function of the drops the reader has added, so
-// setTime only redraws. describe() is documented at the bottom of this file.
-import { el, h, text, C, tint, uid, clamp } from './lib/svg.js';
-import { atom, bond, round, readoutCss, focusMark, INK } from './lib/mol-draw.js';
+// it declares no b.clock() and setTime only redraws. describe() is documented at the bottom of this file.
+import { el, C, tint, clamp } from './lib/svg.js';
+import { atom, bond, round, INK } from './lib/mol-draw.js';
+import { bench } from './lib/bench.js';
 
 export const meta = { kind: 'phlab', title: 'Add acid to water, and to blood', needsWebGL: false, aspect: 16 / 9 };
 
@@ -112,24 +120,15 @@ const BEAKERS = [
 const BEAKER_BY_ID = Object.fromEntries(BEAKERS.map((b) => [b.id, b]));
 
 // ---------------------------------------------------------------- style
+//
+// This figure's own marks, and nothing else. The grid, the panes, the toolbar's groups and divider, the
+// primary mark, the two-width labels, the readout register and the narrow tightening are the bench's,
+// and live once in src/styles/components.css rather than a twelfth time here.
 
 const NARROW_W = 620;
 const NARROW_H = 330;
 
-const CSS = `${readoutCss('.tb-phlab')}
-.tb-phlab { position: absolute; inset: 0; display: grid; box-sizing: border-box;
-  /* fr, not per cent: 42% + 58% + a column gap is wider than the box, so the chart pane hung over the
-     right edge of the stage and the stage cut the end off the legend and the last tick label. */
-  grid-template-columns: minmax(0, 42fr) minmax(0, 58fr);
-  grid-template-rows: var(--ph-beaker-h, 47%) minmax(0, 1fr);
-  padding: 0.35rem 0.45rem var(--ph-pad, 3rem); column-gap: var(--space-3); row-gap: var(--space-2);
-  font-family: var(--font-ui); }
-.tb-phlab .ph-pane { position: relative; min-width: 0; min-height: 0; }
-.tb-phlab .ph-pane > svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.tb-phlab .ph-beakers { grid-column: 1; grid-row: 1; }
-.tb-phlab .ph-inset { grid-column: 1; grid-row: 2; }
-.tb-phlab .ph-chart { grid-column: 2; grid-row: 1 / 3; }
-.tb-phlab svg text { font-family: var(--font-ui); }
+const CSS = `
 .tb-phlab .ph-glass { fill: none; stroke: var(--rule-strong); stroke-width: 1.6; stroke-linejoin: round; }
 .tb-phlab .ph-hit { fill: transparent; cursor: pointer; }
 .tb-phlab .ph-name { fill: var(--ink); font-weight: 600; }
@@ -144,36 +143,11 @@ const CSS = `${readoutCss('.tb-phlab')}
    with it rather than a bordered chip of its own. */
 .tb-phlab .ph-warn { font-weight: 600; stroke: var(--paper); stroke-width: 3px; stroke-linejoin: round;
   paint-order: stroke; }
-/* Two groups on one rule: what goes into the beakers, then which beaker the window opens into. */
-.tb-phlab .fig-toolbar { justify-content: flex-start; }
-.tb-phlab .ph-group { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
-.tb-phlab .ph-sep { width: 1px; min-height: 1.45rem; align-self: center; margin: 0 var(--space-1);
-  background: var(--rule-strong); }
-.tb-phlab .ph-primary { background: var(--paper); border-color: var(--rule-head); font-weight: 600; }
-.tb-phlab .ph-short { display: none; }
-/* The window carries molecules, so it is given the room to draw two rows of them; the chart and the
-   beakers give it up, because at 25fr the counters landed on the equation under them. */
-.tb-phlab.is-narrow { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 28fr) minmax(0, 34fr) minmax(0, 38fr); }
-.tb-phlab.is-narrow .ph-beakers { grid-column: 1; grid-row: 1; }
-.tb-phlab.is-narrow .ph-chart { grid-column: 1; grid-row: 2; }
-.tb-phlab.is-narrow .ph-inset { grid-column: 1; grid-row: 3; }
-.tb-phlab.is-narrow .ph-long { display: none; }
-.tb-phlab.is-narrow .ph-short { display: inline; }
-.tb-phlab.is-narrow .fig-toolbar, .tb-phlab.is-narrow .ph-group { gap: 0.3rem; }
-.tb-phlab.is-narrow .ph-sep { display: none; }
-.tb-phlab.is-narrow .fig-btn { padding: 0.28rem 0.5rem; }
 `;
 
 // ---------------------------------------------------------------- drawing helpers
 
 const fmt = (v, dp = 2) => v.toFixed(dp);
-
-// Inter's average advance is about 0.52 em over mixed-case text, which is close enough to choose a size
-// that fits a box without a measurement pass per label. Returns 0 when even `min` would overrun.
-function fitSize(str, maxWidth, max, min) {
-  const size = Math.min(max, maxWidth / (str.length * 0.53));
-  return size >= min ? size : 0;
-}
 
 // The liquid reads like an indicator: warm towards acid, cool towards alkali, and colourless across a
 // band around 7 so that water at 6.81 and plasma at 7.40 both read as "neither", which they are.
@@ -187,10 +161,14 @@ function liquidColour(pH) {
 // ---------------------------------------------------------------- the figure
 
 export function mount(root, ctx) {
-  const ns = uid('ph');
-  let destroyed = false;
-  let narrow = null;
-  let padPx = 0;
+  const b = bench(root, ctx, {
+    kind: meta.kind,
+    css: CSS,
+    // One threshold, and the bench refuses a figure that declares it and gives no narrow template.
+    narrowBelow: { width: NARROW_W, height: NARROW_H },
+  });
+  // Inter's advance estimate, the text fitter and the clamped primitives all come from the bench now.
+  const fitSize = b.fit;
 
   // ---- state: the whole figure is a function of these three ----
   let drops = []; // +DROP for a drop of acid, -DROP for a drop of base
@@ -203,97 +181,87 @@ export function mount(root, ctx) {
   }
   const mmolAdded = () => curve[curve.length - 1].mmol;
 
-  // ---- DOM ----
-  const wrap = h('div', { class: 'tb-phlab' });
-  wrap.append(h('style', { text: CSS }));
-  const beakerSvg = el('svg', { tabindex: '0', role: 'img', 'aria-label': 'Three beakers: pure water, a bicarbonate buffer and blood plasma, each with its pH. Right arrow adds a drop of the current reagent, left arrow takes one back, Home empties them.' });
-  const chartSvg = el('svg', { 'aria-hidden': 'true' });
-  const insetSvg = el('svg', { 'aria-hidden': 'true' });
-  const beakerPane = h('div', { class: 'ph-pane ph-beakers' }, [beakerSvg]);
-  const chartPane = h('div', { class: 'ph-pane ph-chart' }, [chartSvg]);
-  const insetPane = h('div', { class: 'ph-pane ph-inset' }, [insetSvg]);
+  // ---- panes ----
+  const beakers = b.pane('beakers', {
+    as: 'svg', focus: true,
+    aria: 'Three beakers: pure water, a bicarbonate buffer and blood plasma, each with its pH. Right arrow adds a drop of the current reagent, left arrow takes one back, Home empties them.',
+  });
+  const chart = b.pane('chart', { as: 'svg' });
+  const inset = b.pane('inset', { as: 'svg' });
 
-  const twoLabels = (long, short) => [h('span', { class: 'ph-long', text: long }), h('span', { class: 'ph-short', text: short })];
-  const button = (long, short, aria, onClick, attrs = {}) => {
-    const node = h('button', { class: 'fig-btn', type: 'button', 'aria-label': aria, ...attrs }, twoLabels(long, short));
-    node.addEventListener('click', onClick);
-    return node;
-  };
+  // fr, not per cent: 42% + 58% + a column gap is wider than the box, so the chart pane hung over the
+  // right edge of the stage and the stage cut the end off the legend and the last tick label.
+  // The beaker row's height is --ph-beaker-h, set in draw() from the beakers' own arithmetic below.
+  // The window carries molecules, so the narrow composition gives it the room to draw two rows of them;
+  // the chart and the beakers give it up, because at 25fr the counters landed on the equation under them.
+  b.compose({
+    wide: {
+      columns: 'minmax(0, 42fr) minmax(0, 58fr)',
+      rows: 'var(--ph-beaker-h, 47%) minmax(0, 1fr)',
+      at: { beakers: [1, 1], inset: [1, 2], chart: [2, '1 / 3'] },
+    },
+    narrow: {
+      columns: 'minmax(0, 1fr)',
+      rows: 'minmax(0, 28fr) minmax(0, 34fr) minmax(0, 38fr)',
+      at: { beakers: [1, 1], chart: [1, 2], inset: [1, 3] },
+    },
+  });
 
-  // Every accessible name begins with the button's own long label, so it does not change with the stage
-  // width and a recipe can find the control by the words on it.
-  const btnAcid = button('Add acid', 'Acid', 'Add acid, one drop of strong acid', () => addDrop('acid'), { class: 'fig-btn ph-primary' });
-  const btnBase = button('Add base', 'Base', 'Add base, one drop of strong base', () => addDrop('base'));
-  const btnReset = button('Reset', 'Reset', 'Reset, empty the beakers and clear the chart', () => reset());
-  const beakerBtns = BEAKERS.map((b) => button(`Inside: ${b.short.toLowerCase()}`, b.short, `Inside: ${b.short.toLowerCase()}, show what is in the ${b.name.toLowerCase()} beaker`, () => select(b.id), { 'aria-pressed': String(b.id === beaker) }));
-  const live = h('span', { class: 'fig-chip fig-ui', 'aria-live': 'polite', role: 'status' }, twoLabels('', ''));
-  const group = (kids) => h('div', { class: 'ph-group' }, kids);
-  const toolbar = h('div', { class: 'fig-toolbar fig-ui' }, [
-    group([btnAcid, btnBase, btnReset]),
-    h('span', { class: 'ph-sep', 'aria-hidden': 'true' }),
-    group(beakerBtns),
-  ]);
+  // ---- controls: two groups on one rule — what goes into the beakers, then which beaker the window
+  // opens into. Every accessible name begins with the button's own long label, so it does not change
+  // with the stage width and a recipe can find the control by the words on it.
+  b.action('Add acid', () => addDrop('acid'), { short: 'Acid', aria: 'Add acid, one drop of strong acid', primary: true });
+  b.action('Add base', () => addDrop('base'), { short: 'Base', aria: 'Add base, one drop of strong base' });
+  b.action('Reset', () => reset(), { short: 'Reset', aria: 'Reset, empty the beakers and clear the chart' });
+  b.divide();
+  const pick = b.choice('Beaker', BEAKERS.map((k) => ({
+    id: k.id,
+    label: `Inside: ${k.short.toLowerCase()}`,
+    short: k.short,
+    aria: `Inside: ${k.short.toLowerCase()}, show what is in the ${k.name.toLowerCase()} beaker`,
+  })), (id) => {
+    beaker = id;
+    draw();
+  }, { value: beaker });
 
-  wrap.append(beakerPane, chartPane, insetPane, toolbar, live);
-  // The live chip only has to reach a screen reader; the beakers carry the numbers on the stage.
-  Object.assign(live.style, { position: 'absolute', width: '1px', height: '1px', margin: '-1px', padding: '0', border: '0', overflow: 'hidden', clipPath: 'inset(50%)', whiteSpace: 'nowrap' });
-  root.append(wrap);
+  b.keys({
+    ArrowRight: () => addDrop(reagent),
+    ArrowUp: () => addDrop(reagent),
+    ArrowLeft: undoDrop,
+    ArrowDown: undoDrop,
+    Home: reset,
+    a: () => addDrop('acid'),
+    A: () => addDrop('acid'),
+    b: () => addDrop('base'),
+    B: () => addDrop('base'),
+  });
 
   // ---- reader actions ----
   function addDrop(which) {
     reagent = which;
     if (drops.length >= MAX_DROPS) {
-      announce(`the bench holds ${MAX_DROPS} drops and is full; press Reset to start again`);
+      b.announce(`the bench holds ${MAX_DROPS} drops and is full; press Reset to start again`);
       return;
     }
     const d = which === 'acid' ? DROP : -DROP;
     drops.push(d);
     curve.push(point(mmolAdded() + d));
     draw();
-    announce();
+    b.announce();
   }
   function undoDrop() {
     if (!drops.length) return;
     drops.pop();
     curve.pop();
     draw();
-    announce();
+    b.announce();
   }
   function reset() {
     drops = [];
     curve = [point(0)];
     draw();
-    announce();
+    b.announce();
   }
-  function select(id) {
-    beaker = id;
-    for (let i = 0; i < BEAKERS.length; i += 1) beakerBtns[i].setAttribute('aria-pressed', String(BEAKERS[i].id === beaker));
-    draw();
-  }
-  function announce(msg) {
-    const d = state();
-    live.textContent = msg || `${d.dropsAdded} drops, ${d.mmolAdded > 0 ? `${fmt(d.mmolAdded, 1)} mmol/L acid` : d.mmolAdded < 0 ? `${fmt(-d.mmolAdded, 1)} mmol/L base` : 'nothing added'}. Water ${fmt(d.ph.water)}, buffer ${fmt(d.ph.buffer)}, plasma ${fmt(d.ph.plasma)}${d.inRange ? '' : ', plasma outside 7.35 to 7.45'}.`;
-  }
-
-  const onKey = (e) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      addDrop(reagent);
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      undoDrop();
-    } else if (e.key === 'Home') {
-      e.preventDefault();
-      reset();
-    } else if (e.key === 'a' || e.key === 'A') {
-      e.preventDefault();
-      addDrop('acid');
-    } else if (e.key === 'b' || e.key === 'B') {
-      e.preventDefault();
-      addDrop('base');
-    }
-  };
-  beakerSvg.addEventListener('keydown', onKey);
 
   // ---- derived state, and what describe() reports ----
   function state() {
@@ -317,15 +285,16 @@ export function mount(root, ctx) {
       inRange: ph.plasma >= BAND[0] && ph.plasma <= BAND[1],
       curve: curve.map((p) => ({ ...p })),
       tempC: TEMP_C,
-      layout: narrow ? 'narrow' : 'wide',
     };
   }
 
+  b.onDescribe(state);
+  b.onAnnounce((d) => `${d.dropsAdded} drops, ${d.mmolAdded > 0 ? `${fmt(d.mmolAdded, 1)} mmol/L acid` : d.mmolAdded < 0 ? `${fmt(-d.mmolAdded, 1)} mmol/L base` : 'nothing added'}. Water ${fmt(d.ph.water)}, buffer ${fmt(d.ph.buffer)}, plasma ${fmt(d.ph.plasma)}${d.inRange ? '' : ', plasma outside 7.35 to 7.45'}.`);
+
   // ---------------------------------------------------------------- the beakers
 
-  function drawBeakers(w, hgt) {
-    beakerSvg.setAttribute('viewBox', `0 0 ${w} ${hgt}`);
-    beakerSvg.replaceChildren();
+  function drawBeakers() {
+    const { w, h: hgt } = beakers.clear().box;
     const A = mmolAdded();
     const n = BEAKERS.length;
     const gap = Math.max(6, w * 0.025);
@@ -347,11 +316,11 @@ export function mount(root, ctx) {
     const bodyBot = hgt - readSize - 9;
     const bh = Math.max(24, bodyBot - headH);
 
-    BEAKERS.forEach((b, i) => {
+    BEAKERS.forEach((k, i) => {
       const x = 2 + i * (cw + gap);
       const cx = x + cw / 2;
-      const pH = phOf(b.id, A);
-      const g = el('g');
+      const pH = phOf(k.id, A);
+      const g = beakers.group();
 
       // The glass: a straight-sided beaker, wider than it is tall where the column allows, so it reads
       // as a beaker and not a test tube, with the liquid a little below the lip.
@@ -361,52 +330,49 @@ export function mount(root, ctx) {
       const gy = bodyBot - gh;
       const noteY = gy - 12;
       const nameY = noteY - (showNote ? noteSize + 3 : 0);
-      if (nameSize) g.append(text(cx, nameY, useShort ? b.short : b.name, { anchor: 'middle', class: 'ph-name', 'font-size': fmt(nameSize, 1) }));
-      if (showNote) g.append(text(cx, noteY, b.note, { anchor: 'middle', class: 'ph-note', 'font-size': fmt(noteSize, 1) }));
+      if (nameSize) beakers.text(cx, nameY, useShort ? k.short : k.name, { anchor: 'middle', class: 'ph-name', 'font-size': fmt(nameSize, 1), parent: g });
+      if (showNote) beakers.text(cx, noteY, k.note, { anchor: 'middle', class: 'ph-note', 'font-size': fmt(noteSize, 1), parent: g });
       const r = Math.min(7, gw * 0.12);
       const level = gy + gh * 0.16;
-      g.append(el('path', {
-        d: `M${fmt(gx, 1)} ${fmt(gy, 1)} L${fmt(gx, 1)} ${fmt(gy + gh - r, 1)} Q${fmt(gx, 1)} ${fmt(gy + gh, 1)} ${fmt(gx + r, 1)} ${fmt(gy + gh, 1)} L${fmt(gx + gw - r, 1)} ${fmt(gy + gh, 1)} Q${fmt(gx + gw, 1)} ${fmt(gy + gh, 1)} ${fmt(gx + gw, 1)} ${fmt(gy + gh - r, 1)} L${fmt(gx + gw, 1)} ${fmt(gy, 1)}`,
-        class: 'ph-glass',
-      }));
-      const clipId = `${ns}-clip-${b.id}`;
-      const defs = el('defs', {}, [el('clipPath', { id: clipId }, [el('path', {
+      beakers.path(
+        `M${fmt(gx, 1)} ${fmt(gy, 1)} L${fmt(gx, 1)} ${fmt(gy + gh - r, 1)} Q${fmt(gx, 1)} ${fmt(gy + gh, 1)} ${fmt(gx + r, 1)} ${fmt(gy + gh, 1)} L${fmt(gx + gw - r, 1)} ${fmt(gy + gh, 1)} Q${fmt(gx + gw, 1)} ${fmt(gy + gh, 1)} ${fmt(gx + gw, 1)} ${fmt(gy + gh - r, 1)} L${fmt(gx + gw, 1)} ${fmt(gy, 1)}`,
+        { class: 'ph-glass' }, g,
+      );
+      const clipId = b.uid(`clip-${k.id}`);
+      g.append(el('defs', {}, [el('clipPath', { id: clipId }, [el('path', {
         d: `M${fmt(gx, 1)} ${fmt(level, 1)} L${fmt(gx, 1)} ${fmt(gy + gh - r, 1)} Q${fmt(gx, 1)} ${fmt(gy + gh, 1)} ${fmt(gx + r, 1)} ${fmt(gy + gh, 1)} L${fmt(gx + gw - r, 1)} ${fmt(gy + gh, 1)} Q${fmt(gx + gw, 1)} ${fmt(gy + gh, 1)} ${fmt(gx + gw, 1)} ${fmt(gy + gh - r, 1)} L${fmt(gx + gw, 1)} ${fmt(level, 1)} Z`,
-      })])]);
-      g.append(defs);
-      g.append(el('rect', { x: fmt(gx, 1), y: fmt(level, 1), width: fmt(gw, 1), height: fmt(gy + gh - level, 1), fill: liquidColour(pH), 'clip-path': `url(#${clipId})` }));
-      g.append(el('line', { x1: fmt(gx, 1), y1: fmt(level, 1), x2: fmt(gx + gw, 1), y2: fmt(level, 1), stroke: b.colour, 'stroke-width': 2 }));
+      })])]));
+      beakers.rect(fmt(gx, 1), fmt(level, 1), fmt(gw, 1), fmt(gy + gh - level, 1), { fill: liquidColour(pH), 'clip-path': `url(#${clipId})` }, g);
+      beakers.line(fmt(gx, 1), fmt(level, 1), fmt(gx + gw, 1), fmt(level, 1), { stroke: k.colour, 'stroke-width': 2 }, g);
 
       // The selected beaker is the one the window below opens into: a bracket under it, not colour alone.
-      if (b.id === beaker) {
-        g.append(el('rect', { x: fmt(gx - 5, 1), y: fmt(gy - 4, 1), width: fmt(gw + 10, 1), height: fmt(gh + 8, 1), rx: 8, fill: 'none', stroke: b.colour, 'stroke-width': 1.6, 'stroke-dasharray': '5 4' }));
+      if (k.id === beaker) {
+        beakers.rect(fmt(gx - 5, 1), fmt(gy - 4, 1), fmt(gw + 10, 1), fmt(gh + 8, 1), { rx: 8, fill: 'none', stroke: k.colour, 'stroke-width': 1.6, 'stroke-dasharray': '5 4' }, g);
       }
 
       // The reading, under the glass and clear of the chart's legend in the pane below. The colour goes
       // on as an inline style: as a fill attribute the class rule beat it, and the three readings all
       // came out the same black while the code asked for three colours.
-      g.append(text(cx, hgt - 6, fmt(pH), { anchor: 'middle', class: 'ph-read', 'font-size': fmt(readSize, 1), style: `fill:${b.ink}` }));
+      beakers.text(cx, hgt - 6, fmt(pH), { anchor: 'middle', class: 'ph-read', 'font-size': fmt(readSize, 1), style: `fill:${k.ink}`, parent: g });
       // The plasma beaker says when it has left the band it is supposed to hold. Inside the glass,
       // carrying the paper with it rather than sitting in a bordered chip: the space under the glass
       // belongs to the reading, and at a phone's column width the two would sit on top of each other.
-      if (b.id === 'plasma' && !(pH >= BAND[0] && pH <= BAND[1])) {
+      if (k.id === 'plasma' && !(pH >= BAND[0] && pH <= BAND[1])) {
         const msg = 'outside 7.35–7.45';
         const s = fitSize(msg, gw - 4, 10.4, 8.6);
-        if (s) g.append(text(cx, gy + gh - 8, msg, { anchor: 'middle', class: 'ph-warn', 'font-size': fmt(s, 1), style: `fill:${INK.coral}` }));
+        if (s) beakers.text(cx, gy + gh - 8, msg, { anchor: 'middle', class: 'ph-warn', 'font-size': fmt(s, 1), style: `fill:${INK.coral}`, parent: g });
       }
-      const hit = el('rect', { x: fmt(x, 1), y: 0, width: fmt(cw, 1), height: fmt(hgt, 1), class: 'ph-hit' });
-      hit.addEventListener('click', () => select(b.id));
-      g.append(hit, el('title', { text: `${b.name}: pH ${fmt(pH)}` }));
-      beakerSvg.append(g);
+      const hit = beakers.rect(fmt(x, 1), 0, fmt(cw, 1), fmt(hgt, 1), { class: 'ph-hit' }, g);
+      hit.addEventListener('click', () => pick.set(k.id));
+      g.append(el('title', { text: `${k.name}: pH ${fmt(pH)}` }));
     });
-    beakerSvg.append(focusMark(w, hgt));
+    beakers.focusMark();
   }
 
   // ---------------------------------------------------------------- the chart
 
-  function drawChart(w, hgt) {
-    chartSvg.setAttribute('viewBox', `0 0 ${w} ${hgt}`);
-    chartSvg.replaceChildren();
+  function drawChart() {
+    const { w, h: hgt } = chart.clear().box;
     const tight = w < 300;
     const padL = tight ? 24 : 30;
     const padR = tight ? 8 : 12;
@@ -433,63 +399,67 @@ export function mount(root, ctx) {
     const Y = (p) => padT + ((yHi - p) / (yHi - yLo)) * phh;
 
     const plot = el('g');
-    plot.append(el('rect', { x: fmt(padL, 1), y: fmt(padT, 1), width: fmt(pw, 1), height: fmt(phh, 1), fill: C.paper, stroke: C.rule }));
+    chart.rect(fmt(padL, 1), fmt(padT, 1), fmt(pw, 1), fmt(phh, 1), { fill: C.paper, stroke: C.rule }, plot);
 
     // the blood band, drawn throughout
     const by0 = Y(BAND[1]);
     const by1 = Y(BAND[0]);
-    plot.append(el('rect', { x: fmt(padL, 1), y: fmt(by0, 1), width: fmt(pw, 1), height: fmt(Math.max(1.6, by1 - by0), 1), fill: tint(C.leaf, 26) }));
-    if (phh > 110) plot.append(text(padL + pw - 4, by0 - 3, 'blood, 7.35–7.45', { anchor: 'end', style: `fill:${INK.leaf}`, 'font-size': 9.8, 'font-weight': 600 }));
+    chart.rect(fmt(padL, 1), fmt(by0, 1), fmt(pw, 1), fmt(Math.max(1.6, by1 - by0), 1), { fill: tint(C.leaf, 26) }, plot);
+    if (phh > 110) chart.text(padL + pw - 4, by0 - 3, 'blood, 7.35–7.45', { anchor: 'end', style: `fill:${INK.leaf}`, 'font-size': 9.8, 'font-weight': 600, parent: plot });
 
     // grid and the pH axis; every other unit when a short plot would crowd the labels
     const yStep = yHi - yLo > 8 || phh < 150 ? 2 : 1;
     for (let p = Math.ceil(yLo / yStep) * yStep; p <= yHi; p += yStep) {
       const y = Y(p);
-      plot.append(el('line', { x1: fmt(padL, 1), y1: fmt(y, 1), x2: fmt(padL + pw, 1), y2: fmt(y, 1), stroke: C.rule }));
-      plot.append(text(padL - 5, y + 3.4, String(p), { anchor: 'end', class: 'ph-axis', 'font-size': 10 }));
+      chart.line(fmt(padL, 1), fmt(y, 1), fmt(padL + pw, 1), fmt(y, 1), { stroke: C.rule }, plot);
+      chart.text(padL - 5, y + 3.4, String(p), { anchor: 'end', class: 'ph-axis', 'font-size': 10, parent: plot });
     }
     // the zero line, where nothing has been added yet
-    plot.append(el('line', { x1: fmt(X(0), 1), y1: fmt(padT, 1), x2: fmt(X(0), 1), y2: fmt(padT + phh, 1), stroke: C.ruleStrong, 'stroke-dasharray': '3 3' }));
+    chart.line(fmt(X(0), 1), fmt(padT, 1), fmt(X(0), 1), fmt(padT + phh, 1), { stroke: C.ruleStrong, 'stroke-dasharray': '3 3' }, plot);
     const xStep = x1 - x0 > 45 ? 20 : x1 - x0 > 22 ? 10 : 5;
     for (let m = Math.ceil(x0 / xStep) * xStep; m <= x1; m += xStep) {
       const x = X(m);
-      plot.append(el('line', { x1: fmt(x, 1), y1: fmt(padT + phh, 1), x2: fmt(x, 1), y2: fmt(padT + phh + 4, 1), stroke: C.ruleStrong }));
-      plot.append(text(x, padT + phh + 14, String(m), { anchor: 'middle', class: 'ph-axis', 'font-size': 10 }));
+      chart.line(fmt(x, 1), fmt(padT + phh, 1), fmt(x, 1), fmt(padT + phh + 4, 1), { stroke: C.ruleStrong }, plot);
+      chart.text(x, padT + phh + 14, String(m), { anchor: 'middle', class: 'ph-axis', 'font-size': 10, parent: plot });
     }
 
     // the three curves
-    for (const b of BEAKERS) {
+    for (const k of BEAKERS) {
       let d = '';
-      for (let i = 0; i < curve.length; i += 1) d += `${i ? 'L' : 'M'}${fmt(X(curve[i].mmol), 1)} ${fmt(Y(curve[i][b.id]), 1)}`;
-      plot.append(el('path', { d, fill: 'none', stroke: b.colour, 'stroke-width': b.id === beaker ? 2.8 : 1.8, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', opacity: b.id === beaker ? 1 : 0.72 }));
+      for (let i = 0; i < curve.length; i += 1) d += `${i ? 'L' : 'M'}${fmt(X(curve[i].mmol), 1)} ${fmt(Y(curve[i][k.id]), 1)}`;
+      chart.path(d, { fill: 'none', stroke: k.colour, 'stroke-width': k.id === beaker ? 2.8 : 1.8, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', opacity: k.id === beaker ? 1 : 0.72 }, plot);
       const last = curve[curve.length - 1];
-      plot.append(el('circle', { cx: fmt(X(last.mmol), 1), cy: fmt(Y(last[b.id]), 1), r: b.id === beaker ? 4 : 3, fill: b.colour, stroke: C.paper, 'stroke-width': 1.4 }));
+      chart.circle(fmt(X(last.mmol), 1), fmt(Y(last[k.id]), 1), k.id === beaker ? 4 : 3, { fill: k.colour, stroke: C.paper, 'stroke-width': 1.4 }, plot);
     }
 
     if (curve.length === 1 && phh > 90) {
-      plot.append(text(padL + pw / 2, padT + phh / 2, 'add a drop and the three curves start here', { anchor: 'middle', fill: C.faint, 'font-size': 11 }));
+      // C.soft and not C.faint: this line is the only type inside the plot, and the plot is banded, so it
+      // is the one label here whose ground is not the paper. Measured 2026-09-17: 4.46:1 in the light
+      // theme with 29% of its pixels on a band, against 6.0:1 for the soft ink on the same band. The axis
+      // labels outside the plot keep C.faint, because nothing is painted under them.
+      chart.text(padL + pw / 2, padT + phh / 2, 'add a drop and the three curves start here', { anchor: 'middle', fill: C.soft, 'font-size': 11, parent: plot });
     }
-    chartSvg.append(plot);
+    chart.add(plot);
     // The legend always fits; the title yields to it when the pane is too narrow for both.
-    if (w > 430) chartSvg.append(text(1, 11, `pH against acid added, ${TEMP_C} °C`, { class: 'ph-title', 'font-size': 11 }));
-    chartSvg.append(text(padL + pw - 2, padT + phh + 28, tight ? 'mmol/L H⁺' : 'mmol/L of H⁺ added · negative is OH⁻', { anchor: 'end', fill: C.faint, 'font-size': 9.6 }));
+    if (w > 430) chart.text(1, 11, `pH against acid added, ${TEMP_C} °C`, { class: 'ph-title', 'font-size': 11 });
+    chart.text(padL + pw - 2, padT + phh + 28, tight ? 'mmol/L H⁺' : 'mmol/L of H⁺ added · negative is OH⁻', { anchor: 'end', fill: C.faint, 'font-size': 9.6 });
 
     // A legend on the title line, where no curve ever reaches.
     if (w > 250) {
       const lg = el('g');
       let lx = w - 6;
       for (let i = BEAKERS.length - 1; i >= 0; i -= 1) {
-        const b = BEAKERS[i];
+        const k = BEAKERS[i];
         // 0.62 em, not 0.53: these are capitalised words in Inter and at 0.53 the last of them ('Plasma')
         // ran off the right edge of the stage and was cut.
-        const tw = b.short.length * 6.2;
+        const tw = k.short.length * 6.2;
         lx -= tw;
-        lg.append(text(lx, 11, b.short, { fill: C.soft, 'font-size': 10 }));
+        chart.text(lx, 11, k.short, { fill: C.soft, 'font-size': 10, parent: lg });
         lx -= 17;
-        lg.append(el('line', { x1: fmt(lx, 1), y1: 7.6, x2: fmt(lx + 13, 1), y2: 7.6, stroke: b.colour, 'stroke-width': 2.6, 'stroke-linecap': 'round' }));
+        chart.line(fmt(lx, 1), 7.6, fmt(lx + 13, 1), 7.6, { stroke: k.colour, 'stroke-width': 2.6, 'stroke-linecap': 'round' }, lg);
         lx -= 11;
       }
-      chartSvg.append(lg);
+      chart.add(lg);
     }
   }
 
@@ -600,6 +570,9 @@ export function mount(root, ctx) {
     return { nameSize: fitSize(BEAKERS[2].short, cw - 4, 12.5, 9.6), useShort: true };
   }
 
+  // This is the figure's own arithmetic about its own drawing, and no bench should try to absorb it: it
+  // asks the beakers how tall they need to be so the window below can have the rest. It looks like
+  // layout and it is a statement about what a beaker is.
   function beakerHeight(w) {
     const n = BEAKERS.length;
     const gap = Math.max(6, w * 0.025);
@@ -610,12 +583,11 @@ export function mount(root, ctx) {
     return (nameSize || 10) + 3 + (noteSize > 0 ? noteSize + 3 : 0) + 12 + cw * 0.86 * 1.45 + readSize + 9;
   }
 
-  function drawInset(w, hgt) {
-    insetSvg.setAttribute('viewBox', `0 0 ${w} ${hgt}`);
-    insetSvg.replaceChildren();
+  function drawInset() {
+    const { w, h: hgt } = inset.clear().box;
     const A = mmolAdded();
-    const b = BEAKER_BY_ID[beaker];
-    const scale = narrow ? 0.85 : 1.3;
+    const k = BEAKER_BY_ID[beaker];
+    const scale = b.narrow ? 0.85 : 1.3;
     const titleSize = clamp(w * 0.022, 8.8, 9.8);
     const eqSize = clamp(w * 0.026, 10, 11.4);
     const noteSize = 9.8;
@@ -625,19 +597,19 @@ export function mount(root, ctx) {
     const cellH = 25 * scale;
     const { groups, arrow, note } = population(A);
 
-    const title = `Inside the ${b.name.toLowerCase()}`;
-    insetSvg.append(text(0, titleSize, title, { class: 'mol-rt-title', 'font-size': fmt(titleSize, 1) }));
+    const title = `Inside the ${k.name.toLowerCase()}`;
+    inset.text(0, titleSize, title, { class: 'tb-rt-title', 'font-size': fmt(titleSize, 1) });
     // What the title leaves of the line: capitals letterspaced a tenth of an em run about 0.74 em each.
     const titleRoom = w - title.length * titleSize * 0.74 - 12;
     const headY = titleSize + 5;
-    insetSvg.append(el('line', { x1: 0, y1: fmt(headY, 1), x2: fmt(w, 1), y2: fmt(headY, 1), stroke: C.ruleStrong }));
+    inset.line(0, fmt(headY, 1), fmt(w, 1), fmt(headY, 1), { stroke: C.ruleStrong });
 
     // the foot: the equilibrium this window is a picture of, then what this beaker does about it
     const footTop = hgt - (eqSize + noteSize + 12);
-    insetSvg.append(el('line', { x1: 0, y1: fmt(footTop, 1), x2: fmt(w, 1), y2: fmt(footTop, 1), stroke: C.rule }));
+    inset.line(0, fmt(footTop, 1), fmt(w, 1), fmt(footTop, 1), { stroke: C.rule });
     const eq = beaker === 'water' ? 'H₂O ⇌ H⁺ + OH⁻' : 'HCO₃⁻ + H⁺ ⇌ H₂CO₃ ⇌ CO₂ + H₂O';
-    insetSvg.append(text(0, footTop + eqSize + 6, eq, { class: 'ph-eq', 'font-size': fmt(eqSize, 1) }));
-    insetSvg.append(text(0, hgt - 3, note, { class: 'ph-note', 'font-size': noteSize }));
+    inset.text(0, footTop + eqSize + 6, eq, { class: 'ph-eq', 'font-size': fmt(eqSize, 1) });
+    inset.text(0, hgt - 3, note, { class: 'ph-note', 'font-size': noteSize });
 
     const fieldTop = headY + 9;
     const fieldBot = footTop - 8;
@@ -652,7 +624,7 @@ export function mount(root, ctx) {
     const nameSize = clamp(gw * 0.08, 10, 12.4);
     // On a phone the field heading is the species and its figure and nothing else: the gloss under it
     // costs a whole row of counters, and the counters are what a magnified window is for.
-    const glossSize = narrow ? 0 : 9.8;
+    const glossSize = b.narrow ? 0 : 9.8;
     // The species and its figure share a line where the field is wide enough for both; in the plasma
     // window's three fields it is not, and "CO₂ + H₂O" ran straight into "1.2 mmol/L" at every width.
     // Then the figure takes the line under the species, in every field alike so the counters start on
@@ -660,7 +632,7 @@ export function mount(root, ctx) {
     const est = (s, size) => s.length * size * 0.6;
     const twoLine = groups.some((grp) => est(grp.symbol, nameSize) + est(`${grp.mmol.toFixed(1)} mmol/L`, nameSize - 0.6) + 8 > gw);
     const amountDy = twoLine ? nameSize + 1 : 0;
-    const top = fieldTop + nameSize + amountDy + glossSize + (narrow ? 6 : 12);
+    const top = fieldTop + nameSize + amountDy + glossSize + (b.narrow ? 6 : 12);
     // The counters have the whole field: the gap beside it is sized for the arrow it carries.
     const usable = gw;
     const cols = Math.max(1, Math.floor(usable / cellW));
@@ -679,16 +651,16 @@ export function mount(root, ctx) {
     // overprinted ("BUFFERe drawn per 10 mmol/L").
     const scaleNotes = [`one drawn per ${tokenMmol} mmol/L`, `1 per ${tokenMmol} mmol/L`];
     const scaleNote = scaleNotes.find((s) => fitSize(s, titleRoom, 9.4, 8.4));
-    if (scaleNote) insetSvg.append(text(w, titleSize, scaleNote, { anchor: 'end', class: 'ph-note', 'font-size': 9.4 }));
+    if (scaleNote) inset.text(w, titleSize, scaleNote, { anchor: 'end', class: 'ph-note', 'font-size': 9.4 });
 
     groups.forEach((grp, gi) => {
       const gx = gi * (gw + arrowW);
-      const g = el('g');
+      const g = inset.group();
       // The species and how much of it there is: on one line, the way a table sets a label and a figure,
       // or the figure under the species where the line is too short for both.
-      g.append(text(gx, fieldTop + nameSize, grp.symbol, { class: 'ph-species', 'font-size': fmt(nameSize, 1) }));
-      g.append(text(twoLine ? gx : gx + gw, fieldTop + nameSize + amountDy, `${grp.mmol.toFixed(1)} mmol/L`, { anchor: twoLine ? 'start' : 'end', class: 'ph-amount', 'font-size': fmt(nameSize - 0.6, 1) }));
-      if (glossSize) g.append(text(gx, fieldTop + nameSize + amountDy + glossSize + 4, grp.gloss, { class: 'ph-note', 'font-size': fmt(Math.max(8.6, fitSize(grp.gloss, gw, glossSize, 8.6)), 1) }));
+      inset.text(gx, fieldTop + nameSize, grp.symbol, { class: 'ph-species', 'font-size': fmt(nameSize, 1), parent: g });
+      inset.text(twoLine ? gx : gx + gw, fieldTop + nameSize + amountDy, `${grp.mmol.toFixed(1)} mmol/L`, { anchor: twoLine ? 'start' : 'end', class: 'ph-amount', 'font-size': fmt(nameSize - 0.6, 1), parent: g });
+      if (glossSize) inset.text(gx, fieldTop + nameSize + amountDy + glossSize + 4, grp.gloss, { class: 'ph-note', 'font-size': fmt(Math.max(8.6, fitSize(grp.gloss, gw, glossSize, 8.6)), 1), parent: g });
 
       // A population that exists is always drawn at least once: the figure above carries the real
       // number, and 'none' next to 1.2 mmol/L would be a lie about the chemistry rather than about the
@@ -705,23 +677,23 @@ export function mount(root, ctx) {
         node.setAttribute('transform', `translate(${fmt(x, 1)} ${fmt(y, 1)})`);
         g.append(node);
       }
-      if (n > shown) g.append(text(gx + gw, fieldBot, `+ ${n - shown} more`, { anchor: 'end', class: 'ph-note', 'font-size': 9.4 }));
+      if (n > shown) inset.text(gx + gw, fieldBot, `+ ${n - shown} more`, { anchor: 'end', class: 'ph-note', 'font-size': 9.4, parent: g });
       // An empty field states what the emptiness IS — spent, or not started — where the counters would
       // have begun, rather than the word "none" adrift in the middle of a blank box.
       if (!n) {
         const s = Math.max(9, fitSize(grp.empty, gw, 10.4, 9));
-        g.append(text(gx, top + s * 0.4, grp.empty, {
+        inset.text(gx, top + s * 0.4, grp.empty, {
           'font-size': fmt(s, 1), 'font-weight': grp.spent ? 600 : undefined,
           class: grp.spent ? undefined : 'ph-note', style: grp.spent ? `fill:${INK.coral}` : undefined,
-        }));
+          parent: g,
+        });
       }
-      insetSvg.append(g);
       // The arrow sits with the counters, not with the figures: on the heading line it ran straight into
       // '24.0 mmol/L' on one side and 'CO₂ + H₂O' on the other and the three read as one sentence.
       if (arrow && gi < groups.length - 1) {
         const ax = gx + gw + arrowW / 2;
         const ay = top + cellH * 0.5;
-        const arrowText = (str, y, size) => insetSvg.append(text(ax, y, str, { anchor: 'middle', fill: C.soft, 'font-size': size, 'font-weight': 600 }));
+        const arrowText = (str, y, size) => inset.text(ax, y, str, { anchor: 'middle', fill: C.soft, 'font-size': size, 'font-weight': 600 });
         if (!tight) arrowText(gi === 0 ? arrow : '→', ay + 4, 10.6);
         else if (gi === 0) {
           arrowText(arrow.replace(/\s*→$/, ''), ay - 1, 9.6);
@@ -731,87 +703,41 @@ export function mount(root, ctx) {
     });
   }
 
-  // ---------------------------------------------------------------- layout and drawing
-
-  let ready = false;
-  function paneBox(pane) {
-    const r = pane.getBoundingClientRect();
-    return [Math.max(40, Math.round(r.width)), Math.max(30, Math.round(r.height))];
-  }
+  // ---------------------------------------------------------------- drawing
 
   let beakerPx = 0;
   function draw() {
+    b.redraw();
+  }
+
+  b.onDraw(() => {
     // The beakers ask for the height they need and the window takes the rest of the column. Setting the
     // row height does not change the stage, so the ResizeObserver never sees it and there is no loop;
     // the panes are measured again after it is set, which is what forces the new layout.
-    if (!narrow) {
-      const want = Math.round(beakerHeight(paneBox(beakerPane)[0]));
+    if (!b.narrow) {
+      const want = Math.round(beakerHeight(beakers.box.w));
       if (want !== beakerPx) {
         beakerPx = want;
-        wrap.style.setProperty('--ph-beaker-h', `${want}px`);
+        b.setVar('--ph-beaker-h', `${want}px`);
+        b.remeasure();
       }
     }
-    const [bw, bh] = paneBox(beakerPane);
-    const [cw, ch] = paneBox(chartPane);
-    const [iw, ih] = paneBox(insetPane);
-    drawBeakers(bw, bh);
-    drawChart(cw, ch);
-    drawInset(iw, ih);
-  }
+    drawBeakers();
+    drawChart();
+    drawInset();
+  });
 
-  function applyLayout() {
-    const r = root.getBoundingClientRect();
-    const w = Math.round(r.width);
-    const hgt = Math.round(r.height);
-    if (!w || !hgt) return false;
-    const wantNarrow = w < NARROW_W || hgt < NARROW_H;
-    if (wantNarrow !== narrow) {
-      narrow = wantNarrow;
-      wrap.classList.toggle('is-narrow', narrow);
-    }
-    const pad = Math.round(toolbar.getBoundingClientRect().height) + 20;
-    if (pad > 20 && pad !== padPx) {
-      padPx = pad;
-      wrap.style.setProperty('--ph-pad', `${pad}px`);
-    }
-    return true;
-  }
-
-  function onResize() {
-    if (destroyed) return;
-    if (!applyLayout()) return;
-    draw();
-    if (!ready) {
-      ready = true;
-      announce();
-      ctx.onReady();
-    }
-  }
-
-  const observer = new ResizeObserver(onResize);
-  observer.observe(root);
-  observer.observe(toolbar);
-  const fontsReady = document.fonts?.ready;
-  if (fontsReady) fontsReady.then(() => { if (!destroyed && ready) draw(); });
-  onResize();
-
-  return {
-    destroy() {
-      destroyed = true;
-      observer.disconnect();
-      beakerSvg.removeEventListener('keydown', onKey);
-      root.replaceChildren();
-    },
-    // No clock: the bench is a function of the drops added, so pinning time only redraws.
-    setTime() {
-      if (!destroyed && ready) draw();
-    },
-    setVisible() {},
-    setTheme() {
-      if (!destroyed && ready) draw();
-    },
-    describe() {
-      return state();
-    },
-  };
+  // describe() reports, on top of the frame's id/kind/number/state and the bench's `layout`:
+  //   beaker            which beaker the magnified window is open on
+  //   ph                the three readings, to 2 dp
+  //   reagent           'acid' or 'base' — what the arrow keys will pour next
+  //   dropsAdded        how many drops are in, of either kind
+  //   mmolAdded         net mmol/L of H+ added; negative means base
+  //   speciesMmol       the closed buffer's CO2, H2CO3 and HCO3- populations
+  //   bufferRemaining   0 to 1, capacity left against the reagent now being poured
+  //   exhausted         true at or below a tenth of that capacity
+  //   inRange           whether plasma is still inside 7.35 to 7.45
+  //   curve             every point plotted, so a task can check the shape and not just the end
+  //   tempC             37, because the neutral point below 7 is the chapter's own margin note
+  return b.handle();
 }

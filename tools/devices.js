@@ -44,6 +44,43 @@
 // page was 107 loads and 25 minutes of a 36-minute chain, and the derived matrix is 62 loads with the same
 // verdicts on every (device, page) pair it kept.
 //
+// Bound, and it is the one that moved most on 2026-09-17: every page but one is loaded with its figure
+// clocks PINNED (`t=0`), so this gate mostly judges a page whose figures have each drawn one frame and
+// stopped. Measured, same trimmed run: **181.5 s unpinned against 27.3 s pinned**, 6.6x, with identical
+// findings and identical counts on every load. The time was never this gate's own waiting — a chapter
+// mounts nine animated figures, and every Playwright action waits for the element to hold still across
+// animation frames, so all ~1,400 glossary presses in a run queued behind a page doing continuous work.
+//
+// The residual, stated rather than implied: **animation-induced layout shift is now checked at ONE device
+// shape, not nine.** One load per run stays unpinned — the smallest phone on a chapter page, because a
+// figure whose box grows as it animates does its worst where there is least room — and the run's summary
+// prints `running: 1 of N load(s) …` so nobody reads this gate as covering animation across the matrix. A
+// run trimmed away from that load prints `running: NONE …` rather than staying silent.
+//
+// This was not a coverage decision anyone took: `shot`, `narrow`, `sweep3d`, `legible` and `subpath` all
+// already load at `t=0`, and `devices` was simply the last page gate that did not. What replaces the rest
+// of the crossing is `npm run flow`, which loads this same chapter page unpinned and drives its checks,
+// sort, glossary popover, theme toggle and drawer through real input, and `npm run drive`, which runs all
+// 36 figures unpinned through 216 steps.
+//
+// How this gate waits. It polls the box it is about to measure and never sleeps: `settled` below, and
+// docs/policies/local-rules.md, "A wait in a gate must poll the artefact, never the wall clock". It held
+// four 650 ms sleeps around the drawer, a 300 ms settle after the fonts, and 90 ms after every glossary
+// term — and the terms are the expensive one, because a chapter carries 31 to 71 of them and is loaded on
+// four or five shapes, so one run pressed about 1,400 terms and slept two minutes doing it. The drawer's
+// wait is the only one that had real work behind it (a 400 ms `transform` transition in
+// src/styles/layout.css), and a poll leaves when that transition lands instead of 250 ms after it. Each
+// term's text is now read once for the whole page rather than once per term, which is a protocol round
+// trip per term that bought nothing but a string in a message.
+//
+// A poll is only as true as its readings, and this one has cost the gate two intermittent reds already, so
+// `settled` states all three conditions in its own doc with the numbers behind them: the thing must have
+// STARTED moving (or two reads agree where the press left it), the reading must be the EXACT box and never
+// a rounded copy of it (or two reads agree one pixel short of the destination while it is still sliding —
+// this is the one that made the gate fail about a run in five on 2026-09-17), and a rendered FRAME must
+// separate the two (or they are one reading counted twice). Every `read` handed to `settled` therefore
+// returns `{ v, frame }` from one evaluate, and the assertions round only where they print.
+//
 // What is NOT derived, deliberately: the themes and the engines. A dark page is a different rendering with
 // its own failures, and the two shapes either side of the drawer breakpoint on WebKit and Gecko are where
 // the owner's real-phone defects were reproducible. Cutting either would be a relaxation, not a fix.
@@ -101,6 +138,7 @@ import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { devices as playwrightDevices, chromium, webkit, firefox } from 'playwright';
 import { startServer } from './serve.js';
 import { WEBGL_ARGS, collectErrors, PAGES, BOOKS } from './lib/browser.js';
+import { cacheExternal } from './lib/net-cache.js';
 import { trim, PAGE_HINT } from './lib/trim.js';
 
 // Where this run's evidence goes. `out/devices/` for a single run, unchanged; `out/devices-<label>/` when
@@ -383,11 +421,107 @@ const problems = [];
 const report = [];
 let loads = 0;
 
+// The ONE load that still sees figures running, and why it is where it is.
+//
+// Every other load pins the figure clocks (`t=0`) and is 6.6x faster for it; the `goto` below carries that
+// measurement and what it costs. What it costs is a figure whose box grows as it animates and pushes a
+// glossary popover or the text column off the screen — and that does its worst where there is least room,
+// so this load is the NARROWEST device on a chapter page rather than a comfortable desktop one. A token,
+// deliberately: it means animation-induced layout shift is watched at one device shape, not nine, and the
+// run's summary says so in those words rather than leaving a reader to infer coverage this gate has not
+// got. Chromium and the first theme, so it is exactly one load however the themes are trimmed.
+const UNPINNED_DEVICE = 'phone-small';
+const UNPINNED_PAGE = pages.find((p) => shapeOf(p) === 'chapter' && devicesFor(p).some((d) => d.id === UNPINNED_DEVICE))?.id ?? null;
+let unpinnedLoads = 0;
+
 // Tap on a touch device, click on a mouse one: the point of this gate is to use the input the device
 // actually has, because a drawer that opens on click and not on tap is exactly the defect it hunts.
 async function press(page, locator, kind) {
   if (kind === 'touch') await locator.tap();
   else await locator.click();
+}
+
+// Wait for the page, not for the computer. docs/policies/local-rules.md: "A wait in a gate must poll the
+// artefact, never the wall clock." Everything this gate measures is a rendered box, so "the box is there
+// and has stopped moving" is exactly the condition a measurement needs, and a fixed sleep is an assertion
+// about how fast this machine animates. The drawer carries a 400 ms `transform` transition
+// (src/styles/layout.css: `--dur-slow`), so a sleep long enough to be safe had to be longer than that on
+// every machine; the poll leaves when the box settles and waits longer when the machine is loaded.
+const POLL_MS = 16; // about one frame, and the INTERVAL between samples — never a wait for the artefact
+/**
+ * Poll `read` until the thing it measures has moved away from `from` and then held still across a frame
+ * the browser actually rendered, and return that value.
+ *
+ * `read` returns `{ v, frame }`: `v` is the measurement, and `frame` is `document.timeline.currentTime`,
+ * the clock a CSS transition runs on, read in the SAME evaluate so the pair cannot be torn. A reading
+ * whose `v` is `null` is "not there yet" and never settles it, so a box that appears late is waited for
+ * rather than reported missing — which is the direction a wait must err in. On the budget, the LAST
+ * reading's `v` is returned, including `null`: the caller's own check is what fails, in its own words.
+ *
+ * Three things have to be true before two equal readings mean "stopped", and each of them has been the
+ * defect at some point:
+ *
+ * 1. **It has to have started.** `from` is the reading taken BEFORE the action, and a reading equal to it
+ *    is treated the same way as `null`: not yet. A press hands the work to the browser, and for a frame or
+ *    two afterwards the drawer has not started moving, so two consecutive reads agree at the position it
+ *    started from. Without this guard: `tapping outside the drawer did not close it (x 0)` on six loads
+ *    that had passed for as long as the gate had existed (2026-09-17). Measured on the tree of the same
+ *    day, 400 polls of the drawer: **55 of them (13.75%) saw that pair and this guard is what stopped
+ *    them leaving on it** — it is load-bearing every seventh poll, not a belt for a rare day.
+ * 2. **The reading has to be the box, not a rounded copy of the box.** `Math.round` throws away exactly
+ *    the information that says "still moving". The drawer's ease is `cubic-bezier(0.2, 0.7, 0.2, 1)`
+ *    (src/styles/tokens.css), which spends its last ~90 ms travelling its last ~2 px, so two readings one
+ *    poll apart ROUND to the same integer while the box is still sliding. Measured, same 400 polls:
+ *    **22 (5.5%) returned a value one rounded pixel short of the resting position** — `x -1` where the
+ *    drawer opens to 0, `x -271` where it closes to -272. That short reading is then handed to the NEXT
+ *    wait as its `from`, which disarms guard 1 for the position that actually matters, and the next poll
+ *    leaves on the first pair of reads at the un-moved position. Replaying those same recorded readings
+ *    with a `from` one rounded pixel short: **20 of 200 polls (10%) leave holding `x 0, w 272`** — an open
+ *    drawer, which is the verbatim `following a link left the drawer open over the text (x 0)` that this
+ *    gate was failing about one run in five on. So every `read` here hands back the exact box and the
+ *    messages round; never the other way round.
+ * 3. **A frame has to have happened between them.** `document.timeline.currentTime` only advances when the
+ *    browser renders, so two readings carrying the same `frame` were taken inside one rendering update and
+ *    are equal whatever the box is doing. Bound, because this one is a hole that was measured rather than
+ *    hit: over 100 drawer cycles, **0 of 5,092 pairs taken inside a poll shared a frame** — but **35 of
+ *    100** pairs made of a poll's last reading and the read immediately after it did, so the gap is real
+ *    and the only reason it was not the defect above is the 16 ms between samples. It costs nothing to
+ *    close: the clock rides along in the evaluate that was happening anyway.
+ *
+ * Guards 1 and 2 are one mechanism, and which of them is load-bearing is worth knowing. Replaying the
+ * recorded readings under the FIXED rule but with a `from` one pixel short still leaves **17 to 22 of 200
+ * polls holding an open drawer** — so guard 1 is what stops it, and guard 2's whole job is to make sure
+ * guard 1 is armed with the position the box actually rests at. Neither is redundant.
+ */
+async function settled(page, read, budgetMs, from) {
+  // `from` is REQUIRED, and that is the whole guard against the mistake this function was born from. A
+  // default would let the next caller write the racy version by writing less, and the racy version cannot
+  // be told from the correct one by reading the call — it passes, until the day it does not. Pass `null`
+  // when there is genuinely nothing to move away from, and say why beside the call.
+  if (arguments.length < 4) {
+    throw new Error('settled(page, read, budgetMs, from) needs `from`: the reading taken BEFORE the action, so that a box which has not started moving yet cannot be mistaken for one that has finished. Pass null only where nothing is expected to move, and say why beside the call.');
+  }
+  const start = from === null || from === undefined ? undefined : JSON.stringify(from);
+  const unchanged = (v) => start !== undefined && JSON.stringify(v) === start;
+  const deadline = Date.now() + budgetMs;
+  // A reading with no frame clock cannot answer point 3, and a poll that silently gave up on it would
+  // simply run to its budget on every call — a gate 100 s slower per load and no louder. So it says so.
+  const check = (r) => {
+    if (typeof r?.frame !== 'number') {
+      throw new Error(`settled() was handed a reading whose frame is ${JSON.stringify(r?.frame)} rather than a number. Every read passed to it must return { v, frame } with frame = document.timeline.currentTime, read in the same evaluate as v, because two readings taken inside one rendered frame are equal whatever the thing they measure is doing. What would satisfy this: add \`frame: document.timeline.currentTime\` to the object this read returns.`);
+    }
+    return r;
+  };
+  let last = check(await read());
+  for (;;) {
+    if (Date.now() > deadline) return last.v;
+    await page.waitForTimeout(POLL_MS);
+    const now = check(await read());
+    if (now.v !== null && now.v !== undefined && !unchanged(now.v)
+      && JSON.stringify(now.v) === JSON.stringify(last.v)
+      && now.frame !== last.frame) return now.v;
+    last = now;
+  }
 }
 
 try {
@@ -419,6 +553,12 @@ try {
           const pageName = pageDef.id.replaceAll('/', '-');
           const expect = EXPECT[shapeOf(pageDef)];
           const page = await context.newPage();
+          // This gate does not go through `openPage`, so it installs the external-request cache itself.
+          // It gains less than the other gates do — a context here is shared by the pages of one
+          // (engine, device, theme), so chromium's own HTTP cache already covers the loads after the
+          // first — but the three engines are driven in one process, and the cache is keyed by user agent
+          // as well as URL, so WebKit is never handed the stylesheet Google served to Blink.
+          await cacheExternal(page);
           // What this load is, in one phrase, for a budget message to name. Built here rather than from
           // `where` alone because `where` names the theme only when more than one runs.
           const thisLoad = `${engine.id} at ${device.id} (${widthOf(device)} px, ${device.kind}) on ${pageDef.id}${themes.length > 1 ? `, ${theme} theme` : ''}`;
@@ -478,14 +618,44 @@ try {
             const width = page.viewportSize()?.width ?? device.use.viewport?.width ?? 0;
             phase = 'navigation';
             why = `What would satisfy this: ${NETWORK_BUDGET_MS} ms is the budget for the page's load event at ${device.id}, which is a network wait — the fonts come from Google Fonts and the 3D figures from jsdelivr, so it is the budget that legitimately scales with how busy the network is rather than with the machine. It is unchanged from the single default timeout this gate ran under before, so a load that fails here failed before.`;
-            await runPhase(NETWORK_BUDGET_MS, () => page.goto(`${server.url}${pageDef.path}?theme=${theme}`, { waitUntil: 'load', timeout: NETWORK_BUDGET_MS }));
+            // `t=0` pins every figure's clock, and it is the single largest thing in this gate's budget.
+            // Measured 2026-09-17, `DEVICE_PAGES=biology/ch01 DEVICE_ENGINES=chromium`, five shapes:
+            // **181.5 s unpinned against 27.3 s pinned**, a 6.6x difference, with identical findings and
+            // identical counts on every load (31 terms, 45 prose blocks, 9 wide). The time was never this
+            // gate's own waiting. A chapter page mounts nine figures that animate, and every Playwright
+            // action — `tap`, `click`, `scrollIntoViewIfNeeded` — runs actionability checks that wait for
+            // the element to hold still across animation frames, so each of the ~1,400 glossary presses in
+            // a run was queueing behind a page doing continuous work. Pinning the clock draws each figure
+            // once and stops it; the DOM, the boxes and the terms are the same.
+            //
+            // What this stops checking, stated plainly, because it is a real cut: this gate no longer sees
+            // a page whose figures are RUNNING. A figure whose box grows as it animates, pushing the text
+            // column or a glossary popover off the screen, and a figure that throws a console error after a
+            // few seconds of animation, were both visible here and are not any more. Where that property
+            // now lives: `npm run flow` loads this same chapter page UNPINNED and drives its checks, its
+            // sort, a glossary popover, the theme toggle and the phone drawer through real input, and
+            // `npm run drive` runs all 36 figures unpinned through 216 steps. What is lost is the crossing
+            // of "figures running" with "nine device shapes", which nothing else covers and which nobody
+            // designed — every other page gate in this repository (`shot`, `narrow`, `sweep3d`, `legible`,
+            // `subpath`) already loads with `t=0`, and this gate was the last one that did not.
+            const pinned = !(engine.id === 'chromium' && device.id === UNPINNED_DEVICE && pageDef.id === UNPINNED_PAGE && theme === themes[0]);
+            if (!pinned) unpinnedLoads += 1;
+            await runPhase(NETWORK_BUDGET_MS, () => page.goto(`${server.url}${pageDef.path}?theme=${theme}${pinned ? '&t=0' : ''}`, { waitUntil: 'load', timeout: NETWORK_BUDGET_MS }));
 
             // The handshake (see the header): `window.__textbook.state` becomes 'ready' when the shell
-            // has mounted. This is the page's own JavaScript plus, under ?eager=1, every figure — so it is
-            // renderer work, and its budget is the network one because it runs while fonts are still
-            // arriving.
+            // has mounted, every <tb-sitting> on the page has booted, and, under ?eager=1, every figure
+            // has settled. This is the page's own JavaScript, so it is renderer work, and its budget is
+            // the network one because it runs while fonts are still arriving.
+            //
+            // The sitting term is why /today/ is photographed here at all rather than raced. This gate
+            // does NOT pass ?eager=1, so before that term the handshake here meant the shell alone, and
+            // the shell mounts long before <tb-sitting> has imported five chapters' objectives.js and
+            // items.js. Measured 2026-09-17 on a still tree: three `DEVICE_PAGES=today` runs with nothing
+            // between them, and the tablet-landscape frame came back 109,658 bytes once and 193,829 twice
+            // — the short one carrying the page's heading and none of the study surface, and the gate
+            // calling it clean. The term is in src/shell.js, so nothing here had to know.
             phase = 'the ready handshake (`window.__textbook.state` never became "ready")';
-            why = `What would satisfy this: the shell must mount and set window.__textbook.state to 'ready' within ${NETWORK_BUDGET_MS} ms. The figure states read at the moment of failure are printed beside this message, so a figure stuck in 'loading' is visible rather than inferred. This budget is unchanged from the single default timeout this gate ran under before.`;
+            why = `What would satisfy this: the shell must mount, every <tb-sitting> must boot, and window.__textbook.state must become 'ready' within ${NETWORK_BUDGET_MS} ms. The figure and sitting states read at the moment of failure are printed beside this message, so a figure stuck in 'loading' or a sitting that never painted is visible rather than inferred. This budget is unchanged from the single default timeout this gate ran under before.`;
             // `page.waitForFunction` does accept a timeout option, but the budget is enforced by the timer
             // above for every phase alike, so the call sites stay uniform and there is no second mechanism
             // to get wrong.
@@ -494,10 +664,16 @@ try {
               // never reached a state. The read happens here, inside the failure path, so a healthy load
               // pays nothing for it and a page that will not answer the probe still reports the phase.
               const figures = await page.evaluate(() => Object.fromEntries(Object.entries(window.__textbook?.figures ?? {}).map(([k, v]) => [k, v.state]))).catch((probe) => `could not be read: ${probe.message.split('\n')[0]}`);
+              // And the other half of the handshake, read the same way and for the same reason: a page
+              // held in 'loading' by an unbooted <tb-sitting> must say so here rather than leave a reader
+              // looking at an empty figure list and concluding the shell never mounted.
+              const sittings = await page.evaluate(() => (typeof window.__textbook?.describeSittings === 'function'
+                ? window.__textbook.describeSittings().map((s) => ({ index: s.index, booted: s.booted, steps: s.steps ?? null, items: s.items ?? null }))
+                : 'window.__textbook.describeSittings() is not a function on this page')).catch((probe) => `could not be read: ${probe.message.split('\n')[0]}`);
               // The phase marker is kept at the front of the message: this detail is appended AFTER the
               // sentence runPhase wrote, and the catch below keys the marker on the first characters, so
               // a marker pushed into the middle would make the same message report itself twice.
-              const detail = ` Figure states at that moment: ${JSON.stringify(figures)}.`;
+              const detail = ` Figure states at that moment: ${JSON.stringify(figures)}. Sittings at that moment: ${JSON.stringify(sittings)}.`;
               throw err.message.startsWith(PHASE_TIMEOUT_FLAG)
                 ? new Error(`${PHASE_TIMEOUT_FLAG}${err.message.slice(PHASE_TIMEOUT_FLAG.length)}${detail}`)
                 : new Error(`${err.message}${detail}`);
@@ -513,7 +689,14 @@ try {
             phase = 'the font wait (`document.fonts.ready` never resolved)';
             why = `What would satisfy this: every font the page asks for must finish loading. This is not the screenshot's budget — the same wait happens inside page.screenshot, which is why a stall there used to be reported as a screenshot timeout — and ${FONTS_BUDGET_MS} ms is roughly 4000 times what this wait has measured (2 to 7 ms) since the navigation cannot complete before the stylesheets do.`;
             await runPhase(FONTS_BUDGET_MS, () => page.evaluate(() => document.fonts?.ready));
-            await page.waitForTimeout(300);
+            // Then let the layout settle, by watching it settle rather than by sleeping 300 ms, and with
+            // `from` null on purpose: nothing has been pressed here, so nothing is expected to move. The
+            // measure is the document's own width against the viewport's, which is the first thing the
+            // suites below read, so a width that has stopped changing is the settled page.
+            await settled(page, () => page.evaluate(() => ({
+              v: { w: document.documentElement.scrollWidth, h: document.documentElement.scrollHeight },
+              frame: document.timeline.currentTime,
+            })), 3_000, null);
 
             // --- the document must not scroll sideways ---
             // From here to the screenshot, the phases are the suites' own names, each stated before its
@@ -613,14 +796,42 @@ try {
                 found.push(`at ${width} px the rail is shown, so the drawer button should not also be there`);
               }
               if (width < DRAWER_BELOW && toggleVisible) {
-                const closed = await page.evaluate((sel) => {
-                  const r = document.querySelector(sel.rail).getBoundingClientRect();
-                  return { x: Math.round(r.x), w: Math.round(r.width) };
+                // One reader for the drawer's box, used by every wait below AND by every `from` handed to
+                // one. Each wait is given the reading taken BEFORE its press as `from`, so a box that has
+                // not started moving yet cannot be mistaken for one that has finished: two reads agreeing
+                // at the position the press was supposed to change is exactly what a settle-only poll
+                // calls settled, and it produced six false `did not close it` failures on its first run
+                // (2026-09-17).
+                //
+                // The box is EXACT here — no `Math.round` — and the messages below round instead. Rounding
+                // a reading that a wait compares is what made this gate fail about one run in five three
+                // days later: the drawer's ease spends its last ~90 ms travelling its last ~2 px, so two
+                // readings a poll apart round to one integer while the box is still sliding, the wait
+                // leaves one pixel short, and that short reading becomes the next wait's `from`. `settled`
+                // above carries the measurements. A `from` taken with a DIFFERENT reader from the poll's
+                // own would break the guard just as quietly, which is why there is one reader and
+                // `railBox` is built on it.
+                const railRead = () => page.evaluate((sel) => {
+                  const el = document.querySelector(sel.rail);
+                  // A missing rail THROWS rather than reading as "not there yet": the evaluate this
+                  // replaced threw on the same condition, and a poll that treated it as a box still on
+                  // its way would sit out its budget and hand the caller a null to crash on.
+                  if (!el) throw new Error(`nothing matches ${sel.rail}, so the drawer's position cannot be read`);
+                  const r = el.getBoundingClientRect();
+                  // `document.timeline.currentTime` rides along in the same evaluate: it is the clock the
+                  // drawer's transition runs on, and two readings that carry the same value were taken
+                  // inside one rendered frame and are equal whatever the box is doing.
+                  return { v: { x: r.x, w: r.width }, frame: document.timeline.currentTime };
                 }, SEL);
-                if (closed.x + closed.w > 1) found.push(`the drawer is already on screen before it is opened (x ${closed.x}, width ${closed.w})`);
+                const railBox = async () => (await railRead()).v;
+
+                const closed = await railBox();
+                if (closed.x + closed.w > 1) found.push(`the drawer is already on screen before it is opened (x ${Math.round(closed.x)}, width ${Math.round(closed.w)})`);
 
                 await press(page, page.locator(SEL.toggle), device.kind);
-                await page.waitForTimeout(650);
+                // The drawer is a 400 ms `transform` transition (src/styles/layout.css), and its box is
+                // what every assertion below reads, so the wait is for that box to stop moving.
+                await settled(page, railRead, 5_000, closed);
                 const opened = await page.evaluate((sel) => {
                   const rail = document.querySelector(sel.rail);
                   const r = rail.getBoundingClientRect();
@@ -661,9 +872,10 @@ try {
                 // Tapping outside must dismiss it. This is the one a reader tries first.
                 const outsideX = Math.min(width - 8, Math.round(width * 0.92));
                 const outsideY = Math.round(page.viewportSize().height * 0.6);
+                const beforeOutside = await railBox();
                 if (device.kind === 'touch') await page.touchscreen.tap(outsideX, outsideY);
                 else await page.mouse.click(outsideX, outsideY);
-                await page.waitForTimeout(650);
+                await settled(page, railRead, 5_000, beforeOutside);
                 const afterOutside = await page.evaluate((sel) => {
                   const r = document.querySelector(sel.rail).getBoundingClientRect();
                   return { x: Math.round(r.x), w: Math.round(r.width) };
@@ -671,12 +883,14 @@ try {
                 if (afterOutside.x + afterOutside.w > 1) found.push(`tapping outside the drawer did not close it (x ${afterOutside.x}); a reader who changes their mind is stuck with it over the text`);
 
                 // And following a link must close it, go somewhere, and leave the page scrollable.
+                const beforeReopen = await railBox();
                 await press(page, page.locator(SEL.toggle), device.kind);
-                await page.waitForTimeout(650);
+                await settled(page, railRead, 5_000, beforeReopen);
                 if (opened.links > 0) {
                   const link = page.locator(`${SEL.rail} a`).first();
+                  const beforeLink = await railBox();
                   await press(page, link, device.kind);
-                  await page.waitForTimeout(650);
+                  await settled(page, railRead, 5_000, beforeLink);
                   const closedAgain = await page.evaluate((sel) => {
                     const r = document.querySelector(sel.rail).getBoundingClientRect();
                     return { x: Math.round(r.x), w: Math.round(r.width), hash: location.hash, locked: getComputedStyle(document.documentElement).overflow === 'hidden' };
@@ -690,7 +904,7 @@ try {
 
             // --- anything that pops over the text must stay on screen ---
             phase = 'the glossary-popover phase';
-            why = `What would satisfy this: every term on the page is pressed and its popover measured, 90 ms apart, and the count is printed on the load's own line. ${SUITE_BUDGET_MS} ms bounds the whole walk; a failure inside it names the term it was reading, because the loop builds that label for its own messages.`;
+            why = `What would satisfy this: every term on the page is pressed and its popover measured once the popover's own box has settled, and the count is printed on the load's own line. ${SUITE_BUDGET_MS} ms bounds the term count; a failure inside the walk names the term it was reading, because the loop builds that label for its own messages.`;
             const terms = await runPhase(SUITE_BUDGET_MS, () => page.locator(SEL.term).count());
             counts.terms = terms;
             if (expect.terms && !terms) found.push(`nothing matches ${SEL.term} on this chapter page, so no glossary popover was opened`);
@@ -701,27 +915,43 @@ try {
               // space on either side of it. A gate that samples the ends cannot see the middle. Each
               // message names the term by its place and its text, because "the last" was said of every
               // term but the first.
+              // Every term's own text in ONE read rather than a protocol round trip per term. This walk is
+              // the largest single cost in the gate — a chapter carries 31 to 71 terms and is loaded on
+              // four or five shapes — and the text is used for nothing but naming the term in a message.
+              const termTexts = await page.evaluate((sel) => [...document.querySelectorAll(sel)].map((e) => (e.textContent || '').trim().slice(0, 24)), SEL.term);
               for (let which = 0; which < terms; which += 1) {
                 const t = page.locator(SEL.term).nth(which);
-                const text = ((await t.textContent()) || '').trim().slice(0, 24);
-                const label = `term ${which + 1} of ${terms} ("${text}")`;
+                const label = `term ${which + 1} of ${terms} ("${termTexts[which] ?? ''}")`;
                 await t.scrollIntoViewIfNeeded();
-                await press(page, t, device.kind);
-                await page.waitForTimeout(90);
-                const pop = await page.evaluate((sel) => {
+                // One reader for the popover's box, used by the wait below and by the reading it is armed
+                // with — the same rule as the drawer's `railRead` above, and for the same reason: a `from`
+                // taken with a different reader, or rounded where the poll's own is not, is a guard that
+                // reads as present and does nothing. Exact numbers here, rounded at the messages below.
+                const popRead = () => page.evaluate((sel) => {
                   const p = document.querySelector(sel);
-                  if (!p) return null;
-                  const r = p.getBoundingClientRect();
+                  const r = p ? p.getBoundingClientRect() : null;
                   return {
-                    left: Math.round(r.left), right: Math.round(r.right), width: Math.round(r.width),
-                    overRight: Math.round(r.right - innerWidth), overLeft: Math.round(-r.left),
+                    v: r ? { left: r.left, right: r.right, width: r.width, overRight: r.right - innerWidth, overLeft: -r.left } : null,
+                    frame: document.timeline.currentTime,
                   };
                 }, SEL.pop);
+                // What is on screen before the press, so the wait below cannot settle on it. Normally
+                // `null` — Escape at the foot of this loop closes the previous term's definition — but a
+                // definition that did not close would otherwise be measured again under the next term's
+                // name, and every message here is built to name the term it is about.
+                const popBefore = (await popRead()).v;
+                await press(page, t, device.kind);
+                // The popover is placed synchronously as it opens — src/components/term.js `place()`, no
+                // transition and no deferred frame — so this settles on its first pair of reads. It is a
+                // poll rather than a single read because a browser that has not laid out yet has to be
+                // waited for, never reported as a definition that did not open. Two seconds, because the
+                // budget is what a loaded machine gets and this loop is what used to assert it was idle.
+                const pop = await settled(page, popRead, 2_000, popBefore);
                 if (!pop) {
                   found.push(`tapping glossary ${label} opened no definition (nothing matches ${SEL.pop})`);
                 } else {
-                  if (pop.overRight > 1) found.push(`a glossary definition hangs ${pop.overRight} px off the right edge (${label}, width ${pop.width} in a ${width} px viewport)`);
-                  if (pop.overLeft > 1) found.push(`a glossary definition hangs ${pop.overLeft} px off the left edge (${label})`);
+                  if (pop.overRight > 1) found.push(`a glossary definition hangs ${Math.round(pop.overRight)} px off the right edge (${label}, width ${Math.round(pop.width)} in a ${width} px viewport)`);
+                  if (pop.overLeft > 1) found.push(`a glossary definition hangs ${Math.round(pop.overLeft)} px off the left edge (${label})`);
                 }
                 // Close it before reaching for the next term: an open definition covers the line below it,
                 // and the next tap then waits for a target it can never hit.
@@ -968,14 +1198,24 @@ const floorLine = floorRan.length
         : `both were selected, and the engines are why it did not run: only ${ENGINES.filter((e) => e.full).map((e) => e.id).join(', ')} carries the full device matrix, and the others load the two shapes either side of the drawer breakpoint over ${CROSS_PAGES.join('/')} only`
   }`;
 
+// How much of this run saw figures running, in plain words, so that nobody reads the gate as covering
+// animation across nine shapes when it covers it on one. A report and never a failure — a run trimmed away
+// from that page or that device legitimately has none — but a run with none says so, because "0 of 62" and
+// "1 of 62" are different claims and only one of them is this gate's.
+const animationLine = unpinnedLoads
+  ? `${unpinnedLoads} of ${loads} load(s) ran with its figures RUNNING (chromium, ${UNPINNED_DEVICE}, ${UNPINNED_PAGE}, ${themes[0]} theme); every other load pinned every figure clock with t=0. A figure whose box grows as it animates and pushes a popover or the text column off the screen is therefore watched at ONE device shape, not nine — npm run flow drives this same page unpinned, and npm run drive runs all 36 figures unpinned.`
+  : `NONE of this run's ${loads} load(s) ran with its figures running, so animation-induced layout shift was not checked at all. The one load that does it is chromium on ${UNPINNED_DEVICE} at ${UNPINNED_PAGE === null ? 'a chapter page (this tree has none in the run)' : UNPINNED_PAGE} in the first theme, and this run's trimming excluded it.`;
+
 if (problems.length) {
   console.error(`
 FAIL: ${problems.length} problem(s) over ${coverage}; see ${OUT}/report.json
 pages:   ${pagesLine}
-floor:   ${floorLine}`);
+floor:   ${floorLine}
+running: ${animationLine}`);
   process.exit(1);
 }
 console.log(`
 devices: ${coverage}, all clean; screenshots in ${OUT}/
 pages:   ${pagesLine}
-floor:   ${floorLine}`);
+floor:   ${floorLine}
+running: ${animationLine}`);

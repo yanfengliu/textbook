@@ -17,12 +17,14 @@
     "inspect": "node --require ./tools/zj-quiet-browser.cjs tools/inspect.js",
     "flow": "node --require ./tools/zj-quiet-browser.cjs tools/flow.js",
     "drive": "node --require ./tools/zj-quiet-browser.cjs tools/drive.js",
+    "pinned": "node --require ./tools/zj-quiet-browser.cjs tools/pinned.js",
     "review": "node --require ./tools/zj-quiet-browser.cjs tools/review.js",
     "progress:export": "node --require ./tools/zj-quiet-browser.cjs tools/progress.js export",
     "progress:import": "node --require ./tools/zj-quiet-browser.cjs tools/progress.js import",
     "subpath": "node --require ./tools/zj-quiet-browser.cjs tools/subpath.js",
     "sitting": "node --require ./tools/zj-quiet-browser.cjs tools/sitting.js",
     "narrow": "node --require ./tools/zj-quiet-browser.cjs tools/narrow.js",
+    "legible": "node --require ./tools/zj-quiet-browser.cjs tools/legible.js",
     "devices": "node --require ./tools/zj-quiet-browser.cjs tools/devices.js"
   },
   "engines": {

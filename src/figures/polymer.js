@@ -198,7 +198,10 @@ function aminoAcid({ role, side }) {
   }
   g.append(atom(o2[0], o2[1], 'O', A_O));
   g.append(atom(caH[0], caH[1], 'H', A_H, { label: false }));
-  g.append(el('circle', { cx: rGroup[0], cy: rGroup[1], r: 11, fill: tint(C.leaf, 22), stroke: C.leaf, 'stroke-width': 1.4 }));
+  // 14, not 22: the side chain's name is written ON this disc in --leaf-text, and at 22 that pair is
+  // 4.24:1 in the light theme (measured 2026-09-16, npm run legible). Mixed further towards the paper it
+  // is 4.73:1, and the ring keeps the full leaf so the disc still reads as a side chain.
+  g.append(el('circle', { cx: rGroup[0], cy: rGroup[1], r: 11, fill: tint(C.leaf, 14), stroke: C.leaf, 'stroke-width': 1.4 }));
   g.append(text(rGroup[0], rGroup[1] + 3.6, side, { anchor: 'middle', style: `fill:${INK.leaf}`, 'font-size': 10, 'font-weight': 700 }));
   g.append(atom(cc[0], cc[1], 'C', A_C));
   g.append(atom(ca[0], ca[1], 'C', A_C));
@@ -280,6 +283,11 @@ const CSS = `${readoutCss('.tb-polymer')}
 .tb-polymer .pm-num { fill: var(--ink-faint); font-weight: 600; }
 .tb-polymer .pm-read { fill: var(--ink); font-variant-numeric: lining-nums tabular-nums; font-weight: 600; }
 .tb-polymer .pm-note { fill: var(--ink-faint); }
+/* The halo scale, tree and levels use for a label over a drawing. The chain's two end labels take it
+   because the strip is short and they are set hard against the heading rule above the chain: measured
+   2026-09-17, "N end" was 3.91:1 light and 3.88:1 dark with a third of its glyphs standing on that rule.
+   Where nothing is drawn under a label the halo is the stage's own paper and cannot be seen. */
+.tb-polymer .pm-halo { paint-order: stroke; stroke: var(--paper-2); stroke-width: 3px; stroke-linejoin: round; }
 /* Three groups on one rule: run the reaction, change the chain, choose the partners. */
 .tb-polymer .fig-toolbar { justify-content: flex-start; }
 .tb-polymer .pm-group { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
@@ -853,8 +861,8 @@ export function mount(root, ctx) {
         g.append(el('circle', { cx: fmt(x, 1), cy: fmt(yAt(i), 1), r: fmt(r, 1), fill: tint(C.coral, 26), stroke: C.coral, 'stroke-width': 1.8 }));
       }
       if (n) {
-        g.append(text(x0, yAt(0) - r - 6, 'N end', { anchor: 'middle', class: 'pm-note', 'font-size': 9.6 }));
-        g.append(text(x0 + (n - 1) * stepX, yAt(n - 1) + r + 14, 'C end', { anchor: 'middle', class: 'pm-note', 'font-size': 9.6 }));
+        g.append(text(x0, yAt(0) - r - 6, 'N end', { anchor: 'middle', class: 'pm-note pm-halo', 'font-size': 9.6 }));
+        g.append(text(x0 + (n - 1) * stepX, yAt(n - 1) + r + 14, 'C end', { anchor: 'middle', class: 'pm-note pm-halo', 'font-size': 9.6 }));
       }
     }
     stripSvg.append(g);

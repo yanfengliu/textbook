@@ -139,7 +139,7 @@ const CSS = `
 .tb-homeo .hm-state::before { content: ""; width: 0.6em; height: 0.6em; border-radius: 50%; background: var(--hm-dot, var(--ink-faint)); }
 .tb-homeo .hm-state[data-mode="hot"] { --hm-dot: var(--coral); }
 .tb-homeo .hm-state[data-mode="cold"] { --hm-dot: var(--water); }
-.tb-homeo .hm-open { color: var(--coral); border-color: var(--coral); }
+.tb-homeo .hm-open { color: var(--coral-text); border-color: var(--coral); }
 .tb-homeo .hm-open[hidden] { display: none; }
 .tb-homeo svg text { font-family: var(--font-ui); }
 .tb-homeo .hm-title { font-size: 9.5px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; fill: var(--ink-faint); }
@@ -150,8 +150,8 @@ const CSS = `
 .tb-homeo .hm-active { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .tb-homeo .hm-loopword { font-size: 9.5px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; fill: var(--ink-faint); }
 .tb-homeo .hm-cut { fill: none; stroke: var(--coral); stroke-width: 2; stroke-linecap: round; }
-.tb-homeo .hm-cutlabel { font-size: 10px; fill: var(--coral); font-weight: 600; }
-.tb-homeo .fig-btn.is-live { border-color: var(--coral); color: var(--coral); }
+.tb-homeo .hm-cutlabel { font-size: 10px; fill: var(--coral-text); font-weight: 600; }
+.tb-homeo .fig-btn.is-live { border-color: var(--coral); color: var(--coral-text); }
 .tb-homeo .fig-toolbar { justify-content: flex-start; }
 .tb-homeo .hm-short { display: none; }
 /* The narrow chain. Sizes come from the layout pass in device pixels, so only colour lives here. */
@@ -412,6 +412,12 @@ function layoutNarrow(nd, w, hgt) {
 export function mount(root, ctx) {
   const ns = uid('hm');
   const reduced = Boolean(ctx.reducedMotion);
+  // A pinned clock is not advanced by any control. `?t=` pins every figure on the page and the gates take
+  // their frames that way, so this line alone was only true until something pressed Play — which is what
+  // `npm run pinned` presses. Written as a function rather than read once because the frame may pin a
+  // figure that mounted unpinned. `undefined` counts as unpinned as well as `null`: a ctx that omits the
+  // field must leave the simulation playable for a reader.
+  const pinned = () => ctx.pinnedTime !== null && ctx.pinnedTime !== undefined;
   let palette = ctx.palette;
   let t = ctx.pinnedTime ?? 0;
   let playing = !reduced && ctx.pinnedTime === null;
@@ -883,6 +889,11 @@ export function mount(root, ctx) {
   }
 
   function setPlaying(next) {
+    // Starting is refused while the clock is pinned, and refused rather than recorded: that is this
+    // repo's settled shape (secretion, gradient-battery, bilayer, polymer), and a button reading Pause
+    // over a simulation that is not moving is the worse of the two lies. Stopping is never refused, so
+    // setTime() still calls in. The Space key comes through here too.
+    if (next && pinned()) return;
     playing = next;
     setLabel(btnPlay, playing ? 'Pause' : 'Play', null, playing ? 'Pause the simulation' : 'Play the simulation');
     if (playing) schedule();
@@ -908,10 +919,15 @@ export function mount(root, ctx) {
 
   function episode(kind) {
     record(kind);
-    if (reduced) seek(t + JUMP);
+    // The pinned check comes before the reduced-motion branch, because that branch's 90-second jump
+    // stands in for playing and moves the clock just as surely — the subtlety secretion was fixed for.
+    // Pinned, the episode is recorded and drawn and nothing else, so the frame stays the one `?t=` asked
+    // for.
+    if (pinned()) draw();
+    else if (reduced) seek(t + JUMP);
     else {
       draw();
-      if (!playing && ctx.pinnedTime === null) setPlaying(true);
+      if (!playing) setPlaying(true);
     }
   }
 
