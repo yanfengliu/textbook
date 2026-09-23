@@ -1,0 +1,477 @@
+# Chapter 8 — figure brief
+
+Eight figures, in the order they appear in `index.html`. The figure number is fixed by that order and the prose cites every one of them by number, so the order does not change without editing the prose.
+
+| # | Kind | Id | Section | WebGL | `aspect` | `narrowAspect` |
+|---|---|---|---|---|---|---|
+| 8.1 | `genetic-material` | `fig-genetic-material` | opener, cited in 8.1 | no | 16 / 9 | 4 / 5 |
+| 8.2 | `helix-lab` | `fig-helix-lab` | 8.2 | no | 16 / 9 | 4 / 5 |
+| 8.3 | `meselson-stahl` | `fig-meselson-stahl` | 8.3 | no | 16 / 9 | 4 / 5 |
+| 8.4 | `replication-fork` | `fig-fork` | 8.4 | no | 21 / 9 | 3 / 4 |
+| 8.5 | `fidelity` | `fig-fidelity` | 8.5 | no | 16 / 9 | 4 / 5 |
+| 8.6 | `nucleosome3d` | `fig-nucleosome` | 8.6 | **yes** | 16 / 10 | 1 |
+| 8.7 | `chromosome-end` | `fig-telomere` | 8.7 | no | 16 / 9 | 4 / 5 |
+| 8.8 | `genome-ledger` | `fig-genome` | 8.8 | no | 16 / 9 | 3 / 4 |
+
+Kind ids and figure ids are clear of every other chapter's, checked on 2026-09-22 against `src/figures/registry.js` on `origin/ch06-07` (chapters 1 to 5 registered, and the 資治通鑑 book) and against every `<tb-figure>` in chapters 6 and 7, which are written but not yet registered. Two names were chosen against the obvious one. The DNA helix of chapter 1 is `dna3d` with id `fig-dna`, so nothing here is called `dna-anything`, and the §8.2 figure is `helix-lab` — the book's name for a bench the reader builds on, as `bondlab`, `foldlab` and `phlab` are. And `replication-fork` is spelt out in full because chapter 6 has a `rubisco-fork`, which a bare `fork` would sit next to in the registry and mean nothing beside.
+
+**One WebGL figure, deliberately, as chapters 4, 5 and 7 each have one.** A nucleosome is a left-handed coil of DNA around a two-fold symmetric core, and the direction of the wrap, the one and two-thirds turns, and where the DNA enters and leaves are facts about arrangement in space that a reader who cannot turn it over has to take on trust. The other seven subjects are experiments, patterns, lines of type and ledgers, which a composed 2D view states better than a perspective one. `dna3d`, chapter 1's helix, already answers "what does the molecule look like"; nothing in this chapter redraws it.
+
+## Palette: this chapter asks for nothing new
+
+Read the comments above `ORGANELLES`, `MEMBRANE` and `METABOLISM` in `src/palette.js` before adding anything, and then do not add anything. Every mark this chapter needs is already in a table, and three of them have to be taken from the right one.
+
+- **The four bases are `BASES`** — adenine `coral`, thymine `gold`, guanine `water`, cytosine `violet` — as chapter 1's `dna3d` draws them, the warm pair and the cool pair. Every figure that draws a base draws it in that colour with its letter.
+- **Uracil has no colour of its own, and must not be given one.** It is drawn in thymine's `gold` with **U** written on it and **without the methyl group** that thymine carries. §8.5's argument is that uracil is thymine less one methyl group, and that the difference is exactly what a repair enzyme reads; a figure that gives uracil its own hue has coloured the difference instead of drawing it. In 8.5's "uracil instead of thymine" scene the point is that a deaminated cytosine becomes indistinguishable from the genuine uracils around it — and with one colour for both it is, on the stage as in the cell.
+- **The backbones are chapter 1's.** A parental strand is `inkSoft` at the weight `dna3d` uses. **A new strand is told from an old one by value and weight, not by a hue**: `ink`, one step heavier. The five accents are already the bases, and a new strand in any of them would claim a base's identity. **An RNA primer** is the new strand's stroke broken into short dashes, with its bases, where they are drawn, carrying U; its label says RNA.
+- **In 8.3 a strand's nitrogen is its stroke weight.** A strand made with <sup>15</sup>N is drawn at twice the weight of one made with <sup>14</sup>N, in the same ink, and labelled. Both are nitrogen, which is the point of the experiment: an isotope is the same element. The bands in the tube are ink on the tube's pale ground, as the dark bands of an ultraviolet photograph are.
+- **An isotope takes its element's colour from `ELEMENTS` in `src/figures/lib/chem-atoms.js`** and is told apart by the mass number written on it: <sup>32</sup>P in phosphorus's `violet`, <sup>35</sup>S in sulfur's `gold`, <sup>15</sup>N and <sup>14</sup>N in nitrogen's `water`. Hershey and Chase's labels and Meselson and Stahl's are chemically the element they label, and a figure that coloured "radioactive" differently from "phosphorus" would be teaching the opposite.
+- **Every protein at a fork is `metabolismPart('enzyme')`**, the pale fill chapter 5 fixed for a protein that lowers a barrier, with its name in `ink`, told apart by shape and label: helicase, polymerase, primase, ligase, topoisomerase, and the single-strand binding protein, which is not an enzyme and is drawn as small beads in `inkFaint` on the strand.
+- **Histones are `chromatin`**, from `ORGANELLES`, in two values: the (H3–H4)<sub>2</sub> tetramer in `chromatin` itself, and the two H2A–H2B dimers in `chromatin` mixed towards `paper3`. That is the division the octamer is actually built in, and two values are all the figure needs; do not ask for four. `chromatin`'s `symbolColor` is `null` — neither neutral clears 4.5:1 on it — so **nothing is written on a histone**: labels sit beside the core on the paper halo `scale` and `tree` use. Before shipping, the integration owner measures the two values against each other and against `inkSoft` under the four vision conditions the `METABOLISM` comment names, and records the separation in the module header. Packaging proteins that are not histones — a bacterium's, a mitochondrion's — are `inkFaint`, because the comparison 8.6 makes is histone or not.
+- **Damage is drawn as shape, not colour**: a lost base as an empty rung with its sugar, a deaminated cytosine as the base redrawn as uracil, an oxidised guanine with an `ELEMENTS.O` atom added, a pyrimidine dimer as two thymine rungs bent towards each other and joined by a bar, a broken backbone as a gap. The kind is named by its label and in the readout.
+- **8.8's categories take the accents**, because that figure draws no bases: protein-coding sequence in `ink`, introns in `ruleStrong`, the four families of transposable element in `coral` (LINE), `gold` (SINE), `violet` (LTR) and `water` (DNA transposon), repeats and satellites in `leaf`, and everything else in `paper3`. Every category is also named in the readout beside its share, and selecting a stretch of the strip names it, so the colour is never the only way to tell.
+
+## What every figure here owes
+
+Nothing in this section is answered by a gate unless the line names one. The gates prove that a figure mounts, reports what it claims and survives being pressed; every judgement below is a person's, made at the artefact's own resolution, in both themes, at the widths a reader uses.
+
+**A 2D figure is built on `src/figures/lib/bench.js`.** It is not a framework: it is a function called inside `mount` that returns the object the frame already expects. What that means for the block you write below is that four of the lines in this section stop being yours to remember and become the bench's to enforce — the readout cannot be a pill, a chip, a bordered box or a progress bar because `readout()` emits only `<text>` and `<line>`; the primary action is `primary: true` and the bench renders it as `--rule-head` on the edge and the ink's weight, never as a fill; a control's narrow label is a second span and its accessible name is the long label at every width, by construction; and a negative or `NaN` dimension throws in the lab instead of reaching the DOM, because `pane.rect` and its siblings are the only way to a dimension attribute. `test/bench.test.js` fails a bench figure that defines `mulberry32`, makes its own `ResizeObserver`, writes `border-radius` or `border:` in its own CSS, or calls `el('rect'|'circle'|'line'|'ellipse')` directly.
+
+Everything else in this section is still yours, and the honest list of what the bench does **not** reach is in [figure-bench.md](../../docs/design/figure-bench.md): whether a composition is *good*, whether a label collides at one slider value and not another, whether an assembled sentence is grammatical in every state, and whether the type is legible at 390 px. The bench is finished before the chapter's figure workers start and none of them may extend it — if it cannot do something, drop through to `pane.add()` for that one thing and propose the extension for the next chapter. The WebGL figure keeps `lib/three-common.js` for the scene and takes only the chrome.
+
+### It is a mechanism
+
+It shows a mechanism the reader changes, not a picture of a noun. A labelled diagram that could have been a static image is a weak figure. Prefer, in rough order: a simulation the reader perturbs, a 3D thing they turn over, a scrubbable sequence, an authored illustration that responds. Each block below says in one line why its figure is a mechanism; if that line is hard to write, the figure is the problem.
+
+### Composition
+
+- **A panel that is half empty is a composition failure, and the fix is to re-compose — never to add filler.** Change the aspect, move the readout, let the drawing fill the pane. `polymer` held two 30 px hexagons in a dead lower-left quadrant and `secretion` was half empty from default paragraph margins; both passed every gate first.
+- The drawing is the figure. Controls and readouts serve it and do not compete with it for area.
+- Nothing is sized by a browser default. A margin, a size or a gap that exists because nothing set it is a decision not yet made.
+
+### Readouts
+
+- **A readout is a typographic table, not application chrome.** No pills, no chips, no bordered boxes, no rounded rectangles, no progress bar with its caption over the fill, no letter circles, no translucent panels behind text.
+- Set it the way the book sets a table: a label in the interface face, the number in tabular figures, a hairline between rows only if rows need separating, and space where a box would have gone.
+- **The figure stage is the only drawn rectangle in the book.** Inside it the rule still holds. If a control genuinely must declare its own extent, the sorting activity's single square hairline is the pattern.
+- A readout's sentence is read by a person in every state its parts can take. `secretion` stage 7 read "In the outside the cell."
+- A readout says what the figure is doing now. `prokaryote` described an intact wall in its envelope paragraph while the line above it said the wall was gone.
+
+### Controls
+
+- Control rows are grouped by what they do — what to show, what to change, what to run — with space between the groups and none inside one.
+- **The primary action looks primary**, told by `--rule-head` on its edge and the ink's weight, never by a fill.
+- Everything is reachable and operable by keyboard, and nothing depends on hover: a tap is a hover and a click in one gesture, and the hover gets there first (defect register, 2026-09-12).
+- A control's narrow label is the same word as its wide label, because an item's goal quotes it. Four chapter-3 goals had to be reworded when `surface-volume`'s phone labels turned out to be "Villi", "Rod", "Disc" and "Clock".
+
+### Labels
+
+- **Every label is placed so that it cannot collide** — with another label, with the line or shape it names, with the toolbar, or with the edge of the stage. At every stage of a run, at every width, in both themes.
+- A collision is a state, not a layout: it appears at one slider value and not another. `waterprops` collided at the chart origin, `plantcell3d`'s slider label wrapped and pushed the toolbar over the nucleus labels, `prokaryote` at 390 px overprinted three envelope labels, `cilium` at 390 px clipped its section chip and ran a card under the toolbar.
+- A label drawn off the stage is not a label. `plantcell3d` labelled a channel 11 µm outside the frame.
+
+### The narrow composition
+
+- **A figure whose type would fall below about nine device pixels on a phone carries a second composition, not a scaled-down first one.** Nine device pixels is about three CSS pixels on a 3× phone; 7 CSS px is about 21 device px and passes.
+- A figure that can fill any shape declares a `narrowAspect` in the registry. Say here what the narrow composition drops, stacks or re-orients.
+- `npm run narrow` proves the narrow layout mounts, draws something that is not blank, flat or near-black, and survives a press. It says nothing about legibility, which is why it writes `out/narrow/` at three times scale.
+- **Somebody looks at every figure at 390 px, at 3×, in both themes, before it is called done.** Five figures gained a second composition with no gate over any of that code, and chapter 2's eight were first looked at narrow days after they had been accepted at desktop width.
+
+### Geometry
+
+- **No negative and no `NaN` geometry, at any width.** A chapter-3 figure handed the DOM `<rect width="-0.1">` at tablet and desktop but not at phone; it reached main, was pushed, and logged console errors on the live site.
+- Clamp every computed width, height, radius and length where it is computed. A `NaN` on an attribute the browser ignores fails silently, so guard the arithmetic rather than waiting for a console error.
+
+### Colour, determinism and the contract — these the gates hold
+
+- Colour comes from `ctx.palette` or the CSS variables, never a new hex (`test/palette.test.js`, and the one element and one organelle table in `test/element-table.test.js` and `test/organelle-table.test.js`).
+- No `Math.random`: a seeded generator, so `setTime(t)` reproduces a frame exactly. `test/element-table.test.js` fails any `Math.random()` anywhere under `src/figures/`.
+- The module contract — `meta`, `mount(root, ctx)` returning `destroy`, `setTime`, `describe`, `setVisible`, optional `setTheme`, and `setView` for 3D — is in [textbook.md](../../docs/design/textbook.md) and held by `test/registry.test.js`, `npm run drive` and `npm run sweep3d`.
+- Under `prefers-reduced-motion` the figure still works and nothing moves until the reader moves it.
+
+### `describe()`
+
+Three things read it: `npm run drive`, `npm run narrow`, and every `task` item in `items.js`. Write it for them.
+
+- **It may not report `id`, `kind`, `number` or `state`.** The frame owns those four and spreads them last, so a figure using one would lose its own value without a word. `npm run drive` fails it. `foldlab` reports `foldState`; `plantcell3d` reports `turgorState`. **Nor may a bench figure report `layout`**, which the bench adds itself (`BENCH_DESCRIBE_FIELD` in `lib/bench.js`). No field in this brief uses any of the five, and none may be added — which is why 8.1 reports `experiment` and `step`, 8.4 reports `rule`, and 8.7 reports `phase`, rather than any of them being called a state or a mode.
+- Report the numbers in the units the prose uses, so a task's goal and the readout agree. In this chapter that means nanometres for every length in a molecule, base pairs for every length of DNA, grams per cubic centimetre for every density, nucleotides per second for every fork speed, minutes for every copying time, and **errors per base pair per round of copying** for every error rate — with any other denominator named in the field, as `errorsPerDaughterCell` is.
+- Every field an item can name must be reachable through the reader's own controls, and **must not become true on its own as the clock runs** — otherwise the only load-bearing clause in the expectation is the one proving the reader acted.
+- The task grammar (`src/components/task.js`) compares a field with a literal and never with a second field, reads `.length` and `[n]`, and has `~` for "contains" on a string or a list. A list of short words — `ruledOut: ['conservative']` — is therefore gradable as `ruledOut ~ conservative`, and several fields below are lists for that reason.
+
+### A figure's words are prose
+
+A sentence inside a figure module is read by the same reader and is corrected when the chapter is. `symbiont.js` carried a claim about mitochondrial division machinery for days after the prose had dropped it as wrong. **Six sentences in this chapter are ones the whole chapter turns on, and a figure that contradicts any of them is wrong however good it looks**: that DNA polymerase adds only to a 3′ end; that the lagging strand follows from that fact and the antiparallel strands, and from nothing else; that the chapter's error rate is per base pair per round of copying, and becomes a different number per cell or per generation; that a deaminated cytosine is recognisable because DNA uses thymine; that the 30 nm fibre may not exist in living cells; and that "junk" is a claim about a sequence and not a settled word. And one historical sentence, which the chapter spends a section on: **the helix, its dimensions, the outside backbones and the symmetry that makes the chains antiparallel were measured in Franklin's laboratory.** A figure that labels a measurement "Watson and Crick" is wrong.
+
+---
+
+## 8.1 · `genetic-material` — Three experiments, one molecule
+
+**What it shows.** Three benches on one stage, one for each experiment in §8.1, chosen with a control, and beside them an **account**: a small typographic table of the three candidate molecules — protein, RNA, DNA — against the experiments the reader has run, recording what each result ruled out and what it left open. It opens on Griffith's bench with nothing injected and the account empty. Nothing is written into the account until the reader has made the result it records.
+
+- **Griffith.** A tray of four preparations of pneumococci — *Live R*, *Live S*, *Heat-killed S*, *Heat-killed S + live R* — a group of **eight mice** drawn as authored silhouettes, and a culture plate. Each injection is given to all eight; each mouse lives or dies (a change of posture and a line of type, nothing more graphic), and the count is Griffith's: none of eight die of live R or of heat-killed S, all of them of live S, and **five of eight** of the mixture, which is his series with an R strain derived from type II and type III cells killed at 60 °C (*J Hyg* 27:113, 1928). Culturing a dead mouse's blood shows colonies: rough (irregular edges) or smooth (glossy, each with a capsule's halo), with **the capsular type written on the plate**. The smooth bacteria recovered carry type III, the capsule of the *killed* type, and the figure must say so, because Griffith knew a rough strain could revert to its own former type and the recovered type is what rules that out. State the series and its source in the module header.
+- **Avery.** A tube of extract from heat-killed S cells, four treatments — *Untreated*, *Destroy protein*, *Destroy RNA*, *Destroy DNA* — and a plate of R cells to which the treated extract is added. Smooth colonies appear after every treatment but one. The count is a model number, stated in the header; what matters is zero against not-zero.
+- **Hershey and Chase.** Phages labelled with <sup>35</sup>S or with <sup>32</sup>P, and four steps run in order — *Infect*, *Blend*, *Spin*, *Let them burst* — with a blending-time control. Counters give the share of the label in the cells, in the liquid, and in the next generation of phages, **at the measured values and not round ones** (*J Gen Physiol* 36:39, 1952): 75 to 80 per cent of the sulfur in the liquid and the rest left with the cells; 21 to 35 per cent of the phosphorus in the liquid, about half of it released even without blending, and the rest with the cells; and about 30 per cent of the parents' phosphorus against less than 1 per cent of their sulfur in the progeny. Blending longer does not remove the last fifth of the sulfur; the curve levels off, and the figure draws it levelling off. The module header names the paper and the figure of it the curve is drawn from.
+
+**What the reader does.**
+- **Choose the experiment**, and run each bench's own sequence. Every bench has **Reset**.
+- On Griffith's bench, **choose a preparation** and **Inject** (the primary action), then **Culture the blood**.
+- On Avery's, **choose a treatment** and **Add to R cells**.
+- On Hershey and Chase's, **choose the label**, step through the four steps, and set the **blending time**.
+- The account fills as results are made, and a line under it names the doubt each experiment leaves: the purity of Avery's enzymes, and the protein that blending leaves on the cells.
+
+**Objectives it teaches.** `protein-was-favoured`, `transformation`, `avery-enzymes`, `hershey-chase`, `evidence-weighed`.
+
+**`describe()`**
+
+| field | type | meaning |
+|---|---|---|
+| `experiment` | string | `'griffith' \| 'avery' \| 'hershey-chase'` |
+| `injected` | string \| null | `'live-r' \| 'live-s' \| 'killed-s' \| 'killed-s-live-r'`; null before an injection |
+| `miceInjected` | number | 8 |
+| `miceDied` | number \| null | computed from `injected`: 0, 8, 0 and 5 for the four preparations in the order above; null before an injection |
+| `bloodCulture` | string \| null | `'none' \| 'rough' \| 'smooth'`; null until cultured |
+| `recoveredCapsuleType` | string \| null | `'III'` for smooth bacteria recovered from the mixture; null otherwise |
+| `killedCapsuleType`, `roughDerivedFromType` | string | `'III'` and `'II'`, constant, so a task can compare the recovered type against both |
+| `treatment` | string \| null | `'none' \| 'protease' \| 'ribonuclease' \| 'deoxyribonuclease'` |
+| `transformed` | boolean \| null | computed: false only for `'deoxyribonuclease'` |
+| `smoothColonies` | number \| null | the model count; 0 exactly when `transformed` is false |
+| `label` | string | `'35S' \| '32P'` |
+| `step` | string | `'ready' \| 'infected' \| 'blended' \| 'spun' \| 'progeny'` |
+| `blendMinutes` | number | the blending time set |
+| `labelInCellsPercent`, `labelInLiquidPercent` | number \| null | after *Spin*; null before |
+| `labelInProgenyPercent` | number \| null | after *Let them burst*; about 30 for phosphorus and below 1 for sulfur |
+| `runs` | string[] | the experiments completed, in order |
+| `ruledOut` | string[] | candidate molecules a result has ruled out: `'protein'`, `'rna'`; computed from `runs` and the results, never set by a button |
+| `implicated` | string \| null | `'dna'` once a result points at it |
+| `openDoubts` | string[] | `'enzyme-purity'` after Avery, `'incomplete-separation'` after Hershey and Chase |
+| `t` | number | clock, seconds, three decimals |
+| `playing` | boolean | |
+
+**Why it is a mechanism.** Every entry in the account is a result the reader produced, including the controls, and the account refuses to rule anything out that the reader has not tested — so the reader finds, rather than reads, that each experiment leaves a doubt and that the two doubts are different.
+
+**Narrow composition.** Second composition. Three benches and an account cannot share a 390 px stage. Below 800 px the chosen bench takes the full width at the top, its steps become one row of steppers keeping their desktop labels, and the account moves beneath as rows of type, one row per candidate molecule. The mouse and the plates are drawn smaller but not dropped: the capsule type on the plate stays on the plate.
+
+---
+
+## 8.2 · `helix-lab` — Read the photograph, then build the pairs
+
+**What it shows.** Two scenes, chosen with a control.
+
+**The photograph.** On the left, a helix the reader builds, drawn from the side: one, two or three strands of a given radius and pitch, with a dot at each repeating unit. On the right, in a canvas pane, **the X-ray fibre-diffraction pattern that helix would give**, recalculated as the reader changes it, with hairline marks at the positions measured on Franklin's B-form photograph: the spacing of the layer lines, the heavy meridional arc, the spread that gives the diameter, and a mark at the fourth layer line saying *missing*. It opens on a single strand whose pitch, spacing and radius are all off the B-form values, so the pattern is a cross in the wrong place and the reader's first act is to move it.
+
+The physics, which the worker must get right because the figure's whole claim is that the pattern follows from the helix. Layer lines lie at height *Z* = *l* / *P* for pitch *P*. For a helix of *N* = *P* / *h* units per turn, with *h* the rise per unit, the Bessel orders contributing to layer line *l* are those with *l* = *n* + *mN* for whole *m*, and the amplitude on that line at reciprocal radius *R* goes as *J<sub>n</sub>*(2π*rR*) for helix radius *r* — so the lowest orders give the cross, the order-zero term on layer line *N* gives the meridional arc at 1/*h*, and the arms' slope is set by *r* / *P*. Two strands offset along the axis by a fraction *f* of the pitch multiply layer line *l* by 1 + e<sup>2π*ilf*</sup>, whose square is 4 cos<sup>2</sup>(π*lf*): at *f* = 3/8 that vanishes on the fourth layer line and on no other of the first nine, and at *f* = 1/2 it removes every odd one, which is a different photograph. Restrict *N* to whole numbers (the rise control steps rather than slides) so the selection rule stays exact, and blur by a stated amount for the disorder of a fibre. Say in the module header that the pattern is a calculation from the model, not Photograph 51, which the figure must not reproduce or imitate as a photograph.
+
+**The pairs.** Two backbone rails 2 nm apart. The reader chooses a base for each strand and sees the pair drawn to scale: purine against pyrimidine fits; two purines are too wide and two pyrimidines too narrow; of the purine–pyrimidine pairs only A with T and G with C make their hydrogen bonds, two and three, without distortion. A **tautomer** control redraws guanine or thymine in the rare form the old textbook drawings showed, and the usual partner no longer pairs. A **strand direction** control runs the partner strand parallel instead of antiparallel, and the sugars come out on the wrong side of the pair for the backbone. An **Add pair** action builds a short duplex of the pairs that fit, with a running count of A, T, G and C that obeys Chargaff's rules because the pairing does.
+
+**What the reader does.**
+- **Scene**: *The photograph* or *The pairs*.
+- In the photograph: **Strands** (1, 2, 3), **Pitch**, **Rise per base** (stepped so that bases per turn is a whole number), **Radius**, and **Offset** of the second strand in fractions of a turn; **Show the measurements** overlays Franklin's positions.
+- In the pairs: **Left base**, **Right base**, **Tautomer** (*usual*, *rare*), **Strands run** (*antiparallel*, *parallel*), **Add pair**, **Reset**.
+
+**Objectives it teaches.** `chargaff-rules`, `diffraction-reading`, `antiparallel`, `pairing-geometry`, `franklin-contribution`.
+
+**`describe()`**
+
+| field | type | meaning |
+|---|---|---|
+| `scene` | string | `'photograph' \| 'pairs'` |
+| `strands` | number | 1, 2 or 3 |
+| `pitchNm`, `riseNm`, `radiusNm` | number | the model's |
+| `basesPerTurn` | number | `pitchNm ÷ riseNm`, computed |
+| `offsetTurns` | number | the second strand's axial offset, as a fraction of a turn |
+| `layerLineSpacingPerNm` | number | 1 ÷ `pitchNm`, computed |
+| `meridionalPerNm` | number | 1 ÷ `riseNm`, computed |
+| `missingLayerLines` | number[] | the layer lines from 1 to 9 whose strand interference factor falls below 0.05, computed; `[4]` at the B values and never `[4]` for one strand |
+| `matchesPhotograph` | boolean | computed: two strands, pitch 3.4 ± 0.1 nm, rise 0.34 ± 0.01 nm, radius 0.9–1.1 nm, and `missingLayerLines` exactly `[4]` |
+| `leftBase`, `rightBase` | string | `'A' \| 'T' \| 'G' \| 'C'` |
+| `pairType` | string | `'purine-pyrimidine' \| 'purine-purine' \| 'pyrimidine-pyrimidine'`, computed |
+| `pairWidthNm` | number | C1′ to C1′, computed from ring geometry stated in the header; about 1.05–1.1 for either Watson–Crick pair |
+| `hydrogenBonds` | number | 0, 2 or 3, computed |
+| `pairFits` | boolean | computed from width, bonds, tautomer and strand direction together |
+| `whyNot` | string \| null | `'too-wide' \| 'too-narrow' \| 'no-hydrogen-bonds' \| 'rare-tautomer' \| 'sugars-misplaced'`; null when it fits |
+| `tautomer` | string | `'usual' \| 'rare'` |
+| `strandsRun` | string | `'antiparallel' \| 'parallel'` |
+| `pairsBuilt` | number | |
+| `countA`, `countT`, `countG`, `countC` | number | in the duplex built |
+| `chargaffHolds` | boolean | computed: `countA === countT` and `countG === countC` |
+| `t` | number | clock, seconds, three decimals |
+
+**Why it is a mechanism.** The fourth layer line disappears at one offset and no other, in front of the reader who moved the slider there, which turns "the photograph showed two strands" from an assertion into a calculation the reader can check; and in the pairs scene every wrong combination fails for a reason the figure names.
+
+**Narrow composition.** Second composition. A helix beside its pattern at 390 px puts both below legibility. Below 800 px the helix sits above the pattern, both full width, with the measurement marks labelled beside the pattern rather than on it, and the five sliders become steppers keeping their desktop labels. The pairs scene stacks the pair drawing above the duplex strip and the count beneath it.
+
+---
+
+## 8.3 · `meselson-stahl` — The three schemes, on a switch
+
+**What it shows.** A culture moved from heavy nitrogen to light, a centrifuge tube in which the DNA from the current generation settles into bands, drawn as the dark lines of an ultraviolet photograph on the tube's pale ground, and beside the tube the double helices of the population, each strand drawn heavy or light by the stroke-weight rule above. A control chooses the scheme and the molecules and the predicted bands follow it. It opens at generation 0 under the semiconservative scheme with the data hidden, showing one heavy band.
+
+The densities are the 1958 paper's (*PNAS* 44:671): <i>E. coli</i> DNA at about 1.71 g/cm<sup>3</sup> and fully <sup>15</sup>N DNA 0.014 denser. The figure places light DNA at 1.710, heavy at 1.724 and hybrid halfway, which is those two numbers and nothing more precise, and its header says so. Under the dispersive scheme every molecule at generation *g* has the density 1.710 + 0.014 × (1/2)<sup>*g*</sup>, a single band moving towards light. **Heating** separates strands, and single strands band at their own, higher densities: heated hybrid DNA gives two bands in equal amounts, 0.015 g/cm<sup>3</sup> apart, as the paper's own heating experiment did; heated dispersive DNA a single intermediate band — and heated conservative DNA at generation 1 *also* gives heavy and light single strands in equal amounts, so the heat test separates the dispersive scheme from the other two and not the conservative scheme from the semiconservative one. The figure must model that exactly; it is the kind of thing a reader will test.
+
+**What the reader does.**
+- **Scheme**: *Semiconservative*, *Conservative*, *Dispersive*.
+- **Generation**, stepping 0 to 4.
+- **Show the 1958 data**, which lays the bands Meselson and Stahl photographed over the prediction.
+- **Heat**, which denatures the DNA of the generation shown.
+- **Reset**.
+
+**Objectives it teaches.** `template-principle`, `three-models`, `density-labelling`, `meselson-stahl-result`.
+
+**`describe()`**
+
+| field | type | meaning |
+|---|---|---|
+| `scheme` | string | `'semiconservative' \| 'conservative' \| 'dispersive'` |
+| `generation` | number | 0 to 4 |
+| `bands` | object[] | `{ name, densityGcm3, fraction }` for the prediction shown; `name` is `'heavy' \| 'hybrid' \| 'light' \| 'intermediate'` |
+| `bandCount` | number | `bands.length` |
+| `dataShown` | boolean | |
+| `observedBands` | object[] | the 1958 result at this generation, same shape |
+| `matchesData` | boolean | computed: the prediction's bands equal the observed bands at this generation |
+| `ruledOut` | string[] | the schemes whose prediction fails at any generation from 1 up to the one shown: `[]` at 0, `['conservative']` at 1, `['conservative', 'dispersive']` from 2 — a property of the generation, computed, never set by a button |
+| `heated` | boolean | |
+| `strandBands` | object[] | when heated, the single-strand bands, same shape; empty otherwise |
+
+**Why it is a mechanism.** The reader drives each rival to the generation where its prediction parts from the photograph, and sees that one generation is not enough for the dispersive scheme — which is the misreading of this experiment most readers bring to it.
+
+**Narrow composition.** Second composition. Below 800 px the tube keeps its full height on the left of a two-column layout and the molecules stack to its right in a single column, fewer of them drawn; the table of bands moves beneath as rows of type.
+
+---
+
+## 8.4 · `replication-fork` — The fork, with its chemistry left in
+
+**What it shows.** Two scenes.
+
+**The fork**, drawn along the stage's length. Ahead, the parent helix being opened by a helicase, with a topoisomerase working further ahead and the twist that builds up in front of the fork drawn as coiling of the unopened DNA. Behind, the two templates, single-strand binding protein on the one waiting to be copied, and two new strands: the leading strand extended continuously towards the fork, and the lagging strand made backwards in fragments, each begun on a dashed RNA primer near the fork, later replaced with DNA by a second polymerase that cuts the RNA away ahead of itself, and joined by ligase. Each nucleotide added releases a pyrophosphate, counted. It opens with the fork just leaving its origin, one primer on each template, paused.
+
+**The whole chromosome.** A chromosome drawn to scale as a line, its origins marked, forks leaving each origin in both directions at the organism's speed, and a clock. For *E. coli*, one circle, one origin, two forks at about 1000 nucleotides a second, finishing in about forty minutes. For human chromosome 1, 249 million base pairs, either **one origin** or **its real share of the cell's origins**, fired at different times through the eight hours of copying, with forks at the human speed.
+
+**What the reader does.**
+- **Run**, **Pause**, **Step**, **Reset**.
+- **Remove an enzyme**: *Helicase*, *Topoisomerase*, *Primase*, *Ligase*, *Primer removal*. Each shows its own failure: no unwinding; twist building until the fork stalls; no new fragment started; fragments never joined; primers left in the finished strand.
+- **Rules**: *As they are*, *Strands run the same way*, *Polymerase can add at either end*. The last two are marked as hypothetical wherever they appear, and under either the lagging strand is made continuously. This is the figure's central claim: remove either fact and the lagging strand goes.
+- **Add a chain terminator** to the nucleotide pool: the next strand that takes one in stops there.
+- **Scene**: *Fork* or *Whole chromosome*; in the second, **Organism** (*E. coli*, *Human chromosome 1*) and **Origins** (*One*, *All*).
+
+**Objectives it teaches.** `polymerase-requirements`, `pyrophosphate-pull`, `primer-needed`, `lagging-strand`, `fork-machinery`, `origins-arithmetic`.
+
+**`describe()`**
+
+| field | type | meaning |
+|---|---|---|
+| `scene` | string | `'fork' \| 'chromosome'` |
+| `rule` | string | `'as-they-are' \| 'same-direction' \| 'either-end'` |
+| `laggingContinuous` | boolean | computed; **false in every reachable state under `'as-they-are'`** |
+| `removed` | string[] | the enzymes taken away |
+| `unwoundNt` | number | how far the fork has opened |
+| `leadingLengthNt` | number | |
+| `fragmentsStarted` | number | on the lagging strand; 0 under either hypothetical rule |
+| `primersInPlace` | number | RNA primers not yet replaced |
+| `nicksUnsealed` | number | |
+| `pyrophosphateReleased` | number | one per nucleotide added, computed from the lengths made |
+| `twistAheadTurns` | number | turns of overwinding ahead of the fork, about one per ten base pairs opened less those a topoisomerase has removed |
+| `forkStalled` | boolean | computed |
+| `stalledBecause` | string \| null | `'no-helicase' \| 'twist'`; null while moving |
+| `chainTerminated` | boolean | a strand has stopped at a terminator |
+| `organism` | string | `'e-coli' \| 'human-chr1'` |
+| `origins` | string | `'one' \| 'all'` |
+| `originCount` | number | |
+| `forkSpeedNtPerS` | number | the organism's, from the prose's sources, stated in the header |
+| `copiedPercent` | number | |
+| `elapsedMinutes` | number | |
+| `finishMinutes` | number | computed from the chromosome length, the origins and the speed |
+| `t` | number | clock, seconds, three decimals |
+| `playing` | boolean | |
+
+**Why it is a mechanism.** The reader removes each fact the lagging strand depends on and watches it vanish, which is the only way "a consequence of two facts" becomes something shown rather than said; and the one-origin human chromosome takes about a month on the clock the reader is watching.
+
+**Narrow composition.** Second composition. A fork stretched along a 21 / 9 stage becomes a 390 px strip in which every protein label falls under nine device pixels. Below 800 px **the fork turns through 90 degrees**: the parent helix runs down the stage from the top, the fork moves downwards, and the two new strands run beside each other below it, with labels to the side. The readouts become rows of type beneath, and the rules control keeps its desktop labels. The whole-chromosome scene keeps a horizontal chromosome at full width, since a line is legible at any width, with the clock and counts beneath.
+
+---
+
+## 8.5 · `fidelity` — Three checks, and a day's damage
+
+**What it shows.** Two scenes.
+
+**Copying.** A template being copied, with the new strand drawn base by base, and every wrong nucleotide marked where it sits by its buckled shape and by the pair's two letters. Three checks can be switched on in order — the polymerase's **choice**, **proofreading**, **mismatch repair** — and each removes most of what the one before let through. The drawn stream cannot show a rate of one in ten billion at any speed a reader can watch, so it runs at a stated magnification of the error rate, printed on the stage; **the readout gives the real rates**. Beside it, a **per** control turns the same rate into its other denominators: per base pair per round of copying, per human daughter cell, per bacterial division, per child. A hypothetical switch, *Grow at the 5′ end*, runs a polymerase whose energy is carried on the strand: every attempt it makes to proofread cuts off the triphosphate with the wrong nucleotide, and the strand stops.
+
+**Damage.** One human cell's DNA through a day of figure time, drawn as a long stretch of duplex. Lesions arrive at their measured rates, drawn by kind as the palette section says: lost purines, deaminated cytosines, oxidised guanines, single-strand breaks, double-strand breaks, and, as a **sunlight** control is raised, thymine dimers. Base excision, nucleotide excision and break repair each remove their own kind. Two hypotheticals: **Xeroderma pigmentosum** switches nucleotide excision repair off, and the dimers stay; **Uracil instead of thymine** rebuilds the genome with U where T was, and deaminated cytosines, now indistinguishable from the real uracils, are no longer removed.
+
+**What the reader does.**
+- **Scene**: *Copying*, *Damage*.
+- In copying: **Choice**, **Proofreading**, **Mismatch repair** (toggles), **Per** (*base pair*, *human cell*, *bacterium*, *child*), **Grow at the 5′ end** (hypothetical), **Presets**: *Proofreading lost*, *Mismatch repair lost*.
+- In damage: **Run the day**, **Sunlight**, **Base excision**, **Nucleotide excision**, **Break repair** (toggles), **Xeroderma pigmentosum**, **Uracil instead of thymine**.
+- **Reset** in both.
+
+**Objectives it teaches.** `base-selection`, `proofreading`, `mismatch-repair`, `one-in-a-billion`, `why-5-to-3`, `dna-damage`, `excision-repair`, `thymine-not-uracil`, `repair-choice`.
+
+**`describe()`**
+
+| field | type | meaning |
+|---|---|---|
+| `scene` | string | `'copying' \| 'damage'` |
+| `choice`, `proofreading`, `mismatchRepair` | boolean | the three checks |
+| `errorRate` | number | errors per base pair per round of copying, computed from the checks on: 1e-2 with none, and the prose's values as each is added |
+| `errorsPerBillion` | number | `errorRate × 1e9`, computed |
+| `per` | string | `'base-pair' \| 'human-cell' \| 'bacterium' \| 'child'` |
+| `errorsPerDaughterCell` | number | `errorRate × 6.2e9`, computed, never tabulated |
+| `errorsPerBacterialDivision` | number | `errorRate × 4.6e6`, computed |
+| `growth` | string | `'5-to-3' \| '3-to-5'`; the second is the hypothetical |
+| `strandsStopped` | number | strands halted by a proofreading step; **0 in every state under `'5-to-3'`** |
+| `preset` | string \| null | `'proofreading-lost' \| 'mismatch-repair-lost'` |
+| `hours` | number | figure time through the day, 0 to 24 |
+| `sunlight` | number | 0 to 1 |
+| `lesions` | object | counts so far by kind: `{ lostBase, deamination, oxidation, singleBreak, doubleBreak, dimer }` |
+| `repair` | object | `{ baseExcision, nucleotideExcision, breakRepair }`, booleans |
+| `unrepaired` | object | the same kinds, computed |
+| `unrepairedTotal` | number | computed |
+| `bases` | string | `'thymine' \| 'uracil'`; the second is the hypothetical |
+| `hiddenDeaminations` | number | deaminated cytosines no enzyme can tell from a genuine uracil; **0 in every state with `bases: 'thymine'`** |
+| `t` | number | clock, seconds, three decimals |
+| `playing` | boolean | |
+
+**Why it is a mechanism.** The reader switches the checks on one at a time and watches the rate fall by factors of a hundred and a thousand, then changes only the denominator and watches one rate become three different-sounding numbers — and in the second scene removes one repair route or swaps one base and sees exactly the damage that route or that base existed to deal with stay put.
+
+**Narrow composition.** Second composition. Below 800 px the copying stream runs down the stage instead of across it, the three checks become one row of toggles keeping their desktop labels, and the rates become a four-row table beneath, one row per check, with the per-denominator line under it. The damage scene draws a shorter stretch of duplex and moves the lesion counts beneath as rows of type.
+
+---
+
+## 8.6 · `nucleosome3d` — The spool, and what it is wound into
+
+**What it shows.** A nucleosome in three dimensions, large enough that the core reads as eight proteins and the DNA as a coil: the (H3–H4)<sub>2</sub> tetramer and the two H2A–H2B dimers in the two histone values, 147 base pairs of DNA wound about 1.65 turns round them **in a left-handed coil**, linker DNA running on to the neighbouring nucleosomes, and H1 where the DNA enters and leaves. The DNA is drawn as `dna3d` draws it at this scale — two backbones and base-pair rungs — so the reader recognises the molecule of chapter 1. It opens at a default view stated in the module header: the disc face-on, looking down the axis of the coil, so the turns read as a spiral, with the entry and exit of the DNA visible.
+
+**What the reader does.**
+- **Orbit** by drag or arrow keys, zoom with + and −, as in `cell3d`, `membrane3d` and `atp-synthase`. `setView({ theta, phi, distance })` for the sweep gate.
+- **Unwind**: a slider from 147 base pairs wrapped to none; the DNA peels off the core from its ends, and the readouts give the base pairs wrapped, the turns, and the length of DNA the spool is holding.
+- **Level**: *Helix*, *Nucleosome*, *Beads on a string*, *Packed chain*, *Loop*, *Chromosome at division*, stepping outwards with a ruler beside each. The *Packed chain* is drawn irregular, **not** as a regular 30 nm fibre, and its label says the regular fibre is disputed. Compaction at each level is computed from the drawn geometry — the length of DNA in view divided by the length of the structure's own axis — and the geometry is stated in the header, not a remembered ratio.
+- **Chromosome**: 1 to 22, X or Y, giving that chromosome's length in base pairs (GRCh38; chromosome 1 is 248,956,422), as DNA in centimetres at 0.34 nm a pair, and as a rod at division. The last is an estimate computed from chromosome 1's compaction — 8.46 cm of DNA in a metaphase chromosome 7 to 10 µm long, about ten-thousandfold (Paulson et al. 2021, *Semin Cell Dev Biol*; Cisneros-Soberanis et al. 2024, *J Cell Biol*) — and says so.
+- **Genome**: *Human nucleus*, *Archaeon*, *Bacterium*, *Mitochondrion*. The archaeon's DNA is wound on archaeal histones in a continuous ramp of stacked dimers (Mattiroli et al. 2017, *Science*, for *Methanothermus fervidus*); the bacterium's is a negatively supercoiled loop bent by small nucleoid proteins, with no histone; the mitochondrion's circle, 16,569 base pairs, is packed by TFAM, which is not a histone. The label on the archaeon says most archaea, not all, have histones.
+- **Histones**: remove them, and the DNA relaxes to a straight double helix.
+
+**Objectives it teaches.** `packing-problem`, `nucleosome`, `packing-levels`, `packing-compared`.
+
+**`describe()`**
+
+| field | type | meaning |
+|---|---|---|
+| `view` | object | `{ theta, phi, distance }`, distance non-zero |
+| `drawCalls`, `triangles` | number | |
+| `level` | string | `'helix' \| 'nucleosome' \| 'beads' \| 'packed-chain' \| 'loop' \| 'division'` |
+| `bpWrapped` | number | 0 to 147 |
+| `turnsWrapped` | number | computed, about 1.65 at 147 |
+| `lengthHeldNm` | number | `bpWrapped × 0.34`, computed; 50 at 147 |
+| `handedness` | string | `'left'`, constant; reported so that a drive recipe can assert it and a figure that flips the coil fails |
+| `histonesPresent` | boolean | |
+| `linkerHistone` | boolean | |
+| `compaction` | number | at the current level, computed from the drawn geometry |
+| `chromosome` | string | `'1'` to `'22'`, `'X'`, `'Y'` |
+| `chromosomeBp` | number | from the assembly named in the header |
+| `dnaLengthCm` | number | `chromosomeBp × 0.34 nm`, computed |
+| `divisionLengthUm` | number | computed as described, an estimate |
+| `genome` | string | `'human' \| 'archaeon' \| 'bacterium' \| 'mitochondrion'` |
+| `histonesInGenome` | boolean | computed from `genome`: true for human and archaeon |
+| `packagingProtein` | string | what the genome shown is packed by, in words |
+| `t` | number | clock, seconds, three decimals |
+
+**Why it is a mechanism.** The reader unwinds the spool and reads off how much length it was holding, and turns it over to see the coil is left-handed, which no 2D diagram can show without being taken on trust; the level control makes compaction a number the reader produces from the drawing.
+
+**Narrow composition.** Shrinks honestly at `narrowAspect: 1`, as `cell3d`, `water3d`, `membrane3d`, `atp3d` and `atp-synthase` do. What does not shrink is the readout: below 800 px it moves under the stage at full width as rows of type rather than being inset over the model, and the level and genome controls become steppers keeping their desktop labels. The histone labels are drawn on the model at desktop and become a list at 390 px, because four labels on a rotating object collide at some angles.
+
+---
+
+## 8.7 · `chromosome-end` — One round of copying at the tip
+
+**What it shows.** The last few thousand base pairs of a linear chromosome, drawn with its telomere repeats as a run of short ticks, six base pairs to a tick, and its single-stranded 3′ overhang at the tip. Two phases of one division can be stepped through. **Copying**: the fork arrives at the end, the leading strand runs off with its template, and the last lagging-strand fragment is begun on a primer at or near the tip. **After**: the primers are removed, every gap but the last is filled by extending the fragment beyond it, and the last gap stays open, because there is nothing beyond it; the end is trimmed to restore the overhang, and the new chromosome is shorter by a counted number of base pairs. It opens before the first division, paused, at the starting length stated in the header.
+
+The numbers, with their sources, for the header: the repeat is TTAGGG; a telomere is about 10,000 base pairs at birth (mean 9.5 kb in the blood cells of newborns, Factor-Litvak et al. 2016); fibroblasts in a dish lose about 50 base pairs per division (Levy et al. 1992, *J Mol Biol*, from the same group as Harley et al. 1990); the overhang is roughly 75 to 300 nucleotides (Wright et al. 1997; Makarov et al. 1997); and telomerase's RNA carries an 11-nucleotide template, 3′-CAAUCCCAAUC-5′, which is what the figure draws pairing with the overhang. **The threshold at which the cell stops is a model value, not a measurement**: it is set so that the defaults — 10,000 base pairs, 50 lost per division — stop the cell at about fifty divisions, which is Hayflick's figure for fetal fibroblasts (Hayflick 1965), and the header must say that it was chosen that way.
+
+**What the reader does.**
+- **Step** through the two phases of one division; **Divide** (the primary action) runs a whole division; **Run divisions** repeats until the cell stops or the reader pauses.
+- **Telomerase**, on or off. On, it is drawn as an enzyme carrying a short dashed RNA template whose bases pair with the overhang; it adds one repeat, shifts, adds another, and primase and polymerase then fill in the partner strand. The length holds.
+- **Loss per division**, from 25 to 100 base pairs, opening at 50.
+- **Shape**: *Linear* or *Circular*. Circular has no end, and the problem does not arise.
+- **Reset**.
+
+**Objectives it teaches.** `end-replication-problem`, `telomerase`, `divisions-counted`.
+
+**`describe()`**
+
+| field | type | meaning |
+|---|---|---|
+| `phase` | string | `'before' \| 'copying' \| 'after'` within the current division |
+| `divisions` | number | completed |
+| `telomereBp` | number | current length |
+| `startBp` | number | the starting length, stated in the header |
+| `lossPerDivisionBp` | number | the setting |
+| `lostLastDivisionBp` | number | computed from what the last division did; 0 with telomerase on or on a circle |
+| `gapAtEnd` | boolean | computed: true in phase `'after'` on a linear chromosome without telomerase |
+| `overhangNt` | number | |
+| `telomerase` | boolean | |
+| `repeatsAdded` | number | by telomerase, since reset |
+| `shape` | string | `'linear' \| 'circular'` |
+| `senescent` | boolean | computed: the telomere has fallen to the threshold stated in the header; the cell stops dividing |
+| `divisionsLeft` | number \| null | computed from the length, the threshold and the loss; null with telomerase on or on a circle |
+| `t` | number | clock, seconds, three decimals |
+| `playing` | boolean | |
+
+**Why it is a mechanism.** The gap at the tip is drawn in the one place the lagging strand's own rule forbids filling, and the reader counts the divisions to a stop and then removes the stop with an enzyme that carries its own template.
+
+**Narrow composition.** Second composition. Below 800 px the chromosome end runs down the stage, tip at the bottom, so the repeats keep a legible spacing; the telomerase action is drawn beside the tip, and the readouts become rows of type beneath.
+
+---
+
+## 8.8 · `genome-ledger` — What a genome is made of
+
+**What it shows.** Two scenes.
+
+**Composition.** A genome drawn as a long strip at true proportion, coloured by what each stretch is — protein-coding sequence, introns, the four families of transposable element, repeats and satellites, and the rest — with a readout table of each share beside it. An **organism** control redraws the strip for *E. coli*, baker's yeast, the fruit fly, the pufferfish *Takifugu*, human and onion, so the strip's length changes by orders of magnitude while the gene count, printed beside it where it is known, moves by a factor of a few; the strip's scale is printed on it. A **what counts as functional** control lights the human genome three ways — *codes for protein*, *conserved by selection*, *biochemically active* — and the share lit moves from about one per cent to about a tenth to about four-fifths. It opens on the human genome with nothing lit.
+
+The values, for the header, are the ones the prose uses and their sources: genome sizes and protein-coding gene counts from NCBI and the model-organism databases (*E. coli* K-12 4.64 million and 4290; yeast 12.1 million and about 6000; fly 143.7 million and 13,962; *Takifugu* 384 million and about 22,000; human 3.1 billion and about 20,000; onion about 16 billion, gene count not reliably known). The human shares: coding exons about 1.2 per cent and introns about 24 (International Human Genome Sequencing Consortium 2004; Venter et al. 2001); transposable elements 44.8 per cent in the 2001 draft — LINEs 20.4, SINEs 13.1, LTR elements 8.3, DNA transposons 2.8 (Lander et al. 2001, Table 11) — and about 46 in the complete sequence (Hoyt et al. 2022); simple repeats about 3; satellites about 6 and segmental duplications 6.6 in the complete sequence (Altemose et al. 2022; Nurk et al. 2022). The functional shares: 1.2 coding, about 8 to 11 conserved (Rands et al. 2014; Zoonomia Consortium 2023), 80 biochemically active (ENCODE 2012). Where a strip has to be drawn for an organism whose shares these sources do not give, it draws only the shares they give and labels the rest unclassified.
+
+**Filling.** A small model genome of a fixed number of genes and spacer, run forward through generations with one transposable element copying itself in. An insertion into a gene is removed by selection and counted; an insertion elsewhere stays, and mutation slowly erodes it until it can no longer move. The genome grows while its genes stay the same in number. Controls set the copying rate and the rate at which DNA is deleted, so the reader can find the balance at which a genome stops growing. The model's rules and rates are stated in the header as a model, not as measurements.
+
+**What the reader does.**
+- **Scene**: *Composition*, *Filling*.
+- In composition: **Organism**, **What counts as functional**, and selecting a stretch of the strip names it.
+- In filling: **Run**, **Pause**, **Reset**, **Copying rate**, **Deletion rate**.
+
+**Objectives it teaches.** `genome-composition`, `transposable-elements`, `c-value-paradox`, `junk-dna-debate`.
+
+**`describe()`**
+
+| field | type | meaning |
+|---|---|---|
+| `scene` | string | `'composition' \| 'filling'` |
+| `organism` | string | `'e-coli' \| 'yeast' \| 'fly' \| 'pufferfish' \| 'human' \| 'onion'` |
+| `genomeBp` | number | from the sources the header names |
+| `proteinCodingGenes` | number \| null | null where no reliable count exists |
+| `shares` | object | per cent by category for the organism shown: `{ coding, introns, line, sine, ltr, dnaTransposon, repeats, other }`, with null for any the sources do not give |
+| `functionalDefinition` | string \| null | `'coding' \| 'conserved' \| 'biochemical'`; null with nothing lit |
+| `functionalPercent` | number \| null | computed from the definition, for the human genome only |
+| `selected` | string \| null | the category of the stretch the reader has selected |
+| `generations` | number | in the filling scene |
+| `genesInModel` | number | constant |
+| `modelGenomeBp` | number | |
+| `transposonCopies` | number | intact and eroded |
+| `activeCopies` | number | still able to move |
+| `insertionsRemoved` | number | removed by selection because they hit a gene |
+| `transposonPercent` | number | of the model genome, computed |
+| `t` | number | clock, seconds, three decimals |
+| `playing` | boolean | |
+
+**Why it is a mechanism.** The reader changes one word — what counts as functional — and watches the answer move eightyfold, which is the whole of the junk-DNA argument in one control; and in the second scene grows a genome by nothing but copying and removal, which is the C-value paradox produced rather than described.
+
+**Narrow composition.** Second composition. A strip at true proportion across a 390 px stage cannot show the coding sequence at all. Below 800 px the strip is drawn as a column down the stage, wrapped into rows like lines of text, so that a one per cent share is still a visible band, with the table of shares beneath; the organism control becomes a stepper keeping its desktop labels.
+
+---
+
+## Notes for whoever registers these
+
+- **`narrowAspect` for all eight**, values in the table at the head of this brief. **Seven carry a genuine second composition** — every figure but `nucleosome3d`, each for the reason in its own block. That is more than chapter 7 needed, and the reason is the subject: six of these are a scene beside a readout or a long thing drawn at true proportion (a fork, a genome, a chromosome end), which is the shape that never survives a 390 px stage. `nucleosome3d` shrinks honestly and says what it re-stacks.
+- **One WebGL figure**, `nucleosome3d`, so it is `npm run sweep3d`'s only chapter-8 entry. Its default view is the disc face-on, down the axis of the coil, stated in the module header.
+- **Every kind needs a recipe in `tools/drive.js` or `npm run drive` fails**, so the recipes can be written from this brief before the modules exist. The fields worth asserting after driving are the **computed** ones and never the ones a button sets: `ruledOut` and `labelInProgenyPercent` and `transformed` (8.1); `missingLayerLines` and `matchesPhotograph` and `pairFits` and `chargaffHolds` (8.2); `ruledOut` and `matchesData` and `strandBands` (8.3); `laggingContinuous` and `forkStalled` and `pyrophosphateReleased` (8.4); `errorRate` and `errorsPerDaughterCell` and `strandsStopped` and `hiddenDeaminations` (8.5); `turnsWrapped` and `lengthHeldNm` and `handedness` and `histonesInGenome` (8.6); `gapAtEnd` and `lostLastDivisionBp` and `senescent` (8.7); `functionalPercent` and `insertionsRemoved` (8.8).
+- **`tools/pages-exclude.txt` needs no new line, and adding one would be a mistake.** It holds `**/*.md`, a class and not an instance, so `biology/ch08-dna/FIGURES.md` is excluded from the published tree without anybody naming it. Confirm rather than assume: `node tools/pages-exclude.js` prints this file among the paths it trims.
+- **Five invariants a reviewer must check by hand, because no gate can.** Each is a figure's whole claim reduced to one field, and each would look perfectly healthy if it were quietly wrong. `laggingContinuous` is false in every reachable state of 8.4 under the real rules, including with every enzyme removed in turn. `missingLayerLines` is `[4]` at the B-form values in 8.2 and is never `[4]` for a single strand. `ruledOut` in 8.3 does not contain `'dispersive'` at generation 1 — the obvious implementation, which eliminates both rivals as soon as the first band is hybrid, is exactly the misreading the chapter's third check question is written against. `strandsStopped` is 0 in every state of 8.5 while strands grow 5′ to 3′. And `hiddenDeaminations` is 0 in every state of 8.5 with thymine in the genome.
+- **Numbers a figure may not invent**, because the prose states them and a figure disagreeing with the prose is the defect the brief's last section is about: about 1.71 g/cm<sup>3</sup> for light DNA and 0.014 more for heavy (8.3); Hershey and Chase's shares — 75 to 80 per cent of the sulfur off in the blender, about 30 per cent of the phosphorus and under 1 per cent of the sulfur in the progeny (8.1); Griffith's five mice of eight (8.1); the error rates of the three checks and the 6.2 billion and 4.6 million base pairs they are multiplied by (8.5); 147 base pairs, about 1.65 turns, 0.34 nm per pair (8.6); the fork speeds and the forty minutes (8.4); the shares of the human genome (8.8).
+- **If one has to be cut**, `chromosome-end` is the one to fold into another rather than lose: its drawing is a replication fork meeting an end, and it can become a third scene of `replication-fork`, at the cost of the counter being one control among many. **`helix-lab` and `replication-fork` cannot be cut**: between them they carry eleven objectives, the chapter's account of what Franklin measured, and the lagging strand as a consequence rather than a curiosity. Do not split `fidelity` into a copying figure and a damage figure: the section's argument is that one second strand serves both.
+- **Later chapters are expected to mount two of these.** Chapter 10's S phase is `replication-fork`'s whole-chromosome scene, and chapter 15's mutation rate is `fidelity`'s *per* control. Build both so a later chapter can mount them with a different preset rather than needing its own copy, and say in each module header which chapter is expected to ask — the convention chapter 5's brief established and chapters 6 and 7 used.
