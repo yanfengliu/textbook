@@ -662,7 +662,10 @@ export function bench(root, ctx, {
     }
     const input = h('input', { class: 'fig-range', type: 'range', min, max, step, value, 'aria-label': labelText });
     // Read back off the input, not from the number handed in: the browser clamps a range's value to
-    // its min, max and step, and `set(9)` on an eight-stop range must not ask valueText about stop 9.
+    // its min, max and step, and the words a screen reader hears should describe the value it holds.
+    // `format` and `onInput` still receive the number `set()` was handed, as they always have. What
+    // nine figures' onInput receives is not this change's to alter, so a caller that hands set() a
+    // value outside the range still gets that value back.
     const speak = () => {
       if (valueText) input.setAttribute('aria-valuetext', String(valueText(Number(input.value))));
     };

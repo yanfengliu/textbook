@@ -163,7 +163,8 @@ const rungOfWord = async (h, word) => {
 };
 // The figure printed on the rung a marker word sits on, as a number; NaN when there is no such rung.
 // A marker drawn one rung off its own compound every time would pass rungOfWord's relative checks, so
-// the donor's is held against describe().rungKj, which is the donor's own ΔG°′ of hydrolysis.
+// each word is held against its own compound's ΔG°′ of hydrolysis: describe().rungKj for the donor,
+// describe().targetKj for the target.
 const figureAtWord = async (h, word) => {
   const texts = await ladderTexts(h);
   const at = texts.find((t) => t.s === word);
@@ -2787,6 +2788,12 @@ const RECIPES = {
         expect(sentence.test(said), `the verdict should say ${text}; the rail's text ends ${JSON.stringify(said.slice(-120))}`);
       };
       await verdictSays(/Glucose 6-phosphate cannot phosphorylate ADP to make ATP under standard conditions: \+16\.7 kJ\/mol, uphill\./, '"Glucose 6-phosphate cannot phosphorylate ADP to make ATP under standard conditions: +16.7 kJ/mol, uphill."');
+      // Every "cannot" on the stage names the standard conditions it holds in: the verdict under the rail,
+      // and the rule in the table beside it. The rule said it flatly until 2026-09-23, and took back what
+      // the verdict's clause says: ATP phosphorylating creatine, a rung above it, is what resting muscle does.
+      const stage = [...(await ladderTexts(h)).map((t) => t.s), ...(await h.stage.locator('.tb-pane-ledger text').allTextContents())].join(' ');
+      const flat = stage.split(/(?<=\.)\s+/).filter((s) => /\bcannot\b/.test(s) && !/under standard conditions/i.test(s));
+      expect(flat.length === 0, `every "cannot" on the stage should say "under standard conditions"; these do not: ${JSON.stringify(flat)}`);
       await donor.press('End');
       d = await until(h, (x) => x.donor === 'pep', 5_000);
       expect(d.donor === 'pep', `End on the Donor slider should reach the top rung, phosphoenolpyruvate; it reached ${d.donor}`);
@@ -2834,14 +2841,16 @@ const RECIPES = {
         await slider.fill(String(value));
         await atValue(h, slider, value);
       }
-      // Every press: wait for the figure to report the change, check that the donor's word is on the
-      // donor's own rung, and say which rung the marker is now drawn on.
+      // Every press: wait for the figure to report the change, check that each marker word is on its own
+      // compound's rung, and say which rung the pressed marker is now drawn on.
       const press = async (word, act) => {
         const before = (await h.describe())[word];
         await act();
         const now = await until(h, (x) => x[word] !== before, 5_000);
-        const fig = await figureAtWord(h, 'donor');
-        expect(fig === now.rungKj, `the word "donor" should sit on the donor's own rung, ${now.donor} at ${now.rungKj}; it sits on the rung printed ${fig}`);
+        for (const [marker, kj, id] of [['donor', now.rungKj, now.donor], ['target', now.targetKj, now.target]]) {
+          const fig = await figureAtWord(h, marker);
+          expect(fig === kj, `the word "${marker}" should sit on the ${marker}'s own rung, ${id} at ${kj}; it sits on the rung printed ${fig}`);
+        }
         return rungOfWord(h, word);
       };
       for (const [name, word] of pairs) {
@@ -2870,6 +2879,9 @@ const RECIPES = {
           const back = await press(word, () => downButton.click());
           expect(back === from, `the button "${name}, one rung down" should move the ${word} back down to rung ${from + 1}; it went to rung ${back + 1}`);
         }
+        // The harness photographs a step after it returns, when the viewport is back at 1000x640, so the
+        // phone's state is photographed here, where a person can look at it.
+        await h.stage.screenshot({ path: `${OUT}/atp3d-up-on-the-controls-is-up-on-the-rail-390px.png`, type: 'png' });
       } finally {
         await h.page.setViewportSize({ width: 1000, height: 640 });
         await until(h, (x) => x.layout === 'wide', 10_000);
@@ -2893,6 +2905,8 @@ const RECIPES = {
       try {
         const d = await until(h, (x) => x.layout === 'narrow', 10_000);
         expect(d.layout === 'narrow', `a 390 px viewport should put the figure in its narrow layout: ${d.layout}`);
+        // Photographed before anything is asserted, so a failure leaves the frame that shows it.
+        await h.stage.screenshot({ path: `${OUT}/atp3d-the-verdict-is-drawn-whole-however-long-390px.png`, type: 'png' });
         const texts = await ladderTexts(h);
         const lowest = Math.max(...texts.filter((t) => t.cls.includes('at-num')).map((t) => t.y));
         const foot = texts.filter((t) => t.y > lowest && !t.cls.includes('at-num')).sort((a, b) => a.y - b.y).map((t) => t.s);

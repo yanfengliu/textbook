@@ -377,6 +377,16 @@ tb-figure[data-width="bleed"] figcaption {
   display: inline-block;
 }
 
+/* A step button's width is set here and does not depend on its glyph. At first it came from the glyph.
+   ↑ and ↓ are 2.5 px wider than + and − in Inter, and on a 320 px phone that pushed atp3d's two steppers
+   onto separate toolbar rows: 97 px of toolbar became 131, and its ladder lost 34 px (2026-09-23).
+   1.6rem is the width a + button had: 25.8 px measured, 25.6 here. The selector beats the narrow
+   `.fig-btn` padding below by specificity, not by coming later in the file. */
+.tb-figure__stage .tb-bench.is-narrow .tb-stepper .tb-step.fig-btn {
+  width: 1.6rem;
+  padding-inline: 0;
+}
+
 .tb-figure__stage .tb-bench.is-narrow .tb-stepper > input {
   display: none;
 }

@@ -146,12 +146,19 @@ const inSentence = (name) => (/^[A-Z]{2}/.test(name) ? name : name.charAt(0).toL
 // conditions". The verdict under the rail and the sentence a screen reader hears are both built from
 // this, so they cannot disagree.
 // The "cannot" says UNDER STANDARD CONDITIONS because every number on this rail is a ΔG°′, and because
-// naming the acceptor made the flat version false about cells: "ATP cannot phosphorylate creatine" is
-// how a resting muscle recharges §5.3's reserve, and §5.2 is the section that says a ΔG°′ a little
-// above zero runs perfectly well when the concentrations are right. The "can" needs no such clause.
+// naming the acceptor made the flat version false about cells. ATP phosphorylating creatine is how a
+// resting muscle recharges §5.3's reserve, and §5.2 is the section that says a ΔG°′ a little above
+// zero runs perfectly well when the concentrations are right.
+// The "can" carries no such clause, and the two are not symmetrical. "Can" claims the transfer is
+// possible, and a negative ΔG°′ shows that it is, in the standard state at least. "Cannot" claims it
+// is impossible, and no ΔG°′ can show that for a cell. That holds even at acetyl phosphate to
+// creatine, −0.1 kJ/mol, which a cell runs either way.
 const transferWords = (target, possible) => (possible
   ? `can phosphorylate ${target.acceptor} and make ${inSentence(target.name)}`
   : `cannot phosphorylate ${target.acceptor} to make ${inSentence(target.name)} under standard conditions`);
+// The general form of the "cannot", under the verdict on a phone and in the table beside the rail on a
+// desktop. It carries the same clause for the same reason: flat, it contradicted the verdict above it.
+const UPHILL_RULE = 'Under standard conditions a compound cannot hand a phosphate to anything above it.';
 
 // THE DONOR AND TARGET CONTROLS COUNT RUNGS FROM THE BOTTOM. A range input's value goes UP with
 // ArrowUp, with PageUp, with a drag to the right and with the stepper's up button, and the rail's up is
@@ -321,7 +328,6 @@ const CSS = (scope) => `
 ${scope} .tb-pane-scene canvas { outline: none; touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; }
 ${scope} .tb-pane-scene canvas:focus-visible { box-shadow: inset 0 0 0 2px var(--water); }
 ${scope} .at-head { fill: var(--ink-faint); font-weight: 600; }
-${scope}.is-narrow .at-rungs .tb-step { padding-inline: 0.42rem; }
 ${scope} .at-name { fill: var(--ink); font-weight: 600; }
 ${scope} .at-note { fill: var(--ink-faint); }
 ${scope} .at-num { fill: var(--ink); font-weight: 700; font-variant-numeric: lining-nums tabular-nums; }
@@ -698,14 +704,9 @@ function build(root, ctx) {
     steps: RUNG_STEPS, valueText: rungText,
     onInput: (v) => { s.targetIndex = atHeight(v); draw(); b.announce(); },
   });
-  // ↑ and ↓ are wider than + and −. Each step button measured 28.3 px against 25.8, so on a 320 px
-  // phone the two steppers stopped sharing a toolbar row. The toolbar grew from 97 to 131 px, and the
-  // ladder lost 34 px and its rule line. The padding in this figure's CSS (0.42rem, beating the bench's
-  // narrow 0.5rem) gives the arrow buttons back the width the old ones had: measured 25.7 px, and the
-  // toolbar back at 97 px on four rows. It is scoped to these two steppers, so the Row stepper keeps
-  // its own padding.
-  donorSlider.node.classList.add('at-rungs');
-  targetSlider.node.classList.add('at-rungs');
+  // ↑ and ↓ are wider than + and −, and at first the buttons were sized by their glyph. On a 320 px phone
+  // that pushed these two steppers onto separate toolbar rows. The step button's width is now the
+  // bench's to keep, whatever the glyph: see `.tb-step` in components.css.
   b.divide();
 
   const runCtl = b.run({ primary: false, runLabel: 'Turn', pauseLabel: 'Stop', aria: 'Turn, let the molecule turn slowly on its own', onChange: (on) => { if (on) spin.release(clock.now()); else spin.hold(orbit, clock.now()); loop.invalidate(); draw(); b.announce(); } });
@@ -940,9 +941,10 @@ function build(root, ctx) {
     const possible = dg < 0;
     // The verdict names what is phosphorylated and what that makes (transferWords, above): "Phospho-
     // enolpyruvate can phosphorylate ADP and make ATP". It said "can phosphorylate ATP" until 2026-09-23.
-    // The uphill case ends ", uphill." where it said ", which is uphill.": the standard-conditions clause
-    // made it longer. On the chapter page at 390 px, the shorter ending keeps the longest verdict to two
-    // lines.
+    // The uphill case ends ", uphill." where it said ", which is uphill.", because the standard-conditions
+    // clause made it longer. The shorter ending saves a line on the narrowest desktop stages, 700 to
+    // 712 px, where the longest verdict takes two lines rather than three. On a phone the longest takes
+    // three lines with either ending.
     const verdict = s.donorIndex === s.targetIndex
       ? 'Donor and target are the same compound, so there is nothing to transfer.'
       : possible
@@ -954,12 +956,15 @@ function build(root, ctx) {
     // rail runs the table's way it is true of the picture it is printed under. It said "releases more /
     // releases less" while the rail was upside down: true either way up, and therefore saying nothing
     // about the rail the reader is looking at. The second one said "cannot phosphorylate anything above
-    // it", which is the verdict's old mistake in general form; §5.3's verb is "hand a phosphate to".
+    // it", which is the verdict's old mistake in general form; §5.3's verb is "hand a phosphate to". It is
+    // also a "cannot", so it carries the verdict's "under standard conditions". Flat, it was set
+    // directly under "ATP cannot phosphorylate creatine … under standard conditions" and took back what
+    // that clause says. It dropped "The transfer runs the other way:" to stay two lines at 320 px.
     const rule = !narrow || s.donorIndex === s.targetIndex
       ? null
       : possible
         ? 'A compound takes a phosphate from anything above it and gives one to anything below.'
-        : 'The transfer runs the other way: a compound cannot hand a phosphate to anything above it.';
+        : UPHILL_RULE;
 
     // The geometry, solved rather than assumed, and this is the fix for the overlap above. The foot's
     // height is a line count; the line count depends on the type size; the type size depends on what
@@ -1093,8 +1098,10 @@ function build(root, ctx) {
         // held back and the ladder opened with the mouse while Inter was still loading: the words stood
         // at x = 248.1 and 333.1, moved to 250.3 and 342.2 when the fonts came in, and the ladder pane's
         // markup was then byte-identical to a run that had the fonts first, at 1100 and 390 px.
-        // What that does not cover is a font load that STARTS after the bench took its promise. No face
-        // this pane uses is first requested by it — the ledger and the toolbar set the same Inter first.
+        // What that does not cover is a font load that STARTS after the bench took its promise. What is
+        // measured here are the names, all Latin, and the ledger and the toolbar set that same Inter
+        // first. Opening the ladder can bring in the page's `text=` subset of Inter, for the ΔG°′ in the
+        // heading and the arrows on the steppers, but nothing is laid out against either.
         nameWidth = el?.getComputedTextLength?.() || 0;
       }
       if (isDonor || isTarget) {
@@ -1199,7 +1206,7 @@ function build(root, ctx) {
         ? 'Donor and target are the same compound, so there is nothing to transfer.'
         : d.transferPossible
           ? 'A compound takes a phosphate from anything above it and gives one to anything below. That is the whole of ATP’s qualification for the job.'
-          : 'The transfer runs the other way: a compound cannot hand a phosphate to anything above it.');
+          : `The transfer runs the other way. ${UPHILL_RULE}`);
       return r.fill(room);
     }
 
@@ -1310,8 +1317,9 @@ function build(root, ctx) {
       donor: donor.id,
       target: target.id,
       rungKj: donor.kj,
-      // Computed from the two rungs, never set by the controls: a donor can phosphorylate a target only
-      // when its own hydrolysis releases more.
+      targetKj: target.kj,
+      // Computed from the two rungs, never set by the controls: a donor can phosphorylate a target's
+      // acceptor only when its own hydrolysis releases more.
       transferPossible: s.donorIndex !== s.targetIndex && donor.kj - target.kj < 0,
       t: round(clock.now() - tOrigin, 3),
       playing: b.playing,
@@ -1385,6 +1393,9 @@ function build(root, ctx) {
   //                     the rungs' order was never in describe(), only in where drawLadder put them.
   //                     Nor did turning the Donor and Target controls round (2026-09-23): `donor` and
   //                     `target` are ids, and the height a range holds is not reported.
+  //   targetKj          the selected target's ΔG°′ of hydrolysis. Added 2026-09-23 so `npm run drive`
+  //                     can check that the word "target" is drawn on the target's own rung, as it
+  //                     checks the donor's against rungKj.
   //   transferPossible  computed from the two rungs, never set by the sliders
   //   t                 seconds since mount or since Reset, three decimals
   //   playing           whether the slow turn is on; it opens still
