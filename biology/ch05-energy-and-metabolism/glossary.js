@@ -1,6 +1,14 @@
 // Chapter 5 glossary. Every <tb-term ref="..."> in index.html names a key here, and every key here is
 // used in the chapter at least once (npm run check enforces both). `def` may hold inline HTML.
 //
+// `term` may not. The glossary list and the popover both set it as text (src/components/term.js escapes
+// it on purpose), so a tag in a term is printed as a tag: until 2026-09-23 the page showed
+// "Maximum rate (V<sub>max</sub>)", "Michaelis constant (K<sub>m</sub>)" and "NAD<sup>+</sup>" with
+// the tags visible. A symbol with a sub- or superscript therefore goes in the def, where markup renders,
+// and the heading is the name. That is why the `nad` entry is headed by the full name: a precomposed ⁺
+// in the heading was tried and is drawn by Libertinus Serif, visibly smaller and lighter than the bold
+// face around it at 3x.
+//
 // Terms chapters 1 to 4 already introduced are not repeated: metabolism, homeostasis, negative feedback,
 // set point, mole, covalent bond, electronegativity, polar, ion, hydrophobic effect, functional group,
 // polymer, monomer, dehydration synthesis, hydrolysis, denaturation, nucleotide, protein, amino acid,
@@ -56,8 +64,8 @@ export const GLOSSARY = {
   coenzyme: { term: 'Coenzyme', def: 'An organic cofactor, usually a small molecule that binds loosely and leaves again carrying something: a chemical group, or a pair of electrons. Most are made from vitamins, which is what a vitamin is for.' },
 
   // ---- 5.6 How fast, and what slows it down ----
-  'maximum-rate': { term: 'Maximum rate (V<sub>max</sub>)', def: 'The rate an enzyme reaches when every active site is occupied all the time, so that adding more substrate cannot help. It is set by how much enzyme there is and how fast each molecule cycles.' },
-  'michaelis-constant': { term: 'Michaelis constant (K<sub>m</sub>)', def: 'The substrate concentration at which an enzyme works at half its maximum rate. It does not depend on how much enzyme is present, and a low value roughly means the enzyme works well at low concentrations.' },
+  'maximum-rate': { term: 'Maximum rate', def: 'The rate an enzyme reaches when every active site is occupied all the time, so that adding more substrate cannot help. It is set by how much enzyme there is and how fast each molecule cycles, and is written V<sub>max</sub>.' },
+  'michaelis-constant': { term: 'Michaelis constant', def: 'The substrate concentration at which an enzyme works at half its maximum rate, written K<sub>m</sub>. It does not depend on how much enzyme is present, and a low value roughly means the enzyme works well at low concentrations.' },
   'turnover-number': { term: 'Turnover number', def: 'How many substrate molecules one enzyme molecule converts each second when it is saturated. The range across biology is enormous: a few a second at one end, a million at the other.' },
   'competitive-inhibition': { term: 'Competitive inhibition', def: 'Inhibition by a molecule that resembles the substrate and occupies the active site itself. More substrate outcompetes it, so the maximum rate is unchanged and the Michaelis constant appears to rise.' },
   'noncompetitive-inhibition': { term: 'Non-competitive inhibition', def: 'Inhibition by a molecule that binds somewhere other than the active site and changes the enzyme\'s shape. More substrate does not help, because the substrate is not what it is competing with, so the maximum rate falls.' },
@@ -78,6 +86,6 @@ export const GLOSSARY = {
   reduction: { term: 'Reduction', def: 'The gain of electrons, often arriving as hydrogen atoms. The name is old and unhelpful: it refers to the loss of mass when a metal ore is smelted, not to anything being reduced in the ordinary sense.' },
   'redox-reaction': { term: 'Redox reaction', def: 'A reaction in which electrons move from one substance to another. Oxidation and reduction are two halves of one event and never happen apart: whatever is oxidised has reduced something else.' },
   'electron-carrier': { term: 'Electron carrier', def: 'A small molecule that picks up electrons from one reaction and delivers them to another, then goes back for more. A cell keeps very little of each and recycles it constantly, exactly as it does with ATP.' },
-  nad: { term: 'NAD<sup>+</sup>', def: 'The main electron carrier of catabolism: two nucleotides joined tail to tail, which accepts two electrons and one proton to become NADH. A pool of NADH is a cell holding electrons it has not yet let fall.' },
+  nad: { term: 'Nicotinamide adenine dinucleotide', def: 'The main electron carrier of catabolism, written NAD<sup>+</sup> in the form that is ready to take electrons: two nucleotides joined tail to tail, which accepts two electrons and one proton to become NADH. A pool of NADH is a cell holding electrons it has not yet let fall.' },
   fad: { term: 'FAD', def: 'The other common electron carrier, built around riboflavin — vitamin B<sub>2</sub>. It takes two electrons and two protons to become FADH<sub>2</sub>, and unlike NAD<sup>+</sup> it usually stays bound to the enzyme that uses it.' },
 };
