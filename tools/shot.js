@@ -624,7 +624,7 @@ function auditFigureGeometry({ page: pageId, viewport, theme }) {
 // attribute is put back in the same evaluation, so no frame is painted in between and the screenshot
 // cannot see it. Batching is sound because an absolutely positioned box's intrinsic width depends on its
 // own content and inherited style, never on its siblings; one box at a time would force two layouts of the
-// whole page per box. It costs 7 to 18 ms a load on a chapter.
+// whole page per box. Measured on 2026-09-23 it costs 1 to 18 ms a load, for up to 223 boxes on a page.
 //
 // Bound. The gate's three widths: the layout between them is not measured, and that is where chapter 2's
 // sort collapsed too, 10.8 px in an 800 px window against 186.8 px at 1024. It reads the page as it stands

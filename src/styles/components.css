@@ -1000,6 +1000,11 @@ tb-sort .tb-sort__item .name {
   font-size: var(--text-base);
   line-height: 1.4;
   color: var(--ink);
+  /* A name that wraps is a sentence, set as the check's question and the glossary are. Without it, 9 of
+     the 24 names in chapters 3–5 ended on a line holding one word ("through.", "apart.", "vesicle.") at
+     one or more of 320, 390, 1024 and 1440px, 13 cases in all; with it none do, and no name gains a line
+     (measured in Chromium on 2026-09-23). */
+  text-wrap: pretty;
 }
 
 /* One layout for the whole sort (watchRows in src/components/sort.js): the name takes the whole line, as
@@ -1140,9 +1145,10 @@ tb-sort .tb-sort__status {
 /* On a phone the choices always go under the name, back at the left edge of the column. The widths above
    alone would put some sorts on one line at phone widths: the second book's chapter 1 sort from 413px, and
    this book's chapter 1 sort from 508px (measured with this rule switched off). The phone layout is older
-   than those widths and stays exactly as it was: the name takes the whole line, so nothing else fits
-   beside it. Every sort in both books drew byte-identical pixels to the grid's at nine widths from 320 to
-   599px, measured in Chromium on 2026-09-23. */
+   than those widths and stays as it was: the name takes the whole line, so nothing else fits beside it.
+   Measured in Chromium on 2026-09-23, all eight sorts in both books at nine widths from 320 to 599px, every
+   one kept the grid's exact size, and 53 of the 72 frames were byte-identical to the grid's; the other 19,
+   all in chapters 3–5, differ only where text-wrap: pretty took a one-word last line off a name. */
 @media (max-width: 599.98px) {
   tb-sort .tb-sort__item .name {
     flex-basis: 100%;
