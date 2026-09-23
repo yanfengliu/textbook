@@ -2,7 +2,8 @@
 //
 // Claim: for each chapter page, every <tb-figure> has a registered kind, a unique id, a <figcaption>
 // and a data-alt; every <tb-term ref> names an entry in that chapter's glossary.js and every glossary
-// entry is used; every <tb-check> has a question, at least two options, exactly one data-correct and an
+// entry is used, and no entry's term carries markup (checkGlossaryTerms, above main());
+// every <tb-check> has a question, at least two options, exactly one data-correct and an
 // explanation; every <tb-sort> has at least two bins, and every item names a bin and carries a data-why;
 // every id in the document is unique; there is exactly one <h1>, on a chapter page (main[data-chapter])
 // every <h2> is the direct child of a <section id> so the shell can number it, and no heading level is
@@ -438,6 +439,46 @@ export function checkStudySources({ html, banks = [], pageDir = 'today', file = 
   return fails;
 }
 
+// Claim: no glossary entry's `term` carries markup, whether a tag or an entity such as `&#8288;`. A term is
+// set as text wherever the book shows it: the glossary list writes it with textContent, and every popover
+// escapes it (src/components/term.js: "`term` is escaped and `def` is not"). So markup in a term is shown
+// to the reader exactly as it is written. Found 2026-09-23: chapter 5's glossary printed "Maximum rate
+// (V<sub>max</sub>)", "Michaelis constant (K<sub>m</sub>)" and "NAD<sup>+</sup>" with the tags on the page,
+// and chapter 4's two water potentials the same way. What passes is the name in the term and the symbol,
+// with its markup, in the definition, which is HTML by design.
+//
+// Keyed on the entries, not on a <tb-glossary>: a page with no list still shows each term in the popover of
+// every <tb-term> that names it. `source` is the glossary file's own text, used only to give the failure a
+// line number.
+//
+// Bound: it reads each term as a string, so a bare "&" passes as the text it is, and so does any character
+// at all. A precomposed "⁺" in a term is plain text and passes here, although a heading set in the bold
+// face takes it from Libertinus Serif, smaller and lighter than the letters beside it at 3x; the font
+// census in npm run shot passes it too, because that face is one the page loads. Whether a term looks
+// right is still a question for a person looking at the page.
+export function checkGlossaryTerms(glossary = {}, { file = 'glossary.js', source = '' } = {}) {
+  const fails = [];
+  const lines = String(source).split(/\r?\n/);
+  const escape = (s) => s.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&');
+  for (const [ref, entry] of Object.entries(glossary ?? {})) {
+    const term = String(entry?.term ?? '');
+    const tags = term.match(/<[^>]*>?/g) ?? [];
+    const entities = term.match(/&(?:#\d+|#x[0-9a-f]+|[a-z][a-z0-9]*);/gi) ?? [];
+    if (!tags.length && !entities.length) continue;
+    const key = new RegExp(`(^|[\\s{,])(['"]?)${escape(ref)}\\2\\s*:`);
+    const at = lines.findIndex((l) => key.test(l));
+    const fixes = [];
+    // "Solute potential (Ψ<sub>s</sub>)" already holds its own fix: the name before the bracket and the
+    // symbol inside it. Any other shape gets the worked example.
+    const named = /^(.+?)\s*\(([^()]*<[^()]*)\)\s*$/.exec(term);
+    const example = named ? `term "${named[1]}", and a definition that says it is written ${named[2]}` : 'term "Maximum rate", and a definition that says it is written V<sub>max</sub>';
+    if (tags.length) fixes.push(`put the full name in the term and the symbol, with its markup, in the definition (${example})`);
+    if (entities.length) fixes.push('write the character itself in the term, as a \\u escape in the string (a word joiner is \\u2060)');
+    fails.push(`${file}${at >= 0 ? `:${at + 1}` : ''}: glossary entry "${ref}" has markup in its term, ${[...tags, ...entities].map((m) => `"${m}"`).join(', ')}, in "${term}". A term is set as text in the glossary list and in every popover (src/components/term.js escapes it), so the reader sees the markup exactly as it is written. To pass, ${fixes.join('; and ')}.`);
+  }
+  return fails;
+}
+
 async function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   const { KINDS } = await import(pathToFileURL(join(root, 'src/figures/registry.js')).href);
@@ -536,7 +577,9 @@ async function main() {
     const hasSitting = findAll(tree, (n) => n.tag === 'tb-sitting').length > 0;
     if (hasSitting) sittingPages += 1;
     const sourceFails = hasSitting ? checkStudySources({ html, banks, pageDir: posix.dirname(rel), file: rel }) : [];
-    const all = [...fails, ...dataFails, ...sourceFails];
+    const glossaryFile = join(dir, 'glossary.js');
+    const termFails = existsSync(glossaryFile) ? checkGlossaryTerms(glossary, { file: `${posix.dirname(rel)}/glossary.js`, source: readFileSync(glossaryFile, 'utf8') }) : [];
+    const all = [...fails, ...dataFails, ...sourceFails, ...termFails];
     total += all.length;
     const counts = [`${findAll(tree, (n) => n.tag === 'tb-figure').length} figures`, `${Object.keys(glossary).length} glossary entries`];
     if (objectives.length) counts.push(`${objectives.length} objectives`);
