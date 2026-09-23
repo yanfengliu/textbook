@@ -30,7 +30,7 @@ export const GLOSSARY = {
   'open-system': { term: 'Open system', def: 'A system that exchanges both matter and energy with its surroundings. Every living thing is one, which is why a cell can lower its own entropy while the total goes up.' },
 
   // ---- 5.2 What decides which way a reaction goes ----
-  'free-energy': { term: 'Free energy (ΔG)', def: 'The part of a system\'s energy that is available to do work, in kilojoules per mole. The change in it decides which way a reaction goes: negative and it runs by itself, positive and the reverse does, zero and it is at equilibrium.' },
+  'free-energy': { term: 'Free energy (G)', def: 'The part of a system\'s energy that is available to do work, in kilojoules per mole. The change in it, ΔG, decides which way a reaction goes: negative and it runs by itself, positive and the reverse does, zero and it is at equilibrium.' },
   exergonic: { term: 'Exergonic', def: 'Of a reaction: one that releases free energy, so ΔG is negative and it runs by itself. It says nothing at all about how fast.' },
   endergonic: { term: 'Endergonic', def: 'Of a reaction: one that takes free energy in, so ΔG is positive and it does not run by itself. A cell makes such a reaction go by coupling it to an exergonic one.' },
   'standard-free-energy': { term: 'Standard free energy change (ΔG°′)', def: 'The free energy change measured with every reactant and product at one mole per litre, at pH 7 and 25 °C. It is a property of the reaction and a useful table entry, and it is a condition no cell is ever in.' },
@@ -67,7 +67,7 @@ export const GLOSSARY = {
   allostery: { term: 'Allostery', def: 'The control of a protein by a molecule binding at a site that is not the active site. The protein has two shapes, one active and one not; what binds at the allosteric site shifts the balance between them. The word means "other shape".' },
   cooperativity: { term: 'Cooperativity', def: 'The behaviour of a multi-subunit protein whose subunits change shape together, so that one substrate binding makes the next bind more easily. It turns a gently rising rate curve into an S-shaped one, which behaves like a switch.' },
   'feedback-inhibition': { term: 'Feedback inhibition', def: 'The inhibition of the first committed enzyme of a pathway by the pathway\'s own end product. When the product is plentiful the pathway stops; when it is used up the pathway restarts, and nothing counts anything.' },
-  kinase: { term: 'Kinase', def: 'An enzyme that transfers a phosphate group from ATP onto a target. Protein kinases are the commonest switches in a cell; a human cell makes more than five hundred different ones.' },
+  kinase: { term: 'Kinase', def: 'An enzyme that transfers a phosphate group from ATP onto a target. Protein kinases are the commonest switches in a cell; the human genome encodes more than five hundred different ones.' },
   phosphatase: { term: 'Phosphatase', def: 'An enzyme that removes a phosphate group. It is the other half of every phosphorylation switch: without it, a switch could be thrown once and never reset.' },
 
   // ---- 5.8 Metabolism has a shape ----
