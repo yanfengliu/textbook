@@ -1,6 +1,14 @@
 // Chapter 5 glossary. Every <tb-term ref="..."> in index.html names a key here, and every key here is
 // used in the chapter at least once (npm run check enforces both). `def` may hold inline HTML.
 //
+// `term` may not. The glossary list and the popover both set it as text (src/components/term.js escapes
+// it on purpose), so a tag in a term is printed as a tag: until 2026-09-23 the page showed
+// "Maximum rate (V<sub>max</sub>)", "Michaelis constant (K<sub>m</sub>)" and "NAD<sup>+</sup>" with
+// the tags visible. A symbol with a sub- or superscript therefore goes in the def, where markup renders,
+// and the heading is the name. That is why the `nad` entry is headed by the full name: a precomposed ⁺
+// in the heading was tried and is drawn by Libertinus Serif, visibly smaller and lighter than the bold
+// face around it at 3x.
+//
 // Terms chapters 1 to 4 already introduced are not repeated: metabolism, homeostasis, negative feedback,
 // set point, mole, covalent bond, electronegativity, polar, ion, hydrophobic effect, functional group,
 // polymer, monomer, dehydration synthesis, hydrolysis, denaturation, nucleotide, protein, amino acid,
@@ -30,7 +38,7 @@ export const GLOSSARY = {
   'open-system': { term: 'Open system', def: 'A system that exchanges both matter and energy with its surroundings. Every living thing is one, which is why a cell can lower its own entropy while the total goes up.' },
 
   // ---- 5.2 What decides which way a reaction goes ----
-  'free-energy': { term: 'Free energy (ΔG)', def: 'The part of a system\'s energy that is available to do work, in kilojoules per mole. The change in it decides which way a reaction goes: negative and it runs by itself, positive and the reverse does, zero and it is at equilibrium.' },
+  'free-energy': { term: 'Free energy (G)', def: 'The part of a system\'s energy that is available to do work, in kilojoules per mole. The change in it, ΔG, decides which way a reaction goes: negative and it runs by itself, positive and the reverse does, zero and it is at equilibrium.' },
   exergonic: { term: 'Exergonic', def: 'Of a reaction: one that releases free energy, so ΔG is negative and it runs by itself. It says nothing at all about how fast.' },
   endergonic: { term: 'Endergonic', def: 'Of a reaction: one that takes free energy in, so ΔG is positive and it does not run by itself. A cell makes such a reaction go by coupling it to an exergonic one.' },
   'standard-free-energy': { term: 'Standard free energy change (ΔG°′)', def: 'The free energy change measured with every reactant and product at one mole per litre, at pH 7 and 25 °C. It is a property of the reaction and a useful table entry, and it is a condition no cell is ever in.' },
@@ -56,8 +64,8 @@ export const GLOSSARY = {
   coenzyme: { term: 'Coenzyme', def: 'An organic cofactor, usually a small molecule that binds loosely and leaves again carrying something: a chemical group, or a pair of electrons. Most are made from vitamins, which is what a vitamin is for.' },
 
   // ---- 5.6 How fast, and what slows it down ----
-  'maximum-rate': { term: 'Maximum rate (V<sub>max</sub>)', def: 'The rate an enzyme reaches when every active site is occupied all the time, so that adding more substrate cannot help. It is set by how much enzyme there is and how fast each molecule cycles.' },
-  'michaelis-constant': { term: 'Michaelis constant (K<sub>m</sub>)', def: 'The substrate concentration at which an enzyme works at half its maximum rate. It does not depend on how much enzyme is present, and a low value roughly means the enzyme works well at low concentrations.' },
+  'maximum-rate': { term: 'Maximum rate', def: 'The rate an enzyme reaches when every active site is occupied all the time, so that adding more substrate cannot help. It is set by how much enzyme there is and how fast each molecule cycles, and is written V<sub>max</sub>.' },
+  'michaelis-constant': { term: 'Michaelis constant', def: 'The substrate concentration at which an enzyme works at half its maximum rate, written K<sub>m</sub>. It does not depend on how much enzyme is present, and a low value roughly means the enzyme works well at low concentrations.' },
   'turnover-number': { term: 'Turnover number', def: 'How many substrate molecules one enzyme molecule converts each second when it is saturated. The range across biology is enormous: a few a second at one end, a million at the other.' },
   'competitive-inhibition': { term: 'Competitive inhibition', def: 'Inhibition by a molecule that resembles the substrate and occupies the active site itself. More substrate outcompetes it, so the maximum rate is unchanged and the Michaelis constant appears to rise.' },
   'noncompetitive-inhibition': { term: 'Non-competitive inhibition', def: 'Inhibition by a molecule that binds somewhere other than the active site and changes the enzyme\'s shape. More substrate does not help, because the substrate is not what it is competing with, so the maximum rate falls.' },
@@ -67,7 +75,7 @@ export const GLOSSARY = {
   allostery: { term: 'Allostery', def: 'The control of a protein by a molecule binding at a site that is not the active site. The protein has two shapes, one active and one not; what binds at the allosteric site shifts the balance between them. The word means "other shape".' },
   cooperativity: { term: 'Cooperativity', def: 'The behaviour of a multi-subunit protein whose subunits change shape together, so that one substrate binding makes the next bind more easily. It turns a gently rising rate curve into an S-shaped one, which behaves like a switch.' },
   'feedback-inhibition': { term: 'Feedback inhibition', def: 'The inhibition of the first committed enzyme of a pathway by the pathway\'s own end product. When the product is plentiful the pathway stops; when it is used up the pathway restarts, and nothing counts anything.' },
-  kinase: { term: 'Kinase', def: 'An enzyme that transfers a phosphate group from ATP onto a target. Protein kinases are the commonest switches in a cell; a human cell makes more than five hundred different ones.' },
+  kinase: { term: 'Kinase', def: 'An enzyme that transfers a phosphate group from ATP onto a target. Protein kinases are the commonest switches in a cell; the human genome encodes more than five hundred different ones.' },
   phosphatase: { term: 'Phosphatase', def: 'An enzyme that removes a phosphate group. It is the other half of every phosphorylation switch: without it, a switch could be thrown once and never reset.' },
 
   // ---- 5.8 Metabolism has a shape ----
@@ -78,6 +86,6 @@ export const GLOSSARY = {
   reduction: { term: 'Reduction', def: 'The gain of electrons, often arriving as hydrogen atoms. The name is old and unhelpful: it refers to the loss of mass when a metal ore is smelted, not to anything being reduced in the ordinary sense.' },
   'redox-reaction': { term: 'Redox reaction', def: 'A reaction in which electrons move from one substance to another. Oxidation and reduction are two halves of one event and never happen apart: whatever is oxidised has reduced something else.' },
   'electron-carrier': { term: 'Electron carrier', def: 'A small molecule that picks up electrons from one reaction and delivers them to another, then goes back for more. A cell keeps very little of each and recycles it constantly, exactly as it does with ATP.' },
-  nad: { term: 'NAD<sup>+</sup>', def: 'The main electron carrier of catabolism: two nucleotides joined tail to tail, which accepts two electrons and one proton to become NADH. A pool of NADH is a cell holding electrons it has not yet let fall.' },
+  nad: { term: 'Nicotinamide adenine dinucleotide', def: 'The main electron carrier of catabolism, written NAD<sup>+</sup> in the form that is ready to take electrons: two nucleotides joined tail to tail, which accepts two electrons and one proton to become NADH. A pool of NADH is a cell holding electrons it has not yet let fall.' },
   fad: { term: 'FAD', def: 'The other common electron carrier, built around riboflavin — vitamin B<sub>2</sub>. It takes two electrons and two protons to become FADH<sub>2</sub>, and unlike NAD<sup>+</sup> it usually stays bound to the enzyme that uses it.' },
 };
