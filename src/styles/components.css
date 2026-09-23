@@ -867,7 +867,8 @@ tb-sort .tb-sort__intro {
   max-width: var(--measure);
 }
 
-/* The tray is a ruled list, one thing to a line: name on the left, the three choices on the right.
+/* The tray is a ruled list, one thing to a line: name on the left, the choices on the right, or under the
+   name when they do not fit beside it (see .tb-sort__item).
    It was nine bordered cards inside a dashed box, each card repeating the same three pill buttons —
    twenty-seven pills and ten rounded rectangles to ask nine questions. */
 tb-sort .tb-sort__tray {
@@ -932,14 +933,29 @@ tb-sort .tb-sort__bin h5 {
   color: var(--ink-soft);
 }
 
+/* A row is one line only while the name keeps a readable width beside its choices. When it cannot, the
+   choices go under the name, as they always have on a phone. Flex-wrap makes that decision, not a
+   breakpoint, because it depends on the words: chapter 5's four bins leave a name no room at 1440px, and
+   the second book's three short ones leave plenty at 600px.
+
+   It was a grid, `minmax(0, 1fr) minmax(0, auto)`. Grid sizes the auto track first, to the choices' whole
+   row, and gives the name what is left, down to 0. Measured in Chromium on 2026-09-23: chapter 5's choices
+   are wider than its 697.6px tray, so its name track was 0px wide at 1024 and 1440px, and every
+   observation ran one word to a line, 358–717px tall. Chapter 4's track was 18.8px at 1024 and 60.4px at
+   1440; chapter 3's was 148px and 190px, a ribbon of 22 to 28 characters a line; chapter 2's was 10.8px
+   in an 800px window. Shorter labels only move the width where it happens.
+
+   Now each part asks for a width (see .name and .choose below), and the choices move to a line of their own
+   when the two together are wider than the tray. So a name is never squeezed into a ribbon beside the
+   buttons. `npm run shot` fails a name narrower than its longest word, and a name that wraps into a ribbon
+   (the text-box block in tools/shot.js). */
 tb-sort .tb-sort__item {
-  display: grid;
-  /* The second track may shrink below its content: with a bare `auto` it sized to the widest the three
-     choices could ever be, and chapter 2's bins ("Dissolves in water", "Keeps out of water", "Both at
-     once") made that 444px inside a 390px phone — 79px of horizontal overflow on a page this pass never
-     opened. A track that can shrink lets the control wrap instead. */
-  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  /* Beside the name, the choices sit at the right edge. On a line of their own they are the only item, so
+     space-between puts them at the left edge, where a phone has always put them. */
+  justify-content: space-between;
   gap: var(--space-2) var(--space-4);
   background: none;
   border: 0;
@@ -956,7 +972,27 @@ tb-sort .tb-sort__item:active {
   cursor: grabbing;
 }
 
+/* What the name asks for beside its choices is its own width, from a floor of 11.5rem up to a cap of 21rem.
+   A two-word name asks for the floor, and an observation that wraps asks for the cap. Once the choices fit
+   beside it, flex-grow gives the name whatever they leave.
+     · The cap, 21rem (336px), is fifty characters of this face at this size. Newsreader at 1rem advances
+       6.77px a character, measured in Chromium over the 2,842 characters of the 24 observations in
+       chapters 3–5, each laid out at max-content. Fifty is typography.css's own number: below it, ragged
+       text is hyphenated so its long words do not leave holes, and a name here is never hyphenated. So a
+       name that wraps keeps fifty characters or it goes above its choices.
+     · The floor, 11.5rem (184px), is the glossary's term column, the width this book already sets a column
+       of short names in. It also keeps a sort's rows together. Every short name in the books' sorts fits
+       inside it (the widest is 137px), so every row asks for the same 184px and the rows all change layout
+       at the same width. With no floor each row asked for its own width, and chapter 2's rows split between
+       the two layouts from 600 to 626px and from 846 to 896px, measured in 2px steps; 852 and 896 are
+       iPhones held sideways.
+   Bound: a sort mixing short names with names wider than the floor still asks for different widths row by
+   row, so over a narrow band of widths some of its rows may stack and others not. No sort in either book
+   does: every name is narrower than 137px or wider than 470px. */
 tb-sort .tb-sort__item .name {
+  flex: 1 1 21rem;
+  min-width: 11.5rem;
+  max-width: max-content;
   font-weight: 500;
   font-family: var(--font-text);
   font-size: var(--text-base);
@@ -974,11 +1010,16 @@ tb-sort .tb-sort__item .choose {
   display: flex;
   flex-wrap: wrap;
   gap: 1px;
+  /* The choices ask for their whole row and never grow past it. On a line of their own, a row wider than
+     the tray shrinks to fit it and the segments wrap inside the box; the max-width holds the box to the
+     tray in any layout. The box must be able to shrink: chapter 2's bins ("Dissolves in water", "Keeps out
+     of water", "Both at once") are 444px of choices, and when the box could not shrink they put 79px of
+     horizontal overflow on a 390px phone. */
+  flex: 0 1 auto;
   max-width: 100%;
   background: var(--rule);
   border: 1px solid var(--rule-strong);
   border-radius: 0;
-  justify-self: end;
 }
 
 tb-sort .tb-sort__item .choose button {
@@ -995,7 +1036,7 @@ tb-sort .tb-sort__item .choose button {
      with nowrap that floor was the WHOLE SENTENCE, and the segment could not shrink however narrow the
      screen. Chapter 5's "Exergonic, and waiting on an enzyme" came out 298.8 px inside a 266.8 px column
      and put 5 px of sideways scroll on the page at 320 px, which `npm run devices` found and no other
-     gate did. The track above it can already shrink (minmax(0, auto)) and the box is max-width: 100%;
+     gate did. The box around it can already shrink (`flex: 0 1 auto` in its row, and max-width: 100%);
      this is the last of the three that could not. Nothing else moves: a segment only wraps where it did
      not fit, and where it fits its box is unchanged. */
   white-space: normal;
@@ -1087,14 +1128,16 @@ tb-sort .tb-sort__status {
   max-width: var(--measure);
 }
 
-/* One line cannot hold a long name and three choices on a phone, so the choices drop under the name and
-   go back to the left edge of the column. */
+/* On a phone the choices always go under the name, back at the left edge of the column. The widths above
+   alone would put some sorts on one line at phone widths: the second book's chapter 1 sort from 413px, and
+   this book's chapter 1 sort from 508px (measured with this rule switched off). The phone layout is older
+   than those widths and stays exactly as it was: the name takes the whole line, so nothing else fits
+   beside it. Every sort in both books drew byte-identical pixels to the grid's at nine widths from 320 to
+   599px, measured in Chromium on 2026-09-23. */
 @media (max-width: 599.98px) {
-  tb-sort .tb-sort__item {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  tb-sort .tb-sort__item .choose {
-    justify-self: start;
+  tb-sort .tb-sort__item .name {
+    flex-basis: 100%;
+    max-width: none;
   }
 }
 
