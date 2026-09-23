@@ -646,7 +646,7 @@ const TEXT_BOXES = [
 // A component whose rows each set a second part beside the first or under it: every row of one component
 // must make the same choice.
 const ROWS_AGREE = [
-  { host: 'tb-sort', row: '.tb-sort__tray .tb-sort__item', first: '.name', second: '.choose', what: 'names', parts: 'choices', fix: 'watchRows in src/components/sort.js setting data-stacked once any row\'s choices go under its name, and the tb-sort[data-stacked] rule in src/styles/components.css' },
+  { host: 'tb-sort', row: '.tb-sort__tray .tb-sort__item', first: '.name', second: '.choose', parts: 'choices', fix: 'watchRows in src/components/sort.js setting data-stacked once any row\'s choices go under its name, and the tb-sort[data-stacked] rule in src/styles/components.css' },
 ];
 
 /**
@@ -681,7 +681,7 @@ function auditTextBoxes({ page: pageId, viewport, theme, subjects, rowsAgree, ri
       const under = rows.filter((x) => x.under);
       const beside = rows.filter((x) => !x.under);
       if (under.length && beside.length) {
-        problems.push(`${where}: ${named(host)} sets the ${r.parts} of ${under.length} of its ${rows.length} ${r.what} under the name (${quote(under[0].text)}) and the other ${beside.length} beside it (${quote(beside[0].text)}). One component takes one layout for every row, or its column of ${r.parts} zigzags down the page. What would satisfy this: ${r.fix}.`);
+        problems.push(`${where}: ${named(host)} sets the ${r.parts} under the name on ${under.length} of its ${rows.length} rows (${quote(under[0].text)}) and beside it on the other ${beside.length} (${quote(beside[0].text)}). One component takes one layout for every row, or its ${r.parts} zigzag down the page. What would satisfy this: ${r.fix}.`);
       }
     }
   }
@@ -715,7 +715,7 @@ function auditTextBoxes({ page: pageId, viewport, theme, subjects, rowsAgree, ri
         mine += 1;
       }
       if (!mine && !s.optional) {
-        problems.push(`${where}: ${named(host)} is on the page and none of its ${s.label}s (\`${s.sel}\`) could be measured, so this check compared nothing for it. The class was renamed, or the component stopped building that part; what would satisfy this is the selector in TEXT_BOXES in tools/shot.js naming what the component builds now, rather than the row being dropped.`);
+        problems.push(`${where}: ${named(host)} is on the page and none of its ${s.count}s (\`${s.sel}\`) could be measured, so this check compared nothing for it. The class was renamed, or the component stopped building that part; what would satisfy this is the selector in TEXT_BOXES in tools/shot.js naming what the component builds now, rather than the row being dropped.`);
       }
       measured += mine;
     }
@@ -761,7 +761,7 @@ function auditTextBoxes({ page: pageId, viewport, theme, subjects, rowsAgree, ri
     const overflows = e.scrollWidth > e.clientWidth + 1;
     if (e.word > e.content + 0.5 || overflows) {
       const word = widestWord(e);
-      problems.push(`${where}: ${named(e.host)}'s ${e.s.label} ${quote(e.text)} is ${r1(e.content)} px wide, and its longest word needs ${r1(e.word)} px${word ? ` ("${word}")` : ''}, so its words stand one to a line and run out of the box${overflows ? ` (scrollWidth ${e.scrollWidth} > clientWidth ${e.clientWidth})` : ''}, ${r1(e.height)} px tall. What would satisfy this: ${e.s.fix ?? 'a layout that gives the box at least its longest word — find what its row gave the width to, a track sized to a sibling\'s content or a sibling that cannot shrink'}; never a smaller type size or a word broken mid-way.`);
+      problems.push(`${where}: ${named(e.host)}'s ${e.s.label} ${quote(e.text)} is ${r1(e.content)} px wide, and its longest word needs ${r1(e.word)} px${word ? ` ("${word}")` : ''}, so the box is ${r1(e.height)} px tall and its longest words run out of it${overflows ? ` (scrollWidth ${e.scrollWidth} > clientWidth ${e.clientWidth})` : ''}. What would satisfy this: ${e.s.fix ?? 'a layout that gives the box at least its longest word — find what its row gave the width to, a track sized to a sibling\'s content or a sibling that cannot shrink'}; never a smaller type size or a word broken mid-way.`);
       continue;
     }
     if (e.s.ribbon && e.line > e.content + 0.5) {
