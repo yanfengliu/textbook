@@ -185,7 +185,7 @@ The physics, which the worker must get right because the figure's whole claim is
 | `matchesPhotograph` | boolean | computed: two strands, pitch 3.4 ± 0.1 nm, rise 0.34 ± 0.01 nm, radius 0.9–1.1 nm, and `missingLayerLines` exactly `[4]` |
 | `leftBase`, `rightBase` | string | `'A' \| 'T' \| 'G' \| 'C'` |
 | `pairType` | string | `'purine-pyrimidine' \| 'purine-purine' \| 'pyrimidine-pyrimidine'`, computed |
-| `pairWidthNm` | number | C1′ to C1′, computed from ring geometry stated in the header; about 1.05–1.1 for either Watson–Crick pair |
+| `pairWidthNm` | number | C1′ to C1′, computed from ring geometry the header names with its source; the same, to within the precision the figure shows, for either Watson–Crick pair, which is the claim — no value is given here because none was checked |
 | `hydrogenBonds` | number | 0, 2 or 3, computed |
 | `pairFits` | boolean | computed from width, bonds, tautomer and strand direction together |
 | `whyNot` | string \| null | `'too-wide' \| 'too-narrow' \| 'no-hydrogen-bonds' \| 'rare-tautomer' \| 'sugars-misplaced'`; null when it fits |
@@ -295,11 +295,13 @@ The densities are the 1958 paper's (*PNAS* 44:671): <i>E. coli</i> DNA at about 
 
 **Copying.** A template being copied, with the new strand drawn base by base, and every wrong nucleotide marked where it sits by its buckled shape and by the pair's two letters. Three checks can be switched on in order — the polymerase's **choice**, **proofreading**, **mismatch repair** — and each removes most of what the one before let through. The drawn stream cannot show a rate of one in ten billion at any speed a reader can watch, so it runs at a stated magnification of the error rate, printed on the stage; **the readout gives the real rates**. Beside it, a **per** control turns the same rate into its other denominators: per base pair per round of copying, per human daughter cell, per bacterial division, per child. A hypothetical switch, *Grow at the 5′ end*, runs a polymerase whose energy is carried on the strand: every attempt it makes to proofread cuts off the triphosphate with the wrong nucleotide, and the strand stops.
 
-**Damage.** One human cell's DNA through a day of figure time, drawn as a long stretch of duplex. Lesions arrive at their measured rates, drawn by kind as the palette section says: lost purines, deaminated cytosines, oxidised guanines, single-strand breaks, double-strand breaks, and, as a **sunlight** control is raised, thymine dimers. Base excision, nucleotide excision and break repair each remove their own kind. Two hypotheticals: **Xeroderma pigmentosum** switches nucleotide excision repair off, and the dimers stay; **Uracil instead of thymine** rebuilds the genome with U where T was, and deaminated cytosines, now indistinguishable from the real uracils, are no longer removed.
+The rates, with their sources, for the header. Pairing alone about 1 in 100 (Kunkel 2004, *J Biol Chem* 279:16895, from Loeb and Kunkel 1982: one wrong in ten to a few hundred). After the polymerase's choice 1 in 10<sup>5</sup>, after proofreading 1 in 10<sup>7</sup>, after mismatch repair 1 in 10<sup>9</sup> — Alberts, *Molecular Biology of the Cell*, Table 5-1, which is the book's worked case — with a line under the last saying that measured final rates run lower, 2.2 × 10<sup>−10</sup> per base pair per generation in *E. coli* (Lee et al. 2012, *PNAS*), because proofreading and mismatch repair each vary over a range (40 to 200 and 20 to 400 times in *E. coli*, Schaaper 1993). Per child: about 60 to 70 new mutations (Kong et al. 2012, *Nature*: 63; Jónsson et al. 2017, *Nature*: about 70, counting small insertions and deletions).
+
+**Damage.** One human cell's DNA through a day of figure time, drawn as a long stretch of duplex. Lesions arrive at their measured rates, drawn by kind as the palette section says: lost purines, 2000 to 10,000 a day (Lindahl 1993, *Nature* 362:709); deaminated cytosines, 100 to 500 a day (Barnes and Lindahl 2004); oxidised guanines, 500 to 1000 a day (Lindahl's 2015 Nobel lecture); double-strand breaks, about 50 in each cell cycle (Vilenchik and Knudson 2003, *PNAS*), shown per day at the cycle length the header states; and, as a **sunlight** control is raised, thymine dimers, at a rate the header states as a model value. Single-strand breaks are not drawn, because no rate for them was checked. The day's total is printed against Lindahl's estimate of 10,000 to 20,000 lesions a cell. Base excision, nucleotide excision and break repair each remove their own kind. Two hypotheticals: **Xeroderma pigmentosum** switches nucleotide excision repair off, and the dimers stay; **Uracil instead of thymine** rebuilds the genome with U where T was, and deaminated cytosines, now indistinguishable from the real uracils, are no longer removed.
 
 **What the reader does.**
 - **Scene**: *Copying*, *Damage*.
-- In copying: **Choice**, **Proofreading**, **Mismatch repair** (toggles), **Per** (*base pair*, *human cell*, *bacterium*, *child*), **Grow at the 5′ end** (hypothetical), **Presets**: *Proofreading lost*, *Mismatch repair lost*.
+- In copying: **Choice**, **Proofreading**, **Mismatch repair** (toggles), **Per** (*base pair*, *daughter cell*, *bacterium*, *child*), **Grow at the 5′ end** (hypothetical), **Presets**: *Proofreading lost*, *Mismatch repair lost*.
 - In damage: **Run the day**, **Sunlight**, **Base excision**, **Nucleotide excision**, **Break repair** (toggles), **Xeroderma pigmentosum**, **Uracil instead of thymine**.
 - **Reset** in both.
 
@@ -311,17 +313,18 @@ The densities are the 1958 paper's (*PNAS* 44:671): <i>E. coli</i> DNA at about 
 |---|---|---|
 | `scene` | string | `'copying' \| 'damage'` |
 | `choice`, `proofreading`, `mismatchRepair` | boolean | the three checks |
-| `errorRate` | number | errors per base pair per round of copying, computed from the checks on: 1e-2 with none, and the prose's values as each is added |
+| `errorRate` | number | errors per base pair per round of copying, computed from the checks on: 1e-2 with none, 1e-5, 1e-7 and 1e-9 as each is added in order |
 | `errorsPerBillion` | number | `errorRate × 1e9`, computed |
-| `per` | string | `'base-pair' \| 'human-cell' \| 'bacterium' \| 'child'` |
+| `per` | string | `'base-pair' \| 'daughter-cell' \| 'bacterium' \| 'child'` |
 | `errorsPerDaughterCell` | number | `errorRate × 6.2e9`, computed, never tabulated |
+| `newMutationsPerChild` | number | the measured count the prose gives, a sourced constant shown under *child* with a line saying why it cannot be computed from `errorRate`: a generation spans many divisions, and some of its mutations come from damage |
 | `errorsPerBacterialDivision` | number | `errorRate × 4.6e6`, computed |
 | `growth` | string | `'5-to-3' \| '3-to-5'`; the second is the hypothetical |
 | `strandsStopped` | number | strands halted by a proofreading step; **0 in every state under `'5-to-3'`** |
 | `preset` | string \| null | `'proofreading-lost' \| 'mismatch-repair-lost'` |
 | `hours` | number | figure time through the day, 0 to 24 |
 | `sunlight` | number | 0 to 1 |
-| `lesions` | object | counts so far by kind: `{ lostBase, deamination, oxidation, singleBreak, doubleBreak, dimer }` |
+| `lesions` | object | counts so far by kind: `{ lostBase, deamination, oxidation, doubleBreak, dimer }` |
 | `repair` | object | `{ baseExcision, nucleotideExcision, breakRepair }`, booleans |
 | `unrepaired` | object | the same kinds, computed |
 | `unrepairedTotal` | number | computed |

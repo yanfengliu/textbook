@@ -271,7 +271,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'why-5-to-3',
-    statement: 'Explain why every polymerase grows a strand at its 3′ end, what would become of proofreading if a strand grew at the other end, and why the primers are made of RNA.',
+    statement: 'Explain why every DNA polymerase grows a strand at its 3′ end, what would become of proofreading if a strand grew at the other end, and why the primers are made of RNA.',
     prereqs: ['proofreading', 'pyrophosphate-pull'],
     teaches: { sections: ['fidelity'], figures: ['fig-fidelity'] },
     level: 'explain',
