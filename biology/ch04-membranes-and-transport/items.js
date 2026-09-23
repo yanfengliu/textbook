@@ -11,7 +11,7 @@
 // Three ideas in this chapter are the ones readers get wrong, and the distractors are built out of
 // them rather than out of plausible-sounding falsehoods: that a protein in the path makes transport
 // active (it does not — facilitated diffusion is driven by the gradient and costs nothing); that
-// iso-osmotic means isotonic (it does not — a solute the membrane cannot stop is the only kind that
+// iso-osmotic means isotonic (it does not — a solute the membrane can stop is the only kind that
 // counts); and that the sodium–potassium pump makes the membrane potential (it does not — the
 // potential is potassium leaking out through open channels, the pump's direct contribution is a few
 // millivolts, and the potential outlives the pump by minutes). Others in the same family: that water
@@ -43,7 +43,7 @@
 // cannot reach a closed vesicle: thirty-four molecules cannot make a ring with water inside, so its
 // reachable arrangements are dispersed, micelle, bilayer and droplet. With the wrap taken away (`Curl`)
 // its sheet gets rid of its two open ends by rolling them in and capping them, and reports `sealed`;
-// it never reports `assembly === vesicle`, and its caption and alt say so. No item here asks for a
+// it never reports `assembly === vesicle`, and its alt says so. No item here asks for a
 // vesicle from it: the claim that a bilayer closes into a bag is the prose's (§4.1, liposomes), and it
 // is tested there, by `i-bilayer-properties-3` and the chapter's check q1.
 //
@@ -51,15 +51,19 @@
 // option is written to its content and the distractors are given the reasoning that makes them
 // tempting. Measured 2026-09-23 over the 43 MCQs, on the visible text of each option (tags stripped,
 // entities decoded, word joiners dropped, whitespace collapsed, counted in code points, strict
-// comparison): the correct option is the longest in 11 and the shortest in 9, where before it was the
+// comparison): the correct option is the longest in 11 and the shortest in 8, where before it was the
 // longest in 42. Options are never reordered to get there, because a reader's record stores the
 // authored position of the option they chose.
 //
 // Two items were given new ids on 2026-09-23 because what counts as the right answer changed:
 // `i-osmosis-mechanism-4` and `-5` replace `-1` and `-3`, whose account of osmosis — more water per
 // litre on the pure side, and water taken out of circulation by the solute — is wrong (E. M. Kramer and
-// D. R. Myers, "Five popular misconceptions about osmosis", Am. J. Phys. 80, 694, 2012). The scheduler
-// keeps history per item id, so a reader who had learned the old answer is asked the new one afresh.
+// D. R. Myers, "Five popular misconceptions about osmosis", Am. J. Phys. 80, 694, 2012). What a new id
+// changes, and what it does not: `npm run review` tallies each item's wrong answers by the position of
+// the option chosen, so letters chosen among the old options are never read as choices among the new
+// ones, and the stale-item count starts again. The store keeps one card per objective, not per item
+// (src/learning/store.js, slotFor), so answers once marked right under the old key still count towards
+// `osmosis-mechanism`; whether they should is a question for the scheduler, not for this file.
 //
 // `npm run check` enforces: unique ids, a declared objective, at least three items each, exactly one
 // correct option with a `why` on every other, an explanation on every item, a figure the chapter has
@@ -123,7 +127,7 @@ export const ITEMS = [
     id: 'i-bilayer-selfassembly-2',
     objective: 'bilayer-selfassembly',
     kind: 'mcq',
-    question: 'A chemist makes a new lipid with a single short tail and a large, heavily charged head group, and shakes it up in water. What will it form, and why?',
+    question: 'A chemist makes a new lipid with a single tail and a large, heavily charged head group, and shakes it up in water. What will it form, and why?',
     options: [
       { text: 'Micelles. One tail and a bulky head make a wedge, and wedges pack into a small sphere with the tails gathered at the centre.', correct: true },
       { text: 'A bilayer, because every amphipathic molecule forms one in water: a water-loving end and a water-avoiding end are all that a sheet needs.',
@@ -464,9 +468,9 @@ export const ITEMS = [
     kind: 'mcq',
     question: 'Every membrane in your body is asymmetric: the two faces carry different lipids, different proteins and different sugars. What keeps them different?',
     options: [
-      { text: 'Almost nothing crosses between leaflets by itself, so a difference once made is kept for free; flippases keep up a few on purpose.', correct: true },
+      { text: 'Almost nothing crosses between leaflets by itself, so a difference once made is kept for free; flippases move only a few lipids back on purpose.', correct: true },
       { text: 'A sorting machinery in the membrane works continuously, spending energy to move each component back to the face it belongs on whenever it strays.',
-        why: 'Invents a mechanism to do a job that needs no doing. The interesting fact is the opposite: the asymmetry is free, because the barrier that stops solutes crossing also stops the membrane\'s own molecules crossing.' },
+        why: 'Invents a mechanism for every molecule where the cell runs one for only a few. Most of the asymmetry is free, because the barrier that stops solutes crossing also stops the membrane\'s own molecules crossing; flippases move a few particular lipids back, and nothing needs to move the rest.' },
       { text: 'The two leaflets are chemically bonded to each other in a fixed arrangement, so no molecule can move between them, or even within them.',
         why: 'Makes the sheet a solid. Nothing covalent holds a membrane together at all — every contact is a weak interaction being made and broken constantly — and movement within each leaflet is very fast.' },
       { text: 'The cytoskeleton on the inner face holds every molecule of the membrane in its place, lipids and proteins alike.',
@@ -581,7 +585,7 @@ export const ITEMS = [
       'to enter the oily core it would have to abandon that shell, because there is no room for it in the grease and nothing there to hold it',
       'moving a charge from water, which stabilises it superbly, into hydrocarbon, which does not, costs of the order of a hundred kilojoules per mole',
       'against about 2.6 kJ/mol of thermal energy at body temperature, so the barrier is some forty times what is available',
-      'glucose is polar and crosses very slowly indeed, but it is uncharged and has no shell to shed, so it has no comparable barrier',
+      'glucose is polar and crosses very slowly indeed, but it is uncharged, and the water it holds is held far more loosely than an ion\'s, so it has no comparable barrier',
       'credit for noting that a red blood cell lives on glucose and does not wait for the bilayer: it uses a carrier',
     ],
     explain: 'Size would predict the opposite order and gets it wrong by nine orders of magnitude. The sentence worth keeping is that an ion does not cross a bilayer — not slowly, effectively not at all.',
@@ -638,7 +642,7 @@ export const ITEMS = [
       { text: 'The branching, which multiplies the area available for exchange, and the thin wall, which shortens the distance the oxygen has to cross.', correct: true },
       { text: 'The tubes carry air rather than blood, and oxygen diffuses far faster through a gas than through a liquid — that alone is the whole advantage.',
         why: 'Picks a real effect and lets it stand in for the design. Diffusion is indeed faster in air, but the tubes are still branched to the point of touching individual cells, and the reason is area and distance.' },
-      { text: 'The tubes actively pump oxygen along them towards the muscle, which is how an insect can supply its tissues without any blood at all.',
+      { text: 'The tubes actively pump oxygen along them towards the muscle, doing the job that blood does in a vertebrate.',
         why: 'Adds a pump where none is needed, which is the standard reading of any efficient-looking biological arrangement. Nothing transports oxygen here; the arrangement simply makes ordinary diffusion sufficient.' },
       { text: 'The narrowness of the tubes raises the concentration difference across their walls, and by Fick\'s law the rate rises with the concentration difference.',
         why: 'Has the right term and the wrong cause. The concentration difference is set by the air outside and the respiring cell inside; making a tube narrower does not change either, though it does change how much wall there is.' },
@@ -726,11 +730,11 @@ export const ITEMS = [
       { text: 'The sugar attracts water: each sugar molecule is hydrophilic, so it draws water molecules towards itself and across the membrane.',
         why: 'The commonest picture of osmosis, and there is no attraction in it. In a dilute solution any solute that makes the same number of particles has the same effect, however strongly or weakly it attracts water, and nothing reaches through the membrane to pull.' },
       { text: 'There is more water per litre on the pure side, so more water molecules happen to wander across into the sugar than wander back.',
-        why: 'The account most textbooks give, and a measurement sinks it. Some salts pack water round their ions so tightly that their solutions hold more water per litre than pure water does, and water still crosses into them. How much water a litre holds is not what decides it.' },
+        why: 'The account most textbooks give, and the numbers sink it. Some salts pack water round their ions so tightly that their solutions hold more water per litre than pure water does, and water still crosses into them. How much water a litre holds is not what decides it.' },
       { text: 'Each sugar molecule holds a shell of water round itself, taking that water out of circulation, so fewer free water molecules are left to cross back.',
-        why: 'The other account many books give, and Section 2.3\'s hydration shells make it sound right. But the effect depends on how many particles are dissolved, not on how much water each one holds — which is why a mole of salt, making two particles, does about twice what a mole of sugar does.' },
+        why: 'The other account many books give, and Section 2.3\'s hydration shells make it sound right. But in a dilute solution the effect depends on how many particles are dissolved, not on how much water each one holds — which is why a mole of salt, making two particles, does about twice what a mole of sugar does.' },
     ],
-    explain: 'Nothing attracts the water, and neither of the usual textbook reasons survives a measurement. What decides it is arrangements: sugar and water mixed can be arranged in far more ways than the same sugar and water kept apart, and every water molecule that crosses into the solution dilutes it and adds to that number. So adding solute lowers the tendency of water to leave, and the traffic stays unequal until a pressure on the solution side pays back what the mixing gains.',
+    explain: 'No attraction is needed, and neither of the usual textbook reasons survives the numbers. What decides it is arrangements: sugar and water mixed can be arranged in far more ways than the same sugar and water kept apart, and every water molecule that crosses into the solution dilutes it and adds to that number. So adding solute lowers the tendency of water to leave, and the traffic stays unequal until a pressure on the solution side pays back what the mixing gains.',
   },
   {
     id: 'i-osmosis-mechanism-2',
@@ -748,11 +752,11 @@ export const ITEMS = [
     kind: 'free',
     question: 'Explain osmosis without using the words "attract" or "pull", and say why adding a solute to one side lowers the tendency of water to leave that side. Then say why a mole of sodium chloride lowers it about twice as much as a mole of glucose.',
     rubric: [
-      'osmosis is the net movement of water across a selectively permeable membrane, into the side where more is dissolved',
-      'nothing attracts the water: water and solute mixed can be arranged in far more ways than the same water and solute kept apart, and every water molecule that crosses into the solution adds to that number',
+      'osmosis is the net movement of water across a selectively permeable membrane, into the side where more particles are dissolved',
+      'water and solute mixed can be arranged in far more ways than the same water and solute kept apart, and every water molecule that crosses into the solution adds to that number',
       'so adding a solute lowers the tendency of water to leave that side: water leaving would undo some of the mixing',
       'the traffic stays unequal until something stops it — a pressure on the solution side, which raises the tendency of water to leave until it matches the other side',
-      'what matters is the number of dissolved particles, not their mass or identity, nor how much water each one holds',
+      'in a dilute solution, what matters is the number of dissolved particles, not their mass or identity, nor how much water each one holds',
       'a mole of glucose gives a mole of particles; a mole of sodium chloride dissociates and gives nearly two, so it lowers the water potential about twice as much at the same molarity',
       'credit for saying this is why the concentration that matters is measured in osmoles rather than moles',
       'credit for saying that it is not simply that the pure side holds more water per litre — some salt solutions hold more water per litre than pure water, and water still crosses into them',
@@ -770,7 +774,7 @@ export const ITEMS = [
       { text: 'From B to A, because sodium chloride makes the more concentrated solution, and water always moves away from the more concentrated side.',
         why: 'Has the rule inverted. Water moves from higher water potential to lower, and a more concentrated solution has the lower potential — so water moves towards the salt, not away from it.' },
       { text: 'Neither way: both solutions are 0.1 mol/L, so they have the same concentration and therefore the same water potential.',
-        why: 'Counts molecules instead of particles. Molarity is not osmolarity: a salt dissociates, so the same molarity of sodium chloride holds nearly twice as many dissolved particles and pulls about twice as hard.' },
+        why: 'Counts molecules instead of particles. Molarity is not osmolarity: a salt dissociates, so the same molarity of sodium chloride holds nearly twice as many dissolved particles and lowers the water potential about twice as much.' },
       { text: 'From A to B, because sodium chloride is a salt, and salts are hygroscopic: they draw water to themselves out of anything around them.',
         why: 'Right direction, and a property of solid salt standing in for the mechanism. What decides it is the particle count in solution, which would give the same answer for any solute that dissociates into two.' },
     ],
@@ -827,7 +831,7 @@ export const ITEMS = [
     goal: 'Press Animal cell, set the Outside concentration to 290 millimolar — exactly what the cell holds inside — and press Urea, so the outside solute is one that crosses the membrane. Then press Run.',
     question: 'The two osmolarities were equal when you started, so nothing should have moved. The cell burst. Explain what urea did, and what the phrase "iso-osmotic but hypotonic" means.',
     expect: 'scene === animal-cell and soluteKind === urea and permeantSolute === true and soluteOutsideMM === 290 and outcome === lysed',
-    explain: 'Urea crosses the membrane, so it equalises across it and stops being a difference at all — and that leaves the cell\'s own impermeant solutes doing the pulling with nothing to balance them. The bath was iso-osmotic, in that its osmolarity matched, and hypotonic, in that the cell gained water: the readout shows the inside osmolarity climbing past the outside as urea comes in and water follows. Only solutes the membrane can stop count towards tonicity. Switch the solute to sugar at the same 290 and the cell sits unchanged, which is the comparison worth making.',
+    explain: 'Urea crosses the membrane, so it equalises across it and stops being a difference at all — and that leaves the cell\'s own impermeant solutes with nothing to balance them. The bath was iso-osmotic, in that its osmolarity matched, and hypotonic, in that the cell gained water: the readout shows the inside osmolarity climbing past the outside as urea comes in and water follows. Only solutes the membrane can stop count towards tonicity. Switch the solute to sugar at the same 290 and the cell sits unchanged, which is the comparison worth making.',
   },
   {
     id: 'i-tonicity-animal-3',
@@ -938,7 +942,7 @@ export const ITEMS = [
     id: 'i-facilitated-diffusion-1',
     objective: 'facilitated-diffusion',
     kind: 'mcq',
-    question: 'Glucose crosses a red blood cell\'s membrane through a carrier protein, GLUT1. Is that active transport?',
+    question: 'Glucose crosses a red blood cell\'s membrane through a carrier protein, GLUT1. Is that active transport, and why?',
     options: [
       { text: 'No. The gradient does all the driving and the cell spends nothing on it: a protein makes transport fast and selective, not active.', correct: true },
       { text: 'Yes. A carrier protein is a machine, and a machine has to be powered by something, so any transport through a protein must cost the cell energy.',
@@ -1019,14 +1023,21 @@ export const ITEMS = [
     explain: 'The pattern is that the choice follows from the job: rate and triggering call for a hole, selectivity and the possibility of uphill work call for a binding site. The kidney case is the one that catches people, because water feels like it should not need a protein at all.',
   },
 
+  // "About ten thousand times", here, in -2's explain and in §4.5, is kept on purpose (review of
+  // 2026-09-22, finding 15). Both figures are in the literature: "at least 10,000", which a 2015 review
+  // (Cell. Mol. Life Sci.) cites to Doyle et al., Science 280:69 (1998) — seen only in a search
+  // summary, and neither paper was read — and about 1,000 in Hille's Ion Channels, as quoted by
+  // LeMasurier et al., J. Gen. Physiol. 118:303 (2001), which was read. `transport-lab` prints 10,000 as "Measured, for a real one"
+  // (TRUE_SELECTIVITY in src/figures/transport-lab.js), so the chapter and the figure change together
+  // or not at all.
   {
     id: 'i-channel-selectivity-1',
     objective: 'channel-selectivity',
     kind: 'mcq',
     question: 'A potassium channel conducts potassium about ten thousand times better than sodium, although a sodium ion is the smaller of the two — 0.095 nm against 0.133. How?',
     options: [
-      { text: 'Neither ion travels bare: the filter\'s rigid oxygens stand where a potassium ion\'s water stood, so potassium loses nothing by shedding it, and sodium, too small to reach them, gets nothing back.', correct: true },
-      { text: 'The filter is a sieve with holes just larger than a potassium ion, so potassium fits snugly and is held, while sodium rattles through too fast to be conducted.',
+      { text: 'Neither ion travels bare: the filter\'s rigid oxygens sit where a potassium ion\'s water was, so potassium sheds it at no cost, and sodium, too small to reach them, gains nothing.', correct: true },
+      { text: 'The filter is a sieve with holes sized to a potassium ion, so potassium fits them exactly and passes, while sodium, the wrong size, is refused.',
         why: 'A sieve would pass the smaller ion, which is the puzzle. Selectivity here works the opposite way from a filter: sodium is not too big to get in, it is not attractive enough to be worth letting in.' },
       { text: 'The filter carries a negative charge that attracts potassium more strongly than sodium, because potassium is the more positively charged of the two.',
         why: 'Invents a charge difference. Both are singly charged ions; the difference is in their size and therefore in the geometry of the water each one holds.' },
@@ -1068,7 +1079,7 @@ export const ITEMS = [
     kind: 'mcq',
     question: 'GLUT1 in a red blood cell is half-saturated at about 1 to 2 mmol/L of glucose, and blood is held near 5 mmol/L. The carrier in a liver cell is half-saturated well above blood concentration. What does each arrangement achieve?',
     options: [
-      { text: 'The red cell\'s carrier runs near its ceiling whatever the blood sugar; the liver\'s tracks the blood, so the liver can respond to a meal.', correct: true },
+      { text: 'The red cell\'s carrier runs near its ceiling at any normal blood sugar; the liver\'s tracks the blood, so the liver can respond to a meal.', correct: true },
       { text: 'The red cell takes up glucose faster than the liver, because a lower half-saturation point means a faster carrier.',
         why: 'Confuses the concentration at which a carrier is half busy with how fast each one works. The half-saturation point says how tightly the cargo is held, not the maximum rate — and the maximum rate is set by how many carriers there are.' },
       { text: 'The liver is protected from high blood sugar, because its carrier cannot take up very much glucose until the concentration outside is high.',
@@ -1112,7 +1123,7 @@ export const ITEMS = [
     question: 'Water already crosses a bare bilayer faster than most polar molecules. Why does a kidney tubule cell need aquaporins as well?',
     options: [
       { text: 'Because the kidney must take back nearly all of some 180 litres filtered a day, and a bare bilayer is nowhere near fast enough.', correct: true },
-      { text: 'Because a bilayer passes water in one direction only, from the cell outwards, and the kidney needs to move it the other way, back into the blood.',
+      { text: 'Because a bilayer passes water in one direction only, and the kidney tubule needs it to go the other way, from the urine back towards the blood.',
         why: 'Gives the bilayer a direction it does not have. Water crosses a bilayer both ways at all times; what is at issue is the rate, which is far too low for the volumes a kidney handles.' },
       { text: 'Because aquaporins let the cell pump water against its gradient, and pumping water uphill is exactly what concentrating urine means.',
         why: 'The most important misreading here: no cell pumps water. Water always follows its own potential passively, and urine is concentrated by moving solutes and letting water follow — which is why regulating the aquaporins regulates the water.' },
@@ -1162,7 +1173,7 @@ export const ITEMS = [
     kind: 'mcq',
     question: 'Which single observation would tell you that a transport process is active rather than passive?',
     options: [
-      { text: 'The substance accumulates against its own electrochemical gradient, and stops when the energy supply is cut.', correct: true },
+      { text: 'The substance accumulates against its own electrochemical gradient, and the accumulation stops when the energy supply is cut.', correct: true },
       { text: 'The rate levels off as the outside concentration rises, however much more of the substance is added, because the transporters are all busy.',
         why: 'The most tempting wrong answer in the chapter. Saturation shows a fixed number of binding sites — so a protein is involved — and facilitated diffusion saturates while remaining entirely passive.' },
       { text: 'A protein in the membrane is required, because the substance cannot cross the bilayer unaided and has to be carried through it.',
@@ -1249,7 +1260,7 @@ export const ITEMS = [
     kind: 'mcq',
     question: 'The sodium–potassium pump takes about a third of the ATP a resting animal cell makes, and approaches two-thirds in a nerve cell. A cell whose pump is stopped by ouabain does not merely lose its gradients — it swells and lyses. Why?',
     options: [
-      { text: 'The cell\'s proteins and other solutes cannot leave and keep drawing water in; sodium held outside by the pump balances them, and without the pump the water wins.', correct: true },
+      { text: 'The cell\'s proteins and other solutes cannot leave, so water would keep entering; sodium held outside by the pump balances them, and without the pump it does.', correct: true },
       { text: 'The pump normally carries water out along with the sodium it expels, so stopping it leaves all that water behind to build up inside the cell.',
         why: 'Has the pump moving water, which nothing in biology does. Water always follows its own potential passively; what the pump controls is the solute arrangement that decides where the potential is lower.' },
       { text: 'Without the pump running, the membrane loses its integrity and becomes leaky to everything, water included.',
@@ -1287,6 +1298,10 @@ export const ITEMS = [
     explain: 'The order matters more than the list. Nothing happens suddenly, because the pump was maintaining a store rather than producing a moment-to-moment effect — which is also why the potential outlives the pump by minutes.',
   },
 
+  // "The steepest ion gradient in the body", in this item's explain and in §4.6, is kept (review of
+  // 2026-09-22, finding 14, which asked for "one of the steepest"). The source the review cites says
+  // the opposite of what it was quoted for: K. Abe et al., Nature 556:214 (2018), abstract, "the steepest
+  // known cation gradient of any mammalian tissue".
   {
     id: 'i-proton-pump-1',
     objective: 'proton-pump',
@@ -1317,7 +1332,7 @@ export const ITEMS = [
       { text: 'The lysosome would become more acidic still, because without the pump running, protons would build up inside it.',
         why: 'Has the pump\'s direction backwards. It pumps protons in, against their gradient, to make the interior acid; stop it and the acidity leaks away.' },
     ],
-    explain: 'Proton pumps turn up in three quite different jobs in this chapter, all the same mechanism. A lysosome\'s holds it near pH 5, the acidity its enzymes are built for. A plant or fungal cell has no sodium–potassium pump at all and uses a proton pump in its plasma membrane as its master pump, driving everything else from the gradient it creates. And the stomach\'s builds pH 1 from pH 7.',
+    explain: 'Proton pumps turn up in three quite different jobs in this chapter. A lysosome\'s holds it near pH 5, the acidity its enzymes are built for. A plant or fungal cell has no sodium–potassium pump at all and uses a proton pump in its plasma membrane as its master pump, driving everything else from the gradient it creates. And the stomach\'s builds pH 1 from pH 7.',
   },
   {
     id: 'i-proton-pump-3',
@@ -1333,7 +1348,7 @@ export const ITEMS = [
       'credit for naming proton pump inhibitors as drugs aimed at the last of these',
       'credit for noting that a proton gradient is a store of energy like any other, and that Chapter 7 is built on one',
     ],
-    explain: 'What makes the proton pump worth a paragraph of its own is that the same device is used for three unrelated purposes — setting a compartment\'s chemistry, powering a cell\'s whole transport economy, and digesting food — and Chapter 7 will use it for a fourth, run backwards.',
+    explain: 'What makes proton pumps worth a paragraph of their own is that one act, moving protons across a membrane, serves three unrelated purposes — setting a compartment\'s chemistry, powering a cell\'s whole transport economy, and digesting food — and Chapter 7 will use a proton gradient for a fourth, running a pump backwards.',
   },
 
   // ---- 4.7 A gradient is a battery ----
@@ -1526,7 +1541,7 @@ export const ITEMS = [
     kind: 'mcq',
     question: 'Phagocytosis, pinocytosis and receptor-mediated endocytosis are all endocytosis. What distinguishes them?',
     options: [
-      { text: 'What decides the cargo: one large particle in phagocytosis, nothing at all in pinocytosis, and in receptor-mediated endocytosis one molecule its receptors have bound.', correct: true },
+      { text: 'What decides the cargo: its size in phagocytosis, nothing at all in pinocytosis, and in receptor-mediated endocytosis receptors that bind one kind of molecule.', correct: true },
       { text: 'The size of the vesicle: phagocytosis makes the largest, pinocytosis the smallest, and receptor-mediated endocytosis makes vesicles of a size in between.',
         why: 'Ranks them by an incidental measurement. The vesicle sizes do differ, but the difference that matters is selectivity — and a coated vesicle\'s size is set by the clathrin lattice, not by the cargo.' },
       { text: 'Whether ATP is required: phagocytosis needs it to drive the actin that pushes the membrane out, and the other two do not.',
@@ -1654,7 +1669,7 @@ export const ITEMS = [
     id: 'i-identify-mechanism-1',
     objective: 'identify-mechanism',
     kind: 'mcq',
-    question: 'A substance enters a cell at a rate that rises with the outside concentration and then levels off. Cooling the cell to 4 °C slows the rate roughly as much as it slows everything else, and no ATP is consumed by the process. Which mechanism is it?',
+    question: 'A substance enters a cell down its concentration gradient, at a rate that rises with the outside concentration and then levels off. Cooling the cell to 4 °C slows the rate roughly as much as it slows everything else, and no ATP is consumed by the process. Which mechanism is it?',
     options: [
       { text: 'Facilitated diffusion: the ceiling means transport proteins, and nothing is spent or carried uphill.', correct: true },
       { text: 'Active transport, because the rate saturates, and saturation is the signature of transport that is being paid for.',

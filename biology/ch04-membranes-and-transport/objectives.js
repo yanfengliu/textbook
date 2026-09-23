@@ -16,8 +16,8 @@
 //   `lipids-not-polymers`   — saturated against unsaturated tails, which is what sets fluidity (§4.2)
 //   `protein-levels`        — a transmembrane helix is a fold with its greasy side out (§4.2)
 //   `polar-bonds`           — what makes a molecule polar is what decides whether it crosses (§4.3)
-//   `water-solvent`         — the hydration shell an ion would have to abandon (§4.3), and what it is
-//                             for a solute to be dissolved at all, which is what osmosis counts (§4.4)
+//   `water-solvent`         — the hydration shell an ion would have to abandon (§4.3), and what a
+//                             dissolved particle is, since osmosis counts them (§4.4)
 //   `ion-formation`         — an ion has a charge, so it feels the voltage as well as the gradient (§4.3)
 //   `weak-bonds-matter`     — a carrier binds its cargo the way an enzyme binds a substrate, which is
 //                             why it has a finite number of sites and therefore saturates (§4.5)
@@ -154,7 +154,7 @@ export const OBJECTIVES = [
   // ---- 4.4 Water follows the solute ----
   {
     id: 'osmosis-mechanism',
-    statement: 'Explain why water crosses a membrane into a solution when nothing attracts it, and say why adding a solute lowers the tendency of water to leave.',
+    statement: 'Explain why water crosses a membrane into a solution without being attracted there, and say why adding a solute lowers the tendency of water to leave.',
     prereqs: ['passive-transport', 'water-solvent'],
     teaches: { sections: ['osmosis'], figures: ['fig-osmosis'] },
     level: 'explain',

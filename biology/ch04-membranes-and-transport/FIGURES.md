@@ -105,7 +105,7 @@ The readout is the physics, not the picture: the fraction of tail surface hidden
 - **Molecule** buttons: phospholipid (two tails), detergent (one tail, bulky head), hydrocarbon (no head), cholesterol, and a mixture of phospholipid and cholesterol.
 - **Release**, **pause**, **reset with a new seed**, and **step** for a reader who wants to watch one rearrangement.
 - **Needle**: punctures the sheet, which then reseals. The exposed-edge readout spikes and falls, and that trace is the whole argument about why a membrane heals.
-- **Curl**: removes the constraint that was holding the sheet flat, and forces nothing; the sheet then gets rid of the two edges that opens, because the edge is what costs. As built, a tank of thirty-four molecules does this by rolling its ends in and capping them, not by closing into a hollow vesicle, which would take about ninety (the module header has the arithmetic). So the figure reports `sealed`, never `assembly === 'vesicle'`, and no caption, alt or item may promise a vesicle from it.
+- **Curl**: removes the constraint that was holding the sheet flat, and forces nothing; the sheet then gets rid of the two edges this opens, because the edge is what costs. As built, a tank of thirty-four molecules does this by rolling its ends in and capping them, not by closing into a hollow vesicle, which would take about ninety (the module header has the arithmetic). So the figure reports `sealed`, never `assembly === 'vesicle'`, and no caption, alt or item may promise a vesicle from it.
 - **Temperature** slider, which changes how far the random walk overcomes the penalty. High enough and nothing assembles at all.
 
 **Objectives it teaches.** `amphipathic`, `bilayer-selfassembly`, `bilayer-properties`.
@@ -305,7 +305,7 @@ The readout is the physics, not the picture: the fraction of tail surface hidden
 **What the reader does.**
 - **Step** with the arrow keys or a button, one stage at a time, with a line naming what has just happened and why the protein changed its mind about what it wanted to hold. **Run** at an adjustable rate.
 - **ATP** slider from full to none. The pump slows and then stalls mid-cycle, and the stalled stage is named rather than the pump simply stopping.
-- **Ouabain** toggle, which jams it from the outside only. Ouabain is an arrow poison from the East African plants *Strophanthus gratus* and *Acokanthera schimperi*, not a foxglove drug; foxglove's is digoxin, which §4.6 and §4.7 name for the heart.
+- **Ouabain** toggle, which jams it from the outside only. Ouabain is an African arrow poison, from the seeds of the West African *Strophanthus gratus* and the wood of the East African *Acokanthera schimperi*, not a foxglove drug; foxglove's is digoxin, which §4.6 and §4.7 name for the heart.
 - **Watch it fail**: with the pump stopped, the gradient bars decay at the speed the membrane leaks — over simulated minutes, not seconds — and a modelled cell volume begins to rise. This is §4.6's volume argument and it has to be slow enough to be believed.
 - **Leakiness** slider, so the reader can see that the pump's workload is set by how fast the gradients run down.
 - A **cost** panel: ATP per second at the current rate, and what share of a cell's budget that is.
