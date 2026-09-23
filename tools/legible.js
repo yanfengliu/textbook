@@ -146,9 +146,6 @@ const THEMES = trim('LEGIBLE_THEMES', ['light', 'dark'], { noun: 'theme' });
  * A name here that is not a registered kind fails the run, so the list cannot outlive its subject.
  */
 const DEFERRED = [
-  { kinds: ['bilayer', 'membrane3d', 'permeability', 'osmometer', 'transport-lab', 'pump', 'gradient-battery', 'bulk-transport'],
-    found: "13 pairs under AA on 2026-09-16, 11 of them in gradient-battery (a pump label on the pump's own violet, the sodium leak's reading on the cytoplasm) — and permeability was in the error state in the dark theme, mid-build",
-    why: "chapter 4's eight figures were being written by another worker while this gate was built" },
   { kinds: ['zj-split', 'zj-timeline', 'zj-words'],
     found: '35 pairs under AA on 2026-09-16, nearly all of them --coral or --water spent as type at 3.07:1 in the light theme',
     why: "the second book sets its own colours in tongjian/zj.css and had a colour round of its own; out/colour2/contrast.mjs is that round's instrument" },
