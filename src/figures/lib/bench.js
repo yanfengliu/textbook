@@ -661,10 +661,12 @@ export function bench(root, ctx, {
       throw new Error(`${kind}: the slider "${labelText}" was given valueText as ${typeof valueText}. It is a function from the value to the words a screen reader says for it, valueText(v) => string.`);
     }
     const input = h('input', { class: 'fig-range', type: 'range', min, max, step, value, 'aria-label': labelText });
-    const speak = (v) => {
-      if (valueText) input.setAttribute('aria-valuetext', String(valueText(Number(v))));
+    // Read back off the input, not from the number handed in: the browser clamps a range's value to
+    // its min, max and step, and `set(9)` on an eight-stop range must not ask valueText about stop 9.
+    const speak = () => {
+      if (valueText) input.setAttribute('aria-valuetext', String(valueText(Number(input.value))));
     };
-    speak(value);
+    speak();
     const unitFor = (isNarrow) => (isNarrow ? (narrowUnit ?? unit) : unit);
     const show = (v, isNarrow) => (format ? format(v, { narrow: isNarrow }) : `${v}${unitFor(isNarrow) ? ` ${unitFor(isNarrow)}` : ''}`);
     const values = (v) => labelSpans(show(v, false), show(v, true));
@@ -696,14 +698,14 @@ export function bench(root, ctx, {
     input.addEventListener('input', () => {
       const v = Number(input.value);
       out.replaceChildren(...values(v));
-      speak(v);
+      speak();
       onInput?.(v);
     });
     register(node, { only, long: labelText, name: labelText });
     return {
       node, input,
       get value() { return Number(input.value); },
-      set(v) { input.value = String(v); out.replaceChildren(...values(v)); speak(v); onInput?.(Number(v)); },
+      set(v) { input.value = String(v); out.replaceChildren(...values(v)); speak(); onInput?.(Number(v)); },
     };
   }
 

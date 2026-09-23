@@ -142,11 +142,16 @@ const LADDER = [
 const inSentence = (name) => (/^[A-Z]{2}/.test(name) ? name : name.charAt(0).toLowerCase() + name.slice(1));
 
 // What the transfer does, in §5.3's terms and with the phosphate going onto the right molecule.
-// "can phosphorylate ADP and make ATP"; "cannot phosphorylate ADP to make ATP". The verdict under the
-// rail and the sentence a screen reader hears are both built from this, so they cannot disagree.
+// "can phosphorylate ADP and make ATP"; "cannot phosphorylate ADP to make ATP under standard
+// conditions". The verdict under the rail and the sentence a screen reader hears are both built from
+// this, so they cannot disagree.
+// The "cannot" says UNDER STANDARD CONDITIONS because every number on this rail is a ΔG°′, and because
+// naming the acceptor made the flat version false about cells: "ATP cannot phosphorylate creatine" is
+// how a resting muscle recharges §5.3's reserve, and §5.2 is the section that says a ΔG°′ a little
+// above zero runs perfectly well when the concentrations are right. The "can" needs no such clause.
 const transferWords = (target, possible) => (possible
   ? `can phosphorylate ${target.acceptor} and make ${inSentence(target.name)}`
-  : `cannot phosphorylate ${target.acceptor} to make ${inSentence(target.name)}`);
+  : `cannot phosphorylate ${target.acceptor} to make ${inSentence(target.name)} under standard conditions`);
 
 // THE DONOR AND TARGET CONTROLS COUNT RUNGS FROM THE BOTTOM. A range input's value goes UP with
 // ArrowUp, with PageUp, with a drag to the right and with the stepper's up button, and the rail's up is
@@ -315,7 +320,8 @@ const NARROW_W = 700;
 const CSS = (scope) => `
 ${scope} .tb-pane-scene canvas { outline: none; touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; }
 ${scope} .tb-pane-scene canvas:focus-visible { box-shadow: inset 0 0 0 2px var(--water); }
-${scope} .at-head { fill: var(--ink-faint); font-weight: 600; letter-spacing: 0.09em; }
+${scope} .at-head { fill: var(--ink-faint); font-weight: 600; }
+${scope}.is-narrow .at-rungs .tb-step { padding-inline: 0.42rem; }
 ${scope} .at-name { fill: var(--ink); font-weight: 600; }
 ${scope} .at-note { fill: var(--ink-faint); }
 ${scope} .at-num { fill: var(--ink); font-weight: 700; font-variant-numeric: lining-nums tabular-nums; }
@@ -692,6 +698,14 @@ function build(root, ctx) {
     steps: RUNG_STEPS, valueText: rungText,
     onInput: (v) => { s.targetIndex = atHeight(v); draw(); b.announce(); },
   });
+  // ↑ and ↓ are wider than + and −. Each step button measured 28.3 px against 25.8, so on a 320 px
+  // phone the two steppers stopped sharing a toolbar row. The toolbar grew from 97 to 131 px, and the
+  // ladder lost 34 px and its rule line. The padding in this figure's CSS (0.42rem, beating the bench's
+  // narrow 0.5rem) gives the arrow buttons back the width the old ones had: measured 25.7 px, and the
+  // toolbar back at 97 px on four rows. It is scoped to these two steppers, so the Row stepper keeps
+  // its own padding.
+  donorSlider.node.classList.add('at-rungs');
+  targetSlider.node.classList.add('at-rungs');
   b.divide();
 
   const runCtl = b.run({ primary: false, runLabel: 'Turn', pauseLabel: 'Stop', aria: 'Turn, let the molecule turn slowly on its own', onChange: (on) => { if (on) spin.release(clock.now()); else spin.hold(orbit, clock.now()); loop.invalidate(); draw(); b.announce(); } });
@@ -926,11 +940,14 @@ function build(root, ctx) {
     const possible = dg < 0;
     // The verdict names what is phosphorylated and what that makes (transferWords, above): "Phospho-
     // enolpyruvate can phosphorylate ADP and make ATP". It said "can phosphorylate ATP" until 2026-09-23.
+    // The uphill case ends ", uphill." where it said ", which is uphill.": the standard-conditions clause
+    // made it longer. On the chapter page at 390 px, the shorter ending keeps the longest verdict to two
+    // lines.
     const verdict = s.donorIndex === s.targetIndex
       ? 'Donor and target are the same compound, so there is nothing to transfer.'
       : possible
         ? `${donor.name} ${transferWords(target, true)}: ${signed(dg, 1)} kJ/mol.`
-        : `${donor.name} ${transferWords(target, false)}: ${signed(dg, 1)} kJ/mol, which is uphill.`;
+        : `${donor.name} ${transferWords(target, false)}: ${signed(dg, 1)} kJ/mol, uphill.`;
     // The rule that decides it. At a phone's width the ladder has the whole stage and the ledger is not
     // beside it, so the sentence the ledger carried there is set here, under the verdict. It is §5.3's
     // own sentence, because that is the one a reader carries away from the section — and now that the
@@ -953,12 +970,17 @@ function build(root, ctx) {
     // up and the rail measured again — the numbers are never the thing dropped.
     // NOR IS THE VERDICT. Its lines used to be cut at two, like the rule's, and a verdict that wrapped to
     // three lost its end without a word: measured 2026-09-23 at a 272 px stage, "Fructose 6-phosphate
-    // cannot phosphorylate 1,3-bisphosphoglycerate: +33.5 kJ/mol, which is" — the "uphill." gone. Naming
-    // the acceptor made every verdict longer, and the longest now wraps to three at 390 px too. So every
-    // line of the verdict is laid out and drawn, and only the rule, which the ledger also carries, is
-    // ever cut or given up.
-    // The wide geometry keeps its two lines of foot under the rail. A third line — the longest verdict on
-    // a stage not far over 700 px — is taken out of the rail rather than drawn over its foot.
+    // cannot phosphorylate 1,3-bisphosphoglycerate: +33.5 kJ/mol, which is" — the "uphill." gone. The
+    // verdict now names the acceptor, and a "cannot" names the standard conditions it holds in, so it is
+    // longer. On the chapter page, the measured uphill transfers into 1,3-bisphosphoglycerate (four) and
+    // phosphoenolpyruvate (one) take three lines at every phone width from 320 to 390 px. So every line
+    // of the verdict is laid out and drawn. Only the rule is ever cut or given up, and at a phone's width
+    // nothing else on the stage then says it, because the ledger is not shown there. Measured on the
+    // chapter page before and after this change, over nine pairs at 320, 360, 375 and 390 px, the rule is
+    // shown in exactly the same states it was. At 320 px that is only the opening state.
+    // The wide geometry keeps its two lines of foot under the rail. No verdict needs a third there today —
+    // measured at the narrowest wide stage, 712 px, the longest wraps to two — but one that did would take
+    // its room out of the rail rather than be drawn over it.
     let size;
     let top;
     let bottom;
@@ -993,7 +1015,10 @@ function build(root, ctx) {
     const Y = (kj) => top + ((kj - TOP_KJ) / (BOTTOM_KJ - TOP_KJ)) * (bottom - top);
     const railX = narrow ? pad + w * 0.22 : pad + w * 0.3;
 
-    ladderPane.text(pad, pad + size, 'RELEASED ON HYDROLYSIS, kJ/mol', { class: 'at-head', 'font-size': n1(Math.min(size, 9.4)) });
+    // The quantity by its name, as §5.3's table heads its column. "RELEASED ON HYDROLYSIS" stood over a
+    // column of negative numbers, and a release of −61.9 is a contradiction in its own terms. The rail
+    // still reads the way the prose does: the more negative, the more a hydrolysis releases.
+    ladderPane.text(pad, pad + size, 'ΔG°′ of hydrolysis, kJ/mol', { class: 'at-head', 'font-size': n1(Math.min(size, 9.4)) });
     ladderPane.line(railX, top, railX, bottom, { stroke: C.ruleStrong, 'stroke-width': 2 });
 
     // Two rungs a tenth of a kilojoule apart are two labels in the same place: acetyl phosphate at
@@ -1161,9 +1186,9 @@ function build(root, ctx) {
 
     if (s.scene === 'ladder') {
       r.row('Donor', LADDER[s.donorIndex].short);
-      r.row('It releases', `${n1(d.rungKj)} kJ/mol`);
+      r.row('Its ΔG°′ of hydrolysis', `${n1(d.rungKj)} kJ/mol`);
       r.row('Target', LADDER[s.targetIndex].short);
-      r.row('It releases', `${n1(LADDER[s.targetIndex].kj)} kJ/mol`);
+      r.row('Its ΔG°′ of hydrolysis', `${n1(LADDER[s.targetIndex].kj)} kJ/mol`);
       r.sum('The transfer', `${signed(d.rungKj - LADDER[s.targetIndex].kj, 1)} kJ/mol`, { accent: d.transferPossible ? INK.leaf : INK.coral });
       // §5.3's sentence, and from here it is true of the rail beside it: the most negative is at the
       // top, so "above" on this rail is "releases more" and the arrow for a transfer that can happen
@@ -1297,7 +1322,7 @@ function build(root, ctx) {
   // reader who hears it rather than sees it is told the same chemistry: which molecule the phosphate
   // goes onto, and what that makes.
   b.onAnnounce((d) => (d.scene === 'ladder'
-    ? `The ladder. ${LADDER[s.donorIndex].name} releases ${n1(d.rungKj)} kilojoules per mole and ${inSentence(LADDER[s.targetIndex].name)} releases ${n1(LADDER[s.targetIndex].kj)}, so ${s.donorIndex === s.targetIndex ? 'there is nothing to transfer' : `${inSentence(LADDER[s.donorIndex].name)} ${transferWords(LADDER[s.targetIndex], d.transferPossible)}`}.`
+    ? `The ladder. The standard free energy of hydrolysis, ΔG°′, is ${n1(d.rungKj)} kilojoules per mole for ${inSentence(LADDER[s.donorIndex].name)} and ${n1(LADDER[s.targetIndex].kj)} for ${inSentence(LADDER[s.targetIndex].name)}, so ${s.donorIndex === s.targetIndex ? 'there is nothing to transfer' : `${inSentence(LADDER[s.donorIndex].name)} ${transferWords(LADDER[s.targetIndex], d.transferPossible)}`}.`
     : `ATP, ${d.hydrolysed ? 'hydrolysed' : 'intact'}. The ledger totals ${n1(d.ledgerTotalKj)} kilojoules per mole, and at ${n1(d.atpMM)}, ${n1(d.adpMM)} and ${n1(d.phosphateMM)} millimoles per litre the true value is ${n1(d.deltaGKj)}.${d.ledgerRow ? ` The row shown is ${d.ledgerRow}.` : ''}`));
 
   // ---------------------------------------------------------------- drawing and the handle
@@ -1355,7 +1380,7 @@ function build(root, ctx) {
   //   deltaGStandardKj  -30.5, fixed
   //   deltaGKj          at the current concentrations; -50.1 at the opening values
   //   donor, target     ladder scene, by id
-  //   rungKj            what the selected donor releases on hydrolysis, negative; more negative is
+  //   rungKj            the selected donor's ΔG°′ of hydrolysis, negative; more negative is
   //                     HIGHER on the rail. Turning the ladder the right way up changed no field here —
   //                     the rungs' order was never in describe(), only in where drawLadder put them.
   //                     Nor did turning the Donor and Target controls round (2026-09-23): `donor` and

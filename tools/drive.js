@@ -161,6 +161,15 @@ const rungOfWord = async (h, word) => {
   const at = texts.find((t) => t.s === word);
   return at ? ys.indexOf(at.y) : -1;
 };
+// The figure printed on the rung a marker word sits on, as a number; NaN when there is no such rung.
+// A marker drawn one rung off its own compound every time would pass rungOfWord's relative checks, so
+// the donor's is held against describe().rungKj, which is the donor's own ΔG°′ of hydrolysis.
+const figureAtWord = async (h, word) => {
+  const texts = await ladderTexts(h);
+  const at = texts.find((t) => t.s === word);
+  const fig = at && texts.find((t) => t.cls.includes('at-num') && t.y === at.y);
+  return fig ? Number(fig.s.replace('−', '-')) : NaN;
+};
 // §5.3's own table of phosphate compounds, read out of the chapter, as [{ name, kj }] in the order it is
 // printed. It is the authority for which way up the ladder runs, and it is parsed rather than typed here
 // so the check is the chapter's word against the figure's drawing, not the figure's LADDER against itself.
@@ -170,9 +179,12 @@ const chapterLadder = () => {
   const start = html.indexOf('<section id="atp">');
   const end = start < 0 ? -1 : html.indexOf('</section>', start);
   if (start < 0 || end < 0) throw new Error(`${path} has no complete <section id="atp">, so §5.3's table of phosphate compounds could not be read`);
-  const body = /<tbody>([\s\S]*?)<\/tbody>/.exec(html.slice(start, end));
+  // Tags may carry attributes: a row the pattern skipped would drop out of the comparison without a word.
+  const body = /<tbody[^>]*>([\s\S]*?)<\/tbody>/.exec(html.slice(start, end));
   if (!body) throw new Error(`${path}'s <section id="atp"> has no <tbody>, so §5.3's table of phosphate compounds could not be read`);
-  const rows = [...body[1].matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map((m) => [...m[1].matchAll(/<td>([\s\S]*?)<\/td>/g)].map((c) => c[1].replace(/<[^>]+>/g, '').trim()));
+  const rows = [...body[1].matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].map((m) => [...m[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/g)].map((c) => c[1].replace(/<[^>]+>/g, '').trim()));
+  const trs = (body[1].match(/<tr[\s>]/g) || []).length;
+  if (rows.length !== trs) throw new Error(`${path}: §5.3's table has ${trs} <tr> and ${rows.length} of them could be read as rows`);
   const table = rows.map(([name, kj]) => ({ name, kj: Number(String(kj).replace('−', '-')) }));
   if (table.length < 3 || table.some((r) => !r.name || !Number.isFinite(r.kj))) {
     throw new Error(`${path}: §5.3's table of phosphate compounds read as ${JSON.stringify(table)}; it needs at least three rows, each a name and a number in kJ/mol`);
@@ -2746,30 +2758,47 @@ const RECIPES = {
     ['the-ladder-works-out-the-transfer-itself', async (h) => {
       await h.button(/^Ladder/).click();
       expect((await until(h, (x) => x.scene === 'ladder', 5_000)).scene === 'ladder', 'the ladder scene did not open');
+      // What the rail and the table beside it call the quantity. §5.3's column is headed "ΔG°′ of
+      // hydrolysis (kJ/mol)"; the rail said "RELEASED ON HYDROLYSIS" over a column of negative numbers,
+      // and the table "It releases −61.9 kJ/mol", until 2026-09-23.
+      const rail = (await ladderTexts(h)).map((t) => t.s);
+      expect(rail.includes('ΔG°′ of hydrolysis, kJ/mol'), `the rail should be headed "ΔG°′ of hydrolysis, kJ/mol", as §5.3's table heads its column; its first line reads ${JSON.stringify(rail[0])}`);
+      const beside = await h.stage.locator('.tb-pane-ledger text').allTextContents();
+      expect(beside.filter((s) => s === 'Its ΔG°′ of hydrolysis').length === 2 && !beside.some((s) => /releases/i.test(s)), `the table beside the rail should name the quantity, "Its ΔG°′ of hydrolysis", once for the donor and once for the target; it reads ${JSON.stringify(beside)}`);
       const donor = h.stage.getByRole('slider', { name: 'Donor' });
-      // End and Home rather than a number: the range holds a HEIGHT on the rail, so End is the top rung.
-      await donor.press('End');
-      let d = await until(h, (x) => x.donor === 'pep', 5_000);
-      expect(d.donor === 'pep', `End on the Donor slider should reach the top rung, phosphoenolpyruvate; it reached ${d.donor}`);
-      expect(d.transferPossible === true, `phosphoenolpyruvate should be able to phosphorylate ADP: ${JSON.stringify({ donor: d.donor, target: d.target, rung: d.rungKj })}`);
+      // Home and End rather than a number: the range holds a HEIGHT on the rail, so End is the top rung.
+      // Home first, because the donor opens on the top rung, and an End pressed there would pass by
+      // standing still.
+      await donor.press('Home');
+      let d = await until(h, (x) => x.donor === 'g6p', 5_000);
+      expect(d.donor === 'g6p', `Home on the Donor slider should reach the bottom rung, glucose 6-phosphate; it reached ${d.donor}`);
+      expect(d.transferPossible === false, `glucose 6-phosphate must not be able to phosphorylate ADP: ${JSON.stringify({ donor: d.donor, rung: d.rungKj })}`);
+      expect(d.rungKj > -30.5, `it sits below ATP on the ladder, so it releases less: ${d.rungKj}`);
       // The verdict, as the rail prints it. §5.3: a compound above ATP can "hand a phosphate to ADP and
       // so make ATP". It printed "can phosphorylate ATP" until 2026-09-23: the phosphate put onto the
       // thing it makes. The class first, then the sentence: no rung is ever the thing phosphorylated,
       // because a rung is what a transfer MAKES. The pattern matches all eight names — ATP, the two long
       // ones and the five that end "phosphate" — and none of the molecules that really take a phosphate.
+      // The sentences are matched case and all, so a rung's name set mid-sentence is checked too.
       const verdictSays = async (sentence, text) => {
         const said = (await ladderTexts(h)).map((t) => t.s).join(' ');
         const onto = /phosphorylate (?:ATP|phosphoenolpyruvate|1,3-bisphosphoglycerate|\S+ (?:\d-)?phosphate)\b/i.exec(said);
         expect(!onto, `the rail says "${onto?.[0]}": a rung is what a transfer makes, not what it phosphorylates; the rail's text ends ${JSON.stringify(said.slice(-120))}`);
         expect(sentence.test(said), `the verdict should say ${text}; the rail's text ends ${JSON.stringify(said.slice(-120))}`);
       };
-      await verdictSays(/phosphoenolpyruvate can phosphorylate ADP and make ATP: −31\.4 kJ\/mol/i, 'that phosphoenolpyruvate can phosphorylate ADP and make ATP, −31.4 kJ/mol');
-      await donor.press('Home');
-      d = await until(h, (x) => x.donor === 'g6p', 5_000);
-      expect(d.donor === 'g6p', `Home on the Donor slider should reach the bottom rung, glucose 6-phosphate; it reached ${d.donor}`);
-      expect(d.transferPossible === false, `glucose 6-phosphate must not be able to phosphorylate ADP: ${JSON.stringify({ donor: d.donor, rung: d.rungKj })}`);
-      expect(d.rungKj > -30.5, `it sits below ATP on the ladder, so it releases less: ${d.rungKj}`);
-      await verdictSays(/glucose 6-phosphate cannot phosphorylate ADP to make ATP: \+16\.7 kJ\/mol/i, 'that glucose 6-phosphate cannot phosphorylate ADP to make ATP, +16.7 kJ/mol');
+      await verdictSays(/Glucose 6-phosphate cannot phosphorylate ADP to make ATP under standard conditions: \+16\.7 kJ\/mol, uphill\./, '"Glucose 6-phosphate cannot phosphorylate ADP to make ATP under standard conditions: +16.7 kJ/mol, uphill."');
+      await donor.press('End');
+      d = await until(h, (x) => x.donor === 'pep', 5_000);
+      expect(d.donor === 'pep', `End on the Donor slider should reach the top rung, phosphoenolpyruvate; it reached ${d.donor}`);
+      expect(d.transferPossible === true, `phosphoenolpyruvate should be able to phosphorylate ADP: ${JSON.stringify({ donor: d.donor, target: d.target, rung: d.rungKj })}`);
+      await verdictSays(/Phosphoenolpyruvate can phosphorylate ADP and make ATP: −31\.4 kJ\/mol\./, '"Phosphoenolpyruvate can phosphorylate ADP and make ATP: −31.4 kJ/mol."');
+      // And a target that is not ATP, where the phosphate goes onto a sugar and the rung's name is set in
+      // the middle of the sentence.
+      const target = h.stage.getByRole('slider', { name: 'Target' });
+      await target.press('Home');
+      d = await until(h, (x) => x.target === 'g6p', 5_000);
+      expect(d.target === 'g6p', `Home on the Target slider should reach the bottom rung, glucose 6-phosphate; it reached ${d.target}`);
+      await verdictSays(/Phosphoenolpyruvate can phosphorylate glucose and make glucose 6-phosphate: −48\.1 kJ\/mol\./, '"Phosphoenolpyruvate can phosphorylate glucose and make glucose 6-phosphate: −48.1 kJ/mol."');
     }],
     ['the-rail-runs-the-way-up-the-chapter-prints-it', async (h) => {
       // §5.3's table, top to bottom, is the rail top to bottom: every compound it lists is drawn at the
@@ -2805,10 +2834,14 @@ const RECIPES = {
         await slider.fill(String(value));
         await atValue(h, slider, value);
       }
+      // Every press: wait for the figure to report the change, check that the donor's word is on the
+      // donor's own rung, and say which rung the marker is now drawn on.
       const press = async (word, act) => {
         const before = (await h.describe())[word];
         await act();
-        await until(h, (x) => x[word] !== before, 5_000);
+        const now = await until(h, (x) => x[word] !== before, 5_000);
+        const fig = await figureAtWord(h, 'donor');
+        expect(fig === now.rungKj, `the word "donor" should sit on the donor's own rung, ${now.donor} at ${now.rungKj}; it sits on the rung printed ${fig}`);
         return rungOfWord(h, word);
       };
       for (const [name, word] of pairs) {
@@ -2831,11 +2864,43 @@ const RECIPES = {
           const shows = [(await upButton.textContent()).trim(), (await downButton.textContent()).trim()];
           expect(shows[0] === '↑' && shows[1] === '↓', `"${name}, one rung up" should show ↑ and "${name}, one rung down" ↓; they show ${JSON.stringify(shows)}`);
           const from = await rungOfWord(h, word);
+          expect(from > 0 && from < 7, `at 390 px the ${word} should start away from both ends of the rail; it is on rung ${from + 1} from the top`);
           const up = await press(word, () => upButton.click());
           expect(up === from - 1, `the button "${name}, one rung up" should move the ${word} one rung up the rail as drawn, from rung ${from + 1} to rung ${from} counting from the top; it went to rung ${up + 1}`);
           const back = await press(word, () => downButton.click());
           expect(back === from, `the button "${name}, one rung down" should move the ${word} back down to rung ${from + 1}; it went to rung ${back + 1}`);
         }
+      } finally {
+        await h.page.setViewportSize({ width: 1000, height: 640 });
+        await until(h, (x) => x.layout === 'wide', 10_000);
+      }
+    }],
+    ['the-verdict-is-drawn-whole-however-long', async (h) => {
+      // A verdict that wraps to three lines at a phone's width loses nothing. The narrow layout used to
+      // keep two lines of it and drop the rest without a word: at a 272 px stage the "uphill." was gone,
+      // and the standard-conditions clause made the longest verdicts wrap to three at 390 px. This sets the
+      // longest one there is — fructose 6-phosphate to 1,3-bisphosphoglycerate — at 390 px and reads the
+      // lines under the rail. It also checks that the verdict really took three lines, so a later layout
+      // that fits it on two turns this red rather than letting it pass without testing anything.
+      for (const [name, value] of [['Donor', 1], ['Target', 6]]) {
+        const slider = h.stage.getByRole('slider', { name });
+        await slider.fill(String(value));
+        await atValue(h, slider, value);
+      }
+      const set = await until(h, (x) => x.donor === 'f6p' && x.target === 'bpg', 5_000);
+      expect(set.donor === 'f6p' && set.target === 'bpg', `heights 1 and 6 should put the donor on fructose 6-phosphate and the target on 1,3-bisphosphoglycerate; they put them on ${set.donor} and ${set.target}`);
+      await h.page.setViewportSize({ width: 390, height: 844 });
+      try {
+        const d = await until(h, (x) => x.layout === 'narrow', 10_000);
+        expect(d.layout === 'narrow', `a 390 px viewport should put the figure in its narrow layout: ${d.layout}`);
+        const texts = await ladderTexts(h);
+        const lowest = Math.max(...texts.filter((t) => t.cls.includes('at-num')).map((t) => t.y));
+        const foot = texts.filter((t) => t.y > lowest && !t.cls.includes('at-num')).sort((a, b) => a.y - b.y).map((t) => t.s);
+        const end = foot.findIndex((s) => s.endsWith('uphill.'));
+        const verdict = foot.slice(0, end + 1);
+        const whole = 'Fructose 6-phosphate cannot phosphorylate 3-phosphoglycerate to make 1,3-bisphosphoglycerate under standard conditions: +33.5 kJ/mol, uphill.';
+        expect(verdict.join(' ') === whole, `under the rail at 390 px the verdict should read ${JSON.stringify(whole)}; the lines there read ${JSON.stringify(foot)}`);
+        expect(verdict.length >= 3, `the verdict took ${verdict.length} line(s) at 390 px, so this step no longer tests one that wraps to three; choose a longer one, or a narrower width`);
       } finally {
         await h.page.setViewportSize({ width: 1000, height: 640 });
         await until(h, (x) => x.layout === 'wide', 10_000);
