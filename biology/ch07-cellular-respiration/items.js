@@ -1026,7 +1026,7 @@ export const ITEMS = [
         why: 'Sends FADH<sub>2</sub>\'s electrons through complex I, which they never enter. The cycle\'s FADH<sub>2</sub> hands its pair in at complex II, below it, so a broken complex I costs FADH<sub>2</sub> nothing.' },
       { text: 'Six, the same as a pair from FADH<sub>2</sub>: with complex I pumping nothing, both pairs are pumped only by complexes III and IV.', correct: true },
       { text: 'None, since without complex I pumping first no gradient can start, and the complexes below it have nothing to add to.',
-        why: 'Treats the first pump as the one the others depend on. Each complex pumps with the energy of its own fall, independently; electrons from succinate drive six protons through III and IV with complex I nowhere in their path.' },
+        why: 'Treats the first pump as the one the others depend on. Each pump works with the energy of its own fall, independently; electrons from succinate drive six protons through III and IV with complex I nowhere in their path.' },
     ],
     explain: 'The difference between the two carriers is a difference of entry point. A pair from NADH passes three pumping complexes — four protons at I, four at III, two at IV — and a pair from the cycle\'s FADH<sub>2</sub> joins at complex II, below I, and passes only two of them. Take away complex I\'s pumping and the two routes pump the same six, and the seventy or so kilojoules NADH releases at complex I leave as heat.',
   },
