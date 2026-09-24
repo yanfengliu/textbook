@@ -160,7 +160,7 @@ const TANK_W = 20; // nm
 // not layout: the count is fixed, so a flatter tank is a more crowded one, and a crowded enough tank
 // cannot be taken apart by any heat the slider offers — its molecules have nowhere to go that is not
 // against another's tails. The floor was 0.52, a 10.4 nm tank, which is what a chapter page at 1024 px
-// gave; measured 2026-09-24 with this file's model over 30 s of clock at 90 °C, that tank was a sheet or
+// gave; measured 2026-09-23 with this file's model over 30 s of clock at 90 °C, that tank was a sheet or
 // micelles in 89% of sweeps where the lab's 13.8 nm tank was in 10%, so the figure's claim that heat
 // wins held on one screen and not on another. With the verdict held over a second (SAMPLE_SWEEPS), over
 // nine seeds and 30 s of clock each, a tank came together at 90 °C in 3 runs at 12.0 nm, 1 at 12.4 nm and
@@ -192,7 +192,7 @@ const PROBE = 0.30; // the water probe that measures exposure, nm
 const DIRS = 12;
 // What the reader is told the tank IS — its arrangement, and whether its edge has sealed — is what the
 // tank has HELD over the last second of its own clock, not what one sweep shows. One sweep is a single
-// microstate of a thermal walk, and it flickers: measured 2026-09-24 over 30 s of clock with this file's
+// microstate of a thermal walk, and it flickers: measured 2026-09-23 over 30 s of clock with this file's
 // own model (three seeds, the lab's 13.8 nm tank), a formed sheet at 37 °C classified as micelles in 0.2%
 // of sweeps and at 48 °C in 2.7%, because the spanning sheet momentarily splits in two; and at 90 °C the
 // tank read micelles or a sheet in about one sweep in ten, because a tank this crowded buries half its
@@ -1640,3 +1640,7 @@ export function mount(root, ctx) {
     },
   };
 }
+
+// The model, for test/bilayer-model.test.js, which runs it in Node over windows of clock no browser gate
+// can afford. Nothing in the book reads this; the figure is still `meta` and `mount`.
+export const model = { Tank, stepTank, heldArrangement, heldSealed, kTat, TANK_W, MIN_RATIO, MAX_RATIO, SWEEPS_PER_SECOND };
