@@ -9,17 +9,32 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # A guard against a hung run, sized so a healthy run never meets it. The old 30 could not be met:
+    # steps 1-5 alone used 16 of those minutes here, and no run ever reached step 6. The whole chain
+    # took 2180 s (36 min) on 32 logical CPUs on 2026-09-23 (docs/work/7_project-audit/reviews/
+    # 2_integration.md). On this runner only steps 1-5 have run: 910 s against 733 s locally, drive
+    # alone 754 s against 513 s (run 35902188268). Steps 6-12 scaled the way drive scaled, with pinned
+    # at its one-process time because its eight shards share the runner's cores, put the chain near 60
+    # minutes on the 4-core runner a public repository gets and near 120 on the 2-core one a private
+    # repository gets. 180 covers the 2-core case half again and stays under GitHub's 360-minute ceiling.
+    # These are estimates: replace them with the duration of the first run that completes every step.
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: npm
+      # The machine every step's time below was measured on. The log does not say it otherwise.
+      - name: Record the runner's size
+        run: |
+          echo "$(nproc) logical CPUs, $(free -g | awk '/^Mem:/ {print $2}') GB of memory"
       - run: npm ci
-      # The gates drive a headless chromium; only chromium is needed, and --with-deps brings the
-      # system libraries the runner does not ship.
-      - run: npx playwright install --with-deps chromium
+      # Three engines. Every browser gate drives chromium, and npm run devices also runs its phone
+      # shapes on WebKit and Firefox (ENGINES in tools/devices.js) with no fallback when one is missing,
+      # so a chromium-only install fails that step. --with-deps brings the system libraries the runner
+      # does not ship.
+      - run: npx playwright install --with-deps chromium webkit firefox
       # The runner has no GPU, so the 3D figures render through SwiftShader. npm run perf is
       # deliberately not run here: it measures the machine it runs on.
       - run: npm test

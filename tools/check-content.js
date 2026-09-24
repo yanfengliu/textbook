@@ -16,6 +16,10 @@
 // (expectProblems in src/components/task.js — a clause no figure state can satisfy fails here, not
 // in a sitting); and every chapter that has an items.js is listed as a tb-source, under the chapter
 // id the store files it by, on every page that carries a <tb-sitting>, and at least one page does.
+// Which chapters a page says can be read (checkChapterAvailability): a book's contents page links and
+// tags each chapter exactly as its directory's presence on disk says, and the library page's shelf
+// cards and README.md claim no chapter list or count the disk contradicts. Its own bound, prose it
+// cannot parse, is stated beside it.
 //
 // Bound: it reads the authored HTML with a small tolerant tokenizer, not the rendered DOM, so it knows
 // nothing about what the scripts produce (numbering, popovers, figure content) and nothing about
@@ -438,6 +442,253 @@ export function checkStudySources({ html, banks = [], pageDir = 'today', file = 
   return fails;
 }
 
+// ── Which chapters a page says can be read, against the chapter directories on disk ─────────────────
+//
+// Five times a page has told readers a finished chapter was not written: the book's contents page for
+// chapters 2 and 3 (6d854cf, both on disk and listed "In preparation"), chapter 4's closing card, the
+// contents page again for chapters 4 and 5, and then the library page and README.md, which said
+// "Chapter 1, “What is life?”, is ready; thirty-one more are outlined" with five chapters published.
+// The closing-card rule in checkDocument covers one of those places. The fact every one of them has to
+// be checked against is the tree, never the page, so this rule is handed the chapter directories.
+//
+// Claim, in two halves.
+//   The contents: on a book's own index.html, every <li> of an <ol class="chapters"> is read by the
+//   number in its <span class="n">. A chapter whose chNN- directory is on disk must be an <a> whose href
+//   is that directory and whose .tag is the page language's word for readable (English "Read"); one
+//   whose directory is absent must be a .soon line with no link, tagged with the word for unwritten
+//   ("In preparation"). Every chapter directory on disk must have a line, and no number may be listed
+//   twice. A contents page with no list at all, or a line with no number, fails rather than passing:
+//   a check that cannot find its subject has checked nothing.
+//   The prose: on the library page (index.html), each shelf card <a class="book" href="<book>/"> is read
+//   as a statement about that book; in README.md, each paragraph is read as a statement about the book
+//   whose title (its contents page's <h1>) it names. A sentence naming chapters as ready ("Chapter 1 …
+//   is ready", "Chapters 1 to 5 are written", "the first five chapters are ready") is read as the whole
+//   list and must name exactly the chapters on disk; a count ("five chapters are ready") must be their
+//   number; "N more are outlined" must be the lines in the contents minus the chapters on disk; and a
+//   chapter called unwritten ("chapter 6 is in preparation") must not be on disk. A statement in a place
+//   the rule cannot tie to one book fails and says so.
+//
+// Bound: prose it cannot parse. The prose half recognises the English sentence shapes above, with the
+// number written as digits or as a word up to ninety-nine; a claim made any other way ("everything up
+// to membranes", "half the book", a sentence in Chinese) passes unread. It reads only the library page's
+// shelf cards and README.md — not chapter prose, not docs/ (docs/design/textbook.md's status line is
+// prose this rule never sees), and not the pages outside a book. The contents half reads structure,
+// not wording, except for the one tag word per state, and it knows those words only for the languages
+// in CONTENTS_TAGS; a book in another language fails until its words are added.
+//
+// The Chinese words are accepted in both scripts, for the reason FIGURE_TOKENS accepts 图 and 圖: this
+// rule's claim is which chapters can be read, and the script has its own gate (test/lexicon.test.js).
+// The first word of each list is the one a failure tells the author to write.
+const CONTENTS_TAGS = {
+  en: { ready: ['Read'], soon: ['In preparation'] },
+  zh: { ready: ['可读', '可讀'], soon: ['未写', '未寫'] },
+};
+
+const NUMBER_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+const TENS_WORDS = { twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
+const NUM = `(\\d+|(?:${Object.keys(TENS_WORDS).join('|')})(?:[-\\s](?:${NUMBER_WORDS.slice(1, 10).join('|')}))?|${[...NUMBER_WORDS].reverse().join('|')})`;
+const READY = '(?:ready|written|published|available|finished|complete|readable)';
+const UNREADY = '(?:in preparation|coming soon|not yet written|being written|yet to be written|to come|outlined|planned|unwritten)';
+
+function numberOf(word) {
+  const w = word.toLowerCase().trim();
+  if (/^\d+$/.test(w)) return Number(w);
+  if (NUMBER_WORDS.includes(w)) return NUMBER_WORDS.indexOf(w);
+  const m = /^([a-z]+)(?:[-\s]([a-z]+))?$/.exec(w);
+  if (m && TENS_WORDS[m[1]] !== undefined) return TENS_WORDS[m[1]] + (m[2] ? NUMBER_WORDS.indexOf(m[2]) : 0);
+  return null;
+}
+
+const listOf = (ns) => (ns.length ? ns.map(String).join(', ').replace(/, (\d+)$/, ' and $1') : 'none');
+const range = (a, b) => Array.from({ length: Math.max(0, b - a + 1) }, (_, i) => a + i);
+const sameSet = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
+
+// The visible text of a node, without the contents of <script> and <style>, and with a space around
+// each block, so a heading and the paragraph under it do not run together into one word: "World" and
+// "Five" joined as "WorldFive" have no word boundary between them, and the sentence went unread.
+const BLOCKS = new Set(['address', 'article', 'aside', 'blockquote', 'br', 'dd', 'div', 'dl', 'dt', 'figcaption', 'figure', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hr', 'li', 'main', 'nav', 'ol', 'p', 'section', 'table', 'td', 'th', 'tr', 'ul']);
+function proseOf(node) {
+  if (node.text !== undefined) return node.text;
+  if (RAW.has(node.tag)) return '';
+  const inner = (node.children || []).map(proseOf).join('');
+  return BLOCKS.has(node.tag) ? ` ${inner} ` : inner;
+}
+
+// What one piece of prose says about which of a book's chapters can be read. `book` is { dir, title,
+// onDisk: [{ dir, number }], outline } with outline the number of lines in its contents (or null).
+// Returns the failures, each with the words it quotes so a caller can find the line they are on, and
+// how many statements it recognised, so a caller that cannot place the prose in a book can still tell
+// whether it claimed anything.
+function proseClaims(text, { where, book }) {
+  const fails = [];
+  let found = 0;
+  const said = text.replace(/[*_`]/g, '').replace(/\s+/g, ' ');
+  const disk = book.onDisk.map((c) => c.number).sort((a, b) => a - b);
+  const diskText = `${book.dir} has ${disk.length === 1 ? 'chapter' : 'chapters'} ${listOf(disk)} on disk (${book.onDisk.map((c) => `${book.dir}/${c.dir}/`).join(', ')})`;
+  const fix = `Say it without naming chapters — "the book's contents page says which chapters are ready" cannot go stale, because npm run check holds that page to the tree — or name exactly the chapters on disk`;
+  let m;
+  const push = (msg) => fails.push({ msg: `${where} ${msg.replace('%q', () => `"${m[0].trim()}"`)}`, quote: m[0].trim() });
+
+  // "Chapter 1, “What is life?”, is ready", "Chapters 1 to 5 are written", "chapters 1 and 2 are ready".
+  // The words between the number and the verb may hold a title ("What is life?" has an "is" in it) but
+  // not a sentence end, and not a second "chapter": "chapter 3 explains …, and chapter 4 is ready" is
+  // a statement about chapter 4.
+  const named = new RegExp(`\\bchapters?\\s+${NUM}(?:\\s*(to|through|–|—|-|and)\\s*${NUM})?\\b((?:(?!\\bchapters?\\b)[^.;:!])*?)\\b(?:is|are)\\s+(?:now\\s+|already\\s+|still\\s+)?(${READY}|${UNREADY})\\b`, 'gi');
+  while ((m = named.exec(said))) {
+    const a = numberOf(m[1]);
+    const b = m[3] ? numberOf(m[3]) : a;
+    if (a === null || b === null) continue;
+    found += 1;
+    const set = m[2] && m[2].toLowerCase() === 'and' ? [a, b] : range(Math.min(a, b), Math.max(a, b));
+    const verb = m[5].toLowerCase();
+    if (new RegExp(`^${READY}$`, 'i').test(verb)) {
+      if (!sameSet(set, disk)) push(`says ${set.length === 1 ? `chapter ${set[0]} is` : `chapters ${listOf(set)} are`} ${verb}, and nothing else is (%q), and ${diskText}. ${fix}`);
+    } else {
+      const written = set.filter((n) => disk.includes(n));
+      if (written.length) push(`says ${written.length === 1 ? `chapter ${written[0]} is` : `chapters ${listOf(written)} are`} ${verb} (%q), and ${diskText}. Say what the chapter is about, or drop the sentence`);
+    }
+  }
+
+  // "the first five chapters are ready", "five chapters are written", "5 of 32 chapters are ready".
+  const counted = new RegExp(`\\b(?:(the first)\\s+|only\\s+|just\\s+)?${NUM}\\s+(?:of\\s+(?:the\\s+|its\\s+)?${NUM}\\s+)?chapters?\\s+(?:is|are|has been|have been)\\s+(?:now\\s+|already\\s+)?${READY}\\b`, 'gi');
+  while ((m = counted.exec(said))) {
+    const n = numberOf(m[2]);
+    if (n === null) continue;
+    found += 1;
+    if (m[1] ? !sameSet(range(1, n), disk) : n !== disk.length) push(`says ${m[1] ? 'the first ' : ''}${n} chapter${n === 1 ? ' is' : 's are'} ready (%q), and ${diskText}. ${fix}`);
+    const of = m[3] ? numberOf(m[3]) : null;
+    if (of !== null && book.outline !== null && of !== book.outline) push(`says the book has ${of} chapters (%q), and its contents page lists ${book.outline}; write ${book.outline}`);
+  }
+
+  // "thirty-one more are outlined": the lines in the contents that are not on disk.
+  const more = new RegExp(`\\b${NUM}\\s+(?:more|other|further)(?:\\s+chapters?)?\\s+(?:are|remain)\\s+(?:still\\s+)?(?:only\\s+)?${UNREADY}\\b`, 'gi');
+  while ((m = more.exec(said))) {
+    const n = numberOf(m[1]);
+    if (n === null) continue;
+    found += 1;
+    if (book.outline === null) continue;
+    const left = book.outline - disk.length;
+    if (n !== left) push(`says ${n} more chapters are unwritten (%q), and its contents page lists ${book.outline} with ${disk.length} on disk, so ${left} are; write ${left}, or say it without a count, which cannot go stale`);
+  }
+  return { fails, found };
+}
+
+// The rule. `books` maps a book's directory to { title, onDisk: [{ dir, number }] }; `contentsOf(dir)`
+// returns that book's index.html source (or null), which the shelf and README halves need for the
+// number of lines in its contents. Exactly one of `html` and `markdown` is given.
+export function checkChapterAvailability({ file, html = null, markdown = null, books = new Map(), contentsOf = () => null } = {}) {
+  const fails = [];
+  const bookOf = (dir) => {
+    const b = books.get(dir);
+    if (!b) return null;
+    const src = contentsOf(dir);
+    const outline = src ? findAll(parseHtml(src), (n) => n.tag === 'ol' && hasClass(n, 'chapters')).flatMap((ol) => ol.children.filter((c) => c.tag === 'li')).length : null;
+    return { dir, title: b.title, onDisk: b.onDisk, outline: outline || null };
+  };
+
+  if (markdown !== null) {
+    // Paragraphs with the line each starts on. A fenced block keeps its newlines and loses its text, so
+    // a command in the README is never read as a sentence and the line numbers stay true.
+    const lines = markdown.replace(/```[\s\S]*?```/g, (block) => block.replace(/[^\n]/g, '')).replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').split('\n');
+    const paragraphs = [];
+    let current = null;
+    lines.forEach((l, i) => {
+      if (!l.trim()) { current = null; return; }
+      if (!current) paragraphs.push((current = { line: i + 1, text: '' }));
+      current.text += `${l}\n`;
+    });
+    for (const p of paragraphs) {
+      const at = `${file}:${p.line}`;
+      const flat = p.text.replace(/[*_`]/g, '');
+      const named = [...books.keys()].filter((dir) => books.get(dir).title && flat.includes(books.get(dir).title));
+      if (named.length === 1) {
+        fails.push(...proseClaims(p.text, { where: `${at}: the paragraph about ${named[0]}`, book: bookOf(named[0]) }).fails.map((f) => f.msg));
+      } else if (proseClaims(p.text, { where: at, book: { dir: '?', onDisk: [], outline: null } }).found) {
+        // A claim nobody can tie to a book is a claim nobody checks.
+        fails.push(`${at}: a paragraph says which chapters are ready and names ${named.length ? `${named.length} books (${named.join(', ')})` : 'no book by its title'}, so this rule cannot tell which book's chapters to check it against; name the one book it is about, by the title its contents page's <h1> gives it`);
+      }
+    }
+    return fails;
+  }
+
+  const doc = parseHtml(html);
+  const fail = (msg, node) => fails.push(`${file}${node?.line ? `:${node.line}` : ''}: ${msg}`);
+  const lang = (findAll(doc, (n) => n.tag === 'html')[0]?.attrs.lang || 'en').toLowerCase().split('-')[0];
+  const [top, sub] = file.split('/');
+
+  // A book's contents page: <book>/index.html.
+  if (sub === 'index.html' && books.has(top)) {
+    const { onDisk } = books.get(top);
+    const words = CONTENTS_TAGS[lang];
+    const lists = findAll(doc, (n) => n.tag === 'ol' && hasClass(n, 'chapters'));
+    if (!lists.length) {
+      fail(`${top} has ${onDisk.length} chapter director${onDisk.length === 1 ? 'y' : 'ies'} on disk and this page has no <ol class="chapters">, so no line of its contents can be checked against them; the contents are read from that list`);
+      return fails;
+    }
+    if (!words) fail(`the page's lang is "${lang}" and CONTENTS_TAGS in tools/check-content.js has no words for it, so the tag on each line cannot be checked; add the word this book prints for a chapter that can be read and the one for a chapter that cannot`);
+    const listed = new Map();
+    for (const li of lists.flatMap((ol) => ol.children.filter((c) => c.tag === 'li'))) {
+      const nText = textOf(findAll(li, (n) => hasClass(n, 'n'))[0] ?? { text: '' }).trim();
+      const number = /^\d+$/.test(nText) ? Number(nText) : null;
+      const title = textOf(findAll(li, (n) => hasClass(n, 'title'))[0] ?? { text: '' }).trim().replace(/\s+/g, ' ');
+      if (number === null) {
+        fail(`a line of the contents ("${textOf(li).trim().replace(/\s+/g, ' ').slice(0, 60)}") has no <span class="n"> holding its chapter number, so this rule cannot tell which chapter it lists; give it one`, li);
+        continue;
+      }
+      if (listed.has(number)) fail(`chapter ${number} is listed twice (first at line ${listed.get(number)}); a book has one line per chapter`, li);
+      listed.set(number, li.line);
+      const here = onDisk.find((c) => c.number === number);
+      const link = findAll(li, (n) => n.tag === 'a')[0];
+      const tag = textOf(findAll(li, (n) => hasClass(n, 'tag'))[0] ?? { text: '' }).trim();
+      const name = `chapter ${number}${title ? ` (${title})` : ''}`;
+      if (here) {
+        const want = `${here.dir}/`;
+        if (!link) {
+          fail(`${name} is on disk at ${top}/${here.dir}/ and the contents list it${tag ? ` as "${tag}"` : ''} with no link, so a reader of the book page cannot reach it; make the line <li><a href="${want}"><span class="n">${number}</span><span><span class="title">${title || '…'}</span><span class="dek">what the chapter covers</span></span><span class="tag">${words?.ready[0] ?? '…'}</span></a></li>`, li);
+          continue;
+        }
+        const href = (link.attrs.href || '').split('#')[0].split('?')[0];
+        if (posix.normalize(href.replace(/(^|\/)index\.html$/, '$1')).replace(/\/+$/, '') !== here.dir) {
+          fail(`${name}'s line links href="${link.attrs.href ?? ''}", and chapter ${number} is on disk at ${top}/${here.dir}/; write href="${want}"`, link);
+        }
+        if (words && !words.ready.includes(tag)) fail(`${name} is on disk and linked, and its tag says "${tag}"; write <span class="tag">${words.ready[0]}</span>`, li);
+      } else {
+        if (link) {
+          fail(`${name}'s line links href="${link.attrs.href ?? ''}", and ${top}/ has no ch${String(number).padStart(2, '0')}- directory, so the contents promise a chapter a reader cannot open; make the line <li><span class="soon"><span class="n">${number}</span><span class="title">${title || '…'}</span><span class="tag">${words?.soon[0] ?? '…'}</span></span></li>`, link);
+        } else if (words && !words.soon.includes(tag)) {
+          fail(`${name} has no directory in ${top}/ and its tag says "${tag}"; write <span class="tag">${words.soon[0]}</span>`, li);
+        }
+      }
+    }
+    for (const c of onDisk) {
+      if (!listed.has(c.number)) fail(`${top}/${c.dir}/ is on disk and the contents list no chapter ${c.number}, so no reader can find it from the book page; add its line, in number order, inside the unit it belongs to: <li><a href="${c.dir}/"><span class="n">${c.number}</span>…<span class="tag">${words?.ready[0] ?? '…'}</span></a></li>`);
+    }
+    return fails;
+  }
+
+  // The library page: one shelf card per book, each read as a statement about the book it opens.
+  if (file === 'index.html') {
+    const cards = findAll(doc, (n) => n.tag === 'a' && hasClass(n, 'book'));
+    for (const card of cards) {
+      const dir = (card.attrs.href || '').split('#')[0].split('?')[0].replace(/(^|\/)index\.html$/, '$1').replace(/^\.\//, '').replace(/\/+$/, '');
+      const book = bookOf(dir);
+      if (!book) continue;
+      // Named at the line of the innermost element holding the quoted words, not the card's first line.
+      const flat = (n) => proseOf(n).replace(/[*_`]/g, '').replace(/\s+/g, ' ');
+      for (const f of proseClaims(proseOf(card), { where: `the shelf card for ${dir}`, book }).fails) {
+        fail(f.msg, findAll(card, (n) => flat(n).includes(f.quote)).pop() ?? card);
+      }
+    }
+    // Anything the page says outside a card is about no one book.
+    const outside = parseHtml(html.replace(/<a\b[^>]*\bclass="[^"]*\bbook\b[^"]*"[\s\S]*?<\/a>/gi, ''));
+    const main = findAll(outside, (n) => n.tag === 'main')[0];
+    if (main && proseClaims(proseOf(main), { where: file, book: { dir: '?', onDisk: [], outline: null } }).found) {
+      fail('the library page says which chapters are ready outside any shelf card, so this rule cannot tell which book it means; say it inside the card for that book');
+    }
+  }
+  return fails;
+}
+
 async function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   const { KINDS } = await import(pathToFileURL(join(root, 'src/figures/registry.js')).href);
@@ -499,6 +750,14 @@ async function main() {
     });
   }
 
+  // For checkChapterAvailability: each book's chapters on disk and its title, the <h1> of its contents
+  // page, which is how README.md names the book a paragraph is about.
+  const contentsOf = (book) => (existsSync(join(root, book, 'index.html')) ? readFileSync(join(root, book, 'index.html'), 'utf8') : null);
+  const books = new Map([...chapters].map(([book, onDisk]) => {
+    const h1 = contentsOf(book) && findAll(parseHtml(contentsOf(book)), (n) => n.tag === 'h1')[0];
+    return [book, { title: h1 ? textOf(h1).trim().replace(/\s+/g, ' ') : null, onDisk }];
+  }));
+
   let total = 0;
   let sittingPages = 0;
   for (const page of pages) {
@@ -536,15 +795,25 @@ async function main() {
     const hasSitting = findAll(tree, (n) => n.tag === 'tb-sitting').length > 0;
     if (hasSitting) sittingPages += 1;
     const sourceFails = hasSitting ? checkStudySources({ html, banks, pageDir: posix.dirname(rel), file: rel }) : [];
-    const all = [...fails, ...dataFails, ...sourceFails];
+    const availabilityFails = checkChapterAvailability({ file: rel, html, books, contentsOf });
+    const all = [...fails, ...dataFails, ...sourceFails, ...availabilityFails];
     total += all.length;
     const counts = [`${findAll(tree, (n) => n.tag === 'tb-figure').length} figures`, `${Object.keys(glossary).length} glossary entries`];
     if (objectives.length) counts.push(`${objectives.length} objectives`);
     if (items.length) counts.push(`${items.length} items`);
     if (hasSitting) counts.push(`${banks.length} item bank(s) on disk to list`);
+    // What checkChapterAvailability compared, so a run that read no contents line says so.
+    const [top, sub] = rel.split('/');
+    if (sub === 'index.html' && books.has(top)) counts.push(`${findAll(tree, (n) => n.tag === 'ol' && hasClass(n, 'chapters')).flatMap((ol) => ol.children.filter((c) => c.tag === 'li')).length} contents line(s) against ${books.get(top).onDisk.length} chapter(s) on disk`);
+    if (rel === 'index.html') counts.push(`${findAll(tree, (n) => n.tag === 'a' && hasClass(n, 'book')).length} shelf card(s) read`);
     console.log(`${all.length ? 'FAIL' : 'ok  '} ${rel} (${counts.join(', ')})`);
     for (const f of all) console.log(`  ${f}`);
   }
+  // README.md is not a page, and it is where the library page's stale sentence was also written.
+  const readmeFails = checkChapterAvailability({ file: 'README.md', markdown: readFileSync(join(root, 'README.md'), 'utf8'), books, contentsOf });
+  total += readmeFails.length;
+  console.log(`${readmeFails.length ? 'FAIL' : 'ok  '} README.md (read for which chapters it says are ready, against ${[...books].map(([b, v]) => `${b}'s ${v.onDisk.length}`).join(' and ')} on disk)`);
+  for (const f of readmeFails) console.log(`  ${f}`);
   // Keyed on the banks, not on the page: with no study page at all the loop above ran the source
   // check on nothing, and a check that did not run must not read as one that passed.
   if (banks.length && !sittingPages) {
