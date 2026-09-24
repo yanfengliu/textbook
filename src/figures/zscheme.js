@@ -7,13 +7,14 @@
 // the electrons run from water to NADP⁺. Fire three at photosystem II and no oxygen appears; the fourth
 // releases one molecule and four protons, because the manganese cluster is counting.
 //
-// THE NUMBERS, every one of them §6.4's or derived from §6.4's:
+// THE NUMBERS, §6.4's wherever it gives one:
 //   O₂/H₂O +0.82 V, P680 about +1.2, P700 +0.45, ferredoxin −0.42, NADP⁺/NADPH −0.32 (the prose's table).
 //   Plastoquinone +0.10 V, the cytochrome complex +0.30 (its Rieske centre, where the electrons from
 //   plastoquinol enter it) and plastocyanin +0.37: the measured midpoint potentials, which the prose names
 //   without numbers. They only have to sit in the right order down the hill, and they do.
 //   An excited reaction centre is drawn one whole photon above its ground state, E* = E − E(photon)/F:
-//   P680* at 1.2 − 175.9/96.485 = −0.62 V and P700* at 0.45 − 170.9/96.485 = −1.32 V.
+//   P680* at 1.2 − 175.9/96.485 = −0.62 V and P700* at 0.45 − 170.9/96.485 = −1.32 V. Each climb is
+//   labelled with that lift, 1.82 V and 1.77 V: the prose's "about 1.8 volts for one electron".
 //   A photon of λ nm carries 119 626.6/λ kJ/mol (N_A·h·c), so 680 nm is 175.9, the prose's "176".
 //   The climb from water to NADP⁺ is 0.82 − (−0.32) = 1.14 V, and two electrons up it cost
 //   2 × 96.485 × 1.14 = 220.0 kJ/mol, which is §5.8's number and must agree with it to the digit.
@@ -44,9 +45,11 @@
 // photosystems, at a system reset to the dark. After darkness three clusters in four rest one step along
 // (the dark-stable state), so the drawn cluster opens the train at one, not zero, and the first oxygen
 // comes on flash 3 — the prose's "a burst comes on the third". The chart is the POPULATION's yield, by
-// Kok's model: a flash misses 8% of the centres and double-hits 5%, which blurs the peaks at 3, 7 and 11
-// exactly as the prose describes. A flash that finds photosystem II closed advances no cluster, so a
-// train run on the cyclic path shows the oxygen stopping as the loop fills.
+// Kok's model: each flash misses one centre in twenty, so the population drifts out of step and the peaks
+// at 3, 7 and 11 blur, exactly as the prose describes, while nothing at all comes on the first two. A
+// flash that finds photosystem II closed advances no cluster, so a train run on the cyclic path shows the
+// oxygen stopping as the loop fills. The prose does not say why the first burst is on the third flash
+// rather than the fourth; the note under the chart does, in one sentence.
 //
 // TWO COMPOSITIONS. The brief's second composition is built as it asks, below 800 px:
 //   wide   — the Z across the left, one potential axis, carrier names placed against the drawing with
@@ -56,7 +59,11 @@
 //            run in the upper half, photosystem I's in the lower, both at one scale (the axis is shared,
 //            repeated for each half), and the join marked at both ends by the number of the carrier it
 //            leads to. Stations are numbered and named in a list beside the lower half. The flash train
-//            becomes a strip of marks under the drawing. The counters keep their labels.
+//            becomes a strip of twelve marks under the drawing — the brief says eleven, and a strip that
+//            stopped on the eleventh could not show that it is a peak. The counters keep their labels,
+//            and the table drops its title so the sentence under them always has the room it needs.
+//   Type and marks scale with the pane, up to 1.25 wide and 1.35 narrow, so a tablet's stage is not a
+//   phone's drawing with more paper round it.
 //   Every label is placed by measuring it and trying positions around its mark until one clears every
 //   line, mark, label, animation zone and the pane edge; a label that needs to stand off gets a leader.
 //   The placement is computed once per pane size, against the widest text each label can ever show
@@ -96,8 +103,12 @@ const BEST_KJ = 2 * KJ_680 + 2 * KJ_700; // 693.6
 const PQ_CAP = 2;
 
 // Kok's model of the flash train.
-const MISS = 0.08;
-const DOUBLE = 0.05;
+// A flash misses one centre in twenty, and none is hit twice: a flash short enough to excite each centre
+// once is what the experiment used, and it is what makes the first two flashes give nothing at all, as
+// §6.4 says. Measured miss rates run from about 5% to 15%; 5% keeps the peaks at 3, 7 and 11 through a
+// twelve-flash train, where a larger one walks the third peak on to flash 12.
+const MISS = 0.05;
+const DOUBLE = 0;
 const DARK_S0 = 0.25; // after darkness a quarter rest at zero and three quarters one step along
 const FLASHES = 12;
 
@@ -185,7 +196,6 @@ function fillRuns(node, src, size) {
   return node;
 }
 
-const plainOf = (src) => runsOf(src).map((r) => r.t).join('');
 
 // ---------------------------------------------------------------- the marks' own CSS
 
@@ -560,7 +570,7 @@ export function mount(root, ctx) {
   // oxygen, stalled at either end, cyclic, the train running and the train done.
   function status(v) {
     const s = v.stall;
-    if (train) return `Flash ${train.n} of ${FLASHES}. Each flash's oxygen is plotted as it leaves the cluster.`;
+    if (train) return `Flash${NB}${train.n} of ${FLASHES}. The oxygen is plotted flash by flash.`;
     if (flashYields.length === FLASHES && handAfterTrain === 0) return trainDone();
     if (s.at === 'plastoquinone') {
       return path === 'cyclic'
@@ -1430,7 +1440,7 @@ export function mount(root, ctx) {
 
   // ---------------------------------------------------------------- the flash train
 
-  const FLASH_NOTE = `After darkness three clusters in four rest one step along, so the first oxygen comes on flash${NB}3, not${NB}4. About one flash in twelve misses, and the peaks blur.`;
+  const FLASH_NOTE = `After darkness three clusters in four rest one step along, so the first oxygen comes on flash${NB}3, not${NB}4. Each flash misses about one cluster in twenty, so the peaks blur.`;
   const Y_MAX = 0.6;
 
   function drawFlashChart() {
