@@ -108,6 +108,12 @@ export const FIGURES = Object.freeze({
   // not survive a 390 px stage.
   'rubisco-fork': { url: new URL('./rubisco-fork.js', import.meta.url).href, title: 'One site, two gases, four steps of arithmetic', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
 
+  // Chapter 7, Cellular respiration (biology/ch07-cellular-respiration/FIGURES.md).
+  //
+  // Figure 7.1. Eleven stations in a row want a wide stage, and 16/9 rather than 21/9 leaves the walk
+  // height for its carbons; below 800 px the line turns through 90 degrees and runs down a tall one.
+  glycolysis: { url: new URL('./glycolysis.js', import.meta.url).href, title: 'Ten steps, two halves', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
+
   // Chapter 8, DNA and its copying (biology/ch08-dna/FIGURES.md).
   //
   // Figure 8.1. Below 800 px it carries a second composition: the helix lies along the stage above its
