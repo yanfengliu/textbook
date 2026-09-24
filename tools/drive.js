@@ -1718,14 +1718,36 @@ const RECIPES = {
       await h.button(/^Reset/).click();
       await h.stage.locator('input[type=range]').fill('90');
       expect((await h.describe()).temperatureC === 90, 'the temperature slider did not reach 90 °C');
-      await h.button(/^Release/).click();
+      // The claim is about a WINDOW of the tank's own clock, so it is asserted across one: thirty seconds
+      // of clock walked forward with Step, half a second a press, and the verdict read after every press.
+      // Step is real input and moves the clock by exactly half a second, so every run on every machine
+      // reads the verdict at the same sixty clock values, and a tank that is dispersed at t = 8 and says
+      // "Micelles" at t = 9.5 fails here instead of passing on whichever instant the machine landed on.
+      //   It used to press Release, sleep 500 ms at a time until the clock passed 8 s, and assert once,
+      // at a t the load on the machine chose — a wall-clock wait (docs/policies/local-rules.md, "A wait
+      // in a gate must poll the artefact, never the wall clock"). GitHub's runner read "micelle at
+      // t=8.033, 0.641 buried" where this machine had read dispersed. The figure was wrong and the gate
+      // could only see it by luck: one sweep at 90 °C was a sheet or micelles about one time in ten, and
+      // the verdict is now what the tank has held over the last second (src/figures/bilayer.js,
+      // SAMPLE_SWEEPS). Measured against the one-sweep verdict, 6 of these 60 reads fail, the first at
+      // t = 8.0 (docs/learning/gate-proofs.md).
+      //   Bound: one seed (12, the one Reset gives here), the lab's tank shape, 90 °C, and sixty
+      // instants half a second apart. It proves nothing at the temperatures between, and nothing about a
+      // verdict that holds for less than half a second between two reads.
+      const WINDOW_S = 30;
+      const reads = [];
       let d = await h.describe();
-      for (let i = 0; i < 30; i += 1) {
-        await h.page.waitForTimeout(500);
-        d = await h.describe();
-        if (d.t > 8) break;
+      expect(d.t === 0 && d.playing === false, `Reset should leave a fresh tank, unrun: ${JSON.stringify(d)}`);
+      while (d.t < WINDOW_S) {
+        const before = d.t;
+        await h.button(/^Step/).click();
+        d = await until(h, (x) => x.t > before, 10_000);
+        expect(d.t > before, `Step did not move the tank's clock past ${before}: ${JSON.stringify(d)}`);
+        expect(d.playing === false, `Step set the walk running, so the reads are no longer at fixed clock values: ${JSON.stringify(d)}`);
+        reads.push(d.tailsBuried);
+        expect(d.assembly === 'dispersed', `at 90 °C the jostling should win at every point of ${WINDOW_S} s of clock: ${d.assembly} at t=${d.t}, ${d.tailsBuried} buried, after ${reads.length} reads`);
       }
-      expect(d.assembly === 'dispersed', `at 90 °C the jostling should win: ${d.assembly} at t=${d.t}, ${d.tailsBuried} buried`);
+      expect(reads.length >= WINDOW_S / 0.5, `the window was not walked: ${reads.length} reads to t=${d.t}`);
     }],
     ['step-moves-the-walk-without-running-it', async (h) => {
       await h.button(/^Pause|^Release/).click();
