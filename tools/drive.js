@@ -1770,11 +1770,14 @@ const RECIPES = {
       // t=8.033, 0.641 buried" where this machine had read dispersed. The figure was wrong and the gate
       // could only see it by luck: one sweep at 90 °C was a sheet or micelles about one time in ten, and
       // the verdict is now what the tank has held over the last second (src/figures/bilayer.js,
-      // SAMPLE_SWEEPS). Measured against the one-sweep verdict, 6 of these 60 reads fail, the first at
-      // t = 8.0 (docs/learning/gate-proofs.md).
-      //   Bound: one seed (12, the one Reset gives here), the lab's tank shape, 90 °C, and sixty
-      // instants half a second apart. It proves nothing at the temperatures between, and nothing about a
-      // verdict that holds for less than half a second between two reads.
+      // SAMPLE_SWEEPS). Run against the figure as it was, this step failed at the fourth read, t = 2, and
+      // in a second run at the sixth, t = 3 (docs/learning/gate-proofs.md).
+      //   Bound: one seed — whichever Reset gives at this point of the recipe, which the Curl step's
+      // fresh tanks move on — the lab's tank shape, 90 °C, and sixty instants half a second apart. It
+      // proves nothing at the temperatures between, nothing about a verdict that holds for less than half
+      // a second between two reads, and nothing about any other tank shape: with the tank allowed as flat
+      // as a 1024 px page once drew it, where 90 °C came together, this step stays green, which is why
+      // test/bilayer-model.test.js holds the flattest shape the figure draws.
       const WINDOW_S = 30;
       const reads = [];
       let d = await h.describe();
