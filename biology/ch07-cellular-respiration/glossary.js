@@ -11,33 +11,33 @@
 // metabolic pathway, catabolism, anabolism, oxidation, reduction, redox reaction, electron carrier,
 // NAD⁺ and FAD.
 //
-// Three are defined here although chapter 6 also needs them, and the division was agreed with chapter 6
+// Four are defined here although chapter 6 also defines them, and the division was agreed with chapter 6
 // rather than guessed. Chapter 6 owns the first telling of an electron transport chain in a membrane
-// (§6.4) and of chemiosmosis (§6.5). What is defined here is the mitochondrial vocabulary that has no
-// chloroplast counterpart — the intermembrane space, the respiratory complexes and their two mobile
-// carriers, and the proton-motive force written with a voltage term that dominates, which in a thylakoid
-// it does not. `chemiosmosis` and `atp-synthase` are the two entries that overlap, and they are here
-// because a reader arriving at §7.5 from §7.4 must be able to ask the popover what the word means
-// without leaving the chapter: the same principle chapter 4 applied to `osmosis` and chapter 5 to
-// `enzyme` and `atp`.
+// (§6.4), and of chemiosmosis and an uncoupler (§6.5). What is defined here and nowhere else is the
+// mitochondrial vocabulary: the intermembrane space, the respiratory complexes and their two mobile
+// carriers. The four that overlap are `chemiosmosis`, `proton-motive-force`, `atp-synthase` and
+// `uncoupler`. They are here because a reader arriving at §7.5 or §7.8 must be able to ask the popover
+// what the word means without leaving the chapter: the same principle chapter 4 applied to `osmosis`
+// and chapter 5 to `enzyme` and `atp`. This chapter's `proton-motive-force` is written with the voltage
+// term that dominates across an inner membrane, which in a thylakoid it does not.
 export const GLOSSARY = {
   // ---- 7.1 Respiration is not burning ----
   'cellular-respiration': { term: 'Cellular respiration', def: 'The controlled oxidation of a fuel molecule inside a cell, in many enzyme-catalysed steps, capturing part of the free energy released as ATP. It has nothing directly to do with breathing, which is how an animal gets the oxygen to it and the carbon dioxide away.' },
   'intermembrane-space': { term: 'Intermembrane space', def: 'The gap between a mitochondrion\'s two membranes. The outer membrane is full of wide pores, so this space is chemically close to the cytosol; the inner membrane is not, which is what makes the space useful as one side of a gradient.' },
 
-  // ---- 7.2 The oldest pathway runs in the cytosol ----
-  glycolysis: { term: 'Glycolysis', def: 'The ten-step pathway that splits one glucose into two molecules of pyruvate in the cytosol, spending two ATP and recovering four, and reducing two NAD<sup>+</sup>. It needs no oxygen, no membrane and no organelle, and every domain of life has it.' },
+  // ---- 7.2 A very old pathway runs in the cytosol ----
+  glycolysis: { term: 'Glycolysis', def: 'The ten-step pathway that splits one glucose into two molecules of pyruvate in the cytosol, spending two ATP and recovering four, and reducing two NAD<sup>+</sup>. It needs no oxygen, no membrane and no organelle, and some version of it runs in every domain of life: the three-carbon lower half everywhere, the six-carbon top half in more than one form.' },
   pyruvate: { term: 'Pyruvate', def: 'The three-carbon compound glycolysis ends at, and the junction where a cell decides what happens next: into the mitochondrion if there is oxygen, into a fermentation if there is not.' },
   'substrate-level-phosphorylation': { term: 'Substrate-level phosphorylation', def: 'Making ATP by moving a phosphate group directly from a substrate onto ADP, with no membrane and no gradient involved. It is how glycolysis and one step of the Krebs cycle make their ATP, and it accounts for a small fraction of a cell\'s total.' },
 
   // ---- 7.3 A cycle that takes carbon apart ----
   'link-reaction': { term: 'Link reaction', def: 'The step between glycolysis and the Krebs cycle, carried out by a large enzyme complex in the mitochondrial matrix: pyruvate loses a carbon as carbon dioxide, the remaining two carbons are attached to coenzyme A, and NAD<sup>+</sup> is reduced. It is effectively irreversible, which is what commits a carbon skeleton to being burnt rather than rebuilt into sugar.' },
-  decarboxylation: { term: 'Decarboxylation', def: 'The removal of a carbon atom from a molecule as carbon dioxide. Three of them take a glucose skeleton apart: one in the link reaction and two in each turn of the Krebs cycle.' },
+  decarboxylation: { term: 'Decarboxylation', def: 'The removal of a carbon atom from a molecule as carbon dioxide. Six of them take a glucose skeleton apart: for each of its two pyruvates, one in the link reaction and two in a turn of the Krebs cycle.' },
   'acetyl-coa': { term: 'Acetyl coenzyme A', def: 'A two-carbon acetyl group carried on coenzyme A, joined through a sulfur atom. It is the compound that carbohydrates, fats and many amino acids all funnel into, and the only thing the Krebs cycle accepts.' },
-  'krebs-cycle': { term: 'Krebs cycle', def: 'The eight-step cycle in the mitochondrial matrix that takes the two carbons of an acetyl group, releases two as carbon dioxide, and strips off four pairs of electrons onto carriers, regenerating its own starting compound every turn. Section 3.5 called it the citric acid cycle; it is also the tricarboxylic acid or TCA cycle, and the three names are one cycle.' },
+  'krebs-cycle': { term: 'Krebs cycle', def: 'The eight-step cycle in the mitochondrial matrix that accepts the two carbons of an acetyl group, releases two carbons as carbon dioxide — not, as it happens, the two that just arrived — and strips off four pairs of electrons onto carriers, regenerating its own starting compound every turn. Section 3.5 called it the citric acid cycle; it is also the tricarboxylic acid or TCA cycle, and the three names are one cycle.' },
   oxaloacetate: { term: 'Oxaloacetate', def: 'The four-carbon compound the Krebs cycle starts from and regenerates. It is consumed at the start of every turn and remade at the end, so a cell needs only a trace of it — and the cycle stops if that trace is drawn off.' },
   amphibolic: { term: 'Amphibolic', def: 'Of a pathway: running in both economies at once, taking molecules apart for energy and supplying intermediates for building. The Krebs cycle is the clearest case, which is why draining it for biosynthesis stops it turning.' },
-  'beta-oxidation': { term: 'β-&#8288;oxidation', def: 'The pathway that takes a fatty acid apart two carbons at a time, producing one acetyl-CoA, one NADH and one FADH<sub>2</sub> per cut. It is how a fat reaches the Krebs cycle, and it is why a fat yields so much more per gram than a sugar.' },
+  'beta-oxidation': { term: 'β-⁠oxidation', def: 'The pathway that takes a fatty acid apart two carbons at a time, producing one acetyl-CoA, one NADH and one FADH<sub>2</sub> per cut. It is how a fat reaches the Krebs cycle, and it is why a fat yields so much more per gram than a sugar.' },
 
   // ---- 7.4 The chain makes a gradient, not ATP ----
   'electron-transport-chain': { term: 'Electron transport chain', def: 'A series of carriers in a membrane, each with a greater pull on electrons than the last, so that a pair of electrons entering at the top falls step by step to the bottom. In a mitochondrion it is four complexes and two mobile carriers, and the energy of each fall is spent pumping protons.' },
