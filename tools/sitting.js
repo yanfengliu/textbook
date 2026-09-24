@@ -2,8 +2,12 @@
 // keyboard, in both themes at two widths, and check what the page then claims about what they know.
 //
 // Claim: from a clean record, the Today page offers a calibration sitting; every question can be
-// reached and answered with Tab and Enter alone; each answer is recorded with the objective it tested,
-// the format, and which option was chosen; the sitting reaches its end summary within MAX_STEPS presses
+// reached and answered from the keyboard alone — Enter on a focused option, and on every other question
+// the letter printed on the option instead; each answer is recorded with the objective it tested, the
+// format, and which option was chosen, and for a multiple choice the recorded `chose` is the bank's own
+// letter for the option whose text was on the button pressed, read back through the bank the page
+// loaded — options are shown in a drawn order (src/components/choice-order.js), so the letter on the
+// screen and the letter in the record differ; the sitting reaches its end summary within MAX_STEPS presses
 // (the component's own describe() says `finished`); that summary carries at least one per-objective
 // label; and no label anywhere on the page says the word the component reserves for the store's
 // strictest verdict while the record says nothing has earned it. Fails naming the theme, the width and
@@ -23,8 +27,13 @@
 // the reserved word after a first sitting is wrong wherever it stands.
 //
 // Bound: the reader's path through Today, not the chapter (tools/flow.js) and not the figures'
-// controls (tools/drive.js). It answers by choosing the first option offered, so it exercises the
-// path rather than the pedagogy: it cannot tell a good question from a bad one, and it says nothing
+// controls (tools/drive.js). It answers at a position that moves down one with each question, moved on
+// to the next position whose letter on the screen is not the option's letter in the bank, because a
+// read-back where the two letters agree cannot tell a record that names the option from one that names
+// the position; a sitting in which no read-back could tell them apart fails. It presses no digit. So it
+// exercises the path rather than the pedagogy: over one sitting of about six questions it cannot say
+// whether the correct option's position gives it away — test/choice-order.test.js measures that over
+// every bank — nor tell a good question from a bad one, and it says nothing
 // about a record with history behind it, only about the first sitting from empty. The step cap is
 // MAX_STEPS presses — a calibration sitting is six questions, each an option and an advance, so the cap
 // is about twice the path — and a sitting that has not finished by then fails with the count rather
@@ -69,6 +78,9 @@ let shots = 0;
 let sittings = 0;
 let labelsChecked = 0;
 let closingLabelsChecked = 0;
+let choicesChecked = 0;
+let lettersPressed = 0;
+let choicesTellable = 0;
 
 try {
   for (const theme of THEMES) {
@@ -94,39 +106,115 @@ try {
 
       let answered = 0;
       let advanced = 0;
+      let byLetter = 0;
+      let choicesRead = 0;
+      // Read-backs where the letter on the screen and the letter in the bank differ: the only ones that
+      // can tell a record naming the option from one naming the position.
+      let choicesTold = 0;
       for (let step = 0; step < MAX_STEPS; step += 1) {
-        const kind = await page.evaluate(({ optionSel, advanceSrc }) => {
+        const found = await page.evaluate(async ({ optionSel, advanceSrc, answered: n }) => {
           const advance = new RegExp(advanceSrc, 'i');
           const visible = (el) => el.offsetParent !== null && !el.disabled;
-          const opt = [...document.querySelectorAll(optionSel)].filter(visible)[0];
-          if (opt) {
+          const opts = [...document.querySelectorAll(optionSel)].filter(visible);
+          if (opts.length) {
+            const norm = (s) => s.replace(/\s+/g, ' ').trim();
+            const shown = opts.map((o) => norm([...o.children].filter((c) => !c.classList.contains('k')).map((c) => c.textContent).join('')));
+            const written = (option) => {
+              const box = document.createElement('div');
+              box.innerHTML = option.text ?? option.html ?? option.label ?? String(option);
+              return norm(box.textContent);
+            };
+            // The item on screen, found in the bank the page loaded by its options' text rather than by
+            // asking the component which item it drew.
+            const item = (document.querySelector('tb-sitting')?.items || []).find((i) => i.options?.length === shown.length && i.options.every((o) => shown.includes(written(o))));
+            // A different position each question, so the presses do not all land on A — moved on to the
+            // next position whose letter on the screen is not the option's letter in the bank, because a
+            // read-back where the two letters agree cannot tell a right record from a wrong one.
+            const differs = shown.map((text, p) => Boolean(item) && written(item.options[p]) !== text);
+            let pick = n % opts.length;
+            for (let d = 0; d < opts.length; d += 1) {
+              if (differs[(n + d) % opts.length]) {
+                pick = (n + d) % opts.length;
+                break;
+              }
+            }
+            const opt = opts[pick];
             opt.setAttribute('data-gate-target', '1');
-            return 'option';
+            const { store } = await import('../src/learning/store.js');
+            return {
+              kind: 'option',
+              letter: opt.querySelector('.k')?.textContent.trim() ?? '',
+              text: shown[pick],
+              differs: differs[pick],
+              recorded: store.events().length,
+            };
           }
           const next = [...document.querySelectorAll('button')].filter(visible).find((b) => advance.test(b.textContent));
           if (next) {
             next.setAttribute('data-gate-target', '1');
-            return 'advance';
+            return { kind: 'advance' };
           }
           return null;
-        }, { optionSel: OPTION, advanceSrc: ADVANCE.source });
-        if (!kind) break;
+        }, { optionSel: OPTION, advanceSrc: ADVANCE.source, answered });
+        if (!found) break;
+        const { kind } = found;
 
-        const target = page.locator('[data-gate-target="1"]').first();
-        await target.focus();
-        const tookFocus = await page.evaluate(() => document.activeElement?.getAttribute('data-gate-target') === '1');
-        if (!tookFocus) problems.push(`${where}: the ${kind} at step ${step} could not take keyboard focus`);
-        await page.keyboard.press('Enter');
+        // Every other question is answered by the letter printed on the chosen option, pressed where the
+        // page left focus: the second keyboard path to an option, and the one that has to address what
+        // is on the screen rather than what the bank wrote.
+        const letterPath = kind === 'option' && answered % 2 === 1 && /^[A-H]$/.test(found.letter);
+        if (letterPath) {
+          await page.keyboard.press(found.letter.toLowerCase());
+          byLetter += 1;
+        } else {
+          const target = page.locator('[data-gate-target="1"]').first();
+          await target.focus();
+          const tookFocus = await page.evaluate(() => document.activeElement?.getAttribute('data-gate-target') === '1');
+          if (!tookFocus) problems.push(`${where}: the ${kind} at step ${step} could not take keyboard focus`);
+          await page.keyboard.press('Enter');
+        }
         await page.waitForTimeout(300);
         await page.evaluate(() => document.querySelectorAll('[data-gate-target]').forEach((e) => e.removeAttribute('data-gate-target')));
-        if (kind === 'option') answered += 1;
-        else advanced += 1;
+        if (kind === 'option') {
+          answered += 1;
+          // Which option the record says was chosen, read back through the bank the page loaded: the
+          // letter in the record is the bank's, the letter on the screen is the display order's.
+          const got = await page.evaluate(async ({ before }) => {
+            const { store } = await import('../src/learning/store.js');
+            for (let i = 0; i < 120 && store.events().length <= before; i += 1) await new Promise((r) => requestAnimationFrame(r));
+            const events = store.events();
+            if (events.length !== before + 1) return { problem: `the press recorded ${events.length - before} event(s), not 1` };
+            const e = events[events.length - 1];
+            const item = (document.querySelector('tb-sitting')?.items || []).find((i) => i.id === e.item);
+            if (!item) return { problem: `the answer names item "${e.item}", which no bank the page loaded holds` };
+            const at = 'ABCDEFGH'.indexOf(e.chose ?? '-');
+            const option = at >= 0 ? item.options?.[at] : null;
+            if (!option) return { problem: `the answer to "${e.item}" says chose ${JSON.stringify(e.chose)}, which names none of its ${item.options?.length ?? 0} options` };
+            const box = document.createElement('div');
+            box.innerHTML = option.text ?? option.html ?? option.label ?? String(option);
+            return { item: e.item, chose: e.chose, text: box.textContent.replace(/\s+/g, ' ').trim() };
+          }, { before: found.recorded });
+          const how = letterPath ? `the key "${found.letter.toLowerCase()}"` : 'Enter';
+          if (got.problem) problems.push(`${where}: step ${step}, the option shown at ${found.letter} pressed with ${how}: ${got.problem}`);
+          else if (got.text !== found.text) problems.push(`${where}: step ${step}: the reader pressed ${how} on the option shown at ${found.letter}, "${found.text.slice(0, 80)}", and the record says item "${got.item}" chose ${got.chose}, which the bank writes as "${got.text.slice(0, 80)}". \`chose\` must name the option that was on the button pressed, by its letter in the bank, whatever letter the screen gave it (src/components/choice-order.js).`);
+          else {
+            choicesRead += 1;
+            if (found.differs) choicesTold += 1;
+          }
+        } else {
+          advanced += 1;
+        }
         if (answered <= 2 && kind === 'option') await snap(`answer-${answered}`);
       }
       await snap('end');
 
       if (answered === 0) problems.push(`${where}: no question could be answered with the keyboard alone`);
       if (advanced === 0) problems.push(`${where}: nothing advanced the sitting, so it never reached an end`);
+      // A run that never pressed a letter has not tested that path, and must not read as one that did:
+      // the letter is read from the option's own `.k` label, so a renamed label would quietly fall back
+      // to Enter every time.
+      if (choicesRead > 0 && choicesTold === 0) problems.push(`${where}: ${choicesRead} chosen option(s) were read back and in none of them did the letter on the screen differ from the option's letter in the bank, so the read-back could not tell a record that names the option from one that names the position`);
+      if (answered > 1 && byLetter === 0) problems.push(`${where}: ${answered} question(s) were answered and none by the letter printed on an option — no visible ${OPTION} carried a single letter A to H in its .k label — so that keyboard path was not exercised`);
 
       // Did it end? The component says so itself: `finished` is whether its closing summary is showing.
       // Asked before the labels, because a label count over a sitting that is still running compares
@@ -250,9 +338,12 @@ try {
       for (const e of errors) problems.push(`${where} page error: ${e}`);
       labelsChecked += verdict.labels ?? 0;
       closingLabelsChecked += verdict.closingLabels ?? 0;
+      choicesChecked += choicesRead;
+      lettersPressed += byLetter;
+      choicesTellable += choicesTold;
       // The label counts are printed because a run that checked nothing must not read like a run that
       // checked everything: `0 label(s)` on this line is the shape of the failures above.
-      console.log(`${problems.length ? 'note' : 'ok  '} ${where}: ${answered} answered, ${verdict.events} recorded, ${verdict.withChose} with a chosen option, finished: ${finished}, ${verdict.closingLabels ?? 0} label(s) in the end summary and ${verdict.labels ?? 0} on the page read against the record`);
+      console.log(`${problems.length ? 'note' : 'ok  '} ${where}: ${answered} answered (${byLetter} by letter), ${verdict.events} recorded, ${verdict.withChose} with a chosen option, ${choicesRead} of them read back against the bank (${choicesTold} where the screen's letter and the bank's differ), finished: ${finished}, ${verdict.closingLabels ?? 0} label(s) in the end summary and ${verdict.labels ?? 0} on the page read against the record`);
       sittings += 1;
       await page.close();
     }
@@ -267,4 +358,4 @@ if (problems.length) {
   for (const p of problems) console.error(`  ${p}`);
   process.exit(1);
 }
-console.log(`sitting: ${sittings} keyboard-only sittings completed; ${closingLabelsChecked} per-objective label(s) in the end summaries and ${labelsChecked} on the pages read against the record; ${shots} screenshots in ${OUT}/`);
+console.log(`sitting: ${sittings} keyboard-only sittings completed; ${choicesChecked} chosen option(s) read back against the bank, ${choicesTellable} of them where the screen's letter and the bank's differ and ${lettersPressed} pressed by letter; ${closingLabelsChecked} per-objective label(s) in the end summaries and ${labelsChecked} on the pages read against the record; ${shots} screenshots in ${OUT}/`);

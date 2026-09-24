@@ -121,7 +121,7 @@ The prose is written in semantic HTML plus a small vocabulary of custom elements
 | `<tb-aside>` | A margin note. |
 | `<tb-key>` | A key-idea callout. |
 | `<tb-check>` | A single multiple-choice question with an explanation that appears after answering, right or wrong. Set as a question on an exam paper: a rule, the question a step above the prose, the letters hanging to the left of the answers, a hairline between one answer and the next. |
-| `<tb-sort>` | A sorting activity: items are placed into bins by drag, or by keyboard and tap, and each placement is explained. The tray is a ruled list one measure wide, one thing to a line with its three choices in a single hairline control at the right; the bins are three ruled columns across the spread, which show their extent with a dashed foot only while something is still waiting to be placed. |
+| `<tb-sort>` | A sorting activity: items are placed into bins by drag, or by keyboard and tap, and each placement is explained. The tray is a ruled list one measure wide, one thing to a line with its choices in a single hairline control at the right; where the choices would leave a name less than its readable width (its own width from 11.5rem, or 21rem once it wraps), they go under the name on every row of that sort, as they always do on a phone. The bins are ruled columns across the spread, which show their extent with a dashed foot only while something is still waiting to be placed. |
 
 Every interactive element is keyboard-operable and announces its result through a live region. Nothing depends on hover alone, and no verdict is carried by colour alone: a right answer takes a tint, a coloured letter and a ✓, a wrong one a tint, a coloured letter and a ✗.
 
