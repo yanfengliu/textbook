@@ -2,11 +2,12 @@
 
 These bind alongside the fleet constitution in [AGENTS.md](../../AGENTS.md) and win where they overlap. They may make a canon rule stricter, never weaker.
 
-Unlike the two files under `docs/learning/`, **this one is read.** Ten rules, and the list below is all ten in a line each — enough to know whether a rule applies to what you are doing. Open the section when one does. Each section states the rule first and then what it was learned from, so the first paragraph is the binding part and the rest is the evidence.
+Unlike the two files under `docs/learning/`, **this one is read.** Sixteen rules, and the list below is all sixteen in a line each — enough to know whether a rule applies to what you are doing. Open the section when one does. Each section states the rule first and then what it was learned from, so the first paragraph is the binding part and the rest is the evidence.
 
 | Rule | Applies when |
 |---|---|
 | [Typography and visual design are the product](#typography-and-visual-design-are-the-product) | always. A chapter that is written, correct, gated and ordinary-looking is **not done** |
+| [The usage allowance is the budget: the owner's direction of 2026-09-23](#the-usage-allowance-is-the-budget-the-owners-direction-of-2026-09-23) | always. The token budget, small contexts, the figure cap, the accuracy review, the study loop, the commit gate, one session at a time, the parked Chinese edition, and the stop after chapter 6 |
 | [A check must fail when its subject is missing, and must not depend on being remembered](#a-check-must-fail-when-its-subject-is-missing-and-must-not-depend-on-being-remembered) | you are writing or changing a check, a list of pages, or a census floor |
 | [Running the gates in this environment](#running-the-gates-in-this-environment) | a gate goes red, or a command touches UTF-8 prose, or a browser gate runs long |
 | [Prove a gate red on a file no running worker owns](#prove-a-gate-red-on-a-file-no-running-worker-owns) | you are about to mutate a file to prove a gate |
@@ -16,6 +17,11 @@ Unlike the two files under `docs/learning/`, **this one is read.** Ten rules, an
 | [A file a tool refuses to read is a defect in the tree](#a-file-a-tool-refuses-to-read-is-a-defect-in-the-tree) | a tool calls a text file binary, or you are writing a control character or a log |
 | [Write the assignment so its answer can be checked](#write-the-assignment-so-its-answer-can-be-checked) | you are briefing a worker or a reviewer for a verdict |
 | [A wait in a gate must poll the artefact, never the wall clock](#a-wait-in-a-gate-must-poll-the-artefact-never-the-wall-clock) | you are writing a drive recipe or any wait in a gate |
+| [A gate's exemption list must print what it measured, not what it was told](#a-gates-exemption-list-must-print-what-it-measured-not-what-it-was-told) | you are writing or trusting a gate's list of known exceptions |
+| [A Playwright locator that matches nothing does not fail. It waits.](#a-playwright-locator-that-matches-nothing-does-not-fail-it-waits) | a gate addresses a control that may be gone, such as by an index counted before the page changed |
+| [Retest an inherited blocker before repeating it, and check what the repo says about it](#retest-an-inherited-blocker-before-repeating-it-and-check-what-the-repo-says-about-it) | you were handed a blocker, or a number about a gate, by someone else |
+| [Demonstrate a gate's bound, do not merely state it](#demonstrate-a-gates-bound-do-not-merely-state-it) | you are writing the bound in a gate's header |
+| [A figure that opts out of a shared class name is invisible to every gate that keys on it](#a-figure-that-opts-out-of-a-shared-class-name-is-invisible-to-every-gate-that-keys-on-it) | a figure gives its toolbar, controls or panes a class of its own |
 
 ## Typography and visual design are the product
 
@@ -33,6 +39,46 @@ What it means in practice, so it is a rule and not a sentiment:
 - **Nothing ships with a known visual defect and a note about it.** Either it is fixed or the thing is not done. "Known limitation" is for what cannot be done, not for what was not done.
 
 The gates protect against regression and cannot produce quality. Quality comes from somebody looking, at full size, and being honest about what they see.
+
+## The usage allowance is the budget: the owner's direction of 2026-09-23
+
+Owner directive, 2026-09-23. The owner read the project audit ([7_project-audit](../work/7_project-audit/plan.md)) and replied, in their words: *"All reasonable. Make it known to the agents and persist this in docs."* Point 10 is the scope decision they gave the book's coordinator the same day. These ten bind every agent here:
+
+1. **Budget.** The usage allowance is the budget, counted in price-weighted tokens per chapter: about 40M a chapter, spent on what a reader sees first. Extra usage is the owner's lever, not an agent's.
+2. **Small contexts.** Compact near 250k tokens (see "The compaction setting" below). Start a fresh coordinator each round, with its state in the round's `plan.md`. Never leave a large-context agent idle past the 5-minute cache. Use Explore agents for read-only searches.
+3. **Figures.** At most about four bespoke interactive figures a chapter, each justified in its brief by what handling it teaches that prose cannot. Authored static SVG illustrations are allowed elsewhere; raster images still are not.
+4. **Accuracy.** No chapter ships without an independent review of its prose, its figures against their captions and its item bank, checked against the matching OpenStax Biology 2e section and recorded in the round's work folder.
+5. **Study loop first.** The answer-order fix is on main. When study work resumes, an export on Today comes first. After it, study rounds choose the revision work, not open-ended polish.
+6. **Commit gate.** Until a core gate exists and AGENTS.md names it, `npm test` stays the commit gate.
+7. **One textbook session at a time.**
+8. **The biology book's Chinese edition is parked.**
+9. **AGENTS.md holds rules.** What each gate proves is looked up in [gates.md](gates.md).
+10. **Stop after chapter 6.** Chapter 6 lands, and new work after it waits on the owner.
+
+### What the ten points rest on — evidence, not rules
+
+"Synthesis N" is part N of the audit plan's Outcome, and an F number is a finding row in its [review files](../work/7_project-audit/reviews/).
+
+- **Accepted.** "All reasonable" accepted the audit's recommendations (synthesis 5). Extra usage, one of the decisions left pending, was not decided: it stays the owner's own lever. Point 10 overrides synthesis 5's one-week test, which wanted chapters 6–7 on main.
+- **1.** Usage-limit lockouts took about 71–75% of the time since 2026-09-08 (synthesis 1; F17). A chapter cost about 70M weighted tokens at the margin (F49), and the 40M target is F48's. The weights are API price ratios: fresh input 1, cache write 1.25 (5-minute) or 2 (1-hour), cache read 0.1, output 5. The counting script was in the audit's scratchpad and was not kept. [reviews/1_integration.md](../work/7_project-audit/reviews/1_integration.md) gives the method: each API call's token counts by kind, from the session transcripts, times those weights. Nothing counts tokens per chapter yet (F50).
+- **2.** Re-reading context was 66.1% of weighted tokens, and no subagent ever compacted (F11). 51.5% of cache rewrites followed a gap over 5 minutes (F15). An Explore agent starts at 31.7k tokens, a general one at 59.2k (1_integration.md, change (3)). A compaction is still not a task boundary, as the constitution says; a round is.
+- **3.** Figure work was 37.9% of weighted tokens (F13). The cap takes figures from about 41M a chapter to about 25M ([reviews/5_integration.md](../work/7_project-audit/reviews/5_integration.md), alternative (b)) and gives up about half the bespoke figures and figure tasks (F51). It replaces the recipe's "six to nine figures" and "no static diagram" rules. The first chapter to use a static illustration decides how it is authored and checked. [Typography and visual design are the product](#typography-and-visual-design-are-the-product) still holds.
+- **4.** Every independent read so far found must-fix errors, and chapters 4–5, 52% of the published prose, went live with their review owed (F28, F7). Chapter 6 gets its review before it lands (the book's coordinator, 2026-09-23). The reviews owed for chapters 4 and 5 stay open, waiting on the owner.
+- **5.** The study system has never been used (F4). All 233 review-bank multiple-choice items were written with the right answer first, and Today showed them in that order (F5). Since `407827c`, Today and the chapter checks draw the order (`src/components/choice-order.js`). No page has an export (F29), so a record kept on a phone cannot reach `npm run progress:import`. The export waits on the owner, like all new work after chapter 6.
+- **6.** Synthesis 5's target is a quick core gate on each commit, the full chain when a chapter lands, and a CI that fits its time limit and blocks the Pages deploy. CI had failed 43 runs in a row by the audit, and `pages.yml` deploys regardless (F24, F26). CI cannot finish in its 30 minutes even when green (F25), and the local chain took 36.3 min (F22).
+- **7.** During the audit's gate run the machine was 72–100% busy overall: other sessions' processes, Defender and another session's chromium used 53–90% of it, and the gate's own tree 0.9–3.2% (F23). The workers inside one session are still sized by the constitution.
+- **8.** None of the edition's 7 stages has started (F3). Its design stays in [i18n.md](../design/i18n.md).
+- **9.** `AGENTS.md` loaded into 119 of 124 agents and was 5.0% of weighted tokens (F16). With its Gates body moved to gates.md and this direction added, it went from 58,591 to 36,493 bytes.
+- **10.** The owner told the book's coordinator: *"Reduce scope and stop at your current chapter's completion"*. What they chose for chapter 6, and where chapters 7 and 8 wait, is recorded at the top of [2_rest-of-the-book/plan.md](../work/2_rest-of-the-book/plan.md). It supersedes the standing goal of writing the whole book. Point 4's review was added to chapter 6 afterwards.
+
+### The compaction setting
+
+`CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` set to `25` in the `env` block of `.claude/settings.json` lands on its own, from branch `autocompact-setting`, after the book's coordinator session stops. Project `env` values apply once the workspace is trusted, and "again when a saved change alters the merged env" ([settings-reference](https://code.claude.com/docs/en/settings-reference), `env`). So a session already running in a trusted checkout picks the value up when the file lands there. The book's coordinator was running in the main checkout, in the middle of a landing, and could have compacted at a bad moment.
+
+- The variable sets "the percentage (1-100) of the auto-compact window at which auto-compaction triggers", and can only lower it. It "applies only in sessions that compact before the model's context limit", and it "Applies to both main conversations and subagents" ([env-vars](https://code.claude.com/docs/en/env-vars)). Project settings are allowed to set it.
+- Models with a native 1M window, "the Fable models, and Opus 4.7 and later on the Anthropic API", compact "at about 967K tokens by default" ([model-config](https://code.claude.com/docs/en/model-config)). The transcripts' models are Opus 5, Opus 5.5 and Fable 5.1 (F52), so 25 lands at about 242k–250k.
+- `CLAUDE_CODE_AUTO_COMPACT_WINDOW` was not used: only the percentage's entry says it reaches subagents, which were 123 of the audit's 125 transcripts.
+- Bounds. A 200K-window model that compacts at its limit ignores the variable. The hazard is a window set with `/autocompact`, `--autocompact` or `CLAUDE_CODE_AUTO_COMPACT_WINDOW`: 25% of the 100K minimum is 25K, below the 31.7K an Explore agent starts at. So do not set a window those ways while this variable is set. No session has yet been seen to compact near 250k with it; the first long one after it lands should check, and correct this section if not.
 
 ## A check must fail when its subject is missing, and must not depend on being remembered
 
