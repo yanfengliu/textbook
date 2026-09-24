@@ -150,7 +150,7 @@ const STOPS = [
   { id: 'peroxisome', place: 'peroxisome', brief: 'Peroxide made and destroyed; a nitrogen on.', say: 'In the peroxisome the glycolate hands hydrogen straight to oxygen, making peroxide that a catalase destroys at once, and takes on a nitrogen: it is now glycine.' },
   { id: 'mitochondrion', place: 'mitochondrion', brief: 'Two become one: a carbon and a nitrogen out.', say: 'In the mitochondrion two glycines become one three-carbon serine: a carbon leaves as carbon dioxide, a nitrogen as ammonia.' },
   { id: 'peroxisome-back', place: 'peroxisome', brief: 'The nitrogen handed on, leaving glycerate.', say: 'Back through the peroxisome the serine hands its nitrogen on, leaving glycerate.' },
-  { id: 'chloroplast-back', place: 'chloroplast', brief: 'Two ATP: 3-phosphoglycerate back, ammonia too.', say: 'Back in the chloroplast one ATP makes it 3-phosphoglycerate for the cycle, and a second, with reducing power, recaptures the ammonia.' },
+  { id: 'chloroplast-back', place: 'chloroplast', brief: 'Two ATP: one for 3-phosphoglycerate, one for the ammonia.', say: 'Back in the chloroplast one ATP makes it 3-phosphoglycerate for the cycle, and a second, with reducing power, recaptures the ammonia.' },
 ];
 const DWELL = 1.6; // s at each stop while running
 const LEG = 1.4; // s between stops
@@ -1114,9 +1114,15 @@ export function mount(root, ctx) {
     const discW = chl.rx * 0.22;
     const discH = small ? 2 : 2.8;
     const discGap = discH + (small ? 0.9 : 1.2);
-    const stacks = [[chl.cx - chl.rx * 0.66, yc - chl.ry * 0.42], [chl.cx - chl.rx * 0.42, yc - chl.ry * 0.62], [chl.cx - chl.rx * 0.66, yc + chl.ry * 0.42], [chl.cx - chl.rx * 0.42, yc + chl.ry * 0.62]];
-    site.line(stacks[0][0], stacks[0][1], stacks[1][0], stacks[1][1], { stroke: THYLAKOID.color, 'stroke-width': 0.9, opacity: 0.8 });
-    site.line(stacks[2][0], stacks[2][1], stacks[3][0], stacks[3][1], { stroke: THYLAKOID.color, 'stroke-width': 0.9, opacity: 0.8 });
+    // On a phone the chloroplast is about 108 px across and its two marks need the middle of it, so only
+    // the outer stacks are drawn there.
+    const stacks = small
+      ? [[chl.cx - chl.rx * 0.62, yc - chl.ry * 0.5], [chl.cx - chl.rx * 0.62, yc + chl.ry * 0.5]]
+      : [[chl.cx - chl.rx * 0.66, yc - chl.ry * 0.42], [chl.cx - chl.rx * 0.42, yc - chl.ry * 0.62], [chl.cx - chl.rx * 0.66, yc + chl.ry * 0.42], [chl.cx - chl.rx * 0.42, yc + chl.ry * 0.62]];
+    if (!small) {
+      site.line(stacks[0][0], stacks[0][1], stacks[1][0], stacks[1][1], { stroke: THYLAKOID.color, 'stroke-width': 0.9, opacity: 0.8 });
+      site.line(stacks[2][0], stacks[2][1], stacks[3][0], stacks[3][1], { stroke: THYLAKOID.color, 'stroke-width': 0.9, opacity: 0.8 });
+    }
     for (const [gx, gy] of stacks) {
       for (let i = 0; i < 5; i += 1) {
         const y = gy + (i - 2) * discGap;
@@ -1170,8 +1176,10 @@ export function mount(root, ctx) {
     // What each stop did, once the molecule has reached it, on the outer side of its own track.
     const mark = (x, y, str, opts = {}) => site.label(x, y, str, { size: markSize, anchor: 'middle', fill: C.ink, halo: 3, ...opts });
     const line2 = markSize * 1.25;
+    // The chloroplast's two marks, centred in it on a phone and by the track's end on a desktop.
+    const chlMarkX = small ? chl.cx + chl.rx * 0.14 : x0 - 8;
     {
-      const px = x0 - (small ? 4 : 8);
+      const px = chlMarkX;
       const py = yO - r - (small ? 9 : 13);
       atom(site, px, py, 'P', r);
       mark(px, py - r - (small ? 4 : 6), 'phosphate off');
@@ -1198,10 +1206,10 @@ export function mount(root, ctx) {
       const ar = small ? 7.5 : 10;
       const ay = yR + r + ar + (small ? 5 : 8);
       for (const dx of [-ar * 1.12, ar * 1.12]) {
-        site.circle(x0 - (small ? 2 : 6) + dx, ay, ar, { fill: ATP.color, stroke: 'none' });
-        site.text(x0 - (small ? 2 : 6) + dx, ay + ar * 0.29, 'ATP', { anchor: 'middle', fill: ATP.symbolColor, 'font-size': +(ar * 0.78).toFixed(2), 'font-weight': 700 });
+        site.circle(chlMarkX + dx, ay, ar, { fill: ATP.color, stroke: 'none' });
+        site.text(chlMarkX + dx, ay + ar * 0.29, 'ATP', { anchor: 'middle', fill: ATP.symbolColor, 'font-size': +(ar * 0.78).toFixed(2), 'font-weight': 700 });
       }
-      mark(x0 - (small ? 2 : 6), ay + ar + markSize + 2, 'two ATP spent');
+      mark(chlMarkX, ay + ar + markSize + 2, 'two ATP spent');
     }
 
     // The molecule, on the track, as what the last stop made of it.
