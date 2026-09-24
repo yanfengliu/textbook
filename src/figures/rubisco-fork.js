@@ -166,6 +166,7 @@ const CARGO = [
 // ---------------------------------------------------------------- style
 
 const NARROW_W = 800;
+const MEASURE = 480; // px: the widest a readout is set, so a label stays within reach of its figure
 
 const CSS = `
 .tb-rubisco-fork .rf-num { font-variant-numeric: lining-nums tabular-nums; }
@@ -659,7 +660,7 @@ export function mount(root, ctx) {
   // ---------------------------------------------------------------- the site
 
   function siteLayout(w, hgt) {
-    const r = clamp(Math.min(w * 0.0135, hgt * 0.021), 4.6, 7.6);
+    const r = clamp(Math.min(w * 0.0135, hgt * 0.021), 4.6, 9.5); // the drawing's unit: a gas atom's radius
     const rr = r * 1.04;
     const sp = rr * 1.72;
     const capH = clamp(hgt * 0.08, 18, 28);
@@ -975,7 +976,7 @@ export function mount(root, ctx) {
   function drawTable() {
     const { w, h: hgt } = table.clear().box;
     const m = model();
-    const size = clamp(w * 0.03, 9.6, 11.4);
+    const size = clamp(Math.max(w * 0.03, hgt * 0.024), 9.6, 12.4);
     const gutter = 12;
     const markColour = C.waterText;
     const isMoved = (i) => moved.includes(i);
@@ -994,7 +995,11 @@ export function mount(root, ctx) {
     ];
     const counted = carboxylations + oxygenations ? countedLine(false) : 'no turns yet';
     const rate = leafRate(m);
-    const rd = table.readout({ title: 'The odds, in four steps', x: gutter, width: w - gutter, size, minRow: 14, maxRow: 27 });
+    // A table is read across, so its measure is capped: stretched over a tablet's 720 px the label and its
+    // figure stood 600 px apart. Wider panes centre it.
+    const tw = Math.min(w, MEASURE);
+    const tx = (w - tw) / 2;
+    const rd = table.readout({ title: 'The odds, in four steps', x: tx + gutter, width: tw - gutter, size, minRow: 14, maxRow: 27 });
     // Each step is set as a derivation: its reason in small type, then its result, closed by the row's
     // hairline. Set the other way round the reason sat under the rule and read as the next step's.
     rd.fit(hgt, (r, level) => {
@@ -1018,7 +1023,7 @@ export function mount(root, ctx) {
       const i = [0, 1, 2, 3].find((k) => t.textContent === rowLabel(k, tempC));
       if (i === undefined || !isMoved(i)) continue;
       const y = Number(t.getAttribute('y')) - size * 0.36;
-      table.path(`M1 ${(y - 4).toFixed(1)} L6.5 ${y.toFixed(1)} L1 ${(y + 4).toFixed(1)} Z`, { fill: markColour });
+      table.path(`M${(tx + 1).toFixed(1)} ${(y - 4).toFixed(1)} L${(tx + 6.5).toFixed(1)} ${y.toFixed(1)} L${(tx + 1).toFixed(1)} ${(y + 4).toFixed(1)} Z`, { fill: markColour });
     }
   }
 
@@ -1037,10 +1042,10 @@ export function mount(root, ctx) {
     const span = hgt - margin * 2;
     const yc = margin + span / 2;
     const chl = { cx: w * 0.175, rx: w * 0.165 };
-    chl.ry = Math.min(span / 2 + margin * 0.6, chl.rx * 1.6);
+    chl.ry = Math.min(span / 2 + margin * 0.75, chl.rx * 1.85);
     const per = { cx: w * 0.47, r: Math.min(w * 0.11, span * 0.36) };
     const mit = { cx: w * 0.795, hw: w * 0.185 };
-    mit.hh = Math.min(span * 0.36, mit.hw * 0.7);
+    mit.hh = Math.min(span * 0.38, mit.hw * 0.78);
     const d = clamp(per.r * 0.55, 14, 46);
     const x0 = chl.cx + chl.rx * 0.4;
     const uX = mit.cx + mit.hw - d - (small ? 6 : 10);
@@ -1085,9 +1090,12 @@ export function mount(root, ctx) {
     const { small, yc, d, yO, yR, uX, x0, chl, per, mit } = S;
     const pos = salvageStop(salvageTau);
     const k = pos.stop;
-    const nameSize = small ? 8.8 : 10.6;
-    const markSize = small ? 8.2 : 9.8;
-    const r = small ? 4.6 : 6.2;
+    // One unit for the whole drawing, taken from the pane, so a large desktop stage does not leave the
+    // molecule and its marks at a phone's size inside compartments that grew.
+    const unit = clamp(Math.min(w / 550, hgt / 440), 0.72, 1.3);
+    const nameSize = small ? 8.8 : 10.6 * Math.max(1, unit);
+    const markSize = small ? 8.2 : 9.8 * Math.max(1, unit);
+    const r = small ? 4.6 : 6.2 * Math.max(1, unit);
 
     // The three compartments, each in its colour from the organelle tables, filled with a tint of it so
     // the page's ink reads on it in both themes.
@@ -1202,10 +1210,12 @@ export function mount(root, ctx) {
   function drawLedger() {
     const { w, h: hgt } = table.clear().box;
     const l = ledger();
-    const size = clamp(w * 0.03, 9.6, 11.4);
+    const size = clamp(Math.max(w * 0.03, hgt * 0.024), 9.6, 12.4);
     const k = Math.max(0, l.stop);
     const done = ['phosphate off', 'peroxide made, destroyed', 'two become one', 'nitrogen handed on', 'back as 3-phosphoglycerate'];
-    const rd = table.readout({ title: 'The salvage, for two glycolates', x: 12, width: w - 12, size, minRow: 14, maxRow: 26 });
+    const tw = Math.min(w, MEASURE);
+    const tx = (w - tw) / 2;
+    const rd = table.readout({ title: 'The salvage, for two glycolates', x: tx + 12, width: tw - 12, size, minRow: 14, maxRow: hgt > 440 ? 31 : 26 });
     rd.fit(hgt, (r, level) => {
       if (level === 0) {
         r.head('Where the molecule has been');
