@@ -107,6 +107,9 @@ export const FIGURES = Object.freeze({
   // Figure 6.4. It carries a genuine second composition, because a site drawn beside a four-row table does
   // not survive a 390 px stage.
   'rubisco-fork': { url: new URL('./rubisco-fork.js', import.meta.url).href, title: 'One site, two gases, four steps of arithmetic', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
+  // Figure 7.4. Below a 720 px stage the drawing turns a quarter into one tall column, at 9 / 16 rather
+  // than the brief's 4 / 5 so the pool's carriers stay discs with a letter on them (see the module header).
+  fermentation: { url: new URL('./fermentation.js', import.meta.url).href, title: 'What actually runs out', needsWebGL: false, aspect: 16 / 9, narrowAspect: 9 / 16 },
 
   // 《资治通鉴》 卷一 周纪一 — the second book. Its figures are about a text and a history, not a
   // specimen: where the three states sat and when, what a character becomes when it joins another, and
