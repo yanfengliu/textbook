@@ -1315,7 +1315,6 @@ export function mount(root, ctx) {
   let molGroups = [];
   let scalePx = 10;
   let tankTop = 0;
-  let tankLeft = 0;
   const needleG = el('g');
   const overText = text(0, 0, '', { class: 'bl-over' });
 
@@ -1353,7 +1352,6 @@ export function mount(root, ctx) {
     scalePx = scale;
     const drawnW = TANK_W * scale;
     const drawnH = tank.h * scale;
-    tankLeft = 0;
     tankTop = (hgt - drawnH) / 2;
     const visTop = Math.max(0, tankTop);
     const visH = Math.max(1, Math.min(drawnH, hgt - visTop));
@@ -1362,12 +1360,12 @@ export function mount(root, ctx) {
     // The water is the tank: a tint from edge to edge of the pane with no rule round it, because the
     // stage is the only rectangle the book draws, and paper beside it only on a pane too flat for it.
     // The one line is the surface at the top.
-    tankSvg.append(el('rect', { x: fmt(tankLeft, 1), y: fmt(visTop, 1), width: fmt(Math.max(1, drawnW), 1), height: fmt(visH, 1), fill: tint(C.water, 13) }));
-    tankSvg.append(el('line', { x1: fmt(tankLeft, 1), y1: fmt(visTop, 1), x2: fmt(tankLeft + drawnW, 1), y2: fmt(visTop, 1), stroke: tint(C.water, 46) }));
+    tankSvg.append(el('rect', { x: 0, y: fmt(visTop, 1), width: fmt(Math.max(1, drawnW), 1), height: fmt(visH, 1), fill: tint(C.water, 13) }));
+    tankSvg.append(el('line', { x1: 0, y1: fmt(visTop, 1), x2: fmt(drawnW, 1), y2: fmt(visTop, 1), stroke: tint(C.water, 46) }));
 
     // The clip is written in the holder's own coordinates, because a clip-path on a transformed group is
-    // read after that group's transform: written in the pane's, it sat one offset too far down (and, once
-    // the tank could be centred, one too far right), and cut off the part of the tank it was meant to show.
+    // read after that group's transform: written in the pane's, it sat one offset too far down whenever
+    // the tank did not fill the pane's height, and cut off the part of the tank it was meant to show.
     const clipId = `${ns}-clip`;
     tankSvg.append(el('defs', {}, [el('clipPath', { id: clipId }, [el('rect', { x: 0, y: fmt(visTop - tankTop, 1), width: fmt(Math.max(1, drawnW), 1), height: fmt(visH, 1) })])]));
     molLayer = el('g');
@@ -1376,16 +1374,16 @@ export function mount(root, ctx) {
       molLayer.append(g);
       return g;
     });
-    const holder = el('g', { 'clip-path': `url(#${clipId})`, transform: `translate(${fmt(tankLeft, 1)} ${fmt(tankTop, 1)})` });
+    const holder = el('g', { 'clip-path': `url(#${clipId})`, transform: `translate(0 ${fmt(tankTop, 1)})` });
     holder.append(molLayer, needleG);
     tankSvg.append(holder);
 
     // The scale bar, so the seven nanometres of the prose is measured here rather than asserted.
     const barNm = 5;
-    const bx = tankLeft + drawnW - barNm * scale - 10;
+    const bx = drawnW - barNm * scale - 10;
     if (bx > 14 && hgt > 74) tankSvg.append(scaleBar(bx, hgt - 9, barNm * scale, '5 nm', { fontSize: narrow ? 9.6 : 10.5 }));
 
-    overText.setAttribute('x', fmt(tankLeft + 9, 1));
+    overText.setAttribute('x', '9');
     overText.setAttribute('y', fmt(visTop + (narrow ? 15 : 17), 1));
     overText.setAttribute('font-size', narrow ? '10.4' : '11.4');
     tankSvg.append(overText);
