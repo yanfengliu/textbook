@@ -1133,7 +1133,7 @@ export const ITEMS = [
       'so what a cell buys with catalysis is not speed but choice: its metabolism is not what its chemistry could do, but the small subset it has provided an enzyme for',
       'and changing which enzymes are present changes what the cell is — which is how one genome makes a liver cell and a neuron',
     ],
-    explain: 'The last point is where this chapter meets chapter 8. If metabolism is the set of reactions a cell has enzymes for, then controlling which enzymes exist is controlling what the cell does, and that control is exercised on the DNA.',
+    explain: 'The last point is where this chapter meets chapter 12. If metabolism is the set of reactions a cell has enzymes for, then controlling which enzymes exist is controlling what the cell does, and that control is exercised on the DNA.',
   },
 
   // ============================================================================
