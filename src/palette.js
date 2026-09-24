@@ -353,6 +353,110 @@ export function rgb(hex) {
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }
 
+// ---------------------------------------------------------------- the one colour that is a measurement
+//
+// **Every other colour in this file is a choice. This one is a measurement**, and it is the only such
+// function in the book. Figure 6.1 (`pigment-spectra`) is about which wavelengths a pigment absorbs, and a
+// wavelength axis drawn in the tokens would be a chart about colour with the colour taken out; the swatch
+// showing what a leaf lets through is the answer to "why is a leaf green", and it has to be that green.
+// Chapter 6's brief asked for this exception (biology/ch06-photosynthesis/FIGURES.md, "Palette") and it
+// was approved on 2026-09-23 on two conditions, both held by test/palette.test.js: that it returns a
+// valid sRGB hex across 380–750 nm, and that `pigment-spectra` is its only importer. A second figure that
+// wants it is a decision for the palette's owner, not an import.
+//
+// `spectrumColour(nm)` is the colour of light of one wavelength. `spectrumColour(fraction)` — a function
+// from nanometres to the fraction of light that gets through, 0 to 1 — is the colour of daylight after it
+// has passed through something: a filter, an extract, a leaf. Both come out of one piece of colorimetry:
+// the CIE 1931 2° standard observer and the D65 daylight spectrum at 10 nm, tabulated below, the XYZ to
+// linear-sRGB matrix, and the sRGB transfer curve. The fraction form is normalised so that a sample
+// passing everything is exactly #ffffff and one passing nothing is #000000.
+//
+// ONE JUDGEMENT, and it is in the single-wavelength form only. Light of one wavelength lies outside the
+// sRGB gamut almost everywhere, so it cannot be drawn exactly: the negative channel is lifted a quarter of
+// the way to zero with white and the rest clipped, which keeps the hue and gives up a little of the
+// saturation, and the colour is then set at full brightness through the middle of the spectrum and dimmed
+// at the two ends in step with the eye's own sensitivity (the sum of the three matching functions), so
+// that the band fades into violet below 410 nm and into dark red past 680 nm the way a spectrum seen
+// through a prism does. The fraction form needs no such judgement: daylight through a real sample is a
+// colour sRGB can hold, and it is clipped only where a channel falls a hair outside it.
+//
+// It does not move with the theme, and that is correct: the colour of 550 nm light is not a preference.
+//
+// CIE 1931 2° colour-matching functions x̄, ȳ, z̄, 380–780 nm at 10 nm (CIE 015:2018, table T.4).
+const CIE_1931 = [
+  [0.001368, 0.000039, 0.006450], [0.004243, 0.000120, 0.020050], [0.014310, 0.000396, 0.067850],
+  [0.043510, 0.001210, 0.207400], [0.134380, 0.004000, 0.645600], [0.283900, 0.011600, 1.385600],
+  [0.348280, 0.023000, 1.747060], [0.336200, 0.038000, 1.772110], [0.290800, 0.060000, 1.669200],
+  [0.195360, 0.090980, 1.287640], [0.095640, 0.139020, 0.812950], [0.032010, 0.208020, 0.465180],
+  [0.004900, 0.323000, 0.272000], [0.009300, 0.503000, 0.158200], [0.063270, 0.710000, 0.078250],
+  [0.165500, 0.862000, 0.042160], [0.290400, 0.954000, 0.020300], [0.433450, 0.994950, 0.008750],
+  [0.594500, 0.995000, 0.003900], [0.762100, 0.952000, 0.002100], [0.916300, 0.870000, 0.001650],
+  [1.026300, 0.757000, 0.001100], [1.062200, 0.631000, 0.000800], [1.002600, 0.503000, 0.000340],
+  [0.854450, 0.381000, 0.000190], [0.642400, 0.265000, 0.000050], [0.447900, 0.175000, 0.000020],
+  [0.283500, 0.107000, 0.000000], [0.164900, 0.061000, 0.000000], [0.087400, 0.032000, 0.000000],
+  [0.046770, 0.017000, 0.000000], [0.022700, 0.008210, 0.000000], [0.011359, 0.004102, 0.000000],
+  [0.005790, 0.002091, 0.000000], [0.002899, 0.001047, 0.000000], [0.001440, 0.000520, 0.000000],
+  [0.000690, 0.000249, 0.000000], [0.000332, 0.000120, 0.000000], [0.000166, 0.000060, 0.000000],
+  [0.000083, 0.000030, 0.000000], [0.000042, 0.000015, 0.000000],
+];
+// CIE standard illuminant D65, relative spectral power, 380–780 nm at 10 nm (CIE 015:2018, table T.1).
+const D65 = [
+  49.9755, 54.6482, 82.7549, 91.486, 93.4318, 86.6823, 104.865, 117.008, 117.812, 114.861, 115.923,
+  108.811, 109.354, 107.802, 104.79, 107.689, 104.405, 104.046, 100, 96.3342, 95.788, 88.6856, 90.0062,
+  89.5991, 87.6987, 83.2886, 83.6992, 80.0268, 80.2146, 82.2778, 78.2842, 69.7213, 71.6091, 74.349,
+  61.604, 69.8856, 75.087, 63.5927, 46.4182, 66.8054, 63.3828,
+];
+const cieAt = (nm) => {
+  const f = Math.min(CIE_1931.length - 1, Math.max(0, (nm - 380) / 10));
+  const i = Math.min(CIE_1931.length - 2, Math.floor(f));
+  const t = f - i;
+  return CIE_1931[i].map((v, k) => v + (CIE_1931[i + 1][k] - v) * t);
+};
+const xyzToLinear = ([X, Y, Z]) => [
+  3.2406 * X - 1.5372 * Y - 0.4986 * Z,
+  -0.9689 * X + 1.8758 * Y + 0.0415 * Z,
+  0.0557 * X - 0.2040 * Y + 1.0570 * Z,
+];
+const encodeSrgb = (c) => {
+  const v = Math.min(1, Math.max(0, c));
+  return v <= 0.0031308 ? 12.92 * v : 1.055 * v ** (1 / 2.4) - 0.055;
+};
+const linearToHex = (rgbLinear) => `#${rgbLinear.map((c) => Math.round(encodeSrgb(c) * 255).toString(16).padStart(2, '0')).join('')}`;
+// Daylight itself, through the same arithmetic, so that a sample passing everything comes out exactly
+// white rather than a hair off it: the tables and the matrix agree only to about half a per cent.
+const DAYLIGHT = (() => {
+  const sum = [0, 0, 0];
+  D65.forEach((s, i) => CIE_1931[i].forEach((v, k) => { sum[k] += s * v; }));
+  return { Y: sum[1], white: xyzToLinear(sum.map((v) => v / sum[1])) };
+})();
+
+export function spectrumColour(spectrum) {
+  if (typeof spectrum === 'function') {
+    const sum = [0, 0, 0];
+    D65.forEach((s, i) => {
+      const nm = 380 + i * 10;
+      const through = Number(spectrum(nm));
+      if (!Number.isFinite(through) || through < 0 || through > 1) {
+        throw new Error(`spectrumColour was given a spectrum that returns ${through} at ${nm} nm; it must return the fraction of light that gets through, a number from 0 to 1, at every wavelength from 380 to 780 nm`);
+      }
+      CIE_1931[i].forEach((v, k) => { sum[k] += s * through * v; });
+    });
+    const linear = xyzToLinear(sum.map((v) => v / DAYLIGHT.Y));
+    return linearToHex(linear.map((c, k) => c / DAYLIGHT.white[k]));
+  }
+  const nm = Number(spectrum);
+  if (!Number.isFinite(nm) || nm < 380 || nm > 780) {
+    throw new Error(`spectrumColour was given ${String(spectrum)}; it takes a wavelength from 380 to 780 nm, or a function giving the fraction of light that gets through at each wavelength`);
+  }
+  const xyz = cieAt(nm);
+  let linear = xyzToLinear(xyz);
+  const under = Math.min(0, ...linear);
+  linear = linear.map((c) => Math.max(0, c - under * 0.25));
+  const top = Math.max(...linear) || 1;
+  const brightness = Math.min(1, ((xyz[0] + xyz[1] + xyz[2]) / 0.4) ** 0.7);
+  return linearToHex(linear.map((c) => (c / top) * brightness));
+}
+
 // Mix two hex colours; t = 0 gives a, t = 1 gives b.
 export function mix(a, b, t) {
   const A = rgb(a);

@@ -3250,6 +3250,69 @@ const RECIPES = {
     }],
   ],
 
+  // Figure 6.1. Every assertion is on a computed field — absorbedFraction, actionPoints, and actionAt
+  // against absorbanceAt — never on the field a button sets. The numbers are §6.3's: about a third of the
+  // green absorbed by the extracted pigment and about three-quarters by the whole leaf, at 550 nm.
+  'pigment-spectra': [
+    ['opens-on-chlorophyll-a-with-nothing-measured', async (h) => {
+      const d = await h.describe();
+      expect(d.scene === 'spectrum' && d.sample === 'extracted' && d.wavelengthNm === 550, `it should open on the spectrum, the extract and 550 nm: ${JSON.stringify({ scene: d.scene, sample: d.sample, nm: d.wavelengthNm })}`);
+      expect(JSON.stringify(d.curvesShown) === '["chl-a"]', `only chlorophyll a's curve should be shown at first: ${JSON.stringify(d.curvesShown)}`);
+      expect(d.actionPoints === 0, `the action chart starts empty, because the reader builds it: ${d.actionPoints} points`);
+      expect(d.absorbedFraction >= 0.33 && d.absorbedFraction <= 0.36, `a leaf's worth of extracted pigment absorbs about a third of the green at 550 nm: ${d.absorbedFraction}`);
+    }],
+    ['the-whole-leaf-catches-three-quarters-of-the-green', async (h) => {
+      const extract = (await h.describe()).absorbedFraction;
+      await h.button(/^Whole leaf/).click();
+      const leaf = await until(h, (x) => x.sample === 'leaf', 5_000);
+      expect(leaf.sample === 'leaf', `Whole leaf did not take: ${leaf.sample}`);
+      expect(leaf.absorbedFraction >= 0.72 && leaf.absorbedFraction <= 0.78, `a whole leaf absorbs roughly three-quarters of the green (§6.3): ${leaf.absorbedFraction}`);
+      expect(leaf.absorbedFraction > extract + 0.3, `the scattering should fill the green trough most of the way in: ${extract} extracted against ${leaf.absorbedFraction} in the leaf`);
+      expect(/green/.test(leaf.transmittedName), `what gets through a leaf is still green, because green is where it absorbs least: ${leaf.transmittedName}`);
+      await h.button(/^Whole leaf/).click();
+      const back = await until(h, (x) => x.sample === 'extracted', 5_000);
+      expect(back.absorbedFraction === extract, `back to the extract, the number should come back with it: ${extract} -> ${back.absorbedFraction}`);
+    }],
+    ['measuring-plots-the-action-spectrum-point-by-point', async (h) => {
+      const slider = h.stage.getByRole('slider', { name: 'Wavelength' });
+      let plotted = 0;
+      for (const nm of [450, 480, 640]) {
+        await slider.fill(String(nm));
+        await atValue(h, slider, nm);
+        await until(h, (x) => x.wavelengthNm === nm, 5_000);
+        await h.button(/^Measure here/).click();
+        plotted += 1;
+        const d = await until(h, (x) => x.actionPoints === plotted, 5_000);
+        expect(d.actionPoints === plotted, `Measure here at ${nm} nm should plot point ${plotted}: ${d.actionPoints}`);
+      }
+      // The keyboard on the chart: one step right is 5 nm, and Enter measures there.
+      await h.stage.locator('.tb-pane-chart svg').focus();
+      await h.page.keyboard.press('ArrowRight');
+      await until(h, (x) => x.wavelengthNm === 645, 5_000);
+      await h.page.keyboard.press('Enter');
+      const d = await until(h, (x) => x.actionPoints === 4, 5_000);
+      expect(d.wavelengthNm === 645 && d.actionPoints === 4, `ArrowRight then Enter on the chart should measure at 645 nm: ${JSON.stringify({ nm: d.wavelengthNm, points: d.actionPoints })}`);
+    }],
+    ['chlorophyll-a-alone-leaves-a-gap-the-accessory-pigments-close', async (h) => {
+      const slider = h.stage.getByRole('slider', { name: 'Wavelength' });
+      await slider.fill('480');
+      await atValue(h, slider, 480);
+      const alone = await until(h, (x) => x.wavelengthNm === 480, 5_000);
+      expect(alone.actionAt - alone.absorbanceAt > 0.25, `at 480 nm the alga makes oxygen chlorophyll a barely accounts for: action ${alone.actionAt}, chlorophyll a ${alone.absorbanceAt}`);
+      await h.button(/^Chlorophyll b/).click();
+      await h.button(/^Carotenoids/).click();
+      const all = await until(h, (x) => x.curvesShown.length === 3, 5_000);
+      expect(all.curvesShown.length === 3, `both accessory pigments should now be shown: ${JSON.stringify(all.curvesShown)}`);
+      expect(Math.abs(all.actionAt - all.absorbanceAt) < 0.002, `with all three shown the absorption should account for the action: action ${all.actionAt}, absorption ${all.absorbanceAt}`);
+    }],
+    ['reset-clears-the-points', async (h) => {
+      await h.button(/^Reset/).click();
+      const d = await until(h, (x) => x.actionPoints === 0 && x.curvesShown.length === 1, 5_000);
+      expect(d.actionPoints === 0 && d.wavelengthNm === 550 && d.sample === 'extracted', `Reset left ${JSON.stringify({ points: d.actionPoints, nm: d.wavelengthNm, sample: d.sample })}`);
+      expect(JSON.stringify(d.curvesShown) === '["chl-a"]' && d.absorbedFraction >= 0.33 && d.absorbedFraction <= 0.36, `Reset left ${JSON.stringify({ shown: d.curvesShown, absorbed: d.absorbedFraction })}`);
+    }],
+  ],
+
   cell3d: [
     ['cut-open', async (h) => {
       await h.button(/^Cut open/).click();
