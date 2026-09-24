@@ -105,6 +105,10 @@ export const FIGURES = Object.freeze({
   'zj-split': { url: new URL('./zj-split.js', import.meta.url).href, title: '三家分晋：从灭智到命侯', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
   'zj-timeline': { url: new URL('./zj-timeline.js', import.meta.url).href, title: '周纪一的年表', needsWebGL: false, aspect: 16 / 9, narrowAspect: 2 / 3 },
   'zj-words': { url: new URL('./zj-words.js', import.meta.url).href, title: '字与词', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
+
+  // Chapter 6, Figure 6.4. The brief's aspect and narrow aspect; it carries a genuine second composition,
+  // because a site drawn beside a four-row table does not survive a 390 px stage.
+  'rubisco-fork': { url: new URL('./rubisco-fork.js', import.meta.url).href, title: 'One site, two gases, four steps of arithmetic', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
 });
 
 export const KINDS = Object.freeze(Object.keys(FIGURES));
