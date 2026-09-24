@@ -157,7 +157,7 @@ export function mount(root, ctx) {
 
 The registry (`src/figures/registry.js`) holds each kind's `url`, `title`, `needsWebGL`, `aspect`, and for a figure that can fill any shape (canvas, 3D) a `narrowAspect` the frame uses below 800px, so a phone gets a taller stage rather than a letterboxed strip.
 
-The frame calls `mount` when the figure comes within 600px of the viewport, or immediately for every figure when the page URL carries `?eager=1`. It sets `data-state` to `loading`, `ready`, or `error` on the element and records every figure in `window.__textbook.figures[id]`, which is the handshake the gates wait on. `?t=<seconds>` pins every figure's clock through `setTime`, so a screenshot is the same frame every run.
+The frame calls `mount` when the figure comes within 600px of the viewport, or immediately for every figure when the page URL carries `?eager=1`. It sets `data-state` to `loading`, `ready`, or `error` on the element and records every figure in `window.__textbook.figures[id]`, which is the handshake the gates wait on. `?t=<seconds>` pins every figure's clock through `setTime`, so a figure's state and drawing are the same every run. A screenshot's bytes are not: `tools/shot.js`'s header says why, and what the frames are for.
 
 An ambient animation runs only while its figure is on screen and pauses otherwise. Under `prefers-reduced-motion` a figure still works, but nothing moves unless the reader moves it: autorotation stops, transitions become cuts, and simulations advance by the reader's input.
 
@@ -169,7 +169,7 @@ Three.js through the import map, one renderer per figure, device pixel ratio cap
 
 ## Motion
 
-Motion explains or it does not happen. A transition in the interface is at most 400ms; a diagram animation has a reason the caption can state; an ambient animation is slow and never draws the eye off the text. Every clock is pinnable by `setTime`, so the gates see the same frame every run.
+Motion explains or it does not happen. A transition in the interface is at most 400ms; a diagram animation has a reason the caption can state; an ambient animation is slow and never draws the eye off the text. Every clock is pinnable by `setTime`, so the gates see the same figure state and drawing every run, though not the same screenshot bytes (`tools/shot.js`'s header).
 
 ## Writing the content
 

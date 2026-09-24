@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fixture: a page that reaches the shell through its own script file</title>
+</head>
+<body>
+<!-- test/theme-early.test.js: review finding R3 (2026-09-23). The page names no module of the shell;
+     it loads lab.js by a relative src, and lab.js imports the shell. -->
+<script type="module" src="lab.js"></script>
+</body>
+</html>

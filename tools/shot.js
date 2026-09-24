@@ -13,7 +13,9 @@
 // narrower than 15 em, no sort whose rows split in two layouts (see the text-box block below), no character
 // anywhere on the page drawn by a face the page did not load through `@font-face` (see the font block
 // below), no `<tb-sitting>` still unbooted when the shutter opens and none missing from a page that must
-// carry one (see the sitting block below) — and — on a page whose
+// carry one (see the sitting block below), no CSS transition, CSS animation or Web Animation still running
+// 120 animation frames after the audits — the shutter waits for every one of them to finish, so the frame
+// is the settled page and not a point on a fade (see the settle block below) — and — on a page whose
 // `<html lang>` this gate knows the script of — every figure caption's
 // number word (`.fig-num`) and the figure's aria-label in that script's word. Fails otherwise and names
 // the page, viewport, theme and the errors.
@@ -21,6 +23,8 @@
 // Bound: three viewports, two themes, one pinned time, one renderer (SwiftShader unless SHOT_GPU=1);
 // SHOT_PAGES, SHOT_VIEWPORTS and SHOT_THEMES trim the matrix and a trimmed run proves only its part, and
 // a value naming no page, viewport or theme stops the run rather than emptying it (tools/lib/trim.js).
+// The frames it writes are NOT byte-reproducible from run to run, even on a tree that has not moved: they
+// are for a person to look at, never for a hash (see "What a frame is for" at the end of this header).
 //
 // The directory is the run. `out/shots/` is emptied before the first frame is written, the way every
 // gate empties its own directory, so after a run each file in it is from that run and nothing from an
@@ -71,6 +75,58 @@
 // pages and 162–294 ms on tongjian/ch02, whose 2400 text nodes carry 1644 distinct code points — 1004 ms
 // against 36.6 s of page-load time over chapters 1 and 2, 2.7% of the run. The failing path is the
 // expensive one, because narrowing re-probes in chunks and then one code point at a time.
+//
+// What a frame is for: a person looking at it at native resolution. This gate proves that a page loads
+// and lays out, and the frame is where a person checks what the pixels do. A frame is NOT a regression
+// signal to hash or to compare byte for byte, because the same tree does not write the same bytes twice.
+// Measured on 2026-09-23 on the tree that added this paragraph, with three full untrimmed runs one after
+// another and the tree held still throughout (docs/learning/gate-proofs.md has the provenance), over its
+// 12 pages — the library, both contents pages, biology chapters 1 to 5, tongjian chapters 1 to 3 and
+// Today — at three widths in two themes: 61 of 72 frames byte-identical in all three runs, 11 differing in
+// at least one, and 8 differing between each pair of runs. On the tree of 2026-09-17, before the theme
+// block in src/theme-early.js and the settle wait below, the same 12 pages gave 39 of 72 identical, 33
+// differing, and 27, 24 and 27 per pair. (That tree also held biology chapters 6 and 7, whose 12 frames
+// were identical in all three runs, so over its 14 pages it was 51 of 84.) All 11 are biology chapters at
+// tablet or desktop width, and every differing pixel in them belongs to one of the classes below but a
+// single speck of 21 px, which is unexplained and is the last item. Where two runs' figure frames must be
+// compared, tools/figure-diff.js is this repository's answer: it runs the gates twice on the unchanged
+// tree, records per frame the 16-pixel tiles that moved and by how much, and fails only on a change
+// outside that recording or larger than it.
+//
+// The classes, each with its mechanism and what it measured in those three runs:
+//   - SVG label advances. A figure's SVG <text> is shaped at its font size times the figure's scale.
+//     Chromium keys its font cache on that size to 0.01 px in float arithmetic, so two neighbouring sizes
+//     can share one entry, and whichever is shaped first sets the glyph advances for both. That is
+//     inferred from measurement, not from Chromium's source; a page with no book code on it reproduces
+//     it. The book feeds it: the figures round their pane boxes to whole pixels before the viewBox, so a
+//     label is drawn at 0.998 to 1.001 of its size. Advances move by 1/64 px between loads, and a whole
+//     label is antialiased afresh: 3 frames (chapter 2 at desktop width in both themes, chapter 5 at
+//     desktop width in light), every band on a figure's SVG text, up to 4,250 px in a frame and a channel
+//     delta of up to 74/255, and nothing a reader can see at native size. Two fixes are measured and neither
+//     is landed, owner's decision pending: G, `text-rendering: geometricPrecision` on figure SVG text; and
+//     U, unrounding the pane boxes.
+//   - `backdrop-filter`. The figure toolbars' `.fig-btn` (blur 8px) and `microscopes`' state chip (blur
+//     6px) do not rasterise bit-exactly from load to load: 6 frames, 18 to 67 px each, channel delta at
+//     most 2. tools/figure-diff.js's header has recorded it since 2026-09-16.
+//   - The first figure stage's rounded corners. A chapter's opening stage clips with `border-radius` and
+//     `overflow: hidden`, and pixels on the curve vary: 8 frames, 3 to 13 px per corner, channel delta
+//     at most 2. What varies inside the corner is not known.
+//   - Measured before and not seen in these three runs, and kept here because nothing excludes them: a
+//     run-level glyph event, in which every Latin glyph on a page came back slightly different (3 of 42
+//     trimmed runs on 2026-09-22, cause unexplained); and `soup`, whose world size depends on when the
+//     fonts arrive (475 water molecules on the phone layout with the fonts early, 474 with them held),
+//     which breaks the figure invariant in AGENTS.md (docs/learning/defect-register.md has it, with its
+//     mechanism and the worker it is queued for; no gate covers it). It can show only
+//     when a chapter 2 load is the first load of a run, which fetches the fonts over the network while
+//     every later load replays them from memory (tools/lib/net-cache.js): a trimmed run's case.
+//   - Unexplained: one speck of 21 px at channel delta 2, in one frame (chapter 2, desktop, light), on
+//     the rounded right end of `soup`'s temperature control (`.sp-temp`, a pill with a translucent
+//     background). It has the shape of the two small classes above, on an element that neither clips nor
+//     blurs.
+// The colour transitions the shutter used to land in were the largest class on the 2026-09-17 tree: the
+// theme flash's fade on the 9 dark contents-page frames, and 11 tongjian chapter frames caught mid-way
+// through their figures' own transitions. The block in src/theme-early.js removed the first cause, and
+// the settle wait below holds both.
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { startServer } from './serve.js';
 import { launch, collectErrors, openPage, ACTION_TIMEOUT_MS, PAGES, VIEWPORTS, THEMES } from './lib/browser.js';
@@ -1049,6 +1105,82 @@ async function readSittings(page, pageId) {
   return { problems, found: states.length, states };
 }
 
+// ───────────── the shutter waits for the page to stop moving ─────────────
+//
+// The frame is the settled page, not a point on a fade. Before the shutter opens this polls the page's own
+// list of animations, one animation frame at a time, until none is running, and a page still moving after
+// SETTLE_MAX_FRAMES fails naming what is still running, rather than hanging or photographing a frame no
+// second run will reproduce.
+//
+// Why it was written, and why it stays. It was written for the theme flash (docs/learning/defect-register.md,
+// 2026-09-22): src/shell.js wrote `data-theme` after the page had been styled once, so under `?theme=dark`
+// every title carrying a colour `transition` faded from light to dark over 240 ms from the moment the
+// handshake resolved, and the shutter opened wherever along that curve the audits had brought it. That cause
+// is now fixed at the page — every page carries the block in src/theme-early.js — and it was re-measured on
+// this tree on 2026-09-22 with this gate trimmed to the nine dark contents-page frames
+// (SHOT_PAGES=library,biology,tongjian SHOT_THEMES=dark), eight runs of each arm, the arms interleaved and
+// compared byte for byte:
+//
+//   block and wait        9 of 9 frames byte-identical in all eight runs
+//   block, no wait        9 of 9 byte-identical: on these pages the wait no longer changes a pixel. What it
+//                         still finds, on 39 of 72 loads, is the reading-progress bar's 80 ms `width`
+//                         transition from `0` to `0%` (src/styles/layout.css), which draws nothing
+//   no block, no wait     8 of 9 differ, max |delta| up to 90/255: the defect, reproduced
+//   no block, wait        9 of 9 byte-identical: the wait on its own holds that class as well
+//
+// So on those pages it is a backstop, and it is kept because it is not only those pages. tongjian/ch01 and
+// ch03 start background and border transitions as their figures mount — `.fig-btn.zjs-stop` on ch01,
+// `.zjw-glyph` and `.zjw-chip` on ch03 — in both themes, and the shutter caught them mid-flight: the same
+// day, SHOT_PAGES=tongjian/ch01,tongjian/ch02,tongjian/ch03 in both themes at all three widths, five runs of
+// each arm, 18 of 18 frames byte-identical with the wait and 10 of 18 differing without it (max |delta| 1 to
+// 6). On the three full runs of 2026-09-23 (the measurement at the top of this file) it waited on 72 of
+// 216 loads: the progress bar on 20, tongjian/ch01 and ch03 on 33, and on 19 a `.fig-btn` changing state
+// as a figure mounts on biology chapters 3, 4 and 5. A transition some future page starts while it loads
+// is caught the same way.
+//
+// How. "Started" needs no guard of its own here, because what a load starts has started by the time the
+// handshake resolves — under ?eager=1 that is after every figure has mounted — and openPage has rendered two
+// frames since. The bound is counted in frames, not milliseconds, so a loaded machine changes how long the
+// wait takes and never whether it passes; 120 frames is 2 s at 60 Hz against the longest finite animation in
+// the tree (`--dur-slow`, 400 ms). Cost, from the lines those runs printed: a mean of 15.5 ms per load on the
+// contents pages (max 42 ms, at most 3 frames) and 93 ms per load on the tongjian chapters (max 191 ms, at
+// most 12 frames); over a whole untrimmed run, 1.9 to 2.9 s for 72 loads (a mean of 27 to 41 ms, max 193 ms,
+// at most 12 frames, in the three runs of 2026-09-23). Given the library's eyebrow an infinite animation,
+// the load fails in 120 frames naming
+// `animation landingpulse on p.library__eyebrow`, and without the wait the same page passes as clean
+// (docs/learning/gate-proofs.md).
+//
+// Bound: it waits for what `getAnimations()` reports when it looks — CSS transitions, CSS animations and Web
+// Animations on this document. Something a page starts later, on a timer, is not waited for; a canvas or
+// WebGL figure advancing its own clock is not in that list (under `?t=0` the figures' clocks are pinned);
+// neither is anything inside an iframe. It makes the frame still. It does not make the frame reproducible:
+// see "What a frame is for" at the top of this file.
+const SETTLE_MAX_FRAMES = 120;
+
+async function settleAnimations(maxFrames) {
+  const label = (a) => {
+    const el = a.effect?.target;
+    const what = a.transitionProperty ? `transition of ${a.transitionProperty}` : a.animationName ? `animation ${a.animationName}` : `${a.constructor.name}${a.id ? ` "${a.id}"` : ''}`;
+    const cls = el && typeof el.className === 'string' && el.className.trim() ? `.${el.className.trim().split(/\s+/).join('.')}` : '';
+    const where = el ? `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ''}${cls}${a.effect?.pseudoElement ?? ''}` : 'no target';
+    const end = a.effect?.getComputedTiming?.().endTime;
+    return `${what} on ${where} (${Math.round(Number(a.currentTime) || 0)} ms of ${end === Infinity ? 'infinite' : `${Math.round(end ?? 0)} ms`})`;
+  };
+  const moving = () => document.getAnimations().filter((a) => a.playState === 'running');
+  const running = moving();
+  const first = running.map(label);
+  // "3x transition of color on span.title": what the wait was for, grouped, for the report line.
+  const counts = new Map();
+  for (const s of first) { const k = s.replace(/ \(.*$/, ''); counts.set(k, (counts.get(k) ?? 0) + 1); }
+  const kinds = [...counts].map(([k, n]) => `${n}x ${k}`);
+  let frames = 0;
+  while (moving().length && frames < maxFrames) {
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    frames += 1;
+  }
+  return { frames, first, kinds, still: moving().map(label) };
+}
+
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 const server = await startServer({ port: 0, quiet: true });
@@ -1075,6 +1207,7 @@ try {
         let textNote = '';
         let fonts = { runs: 0, codePoints: 0, faces: [], measured: 0 };
         let sittingNote = '';
+        let settleNote = '';
         const started = Date.now();
         try {
           figures = await openPage(page, `${server.url}${pageDef.path}?eager=1&t=0&theme=${theme}`);
@@ -1129,6 +1262,17 @@ try {
             }
             captionNote = `, ${captions.nums.length} caption(s) in "${word}"`;
           }
+          const settleStarted = Date.now();
+          const settle = await page.evaluate(settleAnimations, SETTLE_MAX_FRAMES);
+          const settleMs = Date.now() - settleStarted;
+          if (settle.still.length) {
+            problems.push(`the page was still moving ${settle.frames} animation frames after the handshake and the audits, so there is no one frame of it to photograph: ${settle.still.join('; ')}. A screenshot of a page in motion is a different picture on every run. What would satisfy this: let it finish inside ${SETTLE_MAX_FRAMES} frames, pin it under ?t=0 the way the figures' clocks are pinned, or, for a finite animation that is meant to be longer, raise SETTLE_MAX_FRAMES in tools/shot.js with the reason.`);
+          }
+          // Printed on every line: `still at once` is a page that was checked and found still, which must
+          // not read the same as a page whose animations were never asked about.
+          settleNote = settle.first.length
+            ? `, still after ${settle.frames} frame(s) (${settleMs} ms) waiting on ${settle.kinds.join(', ')}`
+            : `, still at once (${settleMs} ms)`;
           const file = `${OUT}/${pageDef.id}-${vp.id}-${theme}.png`;
           await page.screenshot({ path: file, type: 'png', fullPage: true });
           // Last, and after the screenshot: it inserts probe spans, and nothing above it should be able
@@ -1154,7 +1298,7 @@ try {
           console.log(`FAIL ${label} (${ms} ms)`);
           for (const p of problems) console.log(`  ${p}`);
         } else {
-          console.log(`ok   ${label} (${ms} ms, ${Object.keys(figures).length} figures ready${sittingNote}${captionNote}${hookNote}${geomNote}${textNote}${fontNote})`);
+          console.log(`ok   ${label} (${ms} ms, ${Object.keys(figures).length} figures ready${sittingNote}${settleNote}${captionNote}${hookNote}${geomNote}${textNote}${fontNote})`);
         }
       }
     }

@@ -1,7 +1,8 @@
-// npm test: the unit tests, then the content check, then the page shots, then the reader flows, then the
-// figure controls, then those same controls with the clock pinned, then a study sitting, then the figures
-// at phone width, then every figure's own type measured against what is behind it, then nine emulated
-// devices, then the 3D sweep, then the site as GitHub Pages will serve it. Twelve steps.
+// npm test: the unit tests, then the content check, then the reader's theme at first paint, then the page
+// shots, then the reader flows, then the figure controls, then those same controls with the clock pinned,
+// then a study sitting, then the figures at phone width, then every figure's own type measured against
+// what is behind it, then nine emulated devices, then the 3D sweep, then the site as GitHub Pages will
+// serve it. Thirteen steps.
 // Each step runs as its own process with inherited stdio; the first non-zero exit stops the run and is
 // reported by name, so a red run always says which gate went red. There is no pipe anywhere in this
 // file: a pipeline reports its last stage's status, not the gate's.
@@ -139,6 +140,10 @@ checkTestFiles();
 // keeps that glob from being a shrinking list.
 run(`unit tests (node --test ${UNIT_GLOB})`, ['--test', UNIT_GLOB]);
 run('content check (tools/check-content.js)', ['tools/check-content.js']);
+// Before the shots, because it is the cheapest browser gate (about a minute: seven situations on each page
+// that loads the shell, none of them waiting for a figure), and because a page that flashes the wrong theme
+// is a page every later gate photographs without noticing.
+run('theme before first paint (tools/theme.js)', ['tools/theme.js']);
 run('page shots (tools/shot.js)', ['tools/shot.js']);
 run('reader flows (tools/flow.js)', ['tools/flow.js']);
 run('figure controls (tools/drive.js)', ['tools/drive.js']);
