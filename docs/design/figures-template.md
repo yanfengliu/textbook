@@ -10,7 +10,7 @@ The book's design is [textbook.md](textbook.md); the order a chapter is built in
 
 # Chapter N — figure brief
 
-Six to nine figures, in the order they appear in `index.html`. The figure number is fixed by that order and the prose cites every one of them by number, so the order does not change without editing the prose.
+At most about four bespoke interactive figures, each justified below by what handling it teaches that prose cannot, in the order they appear in `index.html`. The figure number is fixed by that order and the prose cites every one of them by number, so the order does not change without editing the prose.
 
 | # | Kind | Id | Section | WebGL | `aspect` | `narrowAspect` |
 |---|---|---|---|---|---|---|

@@ -2,11 +2,12 @@
 
 These bind alongside the fleet constitution in [AGENTS.md](../../AGENTS.md) and win where they overlap. They may make a canon rule stricter, never weaker.
 
-Unlike the two files under `docs/learning/`, **this one is read.** Ten rules, and the list below is all ten in a line each — enough to know whether a rule applies to what you are doing. Open the section when one does. Each section states the rule first and then what it was learned from, so the first paragraph is the binding part and the rest is the evidence.
+Unlike the two files under `docs/learning/`, **this one is read.** Sixteen rules, and the list below is all sixteen in a line each — enough to know whether a rule applies to what you are doing. Open the section when one does. Each section states the rule first and then what it was learned from, so the first paragraph is the binding part and the rest is the evidence.
 
 | Rule | Applies when |
 |---|---|
 | [Typography and visual design are the product](#typography-and-visual-design-are-the-product) | always. A chapter that is written, correct, gated and ordinary-looking is **not done** |
+| [The usage allowance is the budget: the owner's direction of 2026-09-23](#the-usage-allowance-is-the-budget-the-owners-direction-of-2026-09-23) | always. The token budget, small contexts, the figure cap, the accuracy review, the study loop, the commit gate, one session at a time, the parked Chinese edition, and the stop after chapter 6 |
 | [A check must fail when its subject is missing, and must not depend on being remembered](#a-check-must-fail-when-its-subject-is-missing-and-must-not-depend-on-being-remembered) | you are writing or changing a check, a list of pages, or a census floor |
 | [Running the gates in this environment](#running-the-gates-in-this-environment) | a gate goes red, or a command touches UTF-8 prose, or a browser gate runs long |
 | [Prove a gate red on a file no running worker owns](#prove-a-gate-red-on-a-file-no-running-worker-owns) | you are about to mutate a file to prove a gate |
@@ -16,6 +17,11 @@ Unlike the two files under `docs/learning/`, **this one is read.** Ten rules, an
 | [A file a tool refuses to read is a defect in the tree](#a-file-a-tool-refuses-to-read-is-a-defect-in-the-tree) | a tool calls a text file binary, or you are writing a control character or a log |
 | [Write the assignment so its answer can be checked](#write-the-assignment-so-its-answer-can-be-checked) | you are briefing a worker or a reviewer for a verdict |
 | [A wait in a gate must poll the artefact, never the wall clock](#a-wait-in-a-gate-must-poll-the-artefact-never-the-wall-clock) | you are writing a drive recipe or any wait in a gate |
+| [A gate's exemption list must print what it measured, not what it was told](#a-gates-exemption-list-must-print-what-it-measured-not-what-it-was-told) | you are writing or trusting a gate's list of known exceptions |
+| [A Playwright locator that matches nothing does not fail. It waits.](#a-playwright-locator-that-matches-nothing-does-not-fail-it-waits) | a gate addresses a control that may be gone, such as by an index counted before the page changed |
+| [Retest an inherited blocker before repeating it, and check what the repo says about it](#retest-an-inherited-blocker-before-repeating-it-and-check-what-the-repo-says-about-it) | you were handed a blocker, or a number about a gate, by someone else |
+| [Demonstrate a gate's bound, do not merely state it](#demonstrate-a-gates-bound-do-not-merely-state-it) | you are writing the bound in a gate's header |
+| [A figure that opts out of a shared class name is invisible to every gate that keys on it](#a-figure-that-opts-out-of-a-shared-class-name-is-invisible-to-every-gate-that-keys-on-it) | a figure gives its toolbar, controls or panes a class of its own |
 
 ## Typography and visual design are the product
 
@@ -33,6 +39,76 @@ What it means in practice, so it is a rule and not a sentiment:
 - **Nothing ships with a known visual defect and a note about it.** Either it is fixed or the thing is not done. "Known limitation" is for what cannot be done, not for what was not done.
 
 The gates protect against regression and cannot produce quality. Quality comes from somebody looking, at full size, and being honest about what they see.
+
+## The usage allowance is the budget: the owner's direction of 2026-09-23
+
+Owner directive, 2026-09-23. The project audit in [docs/work/7_project-audit/](../work/7_project-audit/plan.md) put its recommendations and six pending decisions to the owner, and the owner replied, in their words: *"All reasonable. Make it known to the agents and persist this in docs."* That accepts every recommendation in the audit and every decision it left pending. Points 1–9 below are that direction, and they bind every agent working here. Point 10 is the scope decision the owner gave the book's coordinator the same day.
+
+How to read the evidence: "synthesis N" is the numbered part of the audit plan's Outcome, and an F number is a finding row in one of the audit's review files in [reviews/](../work/7_project-audit/reviews/). Round 1 is the cost audit, round 2 the gate clock, round 3 the blind spots, and round 5 the critic that checked the others.
+
+**1. The usage allowance is the budget, and its unit is price-weighted tokens per chapter.**
+
+- Measured: usage-limit lockouts took about 71–75% of the time since 2026-09-08 (synthesis 1). F17 measured 260.8 h of 349 h, 74.7%, and the critic put it nearer 71%. A chapter cost about 70M weighted tokens, an estimate at the margin: eight figures at about 5.2M each, plus prose, items and overhead (synthesis 1; F49).
+- Target: about 40M weighted tokens a chapter (synthesis 5; F48). Spend it on what a reader sees first.
+- The weighting is the audit's API price ratios: fresh input 1, cache write 1.25 (5-minute cache) or 2 (1-hour cache), cache read 0.1, output 5 ([reviews/1_integration.md](../work/7_project-audit/reviews/1_integration.md), "Reviewers and coverage").
+- The script that counted it lived in the audit's scratchpad and was not kept (the audit plan, Approach, "Raw evidence"). Its method is in the same review file: take each API call's token counts from the project's Claude Code session transcripts, by kind, and weight them by those ratios. Nothing counts tokens per chapter today (F50), so the first round that needs the number rebuilds the count from that method.
+- Extra usage is the owner's lever, not an agent's. Agents plan within the allowance.
+
+**2. Keep contexts small.**
+
+- Compact near 250k tokens rather than ~970k. The harness setting that does it is under "The compaction setting" below.
+- Start a fresh coordinator each round, and carry the round's state in its `plan.md`, not in the conversation. A compaction is still not a task boundary, as the constitution says; a round is.
+- Never leave a large-context agent idle past the 5-minute cache.
+- Use Explore agents for read-only searches. They start at 31.7k tokens, against 59.2k for a general agent (reviews/1_integration.md, the report's change (3)).
+- Evidence: re-reading context was 66.1% of weighted tokens; the average call re-read 315k tokens; no subagent ever compacted, and the largest reached 859k; the coordinator compacted twice at ~970k (F11). The coordinator's own context was 11.0%, and one session averaged 530k tokens a call over 798 calls (F14). Rewriting expired caches cost 63.3M extra, 10.5%, and 51.5% of those rewrites followed a gap of more than 5 minutes (F15).
+
+**3. Figures.**
+
+- A chapter has at most about four bespoke interactive figures.
+- Each figure's brief justifies it by what handling it teaches that prose cannot.
+- Authored static SVG illustrations are allowed elsewhere. There are still no raster images: that rule is unchanged.
+- This replaces the chapter recipe's "Six to nine figures." and "Do not write a figure that is a static diagram with a caption." Both are amended in [chapter-recipe.md](../design/chapter-recipe.md), and the same count in [figures-template.md](../design/figures-template.md).
+- How a static illustration is authored and checked is not decided yet. The first chapter that uses one decides it and writes it into the recipe; nothing is invented ahead of that.
+- The bar in [Typography and visual design are the product](#typography-and-visual-design-are-the-product) still applies to every figure and illustration. The cap lowers the count, not the bar.
+- Evidence: figure work was 37.9% of weighted tokens, 227.5M across 40 agents (F13). The cap is the largest single saving the critic found, from about 41M a chapter in figures to about 25M ([reviews/5_integration.md](../work/7_project-audit/reviews/5_integration.md), alternative (b)). What it gives up is about half the bespoke figures and figure tasks (F51).
+
+**4. An accuracy review before a chapter ships.**
+
+- The review is independent. It covers the chapter's prose, its figures against their captions, and its item bank, checked against the matching section of OpenStax Biology 2e. It is recorded in the round's work folder.
+- The reviews still owed for chapters 4 and 5 are open. Starting them waits on the owner, because of the stop after chapter 6 (point 10).
+- Chapter 6 lands on the owner's scope decision, with the one independent prose review already done. Whatever this point asks that the prose review did not cover is owed in the same way as chapters 4 and 5's.
+- Evidence: nothing checks that the biology is true, and every independent read so far found must-fix errors: 6 in chapter 1's 3,718 words, and 8 in chapters 2–3's 19,199. Chapters 4–5, 52% of the published prose, went live with their review owed (F28, F7; synthesis 4(a)).
+
+**5. The study loop must be able to run before more study features are built.**
+
+- Land the answer-order fix on branch `choice-order`. All 233 review-bank multiple-choice items put the right answer first (F5).
+- Add an export on Today, so a record kept on a phone reaches `npm run progress:import`. No page has the export button that `tools/progress.js` refers to (F29).
+- After that, study rounds choose the revision work, not open-ended polish.
+- Evidence: the study system is built and has never been used. `progress/` holds 0 files, and `docs/study/rounds/` holds only its README (F4; synthesis 2 and 4(e)).
+
+**6. Verification.**
+
+- Target: a quick core gate on each commit, the full chain when a chapter lands, and a CI that fits its time limit and blocks the Pages deploy (synthesis 5).
+- **Until a core gate exists and AGENTS.md names it, `npm test` stays the commit gate.**
+- Evidence: CI had failed 43 runs in a row by the audit, every run since the last green one on 2026-09-11, and `pages.yml` deploys regardless (F24, F26; synthesis 4(c)). CI could not finish in its 30 minutes even if every gate were green (F25). The full local chain took 36.3 min (F22), and extrapolated to 32 chapters it would take about 2.8 h a code commit (F50).
+
+**7. One textbook session at a time.** Parallel sessions spend the same allowance and slow each other's gates. This is about top-level sessions; the workers inside one session are still sized by the constitution. Evidence: during the audit's gate run the machine was 72–100% busy, and the gate's own tree used 0.9–3.2% of it (F23).
+
+**8. The biology book's Chinese edition is parked.** None of its 7 stages has started (F3), and none starts until the owner says so. Its design stays in [i18n.md](../design/i18n.md).
+
+**9. AGENTS.md holds rules.** The long Gates prose moved word for word to [gates.md](gates.md), which agents look up, and `AGENTS.md` keeps the short list. That took `AGENTS.md` from 56,528 to 36,124 bytes as Git stores it. Evidence: at about 20k tokens it loaded into 119 of 124 agents and was 5.0% of weighted tokens, and it had grown from 28.2 KB to 53.7 KB since 2026-09-10 (F16).
+
+**10. Current scope: stop after chapter 6.** This is the owner's direction to the book's coordinator, 2026-09-23, in their words: *"Reduce scope and stop at your current chapter's completion"*. They chose chapter 6 only: 4 of its 8 planned figures (`pigment-spectra`, `zscheme`, `calvin-cycle`, `rubisco-fork`), questions in place of figure tasks, the one independent prose review already done, and no new gates. Land it, then stop. Chapters 7 and 8 stay unpublished on `origin/ch06-07`, `origin/items-ch07` and `origin/ch08-dna`. This supersedes the earlier standing goal to keep writing until the book is done. When this section was written, origin/main at `26d47cf` did not record it anywhere else: not in `docs/work/2_rest-of-the-book/plan.md`, not in this file, and not in `docs/devlog/summary.md`.
+
+### The compaction setting
+
+`.claude/settings.json` sets `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` to `25` in its `env` block. Each claim below comes from Claude Code's own documentation, read on 2026-09-23.
+
+- The variable exists. It sets "the percentage (1-100) of the auto-compact window at which auto-compaction triggers", it can only lower the threshold, and it "Applies to both main conversations and subagents" (https://code.claude.com/docs/en/env-vars).
+- It is a percentage of the auto-compact window, not of the context window as such. Models with a native 1M window, "such as Sonnet 5, the Fable models, and Opus 4.7 and later on the Anthropic API", compact "at about 967K tokens by default" (https://code.claude.com/docs/en/model-config, "Context window and auto-compaction"). The models in this repo's transcripts are Opus 5, Opus 5.5 and Fable 5.1 (F52), all of that kind. So 25 lands at about 242k–250k: 25% of the ~967K default or of the 1M window.
+- A project `.claude/settings.json` applies it. Its `env` values apply "after you trust the workspace", and this variable is not on the list of variables that project settings cannot set (https://code.claude.com/docs/en/settings-reference, `env`).
+- Why this variable and not `CLAUDE_CODE_AUTO_COMPACT_WINDOW`, which sets the window in tokens: the documentation says the percentage applies to subagents, and it does not say so for the window. Subagents were 123 of the audit's 125 transcripts (reviews/1_integration.md, "Target"), and none of them ever compacted (F11).
+- Bounds. The file does nothing until it is on main and a session starts in a checkout that carries it, in a folder the owner has trusted. A window saved with `/autocompact`, or a model with a smaller window, changes what 25% is. Nobody has yet seen a session compact near 250k with it. The first long session after it lands should confirm where it compacts, and correct this section if that is not near 250k.
 
 ## A check must fail when its subject is missing, and must not depend on being remembered
 
