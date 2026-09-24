@@ -47,7 +47,7 @@
 //
 // THE COLOURS. Chlorophyll is `chloroplast` from src/figures/lib/cell3-colours.js, unchanged: the organelle
 // in Figure 3.8 is green because of this pigment, so the pigment takes the organelle's green rather than
-// becoming a second green beside it — and Figure 6.2 draws its reaction centres in the same value. It is
+// becoming a second green beside it, and no new value enters any table. It is
 // lighter than `thylakoid` by construction (thylakoid is it taken 35% into the ink): dE76 20.1 from
 // thylakoid and 18.5 from `enzyme`, both over the 17.8 that MEMBRANE's comment in src/palette.js sets for
 // two things in one frame. As a curve it clears 3:1 against the paper in both themes (3.83 light, 4.39
@@ -860,10 +860,11 @@ export function mount(root, ctx) {
   //   actionPoints      how many wavelengths the reader has measured; 0 at mount and after Reset
   //   actionAt          the oxygen the alga makes at this wavelength, 0 to 1 of its most, whether or not
   //                     it has been measured here
-  //   absorbanceAt      the absorbance of the pigments shown, at this wavelength, 0 to 1 of their own
-  //                     peak — the outline the action chart sets the points against. With all three
-  //                     shown it equals actionAt at every wavelength; with chlorophyll a alone it is
-  //                     far below it at 470 and 640 nm, which is the gap
+  //   absorbanceAt      the absorbance of the pigments shown at this wavelength, on the oxygen's own
+  //                     scale: the oxygen they would make if they were all the alga had, and the outline
+  //                     the action chart sets the points against. Never above actionAt; with all three
+  //                     shown it equals actionAt at every wavelength, and with chlorophyll a alone it is
+  //                     0.025 against 0.424 at 470 nm and 0.093 against 0.207 at 640 nm, which is the gap
   //   sample            'extracted' | 'leaf'
   //   absorbedFraction  the fraction of the light the chosen sample absorbs at this wavelength: 0.346
   //                     extracted and 0.750 in the leaf, at 550 nm
