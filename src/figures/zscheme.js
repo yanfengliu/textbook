@@ -42,14 +42,16 @@
 // the settled state, which is what a screenshot at t should show.
 //
 // THE FLASH TRAIN is Joliot and Kok's experiment: twelve single flashes, one a second, each firing both
-// photosystems, at a system reset to the dark. After darkness three clusters in four rest one step along
+// photosystems, at a system rested in the dark. After darkness three clusters in four rest one step along
 // (the dark-stable state), so the drawn cluster opens the train at one, not zero, and the first oxygen
 // comes on flash 3 — the prose's "a burst comes on the third". The chart is the POPULATION's yield, by
 // Kok's model: each flash misses one centre in twenty, so the population drifts out of step and the peaks
 // at 3, 7 and 11 blur, exactly as the prose describes, while nothing at all comes on the first two. A
 // flash that finds photosystem II closed advances no cluster, so a train run on the cyclic path shows the
-// oxygen stopping as the loop fills. The prose does not say why the first burst is on the third flash
-// rather than the fourth; the note under the chart does, in one sentence.
+// oxygen stopping as the loop fills. §6.4 says why the first burst is on the third flash rather than the
+// fourth, and the note under the chart says it again, in one sentence. Reset is the other state: a
+// cluster holding no charge, so four photons fired by hand make the first oxygen. The stage calls that
+// state what it is and keeps "dark" for the train (accuracy review of 2026-09-24, finding 13).
 //
 // TWO COMPOSITIONS. The brief's second composition is built as it asks, below 800 px:
 //   wide   — the Z across the left, one potential axis, carrier names placed against the drawing with
@@ -452,7 +454,7 @@ export function mount(root, ctx) {
     aria: 'Fire at photosystem I, one photon of 700 nm light',
   });
   b.divide();
-  b.action('Flash train', () => startTrain(), { aria: 'Flash train, twelve single flashes at a system reset to the dark' });
+  b.action('Flash train', () => startTrain(), { aria: 'Flash train, twelve single flashes at a system rested in the dark, most of its clusters one step along' });
   b.divide();
   const pathCtl = b.choice('Path', [
     { id: 'linear', label: 'Linear flow', short: 'Linear', aria: 'Linear flow, ferredoxin hands its electron on to NADP+' },
@@ -464,7 +466,7 @@ export function mount(root, ctx) {
   }, { segmented: true });
   b.divide();
   const runCtl = b.run({ primary: false, aria: 'Run, let the electrons move', onChange: () => draw() });
-  b.action('Reset', () => resetAll(), { aria: 'Reset, back to the dark with nothing fired' });
+  b.action('Reset', () => resetAll(), { aria: 'Reset, a cluster holding no charge and nothing fired' });
 
   b.keys({
     2: () => fire('II'),
@@ -578,7 +580,7 @@ export function mount(root, ctx) {
         : `Stalled at plastoquinone: it is full, and P700 has no hole to take its electrons. Ferredoxin is starved. Fire at photosystem${NB}I.`;
     }
     if (s.at === 'P700') return `Stalled at P700: it has given its electron away, and plastocyanin is empty. Fire at photosystem${NB}II.`;
-    if (photonsII + photonsI === 0 && !flashYields.length) return 'Dark: nothing fired yet. Fire a photon at either photosystem.';
+    if (photonsII + photonsI === 0 && !flashYields.length) return 'Nothing fired yet, and the cluster holds no charge; rested in the dark it would hold one. Fire a photon at either photosystem.';
     if (path === 'cyclic') return 'Cyclic flow: each electron comes back round to the cytochrome complex, so protons move and no NADPH or oxygen is made.';
     const need = 4 - (((v.holes % 4) + 4) % 4);
     return `${WORD[need]} more ${need === 1 ? 'photon' : 'photons'} at photosystem${NB}II for the next oxygen.`;
@@ -1484,7 +1486,7 @@ export function mount(root, ctx) {
       });
     }
     if (!flashYields.length && plotH > 24) {
-      const msg = train ? 'the first flash is coming' : 'Press Flash train to fire twelve flashes at a system reset to the dark.';
+      const msg = train ? 'the first flash is coming' : 'Press Flash train to fire twelve flashes at a system rested in the dark.';
       flashPane.text(x0 + (w - x0) / 2, top + plotH * 0.5, msg, { anchor: 'middle', class: 'tb-rt-note', fit: [10, 8], width: w - x0 - 8 });
     }
     lines.forEach((line, i) => {

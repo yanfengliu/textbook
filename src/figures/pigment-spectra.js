@@ -6,10 +6,11 @@
 // stands on, bacteria that swim towards oxygen crowd round it in proportion to what it makes, and one
 // point is plotted for each wavelength measured. **The action chart starts empty**, because the reader is
 // Engelmann: sweeping the whole range takes about a dozen presses. With chlorophyll a alone shown, the
-// points run visibly broader than the absorption they are compared with — oxygen is made at 470 and at
-// 640 nm, where chlorophyll a barely absorbs — and showing chlorophyll b and the carotenoids closes the
-// gap. That discrepancy is how the accessory pigments were found (§6.3, the margin note), and it cannot
-// be had from a figure that draws both curves finished.
+// points run visibly broader than the absorption they are compared with — the alga makes more oxygen at
+// 470 and at 640 nm than chlorophyll a's absorption can account for — and showing chlorophyll b and the
+// carotenoids closes the gap. That discrepancy is what showed the accessory pigments hand their light on
+// to the chemistry (§6.3's margin note: the pigments themselves had been in bottles for decades), and it
+// cannot be had from a figure that draws both curves finished.
 //
 // THE SECOND QUESTION, why a leaf is green. The sample is a leaf's worth of the same three pigments:
 // extracted and spread flat over the leaf's own area, or left in the leaf. The two numbers beside the
@@ -707,11 +708,16 @@ export function mount(root, ctx) {
     const titleH = roomy ? S.title + 9 : S.title + 3;
     if (roomy) alga.text(0, S.title, 'The living alga', { class: 'tb-rt-title', 'font-size': n1(S.title) });
     const o2 = lit === null ? 0 : actionAt(lit);
-    alga.text(w, S.title, lit === null ? 'in the dark' : `lit at ${lit} nm`, { anchor: 'end', class: lit === null ? 'ps-note' : 'ps-light', 'font-size': n1(S.title) });
+    // The filament is lit only while the slider stands where Measure here lit it. Moved away, the panel
+    // says where it was last lit and draws no light, because a colour the reader has left must not keep
+    // falling on the alga; the crowd stays, as the last measurement's (accuracy review of 2026-09-24,
+    // finding 15).
+    const here = lit !== null && lit === wavelength;
+    alga.text(w, S.title, lit === null ? 'in the dark' : here ? `lit at ${lit} nm` : `last lit at ${lit} nm`, { anchor: 'end', class: here ? 'ps-light' : 'ps-note', 'font-size': n1(S.title) });
     const footH = roomy ? S.title + 8 : 0;
     if (roomy) {
       const made = o2 < 0.005 ? 'oxygen made: almost none' : `oxygen made: ${f2(o2)} of the most`;
-      alga.text(w, h - 3, lit === null ? 'press Measure here to light it' : made, { anchor: 'end', class: lit === null ? 'ps-note' : 'ps-light', fit: [S.title, 7.8], width: w });
+      alga.text(w, h - 3, lit === null ? 'press Measure here to light it' : here ? made : `press Measure here to light it at ${wavelength} nm`, { anchor: 'end', class: here ? 'ps-light' : 'ps-note', fit: [S.title, 7.8], width: w });
     }
     const narrow = !roomy;
 
@@ -727,7 +733,7 @@ export function mount(root, ctx) {
     const crowdBand = clamp(cellH * 1.1, 9, 24);
     const lightTop = bodyTop + 2;
     const lightBottom = cy - cellH / 2 - crowdBand - 4;
-    const showLight = lit !== null && lightBottom - lightTop > 16;
+    const showLight = here && lightBottom - lightTop > 16;
 
     // The bacteria first, so the filament is drawn over any that touch it. In the dark they are spread
     // through the water; lit, a share of them in proportion to the oxygen gather at the filament.

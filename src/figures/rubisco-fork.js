@@ -147,9 +147,9 @@ const rowLabel = (i, tempC) => (i === 1 ? `Dissolved, at ${tempC} °C` : ROW[i])
 // The salvage's five stops, in order, and what happens at each. `id` is what describe() reports.
 const STOPS = [
   { id: 'chloroplast', place: 'chloroplast', brief: 'The phosphate comes off, leaving glycolate.', say: 'In the chloroplast the phosphate comes off 2-phosphoglycolate, leaving glycolate.' },
-  { id: 'peroxisome', place: 'peroxisome', brief: 'Peroxide made and destroyed; a nitrogen on.', say: 'In the peroxisome the glycolate hands hydrogen straight to oxygen, making peroxide that a catalase destroys at once, and takes on a nitrogen: it is now glycine.' },
-  { id: 'mitochondrion', place: 'mitochondrion', brief: 'Two become one: a carbon and a nitrogen out.', say: 'In the mitochondrion two glycines become one three-carbon serine: a carbon leaves as carbon dioxide, a nitrogen as ammonia.' },
-  { id: 'peroxisome-back', place: 'peroxisome', brief: 'The nitrogen handed on, leaving glycerate.', say: 'Back through the peroxisome the serine hands its nitrogen on, leaving glycerate.' },
+  { id: 'peroxisome', place: 'peroxisome', brief: 'Peroxide made and destroyed; a nitrogen on.', say: 'In the peroxisome the glycolate hands hydrogen straight to oxygen, making peroxide that a catalase destroys at once, and takes on a nitrogen.' },
+  { id: 'mitochondrion', place: 'mitochondrion', brief: 'Two become one: a carbon and a nitrogen out.', say: 'In the mitochondrion two of the two-carbon molecules become one three-carbon molecule: a carbon leaves as carbon dioxide, a nitrogen as ammonia.' },
+  { id: 'peroxisome-back', place: 'peroxisome', brief: 'The nitrogen handed on.', say: 'Back through the peroxisome the three-carbon molecule hands its nitrogen on.' },
   { id: 'chloroplast-back', place: 'chloroplast', brief: 'Two ATP: one for 3-phosphoglycerate, one for the ammonia.', say: 'Back in the chloroplast one ATP makes it 3-phosphoglycerate for the cycle, and a second, with reducing power, recaptures the ammonia.' },
 ];
 const DWELL = 1.6; // s at each stop while running
@@ -1039,7 +1039,7 @@ export function mount(root, ctx) {
       }
       r.rule();
       if (level <= 1) r.row('Counted at this site', counted);
-      if (withNotes) r.note('against the same leaf with no oxygenation at all');
+      if (withNotes) r.note('against the same turns with no oxygenation, at this moment: a day of it (§6.7) costs a fifth to a third');
       r.row('Net carbon gain', `${pct1(m.netGain)} %`);
       if (withNotes) r.note(`rubisco, ${share} % of leaf protein, turning 3 times a second`, { accent: accent(LEAF_ROW) });
       r.row(LEAF_ROW, `${Math.round(rate)} % of a typical leaf`, { accent: accent(LEAF_ROW) });
