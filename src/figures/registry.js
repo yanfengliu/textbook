@@ -108,6 +108,13 @@ export const FIGURES = Object.freeze({
   // not survive a 390 px stage.
   'rubisco-fork': { url: new URL('./rubisco-fork.js', import.meta.url).href, title: 'One site, two gases, four steps of arithmetic', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
 
+  // Chapter 8, DNA and its copying (biology/ch08-dna/FIGURES.md).
+  //
+  // Figure 8.3. Below 800 px the fork turns through 90 degrees and runs down the stage. The narrow stage is
+  // 9/16 and not the brief's 3/4: the fork scene's eleven controls wrap to five toolbar rows at 342 px, and
+  // a 3/4 stage leaves the drawing and its table 284 px between them.
+  'replication-fork': { url: new URL('./replication-fork.js', import.meta.url).href, title: 'The fork, with its chemistry left in', needsWebGL: false, aspect: 21 / 9, narrowAspect: 9 / 16 },
+
   // 《资治通鉴》 卷一 周纪一 — the second book. Its figures are about a text and a history, not a
   // specimen: where the three states sat and when, what a character becomes when it joins another, and
   // which year the book chose to begin at. Each was added here by the integration owner from the
