@@ -836,7 +836,8 @@ export function mount(root, ctx) {
       p.text(cx, by + 15, `${across} across`, { anchor: 'middle', 'font-size': 10.5, fill: C.soft, class: 'hl-num' });
     } else {
       const { x0, x1, cy } = g;
-      p.text(w, 12, riseText, { anchor: 'end', fit: [10, 8], width: w * 0.5, fill: C.soft, class: 'hl-num' });
+      // Short of the corner, where the focus bracket is drawn when the pane holds the keyboard.
+      p.text(w - 9, 16, riseText, { anchor: 'end', fit: [10, 8], width: w * 0.5, fill: C.soft, class: 'hl-num' });
       const by = cy - r * s - 6;
       const pitchLabel = `${fmt(P, 1)} nm a turn`;
       const pw = pitchLabel.length * EM_ADVANCE * 10;
@@ -1234,8 +1235,9 @@ export function mount(root, ctx) {
     const S = ([x, y]) => [cx + y * k, cy - x * k];
     const pts = [];
     const railX = [cx - 10 * k, cx + 10 * k];
-    const ry0 = narrow ? 6 : 18;
-    const ry1 = hh - (narrow ? 6 : 18);
+    // Narrow, the rails stop short of the pane's corners, which carry the focus brackets.
+    const ry0 = narrow ? 12 : 18;
+    const ry1 = hh - (narrow ? 12 : 18);
     const sw = narrow ? 1.2 : 1.6;
     const small = narrow && k < 13;
 
@@ -1254,8 +1256,9 @@ export function mount(root, ctx) {
         p.text(e.X, ry0 - 7, e.top, { anchor: 'middle', 'font-size': 10.5, fill: C.soft, 'font-weight': 600 });
         p.text(e.X, ry1 + 16, e.bottom, { anchor: 'middle', 'font-size': 10.5, fill: C.soft, 'font-weight': 600 });
       } else {
-        const x = e.X + e.side * 7;
-        const anchor = e.side < 0 ? 'end' : 'start';
+        // Inside the rails, where the corners are clear.
+        const x = e.X - e.side * 9;
+        const anchor = e.side < 0 ? 'start' : 'end';
         p.text(x, ry0 + 9, e.top, { anchor, 'font-size': 10, fill: C.soft, 'font-weight': 600 });
         p.text(x, ry1, e.bottom, { anchor, 'font-size': 10, fill: C.soft, 'font-weight': 600 });
       }

@@ -8,9 +8,11 @@
 // full at generation 0 as at generation 4. In the middle, the centrifuge tube the DNA of the
 // generation shown settles in, a caesium chloride gradient least dense at the top, with each band drawn as
 // the dark line an ultraviolet photograph shows on the tube's pale ground, darker the more of the DNA is in
-// it. On the right, a table of the bands, and under it what each of the three schemes predicts at the same
-// generation. A switch chooses the scheme; the molecules, the tube and the table follow it. It opens at
-// generation 0, semiconservative, with the data hidden: one heavy band.
+// it. On the right, a table of the bands, and under it, as far as the room allows, what each of the three
+// schemes predicts at the same generation and what the chosen scheme predicts at every generation. A switch
+// chooses the scheme; the molecules, the tube and the table follow it. With the 1958 data shown, an
+// arrowhead beside the tube marks each band that was photographed, and the table adds a column for them. It
+// opens at generation 0, semiconservative, with the data hidden: one heavy band.
 //
 // THE COPYING. Each molecule is two strands of sixteen pieces, each piece ¹⁵N or ¹⁴N, and a generation copies
 // every molecule once:
@@ -456,13 +458,15 @@ export function mount(root, ctx) {
     // same, so the last column is the population and the columns before it are its history.
     const founders = LEAVES / 2 ** gen;
     const cols = gen + 1;
-    const top = 36;
-    const bottom = hh - 30;
-    const colW = w / cols;
+    // The pane holds the keyboard, so its corners carry the focus brackets: nothing is drawn there.
+    const M = 8;
+    const top = 40;
+    const bottom = hh - 32;
+    const colW = (w - 2 * M) / cols;
     const len = clamp(colW * 0.62, 30, 200);
     const pitch = Math.max(4, (bottom - top) / LEAVES);
     const sep = clamp(pitch * 0.34, 5, 13);
-    const xAt = (k) => (k + 0.5) * colW;
+    const xAt = (k) => M + (k + 0.5) * colW;
     const yAt = (k, j) => top + (j + 0.5) * 2 ** (gen - k) * pitch;
     const molAt = (k, j) => gens[k][j % 2 ** k];
 
@@ -470,12 +474,12 @@ export function mount(root, ctx) {
       const now = k === gen;
       const colour = now ? C.ink : C.soft;
       const head = { anchor: 'middle', fill: colour, 'font-weight': 600, class: 'ms-num' };
-      if (!p.text(xAt(k), 12, `Generation ${k}`, { ...head, fit: [10.5, 9], width: colW - 6 })) p.text(xAt(k), 12, String(k), { ...head, 'font-size': 10.5 });
+      if (!p.text(xAt(k), 16, `Generation ${k}`, { ...head, fit: [10.5, 9], width: colW - 6 })) p.text(xAt(k), 16, String(k), { ...head, 'font-size': 10.5 });
       const medium = k === 0 ? 'grown on ¹⁵N' : 'on ¹⁴N';
       const sub = { anchor: 'middle', fill: C.soft, fit: [9.5, 8.5], width: colW - 6 };
-      if (!(now && heated && p.text(xAt(k), 26, `${medium}, heated`, sub))) {
-        if (now && heated) p.text(xAt(k), 26, 'heated', { anchor: 'middle', fill: C.soft, 'font-size': 9.5 });
-        else p.text(xAt(k), 26, medium, sub);
+      if (!(now && heated && p.text(xAt(k), 30, `${medium}, heated`, sub))) {
+        if (now && heated) p.text(xAt(k), 30, 'heated', { anchor: 'middle', fill: C.soft, 'font-size': 9.5 });
+        else p.text(xAt(k), 30, medium, sub);
       }
     }
 
@@ -500,14 +504,14 @@ export function mount(root, ctx) {
       }
     }
 
-    const ky = hh - 10;
-    p.line(0, ky - 3.5, 22, ky - 3.5, { stroke: C.ink, 'stroke-width': W_HEAVY });
-    p.text(28, ky, '¹⁵N strand', { 'font-size': 10, fill: C.soft });
-    p.line(96, ky - 3.5, 118, ky - 3.5, { stroke: C.ink, 'stroke-width': W_LIGHT });
-    p.text(124, ky, '¹⁴N strand', { 'font-size': 10, fill: C.soft });
-    const whole = { anchor: 'end', fit: [10, 8.5], width: w - 196, fill: C.soft, class: 'ms-num' };
-    if (!p.text(w, ky, gen === 0 ? `${LEAVES} molecules of the culture` : `${LEAVES} molecules and those they came from`, whole)) {
-      p.text(w, ky, `${LEAVES} molecules`, whole);
+    const ky = hh - 12;
+    p.line(M, ky - 3.5, M + 22, ky - 3.5, { stroke: C.ink, 'stroke-width': W_HEAVY });
+    p.text(M + 28, ky, '¹⁵N strand', { 'font-size': 10, fill: C.soft });
+    p.line(M + 91, ky - 3.5, M + 113, ky - 3.5, { stroke: C.ink, 'stroke-width': W_LIGHT });
+    p.text(M + 119, ky, '¹⁴N strand', { 'font-size': 10, fill: C.soft });
+    const whole = { anchor: 'end', fit: [10, 8.5], width: w - 2 * M - 180, fill: C.soft, class: 'ms-num' };
+    if (!p.text(w - M, ky, gen === 0 ? `${LEAVES} molecules of the culture` : `${LEAVES} molecules and those they came from`, whole)) {
+      p.text(w - M, ky, `${LEAVES} molecules`, whole);
     }
   }
 
@@ -530,28 +534,30 @@ export function mount(root, ctx) {
     const groups = [...byShare.values()].sort((x, y) => x.share - y.share);
 
     const n = items.length * founders;
-    p.text(0, 13, heated ? `${n} strands` : `${n} molecules`, { 'font-size': 11, 'font-weight': 600, fill: C.ink, class: 'ms-num' });
-    p.text(0, 27, heated ? 'parted by heat' : gen === 0 ? 'grown on ¹⁵N' : `generation ${gen}, on ¹⁴N`, { fit: [9.5, 8.5], width: w, fill: C.soft, class: 'ms-num' });
+    // Clear of the focus brackets in the pane's corners, as in the wide tree.
+    const M = 8;
+    p.text(M, 16, heated ? `${n} strands` : `${n} molecules`, { 'font-size': 11, 'font-weight': 600, fill: C.ink, class: 'ms-num' });
+    p.text(M, 30, heated ? 'parted by heat' : gen === 0 ? 'grown on ¹⁵N' : `generation ${gen}, on ¹⁴N`, { fit: [9.5, 8.5], width: w - M, fill: C.soft, class: 'ms-num' });
 
-    const top = 38;
-    const bottom = hh - 36;
+    const top = 40;
+    const bottom = hh - 38;
     const slot = Math.min(64, (bottom - top) / groups.length);
     const y0 = top + ((bottom - top) - slot * groups.length) / 2;
-    const gx = 30;
-    const len = clamp(w - gx - 6, 40, 110);
+    const gx = M + 30;
+    const len = clamp(w - gx - M, 40, 110);
     groups.forEach((g, i) => {
       const cy = y0 + (i + 0.4) * slot;
-      p.text(0, cy + 4, `×${g.count}`, { 'font-size': 10.5, 'font-weight': 600, fill: C.ink, class: 'ms-num' });
+      p.text(M, cy + 4, `×${g.count}`, { 'font-size': 10.5, 'font-weight': 600, fill: C.ink, class: 'ms-num' });
       if (heated) strandLine(p, gx, gx + len, cy, g.sample, C.ink);
       else drawMolecule(p, gx + len / 2, cy, len, 11, g.sample, { colour: C.ink });
       p.text(gx, cy + (heated ? 15 : 20), nameOf(g.share, heated), { fit: [9.5, 8.5], width: w - gx, fill: C.soft });
     });
 
-    const ky = hh - 20;
-    p.line(0, ky - 3.5, 18, ky - 3.5, { stroke: C.ink, 'stroke-width': W_HEAVY });
-    p.text(24, ky, '¹⁵N strand', { fit: [9.5, 8.5], width: w - 24, fill: C.soft });
-    p.line(0, ky + 10.5, 18, ky + 10.5, { stroke: C.ink, 'stroke-width': W_LIGHT });
-    p.text(24, ky + 14, '¹⁴N strand', { fit: [9.5, 8.5], width: w - 24, fill: C.soft });
+    const ky = hh - 22;
+    p.line(M, ky - 3.5, M + 18, ky - 3.5, { stroke: C.ink, 'stroke-width': W_HEAVY });
+    p.text(M + 24, ky, '¹⁵N strand', { fit: [9.5, 8.5], width: w - M - 24, fill: C.soft });
+    p.line(M, ky + 10.5, M + 18, ky + 10.5, { stroke: C.ink, 'stroke-width': W_LIGHT });
+    p.text(M + 24, ky + 14, '¹⁴N strand', { fit: [9.5, 8.5], width: w - M - 24, fill: C.soft });
   }
 
   // ---------------------------------------------------------------- drawing: the tube
@@ -602,12 +608,10 @@ export function mount(root, ctx) {
     p.line(xl - 4, yRim, xl, yRim, { stroke: C.soft, 'stroke-width': 1.2 });
     p.line(xr, yRim, xr + 4, yRim, { stroke: C.soft, 'stroke-width': 1.2 });
 
+    // A photographed band is marked on the side its label is on: on the other, the mark would run into
+    // the tick of the same density.
     const arrow = (x, y, dir) => p.path(`M${n2(x)} ${n2(y - 3.6)} L${n2(x + dir * 6)} ${n2(y)} L${n2(x)} ${n2(y + 3.6)} Z`, { fill: C.ink });
-    for (const o of obs ?? []) {
-      const y = yOf(o.density);
-      arrow(xl - 8, y, 1);
-      arrow(xr + 8, y, -1);
-    }
+    for (const o of obs ?? []) arrow(xr + 8, yOf(o.density), -1);
 
     const labels = shown.map((bd) => ({ y: yOf(bd.density), text: bd.name, colour: C.ink, weight: 600 }));
     for (const o of obs ?? []) {
@@ -621,9 +625,8 @@ export function mount(root, ctx) {
 
     if (dataShown) {
       const ly = hh - 8;
-      arrow(0, ly - 3.5, 1);
-      arrow(14, ly - 3.5, -1);
-      p.text(20, ly, obs ? 'photographed in 1958' : 'heated in 1958: generation 1', { fit: [9.5, 8.5], width: w - 20, fill: C.soft });
+      arrow(6, ly - 3.5, -1);
+      p.text(12, ly, obs ? 'photographed in 1958' : 'heated in 1958: generation 1', { fit: [9.5, 8.5], width: w - 12, fill: C.soft });
     }
 
     const what = `${bandWord(shown.length)}, ${spoken(shown)}`;
@@ -643,13 +646,16 @@ export function mount(root, ctx) {
     const ruled = ruledOutAt(gen);
     const size = narrow ? 10 : 10.6;
     const titleSize = narrow ? 9 : 9.4;
-    const columns = dataShown ? ['Density', 'Share', '1958'] : ['Density', 'Share'];
+    // The 1958 column, only while some row it would stand beside was measured: heated, only generation 1
+    // was, and a table cut down to the strands elsewhere would carry an empty column.
+    const with1958 = (level) => dataShown && (!heated || Boolean(obsHeated) || level < 1);
+    const columnsAt = (level) => (with1958(level) ? ['Density', 'Share', '1958'] : ['Density', 'Share']);
     const title = `${cap(scheme)}, generation ${gen}`;
 
-    const rows = (r, pred, observed, single) => {
+    const rows = (r, pred, observed, single, col) => {
       for (const u of union(pred, observed)) {
         const vals = [dens3(u.density), u.p ? fracText(u.p.fraction) : '—'];
-        if (dataShown) vals.push(observed ? (u.o ? fracText(u.o.fraction) : '—') : '');
+        if (col) vals.push(observed ? (u.o ? fracText(u.o.fraction) : '—') : '');
         const bad = Boolean(observed) && !(u.p && u.o && Math.abs(u.p.fraction - u.o.fraction) < TOL);
         r.row(single ? `${cap(u.name)} strands` : cap(u.name), vals, bad ? { accent: C.coralText } : {});
       }
@@ -687,19 +693,20 @@ export function mount(root, ctx) {
     // heating, 2 the schemes ruled out (heat changes none of them), and 3 the sentence on what heat does,
     // which is the last thing to go because it is the reason the strands band where they do.
     const build = (r, level) => {
+      const col = with1958(level);
       if (heated) {
         r.head('Heated: single strands');
-        rows(r, pr.strands, dataShown ? obsHeated : null, true);
+        rows(r, pr.strands, dataShown ? obsHeated : null, true, col);
         if (level < 3) note(r, heatNote());
         note(r, heatDataNote());
         if (level < 1) {
           r.head('Before heating');
-          rows(r, pr.bands, dataShown ? obs : null, false);
+          rows(r, pr.bands, dataShown ? obs : null, false, col);
           note(r, duplexNote());
         } else if (!dataShown) note(r, duplexNote());
         if (dataShown && level < 2) note(r, ruledNote());
       } else {
-        rows(r, pr.bands, dataShown ? obs : null, false);
+        rows(r, pr.bands, dataShown ? obs : null, false, col);
         note(r, duplexNote());
         if (dataShown) note(r, ruledNote());
       }
@@ -751,7 +758,7 @@ export function mount(root, ctx) {
       const plan = PLANS[i];
       const parts = [
         (y) => {
-          const r = p.readout({ title, columns, x: 0, y, width: w, size, titleSize });
+          const r = p.readout({ title, columns: columnsAt(plan.level), x: 0, y, width: w, size, titleSize });
           build(r, plan.level);
           return r;
         },
