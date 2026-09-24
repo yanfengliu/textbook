@@ -107,12 +107,20 @@ export const FIGURES = Object.freeze({
   // Figure 6.4. It carries a genuine second composition, because a site drawn beside a four-row table does
   // not survive a 390 px stage.
   'rubisco-fork': { url: new URL('./rubisco-fork.js', import.meta.url).href, title: 'One site, two gases, four steps of arithmetic', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
+
+  // Chapter 8, DNA and its copying (biology/ch08-dna/FIGURES.md).
+  //
   // Figure 8.1. Below 800 px it carries a second composition: the helix lies along the stage above its
   // pattern, both full width, and the pairs scene stacks the pair, the duplex and the table.
   'helix-lab': { url: new URL('./helix-lab.js', import.meta.url).href, title: 'Read the photograph, then build the pairs', needsWebGL: false, aspect: 16 / 9, narrowAspect: 2 / 3 },
   // Figure 8.2. Below 800 px it carries a second composition: the tube keeps its height on the left,
   // the molecules of the generation shown stand beside it one of each kind, and the table goes beneath.
   'meselson-stahl': { url: new URL('./meselson-stahl.js', import.meta.url).href, title: 'The three schemes, on a switch', needsWebGL: false, aspect: 16 / 9, narrowAspect: 2 / 3 },
+  // Figure 8.3. Below 800 px the fork turns through 90 degrees and runs down the stage. The narrow stage is
+  // 9/16 and not the brief's 3/4: the fork scene's eleven controls wrap to five toolbar rows at 342 px, and
+  // a 3/4 stage leaves the drawing and its table 284 px between them.
+  'replication-fork': { url: new URL('./replication-fork.js', import.meta.url).href, title: 'The fork, with its chemistry left in', needsWebGL: false, aspect: 21 / 9, narrowAspect: 9 / 16 },
+  'chromosome-end': { url: new URL('./chromosome-end.js', import.meta.url).href, title: 'One round of copying at the tip', needsWebGL: false, aspect: 16 / 9, narrowAspect: 9 / 16 },
 
   // 《资治通鉴》 卷一 周纪一 — the second book. Its figures are about a text and a history, not a
   // specimen: where the three states sat and when, what a character becomes when it joins another, and
