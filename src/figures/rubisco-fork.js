@@ -57,10 +57,12 @@
 // two ATP.
 //
 // Two compositions. Wide: the site on the left, the table on the right. Narrow, below an 800 px stage:
-// the site across the top and the four rows under it with the moved row marked, the three condition
-// sliders becoming steppers on one row. The salvage route stays a horizontal run at both widths — the
-// narrow route pane is wider than it is tall (about 340 × 240), and stacking three organelles in 240 px
-// would give each about 70. `workingRatio`, `netGainPercent` and the four rows keep their labels at both.
+// the site across the top and the table's rows under it with the moved row marked in the gutter, and the
+// four sliders become steppers — in two rows of two, not the brief's one row of three, because at a
+// 342 px stage the three need 379 px against a 304 px toolbar line (measured, 2026-09-23). The salvage
+// route stays a horizontal run at both widths rather than re-orienting as the brief proposed: the narrow
+// route pane is wider than it is tall (about 330 × 245), and three organelles stacked in 245 px would get
+// about 70 px each. `workingRatio`, `netGainPercent` and the four rows keep their labels at both.
 //
 // describe() is documented at the foot of this file.
 import { C, clamp, lerp, easeInOut, smooth, tint, el, h } from './lib/svg.js';
@@ -139,6 +141,7 @@ const pct1 = (v) => (Math.abs(v - Math.round(v)) < 0.05 ? String(Math.round(v)) 
 
 // The four rows' labels, the same at both widths, because an item's goal quotes them.
 const ROW = ['In the air', 'Dissolved', 'After rubisco’s preference', 'Inside a working leaf'];
+const LEAF_ROW = 'Carbon fixed, whole leaf';
 const rowLabel = (i, tempC) => (i === 1 ? `Dissolved, at ${tempC} °C` : ROW[i]);
 
 // The salvage's five stops, in order, and what happens at each. `id` is what describe() reports.
@@ -359,7 +362,7 @@ export function mount(root, ctx) {
   const shareCtl = b.stepper('Rubisco', {
     min: 5, max: 60, step: 5, value: OPEN.share,
     format: (v, o) => (o.narrow ? `${v} %` : `${v} % of protein`),
-    onInput: (v) => { if (syncing) return; share = v; afterChange(); },
+    onInput: (v) => { if (syncing) return; share = v; moved = [LEAF_ROW]; afterChange(); },
   });
   b.divide();
   const archaeanCtl = b.toggle('Archaean air', (on) => setEra(on ? 'archaean' : 'today'), {
@@ -592,6 +595,11 @@ export function mount(root, ctx) {
 
   const leafRate = (m) => (share / TYPICAL_SHARE) * (m.netGain / TYPICAL_NET) * 100;
 
+  function leafSentence() {
+    if (!moved.includes(LEAF_ROW)) return '';
+    return `Rubisco is ${share} per cent of the leaf’s protein, so the leaf fixes ${Math.round(leafRate(model()))} per cent of a typical leaf’s carbon. `;
+  }
+
   function countSentence() {
     const n = carboxylations + oxygenations;
     if (!n) return 'No turns taken yet.';
@@ -604,12 +612,13 @@ export function mount(root, ctx) {
     if (scene === 'salvage') {
       const l = ledger();
       const stop = STOPS[Math.max(0, l.stop)];
-      return `${stop.say} Carbon recovered ${l.carbonRecovered} of 4, carbon lost ${l.carbonLost}, ATP spent ${l.atpSpent}.`;
+      const none = era() === 'archaean' ? 'In Archaean air no molecule takes this road; this is the route as it runs in today’s. ' : '';
+      return `${none}${stop.say} Carbon recovered ${l.carbonRecovered} of 4, carbon lost ${l.carbonLost}, ATP spent ${l.atpSpent}.`;
     }
     if (!m.hasO2) {
-      return `Archaean air, with no free oxygen and ${ppmText(airCo2)} parts per million of carbon dioxide: every turn is a carboxylation. ${countSentence()}`;
+      return `Archaean air, with no free oxygen and ${airCo2} parts per million of carbon dioxide: every turn is a carboxylation. ${leafSentence()}${countSentence()}`;
     }
-    return `In the air oxygen outnumbers carbon dioxide ${ratioText(m.airRatio)} to 1, and ${ratioText(m.dissolvedRatio)} to 1 dissolved at ${tempC} degrees. Rubisco’s preference makes that ${ratioText(m.siteRatio)} carboxylations for each oxygenation, and ${ratioText(m.working)} inside a working leaf with the pore ${pore} per cent open. Net carbon gain ${pct1(m.netGain)} per cent. ${countSentence()}`;
+    return `In the air oxygen outnumbers carbon dioxide ${ratioText(m.airRatio)} to 1, and ${ratioText(m.dissolvedRatio)} to 1 dissolved at ${tempC} degrees. Rubisco’s preference makes that ${ratioText(m.siteRatio)} carboxylations for each oxygenation, and ${ratioText(m.working)} inside a working leaf with the pore ${pore} per cent open. Net carbon gain ${pct1(m.netGain)} per cent. ${leafSentence()}${countSentence()}`;
   });
 
   // ---------------------------------------------------------------- drawing the atoms
@@ -1015,12 +1024,12 @@ export function mount(root, ctx) {
       if (level <= 1) r.row('Counted at this site', counted);
       if (withNotes) r.note('against the same leaf with no oxygenation at all');
       r.row('Net carbon gain', `${pct1(m.netGain)} %`);
-      if (withNotes) r.note(`rubisco ${share} % of its protein, each site at 3 turns a second`);
-      r.row('Carbon fixed, whole leaf', `${Math.round(rate)} % of a typical leaf`);
+      if (withNotes) r.note(`rubisco, ${share} % of leaf protein, turning 3 times a second`, { accent: accent(LEAF_ROW) });
+      r.row(LEAF_ROW, `${Math.round(rate)} % of a typical leaf`, { accent: accent(LEAF_ROW) });
     }, { levels: 3 });
     // The step the reader's last change entered at, marked in the gutter as well as in its colour.
     for (const t of table.node.querySelectorAll('text.tb-rt-key')) {
-      const i = [0, 1, 2, 3].find((k) => t.textContent === rowLabel(k, tempC));
+      const i = t.textContent === LEAF_ROW ? LEAF_ROW : [0, 1, 2, 3].find((k) => t.textContent === rowLabel(k, tempC));
       if (i === undefined || !isMoved(i)) continue;
       const y = Number(t.getAttribute('y')) - size * 0.36;
       table.path(`M${(tx + 1).toFixed(1)} ${(y - 4).toFixed(1)} L${(tx + 6.5).toFixed(1)} ${y.toFixed(1)} L${(tx + 1).toFixed(1)} ${(y + 4).toFixed(1)} Z`, { fill: markColour });
@@ -1230,7 +1239,8 @@ export function mount(root, ctx) {
       r.row('Carbon recovered', String(l.carbonRecovered));
       r.row('Nitrogen released, as NH₃', l.nitrogenReleased ? (k >= 4 ? '1, recaptured' : '1') : '0');
       r.row('ATP spent', String(l.atpSpent));
-      if (level <= 1) r.note(w < 420 ? STOPS[k].brief : STOPS[k].say);
+      if (level <= 1 && era() === 'archaean') r.note(b.narrow ? 'In Archaean air no molecule takes this road.' : 'In Archaean air no molecule takes this road: with no oxygen there is no oxygenation to salvage.', { accent: C.waterText });
+      if (level <= 1) r.note(b.narrow ? STOPS[k].brief : STOPS[k].say);
       if (level === 0 && k >= 4) r.note('Three carbons in four come back. Doing nothing would lose all four and leave an inhibitor behind.');
     }, { levels: 3 });
   }
