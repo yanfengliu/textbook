@@ -12,7 +12,7 @@ Stack: plain HTML, CSS, and ES modules on Node 24 (`.nvmrc`); Three.js pinned th
 
 **Current direction** (the owner, 2026-09-23). The weekly usage allowance is the budget: about 40M price-weighted tokens a chapter, spent on what a reader sees first. Contexts stay small. A chapter has at most about four bespoke interactive figures, with authored static SVG elsewhere. No chapter ships without an accuracy review against OpenStax Biology 2e. The study loop must run before more study features are built. `npm test` stays the commit gate until a core gate exists. One textbook session runs at a time. The biology book's Chinese edition is parked. Work stops once chapter 6 has landed, until the owner says otherwise. The ten points and their evidence are in [docs/policies/local-rules.md](docs/policies/local-rules.md#the-usage-allowance-is-the-budget-the-owners-direction-of-2026-09-23).
 
-<!-- FLEET-CANON:BEGIN sha=95bcbcb491dd generated from ../fleet/FLEET.md by `npm run sync-canon` — do not edit inside this block; this repo's own rules go in docs/policies/local-rules.md -->
+<!-- FLEET-CANON:BEGIN sha=a4df5e4b87dc generated from ../fleet/FLEET.md by `npm run sync-canon` — do not edit inside this block; this repo's own rules go in docs/policies/local-rules.md -->
 ## Fleet constitution
 
 ### Fleet Orchestration Policy
@@ -23,7 +23,7 @@ Deliver the requested outcome with verified correctness, coherent architecture, 
 
 Only an explicitly designated agent acts as coordinator. Use one accountable integration owner per scope. The coordinator owns planning, dependencies, shared interfaces, architectural consistency, integration, and acceptance. It does not implement. Every change, however small, is delegated: the coordinator's session is where the next request arrives, and a coordinator in the middle of an edit cannot take it. Its own hands stay on what delegation needs — reading enough to write an assignment, and inspecting a handoff to accept or reject it.
 
-Workers own bounded outcomes and local implementation decisions. They may use subagents within their scope and budget, but remain accountable. Organize threads around deliverables, not permanent departments. Avoid recursive manager hierarchies.
+Workers own bounded outcomes and local implementation decisions. Each worker, a reviewer included, decides how many subagents its task needs and dispatches them, within its budget (owner directive, 2026-09-23). For a small task that is none. It remains accountable for what they return. Organize threads around deliverables, not permanent departments. Avoid recursive manager hierarchies.
 
 #### Plan and delegate
 
