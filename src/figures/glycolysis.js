@@ -94,7 +94,8 @@
 //           other phase collapsed to a column that says what it cost or will earn; the ledger beside it.
 //           Where a station would be under 46 px wide or its carbons under 7 px across, the names give
 //           way to a two-line caption naming the step just taken and what it made, the enzymes to their
-//           numbers, and each currency pair to the one token that changes hands, joined to its arrow
+//           numbers, each currency pair to the one token that changes hands, joined to its arrow, and
+//           the other phase's column to the stations, leaving the ledger to say what it cost or earned
 //           (single tokens are used below 58 px of station, too, where a pair would crowd its neighbour)
 //   ladder  a tall stage, which is every phone and a tablet held upright (below 800 px of viewport the
 //           registry makes the stage 3/4): the line turned through 90 degrees and centred in at most
@@ -812,7 +813,10 @@ export function mount(root, ctx) {
     const inv = st.s <= 5;
     const first = phase && !inv ? 5 : 0;
     const last = phase && inv ? 5 : STEPS;
-    const summary = phase ? (inv ? 'right' : 'left') : null;
+    // The compact form gives the other phase's column back to the stations: at 480 px of stage a
+    // station 38 px wide put NADH's token on the neighbouring chains' phosphates. The ledger beside it
+    // still carries what the other phase cost or earned.
+    const summary = phase && !compact ? (inv ? 'right' : 'left') : null;
     const padX = 8;
     const sumW = summary ? clamp(w * 0.18, 66, 124) : 0;
     const n = last - first + 1;
@@ -848,7 +852,7 @@ export function mount(root, ctx) {
     // A full stage gives the currency a band above and below the chains. The compact form's tokens are
     // single and stand between the stations, so the chains may rise into their band: a token needs only
     // the part of its reach (from its lane's arrow to its far edge) that the chains' own height does not
-    // already give it. That is what buys an 800 px window's carbons 7.6 px across rather than 5.8.
+    // already give it. That is what buys an 800 px window's carbons 7.1 px across rather than 5.8.
     const reach = 9 + 2 * tokRy;
     let tokH;
     let bandD;
