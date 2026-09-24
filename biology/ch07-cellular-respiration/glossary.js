@@ -26,7 +26,7 @@ export const GLOSSARY = {
   'intermembrane-space': { term: 'Intermembrane space', def: 'The gap between a mitochondrion\'s two membranes. The outer membrane is full of wide pores, so this space is chemically close to the cytosol; the inner membrane is not, which is what makes the space useful as one side of a gradient.' },
 
   // ---- 7.2 A very old pathway runs in the cytosol ----
-  glycolysis: { term: 'Glycolysis', def: 'The ten-step pathway that splits one glucose into two molecules of pyruvate in the cytosol, spending two ATP and recovering four, and reducing two NAD<sup>+</sup>. It needs no oxygen, no membrane and no organelle, and some version of it runs in every domain of life: the three-carbon lower half everywhere, the six-carbon top half in more than one form.' },
+  glycolysis: { term: 'Glycolysis', def: 'The ten-step pathway that splits one glucose into two molecules of pyruvate in the cytosol, spending two ATP and recovering four, and reducing two NAD<sup>+</sup>. It needs no oxygen, no membrane and no organelle, and some version of it runs in every domain of life: the last steps to pyruvate the same everywhere, the top built in more than one way.' },
   pyruvate: { term: 'Pyruvate', def: 'The three-carbon compound glycolysis ends at, and the junction where a cell decides what happens next: into the mitochondrion if there is oxygen, into a fermentation if there is not.' },
   'substrate-level-phosphorylation': { term: 'Substrate-level phosphorylation', def: 'Making ATP by moving a phosphate group directly from a substrate onto ADP, with no membrane and no gradient involved. It is how glycolysis and one step of the Krebs cycle make their ATP, and it accounts for a small fraction of a cell\'s total.' },
 
