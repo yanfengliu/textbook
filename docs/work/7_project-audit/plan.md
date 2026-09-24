@@ -19,7 +19,7 @@ Decisions: the owner read the summary on 2026-09-23 and replied, in their words:
 
 The same day, the owner told the book's coordinator: "Reduce scope and stop at your current chapter's completion". That is chapter 6 only, then a stop. The round's plan records it (`docs/work/2_rest-of-the-book/plan.md`, "Where this round stands"), and point 10 points there. It overrides synthesis 5's one-week test, which wanted chapters 6–7 on main. Chapter 6 gets point 4's accuracy review before it lands. The chapter 4–5 reviews this audit found owed (F7, F28) stay open, and starting them waits on the owner.
 
-Nothing else is open under this folder. Fixes already under way for things the audit found — the answer order on `choice-order`, chapter 5's errors on `fix-ch05` — are another session's work on its own branches, and are not tracked here.
+Nothing else is open under this folder. Fixes for things the audit found — the answer order (`choice-order`) and chapter 5's errors (`fix-ch05`) — were another session's work, landed on main in `407827c`, and are not tracked here.
 
 ## Problem and outcome
 
