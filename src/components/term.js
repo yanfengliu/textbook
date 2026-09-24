@@ -6,7 +6,8 @@
 //
 // <tb-term> is the biology book's glossary term. Its definition comes from the chapter's glossary
 // (registered on window.__textbook.glossary by the page), and the popover links to the entry in the
-// end-of-chapter glossary (#term-<ref>). That behaviour, its DOM and its classes do not change.
+// end-of-chapter glossary (#term-<ref>). That behaviour, its DOM and its classes do not change. Its
+// label keeps the sub- and superscripts, italics and bold it was written with (LABEL_TAGS, below).
 //
 // <tb-char> is 資治通鑑's character: its key is its own text (exactly one character) or its `for`
 // attribute, and it opens the lexicon card. The card is not built here. A page that has a lexicon
@@ -15,7 +16,7 @@
 // the element itself: which occurrence of a character the reader pressed is the one thing the page's
 // own 字表 cannot say, and the lexicon card is built for a 句 rather than for a chapter. A page without
 // a registry (the biology book) never touches that path: `<tb-char>` opens nothing there, and
-// `<tb-term>` renders exactly what it always rendered. `src/` therefore knows nothing about any book.
+// `<tb-term>` opens the glossary card it always opened. `src/` therefore knows nothing about any book.
 //
 // <tb-glossary> renders every registered entry, alphabetically, as a definition list.
 
@@ -37,18 +38,22 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeOpen();
 });
 
+// Where a card waits while it is measured: far past the page's start edge. A box past the page's end
+// edge widens the page, and on a phone that moves the very width the card is clamped to (see `place()`).
+// A box past the start edge widens nothing, because a page cannot be scrolled to that side.
+const OFF_PAGE = '-100000px';
+
 // The shared behaviour of anything in the text that opens a popover: the button, the four ways in, the
 // one popover at a time, and the placement that keeps it inside the viewport. What differs between the
-// two elements is three small things, and each is a method below.
+// two elements is a few small things, and each is a method below.
 class TbPopover extends HTMLElement {
   connectedCallback() {
     if (this.__built) return;
     this.__built = true;
-    const text = this.textContent;
     this.key = this.lookupKey();
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = text;
+    this.fillLabel(button);
     button.setAttribute('aria-expanded', 'false');
     this.replaceChildren(button);
     this.button = button;
@@ -105,6 +110,11 @@ class TbPopover extends HTMLElement {
     return true;
   }
 
+  /** Put what the reader sees into the button: the element's text. A term keeps some markup too. */
+  fillLabel(button) {
+    button.textContent = this.textContent;
+  }
+
   /** What the popover is about: a reference for a term, a character or a `for` attribute. */
   lookupKey() {
     return this.textContent;
@@ -145,6 +155,8 @@ class TbPopover extends HTMLElement {
     pop.setAttribute('role', 'tooltip');
     pop.id = this.popoverId();
     pop.innerHTML = content.html;
+    // Created parked, so the card is never on the page at the stylesheet's `left: 0` before `place()`.
+    pop.style.left = OFF_PAGE;
     this.append(pop);
     this.pop = pop;
     this.hoverOnly = hover;
@@ -197,18 +209,37 @@ class TbPopover extends HTMLElement {
   // terms; so it is nudged along its own axis until both edges are in, rather than flipped from one
   // anchor to the other. Flipping cannot help a box wider than both gaps, which is why the first
   // version pushed a mid-line term's definition off the left edge.
+  //
+  // **On a phone the width to stay inside is the visual viewport's, and the card must never widen the
+  // page on its way there.** This used to put the card at `left: 0`, measure it, and clamp it against
+  // `innerWidth`. From a term mid-line, `left: 0` runs the card past the right edge. A mobile browser
+  // takes that overflow in by growing its layout viewport, and `innerWidth` reports the layout
+  // viewport, so the clamp read a width the card had just inflated. Measured under Chromium's mobile
+  // emulation at 390 px on 2026-09-23: 33 of chapter 5's 46 cards and 32 of chapter 6's 50 ended off the
+  // right edge with the page scrolling sideways. Chapter 5's NAD⁺ card sat at 63–415 px with `innerWidth`
+  // at 415, while `visualViewport.width` and the root's `clientWidth` stayed 390. A 390 px desktop window
+  // put the same card at 30–382, because a desktop's layout viewport does not grow. `npm run devices`
+  // passed it: it measures a card against `innerWidth`, and checks for sideways scroll before any card is
+  // open.
+  //
+  // So the card is parked at OFF_PAGE whenever it is measured, and the clamp reads the visual viewport's
+  // width, falling back to the root's `clientWidth`. The vertical room below still reads `innerHeight`,
+  // which grew only in proportion to the width (844 to 899 px with the width at 415).
   place() {
     const pop = this.pop;
     if (!pop) return;
     const margin = 8;
     const gap = 8;
-    pop.style.left = '0px';
+    // Parked before anything is read: reading a size forces a layout, and a card still where it was
+    // would be laid out there. After the fonts settle the term may have moved, taking the card with it.
+    pop.style.left = OFF_PAGE;
     pop.style.top = '';
     pop.style.maxHeight = '';
+    const view = window.visualViewport?.width ?? document.documentElement.clientWidth;
     const host = this.getBoundingClientRect();
     const box = pop.getBoundingClientRect();
     let left = 0;
-    if (host.left + box.width > innerWidth - margin) left = innerWidth - margin - box.width - host.left;
+    if (host.left + box.width > view - margin) left = view - margin - box.width - host.left;
     if (host.left + left < margin) left = margin - host.left;
     pop.style.left = `${Math.round(left)}px`;
 
@@ -257,10 +288,47 @@ class TbPopover extends HTMLElement {
   }
 }
 
+// What a term's label keeps of the markup it was written with. A super- or subscript in the prose is
+// markup, never a precomposed character (docs/design/chapter-recipe.md §7), and a term is a word of the
+// prose, so `NAD<sup>+</sup>` has to reach the reader as the NAD⁺ the sentence around it would set. The
+// label used to be the element's `textContent`, which set chapter 5's NAD<sup>+</sup> as "NAD+", and
+// chapter 6's NADP⁺, C₃ plant, C₄ plant and cytochrome b₆f flat in the same way.
+//
+// The list is explicit although the content is authored. A tag off it is dropped and what it held is
+// copied by the same rule, so its text stays. A kept tag is rebuilt bare, with none of its attributes.
+// The button is still named from the text inside it, so its accessible name has not moved: Chrome's
+// names for all 96 term buttons of chapters 5 and 6 were the same before and after (2026-09-23).
+//
+// The popover's heading is a different thing and stays text. It is the glossary entry's `term`, which
+// `checkGlossaryTerms` in tools/check-content.js keeps free of tags because every popover sets it as text.
+const LABEL_TAGS = new Set(['sub', 'sup', 'i', 'em', 'b', 'strong']);
+
+/** Copy `from`'s children into `into`, keeping LABEL_TAGS as elements and anything else as its text. */
+function copyLabel(from, into) {
+  for (const node of from.childNodes) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      into.append(node.data);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      if (LABEL_TAGS.has(node.localName)) {
+        const kept = document.createElement(node.localName);
+        copyLabel(node, kept);
+        into.append(kept);
+      } else {
+        copyLabel(node, into);
+      }
+    }
+  }
+}
+
 export class TbTerm extends TbPopover {
   /** The glossary reference. A property as well as an attribute, as it always was. */
   get ref() {
     return this.getAttribute('ref');
+  }
+
+  /** The label as it was written, less every tag LABEL_TAGS does not name. */
+  fillLabel(button) {
+    copyLabel(this, button);
   }
 
   lookupKey() {
