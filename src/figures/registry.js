@@ -114,6 +114,7 @@ export const FIGURES = Object.freeze({
   // 9/16 and not the brief's 3/4: the fork scene's eleven controls wrap to five toolbar rows at 342 px, and
   // a 3/4 stage leaves the drawing and its table 284 px between them.
   'replication-fork': { url: new URL('./replication-fork.js', import.meta.url).href, title: 'The fork, with its chemistry left in', needsWebGL: false, aspect: 21 / 9, narrowAspect: 9 / 16 },
+  'chromosome-end': { url: new URL('./chromosome-end.js', import.meta.url).href, title: 'One round of copying at the tip', needsWebGL: false, aspect: 16 / 9, narrowAspect: 9 / 16 },
 
   // 《资治通鉴》 卷一 周纪一 — the second book. Its figures are about a text and a history, not a
   // specimen: where the three states sat and when, what a character becomes when it joins another, and
