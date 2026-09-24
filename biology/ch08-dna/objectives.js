@@ -83,6 +83,13 @@
 //   `oxygen-is-the-acceptor` — §7.4 is where electrons leaking from the chain make superoxide, the source of
 //                              the oxidative damage in §8.5's table
 //
+// Four figures, at the reduced scope chapter 6 shipped with (docs/policies/local-rules.md, "The usage
+// allowance is the budget"): `fig-helix-lab` (§8.2), `fig-meselson-stahl` (§8.3), `fig-fork` (§8.4) and
+// `fig-telomere` (§8.7). The four cut were `fig-genetic-material` (§8.1), `fig-fidelity` (§8.5),
+// `fig-nucleosome` (§8.6) and `fig-genome` (§8.8); the twenty-two objectives they taught name no figure
+// (`figures: []`), and each is taught by its section's prose and tables. FIGURES.md says what each
+// cut figure's section carries now.
+//
 // Inside the chapter the graph runs in the order the prose argues — the evidence, the structure, copying,
 // the chemistry, the checking, the packing, the ends and the contents — and no edge points forward in
 // the text. Two reach back across sections, and each is a claim about what the later idea is built on:
@@ -95,35 +102,35 @@ export const OBJECTIVES = [
     id: 'protein-was-favoured',
     statement: 'Explain why most biologists before the 1940s expected genes to be made of protein, and say what was believed about DNA that made it seem unable to carry them.',
     prereqs: ['four-classes', 'amino-acid-structure', 'nucleotide-parts'],
-    teaches: { sections: ['evidence'], figures: ['fig-genetic-material'] },
+    teaches: { sections: ['evidence'], figures: [] },
     level: 'explain',
   },
   {
     id: 'transformation',
     statement: 'Describe Griffith\'s experiment with two forms of pneumococcus, and say what transformation showed about heredity and what it left unexplained.',
     prereqs: ['controlled-experiment', 'prokaryote-parts'],
-    teaches: { sections: ['evidence'], figures: ['fig-genetic-material'] },
+    teaches: { sections: ['evidence'], figures: [] },
     level: 'explain',
   },
   {
     id: 'avery-enzymes',
     statement: 'Predict what an enzyme that destroys protein, RNA or DNA does to the activity of a transforming extract, and explain why the pattern of results points at DNA.',
     prereqs: ['transformation', 'active-site'],
-    teaches: { sections: ['evidence'], figures: ['fig-genetic-material'] },
+    teaches: { sections: ['evidence'], figures: [] },
     level: 'apply',
   },
   {
     id: 'hershey-chase',
     statement: 'Say which radioactive isotope labels a bacteriophage\'s protein and which its DNA, and why; and predict where each label ends up after infected cells are blended and spun.',
     prereqs: ['element-identity', 'functional-groups', 'nucleotide-parts'],
-    teaches: { sections: ['evidence'], figures: ['fig-genetic-material'] },
+    teaches: { sections: ['evidence'], figures: [] },
     level: 'apply',
   },
   {
     id: 'evidence-weighed',
     statement: 'Explain what doubt each of the two decisive experiments left open, and why the two together were stronger than either alone.',
     prereqs: ['avery-enzymes', 'hershey-chase', 'testing-not-proving'],
-    teaches: { sections: ['evidence'], figures: ['fig-genetic-material'] },
+    teaches: { sections: ['evidence'], figures: [] },
     level: 'explain',
   },
 
@@ -245,56 +252,56 @@ export const OBJECTIVES = [
     id: 'base-selection',
     statement: 'Explain how a polymerase picks the right nucleotide far more reliably than the hydrogen bonds of a pair alone could, from the shape its active site closes around.',
     prereqs: ['active-site', 'pairing-geometry', 'weak-bonds-matter'],
-    teaches: { sections: ['fidelity'], figures: ['fig-fidelity'] },
+    teaches: { sections: ['fidelity'], figures: [] },
     level: 'explain',
   },
   {
     id: 'proofreading',
     statement: 'Explain how a polymerase removes a nucleotide it has just added wrongly, and say roughly how much that improves the error rate.',
     prereqs: ['base-selection', 'polymerase-requirements'],
-    teaches: { sections: ['fidelity'], figures: ['fig-fidelity'] },
+    teaches: { sections: ['fidelity'], figures: [] },
     level: 'explain',
   },
   {
     id: 'mismatch-repair',
     statement: 'Explain how a wrong pair left behind by the polymerase is found after copying, and how the repair system tells which strand is the new one.',
     prereqs: ['proofreading', 'complementarity'],
-    teaches: { sections: ['fidelity'], figures: ['fig-fidelity'] },
+    teaches: { sections: ['fidelity'], figures: [] },
     level: 'explain',
   },
   {
     id: 'one-in-a-billion',
     statement: 'Combine the error rates of the three checks into one, say what the overall rate is a rate per, and work out how many new errors one copying of a genome of a given size leaves in each daughter cell.',
     prereqs: ['base-selection', 'proofreading', 'mismatch-repair', 'gene-genome'],
-    teaches: { sections: ['fidelity'], figures: ['fig-fidelity'] },
+    teaches: { sections: ['fidelity'], figures: [] },
     level: 'apply',
   },
   {
     id: 'why-5-to-3',
     statement: 'Explain why every DNA polymerase grows a strand at its 3′ end, what would become of proofreading if a strand grew at the other end, and why the primers are made of RNA.',
     prereqs: ['proofreading', 'pyrophosphate-pull'],
-    teaches: { sections: ['fidelity'], figures: ['fig-fidelity'] },
+    teaches: { sections: ['fidelity'], figures: [] },
     level: 'explain',
   },
   {
     id: 'dna-damage',
     statement: 'Name the commonest kinds of damage DNA suffers in a living cell — lost bases, deaminated bases, oxidised bases, ultraviolet dimers and broken strands — say roughly how often each happens, and say where each comes from.',
     prereqs: ['spontaneous-not-fast', 'why-pigments-absorb', 'photon-energy', 'oxygen-is-the-acceptor'],
-    teaches: { sections: ['fidelity'], figures: ['fig-fidelity'] },
+    teaches: { sections: ['fidelity'], figures: [] },
     level: 'recall',
   },
   {
     id: 'excision-repair',
     statement: 'Explain how a damaged stretch of one strand is cut out and rebuilt from the other, distinguish repairing one base from repairing damage that distorts the helix, and say why a break through both strands cannot be mended that way.',
     prereqs: ['dna-damage', 'complementarity'],
-    teaches: { sections: ['fidelity'], figures: ['fig-fidelity'] },
+    teaches: { sections: ['fidelity'], figures: [] },
     level: 'explain',
   },
   {
     id: 'thymine-not-uracil',
     statement: 'Explain why DNA carries thymine rather than uracil, using what happens when a cytosine loses its amino group, and say why methylated cytosines are places where mutations are unusually common.',
     prereqs: ['dna-vs-rna', 'functional-groups', 'excision-repair'],
-    teaches: { sections: ['fidelity'], figures: ['fig-fidelity'] },
+    teaches: { sections: ['fidelity'], figures: [] },
     level: 'explain',
   },
   {
@@ -303,7 +310,7 @@ export const OBJECTIVES = [
     // as chapter 7's `diagnose-respiration` is.
     statement: 'Decide which system deals with a given mistake or piece of damage — proofreading, mismatch repair, base excision repair, nucleotide excision repair or double-strand break repair — and predict what a person who lacks it suffers.',
     prereqs: ['proofreading', 'mismatch-repair', 'excision-repair', 'pathway-blocked'],
-    teaches: { sections: ['fidelity'], figures: ['fig-fidelity'] },
+    teaches: { sections: ['fidelity'], figures: [] },
     level: 'apply',
   },
 
@@ -312,28 +319,28 @@ export const OBJECTIVES = [
     id: 'packing-problem',
     statement: 'Work out how long the DNA of one human cell would be if it were stretched out, and compare it with the nucleus that holds it and with a bacterium\'s DNA in its cell.',
     prereqs: ['gene-genome', 'diffraction-reading', 'cell-scale'],
-    teaches: { sections: ['packing'], figures: ['fig-nucleosome'] },
+    teaches: { sections: ['packing'], figures: [] },
     level: 'apply',
   },
   {
     id: 'nucleosome',
     statement: 'Describe a nucleosome — the eight histones, the length of DNA wound round them and the linker between — and explain why histones can bind any DNA whatever its sequence.',
     prereqs: ['packing-problem', 'amino-acid-structure', 'bond-types'],
-    teaches: { sections: ['packing'], figures: ['fig-nucleosome'] },
+    teaches: { sections: ['packing'], figures: [] },
     level: 'explain',
   },
   {
     id: 'packing-levels',
     statement: 'Put the levels of packing in order from the double helix to a chromosome at division, say which are established and which are still argued over, and explain why tightly packed DNA is harder to read.',
     prereqs: ['nucleosome', 'em-tradeoff'],
-    teaches: { sections: ['packing'], figures: ['fig-nucleosome'] },
+    teaches: { sections: ['packing'], figures: [] },
     level: 'explain',
   },
   {
     id: 'packing-compared',
     statement: 'Compare how a bacterium, an archaeon, a human nucleus and a mitochondrion package their DNA, and say what the comparison suggests about where histones came from.',
     prereqs: ['nucleosome', 'nucleoid-plasmid', 'bacteria-archaea', 'organelle-genomes'],
-    teaches: { sections: ['packing'], figures: ['fig-nucleosome'] },
+    teaches: { sections: ['packing'], figures: [] },
     level: 'explain',
   },
 
@@ -365,28 +372,28 @@ export const OBJECTIVES = [
     id: 'genome-composition',
     statement: 'Say roughly what fraction of the human genome codes for protein, and name the main kinds of sequence that make up the rest.',
     prereqs: ['gene-genome'],
-    teaches: { sections: ['genome'], figures: ['fig-genome'] },
+    teaches: { sections: ['genome'], figures: [] },
     level: 'recall',
   },
   {
     id: 'transposable-elements',
     statement: 'Explain how a transposable element spreads through a genome, and why most of the copies in the human genome are broken remains that can no longer move.',
     prereqs: ['genome-composition', 'natural-selection', 'telomerase'],
-    teaches: { sections: ['genome'], figures: ['fig-genome'] },
+    teaches: { sections: ['genome'], figures: [] },
     level: 'explain',
   },
   {
     id: 'c-value-paradox',
     statement: 'Explain why the amount of DNA in a genome does not follow the complexity of the organism, and use two genomes of very different size to say where the difference lies.',
     prereqs: ['transposable-elements', 'gene-genome'],
-    teaches: { sections: ['genome'], figures: ['fig-genome'] },
+    teaches: { sections: ['genome'], figures: [] },
     level: 'apply',
   },
   {
     id: 'junk-dna-debate',
     statement: 'Explain why "codes for protein", "conserved by selection" and "biochemically active" give very different answers to how much of the genome is functional, and say what the word "junk" does and does not claim.',
     prereqs: ['genome-composition', 'natural-selection', 'testing-not-proving'],
-    teaches: { sections: ['genome'], figures: ['fig-genome'] },
+    teaches: { sections: ['genome'], figures: [] },
     level: 'explain',
   },
 ];
