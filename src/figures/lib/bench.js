@@ -627,14 +627,49 @@ export function bench(root, ctx, {
   // formatted value: the two spans are written together, one for each width, and the CSS chooses. Before
   // this, `format` could only read `b.narrow` at the moment the value was set, so both spans came out
   // the same and the figure had to re-set every slider when the stage crossed its threshold.
-  function slider(labelText, { min, max, step = 1, value, unit = '', narrowUnit = null, format = null, onInput = null, short = null, only = null, stepper = false }) {
+  //
+  // Two options are for a stepper whose value has a DIRECTION THE READER CAN SEE, which the default
+  // arithmetic labels contradict. `atp3d`'s Donor and Target walk a vertical ladder, and until
+  // 2026-09-23 the button named "step up" — and ArrowUp on the range — moved the marker one rung DOWN
+  // it, because the number being raised was a rung counted from the top.
+  //   `steps: { down: { glyph, name }, up: { glyph, name } }` puts the reader's words on the two buttons:
+  //   the glyph is what the button shows, and the name is what it is called after the label, which is
+  //   also how a recipe finds it. The default is '−' and '+', 'step down' and 'step up'. "Up" still
+  //   calls stepUp(), so ArrowUp on the range and the up button always agree; which way up IS belongs to
+  //   the figure, which counts its values so that raising one is what "up" means on its own stage.
+  //   `valueText(v)` is what a screen reader says for the value, as `aria-valuetext`, kept in step with
+  //   every change. Without it a range announces its bare number, and for a list of compounds that is an
+  //   index nobody can read.
+  function slider(labelText, { min, max, step = 1, value, unit = '', narrowUnit = null, format = null, onInput = null, short = null, only = null, stepper = false, steps = null, valueText = null }) {
     // A `format` owns the whole value, so a `unit` beside one was being dropped in silence — three
     // sliders in chapter 5 asked for "mmol/L" and "mM" and printed neither. Now it is a refusal, and a
     // format that wants the unit takes the width it is setting and writes it itself.
     if (format && (unit || narrowUnit)) {
       throw new Error(`${kind}: the slider "${labelText}" was given both format and ${unit ? `unit "${unit}"` : `narrowUnit "${narrowUnit}"`}. format writes the whole value, so the unit would never appear. Either drop the unit, or write it inside format, which is given the width: format(v, { narrow }).`);
     }
+    if (steps && !stepper) {
+      throw new Error(`${kind}: the slider "${labelText}" was given steps, which name the two buttons a stepper grows at a phone's width; a plain slider has no buttons to name. Make it a stepper() or drop steps.`);
+    }
+    const stepWords = steps ?? { down: { glyph: '−', name: 'step down' }, up: { glyph: '+', name: 'step up' } };
+    for (const dir of ['down', 'up']) {
+      const words = stepWords[dir];
+      if (!words || typeof words.glyph !== 'string' || !words.glyph || typeof words.name !== 'string' || !words.name) {
+        throw new Error(`${kind}: the stepper "${labelText}" was given steps.${dir} = ${JSON.stringify(words)}. Each of steps.down and steps.up needs a glyph, which is what the button shows, and a name, which is what it is called after the label ("${labelText}, <name>"); both must be non-empty strings.`);
+      }
+    }
+    if (valueText !== null && typeof valueText !== 'function') {
+      throw new Error(`${kind}: the slider "${labelText}" was given valueText as ${typeof valueText}. It is a function from the value to the words a screen reader says for it, valueText(v) => string.`);
+    }
     const input = h('input', { class: 'fig-range', type: 'range', min, max, step, value, 'aria-label': labelText });
+    // Read back off the input, not from the number handed in: the browser clamps a range's value to
+    // its min, max and step, and the words a screen reader hears should describe the value it holds.
+    // `format` and `onInput` still receive the number `set()` was handed, as they always have. What
+    // nine figures' onInput receives is not this change's to alter, so a caller that hands set() a
+    // value outside the range still gets that value back.
+    const speak = () => {
+      if (valueText) input.setAttribute('aria-valuetext', String(valueText(Number(input.value))));
+    };
+    speak();
     const unitFor = (isNarrow) => (isNarrow ? (narrowUnit ?? unit) : unit);
     const show = (v, isNarrow) => (format ? format(v, { narrow: isNarrow }) : `${v}${unitFor(isNarrow) ? ` ${unitFor(isNarrow)}` : ''}`);
     const values = (v) => labelSpans(show(v, false), show(v, true));
@@ -644,13 +679,13 @@ export function bench(root, ctx, {
       else input.stepDown();
       input.dispatchEvent(new Event('input', { bubbles: true }));
     };
-    const stepBtn = (dir, glyph, word) => h('button', {
-      class: 'fig-btn tb-step', type: 'button', 'aria-label': `${labelText}, step ${word}`, text: glyph,
+    const stepBtn = ({ glyph, name }) => h('button', {
+      class: 'fig-btn tb-step', type: 'button', 'aria-label': `${labelText}, ${name}`, text: glyph,
     });
     const parts = [...labelSpans(labelText, short), input, out];
     if (stepper) {
-      const down = stepBtn(-1, '−', 'down');
-      const up = stepBtn(1, '+', 'up');
+      const down = stepBtn(stepWords.down);
+      const up = stepBtn(stepWords.up);
       down.addEventListener('click', () => bump(-1));
       up.addEventListener('click', () => bump(1));
       // After BOTH label spans, so the reading order at a phone's width is label, down, value, up —
@@ -666,13 +701,14 @@ export function bench(root, ctx, {
     input.addEventListener('input', () => {
       const v = Number(input.value);
       out.replaceChildren(...values(v));
+      speak();
       onInput?.(v);
     });
     register(node, { only, long: labelText, name: labelText });
     return {
       node, input,
       get value() { return Number(input.value); },
-      set(v) { input.value = String(v); out.replaceChildren(...values(v)); onInput?.(Number(v)); },
+      set(v) { input.value = String(v); out.replaceChildren(...values(v)); speak(); onInput?.(Number(v)); },
     };
   }
 

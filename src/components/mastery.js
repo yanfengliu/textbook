@@ -17,6 +17,7 @@
 // is being learned, a filled disc with a tick is learned well, a barred ring has slipped.
 
 import { learning, record } from './task.js';
+import { displayOrder } from './choice-order.js';
 
 // ---------- the state vocabulary ----------
 
@@ -63,6 +64,9 @@ const FLAG_WORDS = {
   'thin-evidence': 'not much to go on yet',
 };
 
+// A letter names a position on the screen when the reader presses it, and an authored option when the
+// record stores it. The two differ, because options are shown in the order displayOrder() draws, not in
+// the order the bank was written in; see renderChoice() and answerChoice().
 const LETTERS = 'ABCDEFGH';
 
 // At most this many written answers in one sitting: they cost minutes each, and ten of them is not
@@ -796,17 +800,25 @@ export class TbSitting extends HTMLElement {
     opts.setAttribute('role', 'group');
     // The question names the group, so a reader who lands on option A hears what is being asked.
     opts.setAttribute('aria-labelledby', stem.id);
-    step.buttons = (item.options || []).map((option, i) => {
+    // The authored order is never shown: the banks were written with the correct option first, so it
+    // would give the answer away. The order is drawn from the item's id and how often the record has
+    // already seen it answered: the same record gives the same page, and the same question asked again
+    // is shuffled again. `step.order[shown]` is the authored index of the option shown at position `shown`.
+    const options = item.options || [];
+    step.order = displayOrder(item.id, this.timesAnswered(item.id), options.length);
+    step.buttons = step.order.map((authored, shown) => {
+      const option = options[authored];
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'tb-opt';
       const k = document.createElement('span');
       k.className = 'k';
-      k.textContent = LETTERS[i];
+      // The letter follows the screen, so A is always the option at the top.
+      k.textContent = LETTERS[shown];
       const text = document.createElement('span');
       text.append(...fragmentOf(option.text ?? option.html ?? option.label ?? String(option)));
       b.append(k, text);
-      b.addEventListener('click', () => this.answerChoice(step, i));
+      b.addEventListener('click', () => this.answerChoice(step, shown));
       opts.append(b);
       return b;
     });
@@ -974,24 +986,39 @@ export class TbSitting extends HTMLElement {
 
   // ----- answering -----
 
-  answerChoice(step, index) {
+  // How many answers to this item the reader's record already holds: the half of the display order's
+  // seed that changes each time the item comes round. Every event naming the item counts, whether it
+  // was answered or taken on the reader's word, because each was a time the item was shown.
+  timesAnswered(itemId) {
+    const events = safe(() => this.l.store.events(), []) || [];
+    return events.filter((e) => e.item === itemId).length;
+  }
+
+  // `shown` is the position on the screen the reader pressed — a click on that button, or its letter or
+  // digit on the keyboard — and `step.order` turns it into the option the bank wrote.
+  answerChoice(step, shown) {
     if (step.done) return;
     step.done = true;
-    const option = step.item.options[index];
+    const authored = step.order[shown];
+    const option = step.item.options[authored];
     const right = Boolean(option.correct);
     const ms = Math.round(performance.now() - step.shownAt);
     step.outcome = right ? 'right' : 'wrong';
-    step.chose = LETTERS[index];
-    step.buttons.forEach((b, i) => {
+    step.chose = LETTERS[authored];
+    step.buttons.forEach((b, at) => {
       b.disabled = true;
-      if (step.item.options[i].correct) b.classList.add('is-correct');
+      if (step.item.options[step.order[at]].correct) b.classList.add('is-correct');
     });
-    if (!right) step.buttons[index].classList.add('is-wrong');
+    if (!right) step.buttons[shown].classList.add('is-wrong');
     record({
       objective: step.objective,
       item: step.item.id,
       kind: step.item.kind || 'mcq',
       outcome: step.outcome,
+      // `chose` names the option, not the position the reader saw it in: it is the option's letter in
+      // the bank as written (A for the bank's first option), whichever button it was shown on. That is
+      // what `npm run review` and the study rounds map back to the option's `why`, and every record
+      // written before options were shuffled used the same letters.
       chose: step.chose,
       ms,
       // How many choices there were, so "right at about the rate of guessing" can be worked out.
@@ -1091,13 +1118,15 @@ export class TbSitting extends HTMLElement {
     if (!step) return;
     const onControl = e.target instanceof HTMLElement && e.target.closest('button, a, input, select, textarea, canvas, [contenteditable]');
     if (!step.done && step.buttons?.length) {
+      // A letter or a digit names a position on the screen — the letter printed on that button — and
+      // answerChoice() turns the position into the option shown there.
       const key = e.key.toUpperCase();
       const byLetter = LETTERS.indexOf(key);
       const byDigit = /^[1-9]$/.test(e.key) ? Number(e.key) - 1 : -1;
-      const index = byLetter >= 0 ? byLetter : byDigit;
-      if (index >= 0 && index < step.buttons.length) {
+      const shown = byLetter >= 0 ? byLetter : byDigit;
+      if (shown >= 0 && shown < step.buttons.length) {
         e.preventDefault();
-        this.answerChoice(step, index);
+        this.answerChoice(step, shown);
         return;
       }
     }

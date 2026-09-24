@@ -132,6 +132,37 @@ export class TbSort extends HTMLElement {
     this.replaceChildren(dropIntro, tray, binsEl, status);
     this.tray = tray;
     this.updateStatus();
+    this.watchRows();
+  }
+
+  // One layout for the whole sort. Each row decides by itself whether its choices fit beside its name (the
+  // flex wrap in src/styles/components.css), so a sort mixing short names with longer ones split between
+  // the two layouts over a band of widths: in an 800px window, a sort of "A mule" and "A crystal of salt
+  // growing in brine" set the first row's choices at the right edge and the second's under its name. So
+  // whenever the tray changes width the rows are laid out afresh, and if any row's choices went under its
+  // name, every row's do (`data-stacked`). Width only: a placed card changes the tray's height, and deciding
+  // again then would move every remaining row under the reader's hand.
+  watchRows() {
+    let width = -1;
+    const settle = () => {
+      this.removeAttribute('data-stacked');
+      const split = Array.from(this.tray.querySelectorAll('.tb-sort__item')).some((row) => {
+        const name = row.querySelector('.name');
+        const choose = row.querySelector('.choose');
+        return name && choose && choose.getBoundingClientRect().top >= name.getBoundingClientRect().bottom - 1;
+      });
+      if (split) this.setAttribute('data-stacked', '');
+    };
+    new ResizeObserver(([entry]) => {
+      if (entry.contentRect.width === width) return;
+      width = entry.contentRect.width;
+      settle();
+    }).observe(this.tray);
+    // A face that arrives late changes every name's width and not the tray's. Only before the first card
+    // is placed, for the same reason as above.
+    document.fonts?.ready.then(() => {
+      if (!this.placed) settle();
+    });
   }
 
   place(card, binId) {
