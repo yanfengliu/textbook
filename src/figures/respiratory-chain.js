@@ -1,13 +1,15 @@
 // Figure 7.3, `respiratory-chain`: the fall, in four steps.
 //
-// The inner mitochondrial membrane drawn edge-on as a staircase beside a vertical axis of reduction
-// potential, so the drawing is also the graph: every carrier sits at the height its own potential puts it
-// at, each complex stands in one riser of the stair, and a pair of electrons is seen falling from rung to
-// rung. The matrix is below and to the left of the stair, the intermembrane space above and to the right,
-// so the charges a complex moves cross its riser from left to right. The reader delivers pairs from NADH
-// (at complex I) or from the Krebs cycle's FADH₂ (at complex II, which is the cycle's own enzyme), blocks a
-// complex with its inhibitor, takes the oxygen away, or moves the bottom rung to another acceptor — and the
-// row for ATP made here stays at 0 through all of it, because the chain makes none.
+// The inner mitochondrial membrane turned on its side: it runs down the middle of the drawing with the
+// matrix on its left and the intermembrane space on its right, and the height on the page is reduction
+// potential, read off the axis at the left. So the drawing is also the graph. NADH docks at the top of
+// complex I's arm at −0.32 V, ubiquinone sits in the bilayer at +0.04, cytochrome c on the outer face at
+// +0.25, and oxygen takes the pair at the bottom, at +0.82, on the matrix side where the water is made. A
+// pair of electrons is seen falling from rung to rung, and the charges a complex moves cross the membrane
+// from left to right. The reader delivers pairs from NADH (at complex I) or from the Krebs cycle's FADH₂
+// (at complex II, which is the cycle's own enzyme), blocks a complex with its inhibitor, takes the oxygen
+// away, or moves the bottom rung to another acceptor. The row for ATP made here stays at 0 through all
+// of it, because the chain makes none.
 //
 // THE NUMBERS, the prose's wherever it gives one (§7.4, §7.5, §7.7):
 //   NAD⁺/NADH −0.32 V; the cycle's FAD, at the succinate/fumarate couple, +0.03; ubiquinone +0.04;
@@ -51,8 +53,12 @@
 //
 // SIMPLIFICATIONS, stated rather than implied:
 //   - The other acceptors are the mitochondrial chain with its bottom rung moved: the same kind of
-//     machinery, not any one organism's chain (§7.7). Nitrate reductase hangs from the quinone's rung, and
-//     complex II runs backwards as fumarate reductase, because those are the parts that do it in E. coli.
+//     machinery, not any one organism's chain (§7.7). Under nitrate a nitrate reductase takes the place of
+//     complexes III and IV, and under fumarate fumarate reductase, complex II's close relative, takes the
+//     place of complex II; those are the enzymes that do it in E. coli. Under sulfate and carbon dioxide the
+//     rung sits above everything the chain has, so its parts are drawn idle.
+//   - A complex is drawn as a block spanning the potentials between the carriers on either side of it,
+//     which is where its own centres lie; its inner centres are not drawn.
 //   - One pair per station. A complex, a quinone or a cytochrome c holds one pair or none, and a pair moves
 //     on the moment the next station is empty and its own exit is not blocked, the most downstream first.
 //   - Standard potentials throughout, as the prose uses them.
@@ -63,21 +69,24 @@
 //     refused and nothing below complex II is reduced. NADH's pairs never pass through complex II, so with
 //     NADH fed straight in the chain runs on. A real mitochondrion on pyruvate slows and stops too, because
 //     its cycle halts at succinate (§7.8), so no word here says the chain runs on any NADH-linked fuel.
+//     Malonate also blocks fumarate reductase, and does so here.
 //   - Changing the acceptor starts a fresh experiment: the flow and the counters clear.
 //
-// CHANGES FROM THE BRIEF (FIGURES.md, as first written), each for the review of 2026-09-24:
+// CHANGES FROM THE BRIEF (FIGURES.md, as first written), each for the review of 2026-09-24 or for the
+// drawing:
 //   - protonsPumped is chargesMoved, with chargesPerPair and chargesAreCeiling beside it, because §7.4 now
 //     prices the gradient in charges (4, 2 and 4) and not in protons released (4, 4 and 2).
 //   - Nitrate 8 → at most 7, fumarate 4 → at most 3 (finding 9).
 //   - The gradient reads 0 until a pair has passed, rather than opening charged.
-//   - The stage is 16 / 10, not 21 / 9, and the membrane is a staircase rather than a flat band: a flat band
-//     cannot put every carrier at its own potential, which is what the brief asks the drawing to do.
+//   - The stage is 16 / 10, not 21 / 9, and the membrane runs down the stage at every width, which is the
+//     brief's own narrow composition: a membrane drawn across the stage cannot put every carrier at its own
+//     potential, which is what the brief asks the drawing to do.
 //
-// TWO COMPOSITIONS, chosen by the pane's shape rather than by a flag: landscape (16 / 10) with the readout
-// in a column at the right; portrait (below 800 px, 2 / 3) with the stair in the upper part and the readout
-// under it, where the same stair at the same potentials stands in a narrower frame. The toolbar's short
-// labels come in below a 600 px stage. Every label is measured and placed against every mark, line and
-// label already placed, as in zscheme; in the lab a label nothing clears is thrown as a defect.
+// TWO ARRANGEMENTS of one drawing, chosen by the pane's shape rather than by a flag: landscape with the
+// readout in a column at the right, and portrait (the phone's 2 / 3 stage) with the readout beneath. The
+// toolbar's short labels come in below a 600 px stage. Every label is measured and placed against every
+// mark, line and label already placed, as in zscheme; in the lab a label nothing clears is thrown as a
+// defect.
 //
 // describe() is documented at the foot of this file.
 import { C, el, h, clamp, lerp } from './lib/svg.js';
@@ -96,13 +105,14 @@ const PSI_MV = 150;
 
 const E = Object.freeze({ nadh: -0.32, fad: 0.03, uq: 0.04, mq: -0.07, c: 0.25, o2: 0.82, no3: 0.42 });
 
-// In the stepper's order, which is the order of yield: §7.7's table, top to bottom.
+// In the stepper's order, which is the order of yield: §7.7's table, top to bottom. `short` is what a
+// label shrinks to when the full one finds no room.
 const ACCEPTORS = Object.freeze([
-  { id: 'oxygen', E: 0.82, mark: 'O_{2}', label: 'O_{2} → H_{2}O', plain: 'O₂', word: 'oxygen', product: 'H_{2}O' },
-  { id: 'nitrate', E: 0.42, mark: 'NO_{3}^{−}', label: 'NO_{3}^{−} → NO_{2}^{−}', plain: 'NO₃⁻', word: 'nitrate', product: 'NO_{2}^{−}' },
-  { id: 'fumarate', E: 0.03, mark: 'fumarate', label: 'fumarate → succinate', plain: 'fumarate', word: 'fumarate', product: 'succinate' },
-  { id: 'sulfate', E: -0.22, mark: 'SO_{4}^{2−}', label: 'SO_{4}^{2−}', plain: 'SO₄²⁻', word: 'sulfate', product: null },
-  { id: 'carbon-dioxide', E: -0.24, mark: 'CO_{2}', label: 'CO_{2}', plain: 'CO₂', word: 'carbon dioxide', product: null },
+  { id: 'oxygen', E: 0.82, label: 'O_{2} → H_{2}O', short: 'O_{2}', mark: 'O_{2}', plain: 'O₂', word: 'oxygen', product: 'H_{2}O' },
+  { id: 'nitrate', E: 0.42, label: 'NO_{3}^{−} → NO_{2}^{−}', short: 'NO_{3}^{−}', mark: 'NO_{3}^{−}', plain: 'NO₃⁻', word: 'nitrate', product: 'NO_{2}^{−}' },
+  { id: 'fumarate', E: 0.03, label: 'fumarate → succinate', short: 'fumarate', mark: 'fumarate', plain: 'fumarate', word: 'fumarate', product: 'succinate' },
+  { id: 'sulfate', E: -0.22, label: 'SO_{4}^{2−}', short: 'SO_{4}^{2−}', mark: 'SO_{4}^{2−}', plain: 'SO₄²⁻', word: 'sulfate', product: null },
+  { id: 'carbon-dioxide', E: -0.24, label: 'CO_{2}', short: 'CO_{2}', mark: 'CO_{2}', plain: 'CO₂', word: 'carbon dioxide', product: null },
 ]);
 
 const BLOCKS = Object.freeze([
@@ -171,18 +181,19 @@ const T_HOP = 0.36;
 const T_APPEAR = 0.3;
 const T_GAP = 0.2;
 const T_CHARGE = 0.6;
-const STAGGER = 0.08;
+const STAGGER = 0.13;
 const T_FX = 1.0;
 const T_GRAD = 1.6;
 const ease = (f) => f * f * (3 - 2 * f);
 
 // No-break spaces: a sentence must not break inside "complex III", "0.82 V" or "19.3 kJ/mol".
-const NB = ' ';
-const VMIN = -0.46;
-const VMAX = 0.92;
+const NB = String.fromCharCode(0xa0);
+const VMIN = -0.44;
+const VMAX = 0.9;
 const TICKS = [-0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8];
 const sv = (v) => (v > 0 ? `+${v.toFixed(2)}` : v < 0 ? `−${Math.abs(v).toFixed(2)}` : '0.00');
 const si = (v) => (v < 0 ? `−${Math.abs(v)}` : String(v));
+const cap = (s) => `${s[0].toUpperCase()}${s.slice(1)}`;
 
 // ---------------------------------------------------------------- type set as type
 //
@@ -263,20 +274,20 @@ function scriptify(root) {
 
 const CSS = `
 .tb-respiratory-chain .rc-tick { fill: var(--ink-faint); font-variant-numeric: lining-nums tabular-nums; }
-.tb-respiratory-chain .rc-cap { fill: var(--ink-faint); }
+.tb-respiratory-chain .rc-cap { fill: var(--ink-soft); }
 .tb-respiratory-chain .rc-name { fill: var(--ink); font-weight: 600; }
 .tb-respiratory-chain .rc-soft { fill: var(--ink-soft); }
-.tb-respiratory-chain .rc-region { fill: var(--ink-faint); font-style: italic; }
+.tb-respiratory-chain .rc-region { fill: var(--ink-soft); font-style: italic; }
 .tb-respiratory-chain .rc-grid { stroke: var(--rule); stroke-width: 0.6; }
 .tb-respiratory-chain .rc-spine { stroke: var(--rule-strong); stroke-width: 1; }
 .tb-respiratory-chain .rc-path { stroke: var(--ink-soft); stroke-width: 1.3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .tb-respiratory-chain .rc-path.is-off { stroke: var(--rule-strong); stroke-width: 1.1; stroke-dasharray: 3 3.5; }
 .tb-respiratory-chain .rc-leader { stroke: var(--rule-strong); stroke-width: 0.8; }
-.tb-respiratory-chain .rc-axisval { fill: var(--ink-soft); font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
+.tb-respiratory-chain .rc-axisval { fill: var(--ink); font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
 .tb-respiratory-chain .rc-charge { fill: var(--leaf-text); font-weight: 700; font-variant-numeric: lining-nums tabular-nums; }
 .tb-respiratory-chain .rc-block { fill: var(--coral-text); font-weight: 600; }
 .tb-respiratory-chain .rc-idle { fill: var(--paper-2); stroke: var(--rule-strong); stroke-width: 1; stroke-dasharray: 3 2.5; }
-.tb-respiratory-chain .rc-idle-num { fill: var(--ink-faint); font-weight: 700; }
+.tb-respiratory-chain .rc-idle-num { fill: var(--ink-soft); font-weight: 700; }
 `;
 
 // ---------------------------------------------------------------- the figure
@@ -303,7 +314,7 @@ export function mount(root, ctx) {
   let held = {};
   let pairs = { nadh: 0, fadh2: 0 };
   let charges = 0; // charges moved on the oxygen route since the last clear
-  let completed = 0; // pairs through a route that moves a charge or more, since the last clear
+  let completed = 0; // pairs that reached the acceptor through the chain since the last clear
   let refused = null;
   let jamEntry = false;
   let steps = 0;
@@ -405,9 +416,8 @@ export function mount(root, ctx) {
     lastDepart[donor] = t;
     pairs[donor] += 1;
     if (entry === 'out') {
-      const m = { from: 'src', to: 'out', t0: t, t1: t + d(T_HOP * 1.4) };
-      moves.push(m);
       // 19 and 15 kJ/mol pay for no charge, so nothing is counted towards the gradient.
+      moves.push({ from: 'src', to: 'out', t0: t, t1: t + d(T_HOP * 1.4) });
       return true;
     }
     const m = { from: donor === 'nadh' ? 'src' : 'src2', to: entry, t0: t, t1: t + d(donor === 'nadh' ? T_HOP * 1.3 : T_APPEAR) };
@@ -418,14 +428,13 @@ export function mount(root, ctx) {
     return true;
   }
 
-  // The selected donor's whole route is open: a pair from it would reach the acceptor.
+  // The chosen donor's whole route is open: a pair from it would reach the acceptor.
   function routeOpen(dn) {
-    const a = acc();
     const entry = entryOf(dn);
     if (entry === 'out') return true;
     if (entry !== 'I' && entry !== 'II') return false;
     if (entry === 'II' && block().at === 'II') return false;
-    const route = routeOf(a);
+    const route = routeOf(acc());
     for (let s = entry, n = 0; s !== 'out' && n < 12; s = route[s], n += 1) if (exitBlocked(s)) return false;
     return true;
   }
@@ -453,7 +462,7 @@ export function mount(root, ctx) {
   const pane = b.pane('chain', {
     as: 'svg',
     focus: true,
-    aria: 'The electron transport chain drawn against reduction potential: NADH at −0.32 volts at the top, complex I, ubiquinone, complex III, cytochrome c and complex IV down a staircase membrane to oxygen at +0.82, with complex II entering at +0.03, and a table of what a pair releases and moves. Press N or F to choose NADH or the cycle\'s FADH2, D or Enter to deliver a pair, B to block the next complex, O to take the oxygen away or give it back, A to change the acceptor, Space to run or pause, and Home to reset.',
+    aria: 'The electron transport chain drawn against reduction potential. The inner membrane runs down the middle, the matrix on its left and the intermembrane space on its right, and the height is the potential: NADH at −0.32 volts at the top feeds complex I, then ubiquinone, complex III, cytochrome c and complex IV, down to oxygen at +0.82; complex II enters at +0.03 with the cycle\'s FADH2. Charges cross the membrane from left to right, and a table beside the drawing shows what a pair releases and moves, and that the chain makes no ATP. Press N or F to choose NADH or FADH2, D or Enter to deliver a pair, B to block the next complex, O to take the oxygen away or give it back, A to change the acceptor, Space to run or pause, and Home to reset.',
   });
   b.compose({
     wide: { columns: 'minmax(0, 1fr)', rows: 'minmax(0, 1fr)', at: { chain: [1, 1] } },
@@ -503,12 +512,16 @@ export function mount(root, ctx) {
     afterAction();
   }, { segmented: true });
   b.action('Deliver a pair', () => deliverAct(), { short: 'Deliver', primary: true, aria: 'Deliver a pair, from the chosen donor' });
+  // Run and Reset stand with Deliver, so that the conditions below (block, oxygen, acceptor) share a row
+  // and a longer value in one of them does not push the toolbar onto a third.
+  const runCtl = b.run({ primary: false, aria: 'Run, let the pairs move', onChange: () => draw() });
+  b.action('Reset', () => resetAll(), { aria: 'Reset, the chain idle with oxygen present and nothing blocked' });
   b.divide();
-  const BLOCK_WIDE = ['none', 'rotenone at I', 'malonate at II', 'antimycin A at III', 'cyanide at IV'];
+  // The inhibitor's name alone: the stage marks the complex it stops.
   const BLOCK_SAY = ['nothing blocked', 'rotenone, blocking complex I', 'malonate, blocking complex II', 'antimycin A, blocking complex III', 'cyanide, blocking complex IV'];
   const blockCtl = b.stepper('Block', {
     min: 0, max: 4, step: 1, value: 0,
-    format: (v, { narrow }) => (narrow ? (BLOCKS[v]?.by ?? 'none') : BLOCK_WIDE[v]),
+    format: (v) => BLOCKS[v]?.by ?? 'none',
     valueText: (v) => BLOCK_SAY[v],
     onInput: (v) => {
       if (syncing) return;
@@ -552,9 +565,6 @@ export function mount(root, ctx) {
     }
     clearFlow();
   }
-  b.divide();
-  const runCtl = b.run({ primary: false, aria: 'Run, let the pairs move', onChange: () => draw() });
-  b.action('Reset', () => resetAll(), { aria: 'Reset, the chain idle with oxygen present and nothing blocked' });
   for (const n of donorCtl.nodes) scriptify(n);
   scriptify(accCtl.node);
 
@@ -605,7 +615,7 @@ export function mount(root, ctx) {
       if (fx.length && fx.some((f) => fxEnd(f) < t)) fx = fx.filter((f) => fxEnd(f) >= t);
     },
   });
-  const fxEnd = (f) => (f.kind === 'charges' ? f.at + (f.n - 1) * STAGGER + T_CHARGE + 0.45 : f.at + T_FX);
+  const fxEnd = (f) => (f.kind === 'charges' ? f.at + (f.n - 1) * STAGGER + T_CHARGE * 1.75 : f.at + T_FX);
   clearFlow();
 
   // ---- what describe() reports ----
@@ -622,7 +632,6 @@ export function mount(root, ctx) {
     const fall = fallOf(donor, a);
     const on = gradTarget();
     const cs = carriers();
-    const x = crossoverAt();
     return {
       donor,
       pairsDelivered: pairs.nadh + pairs.fadh2,
@@ -643,7 +652,7 @@ export function mount(root, ctx) {
       blockedBy: block().by,
       reducedCarriers: cs.reduced,
       oxidisedCarriers: cs.oxidised,
-      crossoverAt: x,
+      crossoverAt: crossoverAt(),
       refused,
       t: Number(now().toFixed(3)),
       playing: b.playing,
@@ -654,14 +663,12 @@ export function mount(root, ctx) {
   b.onAnnounce((s) => {
     const a = ACCEPTORS.find((x) => x.id === s.acceptor);
     const who = s.donor === 'nadh' ? 'NADH' : 'FADH2 from the cycle';
-    const count = s.chargesAreCeiling
-      ? `at most ${s.chargesPerPair} charges a pair, a ceiling`
-      : `${s.chargesMoved} charges moved`;
-    const block2 = s.blockedBy ? ` ${s.blockedBy} blocks complex ${s.blockedAt}.` : '';
+    const count = s.chargesAreCeiling ? `at most ${s.chargesPerPair} charges a pair, a ceiling` : `${s.chargesMoved} charges moved`;
+    const blocked = s.blockedBy ? ` ${cap(s.blockedBy)} blocks complex ${s.blockedAt}.` : '';
     const noO2 = s.acceptor === 'oxygen' && !s.oxygenPresent ? ' No oxygen.' : '';
     const cross = s.crossoverAt ? ` Crossover at ${nameOf(s.crossoverAt, a)}.` : '';
     const no = s.refused ? ` The last pair was refused: ${refusalWords(s.refused)}.` : '';
-    return `${who} to ${a.word}: ${s.pairsDelivered} ${s.pairsDelivered === 1 ? 'pair' : 'pairs'} delivered, ${count}. Gradient ${s.gradientPH} pH units and ${s.gradientMv} millivolts. ATP made here 0.${block2}${noO2}${cross}${no}`;
+    return `${who} to ${a.word}: ${s.pairsDelivered} ${s.pairsDelivered === 1 ? 'pair' : 'pairs'} delivered, ${count}. Gradient ${s.gradientPH} pH units and ${s.gradientMv} millivolts. ATP made here 0.${blocked}${noO2}${cross}${no}`;
   });
   function refusalWords(r) {
     if (r === 'blocked-entry') return 'malonate holds the cycle at succinate, so no FADH2 is made';
@@ -670,71 +677,71 @@ export function mount(root, ctx) {
     return 'the acceptor sits above FADH2, uphill';
   }
 
-  // ---- the sentence under the table ----
-  const entryName = () => (donor === 'nadh' ? `complex${NB}I` : `complex${NB}II`);
+  // ---- the sentence under the table, in every state the controls can make ----
   const cname = (s) => nameOf(s, acc()).replace(' ', NB);
-  function status(level) {
+  function status(short) {
     const a = acc();
+    const bl = block();
     const per = chargesFor(donor, a);
     const kj = kjOf(fallOf(donor, a));
-    const bl = block();
+    const entry = entryOf(donor);
     const x = crossoverAt();
-    const short = level >= 2;
-    if (refused === 'no-fall') {
-      return short ? 'No fall: FADH₂ and fumarate are level.' : `The cycle's FADH₂ sits at +0.03${NB}V, level with fumarate: no fall, so no pair goes.`;
+    const unusedBlock = bl.at && !inPlay(a).includes(bl.at) ? ` ${cap(bl.by)} blocks complex${NB}${bl.at}, which this route does not use.` : '';
+    // The donor cannot give to this acceptor at all.
+    if (entry === 'no-fall') {
+      return short ? 'No fall: FADH₂ and fumarate are level.' : `The cycle's FADH₂ sits at +0.03${NB}V, level with fumarate: there is no fall, so no pair goes.`;
     }
-    if (refused === 'uphill') {
-      return short ? `Uphill: ${a.word} sits above FADH₂.` : `The cycle's FADH₂ sits at +0.03${NB}V, below ${a.word} at ${sv(a.E)}${NB}V, and electrons do not run uphill, so no pair goes.`;
+    if (entry === 'uphill') {
+      return short ? `Uphill: ${a.word} sits above FADH₂.` : `The cycle's FADH₂ sits at +0.03${NB}V and ${a.word} higher up, at ${sv(a.E)}${NB}V: a pair would have to run uphill, so none goes.`;
     }
-    if (refused === 'blocked-entry') {
+    if (donor === 'fadh2' && bl.at === 'II') {
       return short ? 'Malonate: no FADH₂ is made.' : `Malonate sits in complex${NB}II's succinate site, so the cycle makes no FADH₂ and no pair enters. Everything below complex${NB}II stays oxidised.`;
     }
-    const full = refused === 'backed-up' ? ` A new pair has nowhere to go.` : '';
+    const full = refused === 'backed-up' ? ' A new pair has nowhere to go.' : '';
     if (x) {
-      if (a.id === 'oxygen' && !oxygenOn && bl.at !== 'IV') {
-        return short ? 'No oxygen: backed up from the bottom.' : `No oxygen: complex${NB}IV cannot hand its pair on, so the chain backs up from the bottom and the gradient runs down.${full}`;
+      if (routeOpen(donor)) {
+        return short ? `${cap(bl.by ?? 'the block')} holds NADH; FADH₂ runs.` : `${cap(bl.by ?? 'the block')} holds NADH's pairs at complex${NB}I, but the cycle's FADH₂ enters below it, at complex${NB}II, and still moves ${per} charges a pair.`;
       }
-      const by = bl.by ? `${bl.by[0].toUpperCase()}${bl.by.slice(1)}` : 'The block';
+      if (bl.at !== x && x === 'IV' && a.id === 'oxygen' && !oxygenOn) {
+        return short ? 'No oxygen: backed up from the bottom.' : `No oxygen: complex${NB}IV has nothing to hand its pair to, so the chain backs up from the bottom and the gradient runs down.${full}`;
+      }
+      const by = bl.at === x ? cap(bl.by) : 'The block';
       return short
         ? `Crossover at ${cname(x)}.`
-        : `${by} stops ${cname(x)}: the carriers above it are reduced and those below oxidised, so the crossover is at ${cname(x)}, and the gradient runs down.${full}`;
+        : `${by} stops ${cname(x)}: the carriers above it are reduced and those below it oxidised, so the crossover is at ${cname(x)}, and the gradient runs down.${full}`;
     }
     if (a.id === 'sulfate' || a.id === 'carbon-dioxide') {
-      if (donor === 'nadh') {
-        return short
-          ? `${kj}${NB}kJ/mol: less than one charge.`
-          : `${kj}${NB}kJ/mol from NADH is not quite one charge's worth (19.3${NB}kJ/mol). These organisms take their electrons from fuels other than NADH, mostly hydrogen, and move only a few ions per reaction.`;
-      }
+      return short
+        ? `${kj}${NB}kJ/mol: less than one charge.`
+        : `${kj}${NB}kJ/mol from NADH is not quite one charge's worth (19.3${NB}kJ/mol). These organisms take their electrons from fuels other than NADH, mostly hydrogen, and move only a few ions per reaction.${unusedBlock}`;
     }
     const idle = pairs.nadh + pairs.fadh2 === 0;
+    const malonate = bl.at === 'II' && donor === 'nadh' && a.id !== 'fumarate' ? `Malonate blocks complex${NB}II, which NADH's pairs never pass through. ` : '';
     if (a.id === 'oxygen') {
-      if (idle) return short ? 'Deliver a pair.' : 'Nothing delivered yet. Deliver a pair, and count the charges it moves across the membrane.';
-      if (!oxygenOn) return short ? 'No oxygen.' : `No oxygen: complex${NB}IV has nothing to hand its pair to.`;
-      const malonate = bl.at === 'II' && donor === 'nadh' ? `Malonate blocks complex${NB}II, and NADH's pairs never pass through it: ` : '';
+      if (!oxygenOn) return short ? 'No oxygen.' : `No oxygen: complex${NB}IV has nothing to hand a pair to.`;
+      if (idle) return short ? 'Deliver a pair.' : `${malonate}Nothing delivered yet. Deliver a pair, and count the charges it moves across the membrane.`;
       if (donor === 'nadh') {
-        return short ? '10 charges a pair, and no ATP.' : `${malonate}${malonate ? '4 + 2 + 4 = 10 charges a pair, as before' : 'From NADH, 4 + 2 + 4 = 10 charges a pair'}, and no ATP. The chain's product is the gradient.`;
+        return short ? '10 charges a pair, and no ATP.' : `${malonate}From NADH, 4 + 2 + 4 = 10 charges a pair${malonate ? ', as before' : ''}, and no ATP. The chain's product is the gradient.`;
       }
       return short ? '6 charges a pair, and no ATP.' : `From FADH₂ the pair enters at complex${NB}II, past complex${NB}I: 2 + 4 = 6 charges a pair, and no ATP.`;
     }
-    const unused = bl.at && !inPlay(a).includes(bl.at) ? ` ${bl.by[0].toUpperCase()}${bl.by.slice(1)} blocks complex${NB}${bl.at}, which this route does not use.` : '';
     const ceiling = `${kj}${NB}kJ/mol pays for at most ${per} ${per === 1 ? 'charge' : 'charges'} at 200${NB}mV (19.3${NB}kJ/mol each): a ceiling, not any organism's count.`;
     if (a.id === 'nitrate') {
       if (short) return `At most ${per} charges: a ceiling.`;
-      return `${ceiling}${donor === 'nadh' ? ` E.${NB}coli's own nitrate chain moves about${NB}6.` : ''}${unused}`;
+      return `${malonate}${ceiling}${donor === 'nadh' ? ' A real nitrate chain in a bacterium moves about 6.' : ''}${unusedBlock}`;
     }
-    // fumarate, from NADH (FADH₂ was refused above)
+    // fumarate, from NADH (FADH₂ has no fall to it, above)
     if (short) return `Menaquinone; at most ${per} charges.`;
-    return `Menaquinone (−0.07${NB}V) stands in for ubiquinone, which sits just below fumarate. ${ceiling}${unused}`;
+    return `Menaquinone (−0.07${NB}V) stands in for ubiquinone (+0.04${NB}V), which sits past fumarate (+0.03${NB}V) and could not hand it a pair. ${ceiling}${unusedBlock}`;
   }
   const SAME_KIND = 'The mitochondrial chain with its bottom rung moved: the same kind of machinery, not any one organism\'s chain.';
 
   // ---------------------------------------------------------------- the drawing's clock-side state
 
-  const MODEL = (s) => (held[s] ? 1 : 0);
   // How many pairs a station is DRAWN holding at time t: the model, less those still on their way to it,
   // plus those that have not yet left it.
   function shown(station, t) {
-    let n = MODEL(station);
+    let n = held[station] ? 1 : 0;
     for (const m of moves) {
       if (m.to === station && m.t1 > t) n -= 1;
       if (m.from === station && m.t0 > t) n += 1;
@@ -745,38 +752,13 @@ export function mount(root, ctx) {
 
   // ---------------------------------------------------------------- geometry
   //
-  // Everything the stair draws is decided here, once per pane size, acceptor and block, and both the
-  // drawing and the label placement read it, so a label is placed against exactly what is drawn.
-  let BH = 9; // half the membrane's thickness
-  let CW = 30; // a complex's width
-  let CW2 = 25;
-  let AH = 8; // half complex I's matrix arm
-  let DOT = 2.7;
-  let RQ = 5.5;
-  let RC = 7;
-  let RN = 6.5;
-  let RA = 5.2;
-  let H2 = 22;
-  function applyScale(k, pw) {
-    BH = 9 * k;
-    CW = Math.min(30 * k, Math.max(20, pw * 0.085));
-    CW2 = CW * 0.84;
-    AH = Math.min(8 * k, CW * 0.3);
-    DOT = 2.7 * k;
-    RQ = 5.5 * k;
-    RC = 7 * k;
-    RN = 6.5 * k;
-    RA = 5.2 * k;
-    H2 = 22 * k;
-  }
-
+  // Everything the drawing needs is decided here, once per pane size, acceptor, block, donor and oxygen,
+  // and both the drawing and the label placement read it, so a label is placed against exactly what is
+  // drawn.
   let geo = null;
   function geometry(w, hh) {
-    const key = `${w}|${hh}|${fontsKey()}|${accIdx}|${blockIdx}|${b.narrow ? 'n' : 'w'}`;
-    if (geo?.key === key) {
-      applyScale(geo.k, geo.pw);
-      return geo;
-    }
+    const key = `${w}|${hh}|${fontsKey()}|${accIdx}|${blockIdx}|${donor}|${oxygenOn}`;
+    if (geo?.key === key) return geo;
     const g = frame(w, hh);
     g.key = key;
     placeLabels(g);
@@ -787,161 +769,183 @@ export function mount(root, ctx) {
   function frame(w, hh) {
     const portrait = hh > w * 0.92;
     const g = { w, h: hh, portrait };
+    // Nothing is drawn within M of the pane's edge, where the focus brackets stand. `dw` and `dh` are the
+    // drawing's right and bottom limits in pane coordinates, not its size.
+    const M = 8;
+    g.M = M;
     if (portrait) {
-      const RH = clamp(Math.round(hh * 0.4), 168, 260);
-      g.read = { x: 0, y: hh - RH, w, h: RH };
-      g.dw = w;
-      g.dh = hh - RH - 12;
+      const RH = clamp(Math.round(hh * 0.37), 160, 280);
+      g.read = { x: M, y: hh - M - RH, w: w - 2 * M, h: RH };
+      g.dw = w - M;
+      g.dh = Math.max(120, hh - M - RH - 12);
+      g.memY1 = g.dh + 4;
     } else {
       const RW = clamp(Math.round(w * 0.34), 172, 330);
-      g.read = { x: w - RW, y: 0, w: RW, h: hh };
-      g.dw = w - RW - 18;
-      g.dh = hh;
+      g.read = { x: w - M - RW, y: M, w: RW, h: hh - 2 * M };
+      g.dw = Math.max(160, w - M - RW - 18);
+      g.dh = hh - M;
+      g.memY1 = hh;
     }
-    const k = clamp(Math.min(g.dw / 430, g.dh / 330), 1, 1.3);
+    const k = clamp(Math.min((g.dw - M) / 430, (g.dh - M) / 330), 1, 1.3);
     g.k = k;
     g.size = 10.4 * k;
     g.small = 9.4 * k;
     g.tick = 9.2 * k;
-    g.axisX = Math.ceil(Math.max(textWidth('−0.4', g.tick), textWidth('+0.8', g.tick))) + 5;
+    g.capSize = 9.4 * k;
+    g.axisX = M + Math.ceil(Math.max(textWidth('−0.4', g.tick), textWidth('+0.8', g.tick))) + 5;
     g.left = g.axisX + 16;
     g.right = g.dw - 4;
-    g.pw = Math.max(160, g.right - g.left);
-    applyScale(k, g.pw);
-    g.capSize = 9.4 * k;
-    g.top = Math.round(g.capSize + 13);
+    g.top = M + Math.round(g.capSize + 13);
     g.bottom = g.dh - 8;
-    const yOf = (v) => g.top + ((v - VMIN) / (VMAX - VMIN)) * (g.bottom - g.top);
-    const px = (f) => g.left + f * g.pw;
+    const pxV = (g.bottom - g.top) / (VMAX - VMIN);
+    g.pxV = pxV;
+    const yOf = (v) => g.top + (v - VMIN) * pxV;
     g.yOf = yOf;
+    // Sizes that follow the potential scale as well as the pane, so that a short pane does not lay a
+    // carrier over the complex beside it.
+    g.RQ = clamp(pxV * 0.03, 3.4, 5.5 * k);
+    g.RC = clamp(pxV * 0.036, 4.2, 7 * k);
+    g.RN = clamp(pxV * 0.036, 4.2, 6.5 * k);
+    g.RA = clamp(pxV * 0.034, 4, 5.2 * k);
+    g.DOT = clamp(pxV * 0.02, 2, 2.7 * k);
+    g.GAP = Math.max(2, pxV * 0.012);
+    g.AH = clamp(pxV * 0.04, 4.5, 8 * k);
+    g.BH = clamp(g.dw * 0.034, 13, 20 * k);
+    g.headR = clamp(g.BH * 0.2, 2.6, 3.6 * k);
+    // The membrane's centre line: the matrix side needs room for NADH's arm, complex II and the acceptor,
+    // the intermembrane side for the names of the two mobile carriers.
+    const imsMin = Math.max(textWidth('cytochrome ~c~', g.size, 600), textWidth('intermembrane space', g.small)) + 18;
+    g.sx = Math.round(clamp(g.left + 0.56 * (g.right - g.left), g.left + 96, g.right - g.BH - imsMin));
+    const mL = g.sx - g.BH;
+    const mR = g.sx + g.BH;
+    g.mL = mL;
+    g.mR = mR;
+    g.xN = mL - clamp(0.42 * (mL - g.left), 34, 110 * k);
+    g.W2 = clamp(0.2 * (mL - g.left), 24, 36 * k);
+    g.cx = mR + g.RC - 1.5;
+
     const a = acc();
     const Eq = a.id === 'fumarate' ? E.mq : E.uq;
-    g.Eq = Eq;
-    const x = { N: px(0.06), I: px(0.29), II: px(0.385), Q: px(0.46), Nar: px(0.535), III: px(0.62), c: px(0.715), IV: px(0.81) };
     const y = { N: yOf(E.nadh), Q: yOf(Eq), FAD: yOf(E.fad), C: yOf(E.c), O2: yOf(E.o2), NO3: yOf(E.no3), acc: yOf(a.E) };
-    g.x = x;
     g.y = y;
-    // The stair: riser I from the top of the pane, the quinone's tread, riser III, cytochrome c's tread
-    // (c sits on its upper face), riser IV, and a last tread out to the edge.
-    const y3 = y.C + RC + BH + 1.5;
-    const y4 = yOf(0.7);
-    g.y3 = y3;
-    g.y4 = y4;
-    g.band = [
-      { x: x.I, y: -2 }, { x: x.I, y: y.Q }, { x: x.III, y: y.Q }, { x: x.III, y: y3 },
-      { x: x.IV, y: y3 }, { x: x.IV, y: y4 }, { x: g.dw + 2, y: y4 },
-    ];
-    g.faceIms = offsetLine(g.band, BH);
-    g.faceMat = offsetLine(g.band, -BH);
-    g.headR = BH * 0.34;
-    g.heads = [...beads(g.faceIms, g.headR * 2.35), ...beads(g.faceMat, g.headR * 2.35)];
-    // The complexes, as boxes. Complex I is an L: its membrane arm in riser I, its matrix arm out to NADH.
-    g.body = {
-      Iarm: { x0: x.N + RN + 5 * k, y0: y.N - AH, x1: x.I, y1: y.N + AH },
-      I: { x0: x.I - CW / 2, y0: y.N - AH - 3 * k, x1: x.I + CW / 2, y1: y.Q - 3 },
-      II: { x0: x.II - CW2 / 2, y0: y.Q - BH + 1, x1: x.II + CW2 / 2, y1: y.FAD + H2 },
-      III: { x0: x.III - CW / 2, y0: y.Q - 4 * k, x1: x.III + CW / 2, y1: y.C + 3 * k },
-      IV: { x0: x.IV - CW / 2, y0: y.C - 5 * k, x1: x.IV + CW / 2, y1: yOf(0.86) },
-    };
-    if (a.id === 'nitrate') g.body.Nar = { x0: x.Nar - CW2 / 2, y0: y.Q - BH + 1, x1: x.Nar + CW2 / 2, y1: y.NO3 + 5 * k };
-    // Where a held pair sits, and where each hop runs.
+    const play = new Set(inPlay(a));
+    g.play = play;
+    const idle = (s) => !play.has(s);
+
+    // The bodies. Complex I is an L, its arm out in the matrix with NADH's site at the tip; complex II
+    // stands out of the membrane on the matrix side, where the cycle is.
+    const B = {};
+    B.Iarm = { x0: g.xN + g.RN + 3 * k, y0: y.N - g.AH, x1: g.sx, y1: y.N + g.AH };
+    B.I = { x0: mL, y0: y.N - g.AH - 3 * k, x1: mR, y1: y.Q - g.RQ - g.GAP };
+    const h1 = clamp(pxV * 0.045, 6.5, 11 * k);
+    const h2 = clamp(pxV * 0.13, 14, 26 * k);
+    B.II = { x0: mL - g.W2, y0: y.FAD - h1, x1: mL, y1: y.FAD + h2 };
+    const gap2 = Math.max(3, g.RC * 0.5);
+    if (a.id === 'oxygen') {
+      B.III = { x0: mL, y0: y.Q + g.RQ + g.GAP, x1: mR, y1: y.C - gap2 };
+      B.IV = { x0: mL, y0: y.C + gap2, x1: mR, y1: yOf(0.87) };
+    }
+    if (a.id === 'nitrate') B.Nar = { x0: mL, y0: y.Q + g.RQ + g.GAP, x1: mR, y1: yOf(0.47) };
+    for (const [id, r] of Object.entries(B)) {
+      if (!(r.x1 - r.x0 > 2 && r.y1 - r.y0 > 2)) throw new Error(`respiratory-chain: ${id} came out ${b.num(r.x1 - r.x0, 1)} × ${b.num(r.y1 - r.y0, 1)} px in a ${w}×${hh} pane; the potential scale (${b.num(pxV, 1)} px a volt) is too short to hold it.`);
+    }
+    g.body = B;
+    g.idleBody = { Iarm: idle('I'), I: idle('I'), II: idle('II'), III: false, IV: false, Nar: false };
+    const xII = (B.II.x0 + B.II.x1) / 2;
+    g.xII = xII;
+    // Each complex's numeral stands at the top of its block (complex II's at the foot, below the FAD), and
+    // these are their baselines.
+    g.nh = g.size * 1.02 * 0.72;
+    g.numY = { I: Math.max(B.Iarm.y1, B.I.y0) + g.nh + 4 * k, II: B.II.y1 - 3 * k };
+    if (B.III) {
+      g.numY.III = B.III.y0 + g.nh + 3 * k;
+      g.numY.IV = B.IV.y0 + g.nh + 4 * k;
+    }
+
+    // Where a held pair sits.
     let out;
-    if (a.id === 'oxygen') out = { x: x.IV - CW / 2 - RA - 6 * k, y: y.O2 };
-    else if (a.id === 'nitrate') out = { x: x.Nar - CW2 / 2 - RA - 5 * k, y: y.NO3 };
-    else if (a.id === 'fumarate') out = { x: x.II + CW2 / 2 + RA + 5 * k, y: y.FAD };
-    else out = { x: x.N, y: y.acc };
-    g.seat = {
-      src: { x: x.N, y: y.N },
-      src2: { x: x.II, y: y.FAD + H2 * 0.72 },
-      I: { x: x.I, y: lerp(y.N, y.Q, 0.62) },
-      II: { x: x.II, y: y.FAD },
-      Q: { x: x.Q, y: y.Q },
-      Nar: { x: x.Nar, y: lerp(y.Q, y.NO3, 0.55) },
-      III: { x: x.III, y: lerp(y.Q, y.C, 0.5) },
-      c: { x: x.c, y: y.C },
-      IV: { x: x.IV, y: lerp(y.C, y.O2, 0.5) },
+    if (a.id === 'oxygen') out = { x: mL - 8 * k - g.RA, y: y.O2 };
+    else if (a.id === 'nitrate') out = { x: mL - 8 * k - g.RA, y: y.NO3 };
+    else if (a.id === 'fumarate') out = { x: B.II.x0 - 7 * k - g.RA, y: y.FAD };
+    else out = { x: g.xN, y: y.acc };
+    const s = {
+      src: { x: g.xN, y: y.N },
+      src2: { x: xII, y: y.FAD + h2 * 0.55 },
+      I: { x: g.sx, y: Math.min(B.I.y1 - g.DOT - 2.5, Math.max(lerp(y.N, B.I.y1, 0.5), g.numY.I + g.DOT + 4.5)) },
+      II: { x: xII, y: y.FAD },
+      Q: { x: g.sx, y: y.Q },
       out,
     };
-    const s = g.seat;
-    const tip = g.body.Iarm.x0 + 2;
-    g.wires = {
-      'src>I': [s.src, { x: tip, y: y.N }, { x: x.I, y: y.N }, s.I],
-      'src2>II': [s.src2, s.II],
-      'src>out': [s.src, s.out],
-      'I>Q': [s.I, { x: x.I, y: y.Q }, s.Q],
-      'II>Q': [s.II, { x: x.II, y: y.Q }, s.Q],
-      'Q>III': [s.Q, { x: x.III, y: y.Q }, s.III],
-      'III>c': [s.III, { x: x.III, y: y.C }, s.c],
-      'c>IV': [s.c, { x: x.IV, y: y.C }, s.IV],
-      'IV>out': [s.IV, { x: x.IV, y: y.O2 }, s.out],
-      'Q>Nar': [s.Q, { x: x.Nar, y: y.Q }, s.Nar],
-      'Nar>out': [s.Nar, { x: x.Nar, y: y.NO3 }, s.out],
-      'Q>II': [s.Q, { x: x.II, y: y.Q }, s.II],
-      'II>out': [s.II, s.out],
-    };
-    // The hops drawn as the path, for the route this acceptor opens.
-    const route = routeOf(a);
-    g.hops = [];
-    if (a.id === 'sulfate' || a.id === 'carbon-dioxide') g.hops.push({ id: 'src>out', donor: 'nadh' });
-    else {
-      g.hops.push({ id: 'src>I', donor: 'nadh' });
-      if (a.id !== 'fumarate') g.hops.push({ id: 'src2>II', donor: 'fadh2' });
-      for (const [from, to] of Object.entries(route)) g.hops.push({ id: `${from}>${to}`, donor: from === 'II' && a.id !== 'fumarate' ? 'fadh2' : from === 'I' ? 'nadh' : null });
+    if (B.III) {
+      s.III = { x: g.sx, y: Math.min(B.III.y1 - g.DOT - 2.5, Math.max(lerp(B.III.y0, B.III.y1, 0.7), g.numY.III + g.DOT + 4.5)) };
+      s.c = { x: g.cx, y: y.C };
+      s.IV = { x: g.sx, y: lerp(B.IV.y0, y.O2, 0.5) };
     }
-    // Where the charges cross, with oxygen: through each pumping complex's riser, left to right.
-    const span = (y0, y1, n) => Array.from({ length: n }, (_, i) => lerp(y0, y1, n === 1 ? 0.5 : i / (n - 1)));
-    g.cross = {
-      I: { x: x.I, ys: span(g.body.I.y0 + 5 * k, y.Q - BH - 6 * k, 4) },
-      III: { x: x.III, ys: span(y.Q + BH + 4 * k, y3 - BH - 4 * k, 2) },
-      IV: { x: x.IV, ys: span(y3 + BH + 5 * k, y4 - BH - 5 * k, 4) },
-    };
-    g.crossReach = BH + 9 * k;
-    // The fall: from the donor's rung to the acceptor's, on the axis.
+    if (B.Nar) s.Nar = { x: g.sx, y: lerp(B.Nar.y0, y.NO3, 0.5) };
+    g.seat = s;
+
+    // The wires the pairs run along, for the route this acceptor opens.
+    const W = {};
+    if (a.id === 'sulfate' || a.id === 'carbon-dioxide') W['src>out'] = [s.src, s.out];
+    else {
+      W['src>I'] = [s.src, { x: g.sx, y: y.N }, s.I];
+      W['I>Q'] = [s.I, s.Q];
+      if (a.id === 'fumarate') {
+        W['Q>II'] = [s.Q, { x: xII, y: y.Q }, s.II];
+        W['II>out'] = [s.II, s.out];
+      } else {
+        W['src2>II'] = [s.src2, s.II];
+        W['II>Q'] = [s.II, s.Q];
+      }
+      if (a.id === 'oxygen') {
+        W['Q>III'] = [s.Q, s.III];
+        W['III>c'] = [s.III, { x: g.sx, y: y.C }, s.c];
+        W['c>IV'] = [s.c, { x: g.sx, y: y.C }, s.IV];
+        W['IV>out'] = [s.IV, { x: g.sx, y: y.O2 }, s.out];
+      }
+      if (a.id === 'nitrate') {
+        W['Q>Nar'] = [s.Q, s.Nar];
+        W['Nar>out'] = [s.Nar, { x: g.sx, y: y.NO3 }, s.out];
+      }
+    }
+    g.wires = W;
+    const usedBy = (id) => (id === 'src>I' || id === 'I>Q' ? 'nadh' : (id === 'src2>II' || id === 'II>Q') ? 'fadh2' : null);
+    g.hops = Object.keys(W).map((id) => ({ id, donor: usedBy(id) }));
+
+    // Where the charges cross, with oxygen: through each moving complex, left to right, below its numeral,
+    // in as many rows as the block has room for.
+    g.cross = {};
+    if (a.id === 'oxygen') {
+      for (const st of ['I', 'III', 'IV']) {
+        const r = B[st];
+        const lo = g.numY[st] + g.size * 0.75;
+        const hi = (st === 'IV' ? Math.min(r.y1, y.O2) - g.size * 0.15 : r.y1) - g.size * 0.45;
+        let ys;
+        if (hi < lo) ys = [clamp((lo + hi) / 2, r.y0 + g.size * 0.5, r.y1 - g.size * 0.3)];
+        else {
+          const rows = clamp(Math.floor((hi - lo) / (g.size * 1.25)) + 1, 1, CHARGES_AT[st]);
+          ys = Array.from({ length: rows }, (_, i) => (rows === 1 ? (lo + hi) / 2 : lerp(lo, hi, i / (rows - 1))));
+        }
+        g.cross[st] = { x0: mL - 9 * k, x1: mR + 9 * k, ys };
+      }
+    }
+    // The fall, on the axis: from the donor's rung to the acceptor's.
     g.bracket = { x: g.axisX + 8, y0: yOf(donorE(donor)), y1: y.acc };
-    // The block's mark: a bar across the wire the inhibitor stops.
+    // The block's mark: a bar across the complex the inhibitor stops, where its pair would leave.
     const bl = block();
     g.blockBar = null;
-    if (bl.at === 'I') g.blockBar = { x: x.I, y: lerp(s.I.y, y.Q, 0.55), w: CW * 0.8 };
-    else if (bl.at === 'II') g.blockBar = { x: x.II, y: lerp(y.FAD, s.src2.y, 0.55), w: CW2 * 0.8 };
-    else if (bl.at === 'III') g.blockBar = { x: x.III, y: lerp(s.III.y, y.C, 0.55), w: CW * 0.8 };
-    else if (bl.at === 'IV') g.blockBar = { x: x.IV, y: lerp(s.IV.y, y.O2, 0.5), w: CW * 0.8 };
-    // The legend, bottom left.
-    const ls = g.small;
-    const legendW = 3 * DOT * 2 + 6 + textWidth('a pair of electrons', ls) + 14 + textWidth('+', ls, 700) + 5 + textWidth('a charge moved across', ls);
-    g.legend = { x: g.left, y: g.bottom - 1, size: ls, w: legendW };
-    if (legendW > s.out.x - g.left - 20 && a.id === 'oxygen' && g.bottom - y.O2 < ls * 2.2) g.legend = null;
-    // The axis caption, trimmed to the room left of riser I.
-    const room = x.I - BH - 6;
+    if (bl.at === 'I') g.blockBar = { x: g.sx, y: B.I.y1 - 4 * k, w: g.BH * 1.5 };
+    else if (bl.at === 'II') g.blockBar = { x: xII, y: y.FAD + h2 * 0.3, w: g.W2 * 0.8 };
+    else if (bl.at === 'III' && B.III) g.blockBar = { x: g.sx, y: B.III.y1 - 3 * k, w: g.BH * 1.5 };
+    else if (bl.at === 'IV' && B.IV) g.blockBar = { x: g.sx, y: lerp(s.IV.y, y.O2, 0.5), w: g.BH * 1.5 };
+    // The axis caption, trimmed to the room left of the membrane.
+    const room = mL - 6 - M;
     g.caption = ['Reduction potential, V', 'Potential, V', 'E, V'].find((c) => textWidth(c, g.capSize) <= room) ?? 'V';
+    // The bilayer's heads, down both faces.
+    const gapH = g.headR * 2.3;
+    g.heads = [];
+    for (let yy = gapH / 2; yy < g.memY1; yy += gapH) g.heads.push({ x: mL, y: yy }, { x: mR, y: yy });
     return g;
-  }
-
-  // A rectilinear line moved sideways by `off`: to its left, walking along it, for a positive offset.
-  // Each corner takes the sum of its two segments' unit normals, which for a right angle is the mitre.
-  function offsetLine(pts, off) {
-    const nrm = (p, q) => ({ x: Math.sign(q.y - p.y), y: -Math.sign(q.x - p.x) });
-    return pts.map((p, i) => {
-      const n0 = i > 0 ? nrm(pts[i - 1], p) : { x: 0, y: 0 };
-      const n1 = i < pts.length - 1 ? nrm(p, pts[i + 1]) : { x: 0, y: 0 };
-      return { x: p.x + (n0.x + n1.x) * off, y: p.y + (n0.y + n1.y) * off };
-    });
-  }
-  // Points every `gap` along a polyline.
-  function beads(pts, gap) {
-    const out = [];
-    let carry = gap / 2;
-    for (let i = 1; i < pts.length; i += 1) {
-      const a = pts[i - 1];
-      const c = pts[i];
-      const len = Math.hypot(c.x - a.x, c.y - a.y);
-      let u = carry;
-      while (u <= len) {
-        out.push({ x: a.x + ((c.x - a.x) * u) / len, y: a.y + ((c.y - a.y) * u) / len });
-        u += gap;
-      }
-      carry = u - len;
-    }
-    return out;
   }
 
   // The point a fraction f of the way along a polyline, by length.
@@ -975,9 +979,9 @@ export function mount(root, ctx) {
   // ---------------------------------------------------------------- label placement
   //
   // Every label is measured and tried at a ring of positions around its mark, near ones first and then two
-  // rings further out with a leader line back; the first position whose box clears every line, mark, zone
-  // and label already placed, and stays inside the drawing, is taken. The box is the WIDEST the label can
-  // be in this state, so nothing a run does can make it collide later.
+  // rings further out with a leader line back; the first position whose box clears every line, mark and
+  // label already placed, and stays inside the drawing, is taken. A label with a shorter form tries it
+  // after the full one has failed at every size.
   function segHitsBox(a, c, r, pad) {
     const x0 = r.x0 - pad;
     const y0 = r.y0 - pad;
@@ -1007,30 +1011,29 @@ export function mount(root, ctx) {
   }
   const boxHit = (a, c) => a.x0 < c.x1 && a.x1 > c.x0 && a.y0 < c.y1 && a.y1 > c.y0;
   const grow = (r, p) => ({ x0: r.x0 - p, y0: r.y0 - p, x1: r.x1 + p, y1: r.y1 + p });
+  const disc = (p, r) => ({ x0: p.x - r - 2, y0: p.y - r - 2, x1: p.x + r + 2, y1: p.y + r + 2 });
 
   function obstaclesOf(g) {
     const rects = [];
     const segs = [];
-    const a = acc();
-    for (let i = 1; i < g.band.length; i += 1) segs.push({ a: g.band[i - 1], b: g.band[i], pad: BH + 1.5 });
+    // The membrane itself: nothing is written on it.
+    rects.push({ x0: g.mL - 1, y0: -10, x1: g.mR + 1, y1: g.memY1 + 10, membrane: true });
     for (const hp of g.hops) {
       const pts = g.wires[hp.id];
       for (let i = 1; i < pts.length; i += 1) segs.push({ a: pts[i - 1], b: pts[i], pad: 2.2 });
     }
-    for (const [id, r] of Object.entries(g.body)) if (id !== 'Nar' || a.id === 'nitrate') rects.push(grow(r, 1.5));
-    const disc = (p, r) => ({ x0: p.x - r - 2, y0: p.y - r - 2, x1: p.x + r + 2, y1: p.y + r + 2 });
-    rects.push(disc(g.seat.src, RN), disc(g.seat.Q, RQ), disc(g.seat.c, RC), disc(g.seat.out, RA + 2));
-    if (a.id === 'oxygen') {
-      for (const cr of Object.values(g.cross)) {
-        rects.push({ x0: cr.x - g.crossReach - 4, y0: Math.min(...cr.ys) - g.size * 0.8, x1: cr.x + g.crossReach + 4, y1: Math.max(...cr.ys) + 3 });
-      }
+    for (const r of Object.values(g.body)) rects.push(grow(r, 1.5));
+    rects.push(disc(g.seat.src, g.RN), disc(g.seat.Q, g.RQ), disc(g.seat.out, g.RA + 1));
+    if (g.seat.c) rects.push(disc(g.seat.c, g.RC));
+    // Where the charges pass: no label, though the gradient's signs may stand there between crossings.
+    for (const cr of Object.values(g.cross)) {
+      rects.push({ x0: cr.x0 - 4, y0: Math.min(...cr.ys) - g.size * 0.8, x1: cr.x1 + 4, y1: Math.max(...cr.ys) + 3, crossing: true });
     }
     // The axis, its ticks and the caption.
-    rects.push({ x0: 0, y0: g.top - 8, x1: g.axisX + 1, y1: g.bottom + 5 });
-    rects.push({ x0: 0, y0: 0, x1: textWidth(g.caption, g.capSize) + 3, y1: g.capSize + 4 });
+    rects.push({ x0: 0, y0: g.top - 8, x1: g.axisX + 1, y1: g.bottom + 5, axis: true });
+    rects.push({ x0: 0, y0: 0, x1: g.M + textWidth(g.caption, g.capSize) + 3, y1: g.M + g.capSize + 4, axis: true });
     segs.push({ a: { x: g.bracket.x, y: g.bracket.y0 }, b: { x: g.bracket.x, y: g.bracket.y1 }, pad: 3 });
     if (g.blockBar) rects.push({ x0: g.blockBar.x - g.blockBar.w / 2 - 2, y0: g.blockBar.y - 3, x1: g.blockBar.x + g.blockBar.w / 2 + 2, y1: g.blockBar.y + 3 });
-    if (g.legend) rects.push({ x0: g.legend.x - 2, y0: g.legend.y - g.legend.size - 2, x1: g.legend.x + g.legend.w + 2, y1: g.legend.y + 4 });
     return { rects, segs };
   }
 
@@ -1060,91 +1063,132 @@ export function mount(root, ctx) {
     ].map((c) => ({ ...c, far }));
   }
 
+  const LEGEND_PAIR = 'a pair of electrons';
+  const LEGEND_CHARGE = 'a charge carried across';
+  function legendSize(g, sz) {
+    const w1 = g.DOT * 5.4 + 6 + textWidth(LEGEND_PAIR, sz);
+    const w2 = textWidth('+', sz, 700) + 6 + textWidth(LEGEND_CHARGE, sz);
+    const lines = g.cross.I ? 2 : 1;
+    return { w: Math.max(w1, lines > 1 ? w2 : 0), h: sz * 1.05 + (lines - 1) * sz * 1.45, lines };
+  }
+
   function placeLabels(g) {
     const { rects, segs } = obstaclesOf(g);
     const placed = [];
-    const bounds = { x0: 1, y0: 1, x1: g.dw - 1, y1: g.dh - 1 };
+    const bounds = { x0: g.M, y0: g.M, x1: g.dw - 1, y1: g.dh - 1 };
     const a = acc();
     const s = g.seat;
-    const size = g.size;
+    const B = g.body;
     const items = [];
-    const add = (key, src, mark, hw, hh, { cls = 'rc-name', sz = size, weight = 600, widest = src, prefer = null, cands = null, optional = false } = {}) => {
-      items.push({ key, src, mark, hw, hh, cls, size: sz, weight, widest, prefer, cands, optional });
+    const add = (key, alts, mark, hw, hh, opts = {}) => {
+      items.push({ key, alts: [].concat(alts), mark, hw, hh, cls: 'rc-name', size: g.size, weight: 600, prefer: null, cands: null, optional: false, ...opts });
     };
-    const inBand = BH + 3;
-    add('nadh', 'NADH', s.src, RN, RN, { prefer: 'up' });
-    const accSrc = a.id === 'oxygen' && !oxygenOn ? `no ${a.mark}` : a.label;
-    add('acc', a.label, s.out, RA + 1, RA + 1, { widest: a.id === 'oxygen' ? a.label : a.label, prefer: a.id === 'sulfate' || a.id === 'carbon-dioxide' ? 'down' : 'left' });
-    add('q', a.id === 'fumarate' ? 'menaquinone' : 'ubiquinone', s.Q, RQ, inBand, { prefer: 'up' });
-    add('c', 'cytochrome ~c~', s.c, RC, RC, { prefer: 'up' });
-    add('fadh2', 'FADH_{2}', s.II, CW2 / 2, 4, { prefer: 'left' });
-    if (a.id === 'nitrate') add('nar', 'nitrate reductase', { x: g.x.Nar, y: (g.body.Nar.y0 + g.body.Nar.y1) / 2 }, CW2 / 2, (g.body.Nar.y1 - g.body.Nar.y0) / 2, { cls: 'rc-soft', weight: 500, sz: g.small, prefer: 'right', optional: true });
+    add('nadh', 'NADH', s.src, g.RN, g.RN, { prefer: 'up' });
+    const noO2 = a.id === 'oxygen' && !oxygenOn;
+    add('acc', noO2 ? `no ${a.mark}` : [a.label, a.short], s.out, g.RA + 1, g.RA + 1, { cls: noO2 ? 'rc-block' : 'rc-name', prefer: 'left' });
+    const soft = (st) => (g.play.has(st) ? {} : { cls: 'rc-soft', weight: 500 });
+    add('q', a.id === 'fumarate' ? 'menaquinone' : 'ubiquinone', s.Q, g.BH, g.RQ, { prefer: 'right', ...soft('Q') });
+    if (s.c) add('c', 'cytochrome ~c~', s.c, g.RC, g.RC, { prefer: 'right' });
+    const IIbox = { x: g.xII, y: (B.II.y0 + B.II.y1) / 2 };
+    if (a.id === 'fumarate') add('frd', ['fumarate reductase', 'reductase'], IIbox, g.W2 / 2, (B.II.y1 - B.II.y0) / 2, { cls: 'rc-soft', weight: 500, size: g.small, prefer: 'down', optional: true });
+    else add('fadh2', 'FADH_{2}', IIbox, g.W2 / 2, (B.II.y1 - B.II.y0) / 2, { prefer: 'left', ...soft('II') });
+    if (B.Nar) add('nar', ['nitrate reductase', 'reductase'], { x: g.sx, y: (B.Nar.y0 + B.Nar.y1) / 2 }, g.BH, (B.Nar.y1 - B.Nar.y0) / 2, { cls: 'rc-soft', weight: 500, size: g.small, prefer: 'right' });
+    // How many charges each complex moves, on the side they arrive at and nowhere else.
+    for (const st of Object.keys(g.cross)) {
+      const cr = g.cross[st];
+      const my = (Math.min(...cr.ys) + Math.max(...cr.ys)) / 2;
+      add(`n${st}`, `+${CHARGES_AT[st]}`, { x: g.sx, y: my }, cr.x1 - g.sx + 3, 4, {
+        cls: 'rc-charge', optional: true,
+        cands: (out, sz) => [0, -1, 1, -2, 2].map((j) => ({ x: cr.x1 + 7, y: my + sz * 0.36 + j * sz * 1.1, anchor: 'start', far: 0 })),
+      });
+    }
     if (g.blockBar) {
       const bl = block();
-      add('block', bl.by, { x: g.blockBar.x, y: g.blockBar.y }, g.blockBar.w / 2, 3, { cls: 'rc-block', prefer: 'right' });
+      const inStrip = bl.at !== 'II';
+      add('block', bl.by, { x: g.blockBar.x, y: g.blockBar.y }, inStrip ? g.BH : g.blockBar.w / 2, 3, { cls: 'rc-block', prefer: inStrip ? 'right' : 'left' });
     }
-    add('bracket', `${b.num(Math.abs(fallOf(donor, a)), 2)}${NB}V`, { x: g.bracket.x, y: (g.bracket.y0 + g.bracket.y1) / 2 }, 2, Math.max(6, Math.abs(g.bracket.y1 - g.bracket.y0) / 2 - 4), { cls: 'rc-axisval', sz: g.small, prefer: 'right' });
-    add('bracketSub', `${si(kjOf(fallOf(donor, a)))}${NB}kJ/mol`, { x: g.bracket.x, y: (g.bracket.y0 + g.bracket.y1) / 2 }, 2, 6, {
-      cls: 'rc-cap', sz: g.small * 0.96, weight: 400, optional: true,
-      cands: (out) => (out.bracket ? [{ x: out.bracket.box.x0 + 1.5, y: out.bracket.box.y1 + g.small * 1.08, anchor: 'start', far: 0 }] : []),
+    const mid = { x: g.bracket.x, y: (g.bracket.y0 + g.bracket.y1) / 2 };
+    const fall = fallOf(donor, a);
+    add('bracket', `${fall < 0 ? '−' : ''}${b.num(Math.abs(fall), 2)}${NB}V`, mid, 2, Math.max(6, Math.abs(g.bracket.y1 - g.bracket.y0) / 2 - 4), { cls: 'rc-axisval', size: g.small, prefer: 'right' });
+    add('bracketSub', `${si(kjOf(fall))}${NB}kJ/mol`, mid, 2, 6, {
+      cls: 'rc-cap', size: g.small * 0.96, weight: 400, optional: true,
+      // Under the fall's label, or over it: far enough that the two boxes clear the placer's 2 px margin.
+      cands: (out, sz) => (out.bracket ? [
+        { x: out.bracket.box.x0 + 1.5, y: out.bracket.box.y1 + sz * 0.92 + 3, anchor: 'start', far: 0 },
+        { x: out.bracket.box.x0 + 1.5, y: out.bracket.box.y0 - sz * 0.34 - 3, anchor: 'start', far: 0 },
+      ] : []),
     });
-    if (a.id === 'oxygen') {
-      for (const st of ['I', 'III', 'IV']) {
-        const cr = g.cross[st];
-        const y0 = Math.min(...cr.ys);
-        const y1 = Math.max(...cr.ys);
-        add(`n${st}`, `+${CHARGES_AT[st]}`, { x: cr.x, y: (y0 + y1) / 2 }, g.crossReach + 4, (y1 - y0) / 2 + 2, { cls: 'rc-charge', prefer: 'right', optional: true });
-      }
-    }
     // The two compartments, named where there is room.
-    add('matrix', 'matrix', { x: g.x.N, y: g.yOf(0.5) }, 2, 2, {
-      cls: 'rc-region', weight: 400, sz: g.small, optional: true,
-      cands: () => [0.5, 0.36, 0.62, 0.22, 0.72].flatMap((v) => [0.02, 0.1, 0.2].map((f) => ({ x: g.left + f * g.pw, y: g.yOf(v), anchor: 'start', far: 0 }))),
+    add('matrix', 'matrix', s.src, 2, 2, {
+      cls: 'rc-region', weight: 400, size: g.small, optional: true, padX: 14,
+      cands: () => [
+        ...[0.5, 0.62, 0.36, 0.72, 0.2].map((v) => ({ x: g.mL - 9 * g.k - 10, y: g.yOf(v), anchor: 'end', far: 0 })),
+        ...[0.5, 0.36, 0.62, 0.2, 0.72, 0.1].flatMap((v) => [0.12, 0.3, 0.02].map((f) => ({ x: g.left + f * (g.mL - g.left), y: g.yOf(v), anchor: 'start', far: 0 }))),
+      ],
     });
-    add('ims', 'intermembrane space', { x: g.x.III, y: g.yOf(-0.3) }, 2, 2, {
-      cls: 'rc-region', weight: 400, sz: g.small, optional: true,
-      cands: () => [-0.34, -0.26, -0.18, -0.4].flatMap((v) => [{ x: g.right - 2, y: g.yOf(v), anchor: 'end', far: 0 }, { x: g.x.I + BH + 8, y: g.yOf(v), anchor: 'start', far: 0 }]),
+    add('ims', ['intermembrane space', 'intermembrane'], s.Q, 2, 2, {
+      cls: 'rc-region', weight: 400, size: g.small, optional: true, padX: 14,
+      cands: () => [-0.36, -0.28, -0.2, 0.62, 0.7, 0.5].flatMap((v) => [{ x: g.right - 2, y: g.yOf(v), anchor: 'end', far: 0 }, { x: g.mR + 10, y: g.yOf(v), anchor: 'start', far: 0 }]),
     });
+    // The key to the dots and the crossing charges, in whichever corner is free.
+    add('legend', 'legend', s.src, 0, 0, {
+      cls: 'rc-cap', size: g.small, weight: 400, optional: true,
+      width: (sz) => legendSize(g, sz).w,
+      boxAt: (c, w, sz) => ({ x0: c.x - 1.5, y0: c.y - 1.5, x1: c.x + w + 1.5, y1: c.y + legendSize(g, sz).h + 1.5 }),
+      cands: (out, sz, w) => {
+        const hgt = legendSize(g, sz).h;
+        return [
+          { x: g.right - w, y: g.bottom - hgt },
+          { x: g.mR + 10, y: g.bottom - hgt },
+          { x: g.left + 2, y: g.bottom - hgt },
+          { x: g.right - w, y: g.top },
+          { x: g.left + 2, y: g.yOf(0.5) },
+          { x: g.right - w, y: g.yOf(0.45) },
+        ].map((c) => ({ ...c, anchor: 'start', far: 0 }));
+      },
+    });
+
     const out = {};
+    const boxOf = (c, w, sz) => {
+      const x0 = c.anchor === 'end' ? c.x - w : c.anchor === 'middle' ? c.x - w / 2 : c.x;
+      return { x0: x0 - 1.5, y0: c.y - sz * 0.92, x1: x0 + w + 1.5, y1: c.y + sz * 0.34 };
+    };
     for (const it of items) {
       let chosen = null;
       let first = null;
-      for (const shrink of [1, 0.92, 0.85]) {
-        const sz = it.size * shrink;
-        const w = textWidth(it.widest, sz, it.weight);
-        const asc = sz * 0.92;
-        const desc = sz * 0.34;
-        let cands = it.cands ? it.cands(out) : [0, 13, 26].flatMap((far) => ring(it.mark, it.hw, it.hh, sz, far));
-        if (it.prefer === 'up') cands = [...cands.filter((c) => c.y < it.mark.y && !c.far), ...cands];
-        if (it.prefer === 'down') cands = [...cands.filter((c) => c.y > it.mark.y && !c.far), ...cands];
-        if (it.prefer === 'right') cands = [...cands.filter((c) => c.anchor === 'start' && Math.abs(c.y - it.mark.y) < sz && !c.far), ...cands];
-        if (it.prefer === 'left') cands = [...cands.filter((c) => c.anchor === 'end' && Math.abs(c.y - it.mark.y) < sz && !c.far), ...cands];
-        if (!first && cands.length) {
-          const c = cands[0];
-          const x0 = c.anchor === 'end' ? c.x - w : c.anchor === 'middle' ? c.x - w / 2 : c.x;
-          first = { ...c, size: sz, box: { x0, y0: c.y - asc, x1: x0 + w, y1: c.y + desc }, leader: null, collided: true };
-        }
-        for (const c of cands) {
-          const x0 = c.anchor === 'end' ? c.x - w : c.anchor === 'middle' ? c.x - w / 2 : c.x;
-          const box = { x0: x0 - 1.5, y0: c.y - asc, x1: x0 + w + 1.5, y1: c.y + desc };
-          if (box.x0 < bounds.x0 || box.x1 > bounds.x1 || box.y0 < bounds.y0 || box.y1 > bounds.y1) continue;
-          const clear = { x0: box.x0 - 6, y0: box.y0 - 2, x1: box.x1 + 6, y1: box.y1 + 2 };
-          if (rects.some((r) => boxHit(box, r)) || placed.some((r) => boxHit(clear, r))) continue;
-          if (segs.some((sg) => segHitsBox(sg.a, sg.b, box, sg.pad))) continue;
-          let leader = null;
-          if (c.far) {
-            const tx = clamp(it.mark.x, box.x0, box.x1);
-            const ty = clamp(it.mark.y, box.y0, box.y1);
-            const from = { x: clamp(tx, it.mark.x - it.hw, it.mark.x + it.hw), y: clamp(ty, it.mark.y - it.hh, it.mark.y + it.hh) };
-            leader = { a: from, b: { x: tx, y: ty } };
-            const hitsLabel = placed.some((r) => segHitsBox(leader.a, leader.b, r, 1));
-            const hitsMark = rects.some((r) => segHitsBox(leader.a, leader.b, r, -1) && !(r.x0 <= it.mark.x && r.x1 >= it.mark.x && r.y0 <= it.mark.y && r.y1 >= it.mark.y));
-            if (hitsLabel || hitsMark) continue;
+      search:
+      for (const src of it.alts) {
+        for (const shrink of [1, 0.92, 0.85]) {
+          const sz = it.size * shrink;
+          const w = it.width ? it.width(sz) : textWidth(src, sz, it.weight);
+          let cands = it.cands ? it.cands(out, sz, w) : [0, 13, 26].flatMap((far) => ring(it.mark, it.hw, it.hh, sz, far));
+          const near = (c) => !c.far;
+          if (it.prefer === 'up') cands = [...cands.filter((c) => c.y < it.mark.y && near(c)), ...cands];
+          if (it.prefer === 'down') cands = [...cands.filter((c) => c.y > it.mark.y && near(c)), ...cands];
+          if (it.prefer === 'right') cands = [...cands.filter((c) => c.anchor === 'start' && Math.abs(c.y - it.mark.y) < sz && near(c)), ...cands];
+          if (it.prefer === 'left') cands = [...cands.filter((c) => c.anchor === 'end' && Math.abs(c.y - it.mark.y) < sz && near(c)), ...cands];
+          for (const c of cands) {
+            const box = it.boxAt ? it.boxAt(c, w, sz) : boxOf(c, w, sz);
+            if (!first) first = { ...c, src, size: sz, box, leader: null, collided: true };
+            if (box.x0 < bounds.x0 || box.x1 > bounds.x1 || box.y0 < bounds.y0 || box.y1 > bounds.y1) continue;
+            const px = it.padX ?? 6;
+            const clear = { x0: box.x0 - px, y0: box.y0 - 2, x1: box.x1 + px, y1: box.y1 + 2 };
+            if (rects.some((r) => boxHit(box, r)) || placed.some((r) => boxHit(clear, r))) continue;
+            if (segs.some((sg) => segHitsBox(sg.a, sg.b, box, sg.pad))) continue;
+            let leader = null;
+            if (c.far) {
+              const tx = clamp(it.mark.x, box.x0, box.x1);
+              const ty = clamp(it.mark.y, box.y0, box.y1);
+              const from = { x: clamp(tx, it.mark.x - it.hw, it.mark.x + it.hw), y: clamp(ty, it.mark.y - it.hh, it.mark.y + it.hh) };
+              leader = { a: from, b: { x: tx, y: ty } };
+              const hitsLabel = placed.some((r) => segHitsBox(leader.a, leader.b, r, 1));
+              const hitsMark = rects.some((r) => segHitsBox(leader.a, leader.b, r, -1) && !(r.x0 <= it.mark.x && r.x1 >= it.mark.x && r.y0 <= it.mark.y && r.y1 >= it.mark.y));
+              if (hitsLabel || hitsMark) continue;
+            }
+            chosen = { ...c, src, size: sz, box, leader };
+            break search;
           }
-          chosen = { ...c, size: sz, box, leader };
-          break;
         }
-        if (chosen) break;
       }
       if (!chosen && (it.optional || !first)) continue;
       if (!chosen) chosen = first;
@@ -1152,24 +1196,28 @@ export function mount(root, ctx) {
       if (chosen.leader) segs.push({ a: chosen.leader.a, b: chosen.leader.b, pad: 1.5 });
       out[it.key] = { ...it, ...chosen };
     }
-    if (out.acc) out.acc.live = accSrc;
     g.labels = out;
     g.collisions = Object.values(out).filter((l) => l.collided).map((l) => l.key);
-    // The gradient's signs, along both faces of the membrane, wherever nothing else stands.
-    const keep = (p) => !Object.values(g.body).some((r) => boxHit(grow(r, 4), { x0: p.x - 4, y0: p.y - 6, x1: p.x + 4, y1: p.y + 3 }))
+    // The gradient's signs, down both faces of the membrane, wherever nothing else stands.
+    // A charge crossing passes over them, with its halo, and that is the one thing allowed to.
+    const keep = (p) => !Object.values(g.body).some((r) => boxHit(grow(r, 3), { x0: p.x - 4, y0: p.y - 6, x1: p.x + 4, y1: p.y + 3 }))
       && !placed.some((r) => boxHit(r, { x0: p.x - 5, y0: p.y - 7, x1: p.x + 5, y1: p.y + 4 }))
-      && !rects.some((r) => boxHit(r, { x0: p.x - 3, y0: p.y - 5, x1: p.x + 3, y1: p.y + 2 }))
-      && p.x > g.left && p.x < g.right && p.y > g.top && p.y < g.dh - 4;
-    const gap = 26 * g.k;
-    g.signs = [
-      ...beads(offsetLine(g.band, BH + 7 * g.k), gap).filter(keep).map((p) => ({ ...p, sign: '+' })),
-      ...beads(offsetLine(g.band, -(BH + 7 * g.k)), gap).filter(keep).map((p) => ({ ...p, sign: '−' })),
-    ];
+      && !rects.some((r) => !r.crossing && !r.membrane && boxHit(r, { x0: p.x - 3, y0: p.y - 5, x1: p.x + 3, y1: p.y + 2 }))
+      && !segs.some((sg) => segHitsBox(sg.a, sg.b, { x0: p.x - 4, y0: p.y - 5, x1: p.x + 4, y1: p.y + 3 }, 1))
+      && p.y > g.top && p.y < g.bottom;
+    const gap = 24 * g.k;
+    g.signs = [];
+    for (let yy = g.top + gap / 2; yy < g.bottom; yy += gap) {
+      const plus = { x: g.mR + 7 * g.k, y: yy, sign: '+' };
+      const minus = { x: g.mL - 7 * g.k, y: yy, sign: '−' };
+      if (keep(plus)) g.signs.push(plus);
+      if (keep(minus)) g.signs.push(minus);
+    }
   }
 
   // ---------------------------------------------------------------- drawing
 
-  function richLabel(x, y, src, { size, anchor = 'start', cls = null, weight = null, fill = null, halo = 2.6, haloColour = C.paper, opacity = null } = {}) {
+  function richLabel(x, y, src, { size, anchor = 'start', cls = null, weight = null, fill = null, halo = 2.6, opacity = null } = {}) {
     const t = pane.text(x, y, '', {
       anchor,
       class: cls ?? undefined,
@@ -1177,7 +1225,7 @@ export function mount(root, ctx) {
       'font-weight': weight ?? undefined,
       style: fill ? `fill:${fill}` : undefined,
       opacity: opacity === null ? undefined : b.num(opacity, 3),
-      ...(halo ? { stroke: haloColour, 'stroke-width': `${halo}px`, 'stroke-linejoin': 'round', 'paint-order': 'stroke' } : {}),
+      ...(halo ? { stroke: C.paper, 'stroke-width': `${halo}px`, 'stroke-linejoin': 'round', 'paint-order': 'stroke' } : {}),
     });
     return fillRuns(t, src, size);
   }
@@ -1193,13 +1241,17 @@ export function mount(root, ctx) {
     pane.path(`M${b.num(bx - uy * size * 0.55, 1)} ${b.num(by + ux * size * 0.55, 1)} L${b.num(tip.x, 1)} ${b.num(tip.y, 1)} L${b.num(bx + uy * size * 0.55, 1)} ${b.num(by - ux * size * 0.55, 1)}`, { class: cls, fill: 'none' });
   }
 
-  const electron = (x, y, opacity = null) => pane.circle(x, y, DOT, {
-    fill: C.ink, stroke: C.paper, 'stroke-width': 1.2, ...(opacity === null ? {} : { opacity: b.num(opacity, 3) }),
-  });
-  const pairAt = (p) => {
-    electron(p.x - DOT * 1.2, p.y);
-    electron(p.x + DOT * 1.2, p.y);
-  };
+  function electron(g, x, y, opacity = null) {
+    pane.circle(x, y, g.DOT, { fill: C.ink, stroke: C.paper, 'stroke-width': 1.2, ...(opacity === null ? {} : { opacity: b.num(opacity, 3) }) });
+  }
+  // A pair held in a complex, on a paper socket so that it reads against the complex's fill.
+  function pairAt(g, p) {
+    const pw = g.DOT * 4.4 + 4;
+    const ph = g.DOT * 2 + 4;
+    pane.rect(p.x - pw / 2, p.y - ph / 2, pw, ph, { rx: b.num(ph / 2, 2), fill: C.paper });
+    electron(g, p.x - g.DOT * 1.2, p.y);
+    electron(g, p.x + g.DOT * 1.2, p.y);
+  }
 
   function drawAxes(g) {
     for (const v of TICKS) {
@@ -1209,18 +1261,16 @@ export function mount(root, ctx) {
       pane.text(g.axisX - 4, y + g.tick * 0.35, label, { anchor: 'end', class: 'rc-tick', 'font-size': b.num(g.tick, 1) });
     }
     pane.line(g.axisX, g.top - 4, g.axisX, g.bottom + 2, { class: 'rc-spine' });
-    pane.text(0, g.capSize + 1, g.caption, { class: 'rc-cap', 'font-size': b.num(g.capSize, 1) });
+    pane.text(g.M, g.M + g.capSize + 1, g.caption, { class: 'rc-tick', 'font-size': b.num(g.capSize, 1) });
     const { x, y0, y1 } = g.bracket;
-    const downhill = y1 > y0 + 0.5;
-    const attrs = downhill ? { stroke: C.ink, 'stroke-width': 1.1 } : { stroke: C.coralText, 'stroke-width': 1.1, 'stroke-dasharray': '2.5 2' };
+    const attrs = y1 > y0 + 0.5 ? { stroke: C.ink, 'stroke-width': 1.1 } : { stroke: C.coralText, 'stroke-width': 1.1, 'stroke-dasharray': '2.5 2' };
     pane.line(x, y0, x, y1, attrs);
     pane.line(x - 3, y0, x + 3, y0, attrs);
     pane.line(x - 3, y1, x + 3, y1, attrs);
   }
 
-  function drawBand(g) {
-    const poly = [...g.faceIms, ...[...g.faceMat].reverse()];
-    pane.path(`${dOf(poly)} Z`, { fill: TAIL_FILL });
+  function drawMembrane(g) {
+    pane.rect(g.mL, 0, g.mR - g.mL, g.memY1, { fill: TAIL_FILL });
     for (const p of g.heads) pane.circle(p.x, p.y, g.headR, { fill: HEAD_FILL });
   }
 
@@ -1229,7 +1279,7 @@ export function mount(root, ctx) {
     for (const p of g.signs) {
       pane.text(p.x, p.y + g.small * 0.34, p.sign, {
         anchor: 'middle', 'font-size': b.num(g.small * 1.05, 1), 'font-weight': 700,
-        style: `fill:${p.sign === '+' ? C.leafText : C.waterText}`, opacity: b.num(level, 3),
+        style: `fill:${p.sign === '+' ? C.leafText : C.waterText}`, opacity: level >= 0.999 ? undefined : b.num(level, 3),
       });
     }
   }
@@ -1238,61 +1288,60 @@ export function mount(root, ctx) {
     for (const hp of g.hops) {
       const pts = g.wires[hp.id];
       const off = hp.donor && hp.donor !== donor;
-      pane.path(dOf(pts), { class: `rc-path${off ? ' is-off' : ''}` });
+      const cls = `rc-path${off ? ' is-off' : ''}`;
+      pane.path(dOf(pts), { class: cls });
       // A chevron at the middle of the longest run says which way the pairs go.
       let best = null;
       for (let i = 1; i < pts.length; i += 1) {
         const len = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
         if (!best || len > best.len) best = { a: pts[i - 1], c: pts[i], len };
       }
-      if (best && best.len > 30) {
-        const mid = { x: (best.a.x + best.c.x) / 2, y: (best.a.y + best.c.y) / 2 };
-        arrowHead(toward(mid, best.c, 3), toward(mid, best.a, 3), 4.6, `rc-path${off ? ' is-off' : ''}`);
+      if (best && best.len > 34) {
+        const m = { x: (best.a.x + best.c.x) / 2, y: (best.a.y + best.c.y) / 2 };
+        arrowHead(toward(m, best.c, 3), toward(m, best.a, 3), 4.6, cls);
       }
     }
   }
 
   function drawBodies(g) {
-    const a = acc();
-    const used = new Set(inPlay(a));
-    const box = (r, attrs) => pane.rect(r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0, { rx: b.num(4 * g.k, 1), ...attrs });
-    const num = (x, y, str, fill, halo, idle) => pane.text(x, y + g.size * 0.38, str, {
-      anchor: 'middle', 'font-size': b.num(g.size * 1.05, 1), 'font-weight': 700,
-      ...(idle ? { class: 'rc-idle-num' } : { style: `fill:${fill}`, stroke: halo, 'stroke-width': '2.4px', 'stroke-linejoin': 'round', 'paint-order': 'stroke' }),
-    });
-    const draw1 = (id, parts, fill, ink, label, mid) => {
-      const idle = !used.has(id);
-      for (const r of parts) box(r, idle ? { class: 'rc-idle' } : { fill });
-      num(mid.x, mid.y, label, ink, fill, idle);
-    };
     const B = g.body;
-    draw1('I', [B.Iarm, B.I], PUMP.color, PUMP.symbolColor, 'I', { x: g.x.I, y: (B.I.y0 + B.I.y1) / 2 });
-    draw1('II', [B.II], ENZ.color, ENZ.symbolColor, 'II', { x: g.x.II, y: (g.y.FAD + B.II.y1) / 2 + 2 * g.k });
-    if (B.Nar) draw1('Nar', [B.Nar], ENZ.color, ENZ.symbolColor, 'N', { x: g.x.Nar, y: lerp(g.y.Q, g.y.NO3, 0.28) });
-    draw1('III', [B.III], PUMP.color, PUMP.symbolColor, 'III', { x: g.x.III, y: lerp(B.III.y0, B.III.y1, 0.28) });
-    draw1('IV', [B.IV], PUMP.color, PUMP.symbolColor, 'IV', { x: g.x.IV, y: lerp(B.IV.y0, B.IV.y1, 0.22) });
-    // The cycle's FAD, a rung across complex II.
-    const fadIdle = a.id === 'sulfate' || a.id === 'carbon-dioxide';
-    pane.line(B.II.x0 + 2, g.y.FAD, B.II.x1 - 2, g.y.FAD, { stroke: fadIdle ? C.ruleStrong : ENZ.symbolColor, 'stroke-width': 1.4 });
+    const k = g.k;
+    const box = (r, attrs) => pane.rect(r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0, { rx: b.num(Math.min(4 * k, (r.x1 - r.x0) / 3, (r.y1 - r.y0) / 3), 1), ...attrs });
+    const numeral = (x, y, str, part, idle) => pane.text(x, y, str, {
+      anchor: 'middle', 'font-size': b.num(g.size * 1.02, 1), 'font-weight': 700,
+      ...(idle ? { class: 'rc-idle-num' } : { style: `fill:${part.symbolColor}` }),
+    });
+    const fillOf = (part, idle) => (idle ? { class: 'rc-idle' } : { fill: part.color });
+    // Complex I: the arm first, so the block covers its root.
+    const idleI = g.idleBody.I;
+    box(B.Iarm, fillOf(PUMP, idleI));
+    box(B.I, fillOf(PUMP, idleI));
+    numeral(g.sx, g.numY.I, 'I', PUMP, idleI);
+    // Complex II, with the cycle's FAD as a rung across it.
+    const idleII = g.idleBody.II;
+    box(B.II, fillOf(ENZ, idleII));
+    pane.line(B.II.x0 + 2, g.y.FAD, B.II.x1 - 2, g.y.FAD, { stroke: idleII ? C.ruleStrong : ENZ.symbolColor, 'stroke-width': 1.4 });
+    if (acc().id !== 'fumarate') numeral(g.xII, g.numY.II, 'II', ENZ, idleII);
+    if (B.III) {
+      box(B.III, fillOf(PUMP, false));
+      numeral(g.sx, g.numY.III, 'III', PUMP, false);
+      box(B.IV, fillOf(PUMP, false));
+      numeral(g.sx, g.numY.IV, 'IV', PUMP, false);
+    }
+    if (B.Nar) box(B.Nar, fillOf(ENZ, false));
   }
 
   function drawCarriers(g, t) {
     const a = acc();
-    const used = new Set(inPlay(a));
     const s = g.seat;
     // NADH, the donor, and the mobile carriers: pale when oxidised, full when they hold a pair.
-    pane.circle(s.src.x, s.src.y, RN, { fill: LOADED, stroke: C.ink, 'stroke-width': 0.8, opacity: donor === 'nadh' ? undefined : 0.55 });
-    for (const [id, r] of [['Q', RQ], ['c', RC]]) {
-      if (!used.has(id)) {
-        pane.circle(s[id].x, s[id].y, r, { class: 'rc-idle' });
-        continue;
-      }
-      const full = shown(id, t) > 0;
-      pane.circle(s[id].x, s[id].y, r, { fill: full ? LOADED : CARRIER, stroke: C.ink, 'stroke-width': 0.8 });
-    }
-    // The acceptor, and the product a pair makes of it.
+    pane.circle(s.src.x, s.src.y, g.RN, { fill: LOADED, stroke: C.ink, 'stroke-width': 0.8 });
+    if (g.play.has('Q')) pane.circle(s.Q.x, s.Q.y, g.RQ, { fill: shown('Q', t) > 0 ? LOADED : CARRIER, stroke: C.ink, 'stroke-width': 0.8 });
+    else pane.circle(s.Q.x, s.Q.y, g.RQ, { class: 'rc-idle' });
+    if (s.c) pane.circle(s.c.x, s.c.y, g.RC, { fill: shown('c', t) > 0 ? LOADED : CARRIER, stroke: C.ink, 'stroke-width': 0.8 });
+    // The acceptor.
     const noO2 = a.id === 'oxygen' && !oxygenOn;
-    pane.circle(s.out.x, s.out.y, RA, noO2
+    pane.circle(s.out.x, s.out.y, g.RA, noO2
       ? { fill: C.paper, stroke: C.coralText, 'stroke-width': 1.2, 'stroke-dasharray': '2 1.8' }
       : { fill: C.paper, stroke: C.ink, 'stroke-width': 1.2 });
     if (g.blockBar) {
@@ -1301,31 +1350,35 @@ export function mount(root, ctx) {
     }
   }
 
+  function drawLegend(g, l) {
+    const sz = l.size;
+    const { lines } = legendSize(g, sz);
+    const y1 = l.y + sz * 0.92;
+    electron(g, l.x + g.DOT, y1 - sz * 0.33);
+    electron(g, l.x + g.DOT * 3.4, y1 - sz * 0.33);
+    pane.text(l.x + g.DOT * 5.4 + 6, y1, LEGEND_PAIR, { class: 'rc-cap', 'font-size': b.num(sz, 1) });
+    if (lines > 1) {
+      const y2 = y1 + sz * 1.45;
+      pane.text(l.x, y2, '+', { class: 'rc-charge', 'font-size': b.num(sz, 1) });
+      pane.text(l.x + textWidth('+', sz, 700) + 6, y2, LEGEND_CHARGE, { class: 'rc-cap', 'font-size': b.num(sz, 1) });
+    }
+  }
+
   function drawLabels(g) {
     for (const l of Object.values(g.labels)) {
+      if (l.key === 'legend') {
+        drawLegend(g, l);
+        continue;
+      }
       if (l.leader) pane.line(l.leader.a.x, l.leader.a.y, l.leader.b.x, l.leader.b.y, { class: 'rc-leader' });
-      const src = l.live ?? l.src;
-      const noO2 = l.key === 'acc' && acc().id === 'oxygen' && !oxygenOn;
-      richLabel(l.x, l.y, src, { size: l.size, anchor: l.anchor, cls: noO2 ? 'rc-block' : l.cls, weight: l.weight });
-    }
-    if (g.legend) {
-      const lg = g.legend;
-      let x = lg.x;
-      electron(x + DOT, lg.y - lg.size * 0.33);
-      electron(x + DOT * 3.4, lg.y - lg.size * 0.33);
-      x += DOT * 6 + 6;
-      pane.text(x, lg.y, 'a pair of electrons', { class: 'rc-cap', 'font-size': b.num(lg.size, 1) });
-      x += textWidth('a pair of electrons', lg.size) + 14;
-      pane.text(x, lg.y, '+', { class: 'rc-charge', 'font-size': b.num(lg.size, 1) });
-      x += textWidth('+', lg.size, 700) + 5;
-      pane.text(x, lg.y, 'a charge moved across', { class: 'rc-cap', 'font-size': b.num(lg.size, 1) });
+      richLabel(l.x, l.y, l.src, { size: l.size, anchor: l.anchor, cls: l.cls, weight: l.weight });
     }
   }
 
   function drawDynamic(g, t) {
     const s = g.seat;
-    // Pairs at rest.
-    for (const st of ['I', 'II', 'Q', 'Nar', 'III', 'c', 'IV']) if (shown(st, t) > 0) pairAt(s[st]);
+    // Pairs at rest in the complexes. Ubiquinone and cytochrome c show theirs by colour, as NADH does.
+    for (const st of ['I', 'II', 'Nar', 'III', 'IV']) if (s[st] && shown(st, t) > 0) pairAt(g, s[st]);
     if (instant()) return;
     // Pairs on the move.
     for (const m of moves) {
@@ -1333,24 +1386,24 @@ export function mount(root, ctx) {
       const pts = g.wires[`${m.from}>${m.to}`];
       if (!pts) throw new Error(`respiratory-chain: no wire from ${m.from} to ${m.to} under ${acc().id}.`);
       const f = ease((t - m.t0) / (m.t1 - m.t0));
-      const lag = (DOT * 2.6) / Math.max(1, lengthOf(pts));
-      const appear = m.from === 'src2' ? clamp((t - m.t0) / Math.max(0.01, m.t1 - m.t0) * 2, 0, 1) : null;
+      const lag = (g.DOT * 2.6) / Math.max(1, lengthOf(pts));
+      const appear = m.from === 'src2' ? clamp(((t - m.t0) / Math.max(0.01, m.t1 - m.t0)) * 2, 0, 1) : null;
       const p1 = along(pts, f);
       const p2 = along(pts, Math.max(0, f - lag));
-      electron(p1.x, p1.y, appear);
-      electron(p2.x, p2.y, appear);
+      electron(g, p1.x, p1.y, appear);
+      electron(g, p2.x, p2.y, appear);
     }
     // Charges crossing, and the product appearing.
     for (const f of fx) {
       if (f.kind === 'charges') {
         const cr = g.cross[f.station];
+        if (!cr) continue;
         for (let i = 0; i < f.n; i += 1) {
           const p = (t - f.at - i * STAGGER) / T_CHARGE;
           if (p < 0 || p > 1.75) continue;
           const u = ease(clamp(p, 0, 1));
           const fade = p <= 1 ? 1 : 1 - (p - 1) / 0.75;
-          const x = cr.x - g.crossReach + 2 * g.crossReach * u;
-          pane.text(x, cr.ys[i % cr.ys.length] + g.size * 0.36, '+', {
+          pane.text(lerp(cr.x0, cr.x1, u), cr.ys[i % cr.ys.length] + g.size * 0.36, '+', {
             anchor: 'middle', class: 'rc-charge', 'font-size': b.num(g.size * 1.15, 1), opacity: b.num(fade, 3),
             stroke: C.paper, 'stroke-width': '2.4px', 'stroke-linejoin': 'round', 'paint-order': 'stroke',
           });
@@ -1359,18 +1412,22 @@ export function mount(root, ctx) {
         const p = (t - f.at) / T_FX;
         if (p < 0 || p >= 1) continue;
         const a = acc();
-        const fade = 1 - p * p;
-        richLabel(s.out.x, s.out.y + RA + g.size * 1.1 + 4 * ease(p), a.product, { size: g.small, anchor: 'middle', weight: 600, fill: C.waterText, opacity: fade });
+        richLabel(s.out.x, s.out.y + g.RA + g.size * 1.1 + 4 * ease(p), a.product, { size: g.small, anchor: 'middle', weight: 600, fill: C.waterText, opacity: 1 - p * p });
       }
     }
   }
 
   // ---------------------------------------------------------------- the readout
-
+  //
+  // Two tables: what one pair releases and moves, per donor, and what the membrane holds, with the sentence
+  // on the state under them. Beside the drawing they stack; under it, on a phone, they stand side by side
+  // with the sentence across both, so that the column is not half empty. Level 0 is the fullest; each level
+  // after gives up the row the stage already shows, and the ATP row and the sentence are never given up.
   function drawReadout(g, t) {
     const R = g.read;
     const a = acc();
-    const size = clamp(R.w * 0.034, 9.6, 11.2);
+    // The table's type grows with its column, and its rows spread to fill the column's height.
+    const size = clamp(R.w * 0.038, 9.6, g.portrait ? 10.6 : 12.6);
     const level = gradShown(t);
     const col = (dn) => {
       const fall = fallOf(dn, a);
@@ -1379,46 +1436,67 @@ export function mount(root, ctx) {
     const cn = col('nadh');
     const cf = col('fadh2');
     const build1 = (r, lv) => {
-      r.row('Fall, V', [cn.fall, cf.fall]);
+      if (lv < 1) r.row('Fall, V', [cn.fall, cf.fall]);
       r.row('Released, kJ/mol', [cn.kj, cf.kj]);
       r.row(a.id === 'oxygen' ? 'Charges moved' : 'Charges, at most', [cn.n, cf.n]);
       if (lv < 2) r.row('Pairs delivered', [cn.pairs, cf.pairs]);
     };
-    const jammed = Boolean(crossoverAt()) || Boolean(refused) || (a.id === 'oxygen' && !oxygenOn);
+    const entry = entryOf(donor);
+    const jammed = Boolean(crossoverAt()) || refused === 'backed-up' || entry === 'no-fall' || entry === 'uphill' || (donor === 'fadh2' && block().at === 'II') || (a.id === 'oxygen' && !oxygenOn);
     const build2 = (r, lv) => {
-      if (a.id === 'oxygen' && lv < 1) r.row('Charges moved in all', String(chargesShown(t)));
+      if (a.id === 'oxygen' && lv < 2) r.row('Charges moved in all', String(chargesShown(t)));
       r.row('pH difference', `${(PH_DIFF * level).toFixed(2)} units`);
       r.row('Membrane potential', `${Math.round(PSI_MV * level)} mV`);
       r.sum('ATP made here', '0');
-      r.note(status(lv), jammed ? { accent: C.coralText } : {});
+    };
+    const build3 = (r, lv) => {
+      r.note(status(lv >= 3), jammed ? { accent: C.coralText } : {});
       if (lv < 1 && a.id !== 'oxygen') r.note(SAME_KIND);
     };
     const title1 = `Per pair, to ${a.word}`;
-    const opts = { x: R.x, width: R.w, size, minRow: 13, maxRow: 22 };
+    const base = { size, titleSize: size * 0.88, headSize: size * 0.86, minRow: 13, maxRow: 36 };
+    const side = g.portrait && R.w >= 300;
+    const gutter = 14;
+    const cw = side ? (R.w - gutter) / 2 : R.w;
     const gap = 10;
-    for (let lv = 0; lv < 3; lv += 1) {
-      const m1 = pane.readout({ ...opts, y: R.y, title: title1, columns: ['NADH', 'FADH₂'] });
-      build1(m1, lv);
-      const m2 = pane.readout({ ...opts, y: R.y, title: lv < 2 ? 'Across the membrane' : null });
-      build2(m2, lv);
-      const need = (rowH) => m1.height(rowH) + gap + m2.height(rowH);
-      if (lv < 2 && need(opts.minRow) > R.h) continue;
-      let lo = opts.minRow;
-      let hi = opts.maxRow;
+    const LEVELS = 4;
+    // The three readouts at a given top; beside each other or stacked, the sentence always last.
+    const make = (lv, y1, y3) => {
+      const title2 = lv < 3 ? 'Across the membrane' : null;
+      const r1 = pane.readout({ ...base, x: R.x, width: cw, y: y1, title: title1, columns: ['NADH', 'FADH₂'] });
+      build1(r1, lv);
+      if (side) {
+        const r2 = pane.readout({ ...base, x: R.x + cw + gutter, width: cw, y: y1, title: title2 });
+        build2(r2, lv);
+        const r3 = pane.readout({ ...base, x: R.x, width: R.w, y: y3 });
+        build3(r3, lv);
+        return { r1, r2, r3 };
+      }
+      const r2 = pane.readout({ ...base, x: R.x, width: R.w, y: y3, title: title2 });
+      build2(r2, lv);
+      build3(r2, lv);
+      return { r1, r2, r3: null };
+    };
+    const need = (m, rowH) => (side
+      ? Math.max(m.r1.height(rowH), m.r2.height(rowH)) + gap + m.r3.height(rowH)
+      : m.r1.height(rowH) + gap + m.r2.height(rowH));
+    for (let lv = 0; lv < LEVELS; lv += 1) {
+      const m = make(lv, R.y, R.y);
+      if (lv < LEVELS - 1 && need(m, base.minRow) > R.h) continue;
+      let lo = base.minRow;
+      let hi = base.maxRow;
       for (let i = 0; i < 30; i += 1) {
         const mid = (lo + hi) / 2;
-        if (need(mid) <= R.h) lo = mid;
+        if (need(m, mid) <= R.h) lo = mid;
         else hi = mid;
       }
-      const r1 = pane.readout({ ...opts, y: R.y, title: title1, columns: ['NADH', 'FADH₂'] });
-      build1(r1, lv);
-      const y2 = r1.draw(lo, R.h) + gap;
-      const r2 = pane.readout({ ...opts, y: y2, title: lv < 2 ? 'Across the membrane' : null });
-      build2(r2, lv);
-      r2.draw(lo, R.y + R.h - y2);
+      const bottom = side ? Math.max(m.r1.draw(lo, R.h), m.r2.draw(lo, R.h)) : m.r1.draw(lo, R.h);
+      const y3 = bottom + gap;
+      const d = make(lv, R.y, y3);
+      (side ? d.r3 : d.r2).draw(lo, R.y + R.h - y3);
       return lv;
     }
-    return 2;
+    return LEVELS - 1;
   }
 
   // ---------------------------------------------------------------- drawing
@@ -1429,11 +1507,11 @@ export function mount(root, ctx) {
     // In the lab, and once the book's face has arrived, a label that nothing clears is a defect in this
     // file, and the gates that drive the lab should say so.
     if (g.collisions.length && fontsKey() === 'loaded' && typeof location !== 'undefined' && location.pathname.includes('/lab/')) {
-      throw new Error(`respiratory-chain: at a ${w}×${hh} pane (${g.portrait ? 'portrait' : 'landscape'}, acceptor ${acc().id}, block ${block().at ?? 'none'}) no position clears the label(s) ${g.collisions.join(', ')}; every candidate overlaps a line, a mark or another label.`);
+      throw new Error(`respiratory-chain: at a ${w}×${hh} pane (${g.portrait ? 'portrait' : 'landscape'}, acceptor ${acc().id}, block ${block().at ?? 'none'}, donor ${donor}) no position clears the label(s) ${g.collisions.join(', ')}; every candidate overlaps a line, a mark or another label.`);
     }
     const t = now();
     drawAxes(g);
-    drawBand(g);
+    drawMembrane(g);
     drawSigns(g, gradShown(t));
     drawWires(g);
     drawBodies(g);
@@ -1457,7 +1535,8 @@ export function mount(root, ctx) {
   //                       complex I, 2 as it leaves III, 4 as it leaves IV. null under any other acceptor,
   //                       where the stage shows a ceiling and counts nothing
   //   chargesPerPair      10 from NADH and 6 from FADH₂ with oxygen; otherwise the ceiling, the fall's
-  //                       kJ/mol ÷ 19.3 rounded down: 7, 3, 0 and 0 from NADH, 3 from FADH₂ to nitrate
+  //                       kJ/mol ÷ 19.3 rounded down: 7, 3, 0 and 0 from NADH, 3 from FADH₂ to nitrate,
+  //                       and 0 where FADH₂ has no fall or an uphill one
   //   chargesAreCeiling   false with oxygen, true for the other four acceptors
   //   potentialDropV      the acceptor's potential minus the donor's, for the chosen donor: 1.14 and 0.79
   //                       with oxygen; negative where the acceptor sits above FADH₂ (uphill)
