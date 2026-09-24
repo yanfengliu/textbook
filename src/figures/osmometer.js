@@ -24,9 +24,15 @@
 // all is the signal and the piston is the instrument that reads the number.
 //
 // UREA IS THE ONE CONTROL THAT CATCHES A MISCONCEPTION RATHER THAN SHOWING A FACT. It crosses the
-// membrane, so it equalises; once it has, the cell's own solutes are left doing the pulling and the cell
-// bursts although the two solutions started iso-osmotic. Iso-osmotic is not isotonic, and the panel says
-// which of the two it is reporting at every moment.
+// membrane, so it equalises; once it has, the cell's own solutes are left unbalanced and the cell bursts
+// although the two solutions started iso-osmotic. Iso-osmotic is not isotonic, and the panel says which
+// of the two it is reporting at every moment.
+//
+// NOTHING HERE SAYS THE SOLUTE PULLS, ATTRACTS OR HOLDS THE WATER. §4.4 rejects that picture: osmosis is
+// the net movement of water, and its reason is the number of ways solute and water can be arranged once
+// mixed (E. M. Kramer and D. R. Myers, "Five popular misconceptions about osmosis", Am. J. Phys. 80, 694,
+// 2012). Water crosses both ways all the time, so "no flow" is always "no net flow", and every word the
+// figure shows names the traffic or the potentials, never a solute doing something to the water.
 //
 // Two compositions, chosen by a ResizeObserver on the mount:
 //   wide   — the vessel on the left, the potential panel and the trace in a right column;
@@ -275,7 +281,7 @@ export function mount(root, ctx) {
   function advanceOneStep() {
     const s = solute();
     if (s.permeant && scene !== 'osmometer') {
-      // Urea crosses, so it equalises. Once it has, the cell's own solutes are left doing the pulling.
+      // Urea crosses, so it equalises. Once it has, the cell's own solutes are left unbalanced.
       ureaInsideMM += ((soluteOutsideMM - ureaInsideMM) / UREA_TAU) * STEP;
     } else if (s.permeant) {
       ureaInsideMM += ((soluteOutsideMM - ureaInsideMM) / UREA_TAU) * STEP;
@@ -470,9 +476,16 @@ export function mount(root, ctx) {
     };
   }
 
+  // Tonicity is spoken as a relation, because §4.4 says it is one: a bath is hypotonic TO a cell. The
+  // U-tube has no cell, so there it is the outside against the inside and no outcome is claimed; and a
+  // balance is "no net flow", because water goes on crossing both ways when the potentials match.
   function announce() {
     const d = state();
-    live.textContent = `${SCENES.find((s) => s.id === scene).name}. Outside ${d.osmolarityOutside} milliosmoles per litre, inside ${d.osmolarityInside}. Water potential outside ${signedMPa(d.psiOutside)} megapascals, inside ${signedMPa(d.psiInside)}. Water moving ${d.netWaterFlow === 'none' ? 'neither way' : d.netWaterFlow}. The solution is ${d.tonicity} and the cell is ${d.outcome}.`;
+    const flow = d.netWaterFlow === 'none' ? 'No net flow of water' : `Water moving ${d.netWaterFlow}`;
+    const tail = scene === 'osmometer'
+      ? `The outside is ${d.tonicity} to the inside.`
+      : `The bath is ${d.tonicity} to the cell, and the cell is ${OUTCOME_WORD[d.outcome].split(' — ')[0].toLowerCase()}.`;
+    live.textContent = `${SCENES.find((s) => s.id === scene).name}. Outside ${d.osmolarityOutside} milliosmoles per litre, inside ${d.osmolarityInside}. Water potential outside ${signedMPa(d.psiOutside)} megapascals, inside ${signedMPa(d.psiInside)}. ${flow}. ${tail}`;
   }
 
   // ---------------------------------------------------------------- the scenes
@@ -480,7 +493,7 @@ export function mount(root, ctx) {
   const OUTCOME_WORD = {
     swollen: 'Swollen', lysed: 'Lysed — the membrane has given way', normal: 'Unchanged',
     crenated: 'Crenated — shrunk and puckered', turgid: 'Turgid', flaccid: 'Flaccid — the wall is slack',
-    plasmolysed: 'Plasmolysed — pulled away from its wall',
+    plasmolysed: 'Plasmolysed — shrunk away from its wall',
   };
 
   function drawScene(w, hgt) {
@@ -546,11 +559,16 @@ export function mount(root, ctx) {
     const labY = Math.max(lab, topY - 5);
     sceneSvg.append(text(leftX + limbW / 2, labY, 'outside', { anchor: 'middle', class: 'os-label', 'font-size': fmt(lab, 1) }));
     sceneSvg.append(text(rightX + limbW / 2, labY, 'inside', { anchor: 'middle', class: 'os-label', 'font-size': fmt(lab, 1) }));
-    sceneSvg.append(text(mid, chanTop - 7, narrow ? 'membrane: water only' : 'membrane: water yes, solute no', { anchor: 'middle', class: 'os-label', 'font-size': fmt(lab * 0.9, 1) }));
+    // Urea crosses this membrane too — the model moves it into the inside limb — so with urea chosen the
+    // label names it, rather than saying the membrane stops the solute while the urea is going through.
+    const passes = solute().permeant
+      ? (narrow ? 'membrane: water and urea only' : 'membrane: water and urea yes, the rest no')
+      : (narrow ? 'membrane: water only' : 'membrane: water yes, solute no');
+    sceneSvg.append(text(mid, chanTop - 7, passes, { anchor: 'middle', class: 'os-label', 'font-size': fmt(lab * 0.9, 1) }));
 
     const verdict = d.equilibrated && pistonMPa > 0
       ? (narrow ? `Stopped, at ${fmt(pistonMPa, 2)} MPa.` : `The flow has stopped, with the piston holding ${fmt(pistonMPa, 2)} MPa against it.`)
-      : d.netWaterFlow === 'none' ? (narrow ? 'Neither side pulls.' : 'Neither side pulls: the two potentials already match.')
+      : d.netWaterFlow === 'none' ? (narrow ? 'No net flow: the potentials match.' : 'No net flow: the two potentials already match.')
         : narrow ? `Crossing to the ${d.netWaterFlow === 'in' ? 'inside' : 'outside'}; ${fmt(d.osmoticPressureMPa, 2)} MPa stops it.`
           : `Water is crossing to the ${d.netWaterFlow === 'in' ? 'inside' : 'outside'} limb. It takes ${fmt(d.osmoticPressureMPa, 2)} MPa to stop it.`;
     sceneSvg.append(text(mid, hgt - 6, verdict, { anchor: 'middle', class: 'os-verdict', fill: C.ink, 'font-size': fmt(clamp(10 * size, 9, 11), 1) }));
@@ -723,36 +741,51 @@ export function mount(root, ctx) {
     return rows;
   }
 
-  // The same finding in fewer words, for a column a phone's width.
+  // The same finding in fewer words, for a column a phone's width. Each is one line at 390 px: the side
+  // panel's height is measured on a resize, not on every change of state, so a second line here would
+  // be squeezed rather than given room.
   function shortSentence(d, s) {
-    if (s.permeant && scene !== 'osmometer') return d.outcome === 'lysed' ? 'Iso-osmotic is not isotonic.' : 'Urea crosses, so it equalises and stops pulling.';
+    if (s.permeant && scene !== 'osmometer') return d.outcome === 'lysed' ? 'Iso-osmotic is not isotonic.' : 'Urea equalises; the cell’s own solutes cannot.';
     if (scene === 'osmometer') return d.equilibrated && d.pistonMPa > 0 ? 'The piston has stopped the flow.' : 'Water goes to the lower potential.';
-    if (scene === 'plant-cell') return d.outcome === 'turgid' ? 'The wall pushes back, and the water stops arriving.' : d.outcome === 'plasmolysed' ? 'The contents have pulled away; the wall has not.' : 'No pressure in the wall: the cell is slack.';
+    if (scene === 'plant-cell') return d.outcome === 'turgid' ? 'The wall pushes back, and the water stops arriving.' : d.outcome === 'plasmolysed' ? 'The contents have shrunk; the wall has not.' : 'No pressure in the wall: the cell is slack.';
     if (d.outcome === 'lysed') return 'No wall, so nothing turns the water into pressure.';
     if (d.outcome === 'crenated') return 'Water has left, and the surface has puckered.';
     if (d.outcome === 'swollen') return 'Nothing pushes back, so it all becomes volume.';
+    if (d.tonicity === 'hypotonic') return 'The bath is hypotonic: the cell gains water.';
+    if (d.tonicity === 'hypertonic') return 'The bath is hypertonic: the cell loses water.';
     return 'Neither gaining nor losing: the bath is isotonic.';
   }
 
-  // One sentence, right in every state its parts can take.
+  // One sentence, right in every state its parts can take. None of them gives the solute an agency over
+  // the water: the urea "stops pulling" became the urea equalising and leaving the cell's own solutes
+  // unbalanced, which is §4.4's own account of iso-osmotic urea. A cell at its resting volume is not
+  // thereby in an isotonic bath — it is at the start of a run in any bath — so that sentence is keyed on
+  // the tonicity, and a turgid cell is only said to have stopped the water once the flow has stopped.
   function sentence(d, s) {
     if (s.permeant && scene !== 'osmometer') {
-      if (d.outcome === 'lysed') return 'Iso-osmotic is not isotonic: the urea equalised, and the cell’s own solutes did the rest.';
-      return 'Urea crosses, so it equalises and stops pulling. Watch what the cell’s own solutes then do.';
+      if (d.outcome === 'lysed') return 'Iso-osmotic is not isotonic: the urea equalised; the cell’s own solutes could not.';
+      return 'Urea crosses and equalises, which leaves the cell’s own solutes unbalanced.';
     }
     if (scene === 'osmometer') {
       if (d.equilibrated && d.pistonMPa > 0) return `The piston has stopped the flow at ${fmt(d.pistonMPa, 2)} MPa, which is this pair’s osmotic pressure.`;
-      if (d.netWaterFlow === 'none') return 'The two potentials match, so no water is crossing either way.';
+      if (d.netWaterFlow === 'none') return 'The two potentials match, so water crosses both ways equally: no net flow.';
       return `Water goes to the lower potential. Press the piston to ${fmt(d.osmoticPressureMPa, 2)} MPa and the flow stops.`;
     }
     if (scene === 'plant-cell') {
-      if (d.outcome === 'turgid') return `The wall is pushing back at ${fmt(d.psiPressureInside, 2)} MPa, and that is what stopped the water arriving.`;
-      if (d.outcome === 'plasmolysed') return 'The contents have pulled away, and the wall has kept its shape regardless.';
-      return 'No pressure in the wall: the cell is slack, which is what an isotonic bath does to a plant.';
+      if (d.outcome === 'turgid') {
+        return d.equilibrated
+          ? `The wall is pushing back at ${fmt(d.psiPressureInside, 2)} MPa, and that is what stopped the water arriving.`
+          : `The wall is pushing back at ${fmt(d.psiPressureInside, 2)} MPa; water arrives until the potentials match.`;
+      }
+      if (d.outcome === 'plasmolysed') return 'The contents have shrunk away from the wall, which has kept its shape.';
+      if (d.tonicity === 'isotonic') return 'No pressure in the wall: the cell is slack. In an isotonic bath, a plant wilts.';
+      return 'No pressure in the wall: the cell is slack.';
     }
     if (d.outcome === 'lysed') return 'With no wall there is nothing to convert the arriving water into pressure.';
     if (d.outcome === 'crenated') return 'Water has left, and the surface has puckered rather than the volume holding.';
     if (d.outcome === 'swollen') return 'Nothing is pushing back, so every drop that arrives becomes volume.';
+    if (d.tonicity === 'hypotonic') return 'The bath is hypotonic to this cell: it makes the cell gain water.';
+    if (d.tonicity === 'hypertonic') return 'The bath is hypertonic to this cell: it makes the cell lose water.';
     return 'Neither gaining nor losing: the bath is isotonic to this cell.';
   }
 
@@ -883,7 +916,7 @@ export function mount(root, ctx) {
     // outcome              swollen | lysed | normal | crenated | turgid | flaccid | plasmolysed
     // pistonMPa            osmometer only
     // osmoticPressureMPa   the pressure that would stop the flow
-    // equilibrated         nothing is crossing either way
+    // equilibrated         no net flow either way: water still crosses, as much each way
     // t                    clock, seconds
     // playing              whether the water is moving
     // layout               wide | narrow
