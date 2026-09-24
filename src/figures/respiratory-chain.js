@@ -448,7 +448,10 @@ export function mount(root, ctx) {
     const to = gradTarget();
     if (to === grad.to) return;
     const t = now();
-    grad = { from: gradShown(t), to, t0: t };
+    // A gradient builds only as charges cross, so a rise waits for the first crossing still to come, rather
+    // than showing a potential while "Charges moved in all" still reads 0.
+    const crossings = to > grad.to ? fx.filter((f) => f.kind === 'charges' && f.at >= t).map((f) => f.at) : [];
+    grad = { from: gradShown(t), to, t0: crossings.length ? Math.min(...crossings) : t };
   }
 
   function crossoverAt() {
