@@ -904,8 +904,11 @@ export function mount(root, ctx) {
       if (!mk.filled) place(around(xt, loOut(xt), -1, { offs: [11, 22, 33], shifts: [0, -24, 24, -48] }), narrow ? 'trimmed' : 'trimmed to leave a tail');
     }
     const nameX = G.xMin + (0 - G.xMin) * 0.3;
-    place(around(nameX, upOut(nameX), 1, { offs: [12, 24, 36], shifts: [0, -40, 40, -80] }), narrow ? 'lagging copy' : 'copied by the lagging strand');
-    place(around(nameX, loOut(nameX), -1, { offs: [12, 24, 36], shifts: [0, -40, 40, -80] }), narrow ? 'leading copy' : 'copied by the leading strand');
+    // Sideways along its copy before further from it: one step up from the copy, on a short stage, is
+    // the band of the whole telomere, where a copy's name would read as the band's.
+    const nameShifts = [0, -40, 40, -80, 80, 120, 160, 200];
+    place(around(nameX, upOut(nameX), 1, { offs: [12, 24, 36], shifts: nameShifts }), narrow ? 'lagging copy' : 'copied by the lagging strand');
+    place(around(nameX, loOut(nameX), -1, { offs: [12, 24, 36], shifts: nameShifts }), narrow ? 'leading copy' : 'copied by the leading strand');
     endMark(0, upOut(0), '3′', 1);
     endMark(telomerase && mk.fC > 0 ? mk.telEnd : -O, loIn(-O), '3′', -1);
     // The lagging copy has its tail once its new strand is trimmed back, not while only the primer is gone.
@@ -1029,13 +1032,27 @@ export function mount(root, ctx) {
     const rowGap = narrow ? 20 : 22;
     let x0;
     let y0;
+    const endS = S * 0.9;
+    let prefix = '5′ ···';
+    // From the top of the letters to the foot of the second caption.
+    const tall = 3 * S + rowGap + 12;
     if (!narrow) {
       const [, yLo] = G.P(G.aOf(0), -G.sep / 2 - G.g / 2);
       x0 = G.w - 8 - boxW;
-      y0 = yLo + 30;
+      y0 = Math.min(yLo + 30, G.tvBot - tall);
     } else {
       x0 = G.w - 4 - boxW;
       y0 = G.aHi - 66;
+      // The letters sit right of the short copy. Where its old strand runs down beside them, as on a
+      // stage narrower than a 390 px phone's, the '5′' in front of them goes first, the 3′ end still
+      // named at the right, and the letters themselves if even the '···' would touch the strand: the
+      // copy, its labels and the table still say what the enzyme did. '5′ ···' is estimated at 2.1 em
+      // and '···' at 0.9.
+      const [oldX, oldEnd] = G.P(G.aOf(-G.O), -G.sep / 2 - G.g / 2);
+      if (oldEnd > y0 - 2) {
+        if (x0 + padL - 3 - endS * 0.9 < oldX + 4) return;
+        if (x0 + padL - 3 - endS * 2.1 < oldX + 4) prefix = '···';
+      }
     }
     const col = (i) => x0 + padL + (i + 0.5) * cw;
     const yD = y0 + S;
@@ -1070,8 +1087,7 @@ export function mount(root, ctx) {
     for (let j = 0; j < RNA_TEMPLATE.length; j += 1) p.text(col(lead + j), yR, RNA_TEMPLATE[j], { anchor: 'middle', 'font-size': S.toFixed(1), 'font-weight': 500, style: `fill:${C.ink}` });
     // The RNA's backbone, dashed as every RNA in the figure is, under its letters.
     p.path(`M${(col(lead) - cw / 2).toFixed(1)} ${(yR + 4).toFixed(1)}H${(col(cols - 1) + cw / 2).toFixed(1)}`, { stroke: C.ink, 'stroke-width': 1.6, 'stroke-dasharray': '3.2 2.2' });
-    const endS = S * 0.9;
-    p.text(x0 + padL - 3, yD, '5′ ···', { anchor: 'end', 'font-size': endS.toFixed(1), style: `fill:${C.ink}` });
+    p.text(x0 + padL - 3, yD, prefix, { anchor: 'end', 'font-size': endS.toFixed(1), style: `fill:${C.ink}` });
     const lastCol = shown - 1 - shift;
     p.text(col(lastCol) + cw * 0.8, yD, '3′', { anchor: 'start', 'font-size': endS.toFixed(1), style: `fill:${C.ink}` });
     p.text(col(lead) - cw * 0.8, yR, '3′', { anchor: 'end', 'font-size': endS.toFixed(1), style: `fill:${C.ink}` });
@@ -1099,13 +1115,20 @@ export function mount(root, ctx) {
     const narrow = G.narrow;
     const S = narrow ? 9.6 : 10.5;
     const cw = narrow ? 8.8 : 10.2;
-    const top = narrow ? 'GGTTAGGGTTAGGG' : 'TTAGGGTTAGGGTTAGGG';
     const np = narrow ? 6 : 10; // the columns the C-rich strand pairs with
     const COMP = { A: 'T', T: 'A', G: 'C', C: 'G' };
     const padL = narrow ? 30 : 36;
-    const boxW = padL + top.length * cw + (narrow ? 30 : 36);
+    const padR = narrow ? 30 : 36;
+    const endS = S * 0.9;
     const rowGap = narrow ? 20 : 22;
     const [jx, jy] = G.P(G.aOf(-G.O), -G.g / 2);
+    // A phone's letters sit right of the chromosome, beside the end of the C-rich strand: as many of the
+    // tail's as fit with the '5′ ···' in front of them (estimated at 2.1 em) clear of that strand, and
+    // none if fewer than three would — the labels still name the tail.
+    const fit = narrow ? Math.floor((G.w - 4 - padR - 3 - endS * 2.1 - (jx + 4)) / cw) : Infinity;
+    if (fit < np + 3) return;
+    const top = (narrow ? 'GGTTAGGGTTAGGG' : 'TTAGGGTTAGGGTTAGGG').slice(0, fit);
+    const boxW = padL + top.length * cw + padR;
     let x0;
     let y0;
     if (!narrow) {
@@ -1133,8 +1156,7 @@ export function mount(root, ctx) {
       }
     }
     for (const [base, ds] of Object.entries(pegs)) p.path(ds.join(''), { stroke: BASE_COLOUR[base], 'stroke-width': 2.4, 'stroke-linecap': 'butt' });
-    const endS = (S * 0.9).toFixed(1);
-    const endText = (x, y, str, anchor) => p.text(x, y, str, { anchor, 'font-size': endS, style: `fill:${C.ink}` });
+    const endText = (x, y, str, anchor) => p.text(x, y, str, { anchor, 'font-size': endS.toFixed(1), style: `fill:${C.ink}` });
     endText(x0 + padL - 3, yD, '5′ ···', 'end');
     endText(x0 + padL - 3, yR, '3′ ···', 'end');
     endText(col(top.length - 1) + cw * 0.8, yD, '··· 3′', 'start');
@@ -1180,7 +1202,9 @@ export function mount(root, ctx) {
       const size = clamp(hgt * 0.1, 9.8, 11);
       const titleSize = 9.4;
       const gap = 18;
-      const colW = clamp(w * 0.19, 150, 210);
+      // Narrow enough on the smallest wide stage (about 810 px, a two-row toolbar) that the longest
+      // sentence takes three lines of its column, which is what the band's height holds there.
+      const colW = clamp(w * 0.17, 138, 200);
       const groups = shape === 'circular'
         ? [['A circular chromosome', rows.slice(0, 2)], ['At each division', rows.slice(2, 4)], ['The stop', rows.slice(4)]]
         : [['At the tip', rows.slice(0, 3)], ['At each division', [rows[3], rows[4], rows[7]]], ['The stop', rows.slice(5, 7)]];
@@ -1193,7 +1217,8 @@ export function mount(root, ctx) {
       const noteX = 2 + 3 * (colW + gap);
       const note = table.readout({ title: 'What happens', x: noteX, width: w - noteX - 2, size, titleSize });
       note.note(words, { size: size - 0.8 });
-      note.draw(16, hgt);
+      // Half a sentence says less than none: one that cannot fit whole is left out.
+      if (note.height(16) <= hgt + 0.01) note.draw(16, hgt);
       return;
     }
     // Narrow: the rows in two columns, the sentence under them at full width.
@@ -1201,7 +1226,10 @@ export function mount(root, ctx) {
     const colW = (w - 14) / 2;
     const noteT = table.readout({ x: 0, width: w, size });
     noteT.note(words, { size: 9.4 });
-    const into = Math.max(60, hgt - noteT.height(14) - 2);
+    // The rows make room for the sentence under them only when it can fit there whole; when it cannot,
+    // they have the pane.
+    const spare = hgt - noteT.height(14) - 2;
+    const into = spare >= 60 ? spare : hgt;
     const half = Math.ceil(rows.length / 2);
     const left = table.readout({ title, x: 0, width: colW, size, minRow: 13, maxRow: 20 });
     for (const [k, v] of rows.slice(0, half)) left.row(k, v);
@@ -1211,7 +1239,9 @@ export function mount(root, ctx) {
     const br = right.fill(into);
     const noteAt = table.readout({ x: 0, y: Math.max(bl, br) + 2, width: w, size });
     noteAt.note(words, { size: 9.4 });
-    noteAt.draw(14, hgt - Math.max(bl, br) - 2);
+    // Whole or not at all, as in the wide table: on a stage narrower than a 360 px phone's it is left out.
+    const room = hgt - Math.max(bl, br) - 2;
+    if (noteAt.height(14) <= room + 0.01) noteAt.draw(14, room);
   }
 
   // describe() — what the gates and any task read. The frame adds id, kind, number and state; the bench
