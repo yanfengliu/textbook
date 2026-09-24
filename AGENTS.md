@@ -114,10 +114,10 @@ Do not declare the result fully verified while material findings or required che
 
 **Read a gate's entry in [docs/policies/gates.md](docs/policies/gates.md) before changing the gate or relying on it.** That file holds what each gate proves, its bound, its trims and the measurements behind them; this section is the short list.
 
-- **Node 24**, pinned by `.nvmrc` and `engines.node`; run against v24.18.1. A version mismatch is not a code failure, so check it before reading a red gate as one. Playwright's chromium must be installed once (`npx playwright install chromium`). The gates need the network: every page fetches the fonts from Google Fonts and the 3D figures fetch the pinned Three.js from jsdelivr, and a failed request is a failure.
+- **Node 24**, pinned by `.nvmrc` and `engines.node`; run against v24.18.1. A version mismatch is not a code failure, so check it before reading a red gate as one. Playwright's chromium, WebKit and Firefox must be installed once (`npx playwright install chromium webkit firefox`), because `npm run devices` also loads the library and chapter 1 in WebKit and Firefox. The gates need the network: every page fetches the fonts from Google Fonts and the 3D figures fetch the pinned Three.js from jsdelivr, and a failed request is a failure.
 - **`npm test` is the gate**, and it passes before any commit that touches code. Until a core gate exists and this file names it, `npm test` stays the commit gate ([the owner's direction of 2026-09-23](docs/policies/local-rules.md#the-usage-allowance-is-the-budget-the-owners-direction-of-2026-09-23), point 6). `tools/test.js` runs thirteen steps as separate processes, cheapest first, with no pipe anywhere, and stops at the first red one, naming it. Each is also runnable alone, and each states its own bound in its file header:
   1. `npm run unit`: the unit tests, `node --test "test/*.test.js"`.
-  2. `npm run check`: every page's authored prose and the study data beside it.
+  2. `npm run check`: every page's authored prose and the study data beside it, and which chapters the site says can be read against the chapters on disk.
   3. `npm run theme`: the reader's theme is on the page before first paint.
   4. `npm run shot`: every page at 390, 1024 and 1440 px in both themes, clocks pinned; writes `out/shots/`.
   5. `npm run flow`: the reader controls, through real mouse, keyboard and drag input.

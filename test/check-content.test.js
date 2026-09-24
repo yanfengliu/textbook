@@ -3,7 +3,7 @@
 // chapter is what `npm run check` reads.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { checkDocument, checkChapterData, checkStudySources, parseHtml, findAll, textOf } from '../tools/check-content.js';
+import { checkDocument, checkChapterData, checkStudySources, checkChapterAvailability, parseHtml, findAll, textOf } from '../tools/check-content.js';
 import { parseExpect, evalExpect } from '../src/components/task.js';
 
 const GLOSSARY = { cell: { term: 'Cell', def: 'The unit of life.' }, gene: { term: 'Gene', def: 'A stretch of DNA.' } };
@@ -349,4 +349,178 @@ test('given no bank at all, or a page with no <tb-sitting>, the check fails rath
   assert.ok(f.some((x) => x.includes('nothing to check')), f.join('\n'));
   f = checkStudySources({ html: '<!doctype html><html><body><main><h1>Today</h1></main></body></html>', banks: BANKS });
   assert.ok(f.some((x) => x.includes('no <tb-sitting>')), f.join('\n'));
+});
+
+// ---- which chapters a page says can be read, against the chapter directories on disk ----------------
+// Five times a page called a finished chapter unwritten: the contents for chapters 2 and 3 (6d854cf),
+// chapter 4's closing card, the contents for chapters 4 and 5, then the library page and README.md.
+const ON_DISK = [1, 2, 3, 4, 5].map((n) => ({ dir: `ch0${n}-c${n}`, number: n }));
+const BOOKS = new Map([['biology', { title: 'The Living World', onDisk: ON_DISK }]]);
+const line = (n) => (n <= 5
+  ? `<li><a href="ch0${n}-c${n}/"><span class="n">${n}</span><span><span class="title">T${n}</span></span><span class="tag">Read</span></a></li>`
+  : `<li><span class="soon"><span class="n">${n}</span><span class="title">T${n}</span><span class="tag">In preparation</span></span></li>`);
+const allLines = (n = 32) => Array.from({ length: n }, (_, i) => line(i + 1));
+const contents = (lines = allLines(), lang = 'en') =>
+  `<!doctype html><html lang="${lang}"><body><main class="book"><h1>The Living World</h1><ol class="chapters">${lines.join('')}</ol></main></body></html>`;
+const CONTENTS = contents();
+const contentsOf = (dir) => (dir === 'biology' ? CONTENTS : null);
+const avail = (html, file = 'biology/index.html') => checkChapterAvailability({ file, html, books: BOOKS, contentsOf });
+const shelf = (text) => `<!doctype html><html lang="en"><body><main class="library"><h1>Textbooks</h1><div class="shelf"><a class="book" href="biology/"><div class="book__body"><h2>The Living World</h2><p>${text}</p></div></a></div></main></body></html>`;
+
+test('a contents page that agrees with the disk passes', () => {
+  assert.deepEqual(avail(CONTENTS), []);
+});
+
+test('a chapter on disk listed as in preparation with no link fails, naming the directory and the line to write', () => {
+  const lines = allLines();
+  lines[1] = `<li><span class="soon"><span class="n">2</span><span class="title">T2</span><span class="tag">In preparation</span></span></li>`;
+  const f = avail(contents(lines));
+  assert.equal(f.length, 1, f.join('\n'));
+  assert.ok(f[0].includes('chapter 2 (T2) is on disk at biology/ch02-c2/') && f[0].includes('<a href="ch02-c2/">') && f[0].includes('<span class="tag">Read</span>'), f[0]);
+});
+
+test('a linked chapter tagged as unwritten, a link to a chapter not on disk, and a link to the wrong directory each fail', () => {
+  const lines = allLines();
+  lines[2] = lines[2].replace('>Read<', '>In preparation<');
+  lines[3] = lines[3].replace('href="ch04-c4/"', 'href="ch05-c5/"');
+  lines[6] = '<li><a href="ch07-c7/"><span class="n">7</span><span class="title">T7</span><span class="tag">Read</span></a></li>';
+  const f = avail(contents(lines));
+  assert.ok(f.some((x) => x.includes('chapter 3 (T3) is on disk and linked, and its tag says "In preparation"; write <span class="tag">Read</span>')), f.join('\n'));
+  assert.ok(f.some((x) => x.includes('chapter 4 (T4)\'s line links href="ch05-c5/"') && x.includes('write href="ch04-c4/"')), f.join('\n'));
+  assert.ok(f.some((x) => x.includes('chapter 7 (T7)\'s line links href="ch07-c7/", and biology/ has no ch07- directory')), f.join('\n'));
+});
+
+test('a chapter on disk with no line, a line with no number, a number listed twice, and a page with no list each fail', () => {
+  const lines = allLines();
+  lines[4] = '<li><span class="soon"><span class="title">Untitled</span></span></li>';
+  lines[7] = line(7);
+  let f = avail(contents(lines));
+  assert.ok(f.some((x) => x.includes('biology/ch05-c5/ is on disk and the contents list no chapter 5')), f.join('\n'));
+  assert.ok(f.some((x) => x.includes('has no <span class="n"> holding its chapter number')), f.join('\n'));
+  assert.ok(f.some((x) => x.includes('chapter 7 is listed twice')), f.join('\n'));
+  f = avail('<!doctype html><html lang="en"><body><main><h1>The Living World</h1><p>Chapters.</p></main></body></html>');
+  assert.ok(f.length === 1 && f[0].includes('no <ol class="chapters">'), f.join('\n'));
+});
+
+test('the tag words follow the page language, in either Chinese script, and a language with no words fails', () => {
+  const zh = (ready, soon) => contents(allLines(6).map((l) => l.replace('>Read<', `>${ready}<`).replace('>In preparation<', `>${soon}<`)), 'zh-Hans');
+  assert.deepEqual(avail(zh('可读', '未写')), []);
+  assert.deepEqual(avail(zh('可讀', '未寫')), []);
+  assert.equal(avail(zh('Read', '未写')).length, 5);
+  const f = avail(contents(undefined, 'fr'));
+  assert.ok(f.some((x) => x.includes('lang is "fr"') && x.includes('CONTENTS_TAGS')), f.join('\n'));
+});
+
+test('the library page\'s own sentence fails twice: the chapters it names, and the count it says are left', () => {
+  const f = avail(shelf('An interactive introduction to biology. Chapter 1, “What is life?”, is ready; thirty-one more are outlined.'), 'index.html');
+  assert.equal(f.length, 2, f.join('\n'));
+  assert.ok(f[0].includes('says chapter 1 is ready, and nothing else is') && f[0].includes('chapters 1, 2, 3, 4 and 5 on disk'), f[0]);
+  assert.ok(f[1].includes('says 31 more chapters are unwritten') && f[1].includes('lists 32 with 5 on disk, so 27 are; write 27'), f[1]);
+});
+
+test('a sentence naming exactly the chapters on disk passes, wording with no list has nothing to go stale, and the rest fail', () => {
+  for (const ok of [
+    'Chapters 1 to 5 are ready; twenty-seven more are outlined.',
+    'The first five chapters are ready.',
+    'Five of its 32 chapters are written.',
+    'Chapter 3 explains cells, and chapters 1 through 5 are published.',
+    'It is published a chapter at a time as each is finished, and the book’s contents say which are ready to read.',
+  ]) assert.deepEqual(avail(shelf(ok), 'index.html'), [], ok);
+  for (const bad of ['Chapters 1 to 4 are ready.', 'Four chapters are ready.', 'Five of its 30 chapters are written.', 'Chapter 5 is in preparation.', 'Chapter 3 explains cells, and chapter 4 is ready.']) {
+    assert.ok(avail(shelf(bad), 'index.html').length, `"${bad}" must fail`);
+  }
+});
+
+test('README.md is read a paragraph at a time, against the book whose title the paragraph names', () => {
+  const md = (text) => checkChapterAvailability({ file: 'README.md', markdown: text, books: BOOKS, contentsOf });
+  let f = md('# textbook\n\nThe first book is **The Living World**. Chapter 1, *What is life?*, is written: nine figures.\n');
+  assert.ok(f.length === 1 && f[0].startsWith('README.md:3: the paragraph about biology says chapter 1 is written, and nothing else is'), f.join('\n'));
+  f = md('# textbook\n\nChapter 1 is ready.\n');
+  assert.ok(f.length === 1 && f[0].includes('names no book by its title'), f.join('\n'));
+  assert.deepEqual(md('The Living World.\n\n```bash\n# chapter 1 is ready\n```\n'), []);
+  assert.deepEqual(md('The first book is **The Living World**, published a chapter at a time; its contents page says which chapters are ready.\n'), []);
+});
+
+test('a claim on the library page outside any shelf card fails, because it is about no one book', () => {
+  const html = shelf('An introduction to biology.').replace('<div class="shelf">', '<p>Chapter 1 is ready.</p><div class="shelf">');
+  const f = avail(html, 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('says "Chapter 1 is ready" outside every shelf card'), f.join('\n'));
+});
+
+// The independent review of this rule found each of the following; each test fails without its fix.
+test('a list of chapters is read as the list it names: commas, "and", ranges and the two together', () => {
+  assert.deepEqual(avail(shelf('Chapters 1, 2, 3, 4 and 5 are ready.'), 'index.html'), []);
+  assert.deepEqual(avail(shelf('Chapters 1–3, 4 and 5 are ready.'), 'index.html'), []);
+  let f = avail(shelf('Chapters 1, 2 and 3 are ready.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('says chapters 1, 2 and 3 are ready, and nothing else is'), f.join('\n'));
+  f = avail(shelf('Chapters 1 to 5 and 7 are ready.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('chapters 1, 2, 3, 4, 5 and 7 are ready'), f.join('\n'));
+});
+
+test('an entity is read as the character it stands for, so a no-break space or hyphen hides nothing', () => {
+  let f = avail(shelf('Chapter&nbsp;1 is ready.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('says chapter 1 is ready'), f.join('\n'));
+  f = avail(shelf('Chapters 1 to 5 are ready; thirty&#8209;one more are outlined.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('says 31 more chapters are unwritten'), f.join('\n'));
+});
+
+test('"have been published", "of the book\'s 32", a figure count, and a question in the prose are each read right', () => {
+  assert.deepEqual(avail(shelf('Chapters 1 to 5 have been published.'), 'index.html'), []);
+  assert.ok(avail(shelf('Chapters 1 to 4 have been published.'), 'index.html').length === 1);
+  assert.deepEqual(avail(shelf('Five of the book’s 32 chapters are ready.'), 'index.html'), []);
+  assert.deepEqual(avail(shelf('Eight figures; two more are planned.'), 'index.html'), []);
+  assert.deepEqual(avail(shelf('What is in chapter 3? The cell is complete.'), 'index.html'), []);
+});
+
+test('a line with no link that is not a .soon line fails, and a number span holding something else says what it holds', () => {
+  const lines = allLines();
+  lines[9] = '<li><span class="n">10</span><span class="title">T10</span><span class="tag">In preparation</span></li>';
+  lines[10] = lines[10].replace('<span class="n">11</span>', '<span class="n">11.</span>');
+  const f = avail(contents(lines));
+  assert.ok(f.some((x) => x.includes('chapter 10 (T10) has no directory in biology/, and its line is neither a link nor a .soon line')), f.join('\n'));
+  assert.ok(f.some((x) => x.includes('its <span class="n"> holds "11.", which is not a chapter number')), f.join('\n'));
+});
+
+test('a card for a book with nothing on disk can claim no chapter, whether it links or not', () => {
+  const card = (open, close, text) => `<!doctype html><html lang="en"><body><main class="library"><h1>Textbooks</h1><div class="shelf">${open}<h2>Matter and change</h2><p>${text}</p>${close}</div></main></body></html>`;
+  let f = avail(card('<a class="book" href="chemistry/">', '</a>', 'Chapter 1 is ready.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('the shelf card for chemistry says chapter 1 is ready') && f[0].includes('chemistry/ has no chapter directory on disk'), f.join('\n'));
+  f = avail(card('<div class="book book--soon">', '</div>', 'Chapter 1 is ready.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('a <div> that links to no book directory, says chapter 1 is ready') && f[0].includes('its book has no chapter directory on disk'), f.join('\n'));
+  assert.deepEqual(avail(card('<div class="book book--soon">', '</div>', 'In preparation.'), 'index.html'), []);
+  // True of a book with nothing on disk, so it passes in either kind of card (the re-review's finding).
+  for (const [open, close] of [['<div class="book book--soon">', '</div>'], ['<a class="book" href="chemistry/">', '</a>']]) {
+    assert.deepEqual(avail(card(open, close, 'Chapter 1 is in preparation. Chapters 1 to 12 are planned.'), 'index.html'), [], open);
+  }
+});
+
+// The independent re-review of the fixes above found each of the following.
+test('a number after a comma or an em dash is an aside, not another chapter in the list', () => {
+  assert.deepEqual(avail(shelf('Chapters 1 to 5 — 41 figures — are ready.'), 'index.html'), []);
+  const f = avail(shelf('Chapter 1, nine figures in all, is ready.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('says chapter 1 is ready, and nothing else is'), f.join('\n'));
+});
+
+test('"N more" reads the sentence before it too, and entities that name nothing stay as written instead of crashing', () => {
+  const f = avail(shelf('Chapters 1 to 5 are ready. Thirty-one more are outlined.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('says 31 more chapters are unwritten'), f.join('\n'));
+  assert.deepEqual(avail(shelf('Chapters 1 to 5 are ready&#1114112; &constructor; and more.'), 'index.html'), []);
+});
+
+test('README.md: a fence line with an info string inside a block does not close it', () => {
+  const md = (text) => checkChapterAvailability({ file: 'README.md', markdown: text, books: BOOKS, contentsOf });
+  assert.deepEqual(md('The Living World.\n\n```bash\n```js\nchapter 1 is ready\n```\n'), []);
+});
+
+test('README.md skips code and comments, and a paragraph it cannot place names the titles it could have used', () => {
+  const md = (text) => checkChapterAvailability({ file: 'README.md', markdown: text, books: BOOKS, contentsOf });
+  assert.deepEqual(md('The Living World.\n\n~~~\nchapter 1 is ready\n~~~\n\n<!-- chapter 1 is ready -->\n\n    chapter 1 is ready\n'), []);
+  const f = md('Intro.\n\nChapter 1 is ready.\n');
+  assert.ok(f.length === 1 && f[0].startsWith('README.md:3:') && f[0].includes('"The Living World" (biology)'), f.join('\n'));
+});
+
+test('a run says how many statements and contents lines it compared, so a run that compared none says so', () => {
+  assert.equal(avail(shelf('Chapters 1 to 5 are ready; twenty-seven more are outlined.'), 'index.html').compared.claims, 2);
+  assert.equal(avail(shelf('An introduction to biology.'), 'index.html').compared.claims, 0);
+  assert.equal(avail(CONTENTS).compared.lines, 32);
 });
