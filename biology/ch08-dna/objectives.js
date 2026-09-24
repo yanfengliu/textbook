@@ -285,7 +285,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'dna-damage',
-    statement: 'Name the commonest kinds of damage DNA suffers in a living cell — lost bases, deaminated bases, oxidised bases, ultraviolet dimers and broken strands — say roughly how often each happens, and say where each comes from.',
+    statement: 'Name the commonest kinds of damage DNA suffers in a living cell — lost bases, deaminated bases, oxidised bases, ultraviolet dimers and breaks through both strands — say roughly how often the kinds that do not depend on sunlight happen in one human cell, and say where each kind comes from.',
     prereqs: ['spontaneous-not-fast', 'why-pigments-absorb', 'photon-energy', 'oxygen-is-the-acceptor'],
     teaches: { sections: ['fidelity'], figures: [] },
     level: 'recall',
@@ -331,7 +331,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'packing-levels',
-    statement: 'Put the levels of packing in order from the double helix to a chromosome at division, say which are established and which are still argued over, and explain why tightly packed DNA is harder to read.',
+    statement: 'Put the levels of packing in order from the double helix to a chromosome at division, say which are established and which are still argued over, and say which kind of chromatin holds most of the genes being read and what happens to nucleosomes when the DNA is copied.',
     prereqs: ['nucleosome', 'em-tradeoff'],
     teaches: { sections: ['packing'], figures: [] },
     level: 'explain',
