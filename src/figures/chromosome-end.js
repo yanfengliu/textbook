@@ -185,11 +185,13 @@ export function mount(root, ctx) {
   });
   const table = b.pane('table', { as: 'svg' });
 
+  // Wide, the end takes the stage's whole width, because it is a long thin thing drawn to scale, and
+  // the table is a band of three short columns and a sentence beneath it.
   b.compose({
     wide: {
-      columns: 'minmax(0, 72fr) minmax(0, 28fr)',
-      rows: 'minmax(0, 1fr)',
-      at: { end: [1, 1], table: [2, 1] },
+      columns: 'minmax(0, 1fr)',
+      rows: 'minmax(0, 80fr) minmax(0, 20fr)',
+      at: { end: [1, 1], table: [1, 2] },
     },
     narrow: {
       columns: 'minmax(0, 1fr)',
@@ -475,9 +477,9 @@ export function mount(root, ctx) {
     const O = overhangOf(loss);
     const ov = narrow
       ? { x0: 8, x1: w - 8, top: 2, h: 50 }
-      : { x0: 12, x1: w - 12, top: 4, h: clamp(hgt * 0.19, 62, 86) };
-    const tvTop = ov.top + ov.h + (narrow ? 8 : 12);
-    const tvBot = hgt - (narrow ? 4 : 6);
+      : { x0: 12, x1: w - 12, top: 2, h: clamp(hgt * 0.18, 54, 66) };
+    const tvTop = ov.top + ov.h + (narrow ? 8 : 4);
+    const tvBot = hgt - 4;
     const tvH = Math.max(40, tvBot - tvTop);
     const size = narrow ? 10 : clamp(hgt * 0.028, 10, 11.5);
     const withInset = telomerase && !circ;
@@ -494,12 +496,13 @@ export function mount(root, ctx) {
     let aLo;
     let aHi;
     if (!narrow) {
-      sep = clamp(tvH * 0.21, 34, 70);
-      g = clamp(tvH * 0.03, 7, 10);
-      const yMid = tvTop + tvH * (withInset ? 0.36 : 0.44);
+      sep = clamp(tvH * 0.46, 40, 140);
+      g = clamp(tvH * 0.055, 8, 16);
+      // Fixed, so that switching telomerase on does not move the drawing: the letters sit under it.
+      const yMid = tvTop + tvH * 0.4;
       P = (a, c) => [a, yMid - c];
-      aLo = 10;
-      aHi = circ ? w - 10 : w - 46;
+      aLo = 12;
+      aHi = circ ? w - 12 : w - 48;
     } else {
       sep = clamp(w * 0.14, 34, 50);
       g = 7;
@@ -571,6 +574,7 @@ export function mount(root, ctx) {
         }
       }
       add('up', 'inner', cutUp, -PRIMER_NT, 'ghost');
+      add('up', 'inner', -PRIMER_NT, 0, 'ghost', fA); // where the last primer was: the gap
       add('lo', 'outer', G.xMin, cutLo, 'old');
       add('lo', 'outer', cutLo, -O, 'ghost');
       add('lo', 'inner', G.xMin, -O, 'dna');
@@ -796,19 +800,22 @@ export function mount(root, ctx) {
       lab.reserve(Math.min(ax, bx2) - 4, Math.min(ay, by2) - 4, Math.max(ax, bx2) + 4, Math.max(ay, by2) + 4);
     };
 
-    // The inset of letters, reserved before the labels so they keep clear of it.
+    // The insets of letters, reserved before the labels so they keep clear of them.
     if (!G.circ && m.phase === 'after' && telomerase && mk.fC > 0) drawInset(G, lab, mk.fC, telAt);
+    if (!G.circ && m.phase === 'before') drawJunction(G, lab);
 
     // ---- the labels, most important first ----
     // Candidate spots on one side of a point: `side` +1 is towards the lagging strand's copy (above, or
-    // to the left on a phone), −1 towards the leading strand's; `shifts` slide it along the DNA, in px.
-    const around = (x, c, side, { offs = [12, 24, 36], shifts = [0, 18, -18, 36, -36, 54, -54] } = {}) => {
+    // to the left on a phone), −1 towards the leading strand's; `shifts` slide it along the DNA, in px,
+    // and on a wide stage `anchors` says which end of the words sits there — 'end' for words that must
+    // stop at the tip.
+    const around = (x, c, side, { offs = [12, 24, 36], shifts = [0, 18, -18, 36, -36, 54, -54], anchors = ['middle'] } = {}) => {
       const out = [];
       const [px, py] = at(x, c);
       for (const off of offs) {
         for (const sh of shifts) {
-          if (!narrow) out.push([px + sh, side > 0 ? py - off : py + off + S * 0.72, 'middle']);
-          else out.push([side > 0 ? px - off : px + off, py + sh + S * 0.35, side > 0 ? 'end' : 'start']);
+          if (narrow) out.push([side > 0 ? px - off : px + off, py + sh + S * 0.35, side > 0 ? 'end' : 'start']);
+          else for (const anchor of anchors) out.push([px + sh, side > 0 ? py - off : py + off + S * 0.72, anchor]);
         }
       }
       return out;
@@ -872,27 +879,26 @@ export function mount(root, ctx) {
     }
 
     // After.
+    const atTip = { anchors: ['end', 'middle'], shifts: [8, 0, -24, -48, -96] };
     if (mk.gap) {
       bracket(-PRIMER_NT, 0, upIn(-5), -1);
-      place([...around(-5, upIn(-5) - 8, -1, { offs: [9, 19, 29], shifts: [-20, -60, -100, 0] }), ...around(-5, upOut(-5), 1, { offs: [12, 24], shifts: [-40, -80] })], narrow ? 'last gap: nothing beyond' : 'last primer’s gap: nothing beyond it to fill it');
+      place([...around(0, upIn(0) - 8, -1, { offs: [9, 20, 31], ...atTip }), ...around(0, upOut(0), 1, { offs: [12, 24], ...atTip })], narrow ? 'last gap: nothing beyond' : 'last primer’s gap: nothing beyond it to fill it');
     }
     if (mk.shorter) {
       const c = loOut(-O / 2) - 7;
       dimension(-O, 0, c);
       place(around(-O / 2, c - 2, -1, { offs: [11, 22, 33], shifts: [0, -20, -40, 20] }), `${O} bp shorter`);
     }
+    if (telAt) place([...around(0, loIn(0) + 10, 1, { offs: [12, 24], ...atTip }), ...around(0, loOut(0) - 10, -1, { offs: [12, 24], ...atTip })], 'telomerase');
     if (mk.added) {
-      bracket(-O, 0, loOut(-O / 2) - 3, -1);
-      const n = Math.floor(O / REPEAT_BP);
-      place(around(-O / 2, loOut(-O / 2) - 12, -1, { offs: [11, 22, 33], shifts: [0, -20, -40, 20] }), narrow ? `+${n} repeats` : `${n} repeats added, and a part`);
+      // On the strand telomerase extends: the short copy's new strand, on the side facing the other copy.
+      bracket(-O, 0, loIn(-O / 2) + 3, 1);
+      place(around(-O / 2, loIn(-O / 2) + 12, 1, { offs: [11, 22, 33], shifts: [0, -20, -40, -60, -80, -100] }), narrow ? `+${O} nt` : `${O} nt of repeats added`);
     }
-    if (telAt) place([...around(telAt.x, telAt.c - 6, -1, { offs: [12, 24, 36], shifts: [-30, -60, 0, -90] })], 'telomerase');
     if (mk.filled) place(around(-O * 1.5, loOut(-O * 1.5), -1, { offs: [11, 22, 33], shifts: [0, -20, 20, -40] }), 'filled in');
     if (mk.fB > 0.5) {
       const xt = (mk.cutLo + -O) / 2;
       if (!mk.filled) place(around(xt, loOut(xt), -1, { offs: [11, 22, 33], shifts: [0, -24, 24, -48] }), narrow ? 'trimmed' : 'trimmed to leave a tail');
-      const xu = (mk.cutUp - PRIMER_NT) / 2;
-      place([...around(xu, upIn(xu) - 2, -1, { offs: [10, 20, 30], shifts: [0, -24, 24, -48] })], 'trimmed');
     }
     const nameX = G.xMin + (0 - G.xMin) * 0.3;
     place(around(nameX, upOut(nameX), 1, { offs: [12, 24, 36], shifts: [0, -40, 40, -80] }), narrow ? 'lagging copy' : 'copied by the lagging strand');
@@ -923,8 +929,12 @@ export function mount(root, ctx) {
       const words = m.phase === 'after'
         ? (narrow ? 'filled from the other fork' : 'last gap, filled from the other fork’s leading strand')
         : (narrow ? 'last primer' : 'last primer, just short of the meeting point');
-      place([...around(-9, upOut(-9), 1, { offs: [12, 24, 36], shifts: [0, -30, 30, -60, 60] })], words);
-      place([...around(9, loOut(9), -1, { offs: [12, 24, 36], shifts: [0, 30, -30, 60, -60] })], words);
+      // Each fork's last primer, 4 nt short of the meeting point: the left fork's on the upper copy, the
+      // right fork's on the lower, each marked on the side facing the other copy.
+      bracket(-4 - PRIMER_NT, -4, upIn(-9), -1);
+      bracket(4, 4 + PRIMER_NT, loIn(9), 1);
+      place(around(-9, upIn(-9) - 8, -1, { offs: [9, 20, 31], shifts: [0, -30, 30, -60, 60] }), words);
+      place(around(9, loIn(9) + 8, 1, { offs: [9, 20, 31], shifts: [0, 30, -30, 60, -60] }), words);
       place(around(G.xMin + 60, upOut(G.xMin + 60), 1, { offs: [12, 24], shifts: [0, 20, 40] }), narrow ? 'copy 1' : 'one copy');
       place(around(G.xMin + 60, loOut(G.xMin + 60), -1, { offs: [12, 24], shifts: [0, 20, 40] }), narrow ? 'copy 2' : 'the other copy');
     }
@@ -938,10 +948,6 @@ export function mount(root, ctx) {
     const { ov, narrow } = G;
     const S = narrow ? 9.6 : clamp(G.size - 0.5, 9.8, 11);
     const yO = ov.top + ov.h * (narrow ? 0.46 : 0.5);
-    const tvCorners = () => {
-      if (narrow) return null;
-      return [[G.aOf(G.xMin), G.tvTop - 2], [G.aOf(G.xMax), G.tvTop - 2]];
-    };
     if (G.circ) {
       const r = Math.max(12, ov.h * (narrow ? 0.34 : 0.32));
       const cx = ov.x0 + r + 4;
@@ -952,10 +958,6 @@ export function mount(root, ctx) {
       const by = cy + r + 5;
       p.path(`M${(cx - 7).toFixed(1)} ${(by - 2).toFixed(1)}V${by.toFixed(1)}H${(cx + 7).toFixed(1)}V${(by - 2).toFixed(1)}`, { fill: 'none', stroke: C.ink, 'stroke-width': 1.1 });
       lab.reserve(cx - r - 7, cy - r - 7, cx + r + 7, by + 2);
-      const corners = tvCorners();
-      if (corners) {
-        p.path(`M${(cx - 7).toFixed(1)} ${by.toFixed(1)}L${corners[0][0].toFixed(1)} ${corners[0][1].toFixed(1)}M${(cx + 7).toFixed(1)} ${by.toFixed(1)}L${corners[1][0].toFixed(1)} ${corners[1][1].toFixed(1)}`, { stroke: C.faint, 'stroke-width': 0.8, 'stroke-dasharray': '2 3' });
-      }
       const tx = cx + r + 14;
       lab.place([[tx, cy - (narrow ? 3 : 5), 'start']], narrow ? 'A circle: no ends to copy' : 'A circular chromosome: no ends to copy', { size: S });
       lab.place([[tx, cy + (narrow ? 11 : 12), 'start']], narrow ? 'enlarged: where the forks meet' : 'enlarged below: the far side, where its two forks meet', { size: S * 0.95 });
@@ -986,18 +988,16 @@ export function mount(root, ctx) {
     const by = yO + half + 7;
     p.path(`M${xZ.toFixed(1)} ${(by - 3).toFixed(1)}V${by.toFixed(1)}H${xA.toFixed(1)}V${(by - 3).toFixed(1)}`, { fill: 'none', stroke: C.ink, 'stroke-width': 1.1 });
     lab.reserve(xZ - 1, by - 4, xA + 1, by + 1);
-    const corners = tvCorners();
-    if (corners) {
-      p.path(`M${xZ.toFixed(1)} ${by.toFixed(1)}L${corners[0][0].toFixed(1)} ${corners[0][1].toFixed(1)}M${xA.toFixed(1)} ${by.toFixed(1)}L${corners[1][0].toFixed(1)} ${corners[1][1].toFixed(1)}`, { stroke: C.faint, 'stroke-width': 0.8, 'stroke-dasharray': '2 3' });
-    }
-    const above = yO - half - 6;
-    const below = yO + half + 6 + S * 0.8;
+    // Clear of the band's own reservation, which runs 2 px beyond its strands.
+    const above = yO - half - 9;
+    const below = yO + half + 7 + S * 0.8;
+    // The bracket is named first, so that it keeps its place under itself as the telomere shortens.
+    lab.place([[xA, below + 2, 'end'], [xZ - 4, below + 2, 'end'], [xA, below + 2 + S * 1.2, 'end']], narrow ? 'the tip, enlarged' : 'the tip, enlarged below', { size: S * 0.92 });
     lab.place([[ov.x0, above, 'start']], narrow ? 'rest of the chromosome' : 'the rest of the chromosome', { size: S * 0.92 });
     lab.place([[(xB + xT) / 2, above, 'middle'], [xB + 6, above, 'start']], narrow ? `telomere, ${nt(T)} bp` : `the telomere, ${nt(T)} bp of repeats`, { size: S });
     lab.place([[xTh, below + 2, 'middle'], [xTh - 4, below + 2, 'end'], [xTh + 4, below + 2, 'start']], `the cell stops at ${nt(THRESHOLD_BP)} bp`, { size: S * 0.92 });
     const lostBp = START_BP - T;
     if (lostBp > 0) lab.place([[(xT + xS) / 2, above, 'middle'], [xS, above, 'end'], [xS, below + 2, 'end']], `lost ${nt(lostBp)} bp`, { size: S * 0.92 });
-    if (narrow) lab.place([[xA, below + 2 + S * 1.2, 'end'], [xZ - 4, below + 2, 'end']], 'the tip, enlarged below', { size: S * 0.92 });
   }
 
   // The letters telomerase copies: the tail's 3′ end over the RNA template it carries, paired, a repeat
@@ -1012,14 +1012,17 @@ export function mount(root, ctx) {
     const cw = narrow ? 8.8 : 10.2;
     const padL = narrow ? 30 : 36;
     const padR = narrow ? 14 : 18;
-    const boxW = padL + cols * cw + padR;
+    const caps = narrow ? ['its RNA template', 'adds a repeat, shifts 6'] : ['telomerase’s RNA template', 'adds a repeat, shifts six along, adds another'];
+    const capS = S * 0.92;
+    // As wide as its letters or its longest caption, estimated at 0.53 em a character.
+    const boxW = Math.max(padL + cols * cw + padR, padL + Math.max(...caps.map((c) => c.length)) * capS * 0.53 + 6);
     const rowGap = narrow ? 20 : 22;
     let x0;
     let y0;
     if (!narrow) {
       const [, yLo] = G.P(G.aOf(0), -G.sep / 2 - G.g / 2);
       x0 = G.w - 8 - boxW;
-      y0 = yLo + 44;
+      y0 = yLo + 30;
     } else {
       x0 = G.w - 4 - boxW;
       y0 = G.aHi - 66;
@@ -1060,13 +1063,13 @@ export function mount(root, ctx) {
     const endS = S * 0.9;
     p.text(x0 + padL - 3, yD, '5′ ···', { anchor: 'end', 'font-size': endS.toFixed(1), style: `fill:${C.ink}` });
     const lastCol = shown - 1 - shift;
-    p.text(col(lastCol) + cw * 0.6, yD, '3′', { anchor: 'start', 'font-size': endS.toFixed(1), style: `fill:${C.ink}` });
-    p.text(col(lead) - cw * 0.65, yR, '3′', { anchor: 'end', 'font-size': endS.toFixed(1), style: `fill:${C.ink}` });
-    p.text(col(cols - 1) + cw * 0.6, yR, '5′', { anchor: 'start', 'font-size': endS.toFixed(1), style: `fill:${C.ink}` });
+    p.text(col(lastCol) + cw * 0.8, yD, '3′', { anchor: 'start', 'font-size': endS.toFixed(1), style: `fill:${C.ink}` });
+    p.text(col(lead) - cw * 0.8, yR, '3′', { anchor: 'end', 'font-size': endS.toFixed(1), style: `fill:${C.ink}` });
+    p.text(col(cols - 1) + cw * 0.8, yR, '5′', { anchor: 'start', 'font-size': endS.toFixed(1), style: `fill:${C.ink}` });
     const yC1 = yR + S + 6;
     const yC2 = yC1 + S + 2;
-    p.text(x0 + padL, yC1, narrow ? 'its RNA template' : 'telomerase’s RNA template', { 'font-size': (S * 0.92).toFixed(1), style: `fill:${C.ink}` });
-    p.text(x0 + padL, yC2, narrow ? 'adds a repeat, shifts 6' : 'adds a repeat, shifts six along, adds another', { 'font-size': (S * 0.92).toFixed(1), style: `fill:${C.ink}` });
+    p.text(x0 + padL, yC1, caps[0], { 'font-size': capS.toFixed(1), style: `fill:${C.ink}` });
+    p.text(x0 + padL, yC2, caps[1], { 'font-size': capS.toFixed(1), style: `fill:${C.ink}` });
     lab.reserve(x0 - 2, y0 - 2, x0 + boxW + 2, yC2 + 4);
     // A leader from the enzyme at the tip to its letters.
     if (telAt) {
@@ -1075,6 +1078,67 @@ export function mount(root, ctx) {
       const ly = narrow ? yD - S * 0.4 : y0 - 4;
       p.path(`M${tx.toFixed(1)} ${ty.toFixed(1)}L${lx.toFixed(1)} ${ly.toFixed(1)}`, { stroke: C.faint, 'stroke-width': 0.8, 'stroke-dasharray': '2 3' });
     }
+  }
+
+  // Before a division, where the tail begins, letter by letter: the G-rich strand running on towards
+  // the tip, and its partner, the C-rich strand, ending under it. Each tick of the view above is one
+  // TTAGGG and its partner. The C-rich strand is made to end in ATC at its 5′ end, as most human ones do
+  // (Sfeir et al. 2005); the prose does not say so, and nothing else depends on it.
+  function drawJunction(G, lab) {
+    const p = endPane;
+    const narrow = G.narrow;
+    const S = narrow ? 9.6 : 10.5;
+    const cw = narrow ? 8.8 : 10.2;
+    const top = narrow ? 'GGTTAGGGTTAGGG' : 'TTAGGGTTAGGGTTAGGG';
+    const np = narrow ? 6 : 10; // the columns the C-rich strand pairs with
+    const COMP = { A: 'T', T: 'A', G: 'C', C: 'G' };
+    const padL = narrow ? 30 : 36;
+    const boxW = padL + top.length * cw + (narrow ? 30 : 36);
+    const rowGap = narrow ? 20 : 22;
+    const [jx, jy] = G.P(G.aOf(-G.O), -G.g / 2);
+    let x0;
+    let y0;
+    if (!narrow) {
+      x0 = clamp(jx - padL - (np - 0.5) * cw, 8, G.w - 8 - boxW);
+      y0 = jy + 34;
+    } else {
+      x0 = G.w - 4 - boxW;
+      y0 = clamp(jy - 24, G.tvTop + 4, G.tvBot - 80);
+    }
+    const col = (i) => x0 + padL + (i + 0.5) * cw;
+    const yD = y0 + S;
+    const yR = yD + rowGap;
+    const yMidPeg = (yD + 3 + yR - S * 0.78) / 2;
+    const pegs = {};
+    const peg = (base, x, ya, yb) => (pegs[base] ??= []).push(`M${x.toFixed(1)} ${ya.toFixed(1)}V${yb.toFixed(1)}`);
+    const letter = (x, y, str) => p.text(x, y, str, { anchor: 'middle', 'font-size': S.toFixed(1), 'font-weight': 500, style: `fill:${C.ink}` });
+    for (let i = 0; i < top.length; i += 1) {
+      letter(col(i), yD, top[i]);
+      // A paired base meets its partner half way; the tail's reach out to nothing.
+      peg(top[i], col(i), yD + 3, yMidPeg);
+      if (i < np) {
+        const partner = COMP[top[i]];
+        letter(col(i), yR, partner);
+        peg(partner, col(i), yMidPeg, yR - S * 0.78);
+      }
+    }
+    for (const [base, ds] of Object.entries(pegs)) p.path(ds.join(''), { stroke: BASE_COLOUR[base], 'stroke-width': 2.4, 'stroke-linecap': 'butt' });
+    const endS = (S * 0.9).toFixed(1);
+    const endText = (x, y, str, anchor) => p.text(x, y, str, { anchor, 'font-size': endS, style: `fill:${C.ink}` });
+    endText(x0 + padL - 3, yD, '5′ ···', 'end');
+    endText(x0 + padL - 3, yR, '3′ ···', 'end');
+    endText(col(top.length - 1) + cw * 0.8, yD, '··· 3′', 'start');
+    endText(col(np - 1) + cw * 0.8, yR, '5′', 'start');
+    const yC1 = yR + S + 6;
+    const yC2 = yC1 + S + 2;
+    const cap = (y, str) => p.text(x0 + padL, y, str, { 'font-size': (S * 0.92).toFixed(1), style: `fill:${C.ink}` });
+    cap(yC1, narrow ? 'a tick: TTAGGG, paired' : 'one tick above: TTAGGG and its partner');
+    cap(yC2, narrow ? `tail: ${G.O} nt, one strand` : `the tail: the G-rich strand alone, ${G.O} nt to the tip`);
+    lab.reserve(x0 - 2, y0 - 2, x0 + boxW + 2, yC2 + 4);
+    // A leader from the place on the chromosome to its letters.
+    const lx = narrow ? x0 + padL - 22 : col(np - 0.5);
+    const ly = narrow ? yD - S * 0.35 : y0 - 3;
+    p.path(`M${jx.toFixed(1)} ${(jy + (narrow ? 0 : 3)).toFixed(1)}L${lx.toFixed(1)} ${ly.toFixed(1)}`, { stroke: C.faint, 'stroke-width': 0.8, 'stroke-dasharray': '2 3' });
   }
 
   function drawTable() {
@@ -1101,11 +1165,25 @@ export function mount(root, ctx) {
     const words = noteWords(st);
     const title = shape === 'circular' ? 'A circular chromosome' : 'At the tip';
     if (!b.narrow) {
-      const size = clamp(Math.max(w * 0.04, hgt * 0.033), 9.6, 11.6);
-      table.readout({ title, x: 6, width: Math.min(w - 8, 320), size, minRow: 14, maxRow: 26 }).fit(hgt, (t, level) => {
-        for (const [k, v] of rows) t.row(k, v);
-        if (level < 1) t.note(words, { size: size - 0.6 });
-      }, { levels: 2 });
+      // Three short tables side by side, every row at one height so that they line up across, and the
+      // sentence in a fourth column.
+      const size = clamp(hgt * 0.1, 9.8, 11);
+      const titleSize = 9.4;
+      const gap = 18;
+      const colW = clamp(w * 0.19, 150, 210);
+      const groups = shape === 'circular'
+        ? [['A circular chromosome', rows.slice(0, 2)], ['At each division', rows.slice(2, 4)], ['The stop', rows.slice(4)]]
+        : [['At the tip', rows.slice(0, 3)], ['At each division', [rows[3], rows[4], rows[7]]], ['The stop', rows.slice(5, 7)]];
+      const rowH = clamp((hgt - titleSize - 12) / 3, 14, 24);
+      groups.forEach(([heading, list], i) => {
+        const t = table.readout({ title: heading, x: 2 + i * (colW + gap), width: colW, size, titleSize });
+        for (const [k, v] of list) t.row(k, v);
+        t.draw(rowH, hgt);
+      });
+      const noteX = 2 + 3 * (colW + gap);
+      const note = table.readout({ title: 'What happens', x: noteX, width: w - noteX - 2, size, titleSize });
+      note.note(words, { size: size - 0.8 });
+      note.draw(16, hgt);
       return;
     }
     // Narrow: the rows in two columns, the sentence under them at full width.
