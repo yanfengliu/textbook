@@ -92,7 +92,7 @@
 //                            one, and does not re-teach what a chain is
 //   `atmosphere-changed`   — §7.4's terminal acceptor was put into the air by §6.7's enzyme failing to
 //                            tell two gases apart; a reader who has not got that reads oxygen as given
-//   `thylakoid-gradient`   — §6.5 prices a proton gradient that is almost all pH; §7.5's is mostly
+//   `thylakoid-gradient`   — §6.5 prices a proton gradient that is mostly pH; §7.5's is mostly
 //                            voltage, and the contrast is the point
 //   `photophosphorylation` — §6.5 says ATP synthase makes ATP from a gradient; §7.5 says how the rotor
 //                            does it, and cites §6.5 rather than repeating it
@@ -382,7 +382,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'uncoupling-on-purpose',
-    statement: 'Explain how brown fat warms a newborn, and say what an animal gains from a mitochondrion built to make no ATP at all.',
+    statement: 'Explain how brown fat warms a newborn, and say what an animal gains from a mitochondrion built to make almost no ATP.',
     prereqs: ['uncoupling', 'homeostasis', 'feedback-direction'],
     teaches: { sections: ['poisons'], figures: [] },
     level: 'apply',
