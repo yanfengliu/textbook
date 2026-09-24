@@ -826,14 +826,25 @@ export function mount(root, ctx) {
       g.append(el('circle', { cx: f1(cx + Math.cos(a) * shellR), cy: f1(filterY + Math.sin(a) * shellR), r: f1(Math.max(2.2, oxR * 0.8)), fill: 'none', stroke: C.soft, 'stroke-dasharray': '2 2' }));
     }
     g.append(el('circle', { cx: f1(cx), cy: f1(filterY), r: f1(filterR), fill: 'none', stroke: INK.coral, 'stroke-width': 1.1 }));
-    const gapPm = FILTER_PM - shellPm(sym);
     // Above the protein, in the strip of fluid the ion slots leave empty over it, and in two lines so it
     // stays inside that strip. It was set across the filter itself, over the lipid heads and the
     // channel's own wall, where it measured 2.95:1 light and 1.08:1 dark (npm run legible, 2026-09-23).
-    const who = sym === 'K' ? 'Potassium' : 'Sodium';
-    const second = gapPm < 6 ? 'exactly where the oxygens are.' : `${Math.round(gapPm)} pm short of the oxygens.`;
-    g.append(text(cx, noteBase - 12, `${who}’s water sat`, { anchor: 'middle', 'font-size': 9.4, class: 'tl-line' }));
+    // A phone's fluid is too shallow to leave that strip empty — the sentence landed on three sodium
+    // ions — so there it is the tally's sentence instead (drawTally).
+    if (narrow) return;
+    const [first, second] = filterNote();
+    g.append(text(cx, noteBase - 12, first, { anchor: 'middle', 'font-size': 9.4, class: 'tl-line' }));
     g.append(text(cx, noteBase, second, { anchor: 'middle', 'font-size': 9.4, class: 'tl-line' }));
+  }
+
+  // What the filter overlay shows, in words, as two halves so the wide stage can set it in two lines.
+  function filterNote() {
+    const sym = ion === 'sodium' ? 'Na' : 'K';
+    const gapPm = FILTER_PM - shellPm(sym);
+    return [
+      `${sym === 'K' ? 'Potassium' : 'Sodium'}’s water sat`,
+      gapPm < 6 ? 'exactly where the oxygens are.' : `${Math.round(gapPm)} pm short of the oxygens.`,
+    ];
   }
 
   function drawTally(x, y, w, hgt) {
@@ -852,6 +863,7 @@ export function mount(root, ctx) {
         ['Gate', gdef.label.toLowerCase()],
         ['K⁺ over Na⁺, so far', ratioWord],
         ['Measured, for a real one', `${grouped(TRUE_SELECTIVITY)} ×`],
+        ...(filterShown ? notes(filterNote().join(' '), w, size) : []),
         ...notes('Sodium is the smaller ion. It is not blocked; it is priced out.', w, size),
       ]
       : [

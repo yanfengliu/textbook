@@ -330,6 +330,66 @@ export function mount(root, ctx) {
         bounce: 0,
       });
     }
+    spread();
+  }
+
+  // Thirty particles seeded at random into a band a third of the stage tall land on each other, and an
+  // ion is drawn with its shell of water round it and its charge on a paper badge: where two landed
+  // close, one's water and badge were drawn over the other's symbol, and the opening frame had three
+  // clumps of ions whose symbols could not be read (npm run legible, 2026-09-23: Na at 2.32:1 and Cl at
+  // 1.00:1 in both themes, each a neighbour drawn over it). So the seeding is eased apart before the
+  // first frame, far enough that no neighbour's water reaches a symbol. It draws nothing from the seeded
+  // generator, so every later step reads the random stream it always did, and it is measured in fixed
+  // design units rather than in the stage's pixels, so where the particles start does not depend on the
+  // size of the page. Only particles that are too close move, and only by what separates them.
+  //
+  // The distance is the LARGEST any substance needs, not the one on the stage: choosing a substance
+  // keeps the crowd where it is, so spacing sized for the opening sodium left chloride, the biggest ion,
+  // on top of itself (measured: 18.3 px apart at a 573 px scene). An ion's water reaches 1.9 radii out
+  // with a 0.34-radius oxygen on it and its symbol spans about 0.6 of a radius either side of centre, so
+  // 2.9 radii keeps a neighbour's water off the symbol; 3.2 leaves room for a stage drawn narrower than
+  // the 600 units this is measured in. A molecule with no shell needs 2.2.
+  const SPREAD_W = 600;
+  const SPREAD_H = 320;
+  const SPREAD_REACH = Math.max(...SPECIES.map((s) => s.r * (s.shell ? 3.2 : 2.2)))
+    * clamp(Math.min(SPREAD_W / 520, SPREAD_H / 300), 0.85, 1.25);
+  // With `movers`, only those particles move, and only away from what they landed on: the rest of the
+  // crowd stays exactly where it was, which is what relayoutParticles promises a slider drag.
+  function spread(movers = null) {
+    const reach = SPREAD_REACH;
+    for (let pass = 0; pass < 60; pass += 1) {
+      let moved = false;
+      for (let i = 0; i < parts.length; i += 1) {
+        for (let j = i + 1; j < parts.length; j += 1) {
+          const a = parts[i];
+          const b = parts[j];
+          if (a.out !== b.out) continue;
+          const shareA = movers ? (movers.has(a) ? 1 : 0) : 1;
+          const shareB = movers ? (movers.has(b) ? 1 : 0) : 1;
+          if (!shareA && !shareB) continue;
+          let dx = (b.x - a.x) * SPREAD_W;
+          if (dx > SPREAD_W / 2) dx -= SPREAD_W;
+          if (dx < -SPREAD_W / 2) dx += SPREAD_W;
+          const dy = (b.y - a.y) * SPREAD_H;
+          const dist = Math.hypot(dx, dy);
+          if (dist >= reach) continue;
+          const ux = dist > 1e-6 ? dx / dist : 1;
+          const uy = dist > 1e-6 ? dy / dist : 0;
+          // The whole deficit, split between whichever of the two may move.
+          const push = (reach - dist + 0.02) / (shareA + shareB);
+          a.x -= (ux * push * shareA) / SPREAD_W;
+          a.y -= (uy * push * shareA) / SPREAD_H;
+          b.x += (ux * push * shareB) / SPREAD_W;
+          b.y += (uy * push * shareB) / SPREAD_H;
+          moved = true;
+        }
+      }
+      for (const p of parts) {
+        p.x = ((p.x % 1) + 1) % 1;
+        p.y = p.out ? clamp(p.y, 0.06, 0.40) : clamp(p.y, 0.60, 0.94);
+      }
+      if (!moved) break;
+    }
   }
 
   // The chance a crossing in this direction is accepted, drawn. The concentration part is already in the
@@ -512,14 +572,18 @@ export function mount(root, ctx) {
     const total = insideMM + outsideMM;
     const wantOut = total <= 0 ? Math.round(PARTICLES / 2) : Math.round((outsideMM / total) * PARTICLES);
     let haveOut = parts.filter((p) => p.out).length;
+    const flipped = new Set();
     for (const p of parts) {
       if (haveOut === wantOut) break;
       if (haveOut < wantOut && !p.out) {
-        p.out = true; p.y = 0.06 + rand() * 0.34; p.vy = Math.abs(p.vy) || 0.24; p.shell = true; haveOut += 1;
+        p.out = true; p.y = 0.06 + rand() * 0.34; p.vy = Math.abs(p.vy) || 0.24; p.shell = true; haveOut += 1; flipped.add(p);
       } else if (haveOut > wantOut && p.out) {
-        p.out = false; p.y = 0.60 + rand() * 0.34; p.vy = -(Math.abs(p.vy) || 0.24); p.shell = true; haveOut -= 1;
+        p.out = false; p.y = 0.60 + rand() * 0.34; p.vy = -(Math.abs(p.vy) || 0.24); p.shell = true; haveOut -= 1; flipped.add(p);
       }
     }
+    // A particle put down at random can land on another, so the arrivals are eased off whatever they
+    // landed on, as the seeding is. Only the arrivals move.
+    if (flipped.size) spread(flipped);
   }
 
   function setPlaying(next) {
