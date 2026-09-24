@@ -814,7 +814,7 @@ The front page's card for the biology book read, word for word: *"An interactive
 
 **The root cause.** A sentence that names chapters, written by hand, with no build step to regenerate it. It was true when `7c6f905` wrote it on 2026-09-10 and false from `6d854cf` on 2026-09-15, when chapters 2 and 3 landed. Nothing repoints it when a chapter lands, which is the same cause as the four earlier times this class appeared: the contents page for chapters 2 and 3 (`6d854cf`), chapter 4's closing card, and the contents page again for chapters 4 and 5, fixed inside the `5e9c981` landing.
 
-**What the gates could see, and why the answer was nothing.** The fact to check against is the tree, and the one rule that read the tree (2026-09-16, below) read only the closing card. The href rule sees links, not claims, and the library page's sentence has no link in it. `README.md` is not a page, so no gate read it at all.
+**What the gates could see, and why the answer was nothing.** The fact to check against is the tree, and the one rule that read the tree (2026-09-16, above) read only the closing card. The href rule sees links, not claims, and the library page's sentence has no link in it. `README.md` is not a page, so no gate read it at all.
 
 | Symptom | Root cause | Now checked by |
 |---|---|---|

@@ -11,7 +11,8 @@
 // device's own input, closes when a link in it is followed, and is not present on screens wide enough to
 // show the rail instead; the drawer has a scrim, locks the page behind it, takes focus, and closes on a
 // tap outside; on a chapter page there are glossary terms, and nothing that pops up over the text (a
-// glossary definition, a figure's card) hangs off either edge; on a chapter page there is a text column,
+// glossary definition, a figure's card) hangs off either edge as `innerWidth` measures it — which on a
+// phone is less than it reads: see "The popover bound" below; on a chapter page there is a text column,
 // and its blocks share one left and one right edge; and on a chapter of the paired-column book the
 // reading column and its 原文/譯文 block each take at least half of a 1280–1920 px viewport.
 // Fails naming the device, the page and the measure — and, when a suite finds none of its subject on a
@@ -25,7 +26,20 @@
 //
 // Bound: structure and reachability, not beauty. It cannot tell you a layout is ugly, only that a
 // control is off screen, too small to hit, overflowing, or unreachable by the input the device has.
-// The screenshots in out/devices/ are for the beauty question. The device list is a sample of shapes,
+// The screenshots in out/devices/ are for the beauty question.
+//
+// The popover bound. On a phone this gate cannot see a glossary card that runs off the screen, because
+// that card widens the page. On a mobile shape a box past the right edge grows the layout viewport, and
+// `innerWidth` grows with it; the popover phase measures a card's overshoot against `innerWidth`, so the
+// card that caused the growth reads 0 px over, and the sideways-scroll check that would see the growth
+// runs in the header phase, before any card is open. Demonstrated, not inferred, by the `term-markup`
+// worker on 2026-09-23 (the message of `7296170`): on that branch's first commit, `747ea99`, this gate
+// passed chapter 5 while its NAD⁺ card sat at 63–415 px, with `innerWidth` at 415 and
+// `visualViewport.width` at 390. `src/components/term.js` now places the card against
+// `visualViewport.width`, which fixed the card; this gate would not see the defect come back. The same
+// bound is in docs/policies/gates.md's entry for this gate.
+//
+// The device list is a sample of shapes,
 // not of products: it covers small phone, phone, Android phone, phone landscape, tablet portrait,
 // tablet landscape, small laptop, desktop and wide desktop — nine — which is where the layout's
 // breakpoints actually are. A page is loaded on the ones it needs rather than on all nine: a device is a
