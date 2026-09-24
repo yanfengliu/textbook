@@ -202,7 +202,7 @@ const LADDER = Object.freeze([
   { id: 'atp', label: 'ATP', kj: '−30.5', strong: true },
   { id: 'g6p', label: 'Glucose 6-phosphate', kj: '−13.8' },
 ]);
-const FOOTNOTE = '† Not on Section 5.3’s table; shown where it belongs.';
+const FOOTNOTE = '† Not on Section\u00a05.3’s table; shown where it belongs.';
 // Which rung gives the current step's phosphate, and which rung it lands on.
 const LADDER_MARK = Object.freeze({ 1: { from: 'atp', to: 'g6p' }, 3: { from: 'atp' }, 6: { to: 'bpg' }, 7: { from: 'bpg', to: 'atp' }, 10: { from: 'pep', to: 'atp' } });
 
@@ -528,17 +528,17 @@ export function mount(root, ctx) {
       case 5:
         if (env.ko === 5) return short ? 'Only one piece goes on.' : 'With its isomerase knocked out, dihydroxyacetone phosphate cannot become glyceraldehyde 3-phosphate, and only one piece goes on.';
         return short ? 'Both pieces are now the same.' : 'Dihydroxyacetone phosphate becomes a second glyceraldehyde 3-phosphate, so both pieces run the second half.';
-      case 6: return short ? 'Oxidised, with a phosphate from solution: above ATP now.' : `${lanesText()} is oxidised, reducing an NAD^+, and takes a phosphate ion from solution. 1,3-Bisphosphoglycerate is not on Section 5.3’s table, but its new phosphate belongs above ATP, at about −49 kJ/mol.`;
+      case 6: return short ? 'Oxidised, with a phosphate from solution: above ATP now.' : `${lanesText()} is oxidised, reducing an NAD^+, and takes a phosphate ion from solution. 1,3-Bisphosphoglycerate is not on Section\u00a05.3’s table, but its new phosphate belongs above ATP, at about −49 kJ/mol.`;
       case 7: {
         if (short) return 'ATP from 1,3-bisphosphoglycerate, above ATP on the ladder.';
         const even = L.net === 0 ? 'The ATP made now equals the ATP spent.' : `Net ATP is ${signed(L.net)} ${perWord()}.`;
-        return `${env.ko === 5 ? 'The one' : 'Each'} 1,3-bisphosphoglycerate hands its new phosphate to ADP. It came from above ATP on Section 5.3’s ladder, and the sugar’s oxidation paid for it. ${even}`;
+        return `${env.ko === 5 ? 'The one' : 'Each'} 1,3-bisphosphoglycerate hands its new phosphate to ADP. It came from above ATP on Section\u00a05.3’s ladder, and the sugar’s oxidation paid for it. ${even}`;
       }
       case 8: return 'The remaining phosphate moves from carbon 3 to carbon 2.';
       case 9: return short ? 'Water out: phosphoenolpyruvate.' : 'Enolase takes out a water, and phosphoenolpyruvate is the result.';
       default:
         if (short) return 'ATP from phosphoenolpyruvate, the top of the ladder.';
-        return `${env.ko === 5 ? 'The one' : 'Each'} phosphoenolpyruvate, at the top of Section 5.3’s table at −61.9 kJ/mol, hands its phosphate to ADP: the same trick as step 7. Net ATP is ${signed(L.net)} ${perWord()}.`;
+        return `${env.ko === 5 ? 'The one' : 'Each'} phosphoenolpyruvate, at the top of Section\u00a05.3’s table at −61.9\u00a0kJ/mol, hands its phosphate to ADP: the same trick as step 7. Net ATP is ${signed(L.net)} ${perWord()}.`;
     }
   }
 
@@ -842,13 +842,29 @@ export function mount(root, ctx) {
     const headH = fsHead + 10;
     const nameH = nameN * lh;
     const caretH = 9;
-    const tokH = 2 * tokRy + (compact ? 5 : 8);
-    const bandD = Math.max(tokH, lowName * lh + 4);
     const enzH = enzN * lh + 4;
     const capH = compact ? 2 * lh + 6 : 0;
-    const fixed = headH + nameH + caretH + tokH + bandD + enzH + capH;
     const rCap = Math.max(2.2, Math.min(10, (0.62 * pitch - 4) / 4.3));
-    const r = clamp((hgt - fixed) / 16.95, 2.2, rCap);
+    // A full stage gives the currency a band above and below the chains. The compact form's tokens are
+    // single and stand between the stations, so the chains may rise into their band: a token needs only
+    // the part of its reach (from its lane's arrow to its far edge) that the chains' own height does not
+    // already give it. That is what buys an 800 px window's carbons 7.6 px across rather than 5.8.
+    const reach = 9 + 2 * tokRy;
+    let tokH;
+    let bandD;
+    let r;
+    if (compact) {
+      const avail = hgt - (headH + caretH + 2 + enzH + capH);
+      const rInside = avail / 16.95;
+      r = clamp(3.3 * rInside >= reach ? rInside : (avail - 2 * reach) / 10.35, 2.2, rCap);
+      tokH = Math.max(0, reach - 3.3 * r);
+      bandD = tokH + 2;
+    } else {
+      tokH = 2 * tokRy + 8;
+      bandD = Math.max(tokH, lowName * lh + 4);
+      r = clamp((hgt - (headH + nameH + caretH + tokH + bandD + enzH)) / 16.95, 2.2, rCap);
+    }
+    const fixed = headH + nameH + caretH + tokH + bandD + enzH + capH;
     const chainH = 16.95 * r;
     const top = Math.max(0, hgt - fixed - chainH) * 0.5;
     const yA0 = top + headH;
@@ -873,8 +889,10 @@ export function mount(root, ctx) {
     return {
       compact, single, first, last, summary, padX, sumW, n, pitch, x0, X, GX, tight, fs, lh, fsHead, fsTok, tokRy,
       nameN, enzN, r, sp, halfW, top,
-      yHead: top + fsHead, yNameBase: yA0 + fs + (nameN - 1) * lh, yK0, yB0, yTokU: yB0 + tokRy + 1,
-      yC0, yC, yU: yC - 2.25 * sp, yL: yC + 2.25 * sp, yD0, yTokL: yD0 + tokH - tokRy - 1, yE0,
+      yHead: top + fsHead, yNameBase: yA0 + fs + (nameN - 1) * lh, yK0, yB0,
+      yTokU: compact ? yC - 2.25 * sp - reach + tokRy : yB0 + tokRy + 1,
+      yC0, yC, yU: yC - 2.25 * sp, yL: yC + 2.25 * sp, yD0,
+      yTokL: compact ? yC + 2.25 * sp + reach - tokRy : yD0 + tokH - tokRy - 1, yE0,
       yCap0: yE0 + enzH, spineFit,
     };
   }
@@ -1061,7 +1079,8 @@ export function mount(root, ctx) {
     walk.text(g.padX, y0 + g.lh, `now: ${nowWhat(st.s)}`, { class: 'gl-name', 'font-size': fmt(g.fs) });
   }
 
-  // The phase that is not on show, as a head and one sentence in its own column.
+  // The phase that is not on show, as a head and one sentence in its own column, the pair centred on the
+  // chains beside it so the head never meets the key over the stations.
   function summaryColumn(g, st) {
     const inv = st.s <= 5;
     const right = g.summary === 'right';
@@ -1069,11 +1088,14 @@ export function mount(root, ctx) {
     const width = g.sumW - 14;
     const other = otherPhase(inv);
     const head = inv ? ['PAYOFF', 'STEPS 6–10'] : ['INVESTMENT', 'STEPS 1–5'];
-    head.forEach((ln, j) => walk.text(x, g.yHead + j * g.fsHead * 1.3, ln, { class: 'gl-head', 'font-size': fmt(g.fsHead) }));
+    const lines = wrapText(other.text, width, g.fs);
+    const headStep = g.fsHead * 1.3;
+    const block = g.fsHead + headStep + 6 + lines.length * g.lh;
+    const top = g.yC - block / 2;
+    head.forEach((ln, j) => walk.text(x, top + g.fsHead + j * headStep, ln, { class: 'gl-head', 'font-size': fmt(g.fsHead) }));
     const rule = right ? g.x0 + g.n * g.pitch + 3 : g.x0 - 3;
     walk.line(rule, g.yC0, rule, g.yD0, { stroke: C.rule, 'stroke-width': 1 });
-    const lines = wrapText(other.text, width, g.fs);
-    const y0 = g.yC - ((lines.length - 1) / 2) * g.lh + g.fs * 0.35;
+    const y0 = top + g.fsHead + headStep + 6 + g.fs;
     lines.forEach((ln, j) => walk.text(x, y0 + j * g.lh, ln, { class: 'gl-note', 'font-size': fmt(g.fs) }));
   }
 
@@ -1310,7 +1332,7 @@ export function mount(root, ctx) {
     const s = Math.floor(ticks / TICKS);
     return s === 0 ? 'Now · before step 1' : `Now · after step ${s}`;
   };
-  const DOMAINS = 'Drawn as a human, a yeast and most bacteria run it. All three domains share only steps 8–10.';
+  const DOMAINS = 'Drawn as a human, a yeast and most bacteria run it. All three domains share only steps\u00a08–10.';
 
   // What the step just did first, then the committed step and the knock-out when they have something to
   // say. `short` takes each in its short form; `alertsOnly` leaves out a status that is not a warning.
@@ -1334,7 +1356,8 @@ export function mount(root, ctx) {
       const wB = Math.max(120, w - wA - wC - 2 * gut);
       const size = clamp(hgt / 11.5, 9.4, 10.6);
       talliesInto(ledger.readout({ title, x: 0, y: 0, width: wA, size, minRow: 13, maxRow: 24 })).fill(hgt);
-      ledger.readout({ title: nowTitle(), x: wA + gut, y: 0, width: wB, size, minRow: 13, maxRow: 22 }).fit(hgt, (r, lv) => {
+      // A column of sentences is not stretched to the pane's height: its lines keep their own leading.
+      ledger.readout({ title: nowTitle(), x: wA + gut, y: 0, width: wB, size, minRow: 12, maxRow: 13 }).fit(hgt, (r, lv) => {
         notesInto(r, { short: lv >= 2, domains: lv === 0, size });
       }, { levels: 3 });
       ladderInto(wA + wB + 2 * gut, wC, hgt, size);
@@ -1342,18 +1365,20 @@ export function mount(root, ctx) {
       const x = 10;
       const width = w - x;
       const size = clamp(Math.min(width / 21, hgt / 16), 9.2, 10.6);
-      ledger.readout({ title, x, y: 0, width, size, minRow: 13, maxRow: 22 }).fit(hgt, (r, lv) => {
+      ledger.readout({ title, x, y: 0, width, size, minRow: 13, maxRow: 17 }).fit(hgt, (r, lv) => {
         talliesInto(r);
         notesInto(r, { short: lv >= 2, domains: lv === 0, alertsOnly: lv >= 3, size });
       }, { levels: 4 });
     } else {
-      // Beneath the ladder: the tallies, and beside them what the step did.
+      // Beneath the ladder, in the ladder's own column: the tallies, and beside them what the step did.
+      const cw = Math.min(w, 600);
+      const ox = Math.max(0, (w - cw) / 2);
       const gut = 16;
-      const size = clamp(w / 36, 9.2, 10.6);
-      const wA = clamp((w - gut) * 0.44, 130, 260);
-      talliesInto(ledger.readout({ title: `Per ${env.per}`, x: 0, y: 0, width: wA, size, minRow: 13, maxRow: 22 })).fill(hgt);
-      ledger.readout({ title: nowTitle(), x: wA + gut, y: 0, width: w - wA - gut, size, minRow: 13, maxRow: 22 }).fit(hgt, (r, lv) => {
-        notesInto(r, { short: lv >= 1, domains: lv === 0 && w > 520, alertsOnly: lv >= 2, size });
+      const size = clamp(cw / 36, 9.2, 10.6);
+      const wA = clamp((cw - gut) * 0.44, 130, 260);
+      talliesInto(ledger.readout({ title: `Per ${env.per}`, x: ox, y: 0, width: wA, size, minRow: 13, maxRow: 22 })).fill(hgt);
+      ledger.readout({ title: nowTitle(), x: ox + wA + gut, y: 0, width: cw - wA - gut, size, minRow: 12, maxRow: 13 }).fit(hgt, (r, lv) => {
+        notesInto(r, { short: lv >= 1, domains: lv === 0 && cw > 520, alertsOnly: lv >= 2, size });
       }, { levels: 3 });
     }
     typeset(ledger.node);
