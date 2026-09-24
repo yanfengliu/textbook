@@ -1134,13 +1134,18 @@ export function mount(root, ctx) {
     if (a.id === 'fumarate') add('frd', ['fumarate reductase', 'reductase'], IIbox, g.W2 / 2, (B.II.y1 - B.II.y0) / 2, { cls: 'rc-soft', weight: 500, size: g.small, prefer: 'down', optional: true });
     else add('fadh2', 'FADH_{2}', IIbox, g.W2 / 2, (B.II.y1 - B.II.y0) / 2, { prefer: 'left', ...soft('II') });
     if (B.Nar) add('nar', ['nitrate reductase', 'reductase'], { x: g.sx, y: (B.Nar.y0 + B.Nar.y1) / 2 }, g.BH, (B.Nar.y1 - B.Nar.y0) / 2, { cls: 'rc-soft', weight: 500, size: g.small, prefer: 'right' });
-    // How many charges each complex moves, on the side they arrive at and nowhere else.
+    // How many charges each complex moves, on the side they arrive at and nowhere else, and level with the
+    // complex's own block: beside the next complex down it would be read as that one's count, so where
+    // the block is too short to hold it clear of its neighbours' labels it is left out.
     for (const st of Object.keys(g.cross)) {
       const cr = g.cross[st];
       const my = (Math.min(...cr.ys) + Math.max(...cr.ys)) / 2;
       add(`n${st}`, `+${CHARGES_AT[st]}`, { x: g.sx, y: my }, cr.x1 - g.sx + 3, 4, {
         cls: 'rc-charge', optional: true,
-        cands: (out, sz) => [0, -1, 1, -2, 2].map((j) => ({ x: cr.x1 + 7, y: my + sz * 0.36 + j * sz * 1.1, anchor: 'start', far: 0 })),
+        cands: (out, sz) => [0, -0.5, 0.5, -1, 1, -1.5, 1.5, -2, 2]
+          .map((j) => my + j * sz * 1.1)
+          .filter((cy) => cy >= B[st].y0 + 1 && cy <= B[st].y1 - 1)
+          .map((cy) => ({ x: cr.x1 + 7, y: cy + sz * 0.36, anchor: 'start', far: 0 })),
       });
     }
     if (g.blockBar) {
@@ -1534,7 +1539,8 @@ export function mount(root, ctx) {
     const NOTE_ROW = 13;
     // The three readouts at given tops: the two tables beside each other or stacked, the sentence last.
     const make = (lv, y1, y2, y3) => {
-      const title2 = lv < 3 ? 'Across the membrane' : null;
+      // Stacked, the tersest level gives up the second title; side by side it costs no height.
+      const title2 = side || lv < 3 ? 'Across the membrane' : null;
       const r1 = pane.readout({ ...base, x: R.x, width: cw, y: y1, title: title1, columns: ['NADH', 'FADH₂'] });
       build1(r1, lv);
       const r2 = pane.readout({ ...base, x: side ? R.x + cw + gutter : R.x, width: cw, y: side ? y1 : y2, title: title2 });
@@ -1558,8 +1564,16 @@ export function mount(root, ctx) {
       const y2 = R.y + m.r1.height(lo) + gap;
       const y3 = R.y + tables(m, lo) + gap;
       const d = make(lv, R.y, y2, y3);
-      d.r1.draw(lo, R.h);
-      d.r2.draw(lo, side ? R.h : R.y + R.h - y2);
+      // Side by side, the two tables share their top and bottom rules: the shorter spreads its rows to
+      // the taller's height. A table's height is its fixed part plus its row count times the row height.
+      const H = tables(m, lo);
+      const spread = (r) => {
+        const fixed = r.height(0);
+        const n = r.height(1) - fixed;
+        return side && n > 0 ? (H - fixed) / n : lo;
+      };
+      d.r1.draw(spread(d.r1), R.h);
+      d.r2.draw(spread(d.r2), side ? R.h : R.y + R.h - y2);
       d.r3.draw(NOTE_ROW, R.y + R.h - y3);
       return lv;
     }

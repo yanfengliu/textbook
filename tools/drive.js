@@ -3870,6 +3870,220 @@ const RECIPES = {
       expect(near(d.workingRatio, 3, 0.02) && near(d.netGainPercent, 62.5, 0.1), `Reset left the table at ${JSON.stringify({ workingRatio: d.workingRatio, netGainPercent: d.netGainPercent })}`);
     }],
   ],
+  // Figure 7.3. Every step holds the figure's whole claim as well as its own: atpMadeHere is 0 in every
+  // reachable state (FIGURES.md, "Four invariants"), with each complex blocked in turn, with the oxygen
+  // gone, and under every acceptor. The numbers are the prose's: 4 + 2 + 4 = 10 charges a pair from NADH
+  // and 2 + 4 = 6 from FADH₂ (§7.4), and for the other acceptors a ceiling, the fall's kJ/mol ÷ 19.3
+  // rounded down (§7.7's table; accuracy review of 2026-09-24, finding 9). Every field asserted is one the
+  // figure computes from the model; the controls only set the donor, the block, the oxygen and the rung.
+  'respiratory-chain': [
+    ['opens-idle-with-oxygen-and-nothing-blocked', async (h) => {
+      const d = await h.describe();
+      expect(d.donor === 'nadh' && d.acceptor === 'oxygen' && d.oxygenPresent === true && d.blockedAt === null && d.blockedBy === null && d.playing === false, `it should open on NADH and oxygen with nothing blocked, paused: ${JSON.stringify({ donor: d.donor, acceptor: d.acceptor, oxygenPresent: d.oxygenPresent, blockedAt: d.blockedAt, playing: d.playing })}`);
+      expect(d.pairsDelivered === 0 && d.chargesMoved === 0 && d.gradientPH === 0 && d.gradientMv === 0, `nothing should have moved yet: ${JSON.stringify({ pairsDelivered: d.pairsDelivered, chargesMoved: d.chargesMoved, gradientPH: d.gradientPH, gradientMv: d.gradientMv })}`);
+      expect(d.chargesPerPair === 10 && d.chargesAreCeiling === false && near(d.potentialDropV, 1.14, 0.005) && d.energyReleasedKj === 220 && near(d.acceptorPotentialV, 0.82), `NADH to oxygen should be 10 charges a pair, 1.14 V and 220 kJ/mol: ${JSON.stringify({ chargesPerPair: d.chargesPerPair, chargesAreCeiling: d.chargesAreCeiling, potentialDropV: d.potentialDropV, energyReleasedKj: d.energyReleasedKj })}`);
+      expect(d.reducedCarriers.length === 0 && d.crossoverAt === null && d.refused === null && d.quinone === 'ubiquinone', `every carrier should open oxidised: ${JSON.stringify({ reducedCarriers: d.reducedCarriers, crossoverAt: d.crossoverAt, refused: d.refused, quinone: d.quinone })}`);
+      expect(d.atpMadeHere === 0, `the chain makes no ATP: atpMadeHere ${d.atpMadeHere}`);
+    }],
+    ['a-pair-from-nadh-moves-ten-charges', async (h) => {
+      await h.button(/^Deliver/).click();
+      const d = await until(h, (x) => x.pairsDelivered === 1, 5_000);
+      expect(d.pairsDelivered === 1 && d.pairsByDonor.nadh === 1, `one press should deliver one pair from NADH: ${JSON.stringify(d.pairsByDonor)}`);
+      expect(d.chargesMoved === 10, `a pair from NADH should move 4 + 2 + 4 = 10 charges: ${d.chargesMoved}`);
+      expect(d.gradientPH === 0.75 && d.gradientMv === 150, `the gradient should stand at 0.75 pH units and 150 mV: ${d.gradientPH}, ${d.gradientMv}`);
+      expect(d.playing === true && d.crossoverAt === null && d.refused === null && d.reducedCarriers.length === 0, `delivering should set the chain running, with the pair gone on to oxygen: ${JSON.stringify({ playing: d.playing, crossoverAt: d.crossoverAt, refused: d.refused, reducedCarriers: d.reducedCarriers })}`);
+      expect(d.atpMadeHere === 0, `the chain makes no ATP, whatever it moves: atpMadeHere ${d.atpMadeHere}`);
+    }],
+    ['fadh2-enters-lower-and-moves-six', async (h) => {
+      await h.button(/^FADH₂ from the cycle/).click();
+      const d0 = await until(h, (x) => x.donor === 'fadh2', 5_000);
+      expect(d0.donor === 'fadh2' && near(d0.potentialDropV, 0.79, 0.005) && d0.energyReleasedKj === 152 && d0.chargesPerPair === 6, `the cycle's FADH₂ should fall 0.79 V, release 152 kJ/mol and move 6 charges a pair: ${JSON.stringify({ donor: d0.donor, potentialDropV: d0.potentialDropV, energyReleasedKj: d0.energyReleasedKj, chargesPerPair: d0.chargesPerPair })}`);
+      await h.button(/^Deliver/).click();
+      const d = await until(h, (x) => x.pairsByDonor.fadh2 === 1, 5_000);
+      expect(d.pairsByDonor.fadh2 === 1 && d.pairsDelivered === 2, `one press should deliver one pair from FADH₂: ${JSON.stringify(d.pairsByDonor)}`);
+      expect(d.chargesMoved === 16, `a pair from FADH₂ should add 2 + 4 = 6 charges to NADH's 10: ${d.chargesMoved}`);
+      expect(d.atpMadeHere === 0, `the chain makes no ATP: atpMadeHere ${d.atpMadeHere}`);
+    }],
+    ['malonate-leaves-nadh-running', async (h) => {
+      const blockRange = h.stage.getByRole('slider', { name: 'Block' });
+      await blockRange.fill('2');
+      await atValue(h, blockRange, 2);
+      const d0 = await until(h, (x) => x.blockedAt === 'II', 5_000);
+      expect(d0.blockedAt === 'II' && d0.blockedBy === 'malonate', `the second block should be malonate at complex II: ${d0.blockedAt} ${d0.blockedBy}`);
+      await h.button(/^NADH/).click();
+      const before = await until(h, (x) => x.donor === 'nadh', 5_000);
+      await h.button(/^Deliver/).click();
+      const d = await until(h, (x) => x.pairsByDonor.nadh === before.pairsByDonor.nadh + 1, 5_000);
+      // §7.8's own point: NADH's pairs never pass through complex II, so malonate changes nothing for them.
+      expect(d.pairsByDonor.nadh === before.pairsByDonor.nadh + 1 && d.chargesMoved === before.chargesMoved + 10, `under malonate a pair from NADH should still enter and move 10 charges: ${before.chargesMoved} -> ${d.chargesMoved}`);
+      expect(d.crossoverAt === null && d.refused === null && d.gradientMv === 150, `malonate should leave NADH's chain running with no crossover: ${JSON.stringify({ crossoverAt: d.crossoverAt, refused: d.refused, gradientMv: d.gradientMv })}`);
+      expect(d.atpMadeHere === 0, `the chain makes no ATP: atpMadeHere ${d.atpMadeHere}`);
+    }],
+    ['malonate-refuses-the-cycles-fadh2', async (h) => {
+      await h.button(/^FADH₂ from the cycle/).click();
+      const before = await until(h, (x) => x.donor === 'fadh2', 5_000);
+      await h.button(/^Deliver/).click();
+      const d = await until(h, (x) => x.refused === 'blocked-entry', 5_000);
+      expect(d.refused === 'blocked-entry' && d.crossoverAt === 'II', `malonate should refuse the cycle's FADH₂ at complex II: ${JSON.stringify({ refused: d.refused, crossoverAt: d.crossoverAt })}`);
+      expect(d.pairsByDonor.fadh2 === before.pairsByDonor.fadh2 && d.chargesMoved === before.chargesMoved, `a refused pair should count for nothing: ${JSON.stringify({ fadh2: d.pairsByDonor.fadh2, chargesMoved: d.chargesMoved })}`);
+      expect(d.gradientPH === 0 && d.gradientMv === 0, `with the chosen donor's route shut the gradient should run down: ${d.gradientPH}, ${d.gradientMv}`);
+      expect(d.atpMadeHere === 0, `the chain makes no ATP: atpMadeHere ${d.atpMadeHere}`);
+    }],
+    ['antimycin-backs-the-chain-up-to-complex-iii', async (h) => {
+      const blockRange = h.stage.getByRole('slider', { name: 'Block' });
+      await blockRange.fill('3');
+      await atValue(h, blockRange, 3);
+      await until(h, (x) => x.blockedAt === 'III', 5_000);
+      await h.button(/^NADH/).click();
+      const before = await until(h, (x) => x.donor === 'nadh', 5_000);
+      for (let i = 1; i <= 3; i += 1) {
+        await h.button(/^Deliver/).click();
+        await until(h, (x) => x.pairsByDonor.nadh === before.pairsByDonor.nadh + i, 5_000);
+      }
+      const d = await h.describe();
+      expect(d.blockedAt === 'III' && d.blockedBy === 'antimycin A', `the third block should be antimycin A at complex III: ${d.blockedAt} ${d.blockedBy}`);
+      expect(d.pairsByDonor.nadh === before.pairsByDonor.nadh + 3, `three presses should deliver three pairs: ${before.pairsByDonor.nadh} -> ${d.pairsByDonor.nadh}`);
+      expect(d.crossoverAt === 'III', `the crossover should be at complex III: ${d.crossoverAt}`);
+      const reduced = ['complex I', 'ubiquinone', 'complex III'];
+      const oxidised = ['cytochrome c', 'complex IV'];
+      expect(reduced.every((c) => d.reducedCarriers.includes(c)) && oxidised.every((c) => d.oxidisedCarriers.includes(c)), `the carriers above complex III should be reduced and those below it oxidised: ${JSON.stringify({ reducedCarriers: d.reducedCarriers, oxidisedCarriers: d.oxidisedCarriers })}`);
+      expect(d.chargesMoved === before.chargesMoved + 8, `only complex I should have moved charges, 4 for each of the two pairs that left it: ${before.chargesMoved} -> ${d.chargesMoved}`);
+      expect(d.gradientMv === 0, `a blocked chain's gradient should run down: ${d.gradientMv}`);
+      await h.button(/^Deliver/).click();
+      const full = await until(h, (x) => x.refused === 'backed-up', 5_000);
+      expect(full.refused === 'backed-up' && full.pairsByDonor.nadh === d.pairsByDonor.nadh, `a fourth pair should find complex I full: ${JSON.stringify({ refused: full.refused, nadh: full.pairsByDonor.nadh })}`);
+      expect(full.atpMadeHere === 0, `the chain makes no ATP: atpMadeHere ${full.atpMadeHere}`);
+    }],
+    ['cyanide-backs-it-up-to-complex-iv', async (h) => {
+      const blockRange = h.stage.getByRole('slider', { name: 'Block' });
+      await blockRange.fill('4');
+      await atValue(h, blockRange, 4);
+      // The three pairs antimycin held move down until complex IV, which cyanide stops, holds the first.
+      const d = await until(h, (x) => x.blockedAt === 'IV' && x.crossoverAt === 'IV', 5_000);
+      expect(d.blockedAt === 'IV' && d.blockedBy === 'cyanide', `the fourth block should be cyanide at complex IV: ${d.blockedAt} ${d.blockedBy}`);
+      expect(d.crossoverAt === 'IV' && ['cytochrome c', 'complex IV'].every((c) => d.reducedCarriers.includes(c)), `the held pairs should back up from complex IV: ${JSON.stringify({ crossoverAt: d.crossoverAt, reducedCarriers: d.reducedCarriers })}`);
+      expect(d.gradientMv === 0, `a blocked chain's gradient should run down: ${d.gradientMv}`);
+      expect(d.atpMadeHere === 0, `the chain makes no ATP: atpMadeHere ${d.atpMadeHere}`);
+    }],
+    ['taking-the-oxygen-away-backs-it-up-from-the-bottom', async (h) => {
+      const blockRange = h.stage.getByRole('slider', { name: 'Block' });
+      await blockRange.fill('0');
+      await atValue(h, blockRange, 0);
+      const open = await until(h, (x) => x.blockedAt === null && x.reducedCarriers.length === 0, 5_000);
+      expect(open.blockedAt === null && open.crossoverAt === null && open.reducedCarriers.length === 0, `with the block lifted the held pairs should drain to oxygen: ${JSON.stringify({ blockedAt: open.blockedAt, crossoverAt: open.crossoverAt, reducedCarriers: open.reducedCarriers })}`);
+      await h.button(/^Oxygen/).click();
+      const d0 = await until(h, (x) => x.oxygenPresent === false, 5_000);
+      expect(d0.oxygenPresent === false && d0.acceptor === 'oxygen', `the Oxygen control should take the oxygen away: ${JSON.stringify({ oxygenPresent: d0.oxygenPresent, acceptor: d0.acceptor })}`);
+      await h.button(/^Deliver/).click();
+      const d = await until(h, (x) => x.crossoverAt === 'IV', 5_000);
+      expect(d.crossoverAt === 'IV' && d.reducedCarriers.includes('complex IV'), `with no oxygen complex IV should keep its pair: ${JSON.stringify({ crossoverAt: d.crossoverAt, reducedCarriers: d.reducedCarriers })}`);
+      expect(d.chargesMoved === d0.chargesMoved + 6, `the pair should move complex I's 4 and complex III's 2, and not complex IV's 4, which need oxygen to take the pair: ${d0.chargesMoved} -> ${d.chargesMoved}`);
+      expect(d.gradientMv === 0, `with no oxygen the gradient should run down: ${d.gradientMv}`);
+      expect(d.atpMadeHere === 0, `the chain makes no ATP: atpMadeHere ${d.atpMadeHere}`);
+      await h.button(/^Oxygen/).click();
+      const back = await until(h, (x) => x.oxygenPresent === true && x.crossoverAt === null, 5_000);
+      expect(back.oxygenPresent === true && back.crossoverAt === null && back.reducedCarriers.length === 0, `giving the oxygen back should drain the chain: ${JSON.stringify({ oxygenPresent: back.oxygenPresent, crossoverAt: back.crossoverAt, reducedCarriers: back.reducedCarriers })}`);
+      expect(back.chargesMoved === d.chargesMoved + 4 && back.gradientMv === 150, `the held pair should move complex IV's 4 as it leaves, and the gradient come back: ${d.chargesMoved} -> ${back.chargesMoved}, ${back.gradientMv} mV`);
+    }],
+    ['another-acceptor-shows-a-ceiling-not-a-count', async (h) => {
+      const rung = h.stage.getByRole('slider', { name: 'Acceptor' });
+      // §7.7's table from NADH: the rung, its potential, kJ/mol, at most kJ ÷ 19.3 charges, and the quinone.
+      const table = [
+        [1, 'nitrate', 0.42, 143, 7, 'ubiquinone'],
+        [2, 'fumarate', 0.03, 68, 3, 'menaquinone'],
+        [3, 'sulfate', -0.22, 19, 0, 'ubiquinone'],
+        [4, 'carbon-dioxide', -0.24, 15, 0, 'ubiquinone'],
+      ];
+      for (const [v, id, E, kj, most, quinone] of table) {
+        await rung.fill(String(v));
+        await atValue(h, rung, v);
+        const d0 = await until(h, (x) => x.acceptor === id, 5_000);
+        expect(d0.acceptor === id && near(d0.acceptorPotentialV, E) && d0.energyReleasedKj === kj && d0.chargesPerPair === most && d0.chargesAreCeiling === true, `${id} from NADH should be ${kj} kJ/mol and at most ${most} charges, named as a ceiling: ${JSON.stringify({ acceptor: d0.acceptor, acceptorPotentialV: d0.acceptorPotentialV, energyReleasedKj: d0.energyReleasedKj, chargesPerPair: d0.chargesPerPair, chargesAreCeiling: d0.chargesAreCeiling })}`);
+        expect(d0.chargesMoved === null && d0.pairsDelivered === 0 && d0.oxygenPresent === false && d0.quinone === quinone, `a new acceptor should start afresh, counting no charges, with ${quinone}: ${JSON.stringify({ chargesMoved: d0.chargesMoved, pairsDelivered: d0.pairsDelivered, oxygenPresent: d0.oxygenPresent, quinone: d0.quinone })}`);
+        await h.button(/^Deliver/).click();
+        const d = await until(h, (x) => x.pairsDelivered === 1, 5_000);
+        expect(d.pairsDelivered === 1 && d.chargesMoved === null && d.refused === null, `a pair from NADH should reach ${id} with no charges counted: ${JSON.stringify({ pairsDelivered: d.pairsDelivered, chargesMoved: d.chargesMoved, refused: d.refused })}`);
+        expect(d.atpMadeHere === 0, `the chain makes no ATP under ${id}: atpMadeHere ${d.atpMadeHere}`);
+      }
+    }],
+    ['fadh2-has-less-fall-to-the-other-acceptors', async (h) => {
+      const rung = h.stage.getByRole('slider', { name: 'Acceptor' });
+      await h.button(/^FADH₂ from the cycle/).click();
+      await until(h, (x) => x.donor === 'fadh2', 5_000);
+      await rung.fill('1');
+      await atValue(h, rung, 1);
+      const n = await until(h, (x) => x.acceptor === 'nitrate', 5_000);
+      expect(n.energyReleasedKj === 75 && n.chargesPerPair === 3 && n.chargesAreCeiling === true, `FADH₂ to nitrate should be 75 kJ/mol and at most 3 charges: ${JSON.stringify({ energyReleasedKj: n.energyReleasedKj, chargesPerPair: n.chargesPerPair })}`);
+      await rung.fill('2');
+      await atValue(h, rung, 2);
+      const f0 = await until(h, (x) => x.acceptor === 'fumarate', 5_000);
+      expect(near(f0.potentialDropV, 0, 0.005) && f0.chargesPerPair === 0, `FADH₂ should have no fall to fumarate, which sits at its own potential: ${JSON.stringify({ potentialDropV: f0.potentialDropV, chargesPerPair: f0.chargesPerPair })}`);
+      await h.button(/^Deliver/).click();
+      const f = await until(h, (x) => x.refused === 'no-fall', 5_000);
+      expect(f.refused === 'no-fall' && f.pairsDelivered === 0, `a pair with no fall should not be delivered: ${JSON.stringify({ refused: f.refused, pairsDelivered: f.pairsDelivered })}`);
+      await rung.fill('3');
+      await atValue(h, rung, 3);
+      const s0 = await until(h, (x) => x.acceptor === 'sulfate', 5_000);
+      expect(s0.potentialDropV < 0 && s0.chargesPerPair === 0, `sulfate sits above FADH₂, so the step is uphill: ${JSON.stringify({ potentialDropV: s0.potentialDropV, chargesPerPair: s0.chargesPerPair })}`);
+      await h.button(/^Deliver/).click();
+      const s = await until(h, (x) => x.refused === 'uphill', 5_000);
+      expect(s.refused === 'uphill' && s.pairsDelivered === 0, `an uphill pair should not be delivered: ${JSON.stringify({ refused: s.refused, pairsDelivered: s.pairsDelivered })}`);
+      expect(s.atpMadeHere === 0, `the chain makes no ATP: atpMadeHere ${s.atpMadeHere}`);
+    }],
+    ['the-oxygen-control-brings-oxygen-back-as-the-acceptor', async (h) => {
+      await h.button(/^Oxygen/).click();
+      const d = await until(h, (x) => x.acceptor === 'oxygen', 5_000);
+      expect(d.acceptor === 'oxygen' && d.oxygenPresent === true && d.chargesMoved === 0 && d.pairsDelivered === 0 && d.chargesAreCeiling === false, `pressing Oxygen under another acceptor should put oxygen back at the bottom, afresh: ${JSON.stringify({ acceptor: d.acceptor, oxygenPresent: d.oxygenPresent, chargesMoved: d.chargesMoved, pairsDelivered: d.pairsDelivered })}`);
+      const rung = h.stage.getByRole('slider', { name: 'Acceptor' });
+      const shown = await atValue(h, rung, 0);
+      expect(shown === '0', `the Acceptor range should follow back to oxygen: ${shown}`);
+      expect(d.atpMadeHere === 0, `the chain makes no ATP: atpMadeHere ${d.atpMadeHere}`);
+    }],
+    ['the-keys-drive-it', async (h) => {
+      await h.focusable().focus();
+      await h.page.keyboard.press('Home');
+      const d0 = await until(h, (x) => x.donor === 'nadh' && x.blockedAt === null && x.pairsDelivered === 0 && x.playing === false, 5_000);
+      expect(d0.donor === 'nadh' && d0.blockedAt === null && d0.pairsDelivered === 0 && d0.playing === false && d0.acceptor === 'oxygen', `Home should reset the chain: ${JSON.stringify({ donor: d0.donor, blockedAt: d0.blockedAt, pairsDelivered: d0.pairsDelivered, playing: d0.playing, acceptor: d0.acceptor })}`);
+      await h.page.keyboard.press('b');
+      const d1 = await until(h, (x) => x.blockedAt === 'I', 5_000);
+      expect(d1.blockedAt === 'I' && d1.blockedBy === 'rotenone', `B should block complex I with rotenone: ${d1.blockedAt} ${d1.blockedBy}`);
+      await h.page.keyboard.press('d');
+      const d2 = await until(h, (x) => x.pairsDelivered === 1, 5_000);
+      expect(d2.pairsDelivered === 1 && d2.crossoverAt === 'I' && d2.chargesMoved === 0 && d2.reducedCarriers.includes('complex I'), `under rotenone NADH's pair should stay in complex I, having moved nothing: ${JSON.stringify({ pairsDelivered: d2.pairsDelivered, crossoverAt: d2.crossoverAt, chargesMoved: d2.chargesMoved, reducedCarriers: d2.reducedCarriers })}`);
+      await h.page.keyboard.press('f');
+      await until(h, (x) => x.donor === 'fadh2', 5_000);
+      await h.page.keyboard.press('Enter');
+      const d3 = await until(h, (x) => x.pairsByDonor.fadh2 === 1, 5_000);
+      expect(d3.pairsByDonor.fadh2 === 1 && d3.chargesMoved === 6 && d3.gradientMv === 150, `F then Enter: the cycle's FADH₂ enters below rotenone's block and should still move 6 charges: ${JSON.stringify({ fadh2: d3.pairsByDonor.fadh2, chargesMoved: d3.chargesMoved, gradientMv: d3.gradientMv })}`);
+      await h.page.keyboard.press('n');
+      await until(h, (x) => x.donor === 'nadh', 5_000);
+      await h.page.keyboard.press('a');
+      const d4 = await until(h, (x) => x.acceptor === 'nitrate', 5_000);
+      expect(d4.acceptor === 'nitrate' && d4.pairsDelivered === 0 && d4.oxygenPresent === false, `A should move the bottom rung to nitrate and start afresh: ${JSON.stringify({ acceptor: d4.acceptor, pairsDelivered: d4.pairsDelivered, oxygenPresent: d4.oxygenPresent })}`);
+      await h.page.keyboard.press('o');
+      const d5 = await until(h, (x) => x.acceptor === 'oxygen', 5_000);
+      expect(d5.acceptor === 'oxygen' && d5.oxygenPresent === true, `O under nitrate should bring oxygen back as the acceptor: ${JSON.stringify({ acceptor: d5.acceptor, oxygenPresent: d5.oxygenPresent })}`);
+      await h.page.keyboard.press('o');
+      const d6 = await until(h, (x) => x.oxygenPresent === false, 5_000);
+      expect(d6.oxygenPresent === false && d6.acceptor === 'oxygen', `O again should take the oxygen away: ${d6.oxygenPresent}`);
+      const was = d6.playing;
+      await h.page.keyboard.press('Space');
+      const d7 = await until(h, (x) => x.playing === !was, 5_000);
+      expect(d7.playing === !was, `Space should ${was ? 'pause' : 'run'} the chain: playing ${d7.playing}`);
+      expect(d7.atpMadeHere === 0, `the chain makes no ATP: atpMadeHere ${d7.atpMadeHere}`);
+    }],
+    ['reset-puts-everything-back', async (h) => {
+      await h.button(/^Reset/).click();
+      const d = await until(h, (x) => x.pairsDelivered === 0 && x.blockedAt === null && x.oxygenPresent === true && x.playing === false, 5_000);
+      expect(d.donor === 'nadh' && d.acceptor === 'oxygen' && d.oxygenPresent === true && d.blockedAt === null && d.playing === false, `Reset left ${JSON.stringify({ donor: d.donor, acceptor: d.acceptor, oxygenPresent: d.oxygenPresent, blockedAt: d.blockedAt, playing: d.playing })}`);
+      expect(d.pairsDelivered === 0 && d.chargesMoved === 0 && d.gradientMv === 0 && d.reducedCarriers.length === 0 && d.refused === null && d.t === 0, `Reset left ${JSON.stringify({ pairsDelivered: d.pairsDelivered, chargesMoved: d.chargesMoved, gradientMv: d.gradientMv, reducedCarriers: d.reducedCarriers, refused: d.refused, t: d.t })}`);
+      const blockShown = await atValue(h, h.stage.getByRole('slider', { name: 'Block' }), 0);
+      const rungShown = await atValue(h, h.stage.getByRole('slider', { name: 'Acceptor' }), 0);
+      const pressed = await h.button(/^Oxygen/).getAttribute('aria-pressed');
+      expect(blockShown === '0' && rungShown === '0' && pressed === 'true', `Reset should put both ranges on their first stop and press Oxygen: ${JSON.stringify({ blockShown, rungShown, pressed })}`);
+      expect(d.atpMadeHere === 0, `the chain makes no ATP: atpMadeHere ${d.atpMadeHere}`);
+    }],
+  ],
 };
 
 rmSync(OUT, { recursive: true, force: true });
