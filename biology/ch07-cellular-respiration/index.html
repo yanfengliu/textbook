@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7 · Cellular respiration — The Living World</title>
+<meta name="description" content="Chapter 7 of The Living World, an interactive biology textbook: why respiration is not burning, glycolysis in the cytosol, the link reaction and the Krebs cycle as carbon taken apart, the electron transport chain and what it actually makes, chemiosmosis and the rotary motor that spends the gradient, the honest arithmetic of the ATP yield, fermentation as a way of regenerating a carrier, and what happens when the chain is blocked or the membrane leaks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..700,0..100,0..1&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Inter:wght@400..700&family=Libertinus+Serif:ital,wght@0,400;0,600;1,400;1,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libertinus+Serif:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@400..700&family=Noto+Sans+Math&text=⇌⇀↽→←↔↑↓⟶⟵₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎⁰⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾≈≤≥≠∝∞∆∑√∫∂⋅∼′″‰◀▶Δαβ&display=swap">
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/typography.css">
+<link rel="stylesheet" href="../../src/styles/layout.css">
+<link rel="stylesheet" href="../../src/styles/components.css">
+<link rel="stylesheet" href="../../src/styles/learning.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+  // The glossary must be registered before the elements that read it are defined.
+  import { GLOSSARY } from './glossary.js';
+  import { OBJECTIVES } from './objectives.js';
+  import { textbook } from '../../src/shell.js';
+  import { register } from '../../src/learning/objectives.js';
+  textbook.registerGlossary(GLOSSARY);
+  register('biology/ch07', OBJECTIVES);
+  await import('../../src/components/index.js');
+</script>
+</head>
+<body>
+<a class="tb-skip" href="#burning">Skip to the chapter</a>
+<tb-shell book="The Living World" book-href="../" library-href="../../" today-href="../../today/" chapter="7 · Cellular respiration"></tb-shell>
+
+<div class="tb-page">
+<nav class="tb-rail" aria-label="Chapter contents"></nav>
+
+<main class="tb-main" data-chapter="7">
+
+<header class="tb-opener">
+  <p class="tb-opener__unit">Unit I · The nature of life</p>
+  <p class="tb-opener__number" aria-hidden="true">7</p>
+  <h1>Cellular respiration</h1>
+  <p class="tb-opener__dek">Four chapters have been running up a debt. Chapter 3 said a mitochondrion was once a bacterium and folded its inner membrane for a reason; Chapter 4 charged a gradient and promised a machine that spends it; Chapter 5 set out redox, the carriers and ATP and deliberately spent none of them. This is the chapter that settles the account.</p>
+
+  <tb-figure kind="respiration-tour" id="fig-respiration" width="wide" class="tb-opener__hero" data-alt="A cell drawn with its cytosol and one mitochondrion opened to show the outer membrane, the intermembrane space, the folded inner membrane and the matrix. One glucose molecule is followed through all four stages: its six carbons are tracked and leave as carbon dioxide, two at the link reaction and four in the cycle; electrons are tracked onto carriers and then along the inner membrane; protons pile up in the intermembrane space; and ATP is counted, marked by the stage that made it. A second scene sets the same glucose alight in a steel calorimeter beside the cell: the same equation and the same free energy, a thermometer climbing past a thousand degrees, and an ATP count that stays at zero. Readouts give carbons released, carriers loaded, protons moved, ATP by stage, heat, the captured fraction and the temperature, and a speed control and a stage selector let the reader stop the run anywhere and see what has been made so far.">
+    <figcaption>One glucose, taken apart in four places. Follow the six carbons out, and watch where the ATP is actually made — almost none of it where the carbon leaves. Then press <em>Burn it instead</em> and compare: the same equation, the same free energy, a thermometer past a thousand degrees, and nothing captured.<span class="fig-hint">Stop the run at any stage. The ATP counter is small for a long time, and the carrier counter is not.</span></figcaption>
+  </tb-figure>
+
+  <ol class="tb-opener__contents" aria-label="In this chapter">
+    <li><a href="#burning"><span class="n">7.1</span><span>Respiration is not burning</span></a></li>
+    <li><a href="#glycolysis"><span class="n">7.2</span><span>The oldest pathway runs in the cytosol</span></a></li>
+    <li><a href="#krebs"><span class="n">7.3</span><span>A cycle that takes carbon apart</span></a></li>
+    <li><a href="#chain"><span class="n">7.4</span><span>The chain makes a gradient, not ATP</span></a></li>
+    <li><a href="#chemiosmosis"><span class="n">7.5</span><span>The gradient turns a motor</span></a></li>
+    <li><a href="#yield"><span class="n">7.6</span><span>The number is a range, and here is why</span></a></li>
+    <li><a href="#anaerobic"><span class="n">7.7</span><span>When nothing is there to take the electrons</span></a></li>
+    <li><a href="#poisons"><span class="n">7.8</span><span>Block it, or let it leak</span></a></li>
+  </ol>
+</header>
+
+<div class="tb-text">
+
+<section id="burning">
+<h2>Respiration is not burning</h2>
+
+<p class="tb-dropcap">Section 5.8 ended on a number and a promise. Letting the two electrons of one NADH fall the whole way to oxygen releases about 220 kilojoules per mole, and it said that what takes that fall in stages, and turns the stages into a proton gradient and the gradient into ATP, was this chapter's. Section 4.7 had made the same promise from the other end: your mitochondria, it said, run a pump backwards as a generator, across the folded membrane of Section 3.5. Section 3.5 in turn said that a mitochondrion was once a free-living bacterium, that the folds of its inner membrane hold the machinery, and that Chapter 7 would do the chemistry. And Chapter 1, with no chemistry available to it at all, drew two arrows through an ecosystem and said that energy flows through the living world once while matter goes round it. Everything above is now collectable.</p>
+
+<p>Begin by separating two words that share a root and almost nothing else. <tb-term ref="cellular-respiration">Cellular respiration</tb-term> is the controlled oxidation of a fuel molecule inside a cell, in many small enzyme-catalysed steps, with part of the free energy released captured as ATP. Breathing is an animal's plumbing: moving air in and out so that oxygen reaches the blood and carbon dioxide leaves it. A tree respires and does not breathe. A yeast respires in a sealed vat. Every cell of your body respires, including the ones furthest from any lung, and it does so whether you are asleep or sprinting. When a physiologist says "respiration rate" they usually mean breaths per minute, and when a biochemist says it they mean something happening on a membrane 7 nm thick. This chapter is about the second.</p>
+
+<p>The overall reaction is the one Section 5.8 wrote down:</p>
+
+<p class="tb-equation">C<sub>6</sub>H<sub>12</sub>O<sub>6</sub> + 6 O<sub>2</sub> → 6 CO<sub>2</sub> + 6 H<sub>2</sub>O</p>
+
+<p>and its standard free energy change is about −2870 kilojoules per mole. Now notice something uncomfortable: that is also, exactly, the equation for setting glucose on fire. Same reactants, same products, same free energy change — because free energy depends on where you start and where you finish and not on how you got there. A cell and a flame have precisely the same amount to work with.</p>
+
+<aside class="tb-margin-note">The energy figure on a food packet was measured by burning the food. A weighed sample is sealed in a steel vessel with oxygen, ignited electrically, and the temperature rise of the surrounding water is read off. What that measures is the heat given out, which for glucose is about 2803 kilojoules per mole — a little less than the 2870 of free energy available, because the reaction also turns seven molecules into twelve and the entropy term of Section 5.2 pays the difference.</aside>
+
+<p>So the difference between the two is not in the books. It is entirely in the route. A flame does the whole thing at once, at something over a thousand degrees, and every joule leaves as heat and light. Section 5.1 established what that is worth to a cell: nothing at all, because getting work out of heat needs a temperature difference and a cell is at one temperature throughout. A cell instead takes the same glucose apart in roughly two dozen enzyme-catalysed steps at 37 °C, arranged so that the steps releasing a useful amount release a parcel comparable with what one ATP is worth, and each such parcel can be coupled to making one. Nothing in a cell ever gets hot. Nothing is on fire. Figure 7.1 lets you run the two side by side, and the thermometer is the part worth watching: the calorimeter's needle goes off the scale and its ATP counter never leaves zero.</p>
+
+<p>Here is the shape of the route. Respiration happens in four stages, and it is worth having them in a table before any of them is explained, because a great deal of the confusion in this subject comes from not knowing which stage a claim is about.</p>
+
+<table>
+  <thead><tr><th>Stage</th><th>Where, in a eukaryote</th><th>Goes in</th><th>Comes out, per glucose</th></tr></thead>
+  <tbody>
+    <tr><td>Glycolysis</td><td>Cytosol</td><td>Glucose</td><td>2 pyruvate, 2 ATP, 2 NADH</td></tr>
+    <tr><td>The link reaction</td><td>Mitochondrial matrix</td><td>2 pyruvate</td><td>2 acetyl-CoA, 2 CO<sub>2</sub>, 2 NADH</td></tr>
+    <tr><td>The Krebs cycle</td><td>Mitochondrial matrix</td><td>2 acetyl-CoA</td><td>4 CO<sub>2</sub>, 6 NADH, 2 FADH<sub>2</sub>, 2 ATP</td></tr>
+    <tr><td>Oxidative phosphorylation</td><td>Inner mitochondrial membrane</td><td>10 NADH, 2 FADH<sub>2</sub>, 6 O<sub>2</sub></td><td>H<sub>2</sub>O, and about 26 to 28 ATP</td></tr>
+  </tbody>
+</table>
+
+<p>Read the right-hand column downwards and the shape of the chapter appears. The first three stages take a glucose molecule completely apart — every one of its six carbons leaves as carbon dioxide before the fourth stage begins — and between them they make four ATP, which is almost nothing. What they actually produce is twelve loaded electron carriers. The fourth stage does nothing to the carbon at all: it only unloads those carriers, and it makes six or seven times as much ATP as the other three put together. <strong>Respiration is not a series of steps that each make some ATP.</strong> It is a long dismantling that makes almost none, followed by one membrane that makes nearly all of it.</p>
+
+<p>The geography matters, so look at the organelle. A mitochondrion has two membranes and they are not alike. The outer one is studded with wide pores and passes anything up to about 5000 daltons, so the <tb-term ref="intermembrane-space">intermembrane space</tb-term> between the two is, chemically, very nearly the cytosol. The inner one is the tight one — Section 4.2 would recognise it as an extreme case of a fluid mosaic, about three-quarters protein by mass, the highest of any membrane in the cell — and it lets almost nothing through without a transporter. That asymmetry is the whole architecture. The matrix inside it is a separate chemical world, and the inner membrane is the only boundary that can hold a gradient.</p>
+
+<aside class="tb-margin-note">A mitochondrion is not usually the tidy bean of a diagram. In a living cell the mitochondria are a network that fuses and divides continuously, and a single "mitochondrion" may be a transient piece of it. The cristae are not simple corrugations either: they connect to the boundary membrane through narrow necks, which partly seals each fold off as a compartment of its own.</aside>
+
+<p>Now the folds. Section 3.5 said the inner membrane is thrown into deep cristae carrying several times the area of the outer one, and that more folding means more power. That is Section 3.2's arithmetic in a new place: the fourth stage happens on a surface, everything it feeds happens in a volume, and a surface grows as the square of a length while a volume grows as the cube. A cell that needs more ATP per unit of its own volume cannot solve it by having a bigger mitochondrion; it has to fold the membrane harder. So a heart muscle cell, which must not stop, is packed with mitochondria whose cristae are so dense that the matrix is nearly squeezed out, and a liver cell, which does a great deal of chemistry and comparatively little mechanical work, has a thousand or two that are much more loosely folded. Part of that folding is made by the machinery itself: the ATP synthases of Section 7.5 sit in long double rows along the ridges of each crista, and the shape of the dimer bends the membrane where it sits.</p>
+
+<p>One more thing before the chemistry, and it is Section 3.5's point running forwards. A bacterium respires too, with the same four stages, and it has no mitochondrion: glycolysis and the cycle are in its cytosol and the chain and the synthase are in its plasma membrane. So the mitochondrion is not what makes respiration possible. It is where a eukaryote keeps a set of machinery its ancestor acquired ready-made, and the reason the inner membrane is the one that holds the gradient is that the inner membrane is the bacterium's own.</p>
+
+<tb-key><p>Respiration and combustion have the same equation and the same free energy change; everything that differs is the route. A cell takes the fall in two dozen small steps at one temperature, so that each useful step can pay for an ATP, and a flame takes it in one and can pay for nothing. The first three stages take the carbon apart and make almost no ATP; the fourth makes nearly all of it and touches no carbon at all.</p></tb-key>
+</section>
+
+<section id="glycolysis">
+<h2>The oldest pathway runs in the cytosol</h2>
+
+<p>A cell with a glucose molecule in it begins in the last place a reader expects: outside the mitochondrion, in the general cytosol, with a pathway that needs no oxygen, no membrane and no organelle of any kind. <tb-term ref="glycolysis">Glycolysis</tb-term> is ten enzyme-catalysed steps that split one six-carbon glucose into two three-carbon molecules of <tb-term ref="pyruvate">pyruvate</tb-term>. Its name simply means sugar-splitting, and that is the honest description of what it does, because the energy it captures is small.</p>
+
+<p>The ledger is worth learning as two halves rather than as ten steps. In the first half the cell <em>spends</em>: one ATP to attach a phosphate to the glucose, and a second, three steps later, to attach another. The six-carbon molecule is then split in two, and the second half runs twice over, once on each half. In that second half the cell <em>earns</em>: each three-carbon fragment is oxidised once, reducing one NAD<sup>+</sup>, and gives up two phosphate groups to ADP. So four ATP come out where two went in.</p>
+
+<p class="tb-equation">glucose + 2 ADP + 2 P<sub>i</sub> + 2 NAD<sup>+</sup> → 2 pyruvate + 2 ATP + 2 NADH + 2 H<sup>+</sup></p>
+
+<p>Two ATP net, two NADH, and two pyruvate that still hold most of the fuel. Against the 2870 kilojoules a mole that a glucose molecule is worth, two ATP at the standard 30.5 is 61 — about two per cent. Glycolysis is not where the energy is. It is where the sugar is opened.</p>
+
+<p>Why spend before earning? Because the phosphate does two jobs, and neither of them is delivering energy. The first phosphorylation, by the hexokinase of Section 5.6, converts glucose to glucose 6-phosphate, which is on Section 5.3's ladder at −13.8 kilojoules per mole — well below ATP, so the cell pays for the tag and does not get its money back. What it buys is a molecule that carries a charge and therefore cannot leave through any of the carriers of Section 4.5, which is why Section 5.3's table describes it as glucose tagged so it cannot escape. A cell that has taken a sugar in has committed to it within one step. The second phosphorylation does the other job: it makes a molecule that can be split down the middle into two three-carbon pieces each carrying a phosphate, so that the second half of the pathway can run on both.</p>
+
+<aside class="tb-margin-note">Eduard Buchner ground yeast with sand and kieselguhr in 1897, squeezed out the juice, and found that the cell-free liquid fermented sugar just as living yeast did. Fermentation had been held to require an intact living cell; it turned out to require enzymes, which could be taken out and kept in a bottle. He had a Nobel prize for it ten years later, and biochemistry as a subject begins about there.</aside>
+
+<p>Now the step that matters, which is the sixth. One three-carbon fragment is oxidised — a pair of electrons is taken off it onto NAD<sup>+</sup> — and in the same reaction, on the same enzyme, a phosphate ion from solution is attached to it. The product, 1,3-bisphosphoglycerate, sits <em>above</em> ATP on Section 5.3's ladder, so the next enzyme can simply hand that phosphate to ADP and make an ATP. Three steps later the same trick is played again with phosphoenolpyruvate, which is the compound at the top of Section 5.3's table at −61.9 kilojoules per mole, described there as an intermediate of sugar breakdown that recharges ADP. This is it. Making ATP this way — by moving a phosphate group straight from a substrate onto ADP, with no membrane and no gradient in sight — is <tb-term ref="substrate-level-phosphorylation">substrate-level phosphorylation</tb-term>, and it is the only way any of the first three stages makes ATP.</p>
+
+<p>Notice what actually paid. It was not the phosphate, and Section 5.3 spent a section on why: no energy is stored in the bond that breaks. The free energy came out of oxidising the sugar, and the phosphate was the means of carrying it from the reaction that released it to the ADP that needed it. It is Section 5.4's shared intermediate, twice over, made visible: the enzyme that oxidises the sugar and the enzyme that makes the ATP are two steps of one process joined by a molecule they both hold.</p>
+
+<p>Glycolysis is also where the whole of respiration is regulated first, and by the pattern of Section 5.7. The step that commits a molecule to being broken down is not the first — glucose 6-phosphate can still go into glycogen or into several other pathways — but the third, the second phosphorylation, catalysed by phosphofructokinase. Its product has nowhere else to go. That enzyme is allosteric in Section 5.7's exact sense, and ATP is both its substrate and its inhibitor: as substrate it binds the active site, and as inhibitor it binds a second site of its own, where plenty of ATP holds the enzyme in its inactive shape. AMP and ADP bind that same regulatory site and displace it. Read the loop as Section 5.7's, with an unusual product: the thing the pathway makes is the thing that switches it off, and the regulated quantity is the cell's own energy state. The enzyme is also inhibited by citrate, which is the first intermediate of the next section's cycle — a message from downstream saying that the matrix already has more fuel than it can process. Figure 7.2 lets the pathway be walked a step at a time and lets each of those controls be pushed.</p>
+
+<tb-figure kind="glycolysis" id="fig-glycolysis" width="wide" data-alt="The ten steps of glycolysis drawn as a line the reader walks. Each step shows the molecule with its carbon count and its phosphate groups, names the enzyme, and marks what is spent and what is captured; the six-carbon molecule splits at step four and the line becomes two lanes that run in step. Running tallies give ATP spent, ATP made, net ATP, NADH made and pyruvate produced, and a marker sits on the committed step. Controls step forwards and backwards, run, and set the ATP and AMP levels the committed enzyme reads, so that raising ATP visibly shuts the pathway down and raising AMP restarts it; a citrate control does the same from the other end. Any one of the ten enzymes can be knocked out, and the intermediate before the gap accumulates while everything past it drains away. A ledger switch reports the tally per glucose or per three-carbon fragment, and the two ATP-making steps are marked with the compound the phosphate came from and where that compound sits on chapter 5's ladder.">
+  <figcaption>Ten steps, two halves. Walk it once and watch the ATP counter go negative before it goes positive, then find the step that puts it right. The two steps that make ATP each name the compound the phosphate was taken from, and both of them sit above ATP on Section 5.3's ladder.<span class="fig-hint">Raise the ATP slider and the committed step closes. Raise AMP and it opens again.</span></figcaption>
+</tb-figure>
+
+<p>Two more things about this pathway are worth more than the ten steps are. The first is where it is. Glycolysis happens in the cytosol of every organism that has been looked at, in all three of Section 1.7's domains, with the same intermediates in the same order in a human, a yeast and an archaean from a hot spring. It needs no oxygen. It needs no compartment. Put those together with Section 3.5's evidence that the mitochondrion arrived later, as a bacterium taken in by a cell that already existed, and the conclusion is hard to avoid: glycolysis is older than the mitochondrion, older than the oxygen in the air, and probably older than the last common ancestor of everything alive. Its being in the cytosol is not an inconvenience of the architecture. It is a fossil.</p>
+
+<p>The second is that it runs backwards, and not by the same route. A liver cell that needs to make glucose rather than spend it uses gluconeogenesis, and Section 5.8's rule holds exactly: three of glycolysis's ten steps are strongly exergonic and therefore strongly uphill in reverse, so each of those three is bypassed by a different enzyme with different regulation. The two routes share seven steps and differ at three, which is what lets a cell switch one off without switching the other on. Chapter 6 uses two of the shared seven in the other direction as well: the reduction step of the Calvin cycle in Section 6.6 is glycolysis's sixth and seventh steps run backwards, spending an ATP and a reduced carrier where glycolysis makes one of each.</p>
+
+<tb-key><p>Glycolysis splits glucose into two pyruvate in the cytosol, spending two ATP and recovering four, and reducing two NAD<sup>+</sup>. Its ATP is made by handing a phosphate straight from a substrate to ADP, and what paid was oxidising the sugar, not the phosphate. It needs no oxygen and no organelle, it is in all three domains, and that is what a pathway older than the mitochondrion looks like.</p></tb-key>
+</section>
+
+<section id="krebs">
+<h2>A cycle that takes carbon apart</h2>
+
+<p>Pyruvate is a junction. If there is oxygen and a mitochondrion, it is carried across both membranes into the matrix, and there it meets one of the largest enzyme assemblies in the cell — three different enzymes and five different cofactors built into a single particle — which does three things to it at once in what everybody calls the <tb-term ref="link-reaction">link reaction</tb-term>.</p>
+
+<p>The three things are worth separating. One carbon is removed as carbon dioxide, which is a <tb-term ref="decarboxylation">decarboxylation</tb-term>. A pair of electrons is taken off what remains onto NAD<sup>+</sup>, which is an oxidation. And the two carbons that are left are attached to a carrier molecule, coenzyme A, through a sulfur atom — Section 2.5's sulfhydryl group, doing the one job it is uniquely good at. The product is <tb-term ref="acetyl-coa">acetyl coenzyme A</tb-term>. The link between the acetyl group and the sulfur is a thioester, and its hydrolysis releases about 31 kilojoules per mole — which puts it on Section 5.3's ladder at very nearly ATP's own rung, and well above the ordinary oxygen ester it would otherwise have been. That is what makes the acetyl group reactive enough to be handed on in the next step: not a special bond, but a rung, in the sense Section 5.3 was careful about.</p>
+
+<p class="tb-equation">pyruvate + CoA–SH + NAD<sup>+</sup> → acetyl-CoA + CO<sub>2</sub> + NADH</p>
+
+<p>Per glucose that happens twice, so two carbons of the original six have now left the cell entirely, two more NADH have been made, and what remains of the sugar is two acetyl groups on two carriers. The reaction is effectively irreversible, and that has a consequence a reader can check against their own body: an animal cannot turn fat back into sugar. Fat arrives at this pathway as acetyl-CoA, and this is a one-way door.</p>
+
+<p>The <tb-term ref="krebs-cycle">Krebs cycle</tb-term> takes it from there. Hans Krebs worked it out in 1937 from minced pigeon breast muscle, which respires furiously and was cheap; the paper was turned away by <i>Nature</i> for want of space and appeared in <i>Enzymologia</i> instead. Section 3.5 called the same cycle the citric acid cycle, which is its other common name; a third is the tricarboxylic acid cycle. The three names are one cycle and nothing turns on which you use.</p>
+
+<p>Here is what it does, in the order it does it, and then the reason the order is not the point. The two-carbon acetyl group is handed from coenzyme A onto <tb-term ref="oxaloacetate">oxaloacetate</tb-term>, a four-carbon compound, making the six-carbon citrate. Citrate is rearranged. Then two carbons come off as carbon dioxide, in two successive decarboxylations, each of which also reduces an NAD<sup>+</sup>; the molecule is back to four carbons. The rest of the cycle is a matter of getting that four-carbon molecule back into the shape oxaloacetate has, which takes four more steps: one of them hands a phosphate to a nucleotide and so makes an ATP by the substrate-level route of Section 7.2, one reduces an FAD to FADH<sub>2</sub>, one adds water, and the last reduces a third NAD<sup>+</sup>. Oxaloacetate is back, unchanged, ready for the next acetyl group.</p>
+
+<table>
+  <thead><tr><th>One turn of the cycle</th><th>Carbons</th><th>Captured</th></tr></thead>
+  <tbody>
+    <tr><td>Acetyl group joins oxaloacetate</td><td>2 + 4 → 6</td><td>—</td></tr>
+    <tr><td>Two decarboxylations</td><td>6 → 5 → 4</td><td>2 CO<sub>2</sub>, 2 NADH</td></tr>
+    <tr><td>Four steps back to oxaloacetate</td><td>4</td><td>1 ATP, 1 FADH<sub>2</sub>, 1 NADH</td></tr>
+    <tr><td><strong>Per turn</strong></td><td><strong>2 in, 2 out</strong></td><td><strong>3 NADH, 1 FADH<sub>2</sub>, 1 ATP</strong></td></tr>
+    <tr><td><strong>Per glucose (two turns)</strong></td><td><strong>4 in, 4 out</strong></td><td><strong>6 NADH, 2 FADH<sub>2</sub>, 2 ATP</strong></td></tr>
+  </tbody>
+</table>
+
+<p>Now put that table beside the link reaction's and do the carbon accounting, because it is the clearest thing in the chapter. Glucose has six carbons. Glycolysis keeps all six, three in each pyruvate. The link reaction takes one off each pyruvate: two gone. Two turns of the cycle take two off each acetyl group: four gone. Six out of six. <strong>By the time the cycle has turned twice, nothing of the glucose molecule remains</strong> — every atom of its carbon is carbon dioxide on its way out through your lungs, and the oxygen you breathed in has not yet been used for anything. That last point surprises people, and it is worth holding on to: the oxygen does not go into the carbon dioxide. It goes into water, at the very end, in a place the carbon never reaches.</p>
+
+<aside class="tb-margin-note">Follow a labelled carbon and the cycle turns out to be less tidy than the diagram. The two carbon dioxide molecules released on the first turn do <em>not</em> come from the acetyl group that just arrived; they come from the oxaloacetate. Citrate looks symmetrical, and for twenty years it was argued that an enzyme could not tell its two ends apart. Alexander Ogston pointed out in 1948 that a site gripping a molecule at three points always can, and that settled it. The acetyl carbons come out on later turns.</aside>
+
+<p>Why a cycle at all? Because the alternative would need a supply of the starting material. Section 5.8 said that a cyclic pathway regenerates its own carrier every turn, so a small amount of it processes an unlimited amount of material, and this is the case it was pointing at. A mitochondrion holds a trace of oxaloacetate — far less than the acetyl-CoA passing through it in an hour — and that trace is enough, because every turn puts it back. It is the same economy as ATP and NAD<sup>+</sup>: not a store, a carrier, recycled continuously, held in tiny amounts.</p>
+
+<p>Which is also its weakness, and the reason the cycle is not only a furnace. Several of its intermediates are the starting materials for building things. The five-carbon intermediate is where glutamate comes from, and glutamate is what Section 5.4's glutamine synthetase works on; oxaloacetate is where aspartate comes from; another intermediate is where haem begins; and citrate itself is exported to the cytosol when a cell is building fat. A pathway that runs in both economies at once like this is <tb-term ref="amphibolic">amphibolic</tb-term>, and the consequence is immediate: <strong>draw an intermediate off and the cycle stops turning</strong>, because the oxaloacetate it regenerates is now going somewhere else. So a cell that is building has to top the cycle up, which it does by carboxylating pyruvate straight to oxaloacetate — a reaction that exists for no other reason. This is Section 5.8's blocked-pathway reasoning seen from the other side: there, an enzyme was missing and an intermediate piled up; here, an intermediate is removed and everything downstream of it starves.</p>
+
+<p>The cycle is also where every other fuel arrives, which is Section 5.8's hourglass with its waist named. Figure 7.3 draws the whole thing and lets a labelled carbon be followed round it.</p>
+
+<tb-figure kind="krebs" id="fig-krebs" width="wide" data-alt="The Krebs cycle drawn as a ring with the carbon count marked on every intermediate, the link reaction feeding into it, and the two decarboxylations and four oxidations marked where they happen. The reader can label any carbon — either of the two arriving on the acetyl group, or one of oxaloacetate's four — and follow it round for three turns, watching which turn it finally leaves on as carbon dioxide; a readout names the labelled position and the turn it left on, which for an acetyl carbon is never the first. Running tallies give the turn number, carbons in and out, and NADH, FADH2 and ATP per turn and in total. A drain control removes any one intermediate to a biosynthetic route, and the cycle slows and stops as oxaloacetate runs down, with a top-up control that carboxylates pyruvate and restarts it. A fuel selector feeds the cycle from glucose, from a fatty acid taken apart two carbons at a time, or from an amino acid, and each traces its own entry point into the ring with its own per-gram yield.">
+  <figcaption>The carbon, and where it goes. Label one of the acetyl group's two carbons and follow it: it does not leave on the first turn, and the carbon dioxide from that turn came from the oxaloacetate. Then drain an intermediate off to build something with, and watch the cycle stop for want of the compound it is supposed to regenerate.<span class="fig-hint">Switch the fuel to a fatty acid. It enters in one place only, and the cycle does not know the difference.</span></figcaption>
+</tb-figure>
+
+<p>Take fat first. A triglyceride is hydrolysed — Section 2.6's reaction — into glycerol and three fatty acids. The glycerol joins glycolysis partway down. Each fatty acid is fed into <tb-term ref="beta-oxidation">β-&#8288;oxidation</tb-term>, which cuts two carbons off the end at a time; every cut yields one acetyl-CoA, one NADH and one FADH<sub>2</sub>. Palmitate, a common sixteen-carbon fatty acid, takes seven cuts and gives eight acetyl-CoA, seven NADH and seven FADH<sub>2</sub>, having first cost two ATP to get itself attached to coenzyme A. Add the eight turns of the cycle those acetyl groups pay for and the whole molecule is worth about 106 ATP against glucose's 32.</p>
+
+<p>That is Section 5.8's claim about fats, arrived at by a completely different road, and it is worth checking that the two agree. Palmitate weighs 256 grams a mole, so 106 ATP is 0.41 moles of ATP per gram; glucose weighs 180, so 32 ATP is 0.18. The ratio is 2.3. Section 2.6 and Section 5.8 both put a fat at about 37 kilojoules a gram against a carbohydrate's 17, a ratio of 2.2. The two numbers were got from a calorimeter and from counting ATP, and they agree to within the rounding. The reason is Section 5.8's: a fat's carbons are bonded almost entirely to hydrogen and have the whole fall to oxygen ahead of them, while many of a sugar's carbons already carry an oxygen and are partway down.</p>
+
+<p>Protein arrives last and least tidily. An amino acid must first lose its nitrogen, which leaves as ammonia and is converted to urea in the liver because ammonia is toxic; the carbon skeleton that remains then enters as pyruvate, as acetyl-CoA, or as one of the cycle's own intermediates, depending on which amino acid it was. A body burning protein for energy is a body that has run out of the other two, which is why it is a sign of starvation rather than of diet.</p>
+
+<p>One consequence of the amphibolic point deserves its own sentence, because it explains something that is otherwise a piece of folklore. Fat can only be burnt as fast as the cycle can accept acetyl groups, and the cycle can only accept them as fast as oxaloacetate is available — which in practice comes from carbohydrate. Starve the carbohydrate and acetyl-CoA accumulates faster than the cycle can take it, and the liver condenses the excess into ketone bodies, which other tissues including the brain can burn. That is what a low-carbohydrate diet does, and what an untreated diabetic does dangerously. The old teaching phrase for it is that fat burns in the flame of carbohydrate, which is wrong as chemistry and right as bookkeeping.</p>
+
+<tb-key><p>The link reaction takes one carbon off each pyruvate and hands the other two to coenzyme A; the Krebs cycle takes those two off as carbon dioxide and strips four pairs of electrons onto carriers, regenerating its own starting compound every turn. All six of glucose's carbons are gone by the end of the second turn, and the oxygen you breathed has still not been touched. The cycle is also where everything is built from, which is why draining it stops it.</p></tb-key>
+</section>
+
+<section id="chain">
+<h2>The chain makes a gradient, not ATP</h2>
+
+<p>Stand back and count what three stages have produced from one glucose molecule. Four ATP, which at 30.5 kilojoules a mole is about 120 of the 2870 that were available — four per cent. And ten NADH and two FADH<sub>2</sub>, which is where everything else went. Section 5.8 said a cell holds very little of either carrier and recycles it constantly, and that a cell whose carriers are all loaded cannot oxidise anything further. Twelve loaded carriers is an enormous amount by that standard. Unless something unloads them within seconds, the whole of the last two sections stops.</p>
+
+<p>What unloads them is an <tb-term ref="electron-transport-chain">electron transport chain</tb-term>: a series of carriers held in a membrane, each with a slightly stronger pull on electrons than the one before, so that a pair of electrons handed in at the top falls step by step to the bottom. Section 6.4 tells this story first, in a thylakoid membrane, and the principle is that chapter's rather than this one's. The difference between the two is worth one sentence and no more: a chloroplast's chain is driven by light pushing electrons <em>up</em> to where they can fall again, and a mitochondrion's is driven by them falling <em>down</em> from a fuel that has already been oxidised. What each chain does with the energy is the same in both, and it is not what most readers expect.</p>
+
+<p>Measure the fall properly first. The <tb-term ref="reduction-potential">standard reduction potential</tb-term> of a substance, written E°′, says in volts how strongly it pulls electrons towards itself, measured at pH 7 against a hydrogen standard. Electrons move by themselves from a substance with a low value to one with a high value — which is Section 5.8's electronegativity argument, measured. The free energy released is the difference in volts multiplied by the charge moved:</p>
+
+<p class="tb-equation">ΔG°′ = −<i>n</i>FΔE°′</p>
+
+<p>where <i>n</i> is the number of electrons and F is the charge on a mole of them, 96.5 kilojoules per volt per mole. NAD<sup>+</sup>/NADH sits at −0.32 volts and oxygen at +0.82, so a pair of electrons falling all the way releases 2 × 96.5 × 1.14, which is 220 kilojoules per mole — the number Section 5.8 quoted and promised to explain. Here is the same fall broken into the steps a mitochondrion actually takes it in.</p>
+
+<table>
+  <thead><tr><th>Complex</th><th>Electrons go from → to</th><th>E°′ (V)</th><th>ΔG°′ (kJ/mol of pairs)</th><th>H<sup>+</sup> pumped</th></tr></thead>
+  <tbody>
+    <tr><td>I</td><td>NADH → ubiquinone</td><td>−0.32 → +0.04</td><td>−70</td><td>4</td></tr>
+    <tr><td>II</td><td>succinate → ubiquinone</td><td>+0.03 → +0.04</td><td>−2</td><td>0</td></tr>
+    <tr><td>III</td><td>ubiquinol → cytochrome c</td><td>+0.04 → +0.25</td><td>−41</td><td>4</td></tr>
+    <tr><td>IV</td><td>cytochrome c → oxygen</td><td>+0.25 → +0.82</td><td>−110</td><td>2</td></tr>
+  </tbody>
+</table>
+
+<p>Check the arithmetic against the whole fall, because that is what the table is for. From NADH the route is I, III, IV: 70 + 41 + 110 is 221, against the 220 the whole drop releases, and the extra kilojoule is rounding. Ten protons are moved for a pair of electrons from NADH, and six for a pair entering at complex II.</p>
+
+<p>The chain's parts divide into two kinds, and the division is Section 3.2's diffusion argument in a membrane. Four large complexes are fixed in place — integral membrane proteins in Section 4.2's sense, spanning the bilayer and going nowhere. Complex I is a right-angled assembly of forty-five different proteins in a mammal; complex IV is smaller and carries copper as well as iron. Between them run two mobile carriers, because two complexes that are fixed and never touch cannot hand anything to each other. <tb-term ref="ubiquinone">Ubiquinone</tb-term> is a small molecule with a long hydrocarbon tail that keeps it dissolved in the bilayer, where it diffuses sideways between complexes; <tb-term ref="cytochrome">cytochrome</tb-term> c is a small protein that sits loosely on the outer face of the inner membrane and skates along it. Both are carriers in exactly Section 5.8's sense, working over nanometres instead of between reactions.</p>
+
+<p>Complex II is worth a second look, because it is an old friend. It is succinate dehydrogenase — the sixth step of the Krebs cycle, the one that reduces FAD. It is the only enzyme of the cycle that is not floating in the matrix but built into the membrane, and that is not an accident: it hands its electrons straight into the chain instead of onto a carrier that has to find one. Look at the table again and notice what it does not do. Its fall is two kilojoules per mole. Moving one proton across this membrane costs about nineteen, as the arithmetic below works out, so complex II could not pump a single one even if it were built to — and it is not.</p>
+
+<p>Which brings us to the sentence this section exists to remove. It is written in a great many places that the electron transport chain makes ATP, or produces energy, or generates ATP by oxidative phosphorylation. <strong>Not one molecule of ATP is made by any of the four complexes.</strong> They contain no site that binds ADP; they would not know what to do with a phosphate. What every one of them does with the energy of its fall is one thing only: it moves protons from the matrix out into the intermembrane space, against their own concentration and against the charge that piles up as they go. The chain's product is a gradient. Section 4.6 promised that proton pumps deserved a paragraph of their own because Chapter 7 would be built on one; the three of these four that pump are the pumps it meant, and unlike the pump of Section 4.6 they are not driven by ATP but by electrons falling. And Section 4.7 spent a whole section establishing that a gradient across a membrane is stored energy in the most literal sense. This is what that was for.</p>
+
+<p>Price the gradient and the design becomes obvious. Section 7.5 works out that the force across the inner membrane is about 200 millivolts, and a mole of protons pushed against 200 millivolts costs 96.5 × 0.2, which is 19.3 kilojoules. Ten protons therefore cost 193 kilojoules — out of the 220 that were released by the fall that paid for them. The chain keeps very nearly nine-tenths of what it takes. That is an extraordinary figure for any machine, and it is the same kind of narrow margin Section 5.4 found in the sodium–potassium pump, for the same reason and with the same consequence, which Section 7.5 collects.</p>
+
+<aside class="tb-margin-note">Human mitochondrial DNA carries thirteen protein-coding genes, and every one of them is a subunit of complex I, complex III, complex IV or ATP synthase. None is a subunit of complex II, which is made entirely from nuclear genes. Of the thousand-odd proteins Section 3.5 said a mitochondrion needs, these thirteen are what two billion years of gene transfer did not move — all of them deeply buried in the membrane, and all of them awkward to import from outside.</aside>
+
+<p>Now oxygen, and the way it is usually described gets it backwards. Oxygen is the <tb-term ref="terminal-electron-acceptor">terminal electron acceptor</tb-term>: it takes the electrons at the bottom of the chain and leaves, as water. It is not what the chain is for and it is not what any of the earlier steps is aiming at. What it is, is the best sink available — it sits at +0.82 volts, further down than anything else a cell is likely to meet, and the whole 220-kilojoule fall exists because it is there. Section 6.7 explains where it came from, which is worth holding on to: the terminal acceptor of your respiration is the waste product of somebody else's photosynthesis, and before there was any of it in the air no organism could do what this chapter describes.</p>
+
+<p>Complex IV is fussy about how it does the last step. Four electrons and four protons are needed to turn one O<sub>2</sub> into two waters, and the complex holds the oxygen molecule bound between an iron and a copper atom until all four have arrived, releasing nothing in between. The reason is that a half-reduced oxygen molecule is superoxide, which is violently reactive and damages whatever it touches. Even so, a small fraction of electrons leak out of the chain early — the usual estimate is a per cent or two — and make superoxide anyway, which is why every aerobic cell carries an enzyme whose whole job is to destroy it, and why the peroxisome of Section 3.4 exists to mop up what that enzyme produces. Breathing oxygen is not free.</p>
+
+<p>Finally, and this is the number the next two sections need: a pair of electrons from FADH<sub>2</sub> enters at complex II rather than complex I, which means it bypasses the first of the three proton-pumping steps. It therefore drives six protons across instead of ten, and it releases about 150 kilojoules of free energy on its way down instead of 220. An FADH<sub>2</sub> is worth roughly three-fifths of an NADH, and the reason is not that the carrier is worse but that it joins the chain lower down. Figure 7.4 lets both be delivered and the protons counted.</p>
+
+<tb-figure kind="respiratory-chain" id="fig-chain" width="wide" data-alt="The inner mitochondrial membrane drawn edge-on with the four complexes in it, ubiquinone diffusing within the bilayer and cytochrome c skating along its outer face, the matrix below and the intermembrane space above. A vertical axis of reduction potential runs down the side, with every carrier placed at its own value, so a pair of electrons is seen falling from one rung to the next; each complex that pumps shows its protons crossing as the electrons pass. The reader chooses the donor — NADH at complex I or FADH2 at complex II — and the protons pumped and the energy released are counted for each. Readouts give the donor, electron pairs delivered, protons pumped, the potential drop in volts, the free energy released, the proton gradient as a pH difference and as a voltage, and an ATP counter that stays at zero whatever is done, because nothing here makes any. Any complex can be blocked with its named inhibitor, and the carriers above the block are drawn filling with electrons while those below empty, with a readout naming which are reduced, which are oxidised and where the crossover lies. Removing the oxygen backs the whole chain up in the same way from the bottom.">
+  <figcaption>The fall, in the four steps a mitochondrion takes it in. Deliver a pair from NADH and count the protons, then deliver one from FADH<sub>2</sub> and count again — the second enters lower and drives four fewer. Then block a complex and watch the carriers above it fill while the ones below empty.<span class="fig-hint">The ATP counter on this figure never moves. That is the point of it.</span></figcaption>
+</tb-figure>
+
+<tb-key><p>The chain is four complexes and two mobile carriers, arranged so that a pair of electrons falls from −0.32 volts to +0.82 in steps. Every complex that can spends the energy of its fall pumping protons out of the matrix, and none of them makes any ATP: the chain's product is a gradient, and it keeps about nine-tenths of what the fall releases. Oxygen is what takes the electrons at the bottom, not what the chain is for.</p></tb-key>
+</section>
+
+<section id="chemiosmosis">
+<h2>The gradient turns a motor</h2>
+
+<p>By 1960 everything in the last section was known, and so was the fact that mitochondria make ATP, and the connection between the two was a complete mystery that a large number of very good people had spent a decade failing to solve. They were all looking for the same thing, and for a reasonable reason: Section 7.2's substrate-level phosphorylation works through a shared chemical intermediate, so the chain's phosphorylation should work through one too. Somewhere in there, the argument ran, must be a compound holding the energy of the fall — written X~P in the papers of the period — which would hand its phosphate to ADP. Laboratories competed to isolate it. Nobody ever did, and it does not exist.</p>
+
+<p>Peter Mitchell proposed in 1961 that there was no intermediate to find. The chain, he said, pumps protons across the membrane; the gradient is where the energy is held; and a separate enzyme makes ATP by letting the protons fall back. Nothing chemical passes between the two halves at all. He called it a chemi-osmotic mechanism, and the name has stuck as <tb-term ref="chemiosmosis">chemiosmosis</tb-term>. The reception was hostile and stayed hostile for the better part of fifteen years, partly because it came from outside the field — Mitchell left his university post soon afterwards and did most of the work in a converted manor house in Cornwall, funded largely by himself, with Jennifer Moyle — and partly because it asked biochemists to accept that the answer to a chemical question was not a molecule.</p>
+
+<p>It also contradicts, on its face, something this book said two chapters ago, and the contradiction is worth facing rather than stepping around. Section 5.4 was categorical: two reactions are coupled only when they share a chemical intermediate, and heat released nearby does no work. Chemiosmosis has no chemical intermediate. Is the rule wrong?</p>
+
+<p>No — but the rule was a case of something more general, and this is the case that shows what it was really ruling out. What Section 5.4 forbade was paying for a reaction with energy that had been released into the surroundings, because energy in the surroundings of a cell is heat, and heat at one temperature can do nothing. A shared intermediate is one way of keeping the energy out of the surroundings and in a usable form. A gradient across a membrane is another, and Section 4.7 established that it is a genuine store of free energy with a value you can calculate. So the general principle stands untouched: <strong>what passes between two coupled processes must be something that still holds free energy in a directed form, and never heat.</strong> Here the thing that passes is a proton gradient. It is not a molecule and it is not heat, and Mitchell's real achievement was noticing that those are not the only two options.</p>
+
+<p>Price it. The <tb-term ref="proton-motive-force">proton-motive force</tb-term> is the energy in that gradient written as a voltage, and it has two parts, because a proton carries both a concentration and a charge — which is exactly Section 4.3's electrochemical gradient, with a name of its own because this is the case the whole of biology runs on. The concentration part is a pH difference, and Section 2.4 has already made that a ratio: pH is a logarithm of a hydrogen ion concentration, so a difference in pH is a concentration ratio written down. The matrix runs about 0.75 of a pH unit more alkaline than the intermembrane space. Section 4.7's constant converts that directly — at body temperature, 61.5 millivolts for each tenfold difference in concentration — so 0.75 of a pH unit is about 46 millivolts. The charge part is larger: pumping positive charge out and leaving negative behind makes the matrix some 150 millivolts negative with respect to the outside, which is a stronger membrane potential than the resting nerve cell of Section 4.7 carries. Together they come to roughly 200 millivolts, and about three-quarters of it is charge rather than pH.</p>
+
+<aside class="tb-margin-note">A thylakoid does it the other way round. Section 6.5's proton-motive force is almost entirely a pH difference and hardly any voltage, because the thylakoid membrane lets other ions move across to neutralise the charge as fast as the protons build it. Same principle, same units, opposite split — which is a useful reminder that the force is one quantity with two terms and not two mechanisms.</aside>
+
+<p>A mole of protons falling through 200 millivolts returns 96.5 × 0.2, about 19 kilojoules. Section 5.3 worked out that an ATP inside a cell is worth about 50 kilojoules a mole rather than the table's 30.5. Divide: 50 ÷ 19 is 2.6, so a little over two and a half protons must fall for every ATP made. That is the constraint the machine has to satisfy, and it turns out to satisfy it with almost nothing to spare.</p>
+
+<p>The machine is <tb-term ref="atp-synthase">ATP synthase</tb-term>, and it is a rotary motor — a genuine one, with a rotor, a stator and a drive shaft, about ten nanometres across. Section 3.6's kinesin walked along a track; this one turns on the spot. And it is not the first rotary motor the book has met: Section 4.7 said that a bacterial flagellum is spun by one driven by protons falling back into the cell, which is this same machine with the work taken off as rotation rather than as chemistry. It is built in two parts. Embedded in the membrane is a ring of identical subunits, and beside the ring a fixed subunit carrying two half-channels that do not meet. A proton enters the outer half-channel from the intermembrane space, binds to one subunit of the ring, rides round with it for almost a full turn, and leaves by the inner half-channel into the matrix. Because protons can only get on at one side and off at the other, the ring can only turn one way. Attached to the ring is a bent, asymmetric shaft, which projects into the matrix, into the middle of a head made of three pairs of subunits held still by an external stalk.</p>
+
+<p>What the turning shaft does to that head is the part worth understanding, and it is not what anybody guessed. Paul Boyer worked it out in the 1970s from isotope-exchange experiments, and it is called the binding change mechanism. Each of the head's three catalytic sites is in one of three shapes at any moment, and the shaft's rotation forces each site through all three in turn: a shape that binds ADP and phosphate loosely, a shape that grips them tightly and lets them join, and a shape that opens and lets the ATP go. The surprise is where the energy goes. Forming the ATP in the tight site is very nearly free — Boyer's experiments showed ATP forming and re-splitting on the enzyme with almost no free energy change at all, which is not how it behaves in solution. <strong>The motor's work is spent on letting the ATP go, not on making it.</strong> The tight site holds the product so well that prising it out is the expensive step, and the falling protons pay for that.</p>
+
+<p>The gearing is arithmetic. There are three catalytic sites, so one complete rotation makes three ATP. The number of protons per rotation is the number of subunits in the ring, and that number differs between organisms: eight in a mammal, ten in yeast and in <i>E. coli</i>, fourteen in a plant chloroplast — the figure Section 6.5 quotes. Eight protons for three ATP is 2.7 protons each, against the 2.6 the arithmetic above demanded — a margin of four per cent, tighter even than the nine-tenths Section 5.4 found the sodium–potassium pump working at. An organism that can raise a stronger force can afford a smaller ring and get more ATP per proton; one that cannot needs a bigger ring for more leverage. The gear ratio is tuned to the force.</p>
+
+<p>Two pieces of evidence turned the mechanism from a model into a description. John Walker solved the structure of the head in 1994 and found its three catalytic subunits caught in three <em>different</em> conformations within one crystal — the three stages of Boyer's cycle, frozen in place, which is about as direct as structural evidence gets. Then in 1997 Hiroyuki Noji and colleagues fixed the head to a glass slide, attached a fluorescent actin filament to the shaft, supplied ATP to run the machine backwards, and watched the filament turn under a microscope, anticlockwise, in three steps of 120 degrees per revolution. Boyer and Walker shared the Nobel prize that year with Jens Skou, whose machine was the sodium–potassium pump of Section 4.6 — three prizes for three proteins that turn out to be the same kind of thing.</p>
+
+<p>The chain and the synthase taken together are <tb-term ref="oxidative-phosphorylation">oxidative phosphorylation</tb-term>, and between them they make something like nine-tenths of the ATP an aerobic cell uses. Figure 7.5 is the motor itself, which can be turned over, driven, stalled and reversed.</p>
+
+<tb-figure kind="atp-synthase" id="fig-synthase" width="wide" data-alt="ATP synthase in three dimensions, in a patch of inner membrane the reader can turn over and zoom into. The ring of subunits sits in the membrane beside the fixed subunit with its two half-channels, and protons are drawn entering from the intermembrane space, binding to the ring, riding round and leaving into the matrix; the bent shaft turns with the ring inside the three-fold head, and each of the three catalytic sites is drawn and labelled in whichever of its three shapes it currently holds, with ADP and phosphate binding, joining and being released as the shaft passes. Sliders set the pH difference and the membrane voltage separately and a readout adds them into one proton-motive force in millivolts; another sets the ratio of ATP to ADP. A ring-size control steps between eight, ten and fourteen subunits and the protons needed per ATP change with it. Readouts give the force and its two parts, the ring size, protons per ATP, revolutions, ATP made, protons used, the three sites' shapes, and the direction, which reads synthesis, stalled or hydrolysis: lowering the force or raising the ATP ratio far enough turns the motor the other way and it pumps protons back out while consuming ATP.">
+  <figcaption>The rotor, the shaft and the three sites. Drag to turn the whole thing over, then drive it and watch one site go round its three shapes — bind, hold, release — once per third of a revolution. Then lower the force until the machine stalls, and lower it further until it runs backwards and starts spending the ATP it was making.<span class="fig-hint">Change the ring from eight subunits to fourteen and watch the protons-per-ATP figure move. It is a gear ratio.</span></figcaption>
+</tb-figure>
+
+<p>Two predictions of chemiosmosis are worth stating as predictions, because they are what made it testable and because Section 7.8 is built on them.</p>
+
+<p>The first is that the membrane must be <strong>intact</strong>. If the energy is held as a gradient and nothing chemical passes between the chain and the synthase, then a torn membrane cannot hold a gradient, and no ATP will be made however fast the chain runs and however much ADP is available. Two things chapter 4 established are doing the work here. A proton is an ion, and Section 4.3's rules say a bare bilayer will not pass one, which is what makes the gradient holdable at all; and a bilayer closes itself, which is Section 4.1's point and the reason an intact vesicle is the normal case and a torn one is an experiment you have to arrange. A chemical-intermediate hypothesis predicts nothing of the kind: an X~P in solution would not care whether the vesicle it was in had a hole. This is why mitochondria have to be prepared gently, and it is why the field's own experimental frustrations were evidence all along.</p>
+
+<p>The second is that <strong>anything that makes a proton gradient will do</strong>. The chain is not special; it is merely the pump that happens to be there. Efraim Racker and Walther Stoeckenius tested this directly in 1974 with an experiment that still reads as audacious. They built artificial lipid vesicles containing two proteins and nothing else: mitochondrial ATP synthase, and bacteriorhodopsin, a light-driven proton pump from a salt-loving archaean that has no connection to respiration whatever. No chain, no Krebs cycle, no mitochondrion, no oxygen required. They shone light on the vesicles and got ATP. Section 6.5 has the companion experiment from the other direction, in which chloroplast membranes soaked in acid and then jumped into alkali made ATP in the dark with no light and no electron transport at all.</p>
+
+<p>Both experiments answer the same question, and it is the question that decides a hypothesis in Section 1.8's sense: what would have shown this to be false? An intermediate isolated from the chain that could phosphorylate ADP would have done it. So would ATP synthesis by a preparation with no closed membrane. Neither has ever been produced, and a light-driven proton pump bolted to a mitochondrial enzyme makes ATP. Mitchell had his Nobel prize in 1978.</p>
+
+<p>One last consequence, which follows from the machine being a machine. Section 5.4 said that when two sides of a coupled reaction are close in value, which way it goes is decided by the conditions rather than by the machinery, and Section 4.7 said that a pump driven hard enough backwards becomes a generator. ATP synthase is the same statement read from the other end: it is an ATP-driven proton pump, and we name it for the direction we care about. Collapse the gradient — stop the oxygen, block the chain — and it does not politely stop. It reverses, hydrolysing ATP as fast as it can to pump protons back out, which is why a cell starved of oxygen loses its ATP faster than it would if the synthase simply switched off. Cells carry a small protein whose only job is to clamp the machine when this happens, and it is one of the reasons a heart muscle cell can survive a few minutes without blood.</p>
+
+<tb-key><p>The chain and the synthase share no chemical intermediate at all: what passes between them is a proton gradient of about 200 millivolts, three-quarters of it charge. ATP synthase spends it as a rotary motor — protons turn a ring, the ring turns a shaft, and the shaft forces three catalytic sites through the shapes that bind, join and release, one ATP each per third of a turn. The energy is spent letting the ATP go, not making it, and the machine runs backwards when the gradient fails.</p></tb-key>
+</section>
+
+<section id="yield">
+<h2>The number is a range, and here is why</h2>
+
+<p>Every textbook prints a number for the ATP a glucose molecule yields, and a great many print 38. That figure is wrong, and the interesting thing is not that it is wrong but why it survived: it is the answer you get by assuming that two quantities which are not whole numbers are whole numbers, and by forgetting to charge for transport. Doing the sum honestly is the best exercise in the chapter, because every term in it has already been derived.</p>
+
+<p>Start with what the four stages hand over.</p>
+
+<table>
+  <thead><tr><th>Stage</th><th>Where</th><th>ATP made directly</th><th>NADH</th><th>FADH<sub>2</sub></th></tr></thead>
+  <tbody>
+    <tr><td>Glycolysis</td><td>Cytosol</td><td>2</td><td>2 (in the cytosol)</td><td>0</td></tr>
+    <tr><td>Link reaction, ×2</td><td>Matrix</td><td>0</td><td>2</td><td>0</td></tr>
+    <tr><td>Krebs cycle, ×2</td><td>Matrix</td><td>2</td><td>6</td><td>2</td></tr>
+    <tr><td><strong>Total</strong></td><td></td><td><strong>4</strong></td><td><strong>10</strong></td><td><strong>2</strong></td></tr>
+  </tbody>
+</table>
+
+<p>The four ATP are certain, and they are the only certain part. Everything else depends on converting carriers into ATP, and that conversion needs two numbers, neither of which is an integer and neither of which is the same everywhere.</p>
+
+<p>Work the first one out from the machinery. A pair of electrons from NADH drives ten protons out. The synthase in a mammal has a ring of eight subunits and makes three ATP per revolution, so it needs 2.7 protons per ATP. But that ATP is made in the matrix and is needed in the cytosol, and getting it there is not free: the transporter that swaps matrix ATP for cytosolic ADP carries a net charge outwards each time, and the phosphate that replaces it comes in with a proton of its own. Between them they cost the equivalent of about one more proton. So a mole of ATP delivered to the cytosol costs about 3.7 protons, and ten protons should give 10 ÷ 3.7 = 2.7 ATP.</p>
+
+<p>Now measure it instead of calculating it, which is what Peter Hinkle and others did over three decades of careful work: the answer is about 2.5 ATP per NADH and about 1.5 per FADH<sub>2</sub>. The measurement is lower than the machinery predicts, and the difference is not error. It is leak. The inner membrane is not perfectly tight, and some protons find their way back across without turning anything; the faster the chain runs, the steeper the gradient and the more leaks back.</p>
+
+<p>That is the real answer to why the yield is a range, and it is worth stating plainly. <strong>The ATP made per NADH is not a stoichiometry. It is an efficiency</strong>, and an efficiency is not a whole number, is not the same in a heart as in a liver, and is not even the same in one mitochondrion at two different rates. A chemical equation can have integer coefficients; a leaky machine cannot.</p>
+
+<p>The second number that is not fixed is what happens to glycolysis's two NADH, and it is a question of geography. They were made in the cytosol, and NADH is large and carries two negative charges, so by Section 4.3's rules it cannot cross the inner membrane and there is no transporter for it. What crosses instead are their electrons, by one of two <tb-term ref="electron-shuttle">electron shuttles</tb-term>, and the choice costs something.</p>
+
+<ul>
+  <li>The <strong>malate–aspartate shuttle</strong>, used by heart and liver, reduces a compound in the cytosol, carries it in, and re-oxidises it inside — so the electrons arrive on a matrix NAD<sup>+</sup> and are worth the full 2.5. It is reversible, so it only runs when the matrix has empty carriers to take them.</li>
+  <li>The <strong>glycerol 3-phosphate shuttle</strong>, used by skeletal muscle, brain and insect flight muscle, hands the electrons to an FAD on the outer face of the inner membrane instead. They enter the chain at ubiquinone, below complex I, and are worth 1.5. It costs one ATP per NADH, and it buys speed: it runs in one direction only and does not stop when the matrix is loaded.</li>
+</ul>
+
+<p>Put the two numbers in and the sum comes out twice.</p>
+
+<table>
+  <thead><tr><th>Source</th><th>Heart or liver (malate–aspartate)</th><th>Skeletal muscle (glycerol 3-phosphate)</th></tr></thead>
+  <tbody>
+    <tr><td>Direct, by substrate-level phosphorylation</td><td>4</td><td>4</td></tr>
+    <tr><td>8 matrix NADH at 2.5</td><td>20</td><td>20</td></tr>
+    <tr><td>2 cytosolic NADH</td><td>5 (as NADH, at 2.5)</td><td>3 (as FADH<sub>2</sub>, at 1.5)</td></tr>
+    <tr><td>2 FADH<sub>2</sub> from the cycle, at 1.5</td><td>3</td><td>3</td></tr>
+    <tr><td><strong>Total per glucose</strong></td><td><strong>32</strong></td><td><strong>30</strong></td></tr>
+  </tbody>
+</table>
+
+<p>About 30 to 32, then, and a reader asked for one number should give the range and say which tissue. Where did 38 come from? Put 3 in place of 2.5 and 2 in place of 1.5 and charge nothing for transport, and the same table gives 10 × 3 + 2 × 2 + 4 = 38. Every one of those three moves is wrong, and all three in the same direction: the first two put a round number where the measurement gives 2.5 and 1.5, and the third leaves out a cost that is really paid, of about one proton for every ATP delivered out of the matrix. The old figures were not measurements at all. They were the round numbers people assumed before anyone could count protons, and they went into textbooks and stayed there for forty years. Figure 7.6 lets the whole sum be rebuilt from its assumptions, which is the quickest way to see how much of it is convention.</p>
+
+<tb-figure kind="yield-ledger" id="fig-yield" width="wide" data-alt="A ledger the reader assembles rather than reads. Rows for glycolysis, the link reaction, the Krebs cycle and oxidative phosphorylation carry the ATP made directly and the carriers produced, and beneath them the conversion is done in the open: the reader sets the ATP made per NADH and per FADH2, chooses which shuttle carries the cytosolic pair, and switches the charge for transporting ATP out and phosphate in on or off. The total moves as each assumption changes, with a band showing the honest range of 30 to 32 and a marker that lights when the assumptions are exactly the ones that produce the old figure of 38, naming them. An efficiency readout divides the total by glucose's free energy and shows what leaves as heat. A fuel selector switches the whole ledger between glucose, a sixteen-carbon fatty acid and an amino acid, giving the total per molecule, per carbon and per gram, and a proton readout traces the same sum in protons rather than ATP so that the two ways of counting can be compared.">
+  <figcaption>Build the number yourself and watch it move. Set the ATP per carrier, pick the shuttle, decide whether to charge for transport — and see which combination produces the textbook 38 and what each of those assumptions has to be untrue for. Then switch the fuel to a fatty acid and compare per gram.<span class="fig-hint">The honest range is marked. Getting outside it takes an assumption the figure will name for you.</span></figcaption>
+</tb-figure>
+
+<p>Now the efficiency, which is the other number usually got wrong. Thirty-two moles of ATP at the standard 30.5 kilojoules each is 976 kilojoules, out of the 2870 that a mole of glucose releases: about 34 per cent. Quote that one, because both figures are standard-state figures and the comparison is therefore a fair one. It is tempting to use the cell's own 50 kilojoules an ATP from Section 5.3 instead, which gives 1600 kilojoules and 56 per cent, but that prices the product at the cell's concentrations while pricing the fuel at nobody's, and mixing the two is how a good many surprising efficiencies get published. Either way a cell is doing better than a petrol engine, which manages about a quarter.</p>
+
+<p>The other 66 per cent leaves as heat, and Section 5.1 already told you how much: a resting adult is a hundred-watt heater. That heat is not waste in the sense of a design fault — Section 5.1 established that every transfer must shed some, and a machine that shed none would be the perpetual motion device that thermodynamics forbids. It is simply the price, and Section 7.8 is about what happens when an animal decides to pay all of it on purpose.</p>
+
+<p>One last sum, because it can be done two ways and the two ways disagree instructively. A resting adult takes up about 250 millilitres of oxygen a minute. At 22.4 litres to the mole that is 0.011 moles a minute; each mole of O<sub>2</sub> accepts four electrons, which is two pairs, and each pair is worth about 2.5 ATP, so a mole of oxygen is worth five moles of ATP. That gives 0.056 moles of ATP a minute, or about 80 moles a day — some 41 kilograms of it, for a person who weighs rather less. Section 5.3 got 170 moles a day by a different route, dividing the whole daily food intake by what an ATP is worth, and warned in the same paragraph to treat it as an order of magnitude. This count is the more direct one and it comes out about half as large, for two honest reasons: nobody spends a whole day at rest, and not every joule a body spends passes through ATP on the way.</p>
+
+<tb-key><p>One glucose yields about 30 to 32 ATP, not 38. Ten NADH at about 2.5 each and two FADH<sub>2</sub> at about 1.5, plus four made directly — and those two conversion figures are efficiencies rather than stoichiometries, because the membrane leaks and because moving the ATP out costs a proton. Which shuttle carries glycolysis's two NADH decides the last two. About a third of the fuel's free energy is captured; the rest is the heat you are making now.</p></tb-key>
+</section>
+
+<section id="anaerobic">
+<h2>When nothing is there to take the electrons</h2>
+
+<p>Take the oxygen away and ask what fails first. The obvious answer is ATP, and it is wrong — or rather, it is a symptom and not the cause. What fails first is NAD<sup>+</sup>.</p>
+
+<p>Trace it. With no oxygen, complex IV has nowhere to put its electrons, so it stops; cytochrome c stays reduced, so complex III stops; ubiquinone stays reduced, so complex I stops; and complex I is the only thing in the cell that can take electrons off NADH in any quantity. Section 5.8 said a cell holds very little of each carrier and recycles it constantly, and the pool here is a fraction of a millimole per litre — against the five millimoles per litre of ATP that Section 5.3 quoted. Glycolysis alone, running at the rate a working muscle runs it, would convert the whole pool to NADH in a matter of seconds. And glycolysis's sixth step needs an empty NAD<sup>+</sup> to hand its electrons to. <strong>A cell with no NAD<sup>+</sup> cannot run glycolysis</strong>, which means it cannot make even the two ATP that do not need oxygen. Within seconds of the chain stopping, everything stops.</p>
+
+<p>Unless something else takes the electrons. <tb-term ref="fermentation">Fermentation</tb-term> is any pathway that regenerates NAD<sup>+</sup> by handing the electrons of NADH to an organic molecule the cell has made itself, so that glycolysis can go on running with no chain and nothing arriving from outside. That is its entire purpose, and it is worth being blunt about what follows: <strong>fermentation produces no ATP at all.</strong> The two ATP a fermenting cell gets per glucose are glycolysis's, and glycolysis would have made them anyway if it had anywhere to put its electrons. The fermentation step itself is a straight loss — it takes a reduced carrier and throws its electrons onto a molecule that is then discarded, still holding most of the fuel value it started with. A cell ferments the way a sailor bails: not to go anywhere, but to keep going at all.</p>
+
+<p>There are more than a dozen fermentations in nature and two of them are worth knowing.</p>
+
+<p>A muscle cell uses one step. Lactate dehydrogenase reduces pyruvate to <tb-term ref="lactate">lactate</tb-term>, using up one NADH and freeing one NAD<sup>+</sup>. Three carbons in, three carbons out, nothing lost from the cell; the reaction is readily reversible, so the lactate can be turned back into pyruvate later and oxidised properly when the oxygen arrives. Nothing is wasted except time.</p>
+
+<p>A yeast uses two. Pyruvate is decarboxylated to acetaldehyde, releasing carbon dioxide — this is a decarboxylation like the link reaction's, but with no oxidation and no carrier attached — and then acetaldehyde is reduced to ethanol, which is the step that frees the NAD<sup>+</sup>. Two carbons leave the cell as gas and two as alcohol, and neither can be got back. The yeast is poisoning its own medium, and eventually itself: most brewing strains stop at something between 12 and 15 per cent alcohol by volume. Both products have been useful to people for about as long as there have been people. Bread keeps the gas and bakes off the alcohol; beer keeps the alcohol and lets the gas go, or does not.</p>
+
+<aside class="tb-margin-note">Why two different answers to one problem? Because a muscle cell is part of a body that owns a liver, a bloodstream and a pair of lungs, and can send its half-finished fuel somewhere else to be dealt with. A yeast in a barrel has nowhere to send anything. Lactate is what you make when somebody else will clear it up; ethanol is what you make when nobody will.</aside>
+
+<p>Figure 7.7 makes the dependency visible by taking the oxygen away and leaving the fermentation route switched off, which is the state a cell is in for the first second.</p>
+
+<tb-figure kind="fermentation" id="fig-fermentation" width="wide" data-alt="A cell with its NAD pool drawn as a small closed loop between glycolysis and the electron transport chain, with the number of empty and loaded carriers shown as a count rather than a bar. Removing the oxygen stops the chain, the pool fills with NADH within a few seconds of figure time, and glycolysis visibly stalls with a readout naming what has run out. The reader then switches on a fermentation route — lactate, using one enzyme, or ethanol, using two with carbon dioxide released — and glycolysis restarts while the ATP-per-glucose readout stays at two and a separate readout for ATP made by the fermentation step itself stays at zero. A demand slider sets how fast the cell is spending ATP, and a muscle preset and a yeast preset load the two cases. Restoring the oxygen restarts the chain, the lactate is cleared over a timed run with a counter showing how much has been oxidised and how much has gone to the liver, and an accompanying ledger shows the liver spending six ATP to rebuild one glucose from two lactate against the two the muscle gained.">
+  <figcaption>Take the oxygen away and watch what actually runs out. It is not ATP. Then switch on a fermentation and watch glycolysis restart — while the ATP figure stays exactly where it was, because the fermentation step makes none.<span class="fig-hint">The counter for ATP made by fermentation itself never leaves zero. Try both routes.</span></figcaption>
+</tb-figure>
+
+<p>Now what a muscle actually does, because the textbook picture of a sprinter gasping for oxygen is only half right. A muscle fibre holds about two seconds' worth of ATP. Section 5.3's creatine phosphate, the rung just above ATP on the ladder, buys another six to ten by re-phosphorylating ADP as fast as it is produced. After that the fibre runs on glycolysis and lactate fermentation for a minute or two. But the reason it does so is not usually that oxygen has run out: glycolysis delivers ATP faster than oxidative phosphorylation can, and, more to the point, it can be turned up within a second, where mitochondria take much longer to come to rate. A muscle contracting maximally needs the rate far more than it needs the yield. Fermentation is what you use when speed matters more than efficiency, and a working muscle with a perfectly good blood supply uses it constantly. The name "anaerobic glycolysis" describes the chemistry and misdescribes the situation.</p>
+
+<p>What becomes of the lactate is the part most often got wrong, and one claim about it is simply false. Lactate is a fuel. Some is oxidised in the same fibre once the demand falls; some passes into the blood and is taken up and burnt by the heart, by slow muscle fibres and by the brain; and some goes to the liver, which rebuilds it into glucose and sends it back — the <tb-term ref="cori-cycle">Cori cycle</tb-term>, which costs the liver six ATP to return the glucose the muscle got two from. That is not a waste: it is a body moving a bill to the organ that has oxygen to pay it with. Blood lactate is back to its resting value within thirty minutes to an hour of stopping.</p>
+
+<p>Which disposes of the folklore. <strong>Lactic acid does not cause the muscle ache you feel two days later.</strong> That ache — delayed onset muscle soreness — begins several hours after exercise, peaks at one to three days, and is worst after the kind of contraction in which a muscle lengthens under load: walking downhill, lowering a weight. Those are precisely the contractions that produce comparatively <em>little</em> lactate, and every trace of lactate is gone many hours before the soreness arrives. What causes it is microscopic damage to the fibres and the inflammation that repairs them. Two further points go with it. At blood pH the acid is almost entirely ionised — Section 2.4's arithmetic, on an acid that gives its proton up well below pH 7 — so what is present is lactate, an anion, and calling it lactic acid is already a small misdescription. And on the best current account the protons that make a hard-working muscle acid come mostly from ATP being hydrolysed faster than it is remade, rather than from the lactate, whose formation consumes a proton rather than releasing one.</p>
+
+<p>Finally, a distinction that the word "anaerobic" blurs and that matters. Fermentation is not the only thing an organism can do without oxygen. <tb-term ref="anaerobic-respiration">Anaerobic respiration</tb-term> is respiration in the full sense — a chain, a proton gradient, a synthase, chemiosmosis, all of Sections 7.4 and 7.5 — with something other than oxygen at the bottom of the ladder. The machinery is the same. Only the terminal acceptor differs, and since the yield is the size of the fall, an acceptor that sits higher up gives less.</p>
+
+<table>
+  <thead><tr><th>Terminal acceptor</th><th>Becomes</th><th>E°′ (V)</th><th>From one NADH (kJ/mol)</th><th>Who</th></tr></thead>
+  <tbody>
+    <tr><td>Oxygen</td><td>Water</td><td>+0.82</td><td>220</td><td>You, and most of what you can see</td></tr>
+    <tr><td>Nitrate</td><td>Nitrite, then nitrogen gas</td><td>+0.42</td><td>143</td><td>Denitrifying bacteria in wet soil</td></tr>
+    <tr><td>Fumarate</td><td>Succinate</td><td>+0.03</td><td>68</td><td>Gut bacteria; parasitic worms</td></tr>
+    <tr><td>Sulfate</td><td>Sulfide</td><td>−0.22</td><td>19</td><td>Sulfate reducers in marsh mud</td></tr>
+    <tr><td>Carbon dioxide</td><td>Methane</td><td>−0.24</td><td>15</td><td>Methanogenic archaea</td></tr>
+  </tbody>
+</table>
+
+<p>Each figure in the fourth column is the third column's potential minus NADH's −0.32, multiplied by 2 × 96.5, exactly as in Section 7.4's table — so the arithmetic is the same and only the bottom rung has moved. The consequences are on a planetary scale rather than a cellular one. The rotten-egg smell of a salt marsh and the black iron sulfide in its mud are sulfate reducers living on 19 kilojoules a pair. Methanogens in a cow's rumen, a rice paddy and a landfill are living on 15, which is close to the least any organism has been shown to get by on, and their waste product is the second most important greenhouse gas. Denitrifiers return nitrogen from soil to the air and undo a good deal of what is spread on a field. A bacterium such as <i>E. coli</i>, which can use several of these, switches between them in order of yield: oxygen while there is any, then nitrate, then fumarate, taking the best rung available.</p>
+
+<tb-key><p>What runs out when the oxygen stops is NAD<sup>+</sup>, not ATP, and within seconds. Fermentation exists to get the NAD<sup>+</sup> back by dumping the electrons on a molecule the cell made itself; it yields no ATP of its own, and the two a fermenting cell gets are glycolysis's. A muscle makes lactate, which is a fuel and is cleared within the hour and has nothing to do with soreness two days later; a yeast makes ethanol and cannot take it back. Anaerobic respiration is a different thing altogether: the same machinery ending on nitrate, sulfate or carbon dioxide, and yielding less only because those sit higher on the ladder.</p></tb-key>
+</section>
+
+<section id="poisons">
+<h2>Block it, or let it leak</h2>
+
+<p>There are two ways to stop a mitochondrion making ATP, and they are opposites. You can stop the electrons moving, in which case nothing is pumped and no gradient forms. Or you can leave the chain running perfectly and put a hole in the membrane, in which case the protons come back without doing any work. The two look nothing alike in the laboratory, and the difference between them is what settled the argument of Section 7.5. This section is where the chapter's evidence lives.</p>
+
+<p>The instrument is simple and it is the same one Britton Chance and Ronald Williams used in 1955: a sealed chamber holding a suspension of isolated mitochondria, with an electrode measuring the oxygen still dissolved in it. The trace of oxygen against time is the rate at which the mitochondria are respiring, read directly. You then add things and watch the slope change.</p>
+
+<p>Take blocking first. Every part of the machinery has a substance that stops it, and each binds somewhere different.</p>
+
+<table>
+  <thead><tr><th>Substance</th><th>Stops</th><th>Where it binds</th><th>Where it comes from</th></tr></thead>
+  <tbody>
+    <tr><td>Rotenone</td><td>Complex I</td><td>The ubiquinone site</td><td>A root extract, used as an insecticide and a fish poison</td></tr>
+    <tr><td>Malonate</td><td>Complex II</td><td>The succinate site, competitively</td><td>Krebs used it to work the cycle out</td></tr>
+    <tr><td>Antimycin A</td><td>Complex III</td><td>A cytochrome site</td><td>A bacterial product; used in fisheries</td></tr>
+    <tr><td>Cyanide</td><td>Complex IV</td><td>Its iron, in the oxidised state</td><td>Apple pips, cassava, industry</td></tr>
+    <tr><td>Carbon monoxide</td><td>Complex IV</td><td>Its iron, in the reduced state</td><td>Any incomplete combustion</td></tr>
+    <tr><td>Oligomycin</td><td>ATP synthase</td><td>The proton channel</td><td>A soil bacterium</td></tr>
+  </tbody>
+</table>
+
+<p>Only one of the six, malonate, is competitive in Section 5.6's sense, and that matters medically. Section 5.6's diagnostic question is whether more substrate wins, and for the other five the answer is no: each binds a site the substrate does not use, so no amount of fuel and no amount of oxygen relieves it. A cyanide antidote has to take the cyanide away, and that is exactly what one does.</p>
+
+<p>Malonate is also the one that does not stop respiration, and the exception is instructive. Electrons from NADH enter at complex I and never pass through complex II at all, so a mitochondrion given any NADH-linked fuel carries on breathing with complex II fully blocked. What malonate stops is the Krebs cycle's sixth step, which is what Krebs was using it for. Block complex I, III or IV instead, and the oxygen trace goes flat: respiration stops. That is obvious for cyanide, at the bottom, and less obvious for rotenone, at the top — but a chain is a chain, and blocking it anywhere backs up everything above the block and starves everything below it. That is more than an inconvenience; it is how the order of the chain was discovered, before anybody could purify a complex or see one. Each carrier absorbs light differently when it is holding an electron and when it is not, so a spectrophotometer can report which carriers are reduced and which are oxidised while the machine runs. Add an inhibitor and a sharp boundary appears: everything above it fills with electrons that cannot move on, everything below it empties. The place where reduced turns to oxidised is the <tb-term ref="crossover-point">crossover point</tb-term>, and it is where the inhibitor acted. Move along the chain with a different inhibitor and the boundary moves. Put the boundaries in order and you have the order of the chain, read off an instrument, from outside a membrane nobody could see into. Figure 7.4 runs that experiment.</p>
+
+<p>Cyanide is worth a paragraph because of what it teaches about the difference between having oxygen and using it. A cyanide-poisoned person is not short of oxygen: the lungs work, the haemoglobin is loaded, the tissues are perfused. What has happened is that complex IV can no longer hand its electrons over, so the oxygen arrives and is not taken up — which is why venous blood in cyanide poisoning stays arterial red, and why the classic sign is a patient who is not blue. Death comes in minutes, and from the places with the least reserve: the brain first. The antidote works by offering the cyanide something it binds even better, a cobalt compound related to vitamin B<sub>12</sub>, which carries it out in the urine.</p>
+
+<p>Now the second way, and it is the one that matters for the argument. An <tb-term ref="uncoupler">uncoupler</tb-term> is a small molecule that carries protons across the inner membrane on its own, bypassing the synthase entirely. 2,4-dinitrophenol is the classic: it is a weak acid, and — this is the trick — it dissolves in a lipid bilayer both with its proton and without it. So it picks up a proton on the acid side, drifts across, drops it on the alkaline side, and drifts back. It is a proton hole with legs.</p>
+
+<p>Put it into the oxygen chamber and the trace does something no blocker does: it steepens. Oxygen consumption goes to its maximum and stays there; the chain runs flat out because the gradient it is pumping against has vanished; ATP synthesis falls to nothing; and every joule of the 220 that each NADH released comes out as heat. <strong>No chemical-intermediate hypothesis predicts anything like this.</strong> If the chain handed its energy to an X~P, a small molecule dissolving in the lipid could not intercept it, and certainly could not make the chain speed up while the ATP stopped. Chemiosmosis predicts it exactly, because the gradient is the intermediate and the uncoupler is short-circuiting it.</p>
+
+<p>The companion observation is the opposite one and has its own name. Add oligomycin, which jams the synthase, and the oxygen consumption falls — although nothing has touched the chain. Add ADP to a suspension that has run out of it and consumption rises; let the ADP be used up and it falls again. <tb-term ref="respiratory-control">Respiratory control</tb-term> is the name for that coupling, and it is why a mitochondrion burns fuel at the rate its cell is spending ATP and not faster. There is no signal and no sensor: the synthase stops turning, protons stop coming back, the gradient steepens, and the pumps stall against it because a pump can only push so hard. Section 5.7's feedback loop again, with the gradient itself as the messenger. Figure 7.8 is that chamber, and the additions can be made in any order you like.</p>
+
+<tb-figure kind="uncoupler-bench" id="fig-uncoupling" width="wide" data-alt="An oxygen electrode trace drawn live beneath a suspension of mitochondria, with the proton gradient, the ATP production rate and the heat production rate shown beside it as a typographic table. The reader adds substances in any order from a tray — fuel, ADP, oligomycin, an uncoupler, cyanide — and the trace responds: adding ADP steepens it and using the ADP up flattens it again, oligomycin flattens it although nothing has touched the chain, an uncoupler drives it to maximum while ATP falls to zero and the heat readout climbs, and cyanide stops it dead from any state. A respiratory control ratio is computed from the trace and printed with the two slopes it was taken from. A second scene is a brown fat cell in a newborn, where the same uncoupling is done deliberately by a protein in the membrane: a cold control turns it on, the mitochondria are drawn running flat out, an ATP readout stays near zero and a body temperature readout rises, with the protein's channel openable and closable so the two states can be compared. The sequence of additions is listed as it is made, so a reader can reproduce the classic experiment in order.">
+  <figcaption>The two ways of stopping it, on one trace. Add the uncoupler and the line gets <em>steeper</em> while the ATP goes to nothing; add oligomycin and it flattens although the chain has not been touched. Nothing but a gradient between the two machines explains both.<span class="fig-hint">Try the additions in different orders. Cyanide overrides everything; the uncoupler overrides oligomycin.</span></figcaption>
+</tb-figure>
+
+<p>Dinitrophenol has a history, and it is not a happy one. Munitions workers handling it in the First World War were noticed to lose weight and run fevers. In 1933 two Stanford pharmacologists published it as a slimming drug; it worked exactly as the mechanism says it should, since a body that cannot make ATP from its fuel simply burns more fuel. Something over a hundred thousand people in the United States took it in the first year. Then the reports came in: cataracts, and deaths from hyperthermia in people whose heat production had outrun any way of losing it. It was withdrawn in 1938 under the new food and drug law, and it is still sold on the internet and still kills people every year. There is no safe dose, and the reason is structural rather than a matter of formulation: the therapeutic effect and the lethal one are the same effect, and the gap between them is how fast the weather can take heat off a human body.</p>
+
+<p>Which is exactly what makes it useful to an animal that wants heat. Brown fat holds a <tb-term ref="uncoupling-protein">uncoupling protein</tb-term> in the inner membrane of its mitochondria — a controlled leak, opened by the fatty acids released when the tissue is told it is cold. A brown fat mitochondrion in that state is doing the whole of Sections 7.3 and 7.4 at full speed and making no ATP whatever; all 220 kilojoules per NADH become heat, on purpose, in the right place. Newborn mammals depend on it, because an infant cannot shiver effectively and has a great deal of surface for its volume, which is Section 3.2's ratio at the scale of a whole animal. So do hibernators, which must rewarm several kilograms of themselves from near freezing, and which would not survive without a tissue whose only product is heat. This is Section 1.2's thermostat with an effector Chapter 1 could not yet describe: the regulated quantity is core temperature, the response is a hole in a membrane, and it opposes the change.</p>
+
+<p>Last, what happens when the machine is faulty rather than poisoned. Section 3.5 said a mitochondrion keeps a tiny genome of its own, and the margin note in Section 7.4 said that all thirteen of its protein-coding genes are subunits of this machinery. So a mutation in that genome lands, almost inevitably, on the chain or the synthase — and the tissues that fail are the ones with the least spare capacity: the optic nerve, the brain, the heart, skeletal muscle. That is the shape of the mitochondrial diseases, and it is also why they are inherited down the maternal line alone, since Section 3.5 established that your mitochondria came from the egg.</p>
+
+<p>Put the four failures side by side and they can be told apart by measurement, which is the skill this section is really teaching.</p>
+
+<tb-sort id="diagnose" objective="diagnose-respiration">
+  <p class="intro">Each observation is a mitochondrion failing in one of four ways. Sort them by which part has been interfered with. Drag a card onto a bin, or use its buttons.</p>
+  <ul class="bins">
+    <li data-bin="blocked">The chain is blocked</li>
+    <li data-bin="leaking">The membrane is leaking</li>
+    <li data-bin="synthase">The synthase is stopped</li>
+    <li data-bin="unloaded">The carriers have nowhere to unload</li>
+  </ul>
+  <ul class="items">
+    <li data-bin="leaking" data-why="Oxygen consumption rising while ATP falls is the signature of an uncoupler and of nothing else: the chain speeds up precisely because the gradient it was pushing against has gone. A blocker would slow the trace, not steepen it. This is the observation that decided between Mitchell's hypothesis and the chemical-intermediate one.">Adding a substance to a mitochondrial suspension makes oxygen consumption rise to its maximum while ATP production falls to nothing and the preparation warms.</li>
+    <li data-bin="blocked" data-why="Bright red venous blood means the oxygen arrived and was not taken up, which puts the fault at the very bottom of the chain rather than anywhere in the delivery. A patient who is not blue is the classic sign, and it is the opposite of what suffocation looks like.">A poisoned patient is not blue, their arterial oxygen is normal, and their venous blood is bright red.</li>
+    <li data-bin="synthase" data-why="Consumption falling when nothing has touched the chain is respiratory control: the synthase stops turning, protons stop returning, the gradient steepens, and the pumps stall against it. Read it as the chain being stopped by the gradient rather than by a poison.">A substance is added that binds the proton channel of ATP synthase, and oxygen consumption falls although no complex has been touched.</li>
+    <li data-bin="unloaded" data-why="No terminal acceptor means complex IV has nowhere to put its electrons, and the backing-up reaches NADH within seconds. What stops glycolysis is the absence of NAD-plus, not the absence of ATP, which is the point Section 7.7 is built on.">A muscle cell's oxygen supply is cut off, and within seconds its NADH has risen sharply and its glycolysis has stalled.</li>
+    <li data-bin="leaking" data-why="A protein that opens a proton path on demand is doing deliberately what dinitrophenol does indiscriminately. The chain runs flat out, no ATP is made, and the whole fall becomes heat where it is wanted — the same mechanism, under control.">A newborn kept in a cold room raises its temperature without shivering, and its brown fat mitochondria are consuming oxygen at their maximum rate and making almost no ATP.</li>
+    <li data-bin="blocked" data-why="A sharp boundary between reduced carriers and oxidised ones is the crossover point, and it names where the block is. Everything above fills because it cannot pass its electrons on; everything below empties because nothing is arriving. This is how the order of the chain was established.">A spectrophotometer shows complex I and ubiquinone fully reduced while cytochrome c and complex IV are fully oxidised.</li>
+    <li data-bin="synthase" data-why="Oxygen consumption tracking the supply of ADP is respiratory control seen from the other side: the synthase only turns when it has something to phosphorylate, and the chain only pumps when the synthase is turning. Nothing signals between them; the gradient carries the message.">An isolated mitochondrion with plenty of fuel consumes almost no oxygen until ADP is added, consumes it rapidly until the ADP is used up, and then slows again.</li>
+    <li data-bin="unloaded" data-why="Glycolysis is running faster than the mitochondria can accept its NADH, so at the margin those carriers have nowhere to unload and lactate is what gets them back. The fermentation is not making the ATP; it is making the glycolysis that makes the ATP possible. Note that this happens with a perfectly good oxygen supply: anaerobic names the chemistry, not the situation.">A muscle fibre contracting maximally pours out lactate although its blood supply is intact and its mitochondria are undamaged.</li>
+  </ul>
+</tb-sort>
+
+<p>And that closes the unit. Figure 1.7 drew two arrows through an ecosystem, gold for energy and green for matter, at a point in the book where neither could be explained. Chapter 6 supplied the gold arrow's beginning: light pushing electrons up onto carbon, against everything in Chapter 5, and putting oxygen into the air as waste. This chapter supplied its end: the same electrons falling back to that oxygen, through a chain, into a gradient, through a motor, and out as heat. The carbon that came out of the air in Chapter 6 went back into it here, atom for atom, which is the green arrow closing. The energy did not close, and cannot: it arrived as light, it left as heat, and Section 5.1 explained why that is the only direction it can go.</p>
+
+<p>What is left is the question of how a cell decides which of these thousands of enzymes to build. Section 5.7 named it as the slowest of the four controls and said the answer was on the DNA, and Section 1.5 said that life runs on information. That is the next chapter's.</p>
+
+<tb-key><p>A blocker on the path the electrons take stops them and the oxygen trace goes flat; an uncoupler leaves the chain running and lets the protons back without work, and the trace gets steeper while the ATP goes to nothing. Only a gradient between the two machines explains both, which is the evidence chemiosmosis rests on. Brown fat does deliberately what dinitrophenol does indiscriminately, and a mitochondrion's own thirteen genes all code for parts of this machinery, which is why a fault in them strikes the tissues with the least reserve.</p></tb-key>
+</section>
+
+<section id="summary" data-unnumbered class="tb-endmatter">
+<h2>Key ideas</h2>
+<ul>
+  <li>Cellular respiration is the controlled oxidation of a fuel inside a cell. It has the same equation and the same free energy change as burning the same fuel; everything that differs is the route, which is two dozen enzyme-catalysed steps at one temperature instead of one step at a thousand degrees.</li>
+  <li>There are four stages. Glycolysis is in the cytosol; the link reaction and the Krebs cycle are in the mitochondrial matrix; oxidative phosphorylation is on the inner membrane. The first three take the carbon apart and make four ATP between them. The fourth touches no carbon and makes nearly all of it.</li>
+  <li>Glycolysis splits glucose into two pyruvate, spending two ATP and recovering four, and reducing two NAD<sup>+</sup>. Its ATP is made by handing a phosphate straight from a substrate to ADP; what paid was oxidising the sugar, not the phosphate. It needs no oxygen and no organelle, and it is in all three domains, which is what a pathway older than the mitochondrion looks like.</li>
+  <li>The link reaction takes one carbon off each pyruvate as carbon dioxide and hands the other two to coenzyme A. It is irreversible, which is why an animal cannot turn fat back into sugar.</li>
+  <li>The Krebs cycle takes those two carbons off as carbon dioxide and strips four pairs of electrons onto carriers, regenerating oxaloacetate every turn — which is why a trace of it processes an unlimited amount of fuel. All six of glucose's carbons are gone by the end of the second turn, and the oxygen you breathed has not been used yet.</li>
+  <li>The cycle is amphibolic: its intermediates are what a cell builds from, so draining one stops the cycle turning and a growing cell has to top the oxaloacetate up. Fats enter as acetyl-CoA after β-&#8288;oxidation, and amino acids enter at several points once their nitrogen has gone.</li>
+  <li>The electron transport chain is four complexes and two mobile carriers, arranged so that a pair of electrons falls from −0.32 volts to +0.82 in steps. Every step that releases enough to be worth anything spends it pumping protons out of the matrix — ten per NADH, six per FADH<sub>2</sub>, which enters lower down and skips the first pump.</li>
+  <li>The chain makes no ATP. Its product is a gradient, and it keeps about nine-tenths of what the fall releases. Oxygen is what takes the electrons at the bottom, not what the chain is for, and it was put into the air by photosynthesis.</li>
+  <li>Chemiosmosis: the chain and the synthase share no chemical intermediate at all. What passes between them is a proton-motive force of about 200 millivolts, three-quarters of it charge rather than pH. That does not break Section 5.4's rule — a gradient still holds free energy in a directed form, and what the rule forbids is paying with heat.</li>
+  <li>ATP synthase is a rotary motor. Protons turn a ring, the ring turns a bent shaft, and the shaft forces three catalytic sites through the shapes that bind, join and release — three ATP per revolution, and as many protons as the ring has subunits. The energy is spent letting the ATP go, not making it.</li>
+  <li>One glucose yields about 30 to 32 ATP, not 38. Ten NADH at about 2.5 each and two FADH<sub>2</sub> at about 1.5, plus four made directly. Those conversion figures are efficiencies and not stoichiometries, because the membrane leaks and moving the ATP to the cytosol costs a proton; which shuttle carries glycolysis's NADH decides the last two.</li>
+  <li>About a third of glucose's free energy is captured as ATP. The rest leaves as heat, which is the hundred watts of Section 5.1.</li>
+  <li>When oxygen goes, what runs out first is NAD<sup>+</sup>, within seconds. Fermentation exists to get it back by dumping electrons on a molecule the cell made itself; it yields no ATP of its own. A muscle makes lactate and a yeast makes ethanol, and a muscle can make lactate with plenty of oxygen present, because glycolysis can be turned up faster than the mitochondria can follow.</li>
+  <li>Lactate is a fuel, cleared within the hour and burnt by the heart or rebuilt into glucose by the liver. It does not cause the ache two days later, which is damage and inflammation.</li>
+  <li>Anaerobic respiration is not fermentation. It is the same chain, gradient and synthase ending on nitrate, fumarate, sulfate or carbon dioxide, and it yields less only because those acceptors sit higher on the ladder.</li>
+  <li>A blocker on the path the electrons take stops them and the oxygen trace goes flat; an uncoupler leaves the chain running and lets the protons back without work, so the trace steepens while the ATP goes to nothing. Only a gradient explains both, and brown fat does the second thing deliberately.</li>
+</ul>
+</section>
+
+<section id="glossary" data-unnumbered>
+<h2>Glossary</h2>
+<tb-glossary></tb-glossary>
+</section>
+
+<section id="checks" data-unnumbered>
+<h2>Check your understanding</h2>
+
+<tb-check id="q1" objective="respiration-vs-combustion">
+  <p class="question">A spoonful of glucose is burnt in a calorimeter, and an identical spoonful is respired by a yeast culture. Which statement is correct?</p>
+  <ul class="options">
+    <li>The cell releases more free energy from the glucose, because enzymes make the reaction more exergonic.</li>
+    <li>The flame releases more free energy, because combustion is complete and respiration is not.</li>
+    <li data-correct>Both release the same free energy, because the reactants and products are the same; the difference is that the cell takes the fall in many small steps and can couple some of them to making ATP, while the flame releases everything at once as heat.</li>
+    <li>Both release the same free energy, and the cell captures more of it because it works at a lower temperature.</li>
+  </ul>
+  <p class="explain">Free energy depends on where you start and where you finish, and both routes start and finish in the same place. Section 5.5 is categorical that an enzyme changes no reaction's free energy, which disposes of the first option; the second is wrong about the chemistry, since respiration oxidises the glucose completely and produces exactly the same carbon dioxide and water. The last option is the tempting near-miss: the low temperature is a consequence of taking the fall in small steps, not the reason anything is captured. What makes capture possible is that each step releases a parcel comparable with what one ATP is worth, so it can be coupled to making one.</p>
+</tb-check>
+
+<tb-check id="q2" objective="chain-pumps-protons">
+  <p class="question">What does the electron transport chain do with the free energy released as electrons fall from NADH to oxygen?</p>
+  <ul class="options">
+    <li>It uses it to attach phosphate groups to ADP at four sites along the chain, one at each complex.</li>
+    <li data-correct>It uses it to pump protons out of the matrix, building a gradient across the inner membrane; no complex in the chain makes any ATP at all.</li>
+    <li>It transfers it to a high-energy intermediate, which then hands a phosphate to ADP.</li>
+    <li>It releases it as heat, which warms the mitochondrion and drives ATP synthesis nearby.</li>
+  </ul>
+  <p class="explain">Not one of the four complexes has a site that binds ADP. Each spends the energy of its own fall moving protons against their concentration and against the charge already built up, and the chain's only product is that gradient. The first option is the commonest version of the error and is worth naming: three of the complexes do pump, but pumping is not phosphorylating. The third is the chemical-intermediate hypothesis that people looked for through the 1950s and never found, and Section 7.5 is about why. The last one is ruled out twice over, by Section 5.1 and by Section 5.4: heat at one temperature can do no work anywhere, least of all nearby.</p>
+</tb-check>
+
+<tb-check id="q3" objective="why-not-38">
+  <p class="question">An older textbook gives the yield of aerobic respiration as 38 ATP per glucose. Which set of assumptions produces that figure?</p>
+  <ul class="options">
+    <li>That glycolysis makes four ATP net rather than two, and that the Krebs cycle turns three times per glucose.</li>
+    <li data-correct>That each NADH is worth exactly 3 ATP and each FADH<sub>2</sub> exactly 2, and that moving the ATP out of the matrix costs nothing.</li>
+    <li>That the cytosolic NADH are carried in by the glycerol 3-phosphate shuttle rather than the malate–aspartate shuttle.</li>
+    <li>That some of the glucose is also fermented to lactate, adding two more ATP.</li>
+    <li>That the proton-motive force is larger than it really is, so fewer protons are needed per ATP.</li>
+  </ul>
+  <p class="explain">Ten NADH at 3 and two FADH<sub>2</sub> at 2 is 34, and the four made by substrate-level phosphorylation brings it to 38. Both of those conversion figures are round numbers that were assumed before protons could be counted; the measured values are about 2.5 and 1.5, and they are efficiencies rather than stoichiometries, because the membrane leaks. The third option gets the direction wrong: that shuttle <em>lowers</em> the figure, to 30. The last is the subtlest wrong answer — a stronger force would indeed mean fewer protons per ATP and a higher yield, but the 38 was never derived from any force at all, since nobody was counting protons when it was written down.</p>
+</tb-check>
+
+<tb-check id="q4" objective="fermentation-purpose">
+  <p class="question">A yeast in a sealed vat switches from respiration to fermentation. What is the fermentation step itself achieving?</p>
+  <ul class="options">
+    <li>It produces two ATP per glucose, which is how the yeast survives without oxygen.</li>
+    <li data-correct>It regenerates NAD<sup>+</sup> by handing the electrons of NADH to a molecule the yeast made itself, so that glycolysis can keep running. The step makes no ATP; the two the yeast gets are glycolysis's.</li>
+    <li>It releases the energy remaining in pyruvate, which is why ethanol contains less energy than glucose.</li>
+    <li>It removes pyruvate, which would otherwise inhibit glycolysis by feedback.</li>
+  </ul>
+  <p class="explain">The first option is what most readers say and it is the wrong attribution: those two ATP are made in glycolysis, by substrate-level phosphorylation, and would be made with or without a fermentation — provided something regenerates the NAD<sup>+</sup>, which is exactly what fermentation is for. The third gets the energetics backwards: fermentation releases almost nothing, and ethanol is discarded still holding most of the fuel value it started with, which is why it burns. The fourth is a real mechanism applied to the wrong molecule — glycolysis is regulated by ATP and AMP at its committed step, not by pyruvate — and it is worth noticing that the correct answer <em>is</em> a kind of unblocking, but of a carrier pool and not of an enzyme.</p>
+</tb-check>
+
+<tb-check id="q5" objective="uncoupling">
+  <p class="question">Dinitrophenol is added to a suspension of respiring mitochondria. What happens to the rate of oxygen consumption and to the rate of ATP synthesis?</p>
+  <ul class="options">
+    <li>Both fall, because the mitochondria have been poisoned.</li>
+    <li>Oxygen consumption is unchanged and ATP synthesis falls, because only the synthase has been blocked.</li>
+    <li data-correct>Oxygen consumption rises to its maximum and ATP synthesis falls to nothing, because the protons return across the membrane without passing through the synthase and the chain is no longer pumping against anything.</li>
+    <li>Oxygen consumption falls and ATP synthesis is unchanged, because the gradient is now being used more efficiently.</li>
+  </ul>
+  <p class="explain">This is the observation that decided the argument of Section 7.5, and the surprising half of it is that the trace gets <em>steeper</em>. A chain with no gradient to push against runs as fast as its slowest enzyme allows; all of the energy that would have become ATP becomes heat. The first option describes a blocker, which is the other way of stopping a mitochondrion and looks entirely different on the same instrument. The second describes oligomycin's effect but gets even that wrong: blocking the synthase lowers oxygen consumption rather than leaving it alone, which is respiratory control. The last option is impossible in the direction it claims — nothing here makes ATP more efficiently, and a gradient being spent without work is the definition of waste.</p>
+</tb-check>
+</section>
+
+<a class="tb-next" href="../">
+  <span class="tb-label">Next</span>
+  <strong>8 · The information in a cell</strong>
+  <span class="dek">The slowest of Section 5.7's four controls, and the one every other chapter has been standing on: what a gene is, how a sequence of bases becomes a protein, and how a cell decides which of its thousands of enzymes to build.</span>
+</a>
+
+
+</div>
+</main>
+
+<aside class="tb-margin" aria-hidden="true"></aside>
+</div>
+</body>
+</html>
