@@ -539,7 +539,8 @@ export function checkStudySources({ html, banks = [], pageDir = 'today', file = 
 //   nothing.
 //
 // Bound: prose it cannot parse. The prose half recognises the English sentence shapes above, with
-// numbers written as digits or as words up to ninety-nine and HTML entities decoded; a claim made any
+// numbers written as digits or as words up to ninety-nine, numeric entities and the common named ones
+// (&nbsp;, &ndash;, &rsquo; …) decoded, and an em dash read as an aside; a claim made any
 // other way ("everything up to membranes", "half the book", a claim split across two sentences, a
 // sentence in Chinese) passes unread, and a sentence using one of its words in another sense ("chapter
 // 1 is written for a reader who…") fails and is reworded. It reads the library page's <main> and
@@ -563,8 +564,12 @@ const TENS_WORDS = { twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, se
 const JOIN = '[-\\u2010\\u2011\\s]';
 const NUM_WORD = `(?:\\d+|(?:${Object.keys(TENS_WORDS).join('|')})(?:${JOIN}(?:${NUMBER_WORDS.slice(1, 10).join('|')}))?|${[...NUMBER_WORDS].reverse().join('|')})`;
 const NUM = `(${NUM_WORD})`;
-// Between two numbers of a list: ", ", ", and ", " and ", " to ", " through ", or a dash for a range.
-const LINK = '(?:\\s*,\\s*(?:and\\s+)?|\\s+(?:and|to|through)\\s+|\\s*[–—-]\\s*)';
+// Between two numbers of a list: ", ", ", and ", " and ", " to ", " through ", or an en dash or hyphen
+// for a range. Not an em dash, which sets off an aside: "Chapters 1 to 5 — 41 figures — are ready".
+const LINK = '(?:\\s*,\\s*(?:and\\s+)?|\\s+(?:and|to|through)\\s+|\\s*[–-]\\s*)';
+// A later member of a list is a number standing alone: "Chapter 1, nine figures in all, is ready" names
+// one chapter, not chapters 1 and 9, so a number followed by an ordinary word ends the list before it.
+const MEMBER_ENDS = '(?!\\s+(?!(?:and|to|through|is|are|has|have)\\b)[a-z])';
 const READY = '(?:ready|written|published|available|finished|complete|readable)';
 const UNREADY = '(?:in preparation|coming soon|not yet written|being written|yet to be written|to come|outlined|planned|unwritten)';
 
@@ -582,7 +587,7 @@ function numbersIn(list) {
   const out = [];
   let last = null;
   let ranging = false;
-  const re = new RegExp(`${NUM}|(to|through|[–—-])|(,|and)`, 'gi');
+  const re = new RegExp(`${NUM}|(to|through|[–-])|(,|and)`, 'gi');
   let t;
   while ((t = re.exec(list))) {
     if (t[1] !== undefined) {
@@ -605,10 +610,12 @@ const sameSet = (a, b) => a.length === b.length && a.every((x) => b.includes(x))
 
 // The entities an author writes in running text, so "Chapter&nbsp;1" is read as "Chapter 1".
 const ENTITIES = { nbsp: ' ', amp: '&', ndash: '–', mdash: '—', lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”', hellip: '…', quot: '"', apos: "'", lt: '<', gt: '>' };
+// Any other named entity stays as written, and so does a number past the last code point, which
+// String.fromCodePoint would throw on and take the whole check down with it.
 const decode = (s) => s.replace(/&(?:#(\d+)|#x([0-9a-f]+)|([a-z]+));/gi, (all, dec, hex, name) => {
-  if (dec) return String.fromCodePoint(Number(dec));
-  if (hex) return String.fromCodePoint(parseInt(hex, 16));
-  return ENTITIES[name.toLowerCase()] ?? all;
+  const code = dec ? Number(dec) : hex ? parseInt(hex, 16) : null;
+  if (code !== null) return code <= 0x10ffff ? String.fromCodePoint(code) : all;
+  return Object.hasOwn(ENTITIES, name.toLowerCase()) ? ENTITIES[name.toLowerCase()] : all;
 });
 
 // The visible text of a node, without the contents of <script> and <style>, and with a space around
@@ -635,7 +642,7 @@ function proseClaims(text, { where, book }) {
   const disk = book.onDisk.map((c) => c.number).sort((a, b) => a - b);
   const diskText = disk.length
     ? `${book.dir} has ${disk.length === 1 ? 'chapter' : 'chapters'} ${listOf(disk)} on disk (${book.onDisk.map((c) => `${book.dir}/${c.dir}/`).join(', ')})`
-    : `${book.dir}/ has no chapter directory on disk`;
+    : `${book.dir ? `${book.dir}/` : 'its book'} has no chapter directory on disk`;
   const fix = `Say it without naming chapters — "the book's contents page says which chapters are ready" cannot go stale, because npm run check holds that page to the tree — or name exactly the chapters on disk`;
   let m;
   const push = (msg) => fails.push({ msg: `${where} ${msg.replace('%q', () => `"${m[0].trim()}"`)}`, quote: m[0].trim() });
@@ -646,7 +653,7 @@ function proseClaims(text, { where, book }) {
   // an "is" in it) but not a sentence end, and not a second "chapter": "chapter 3 explains …, and
   // chapter 4 is ready" is a statement about chapter 4. A question mark ends the sentence when a word
   // follows it, and not when a comma or a closing quote does, as in a title.
-  const named = new RegExp(`\\bchapters?\\s+(${NUM_WORD}(?:${LINK}${NUM_WORD})*)\\b((?:(?!\\bchapters?\\b)(?!\\?\\s+[a-z])[^.;:!])*?)\\b(?:is|are|has been|have been)\\s+(?:now\\s+|already\\s+|still\\s+)?(${READY}|${UNREADY})\\b`, 'gi');
+  const named = new RegExp(`\\bchapters?\\s+(${NUM_WORD}(?:${LINK}${NUM_WORD}${MEMBER_ENDS})*)\\b((?:(?!\\bchapters?\\b)(?!\\?\\s+[a-z])[^.;:!])*?)\\b(?:is|are|has been|have been)\\s+(?:now\\s+|already\\s+|still\\s+)?(${READY}|${UNREADY})\\b`, 'gi');
   while ((m = named.exec(said))) {
     const set = numbersIn(m[1]);
     if (!set || !set.length) continue;
@@ -672,13 +679,14 @@ function proseClaims(text, { where, book }) {
     if (of !== null && book.outline !== null && of !== book.outline) push(`says the book has ${of} chapters (%q), and its contents page lists ${book.outline}; write ${book.outline}`);
   }
 
-  // "thirty-one more are outlined": the lines in the contents that are not on disk. Only in a sentence
-  // about chapters: "eight figures; two more are planned" is about figures.
+  // "thirty-one more are outlined": the lines in the contents that are not on disk. Only after a mention
+  // of chapters, in its own sentence or the one before it: "eight figures; two more are planned" is
+  // about figures, and "Chapters 1 to 5 are ready. Thirty-one more are outlined." is about chapters.
   const more = new RegExp(`\\b${NUM}\\s+(?:more|other|further)(\\s+chapters?)?\\s+(?:are|remain)\\s+(?:still\\s+)?(?:only\\s+)?${UNREADY}\\b`, 'gi');
   while ((m = more.exec(said))) {
     const n = numberOf(m[1]);
     if (n === null) continue;
-    const sentence = said.slice(0, m.index).split(/[.!?]\s/).pop();
+    const sentence = said.slice(0, m.index).split(/[.!?]\s/).slice(-2).join(' ');
     if (!m[2] && !/\bchapters?\b/i.test(sentence)) continue;
     saw();
     if (book.outline === null) continue;
@@ -709,13 +717,15 @@ export function checkChapterAvailability({ file, html = null, markdown = null, b
     // Paragraphs with the line each starts on. Code — a fenced block (``` or ~~~), an indented block —
     // and HTML comments keep their newlines and lose their text, so a command or a note in the README is
     // never read as a sentence and the line numbers stay true.
-    const lines = decode(markdown.replace(/<!--[\s\S]*?-->/g, (c) => c.replace(/[^\n]/g, ''))).split('\n');
+    // Entities are decoded a line at a time, after the split, so a `&#10;` cannot move a line number.
+    const lines = markdown.replace(/<!--[\s\S]*?-->/g, (c) => c.replace(/[^\n]/g, '')).split('\n').map(decode);
     let fence = null;
     let prevBlank = true;
     const prose = lines.map((l) => {
       const opens = /^\s{0,3}(`{3,}|~{3,})/.exec(l);
       if (fence) {
-        if (opens && opens[1][0] === fence[0] && opens[1].length >= fence.length) fence = null;
+        // A closing fence carries no info string: "```js" inside a block does not end it.
+        if (opens && opens[1][0] === fence[0] && opens[1].length >= fence.length && !l.trim().slice(opens[1].length).trim()) fence = null;
         return '';
       }
       if (opens) { fence = opens[1]; return ''; }
@@ -819,19 +829,25 @@ export function checkChapterAvailability({ file, html = null, markdown = null, b
       compared.claims += r.claims.length;
       for (const f of r.fails) fail(f.msg, at(card, f.quote));
     }
-    // Anything else the page's <main> says is about no one book. The cards are blanked rather than cut,
-    // so every line number below is the page's own.
+    // A card with no link, like Book 3's <div class="book book--soon">, is a book with nothing on disk: it
+    // is read against an empty shelf too, so "Chapter 1 is in preparation" passes there and "Chapter 1 is
+    // ready" fails. The cards are blanked rather than cut, so every line number below is the page's own.
     const rest = parseHtml(html.replace(/<a\b[^>]*\bclass="[^"]*\bbook\b[^"]*"[\s\S]*?<\/a>/gi, (card) => card.replace(/[^\n]/g, '')));
     const main = findAll(rest, (n) => n.tag === 'main')[0];
     if (main) {
-      const r = proseClaims(proseOf(main), { where: file, book: nowhere });
-      compared.claims += r.claims.length;
       const linkless = findAll(main, (n) => hasClass(n, 'book'));
-      for (const c of r.claims) {
-        const card = linkless.find((n) => flatten(proseOf(n)).includes(c.quote));
-        fail(card
-          ? `the card at line ${card.line} says "${c.quote}", and it is a <${card.tag}> with no link to a book directory — a book with nothing on disk — so no chapter of it can be ready; drop the sentence, or make the card <a class="book" href="<book>/"> once its book has chapters`
-          : `the library page says "${c.quote}" outside every shelf card, so this rule cannot tell which book it means; move the sentence into the <a class="book" href="<book>/"> card of the book it is about`, at(main, c.quote));
+      const inCard = new Set();
+      for (const card of linkless) {
+        const r = proseClaims(proseOf(card), { where: `the card at line ${card.line}, a <${card.tag}> that links to no book directory,`, book: { dir: null, onDisk: [], outline: null } });
+        compared.claims += r.claims.length;
+        for (const c of r.claims) inCard.add(c.quote);
+        for (const f of r.fails) fail(`${f.msg}. A card for a book with chapters is an <a class="book" href="<book>/">`, at(card, f.quote));
+      }
+      // Anything else the page's <main> says is about no one book.
+      const r = proseClaims(proseOf(main), { where: file, book: nowhere });
+      for (const c of r.claims.filter((x) => !inCard.has(x.quote))) {
+        compared.claims += 1;
+        fail(`the library page says "${c.quote}" outside every shelf card, so this rule cannot tell which book it means; move the sentence into the <a class="book" href="<book>/"> card of the book it is about`, at(main, c.quote));
       }
     }
   }

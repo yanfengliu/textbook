@@ -486,8 +486,30 @@ test('a card for a book with nothing on disk can claim no chapter, whether it li
   let f = avail(card('<a class="book" href="chemistry/">', '</a>', 'Chapter 1 is ready.'), 'index.html');
   assert.ok(f.length === 1 && f[0].includes('the shelf card for chemistry says chapter 1 is ready') && f[0].includes('chemistry/ has no chapter directory on disk'), f.join('\n'));
   f = avail(card('<div class="book book--soon">', '</div>', 'Chapter 1 is ready.'), 'index.html');
-  assert.ok(f.length === 1 && f[0].includes('with no link to a book directory') && f[0].includes('"Chapter 1 is ready"'), f.join('\n'));
+  assert.ok(f.length === 1 && f[0].includes('a <div> that links to no book directory, says chapter 1 is ready') && f[0].includes('its book has no chapter directory on disk'), f.join('\n'));
   assert.deepEqual(avail(card('<div class="book book--soon">', '</div>', 'In preparation.'), 'index.html'), []);
+  // True of a book with nothing on disk, so it passes in either kind of card (the re-review's finding).
+  for (const [open, close] of [['<div class="book book--soon">', '</div>'], ['<a class="book" href="chemistry/">', '</a>']]) {
+    assert.deepEqual(avail(card(open, close, 'Chapter 1 is in preparation. Chapters 1 to 12 are planned.'), 'index.html'), [], open);
+  }
+});
+
+// The independent re-review of the fixes above found each of the following.
+test('a number after a comma or an em dash is an aside, not another chapter in the list', () => {
+  assert.deepEqual(avail(shelf('Chapters 1 to 5 — 41 figures — are ready.'), 'index.html'), []);
+  const f = avail(shelf('Chapter 1, nine figures in all, is ready.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('says chapter 1 is ready, and nothing else is'), f.join('\n'));
+});
+
+test('"N more" reads the sentence before it too, and entities that name nothing stay as written instead of crashing', () => {
+  const f = avail(shelf('Chapters 1 to 5 are ready. Thirty-one more are outlined.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('says 31 more chapters are unwritten'), f.join('\n'));
+  assert.deepEqual(avail(shelf('Chapters 1 to 5 are ready&#1114112; &constructor; and more.'), 'index.html'), []);
+});
+
+test('README.md: a fence line with an info string inside a block does not close it', () => {
+  const md = (text) => checkChapterAvailability({ file: 'README.md', markdown: text, books: BOOKS, contentsOf });
+  assert.deepEqual(md('The Living World.\n\n```bash\n```js\nchapter 1 is ready\n```\n'), []);
 });
 
 test('README.md skips code and comments, and a paragraph it cannot place names the titles it could have used', () => {
