@@ -384,5 +384,61 @@ test('README.md is read a paragraph at a time, against the book whose title the 
 test('a claim on the library page outside any shelf card fails, because it is about no one book', () => {
   const html = shelf('An introduction to biology.').replace('<div class="shelf">', '<p>Chapter 1 is ready.</p><div class="shelf">');
   const f = avail(html, 'index.html');
-  assert.ok(f.length === 1 && f[0].includes('outside any shelf card'), f.join('\n'));
+  assert.ok(f.length === 1 && f[0].includes('says "Chapter 1 is ready" outside every shelf card'), f.join('\n'));
+});
+
+// The independent review of this rule found each of the following; each test fails without its fix.
+test('a list of chapters is read as the list it names: commas, "and", ranges and the two together', () => {
+  assert.deepEqual(avail(shelf('Chapters 1, 2, 3, 4 and 5 are ready.'), 'index.html'), []);
+  assert.deepEqual(avail(shelf('Chapters 1–3, 4 and 5 are ready.'), 'index.html'), []);
+  let f = avail(shelf('Chapters 1, 2 and 3 are ready.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('says chapters 1, 2 and 3 are ready, and nothing else is'), f.join('\n'));
+  f = avail(shelf('Chapters 1 to 5 and 7 are ready.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('chapters 1, 2, 3, 4, 5 and 7 are ready'), f.join('\n'));
+});
+
+test('an entity is read as the character it stands for, so a no-break space or hyphen hides nothing', () => {
+  let f = avail(shelf('Chapter&nbsp;1 is ready.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('says chapter 1 is ready'), f.join('\n'));
+  f = avail(shelf('Chapters 1 to 5 are ready; thirty&#8209;one more are outlined.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('says 31 more chapters are unwritten'), f.join('\n'));
+});
+
+test('"have been published", "of the book\'s 32", a figure count, and a question in the prose are each read right', () => {
+  assert.deepEqual(avail(shelf('Chapters 1 to 5 have been published.'), 'index.html'), []);
+  assert.ok(avail(shelf('Chapters 1 to 4 have been published.'), 'index.html').length === 1);
+  assert.deepEqual(avail(shelf('Five of the book’s 32 chapters are ready.'), 'index.html'), []);
+  assert.deepEqual(avail(shelf('Eight figures; two more are planned.'), 'index.html'), []);
+  assert.deepEqual(avail(shelf('What is in chapter 3? The cell is complete.'), 'index.html'), []);
+});
+
+test('a line with no link that is not a .soon line fails, and a number span holding something else says what it holds', () => {
+  const lines = allLines();
+  lines[9] = '<li><span class="n">10</span><span class="title">T10</span><span class="tag">In preparation</span></li>';
+  lines[10] = lines[10].replace('<span class="n">11</span>', '<span class="n">11.</span>');
+  const f = avail(contents(lines));
+  assert.ok(f.some((x) => x.includes('chapter 10 (T10) has no directory in biology/, and its line is neither a link nor a .soon line')), f.join('\n'));
+  assert.ok(f.some((x) => x.includes('its <span class="n"> holds "11.", which is not a chapter number')), f.join('\n'));
+});
+
+test('a card for a book with nothing on disk can claim no chapter, whether it links or not', () => {
+  const card = (open, close, text) => `<!doctype html><html lang="en"><body><main class="library"><h1>Textbooks</h1><div class="shelf">${open}<h2>Matter and change</h2><p>${text}</p>${close}</div></main></body></html>`;
+  let f = avail(card('<a class="book" href="chemistry/">', '</a>', 'Chapter 1 is ready.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('the shelf card for chemistry says chapter 1 is ready') && f[0].includes('chemistry/ has no chapter directory on disk'), f.join('\n'));
+  f = avail(card('<div class="book book--soon">', '</div>', 'Chapter 1 is ready.'), 'index.html');
+  assert.ok(f.length === 1 && f[0].includes('with no link to a book directory') && f[0].includes('"Chapter 1 is ready"'), f.join('\n'));
+  assert.deepEqual(avail(card('<div class="book book--soon">', '</div>', 'In preparation.'), 'index.html'), []);
+});
+
+test('README.md skips code and comments, and a paragraph it cannot place names the titles it could have used', () => {
+  const md = (text) => checkChapterAvailability({ file: 'README.md', markdown: text, books: BOOKS, contentsOf });
+  assert.deepEqual(md('The Living World.\n\n~~~\nchapter 1 is ready\n~~~\n\n<!-- chapter 1 is ready -->\n\n    chapter 1 is ready\n'), []);
+  const f = md('Intro.\n\nChapter 1 is ready.\n');
+  assert.ok(f.length === 1 && f[0].startsWith('README.md:3:') && f[0].includes('"The Living World" (biology)'), f.join('\n'));
+});
+
+test('a run says how many statements and contents lines it compared, so a run that compared none says so', () => {
+  assert.equal(avail(shelf('Chapters 1 to 5 are ready; twenty-seven more are outlined.'), 'index.html').compared.claims, 2);
+  assert.equal(avail(shelf('An introduction to biology.'), 'index.html').compared.claims, 0);
+  assert.equal(avail(CONTENTS).compared.lines, 32);
 });

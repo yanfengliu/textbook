@@ -31,4 +31,4 @@ npx playwright install chromium webkit firefox
 npm test
 ```
 
-`npm test` runs every gate in turn, cheapest first, and stops at the first one that goes red, naming it. It needs WebKit and Firefox as well as Chromium, because the device check runs its phone shapes on all three engines. The screenshots land under `out/` for a person to look at, because a green gate proves the pages load, not that they are beautiful. `AGENTS.md` lists every gate with what it does and does not prove.
+`npm test` runs every gate in turn, cheapest first, and stops at the first one that goes red, naming it. It needs WebKit and Firefox as well as Chromium, because the device check also loads the library and the first chapter in those two engines. The screenshots land under `out/` for a person to look at, because a green gate proves the pages load, not that they are beautiful. `AGENTS.md` lists every gate with what it does and does not prove.
