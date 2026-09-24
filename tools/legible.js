@@ -92,7 +92,7 @@
 //     nothing must never read as a census that found nothing.
 //
 // Cost, measured 2026-09-17 on this machine over the whole registry — 66 figure/theme pairs, 33 kinds,
-// the other 11 deferred below. Green runs measure 340.7-347.1 s, against 339.7 s for the dominant-surface
+// the other 11 deferred at the time (chapter 4's eight have since been added; not re-measured). Green runs measure 340.7-347.1 s, against 339.7 s for the dominant-surface
 // rule this replaced: judging every core pixel instead of one named colour costs about 2%, and buys the
 // 98 glyph runs that rule refused to look at. 15,280-15,284 runs compared — the handful of runs of spread
 // is `prokaryote` dark, the figure this gate already records as racing its own press-and-measure
@@ -137,11 +137,12 @@ const THEMES = trim('LEGIBLE_THEMES', ['light', 'dark'], { noun: 'theme' });
  * findings are in docs/learning/defect-register.md and in docs/work/2_rest-of-the-book/plan.md, and the
  * list is printed in full on every run, red or green, so that nobody has to go looking for it.
  *
- * Both groups are deferred for the same reason — they belong to work in flight that this round was told
- * not to touch. Chapter 4's eight figures were being written by another worker while this gate was being
- * built (one of them, `permeability`, would not even mount in the dark theme at the time), and the second
- * book has a colour round of its own with its own tokens in tongjian/zj.css. Clearing each group is the
- * follow-up, and the moment a group is cleared its line comes out of this list.
+ * The group left is deferred because it belongs to work in flight that this round was told not to
+ * touch: the second book has a colour round of its own with its own tokens in tongjian/zj.css. Clearing it
+ * is the follow-up, and the moment it is cleared its line comes out of this list. Chapter 4's eight figures
+ * were the other group, deferred while another worker was still writing them; they came off on 2026-09-23,
+ * when the first run over them found 30 pairs under AA in four figures, all fixed without an `ALLOWED`
+ * entry (docs/learning/gate-proofs.md).
  *
  * A name here that is not a registered kind fails the run, so the list cannot outlive its subject.
  */

@@ -4,7 +4,7 @@ The order an author works in, and what to check before handing each stage on. Ch
 
 Read `biology/ch01-what-is-life/` before writing anything, in a browser rather than as source. It is the reference implementation, and matching its voice matters more than any rule here.
 
-The book's design is [textbook.md](textbook.md); the study system's is [adaptive.md](adaptive.md); the gates and what each proves are in `AGENTS.md`; the owner's standing quality bar is [local-rules.md](../policies/local-rules.md). Those four are read. The two standing records — [gate-proofs.md](../learning/gate-proofs.md) and [defect-register.md](../learning/defect-register.md) — are **looked up**: each opens with an index, and you read the one entry it sends you to. Between them they run to hundreds of kilobytes, and no line of a chapter depends on reading either end to end.
+The book's design is [textbook.md](textbook.md); the study system's is [adaptive.md](adaptive.md); the gates are listed in `AGENTS.md`; the owner's standing quality bar and current direction are in [local-rules.md](../policies/local-rules.md). Those four are read. What each gate proves is looked up, one entry at a time, in [gates.md](../policies/gates.md). The two standing records — [gate-proofs.md](../learning/gate-proofs.md) and [defect-register.md](../learning/defect-register.md) — are **looked up**: each opens with an index, and you read the one entry it sends you to. Between them they run to hundreds of kilobytes, and no line of a chapter depends on reading either end to end.
 
 ## What a chapter is
 
@@ -108,9 +108,9 @@ Where chapters 2 and 3 each lost a pass:
 
 **Owner: the author**, before any figure is written. Copy [figures-template.md](figures-template.md) to `biology/chNN-<slug>/FIGURES.md` and fill it in. Its header is the contract the figures are judged against, and it lives in the brief so a figure worker reads it before writing code rather than after.
 
-Six to nine figures. Write the brief well enough that the drive recipes and the task items can be written from it before the modules exist, because that is the cheaper order: `npm run drive` fails any registered kind without a recipe.
+At most about four bespoke interactive figures, each justified in the brief by what handling it teaches that prose cannot. Authored static SVG illustrations are allowed elsewhere in the chapter, and raster images still are not ([the owner's direction of 2026-09-23](../policies/local-rules.md#the-usage-allowance-is-the-budget-the-owners-direction-of-2026-09-23), point 3). How a static illustration is authored and checked is not decided yet: the first chapter that uses one decides it and writes it here. Write the brief well enough that the drive recipes and the task items can be written from it before the modules exist, because that is the cheaper order: `npm run drive` fails any registered kind without a recipe.
 
-- [ ] Every figure in the brief shows a mechanism the reader changes, and I could write the one-line "why it is a mechanism" for each.
+- [ ] The brief has at most about four bespoke interactive figures. Each shows a mechanism the reader changes, and its one-line "why it is a mechanism" says what handling it teaches that prose cannot.
 - [ ] Every `describe()` field a task or a drive recipe will need is in the brief, and none is named `id`, `kind`, `number` or `state`.
 - [ ] Every figure that can fill any shape has an `aspect` and a `narrowAspect`, and the brief says what its narrow composition drops or re-stacks.
 - [ ] Kind ids and figure ids are clear of every other chapter's.
@@ -194,7 +194,7 @@ Sizing and resources: one worker per disjoint set of files, and **exactly one ex
 - [ ] I have looked at the chapter page at desktop and phone width, in both themes, and at every figure's frames — not at a contact sheet.
 - [ ] Every imperfection a worker named in its handoff is written into the round's `plan.md` with a judgement: fixed, or accepted with a reason. Nothing ships with a known visual defect and a note about it.
 - [ ] Any defect the owner reported is in `docs/learning/defect-register.md` with a check covering its whole class — the entry written to the shape stated at the top of that file, and added to its index.
-- [ ] Independent read-only review obtained for the prose, or its absence reported.
+- [ ] Independent accuracy review obtained for the prose, for the figures against their captions and for the item bank, checked against the matching OpenStax Biology 2e section and recorded in the round's work folder. The chapter does not ship without it ([local-rules.md](../policies/local-rules.md#the-usage-allowance-is-the-budget-the-owners-direction-of-2026-09-23), point 4).
 - [ ] Merged to main. A branch or a worktree does not count.
 
 ---
@@ -202,7 +202,7 @@ Sizing and resources: one worker per disjoint set of files, and **exactly one ex
 ## What not to do
 
 - Do not hide, lock, gate or reorder prose behind progress. The book stays a book.
-- Do not write a figure that is a static diagram with a caption.
+- Do not write more than about four bespoke interactive figures in a chapter, or one the brief cannot justify by what handling it teaches that prose cannot. Where the chapter needs a picture beyond those, an authored static SVG illustration is allowed; a raster image is not.
 - Do not pad an item bank to hit three per objective.
 - Do not invent a number. Look it up or leave it out.
 - Do not fix a half-empty panel by putting something in it.

@@ -7,16 +7,19 @@ Updated: 2026-09-23
 
 Complete. This was a read-only audit of the book and of how it is being made. Six workers read the repository at base revision `5e9c981`, every branch and worktree, the project's session transcripts, the CI and Pages record and the live site, and no product file changed. The only changes the round made are this folder and three entries added to `docs/work/registry.json` (see Approach, "Allocation"). The coordinator's answers are under Outcome, and the six handoffs are filed verbatim in `reviews/`.
 
-Decisions pending with the owner:
+Decisions: the owner read the summary on 2026-09-23 and replied, in their words: "All reasonable. Make it known to the agents and persist this in docs." That accepted the recommendations in synthesis 5. Of the decisions that were pending here, one was not decided: whether to buy more usage, which stays the owner's own lever. The direction is written in `docs/policies/local-rules.md`, section "The usage allowance is the budget: the owner's direction of 2026-09-23", whose points are cited below, and `AGENTS.md`'s "What this is" names it in one paragraph. Where each decision landed:
 
-- The figure cap — about four bespoke interactive figures a chapter — and the recipe rule it overrides ("six to nine figures, no static diagram").
-- The compaction threshold (near 250k tokens instead of ~970k) and a fresh coordinator for each round. Both are harness settings.
-- Trimming `AGENTS.md` to its rules and moving the long Gates section into a doc that agents look up. `AGENTS.md` names changes to itself as high-risk, so this needs independent review.
-- Running one textbook session at a time.
-- Whether to buy more usage.
-- Whether to park the Chinese edition.
+- The figure cap, about four bespoke interactive figures a chapter with authored static SVG elsewhere, and the recipe rules it overrides: point 3. `docs/design/chapter-recipe.md` and `docs/design/figures-template.md` now say it in place of "six to nine figures" and "no static diagram".
+- The compaction threshold near 250k tokens and a fresh coordinator for each round: point 2. The threshold, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` set to `25` in `.claude/settings.json`, lands on its own from branch `autocompact-setting` once the book's coordinator session has stopped. The section says why, and gives the documentation it rests on.
+- Trimming `AGENTS.md` to its rules: point 9. The body of its Gates section moved word for word to `docs/policies/gates.md`, and `AGENTS.md` went from 58,591 to 36,493 bytes.
+- Running one textbook session at a time: point 7.
+- Whether to buy more usage: not decided. Point 1 records that extra usage is the owner's lever, not an agent's.
+- Whether to park the Chinese edition: parked, point 8.
+- The rest of synthesis 5 is points 1 and 4–6: the budget of about 40M weighted tokens a chapter, the accuracy review before a chapter ships, the study loop first when study work resumes, and the verification target, with `npm test` as the commit gate until a core gate exists.
 
-Nothing else is open under this folder. Fixes already under way for things the audit found — the answer order on `choice-order`, chapter 5's errors on `fix-ch05` — are another session's work on its own branches, and are not tracked here.
+The same day, the owner told the book's coordinator: "Reduce scope and stop at your current chapter's completion". That is chapter 6 only, then a stop. The round's plan records it (`docs/work/2_rest-of-the-book/plan.md`, "Where this round stands"), and point 10 points there. It overrides synthesis 5's one-week test, which wanted chapters 6–7 on main. Chapter 6 gets point 4's accuracy review before it lands. The chapter 4–5 reviews this audit found owed (F7, F28) stay open, and starting them waits on the owner.
+
+Nothing else is open under this folder. Fixes for things the audit found — the answer order (`choice-order`) and chapter 5's errors (`fix-ch05`) — were another session's work, landed on main in `407827c`, and are not tracked here.
 
 ## Problem and outcome
 
