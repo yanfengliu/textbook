@@ -55,6 +55,7 @@ In file order. Every line is one `##` entry.
 | [2026-09-22 — `soup` draws 475 water molecules or 474 on a phone, depending on when the fonts arrived](#2026-09-22--soup-draws-475-water-molecules-or-474-on-a-phone-depending-on-when-the-fonts-arrived) | found by probe, holding the font responses: 475 in 3 loads of 3 with the fonts early, 474 in 3 of 3 with them late — a breach of the figure invariant | **no gate yet.** Queued for the textbook session's next worker on chapter 2's figures: rebuild on `document.fonts.ready`, as `scale.js` does |
 | [2026-09-23 — at 90 °C the bilayer tank said "Micelles", and a 1024 px page's tank said "Bilayer"](#2026-09-23--at-90-c-the-bilayer-tank-said-micelles-and-a-1024-px-pages-tank-said-bilayer) | GitHub's `npm run drive`: *"micelle at t=8.033, 0.641 buried"*; and after Curl, "two open ends" beside a sealed sheet | `npm run drive` (two `bilayer` steps, walked by Step) and `test/bilayer-model.test.js` |
 | [2026-09-23 — the library page said only chapter 1 was ready](#2026-09-23--the-library-page-said-only-chapter-1-was-ready-with-five-chapters-published) | *"Chapter 1, “What is life?”, is ready; thirty-one more are outlined"* on the live front page and in README.md, with five chapters published | `npm run check`'s `checkChapterAvailability`: a book's contents page, the library page's shelf cards and README.md against the chapter directories on disk. **`docs/design/textbook.md` still says it and nothing reads it** |
+| [2026-09-24 — a comma after a glossary term began a line on its own](#2026-09-24--a-comma-after-a-glossary-term-began-a-line-on-its-own) | the comma after "pyrimidine dimer" alone at the start of a line, chapter 8 at 390 px; 172 of the 218 marks glued to a term strand at some width | `test/term-hold.test.js`, which holds the markup and the stylesheet. **No gate measures where a line breaks** |
 
 **By area, for when you are changing something and want what is still unwatched there.**
 
@@ -68,6 +69,7 @@ In file order. Every line is one `##` entry.
 - **Cross-book and cross-chapter facts** — 2026-09-12 (page ids), 2026-09-16 (next-chapter card), 2026-09-23 (the library page and the contents page). All three were invisible to any rule that reads one document.
 - **What a reader sees while a page loads** — 2026-09-22 (the theme flash). Every page gate photographs a page after the handshake, so a defect that is over by then is invisible to all of them; `npm run theme` holds one attribute across the interval from `<body>` being inserted to the handshake, and nothing records the frames in between.
 - **A figure's frame and when the fonts arrive** — 2026-09-22 (`soup`'s world). **No gate yet.** Every gate replays the fonts from memory after a run's first load, so a figure whose picture depends on when they arrive is seen in one of its states only.
+- **Where a line breaks** — 2026-09-24 (a comma stranded after a glossary term). **No gate.** A break moves with the width, and the gates look at a handful of widths, so the only measurement of the class was a scratch probe that tried every width from 320 to 1440 px.
 
 ## 2026-09-10 — four defects on a real phone and a desktop, none of which any gate could see
 
@@ -823,3 +825,29 @@ The front page's card for the biology book read, word for word: *"An interactive
 | The class: a book's contents page listing a chapter on disk as "In preparation" (twice) | a hand-edited list | the rule's contents half: a directory on disk means a link to it and the readable tag, an absent one means no link and the unwritten tag, and every directory has a line. Proved red on the real files and on `6d854cf` in [gate-proofs.md](gate-proofs.md#check-which-chapters-a-page-says-can-be-read-agrees-with-the-chapter-directories-on-disk-toolscheck-contentjs-checkchapteravailability) |
 
 **The lesson underneath.** The 2026-09-16 gate covered the one place the defect had last been seen, and the next occurrence came from a place next to it. This rule reads every place the audit found, and its bound is named in its header: English prose it cannot parse, and nothing under `docs/`. `docs/design/textbook.md` still says only chapter 1 exists (lines 3 and 194), and nothing reads it.
+
+## 2026-09-24 — a comma after a glossary term began a line on its own
+
+**The symptom**, as the book's coordinator saw it in a phone frame of chapter 8's §8.5 at 390 px: the comma after "pyrimidine dimer" began a line on its own. No one reported it in words to quote; this is the coordinator's description of the frame.
+
+**How it was found.** A person looked at a frame. The `term-comma` worker then measured the whole class with a scratch probe, `strand.mjs`, standing in for `npm run inspect`, which frames named elements but does not count what starts a line.
+
+- In chapters 1–8, 218 terms are followed directly by a mark: `,` 129, `.` 44, `:` 39, `;` 6.
+- At 390 px, 4 stranded their mark, the same in both themes: ch01 endosymbiosis, ch03 cell wall and gap junctions, ch08 pyrimidine dimer.
+- At 320 px, 6 more did.
+- At some width from 320 to 1440 px, 172 of the 218 did.
+- 資治通鑑 stranded none.
+- Chapters 7 and 8 were measured in their own worktrees before they landed, so their text was not final.
+
+**The root cause.** `<tb-term>` draws a `<button>` (`src/components/term.js:54`). HTML lays out a `<button>` as an inline-block whatever its `display` says, and a line may break after an inline-block even when a comma follows it. The wrong assumption was that a mark written against a word stays with it: that holds for text, not for a box. A word joiner (U+2060) between the term and its mark does not help: 180, 180 and 179 still stranded in Chromium, WebKit and Firefox.
+
+**What the gates could see, and why the answer was nothing.** No gate asks where a line breaks. A stranded comma overflows nothing, throws nothing and is drawn in a loaded face, so `shot`, `narrow` and `devices` all passed it. And the class moves with the width, while the gates look at a handful of widths.
+
+**Now checked by:**
+
+| Symptom | Root cause | Now checked by |
+|---|---|---|
+| A mark glued to a term's end starts the next line | a line may break after the term's `<button>` | `term.js` wraps the term and the run glued to its end (the mark, or a plural's "s") in a `<tb-term-hold>`, which `src/styles/components.css` sets `white-space: nowrap`, with a zero-width space after it and wrapping restored inside the button and the card. `test/term-hold.test.js` holds that markup and those rules. The worker proved it red twelve ways (5 in the stylesheet, 7 in `term.js`), recorded in [the handoff](../work/2_rest-of-the-book/reviews/2026-09-24-term-comma-handoff.md) and **not yet in [gate-proofs.md](gate-proofs.md)** |
+| The class: where any line breaks | a break depends on the width, the text and the face | **no gate.** After the fix the probe measured 0 stranded at 390 and 320 px and at every width from 320 to 1440 px, in biology ch01–08 and 資治通鑑 ch01–03, and 0 of 608 other term paragraphs broke differently from main. Nothing repeats that measurement, because this round adds no gates (chapter 6's reduced scope, which chapters 7 and 8 ship at) |
+
+**The lesson underneath.** A line-break defect lives at every width, and a frame shows one. The 390 px frame showed 4 of the 172 pairs that strand somewhere.
