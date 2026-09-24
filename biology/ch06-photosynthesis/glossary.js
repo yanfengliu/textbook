@@ -21,6 +21,12 @@
 //     which is the whole reason §6.5 works, so the entry says that instead.
 //   stroma      — §3.5 said it holds "the enzymes that build sugar". This chapter names them.
 //
+// Two entries are headed by a name rather than by the symbol the prose sets, because a term is shown as
+// text in the glossary list and in every popover (src/components/term.js escapes it) and markup in it
+// would be printed as written: `nadp` is "Nicotinamide adenine dinucleotide phosphate", as chapter 5's
+// `nad` is headed by its full name, and `cytochrome-b6f` is "Cytochrome complex", the prose's own
+// short name for it. Each definition says how the symbol is written, with its markup, where it renders.
+//
 // Peroxisome has been used three times in this book — in §3.8's figure, in §5.8's sort activity, and now
 // in §6.7's salvage route — and defined nowhere, so it is defined here.
 export const GLOSSARY = {
@@ -58,10 +64,10 @@ export const GLOSSARY = {
   'z-scheme': { term: 'Z scheme', def: 'The path of an electron from water to NADPH, drawn against how tightly each carrier holds it. Two light-driven climbs separated by a downhill run gives the zigzag the name describes, and the downhill run is where the protons are moved.' },
   'oxygen-evolving-complex': { term: 'Oxygen-evolving complex', def: 'The cluster of four manganese ions and one calcium ion on the lumen side of photosystem II that takes electrons from water. It holds its count, giving up one oxygen molecule only after four separate photons have removed four electrons.' },
   plastoquinone: { term: 'Plastoquinone', def: 'A small, oily, mobile carrier that takes two electrons and two protons from photosystem II and diffuses within the membrane to the cytochrome complex. Taking protons from one side of the membrane and releasing them on the other is how it moves charge across.' },
-  'cytochrome-b6f': { term: 'Cytochrome <i>b</i><sub>6</sub><i>f</i>', def: 'The complex between the two photosystems. It accepts electrons from plastoquinone and passes them to plastocyanin, and in doing so it pumps protons from the stroma into the lumen: the only proton pump in the chain.' },
+  'cytochrome-b6f': { term: 'Cytochrome complex', def: 'The complex between the two photosystems, written cytochrome <i>b</i><sub>6</sub><i>f</i> after two of the cytochromes it contains. It accepts electrons from plastoquinone and passes them to plastocyanin, and in doing so it pumps protons from the stroma into the lumen: the only proton pump in the chain.' },
   plastocyanin: { term: 'Plastocyanin', def: 'A small copper-containing protein that carries one electron at a time along the lumen face of the membrane, from the cytochrome complex to photosystem I.' },
-  ferredoxin: { term: 'Ferredoxin', def: 'A small iron–sulfur protein on the stromal side that takes the electron from photosystem I. It is the most strongly reducing carrier in the chain, and what it does with the electron is the fork where the two kinds of electron flow separate.' },
-  nadp: { term: 'NADP<sup>+</sup>', def: 'NAD<sup>+</sup> with one extra phosphate group, reduced to NADPH by the light reactions. The phosphate carries no energy; it is a label, and it lets a cell keep a reduced pool for building things separate from the pool it fills by taking things apart.' },
+  ferredoxin: { term: 'Ferredoxin', def: 'A small iron–sulfur protein on the stromal side that takes the electron from photosystem I. It is the most strongly reducing of the mobile carriers in the chain, and what it does with the electron is the fork where the two kinds of electron flow separate.' },
+  nadp: { term: 'Nicotinamide adenine dinucleotide phosphate', def: 'NAD<sup>+</sup> with one extra phosphate group, written NADP<sup>+</sup> in the form ready to take electrons and reduced to NADPH by the light reactions. The phosphate carries no energy; it is a label, and it lets a cell keep a reduced pool for building things separate from the pool it fills by taking things apart.' },
   'linear-electron-flow': { term: 'Linear electron flow', def: 'The straight-through path: water to photosystem II, on to photosystem I, on to NADP<sup>+</sup>. It produces NADPH, ATP and oxygen, and it consumes a water molecule for every two electrons.' },
   'cyclic-electron-flow': { term: 'Cyclic electron flow', def: 'The short circuit: the electron leaving photosystem I is sent back to the cytochrome complex instead of to NADP<sup>+</sup>. Protons are still pumped, so ATP is still made, but no NADPH is made and no water is split, so no oxygen appears.' },
 
@@ -75,7 +81,7 @@ export const GLOSSARY = {
   // ---- 6.6 Building a sugar out of air ----
   'calvin-cycle': { term: 'Calvin cycle', def: 'The stroma\'s three-phase cycle: carbon dioxide is attached to a five-carbon acceptor, the product is reduced using ATP and NADPH, and most of what is made goes back to rebuilding the acceptor. One sugar leaves for every three turns.' },
   rubisco: { term: 'Rubisco', def: 'Ribulose bisphosphate carboxylase/oxygenase, the enzyme that attaches carbon dioxide to the acceptor. It is slow, it confuses carbon dioxide with oxygen, and there is more of it on Earth than of any other protein — three facts that belong together.' },
-  rubp: { term: 'RuBP (ribulose bisphosphate)', def: 'The five-carbon sugar with a phosphate at each end that carbon dioxide is attached to. It is the cycle\'s acceptor, and rebuilding it is what two-thirds of the cycle\'s work is for.' },
+  rubp: { term: 'RuBP (ribulose bisphosphate)', def: 'The five-carbon sugar with a phosphate at each end that carbon dioxide is attached to. It is the cycle\'s acceptor, and five of every six sugars the cycle makes go back into rebuilding it.' },
   g3p: { term: 'G3P (glyceraldehyde 3-phosphate)', def: 'The three-carbon sugar the cycle produces. Five of every six made go back into rebuilding the acceptor; the sixth leaves, and pairs of them become the glucose, sucrose and starch a plant actually uses.' },
   'photosynthate': { term: 'Photosynthate', def: 'What a leaf exports: in most plants, sucrose, made in the cytosol from the sugar the Calvin cycle produced and carried away to roots, fruit and growing tips. What is not exported by nightfall is stored in the stroma as starch.' },
 
@@ -84,9 +90,9 @@ export const GLOSSARY = {
   peroxisome: { term: 'Peroxisome', def: 'A small single-membraned compartment holding enzymes that hand hydrogen to oxygen, making hydrogen peroxide, and a catalase that destroys the peroxide again. It handles reactions a cell would rather not have loose in the cytosol; in a leaf it holds the middle of the salvage route.' },
 
   // ---- 6.8 Two answers to the same problem ----
-  'c3-plant': { term: 'C3 plant', def: 'A plant in which the first stable product of carbon fixation is a three-carbon acid, because rubisco does the fixing directly. Most plants are C3, including every tree in a temperate forest, wheat, rice and every plant so far in this chapter.' },
+  'c3-plant': { term: 'C3 plant', def: 'A plant in which the first stable product of carbon fixation is a three-carbon acid, because rubisco does the fixing directly. Most plants are C3, including nearly every tree in a temperate forest, wheat, rice and every plant so far in this chapter.' },
   'c4-plant': { term: 'C4 plant', def: 'A plant that fixes carbon dioxide first into a four-carbon acid in one cell, then releases it again around rubisco in another. The arrangement costs two extra ATP for every carbon dioxide delivered and buys a concentration rubisco cannot confuse.' },
   cam: { term: 'CAM', def: 'Crassulacean acid metabolism: the same two steps as a C4 plant, separated by time instead of by distance. The stomata open at night to take carbon dioxide in and close by day, and the carbon waits in the vacuole as an acid.' },
-  'pep-carboxylase': { term: 'PEP carboxylase', def: 'The enzyme that does the first fixation in a C4 or CAM plant. It takes bicarbonate rather than carbon dioxide, which is why oxygen cannot be mistaken for its substrate, and it binds it far more tightly than rubisco binds carbon dioxide.' },
+  'pep-carboxylase': { term: 'PEP carboxylase', def: 'The enzyme that does the first fixation in a C4 or CAM plant. It takes bicarbonate rather than carbon dioxide, which is why oxygen cannot be mistaken for its substrate; and bicarbonate is about ten times as plentiful in the cell as dissolved carbon dioxide, so the enzyme keeps working at levels at which rubisco slows badly.' },
   'bundle-sheath': { term: 'Bundle sheath', def: 'The ring of cells around a leaf vein. In a C4 plant they are large, thick-walled, packed with chloroplasts and connected to the surrounding mesophyll — an arrangement called Kranz anatomy, from the German for wreath — and they are where rubisco is kept.' },
 };
