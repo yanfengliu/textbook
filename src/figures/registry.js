@@ -107,6 +107,9 @@ export const FIGURES = Object.freeze({
   // Figure 6.4. It carries a genuine second composition, because a site drawn beside a four-row table does
   // not survive a 390 px stage.
   'rubisco-fork': { url: new URL('./rubisco-fork.js', import.meta.url).href, title: 'One site, two gases, four steps of arithmetic', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
+  // Figure 7.1. Eleven stations in a row want a wide stage, and 16/9 rather than 21/9 leaves the walk
+  // height for its carbons; below 800 px the line turns through 90 degrees and runs down a tall one.
+  glycolysis: { url: new URL('./glycolysis.js', import.meta.url).href, title: 'Ten steps, two halves', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
 
   // 《资治通鉴》 卷一 周纪一 — the second book. Its figures are about a text and a history, not a
   // specimen: where the three states sat and when, what a character becomes when it joins another, and
