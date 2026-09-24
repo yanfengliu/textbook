@@ -1706,9 +1706,17 @@ const RECIPES = {
         await h.button(/^Curl/).click();
         const after = await h.describe();
         // The wrap was what held the sheet flat, so taking it away opens two rims. That is the whole of
-        // what this control does; the rolling up is the walk's, and it is what is asserted below.
-        if (after.edgeLengthNm > flat.edgeLengthNm + 2) opened = after;
-        else expect(/no ends opened/.test((await words()).over), `Curl opened no rims (${flat.edgeLengthNm} -> ${after.edgeLengthNm} nm) and the overlay did not say so: ${JSON.stringify((await words()).over)}`);
+        // what this control does; the rolling up is the walk's, and it is what is asserted below. Whether
+        // it opened any is the figure's own finding (`curl`), read here rather than re-derived with a
+        // threshold of this step's own: the first version demanded 2 nm where the figure decides at 1, so a
+        // Curl that opened 1.5 nm was a false red here (review, 2026-09-23). What this step adds is that
+        // the edge rose when the figure says it opened, and that the overlay says so when it did not.
+        if (after.curl === 'opened') {
+          expect(after.edgeLengthNm > flat.edgeLengthNm, `the figure says Curl opened the ends, and the exposed edge did not rise: ${flat.edgeLengthNm} -> ${after.edgeLengthNm} nm`);
+          opened = after;
+        } else if (after.curl === 'none') {
+          expect(/no ends opened/.test((await words()).over), `Curl opened no rims (${flat.edgeLengthNm} -> ${after.edgeLengthNm} nm) and the overlay did not say so: ${JSON.stringify((await words()).over)}`);
+        }
       }
       expect(opened, `in ${tries} fresh tanks Curl never opened two rims: the last went ${flat?.edgeLengthNm} -> ${(await h.describe()).edgeLengthNm} nm, ${flat?.assembly}`);
       const open = await words();

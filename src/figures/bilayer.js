@@ -208,7 +208,7 @@ const DIRS = 12;
 // in 23 runs of 30 s, where one sweep had changed its word about 100 times a run.
 const SAMPLE_SWEEPS = 70; // 0.05 s of clock
 const VERDICT_SAMPLES = 20; // one second of clock
-// An end is open when the exposed edge, averaged over that same second, is more than a lone molecule
+// An end is open when the exposed edge, averaged over a second of samples, is more than a lone molecule
 // shows. A closed sheet's thermal rim is one molecule at a time — about 1.6 nm of edge on and off, which
 // the one-sweep test this replaced (under 0.5 nm) called unsealed for most of the time after a sheet had
 // capped both its ends — while two open ends keep three or four molecules' tails in the water, 3-6 nm.
@@ -535,21 +535,37 @@ class Tank {
     this.rebuild();
   }
 
-  // What the tank has held, begun again: when it is filled, and when the wrap comes off or goes back on.
-  // Until a full second of samples has come in, the tank as it stood at that moment stands for the rest
-  // of the second — so a verdict changes once, when the samples that disagree with it are a majority,
-  // rather than following the first two or three samples wherever they point.
+  // What the tank has held, begun when it is filled. Until a full second of samples has come in, the tank
+  // as it was filled stands for the rest of the second — so the first verdict changes once, when the
+  // samples that disagree with it are a majority, rather than following the first two or three samples
+  // wherever they point. The arrangement's history then runs on through anything the reader does,
+  // because no press changes where the molecules are: a first version began it again at Curl from one
+  // sweep's classification, which gave that one sweep a whole second's weight (review, 2026-09-23: at
+  // 90 °C, 86 of 1806 Curl instants read as something other than dispersed, and would have been reported
+  // for 0.7 s).
   startHistory() {
     this.history = [];
-    this.baseline = { assembly: classify(this), edge: this.measure().edgeLengthNm };
+    this.edges = [];
+    this.baseline = { assembly: classify(this) };
     this.verdict = this.baseline.assembly;
+  }
+
+  // The exposed edge's own history, begun again whenever a press changes the edge without moving a
+  // molecule: Curl, which uncovers the ends, and the needle, which opens a hole. Whether the ends have
+  // sealed is then read only off samples taken since, so it cannot be answered by the edge the tank had
+  // before the press — the first version counted that edge for the whole second, and a Curl that opened
+  // 1.76 nm was reported as sealed at the instant it opened.
+  restartEdges() {
+    this.edges = [];
   }
 
   // One sample of what the tank is, for the verdict the reader is shown. Called at fixed sweep counts
   // only, so the history — and every verdict read off it — is a function of the clock.
   remember() {
-    this.history.push({ assembly: classify(this), edge: this.measure().edgeLengthNm });
+    this.history.push({ assembly: classify(this) });
     if (this.history.length > VERDICT_SAMPLES) this.history.shift();
+    this.edges.push(this.measure().edgeLengthNm);
+    if (this.edges.length > VERDICT_SAMPLES) this.edges.shift();
     this.verdict = nextVerdict(this.verdict, heldSamples(this));
   }
 
@@ -844,8 +860,8 @@ function classify(tank) {
   return 'micelle';
 }
 
-// The last second of samples, with the tank as it stood when the history began standing in for any of
-// the second that has not come in yet. See startHistory().
+// The last second of samples, with the tank as it was filled standing in for any of the second that has
+// not come in yet. See startHistory().
 function heldSamples(tank) {
   const pad = VERDICT_SAMPLES - tank.history.length;
   return pad > 0 ? [...Array(pad).fill(tank.baseline), ...tank.history] : tank.history;
@@ -888,13 +904,13 @@ function heldArrangement(tank) {
   return tank.verdict;
 }
 
-// Whether the tank has held no open end: its exposed edge averaged over the last second is less than two
-// rim molecules show. See HELD_SEALED_NM.
+// Whether the tank has held no open end: a full second of samples since the edge last changed under a
+// press, and its exposed edge averaged over them less than two rim molecules show. See HELD_SEALED_NM.
 function heldSealed(tank) {
+  if (tank.edges.length < VERDICT_SAMPLES) return false;
   let sum = 0;
-  const hist = heldSamples(tank);
-  for (const s of hist) sum += s.edge;
-  return sum / hist.length < HELD_SEALED_NM;
+  for (const e of tank.edges) sum += e;
+  return sum / tank.edges.length < HELD_SEALED_NM;
 }
 
 // One sweep of the walk, the whole-aggregate moves on their own schedule, and a sample of what the tank
@@ -1013,11 +1029,14 @@ export function mount(root, ctx) {
   // The last thing the reader did to the tank, needle or curl, so the reading speaks of that and not of
   // an older one: a heal time is news until the reader curls the sheet, and then it is history.
   let lastEvent = null;
-  // Whether the last Curl had a sheet reaching across the tank to open. When nothing reached across, the
-  // wrap was holding nothing flat and taking it away opened no ends — which the reading has to say
-  // rather than describe ends that were never there: a sheet the needle had split into two short
-  // pieces was reported as having "sealed both ends" by rolling them in, when nothing had rolled.
-  let curlOpened = false;
+  // What the last Curl found: 'opened' when the tank held a sheet and taking the wrap away uncovered its
+  // ends, 'none' when it held a sheet that did not reach across the tank, so the wrap was holding
+  // nothing flat and no ends opened, and null when no Curl has been pressed on a sheet in this tank —
+  // including a tank filled with the wrap already off, which never had one. The reading says which,
+  // rather than describe ends that were never there: a sheet the needle had split into two short pieces
+  // was reported as having "sealed both ends" by rolling them in, when nothing had rolled; and a Curl
+  // pressed on a dispersed tank before Release was later reported as having rolled up a sheet.
+  let curl = null;
   const OPENED_NM = 1.0; // less than the tails of one molecule at an open end
   let trace = [{ t: 0, edge: tank.measure().edgeLengthNm }];
 
@@ -1083,6 +1102,7 @@ export function mount(root, ctx) {
     puncturePoint = null;
     healSeconds = null;
     lastEvent = null;
+    curl = null;
     trace = [{ t: 0, edge: tank.measure().edgeLengthNm }];
     molLayer = null;
   }
@@ -1099,19 +1119,24 @@ export function mount(root, ctx) {
 
   function setWrapped(next) {
     const edgeAsWas = tank.measure().edgeLengthNm;
+    const heldAsWas = heldArrangement(tank);
     wrapped = next;
     tank.wrapped = wrapped;
-    // Taking the wrap away changes the rules the tank is under, so what it held before is no evidence of
-    // what it holds now: a flat sheet's last second says "sealed", and the two ends Curl has just opened
-    // say otherwise. The verdict starts again from the tank as it stands.
     lastEvent = 'curl';
     tank.rebuild();
-    tank.startHistory();
+    // Taking the wrap away changes the edge without moving a molecule: a flat sheet's last second says
+    // "sealed", and the two ends Curl has just uncovered say otherwise. So whether the ends have sealed is
+    // read again from samples taken after the press. The arrangement's history runs on: see startHistory.
+    tank.restartEdges();
     // The same molecules, measured with the wrap and without it: whatever edge that exposes is the ends
     // the Curl opened. It is exact rather than a guess at whether the sheet reached across — the first
     // version asked whether the biggest cluster had a molecule in every twelfth of the tank, and a sheet
-    // just healed from the needle failed that while unwrapping it opened 4.5 nm of edge.
-    if (!next) curlOpened = tank.baseline.edge - edgeAsWas > OPENED_NM;
+    // just healed from the needle failed that while unwrapping it opened 4.5 nm of edge. It is asked only
+    // of a tank that held a sheet, because a dispersed tank's molecules at the two ends lose neighbours
+    // too, and that was once read as ends opened (review, 2026-09-23).
+    const sheetAsWas = heldAsWas === 'bilayer' || heldAsWas === 'vesicle';
+    if (!next && sheetAsWas) curl = tank.measure().edgeLengthNm - edgeAsWas > OPENED_NM ? 'opened' : 'none';
+    else curl = null;
     btnCurl.setAttribute('aria-pressed', String(!wrapped));
     paint();
     announce();
@@ -1152,6 +1177,7 @@ export function mount(root, ctx) {
     punctureAt = t;
     healSeconds = null;
     lastEvent = 'needle';
+    tank.restartEdges();
     record();
     paint();
     announce();
@@ -1210,6 +1236,7 @@ export function mount(root, ctx) {
       puncturePoint = null;
       healSeconds = null;
       lastEvent = null;
+      curl = null;
       trace = [{ t: 0, edge: tank.measure().edgeLengthNm }];
       molLayer = null;
     }
@@ -1287,6 +1314,7 @@ export function mount(root, ctx) {
       edgeLengthNm: round(m.edgeLengthNm, 1),
       thicknessNm: round(thickness(assembly), 2),
       sealed: heldSealed(tank),
+      curl,
       punctured,
       healSeconds,
       temperatureC: tempC,
@@ -1422,7 +1450,7 @@ export function mount(root, ctx) {
   function curlNote() {
     const assembly = heldArrangement(tank);
     if (assembly !== 'bilayer' && assembly !== 'vesicle') return 'the wrap is off';
-    if (!curlOpened) return narrow ? 'the wrap is off: no ends opened' : 'the wrap is off, and no ends opened: the sheet did not reach across';
+    if (curl === 'none') return narrow ? 'the wrap is off: no ends opened' : 'the wrap is off, and no ends opened';
     if (heldSealed(tank)) return narrow ? 'the wrap is off: ends sealed' : 'the wrap is off, and the sheet has sealed both ends';
     return narrow ? 'the wrap is off: two open ends' : 'the wrap is off: the sheet has two open ends';
   }
@@ -1485,9 +1513,10 @@ export function mount(root, ctx) {
     const sheet = d.assembly === 'bilayer' || d.assembly === 'vesicle';
     if (d.punctured) return 'The hole is open, and the edge below is what is closing it.';
     if (lastEvent === 'needle' && d.healSeconds !== null && d.assembly !== 'dispersed') return `The last hole closed in ${fmt(d.healSeconds, 2)} s.`;
-    if (!wrapped && sheet && !curlOpened) return 'The wrap is off, but the sheet did not reach across the tank, so taking the wrap away opened no ends.';
+    if (!wrapped && sheet && curl === 'none') return 'The wrap is off, but the sheet did not reach across the tank, so taking the wrap away opened no ends.';
     if (!wrapped && d.assembly === 'vesicle') return 'With the wrap gone the sheet rolled up into a ring, and the edge went with it.';
-    if (!wrapped && sheet && d.sealed) return `With the wrap gone the sheet rolled both ends in and capped them. A ring with water inside needs about ninety molecules at this thickness; these ${d.count} close by capping.`;
+    if (!wrapped && sheet && d.sealed && curl === 'opened') return `With the wrap gone the sheet rolled both ends in and capped them. A ring with water inside needs about ninety molecules at this thickness; these ${d.count} close by capping.`;
+    if (!wrapped && sheet && d.sealed) return `Both ends of the sheet are capped. A ring with water inside needs about ninety molecules at this thickness; these ${d.count} close by capping.`;
     if (!wrapped && sheet) return 'The wrap is off: the two open ends are what the sheet is working on.';
     if (d.assembly === 'dispersed' && tank.sweeps === 0) return 'Nothing has been released yet. Press Release.';
     // The one place the tank has to say which of two numbers it is quoting. Section 4.1's 7 nm is a
@@ -1628,7 +1657,10 @@ export function mount(root, ctx) {
     // tailsBuried    0-1, the fraction of tail surface a water probe cannot reach
     // edgeLengthNm   the exposed tail perimeter, nm; about 0 for a sheet with no rim
     // thicknessNm    measured across the sheet, and 0 when there is no sheet
-    // sealed         no open end: the exposed tail edge, averaged over the same second, is under
+    // curl           what the last Curl found: 'opened' (the sheet's ends uncovered), 'none' (a sheet that
+    //                did not reach across, so no ends opened), or null (no Curl on a sheet in this tank)
+    // sealed         no open end: the exposed tail edge, averaged over a full second of samples taken
+    //                since the last press that changed it (Curl or the needle), is under
     //                HELD_SEALED_NM, less than two rim molecules show. The lone thermal rim molecule any
     //                closed sheet shows is not an open end.
     // punctured      true from the needle until the hole closes
