@@ -4103,6 +4103,134 @@ const RECIPES = {
       expect(await h.stage.getByRole('slider', { name: 'Offset' }).isDisabled(), 'the offset should be disabled again with one strand');
     }],
   ],
+  // Figure 8.2. The fields worth asserting are the computed ones — ruledOut, matchesData and strandBands —
+  // and never the ones a button sets. FIGURES.md's invariant: ruledOut does not contain 'dispersive' at
+  // generation 1, because one generation cannot tell the dispersive scheme from the semiconservative one.
+  'meselson-stahl': (() => {
+    // [name, g/cm3, share] for each band, lightest first.
+    const bandsAre = (list, want) => Array.isArray(list) && list.length === want.length
+      && list.every((b, i) => b.name === want[i][0] && near(b.densityGcm3, want[i][1], 1e-6) && near(b.fraction, want[i][2], 1e-9));
+    const brief = (list) => JSON.stringify((list || []).map((b) => [b.name, b.densityGcm3, b.fraction]));
+    const toGeneration = async (h, g) => {
+      const s = h.stage.getByRole('slider', { name: 'Generation' });
+      await s.fill(String(g));
+      await atValue(h, s, g);
+      return until(h, (x) => x.generation === g, 5_000);
+    };
+    const toScheme = async (h, re, id) => {
+      await h.button(re).click();
+      return until(h, (x) => x.scheme === id, 5_000);
+    };
+    return [
+      ['opens-at-generation-0-on-one-heavy-band', async (h) => {
+        const d = await h.describe();
+        expect(d.scheme === 'semiconservative' && d.generation === 0 && d.dataShown === false && d.heated === false, `it should open at generation 0, semiconservative, the data hidden, not heated: ${JSON.stringify({ scheme: d.scheme, generation: d.generation, dataShown: d.dataShown, heated: d.heated })}`);
+        expect(bandsAre(d.bands, [['heavy', 1.724, 1]]) && d.bandCount === 1, `one heavy band at 1.724: ${brief(d.bands)}`);
+        expect(d.matchesData === true && Array.isArray(d.ruledOut) && d.ruledOut.length === 0, `generation 0 should match and rule nothing out: ${JSON.stringify({ matchesData: d.matchesData, ruledOut: d.ruledOut })}`);
+        expect(Array.isArray(d.strandBands) && d.strandBands.length === 0 && d.strandsMatchData === null, `no strand bands before heating: ${JSON.stringify({ strandBands: d.strandBands, strandsMatchData: d.strandsMatchData })}`);
+        expect(await h.button(/^Semiconservative/).getAttribute('aria-pressed') === 'true', 'the Semiconservative button should be the one pressed');
+      }],
+      ['semiconservative-makes-hybrid-then-hybrid-and-light', async (h) => {
+        const one = await toGeneration(h, 1);
+        expect(bandsAre(one.bands, [['hybrid', 1.717, 1]]) && one.matchesData === true, `generation 1 should be one hybrid band, as photographed: ${brief(one.bands)}`);
+        expect(JSON.stringify(one.ruledOut) === '["conservative"]', `generation 1 rules out the conservative scheme alone: ${JSON.stringify(one.ruledOut)}`);
+        const two = await toGeneration(h, 2);
+        expect(bandsAre(two.bands, [['light', 1.71, 0.5], ['hybrid', 1.717, 0.5]]) && two.matchesData === true, `generation 2 should be light and hybrid, half each: ${brief(two.bands)}`);
+        expect(JSON.stringify(two.ruledOut) === '["conservative","dispersive"]', `generation 2 rules out both rivals: ${JSON.stringify(two.ruledOut)}`);
+        const four = await toGeneration(h, 4);
+        expect(bandsAre(four.bands, [['light', 1.71, 0.875], ['hybrid', 1.717, 0.125]]) && four.matchesData === true, `generation 4 should be seven-eighths light: ${brief(four.bands)}`);
+      }],
+      ['conservative-parts-from-the-photograph-at-generation-1', async (h) => {
+        await toScheme(h, /^Conservative/, 'conservative');
+        const d = await toGeneration(h, 1);
+        expect(bandsAre(d.bands, [['light', 1.71, 0.5], ['heavy', 1.724, 0.5]]) && d.bandCount === 2, `conservative copying at generation 1 should give light and heavy, half each: ${brief(d.bands)}`);
+        expect(d.matchesData === false && bandsAre(d.observedBands, [['hybrid', 1.717, 1]]), `it should not match the one hybrid band photographed: ${JSON.stringify({ matchesData: d.matchesData, observedBands: brief(d.observedBands) })}`);
+        expect(JSON.stringify(d.ruledOut) === '["conservative"]', `ruledOut at generation 1 should be the conservative scheme alone: ${JSON.stringify(d.ruledOut)}`);
+      }],
+      ['dispersive-survives-generation-1-and-fails-at-2', async (h) => {
+        const one = await toScheme(h, /^Dispersive/, 'dispersive');
+        expect(one.generation === 1 && bandsAre(one.bands, [['hybrid', 1.717, 1]]) && one.matchesData === true, `dispersive copying at generation 1 should give the photograph's one hybrid band: ${brief(one.bands)}`);
+        expect(!one.ruledOut.includes('dispersive'), `one generation is not enough to rule out the dispersive scheme: ${JSON.stringify(one.ruledOut)}`);
+        const two = await toGeneration(h, 2);
+        expect(bandsAre(two.bands, [['intermediate', 1.7135, 1]]) && two.matchesData === false, `at generation 2 one intermediate band at 1.710 + 0.014/4: ${brief(two.bands)}`);
+        expect(two.ruledOut.includes('dispersive') && two.ruledOut.includes('conservative'), `generation 2 rules the dispersive scheme out: ${JSON.stringify(two.ruledOut)}`);
+        const four = await toGeneration(h, 4);
+        expect(bandsAre(four.bands, [['intermediate', 1.710875, 1]]), `at generation 4 the one band sits at 1.710 + 0.014/16: ${brief(four.bands)}`);
+      }],
+      ['heat-tells-dispersive-from-the-others-but-not-conservative-from-semiconservative', async (h) => {
+        await toGeneration(h, 1);
+        await h.button(/^Heat/).click();
+        const disp = await until(h, (x) => x.heated === true, 5_000);
+        expect(disp.scheme === 'dispersive' && bandsAre(disp.strandBands, [['intermediate', 1.7325, 1]]), `heated dispersive DNA should give one intermediate strand band: ${brief(disp.strandBands)}`);
+        expect(bandsAre(disp.observedStrandBands, [['light', 1.725, 0.5], ['heavy', 1.74, 0.5]]) && disp.strandsMatchData === false, `the 1958 heated DNA gave light and heavy strands, which dispersive copying does not: ${JSON.stringify({ observedStrandBands: brief(disp.observedStrandBands), strandsMatchData: disp.strandsMatchData })}`);
+        expect(bandsAre(disp.bands, [['hybrid', 1.717, 1]]) && disp.matchesData === true && JSON.stringify(disp.ruledOut) === '["conservative"]', `heat should change neither the bands before it nor what is ruled out: ${JSON.stringify({ bands: brief(disp.bands), matchesData: disp.matchesData, ruledOut: disp.ruledOut })}`);
+        const cons = await toScheme(h, /^Conservative/, 'conservative');
+        expect(cons.heated === true && bandsAre(cons.strandBands, [['light', 1.725, 0.5], ['heavy', 1.74, 0.5]]) && cons.strandsMatchData === true, `heated conservative DNA at generation 1 should also give light and heavy strands, half each: ${brief(cons.strandBands)}`);
+        expect(near(cons.strandBands[1].densityGcm3 - cons.strandBands[0].densityGcm3, 0.015, 1e-9), `the two strand bands should be 0.015 g/cm3 apart: ${brief(cons.strandBands)}`);
+        expect(cons.matchesData === false && JSON.stringify(cons.ruledOut) === '["conservative"]', `heat does not rescue the conservative scheme: ${JSON.stringify({ matchesData: cons.matchesData, ruledOut: cons.ruledOut })}`);
+        const semi = await toScheme(h, /^Semiconservative/, 'semiconservative');
+        expect(bandsAre(semi.strandBands, [['light', 1.725, 0.5], ['heavy', 1.74, 0.5]]) && semi.strandsMatchData === true && semi.matchesData === true, `heated hybrid DNA should give light and heavy strands, as in 1958: ${brief(semi.strandBands)}`);
+      }],
+      ['heat-at-generations-0-and-2-has-no-1958-counterpart', async (h) => {
+        const zero = await toGeneration(h, 0);
+        expect(zero.heated === true && bandsAre(zero.strandBands, [['heavy', 1.74, 1]]), `heated generation 0 should be all heavy strands at 1.740: ${brief(zero.strandBands)}`);
+        expect(zero.strandsMatchData === null && zero.observedStrandBands.length === 0, `no heated DNA was photographed at generation 0: ${JSON.stringify({ strandsMatchData: zero.strandsMatchData, observedStrandBands: zero.observedStrandBands })}`);
+        const two = await toGeneration(h, 2);
+        expect(bandsAre(two.strandBands, [['light', 1.725, 0.75], ['heavy', 1.74, 0.25]]) && two.strandsMatchData === null, `heated generation 2 should be three-quarters light strands: ${brief(two.strandBands)}`);
+        await h.button(/^Heat/).click();
+        const cool = await until(h, (x) => x.heated === false, 5_000);
+        expect(cool.heated === false && cool.strandBands.length === 0 && cool.strandsMatchData === null, `pressing Heat again should put the strands back together: ${JSON.stringify({ heated: cool.heated, strandBands: cool.strandBands })}`);
+      }],
+      ['the-1958-data-show-and-change-no-verdict', async (h) => {
+        const before = await h.describe();
+        await h.button(/^Show the 1958 data/).click();
+        const on = await until(h, (x) => x.dataShown === true, 5_000);
+        expect(on.dataShown === true && on.matchesData === before.matchesData && JSON.stringify(on.ruledOut) === JSON.stringify(before.ruledOut), `showing the data should change no computed field: ${JSON.stringify({ matchesData: on.matchesData, ruledOut: on.ruledOut })}`);
+        expect(await h.button(/^Show the 1958 data/).getAttribute('aria-pressed') === 'true', 'the data button should say it is pressed');
+        await h.button(/^Show the 1958 data/).click();
+        const off = await until(h, (x) => x.dataShown === false, 5_000);
+        expect(off.dataShown === false, 'pressing it again should hide the data');
+      }],
+      ['the-keys', async (h) => {
+        await h.focusable().focus();
+        await h.page.keyboard.press('ArrowRight');
+        const three = await until(h, (x) => x.generation === 3, 5_000);
+        expect(three.generation === 3, `the right arrow should step on to generation 3: ${three.generation}`);
+        await h.page.keyboard.press('ArrowLeft');
+        await h.page.keyboard.press('ArrowLeft');
+        const one = await until(h, (x) => x.generation === 1, 5_000);
+        expect(one.generation === 1, `two presses of the left arrow should step back to generation 1: ${one.generation}`);
+        await h.page.keyboard.press('4');
+        await until(h, (x) => x.generation === 4, 5_000);
+        await h.page.keyboard.press('1');
+        const back = await until(h, (x) => x.generation === 1, 5_000);
+        expect(back.generation === 1, `the number keys should choose the generation: ${back.generation}`);
+        await h.page.keyboard.press('s');
+        const cons = await until(h, (x) => x.scheme === 'conservative', 5_000);
+        expect(cons.scheme === 'conservative' && cons.matchesData === false, `S should move on to the conservative scheme: ${cons.scheme}`);
+        await h.page.keyboard.press('s');
+        const disp = await until(h, (x) => x.scheme === 'dispersive', 5_000);
+        expect(disp.scheme === 'dispersive' && disp.matchesData === true, `S again should move on to the dispersive scheme: ${disp.scheme}`);
+        expect(await h.button(/^Dispersive/).getAttribute('aria-pressed') === 'true', 'the Dispersive button should follow the key');
+        await h.page.keyboard.press('h');
+        const hot = await until(h, (x) => x.heated === true, 5_000);
+        expect(hot.heated === true && hot.strandsMatchData === false, `H should heat the DNA: ${JSON.stringify({ heated: hot.heated, strandsMatchData: hot.strandsMatchData })}`);
+        await h.page.keyboard.press('d');
+        const shown = await until(h, (x) => x.dataShown === true, 5_000);
+        expect(shown.dataShown === true, 'D should show the 1958 data');
+      }],
+      ['reset-puts-everything-back', async (h) => {
+        await h.button(/^Reset/).click();
+        const d = await until(h, (x) => x.generation === 0 && x.scheme === 'semiconservative' && x.heated === false && x.dataShown === false, 5_000);
+        expect(d.scheme === 'semiconservative' && d.generation === 0 && d.heated === false && d.dataShown === false && d.t === 0, `Reset left ${JSON.stringify({ scheme: d.scheme, generation: d.generation, heated: d.heated, dataShown: d.dataShown, t: d.t })}`);
+        expect(bandsAre(d.bands, [['heavy', 1.724, 1]]) && d.ruledOut.length === 0 && d.strandBands.length === 0, `Reset should leave the one heavy band: ${JSON.stringify({ bands: brief(d.bands), ruledOut: d.ruledOut, strandBands: d.strandBands })}`);
+        const shownGen = await atValue(h, h.stage.getByRole('slider', { name: 'Generation' }), 0);
+        expect(shownGen === '0', `the Generation control should read 0 after Reset: ${shownGen}`);
+        expect(await h.button(/^Semiconservative/).getAttribute('aria-pressed') === 'true', 'the Semiconservative button should be pressed again after Reset');
+        expect(await h.button(/^Heat/).getAttribute('aria-pressed') === 'false' && await h.button(/^Show the 1958 data/).getAttribute('aria-pressed') === 'false', 'Heat and the data should be off after Reset');
+      }],
+    ];
+  })(),
 };
 
 rmSync(OUT, { recursive: true, force: true });

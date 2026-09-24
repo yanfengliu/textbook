@@ -307,7 +307,7 @@ export function mount(root, ctx) {
     },
     narrow: {
       columns: 'minmax(0, 56fr) minmax(0, 44fr)',
-      rows: 'minmax(0, 58fr) minmax(0, 42fr)',
+      rows: 'minmax(0, 54fr) minmax(0, 46fr)',
       rowGap: 'var(--space-1)',
       at: { tube: [1, 1], molecules: [2, 1], table: ['1 / 3', 2] },
     },
@@ -535,7 +535,7 @@ export function mount(root, ctx) {
 
     const top = 38;
     const bottom = hh - 36;
-    const slot = Math.min(52, (bottom - top) / groups.length);
+    const slot = Math.min(64, (bottom - top) / groups.length);
     const y0 = top + ((bottom - top) - slot * groups.length) / 2;
     const gx = 30;
     const len = clamp(w - gx - 6, 40, 110);
@@ -543,8 +543,8 @@ export function mount(root, ctx) {
       const cy = y0 + (i + 0.4) * slot;
       p.text(0, cy + 4, `×${g.count}`, { 'font-size': 10.5, 'font-weight': 600, fill: C.ink, class: 'ms-num' });
       if (heated) strandLine(p, gx, gx + len, cy, g.sample, C.ink);
-      else drawMolecule(p, gx + len / 2, cy, len, 10, g.sample, { colour: C.ink });
-      p.text(gx, cy + (heated ? 15 : 19), nameOf(g.share, heated), { fit: [9.5, 8.5], width: w - gx, fill: C.soft });
+      else drawMolecule(p, gx + len / 2, cy, len, 11, g.sample, { colour: C.ink });
+      p.text(gx, cy + (heated ? 15 : 20), nameOf(g.share, heated), { fit: [9.5, 8.5], width: w - gx, fill: C.soft });
     });
 
     const ky = hh - 20;
@@ -683,69 +683,103 @@ export function mount(root, ctx) {
       return { text: `The 1958 heated DNA gave two bands, light and heavy, where this predicts ${bandWord(pr.strands.length)}.`, accent: C.coralText };
     };
 
-    // Level 0 is everything; each level after it gives one thing up, the comparison of the schemes first.
-    const LEVELS = 5;
+    // The table of this generation's bands. Level 0 is everything. Heated, 1 gives up the bands before
+    // heating, 2 the schemes ruled out (heat changes none of them), and 3 the sentence on what heat does,
+    // which is the last thing to go because it is the reason the strands band where they do.
     const build = (r, level) => {
       if (heated) {
         r.head('Heated: single strands');
         rows(r, pr.strands, dataShown ? obsHeated : null, true);
         if (level < 3) note(r, heatNote());
         note(r, heatDataNote());
-        if (level < 2) {
+        if (level < 1) {
           r.head('Before heating');
           rows(r, pr.bands, dataShown ? obs : null, false);
           note(r, duplexNote());
         } else if (!dataShown) note(r, duplexNote());
+        if (dataShown && level < 2) note(r, ruledNote());
       } else {
         rows(r, pr.bands, dataShown ? obs : null, false);
         note(r, duplexNote());
+        if (dataShown) note(r, ruledNote());
       }
-      if (dataShown) note(r, ruledNote());
       r.rule();
     };
-    // Under the table, what each scheme predicts at this generation, so the switch can be read at a glance.
-    const summaryTitle = heated ? `Each scheme, heated, generation ${gen}` : `Each scheme at generation ${gen}`;
-    const buildSummary = (r) => {
-      const obsX = heated ? obsHeated : obs;
-      for (const s of SCHEMES) {
-        const bands = heated ? PREDICTED[s][gen].strands : PREDICTED[s][gen].bands;
-        const bad = dataShown && obsX && !sameBands(bands, obsX);
-        r.row(cap(s), bandList(bands), { accent: bad ? C.coralText : undefined, strong: s === scheme });
-      }
-      if (dataShown && obsX) r.row('Photographed, 1958', bandList(obsX));
+    // Under it, what each scheme predicts at this generation, so the switch can be read at a glance; and
+    // what this scheme predicts at every generation, so the stepper can. The row being shown is in ink and
+    // the others soft; coral is a prediction the photograph contradicts, once the data are shown.
+    const heatedTag = heated ? ', heated' : '';
+    const EXTRAS = {
+      schemes: {
+        title: `Each scheme${heatedTag}, generation ${gen}`,
+        build: (r) => {
+          const obsX = heated ? obsHeated : obs;
+          for (const s of SCHEMES) {
+            const bands = heated ? PREDICTED[s][gen].strands : PREDICTED[s][gen].bands;
+            const bad = dataShown && obsX && !sameBands(bands, obsX);
+            r.row(cap(s), bandList(bands), { accent: bad ? C.coralText : s === scheme ? undefined : C.soft });
+          }
+          if (dataShown && obsX) r.row('Photographed, 1958', bandList(obsX));
+        },
+      },
+      history: {
+        title: `${cap(scheme)}${heatedTag}, every generation`,
+        build: (r) => {
+          for (let g = 0; g <= MAX_GEN; g += 1) {
+            const bands = heated ? PREDICTED[scheme][g].strands : PREDICTED[scheme][g].bands;
+            const obsX = heated ? OBSERVED_HEATED[g] ?? null : OBSERVED[g];
+            const bad = dataShown && obsX && !sameBands(bands, obsX);
+            r.row(`Generation ${g}`, bandList(bands), { accent: bad ? C.coralText : g === gen ? undefined : C.soft });
+          }
+        },
+      },
     };
-    const main = (y) => p.readout({ title, columns, x: 0, y, width: w, size, titleSize });
-    const summary = (y) => p.readout({ title: summaryTitle, columns: null, x: 0, y, width: w, size, titleSize });
-
-    const H = hh - 4;
+    // Each plan gives up one more thing than the one before it, the summaries first.
+    const PLANS = [
+      { extras: ['schemes', 'history'], level: 0 },
+      { extras: ['schemes'], level: 0 },
+      { extras: [], level: 0 },
+      { extras: [], level: 1 },
+      { extras: [], level: 2 },
+      { extras: [], level: 3 },
+    ];
+    const TOP = 2;
+    const H = hh - TOP - 3;
     const GAP = 18;
     p.clear();
-    for (let level = 0; level < LEVELS; level += 1) {
-      const rt = main(2);
-      build(rt, level);
-      const withSummary = level === 0;
-      if (withSummary) {
-        const rs = summary(0);
-        buildSummary(rs);
-        if (rt.height(14) + GAP + rs.height(14) > H) continue;
-        // One row height for both, the largest that fills the column, so the two read as one table.
-        let lo = 14;
-        let hi = 26;
-        for (let i = 0; i < 30; i += 1) {
-          const mid = (lo + hi) / 2;
-          if (rt.height(mid) + GAP + rs.height(mid) <= H) lo = mid;
-          else hi = mid;
-        }
-        const bottom = rt.draw(lo, H);
-        const rs2 = summary(bottom + GAP);
-        buildSummary(rs2);
-        rs2.draw(lo, hh - 4 - (bottom + GAP));
+    for (let i = 0; i < PLANS.length; i += 1) {
+      const plan = PLANS[i];
+      const parts = [
+        (y) => {
+          const r = p.readout({ title, columns, x: 0, y, width: w, size, titleSize });
+          build(r, plan.level);
+          return r;
+        },
+        ...plan.extras.map((k) => (y) => {
+          const r = p.readout({ title: EXTRAS[k].title, columns: null, x: 0, y, width: w, size, titleSize });
+          EXTRAS[k].build(r);
+          return r;
+        }),
+      ];
+      const total = (rh) => parts.reduce((s, make) => s + make(0).height(rh), 0) + GAP * (parts.length - 1);
+      // A summary is only worth its room at a row height that still reads as a table rather than a list.
+      const least = plan.extras.length ? (narrow ? 17 : 19) : 14;
+      if (i < PLANS.length - 1 && total(least) > H) continue;
+      if (parts.length === 1) {
+        parts[0](TOP).fill(H);
         return;
       }
-      if (level === LEVELS - 1 || rt.height(14) <= H) {
-        rt.fill(H);
-        return;
+      // One row height for all of them, the largest that fills the column, so they read as one table.
+      let lo = least;
+      let hi = 26;
+      for (let k = 0; k < 30; k += 1) {
+        const mid = (lo + hi) / 2;
+        if (total(mid) <= H) lo = mid;
+        else hi = mid;
       }
+      let y = TOP;
+      for (const make of parts) y = make(y).draw(lo, TOP + H - y) + GAP;
+      return;
     }
   }
 
