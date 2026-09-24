@@ -20,9 +20,11 @@ A directory `biology/chNN-<slug>/` holding five files:
 
 Plus the figure modules, one file each in `src/figures/`, registered in `src/figures/registry.js`, each with a recipe in `tools/drive.js`.
 
+`index.html`'s `<head>` is copied from the previous chapter, and one thing in it is load-bearing: the two lines of `THEME_BLOCK` from `src/theme-early.js`, before the first stylesheet — every page carries them on the line after `<meta name="viewport" …>`. They apply the reader's stored theme before the page is first styled. A page without them shows a reader whose choice differs from their system the whole page in the other theme for a few frames, and then its titles fading across. Copy them verbatim and never edit a page's copy. `test/theme-early.test.js`, in `npm run unit`, fails a page that loads the shell and is missing them, carries a drifted copy, or carries them after a stylesheet; it names the page and prints the block to paste. `npm run theme` checks in a browser that the theme is on `<html>` before `<body>` exists.
+
 ## What a gate can see, and what it cannot
 
-Read this twice. Ten gates run before every commit and **not one of them can see a page**. Every gate says so in its own header; `local-rules.md` says it as a rule.
+Read this twice. `npm test` runs every gate before every commit, and **not one of them can see a page**. Every gate says so in its own header; `local-rules.md` says it as a rule.
 
 | A gate answers | Only a person answers |
 |---|---|
@@ -185,7 +187,7 @@ The order of work, across the stages above:
 
 Sizing and resources: one worker per disjoint set of files, and **exactly one expensive gate at a time** — a browser gate owns a port and the CPU, and workers firing them at once empty each other's `out/` directories mid-read. Workers run kind-trimmed and page-trimmed gates (`DRIVE_KINDS`, `NARROW_KINDS`, `SWEEP_KINDS`, `SHOT_PAGES`, `DEVICE_PAGES`) and copy frames out of `out/` immediately. A trimming value that names nothing stops the gate rather than running nothing and passing. Page ids are book-qualified: `biology/ch04`, not `ch04`. The full chain runs once, by the integration owner, at the end; on `f5bd0e9` that was 36 minutes, of which `devices` was 25.
 
-- [ ] `npm test` green, all ten steps, run once with no worker competing.
+- [ ] `npm test` green, every step, run once with no worker competing.
 - [ ] `npm run audit` green if any dependency changed.
 - [ ] The chapter's `tb-source` is in `today/index.html` — `npm run check` prints the exact element when it is missing.
 - [ ] The chapter is marked Read with a link and a dek on `biology/index.html`, and the previous chapter's next-card points at it.

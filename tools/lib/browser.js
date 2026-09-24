@@ -22,11 +22,12 @@ export const GPU_ARGS = [...WEBGL_ARGS, '--use-angle=d3d11', '--enable-gpu-raste
 // vs_5_0 ps_5_0, D3D11)` against `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero)
 // (0x0000C0DE)), SwiftShader driver)`), `gpu: true` runs `npm run sweep3d` in a median 52.1 s against
 // 101.1 s — **1.94x**, over nine arms, of which the four GPU arms sat inside 10% and the CPU arms
-// ranged 61.1-155.4 s (out/gpu/renderer.json, out/gpu/arm*.log). It is declined because the CPU is
-// byte-reproducible and the GPU is not: two CPU runs of the sweep produced 180/180 identical frames at
-// max delta 0, two GPU runs 119/180 with a 1-2/255 jitter in the rest. "Every frame is a pure function
-// of its clock and the reader's actions" is exactly the promise that a screenshot is the same frame
-// every run, and 1.94x is not worth spending it. The speed is still reachable per tool through
+// ranged 61.1-155.4 s (out/gpu/renderer.json, out/gpu/arm*.log). It is declined on the sweep's own
+// measurement: two CPU runs of the sweep produced 180/180 identical frames at max delta 0, two GPU runs
+// 119/180 with a 1-2/255 jitter in the rest. So on the CPU a sweep frame that changes is a drawing that
+// changed, and 1.94x is not worth losing that. It is a measurement of the sweep's WebGL frames, not a
+// promise about every gate's: on this same CPU rasterizer `npm run shot` writes 61 of its 72 frames
+// identically across three runs (tools/shot.js's header). The speed is still reachable per tool through
 // PERF_GPU / SHOT_GPU / SWEEP_GPU, which is where a developer who wants the fast loop should ask for it.
 //
 // The segment that dominates either way is the screenshot readback, not the raster: 762.4 of 922.9 ms
