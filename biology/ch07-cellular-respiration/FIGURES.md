@@ -1,30 +1,35 @@
 # Chapter 7 — figure brief
 
-Eight figures, in the order they appear in `index.html`. The figure number is fixed by that order and the prose cites every one of them by number, so the order does not change without editing the prose.
+Four figures, in the order they appear in `index.html`. The figure number is fixed by that order and the prose cites every one of them by number, so the order does not change without editing the prose.
 
 | # | Kind | Id | Section | WebGL | `aspect` | `narrowAspect` |
 |---|---|---|---|---|---|---|
-| 7.1 | `respiration-tour` | `fig-respiration` | opener, cited in 7.1 | no | 16 / 9 | 4 / 5 |
-| 7.2 | `glycolysis` | `fig-glycolysis` | 7.2 | no | 21 / 9 | 3 / 4 |
-| 7.3 | `krebs` | `fig-krebs` | 7.3 | no | 16 / 10 | 4 / 5 |
-| 7.4 | `respiratory-chain` | `fig-chain` | 7.4 | no | 21 / 9 | 4 / 5 |
-| 7.5 | `atp-synthase` | `fig-synthase` | 7.5 | **yes** | 16 / 10 | 1 |
-| 7.6 | `yield-ledger` | `fig-yield` | 7.6 | no | 16 / 9 | 3 / 4 |
-| 7.7 | `fermentation` | `fig-fermentation` | 7.7 | no | 16 / 9 | 4 / 5 |
-| 7.8 | `uncoupler-bench` | `fig-uncoupling` | 7.8 | no | 16 / 9 | 3 / 4 |
+| 7.1 | `glycolysis` | `fig-glycolysis` | 7.2 | no | 21 / 9 | 3 / 4 |
+| 7.2 | `krebs` | `fig-krebs` | 7.3 | no | 16 / 10 | 4 / 5 |
+| 7.3 | `respiratory-chain` | `fig-chain` | 7.4, cited again in 7.7 and 7.8 | no | 21 / 9 | 4 / 5 |
+| 7.4 | `fermentation` | `fig-fermentation` | 7.7 | no | 16 / 9 | 4 / 5 |
 
-Kind ids and figure ids are clear of every other chapter's, checked against `src/figures/registry.js` on 2026-09-17 and against chapter 6's own list, supplied by its author the same day: chapter 6 is `photon-lab`, `chloroplast3d`, `pigment-spectra`, `zscheme`, `proton-ledger`, `calvin-cycle`, `rubisco-fork`, `carbon-concentrator`, none of which collides with the eight above. Two names here were chosen deliberately against the obvious one. `glycolysis` is a kind and also a glossary key and also this chapter's §7.2 `<section id>`; those three namespaces do not meet, and `npm run check` holds that every `id` in the document is unique, which the figure id `fig-glycolysis` satisfies. And the chain figure is `respiratory-chain` rather than `electron-chain`, because chapter 6 draws the other one and a bare `electron-chain` would have to be fought over later.
+**Four were cut on 2026-09-24.** The owner finished this chapter at the reduced scope chapter 6 set (`docs/policies/local-rules.md`, "The usage allowance is the budget"): four of its eight planned figures, and questions instead of figure tasks, so no item in `items.js` sets a task on any figure. The four cut, with the numbers they had in the first plan, and what their sections carry now:
 
-**One WebGL figure, deliberately, and for the same reason chapters 4 and 5 each had one.** ATP synthase is a rotary motor: the rotor turns inside a fixed head, the shaft is bent and off-centre, and the three catalytic sites are at 120 degrees to one another. Every one of those facts is about arrangement in space, and a reader who cannot turn the thing over has to take the geometry on trust. The other seven subjects are ledgers, lines, rings, traces and maps, which a composed 2D view states better than a perspective one.
+- `respiration-tour` (7.1, the opener's hero). §7.1's argument was always carried by its prose and its four-stage table. The flame against the cell is now one sentence of prose, and the opener has no hero figure. Review finding 12, about the hero's calorimeter, went with it.
+- `atp-synthase` (7.5, the chapter's only WebGL figure). The first plan said it could not be cut. It could, at a cost worth naming: §7.5's argument that the synthase is a motor rests on Boyer's binding change, Walker's structure and Noji's filament, all three of which the prose tells, but a reader now takes the machine's geometry — the ring, the bent shaft, the three sites at 120 degrees — on trust from the prose rather than turning it over.
+- `yield-ledger` (7.6). §7.6 carries the sum in its two tables and the 38 as arithmetic in the prose.
+- `uncoupler-bench` (7.8). The oxygen trace is told, not run, as chapter 6 told its uncoupler; the blocking half is Figure 7.3's inhibitor controls, and the sort at the end of §7.8 is where the reader does the diagnosis.
+
+Their briefs are in this file as it was imported, `git show origin/ch06-07:biology/ch07-cellular-respiration/FIGURES.md`, and should be read only as history: they predate the review of 2026-09-22. Twenty objectives named a cut figure. Seventeen now name none, which the checker accepts. `proton-motive-force` names `fig-chain` instead, and `blocking-the-chain` and `diagnose-respiration` keep the `fig-chain` they already named beside the cut one. `anaerobic-respiration` gains `fig-chain` for its new acceptor control (review finding 17). The header of `objectives.js` says the same.
+
+Kind ids and figure ids are clear of every other chapter's, checked against `src/figures/registry.js` on 2026-09-17 and against chapter 6's own list, supplied by its author the same day. Two names here were chosen deliberately against the obvious one. `glycolysis` is a kind and also a glossary key and also this chapter's §7.2 `<section id>`; those three namespaces do not meet, and `npm run check` holds that every `id` in the document is unique, which the figure id `fig-glycolysis` satisfies. And the chain figure is `respiratory-chain` rather than `electron-chain`, because chapter 6 draws the other one and a bare `electron-chain` would have to be fought over later.
+
+No figure here is WebGL, so this chapter adds nothing to `npm run sweep3d`. The four subjects are a line, a ring, a ladder and a count, which a composed 2D view states better than a perspective one.
 
 ## Palette: this chapter asks for nothing new
 
 Read the long comment above `METABOLISM` in `src/palette.js` before adding anything, and then do not add anything. Chapter 5's brief asked for six values and the measurement that answered it fixed four — `atp`, `enzyme`, `electronCarrier`, `electronCarrierLoaded` — and refused two, `adp` and `phosphate`, with a reason in each case that `metabolismPart()` now throws back at you by name. Chapter 7 draws the same substances under load and needs no colour the book has not got:
 
 - **ATP and ADP** are `metabolismPart('atp')`, ADP being the same disc with its third phosphate gone. Do not ask for an `adp` colour; the error message explains why, and the sweep that produced it is in the file.
-- **A transferred phosphate group** is a phosphorus atom with its oxygens — `ELEMENTS.P` in `src/figures/lib/chem-atoms.js`, violet with P written on it in `paper`. Figures 7.2 and 7.5 both move one, and they move the same mark.
+- **A transferred phosphate group** is a phosphorus atom with its oxygens — `ELEMENTS.P` in `src/figures/lib/chem-atoms.js`, violet with P written on it in `paper`. Figure 7.1 moves one, and any later figure that moves one moves the same mark.
 - **NAD⁺ and NADH, FAD and FADH₂** are `electronCarrier` and `electronCarrierLoaded`. The pair is the one pair in the table meant to read as related, measured at 13.4 apart, and §7.4's whole argument is that the difference between them is what the chain is unloading. Do not draw a loaded carrier as the currency: `atp` against `electronCarrierLoaded` is 43.3 apart precisely so a reader cannot confuse an ATP with an NADH, and §7.6's sum is meaningless to anyone who does.
-- **A respiratory complex is a pump**, `membranePart('pump')`, because that is exactly what it is; and so is ATP synthase, which is a pump named for the direction we care about (§7.5). Complex II, which pumps nothing, is drawn as `enzyme` instead, and that difference is a claim the figure is making.
+- **A respiratory complex is a pump**, `membranePart('pump')`, because that is exactly what it is. Complex II, which pumps nothing, is drawn as `enzyme` instead, and that difference is a claim the figure is making.
 - **The membrane** is `lipidHead` and `lipidTail`; **the organelle** is `mitochondrion` from `ORGANELLES`; **glucose and the sugar intermediates** are `glucose` from `MEMBRANE`; **oxygen, iron and the ions** come from the element table.
 
 Two quantities in this chapter have nothing to be the colour of, and both are set as type rather than given a hue. **Heat** is `inkSoft`, as §5.1 and §5.4 set it. **A proton** is a hydrogen ion and takes `ELEMENTS.H`, but a *gradient* of them is not a colour at all: it is a number in millivolts and a count on two sides of a line, and a figure that shades the intermembrane space to show "more protons" has drawn a fog where it should have drawn a readout.
@@ -91,7 +96,7 @@ It shows a mechanism the reader changes, not a picture of a noun. A labelled dia
 
 Three things read it: `npm run drive`, `npm run narrow`, and every `task` item in `items.js`. Write it for them.
 
-- **It may not report `id`, `kind`, `number` or `state`.** The frame owns those four and spreads them last, so a figure using one would lose its own value without a word. `npm run drive` fails it. `foldlab` reports `foldState`; `plantcell3d` reports `turgorState`. No field in this brief uses any of the four, and none may be added — which is why 7.1 reports `stage` and `scene`, 7.5 reports `direction`, and 7.8 reports `verdict`, rather than any of them being called a state.
+- **It may not report `id`, `kind`, `number` or `state`.** The frame owns those four and spreads them last, so a figure using one would lose its own value without a word. `npm run drive` fails it. `foldlab` reports `foldState`; `plantcell3d` reports `turgorState`. No field in this brief uses any of the four, and none may be added.
 - Report the numbers in the units the prose uses, so a task's goal and the readout agree. In this chapter that means kilojoules per mole for every energy, volts for every reduction potential, millivolts for every membrane force, millimoles per litre for every concentration, and whole counts for protons, ATP and carbons.
 - Every field an item can name must be reachable through the reader's own controls, and **must not become true on its own as the clock runs** — otherwise the only load-bearing clause in the expectation is the one proving the reader acted.
 
@@ -99,51 +104,18 @@ Three things read it: `npm run drive`, `npm run narrow`, and every `task` item i
 
 A sentence inside a figure module is read by the same reader and is corrected when the chapter is. `symbiont.js` carried a claim about mitochondrial division machinery for days after the prose had dropped it as wrong. **Five sentences in this chapter are ones the whole chapter turns on, and a figure that contradicts any of them is wrong however good it looks**: that the electron transport chain makes no ATP; that oxygen is what takes the electrons at the end and not what the chain is for; that fermentation yields no ATP of its own; that the ATP per glucose is a range of about 30 to 32 and not 38; and that lactate is a fuel and is not what makes a muscle ache two days later.
 
----
+**Six more sentences were corrected by the review of 2026-09-22 and by the item writer's findings of 2026-09-23, and the four figures below must follow them.** A figure that repeats the first draft's version is wrong however good it looks.
 
-## 7.1 · `respiration-tour` — One glucose, taken apart in four places
-
-**What it shows.** A cell in section, with its cytosol and one mitochondrion opened far enough to show the outer membrane, the intermembrane space, the folded inner membrane and the matrix. One glucose molecule is followed through all four stages. Three things are tracked at once and each has its own mark: the six carbons, which leave as carbon dioxide and are counted out; the electrons, which go onto carriers and then along the inner membrane; and the ATP, which is counted and marked by the stage that made it. It opens paused, at the start of glycolysis, with every counter at zero — because the first thing a reader should do is run it and notice how long the ATP counter stays small.
-
-**The second scene is the argument.** A steel calorimeter beside the cell, with the same glucose and the same oxygen in it. Igniting it gives the same equation, the same free energy, a thermometer that climbs past a thousand degrees, and an ATP counter that never leaves zero. The two scenes share one ledger, so the free energy released reads the same in both and only the disposal differs.
-
-**What the reader does.**
-- **Run**, **pause**, **step to the next stage**, **reset**. Stepping is the point: a reader who stops after the link reaction should see four carbons still in the cell and two ATP on the board.
-- **Speed**, three settings. The default is slow enough that a carbon can be followed by eye.
-- **Burn it instead**, which switches to the calorimeter and back. Both scenes keep their counters, so the comparison survives switching.
-- **Show what is tracked**: carbon, electrons, or ATP. All three at once is legible at desktop and is not at 390 px, which is what the narrow composition is for.
-- **Heat readout**, set as type and not as a colour: kilojoules released so far, and the fraction captured.
-
-**Objectives it teaches.** `respiration-definition`, `respiration-vs-combustion`, `four-stages`, `cristae-area`.
-
-**`describe()`**
-
-| field | type | meaning |
-|---|---|---|
-| `scene` | string | `'cell' \| 'calorimeter'` |
-| `stage` | string | `'glycolysis' \| 'link' \| 'krebs' \| 'oxphos' \| 'done'`; `'none'` in the calorimeter |
-| `compartment` | string | where the current stage is happening: `'cytosol' \| 'matrix' \| 'inner-membrane'` |
-| `tracking` | string | `'carbon' \| 'electrons' \| 'atp'` |
-| `carbonsReleased` | number | 0 to 6; 2 after the link reaction, 6 after two turns |
-| `carriersLoaded` | number | NADH plus FADH₂ currently reduced |
-| `nadhMade`, `fadh2Made` | number | running totals |
-| `protonsPumped` | number | 0 until the fourth stage, and that zero is a claim |
-| `atpByStage` | object | `{ glycolysis, krebs, oxphos }`, whole numbers |
-| `atpTotal` | number | the sum |
-| `heatKj` | number | released and not captured, kJ per mole of glucose |
-| `capturedFraction` | number | 0–1; 0 in the calorimeter in every state |
-| `temperatureC` | number | 37 in the cell whatever happens; hundreds in the calorimeter |
-| `speed` | string | `'slow' \| 'normal' \| 'fast'` |
-| `t` | number | clock, seconds, three decimals |
-| `playing` | boolean | |
-
-**Why it is a mechanism.** The reader can stop the run at any stage and read three counters that disagree with the story most readers arrive with: the carbon is all gone before the ATP starts, and the calorimeter's thermometer is the only thing in the figure that moves when the same reaction is allowed to go at once. The claim that the two routes have the same free energy is on the stage as one number shared between two scenes, and a reader can check it rather than being told it.
-
-**Narrow composition.** Second composition. The cell and the calorimeter cannot sit side by side at 390 px, so below 800 px only one scene is drawn at a time and **Burn it instead** becomes the switch between them rather than a comparison control; the shared ledger is what carries the comparison, and it keeps both columns. The mitochondrion moves from beside the cytosol to below it, the three trackings stop being simultaneous — `tracking` selects one and the other two are counted rather than drawn — and the stage counters become four rows of type under the stage. Nothing is dropped: every field above is still reachable.
+- **The carbons that leave on a turn of the Krebs cycle are not the two that just arrived.** By the end of the second turn as much carbon has left as the glucose brought in, which is a count and not a tracking of atoms. The acetyl group's carbonyl carbon leaves entirely on the second turn; its methyl carbon leaves none on the first two, half on the third, and half of what is left on each turn after that, because succinate is symmetrical. The carbon dioxide of the first turn came from oxaloacetate. Figure 7.2 is built on this.
+- **1,3-bisphosphoglycerate is not on Section 5.3's table.** It belongs above ATP on that ladder, at about −49 kJ/mol, between creatine phosphate (−43.0) and phosphoenolpyruvate (−61.9). Figure 7.1 says where it belongs, not that the table lists it.
+- **Not every organism runs the same ten steps.** A human, a yeast and most bacteria do. *Pyrococcus* spends ADP rather than ATP at its two phosphorylations and skips 1,3-bisphosphoglycerate; *Sulfolobus* takes another route and joins only in the lower half. What all three domains share is the three-carbon lower half. Figure 7.1 draws one organism's pathway and must not claim it is everybody's.
+- **Only the Krebs cycle's FADH₂ enters at complex II.** The other FAD enzymes hand their electrons to ubiquinone through doors of their own, at the same level and with the same result. Figure 7.3's second donor is the cycle's.
+- **A yeast's carbons, per glucose, are two in carbon dioxide and four in ethanol.** Per pyruvate it is one and two. Figure 7.4's ethanol route counts per glucose.
+- **The yield is a range of about 30 to 32 ATP per glucose.** A figure that shows one number says which tissue it is.
 
 ---
 
-## 7.2 · `glycolysis` — Ten steps, two halves
+## 7.1 · `glycolysis` — Ten steps, two halves
 
 **What it shows.** The ten steps as a line the reader walks, left to right, with the molecule drawn at each step: its carbon count, its phosphate groups, and the enzyme's name beneath. At step four the six-carbon molecule splits and the line becomes two lanes that run in step, which is the visual fact that makes the ledger come out right. Running tallies sit under the line — ATP spent, ATP made, net ATP, NADH, pyruvate — and the net figure is deliberately negative for the first four steps. It opens at step 0 with nothing spent, paused.
 
@@ -152,9 +124,9 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 - **Ledger per glucose** or **per fragment**, which is the commonest arithmetic slip in the section and is worth being able to switch.
 - **The committed step's controls**: an ATP slider and an AMP slider in millimoles per litre, and a citrate slider. Raising ATP closes the committed step and the line stops there with a readout saying which control closed it; raising AMP opens it again. This is §5.7's feedback loop with the reader's hand on it.
 - **Knock out an enzyme**, any of the ten. The intermediate before the gap accumulates and everything past it drains away, both reported.
-- **Name the phosphate donor**: the two ATP-making steps each print the compound the phosphate came from and where that compound sits on §5.3's ladder, because §7.2's argument is that the sugar paid and not the phosphate.
+- **Name the phosphate donor**: the two ATP-making steps each print the compound the phosphate came from and that it belongs **above** ATP on §5.3's ladder, because §7.2's argument is that the sugar paid and not the phosphate. Phosphoenolpyruvate is on §5.3's table; 1,3-bisphosphoglycerate is not, and the figure says where it belongs (about −49 kJ/mol, between creatine phosphate and PEP) rather than that the table lists it.
 
-**Objectives it teaches.** `glycolysis-ledger`, `substrate-level-phosphorylation`, `glycolysis-committed-step`, `glycolysis-universal`.
+**Objectives it teaches.** `glycolysis-ledger`, `substrate-level-phosphorylation`, `glycolysis-committed-step`, `glycolysis-universal`. No field below grades `glycolysis-universal`: the figure draws one organism's ten steps, and §7.2's point is that other domains build the top half differently. That objective is tested by questions only, and an item writer should not hunt for a `task` (review finding 30).
 
 **`describe()`**
 
@@ -184,15 +156,15 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 
 ---
 
-## 7.3 · `krebs` — The carbon, and where it goes
+## 7.2 · `krebs` — The carbon, and where it goes
 
 **What it shows.** The cycle as a ring of eight positions, with the carbon count written on every intermediate, the link reaction feeding in from outside the ring, and the two decarboxylations and four oxidations marked where they happen. The ring is the drawing and it fills the pane; the tallies are typography to one side. It opens with the link reaction done and one acetyl group waiting, paused at the joining step.
 
-**The labelled carbon is the reason this figure exists.** The reader can label either of the acetyl group's two carbons, or any one of oxaloacetate's four, and follow it round for three turns. The readout names where the label is and which turn it finally left on, and for an acetyl carbon the answer is never the first — which is the fact §7.3's margin note is about, and the one a reader will not believe from a sentence.
+**The labelled carbon is the reason this figure exists.** The reader can label either of the acetyl group's two carbons, or any one of oxaloacetate's four, and follow it round for as many turns as they like. `acetyl-1` is the carbonyl carbon and `acetyl-2` the methyl; oxaloacetate's carbons are numbered from the carboxyl beside the keto group, so `oxaloacetate-1` and `oxaloacetate-4` are its two carboxyls. The readout names where the label sits, how much of it left on each turn, and how much is still in the cycle. The rule the figure must compute rather than script is this. A carbon that ends a turn as one of succinate's two carboxyls leaves entirely on the next turn; a carbon that ends a turn as one of its two middle carbons is split half and half between the two classes on the next, because succinate is symmetrical and the enzyme after it cannot tell its ends apart. So `acetyl-1` leaves none on the first turn and all of it on the second; `acetyl-2` leaves none on the first two, half on the third, and half of what is left on each turn after that; `oxaloacetate-1` and `oxaloacetate-4` leave on the first turn, because they are the carbon dioxide of that turn; `oxaloacetate-3` leaves on the second, as `acetyl-1` does; and `oxaloacetate-2` follows `acetyl-2`. For an acetyl carbon the answer is never the first turn, which is the fact §7.3's margin note is about, and one a reader will not believe from a sentence. The obvious implementation, which releases whichever carbons the decarboxylation steps happen to point at, gets every one of these wrong.
 
 **What the reader does.**
-- **Run**, **step**, **reset**, and a **turn counter** that keeps going past the second turn, because the labelled carbon needs three.
-- **Label a carbon**: six choices, and a readout naming the labelled position and, once it has gone, the turn it left on.
+- **Run**, **step**, **reset**, and a **turn counter** that keeps going past the second turn, because the methyl carbon does not begin to leave until the third and is never entirely gone.
+- **Label a carbon**: six choices, and a readout naming where the label sits, the share of it that left on each turn so far, and the share still in the cycle.
 - **Drain an intermediate** to a named biosynthetic route — the five-carbon one to glutamate, oxaloacetate to aspartate, citrate out for fat. Oxaloacetate runs down and the cycle slows and stops, with the readout saying what it is short of. **Top up** carboxylates pyruvate and restarts it.
 - **Fuel**: glucose, a sixteen-carbon fatty acid, or an amino acid. Each traces its own entry point into the ring, and the fatty acid's is drawn as repeated two-carbon cuts with the carriers each cut produces.
 - **Tallies**, per turn and cumulative: carbons in, carbons out, NADH, FADH₂, ATP.
@@ -206,12 +178,14 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 | `turn` | number | 0 before the first joining step |
 | `position` | string | which of the eight intermediates the cycle is at |
 | `carbonsHere` | number | the current intermediate's carbon count, 4, 5 or 6 |
-| `carbonsIn`, `carbonsOut` | number | cumulative; equal at the end of every turn |
+| `carbonsIn`, `carbonsOut` | number | cumulative counts; equal at the end of every turn, which is a count and not a claim about which atoms left |
 | `nadhPerTurn`, `fadh2PerTurn`, `atpPerTurn` | number | 3, 1 and 1 in every state; a run reporting otherwise is a defect |
 | `nadhTotal`, `fadh2Total`, `atpTotal` | number | cumulative |
 | `labelledCarbon` | string \| null | `'acetyl-1' \| 'acetyl-2' \| 'oxaloacetate-1'…`; null when none |
 | `labelPosition` | string \| null | where the label currently sits |
-| `labelReleasedOnTurn` | number \| null | the turn the labelled carbon left on; never 1 for an acetyl carbon |
+| `labelFirstLeftOnTurn` | number \| null | the first turn on which any of the label left: 2 for `acetyl-1`, 3 for `acetyl-2`, never 1 for either; null until some has |
+| `labelReleasedByTurn` | number[] | the share of the original label released on each completed turn, as fractions of 1: `[0, 1]` for `acetyl-1`, `[0, 0, 0.5, 0.25, …]` for `acetyl-2` |
+| `labelRemaining` | number | the share of the label still in the cycle, 1 down to 0; never reaches 0 for `acetyl-2` |
 | `oxaloacetateLevel` | number | arbitrary units on one scale, stated in the module header |
 | `drainedTo` | string \| null | the biosynthetic route taking an intermediate |
 | `stalled` | boolean | the cycle has stopped for want of oxaloacetate; computed |
@@ -222,23 +196,34 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 | `t` | number | clock, seconds, three decimals |
 | `playing` | boolean | |
 
-**Why it is a mechanism.** Label an acetyl carbon and it does not come out on the first turn, however many times the reader runs it. That is a fact about a cycle that a ring-with-arrows diagram not only fails to show but actively suggests the opposite of, and it took the subject twenty years to settle.
+**Why it is a mechanism.** Label an acetyl carbon and none of it comes out on the first turn, however many times the reader runs it, while the counters say two carbons left. A ring-with-arrows diagram not only fails to show that but suggests the opposite, and through most of the 1940s labelling results like it were read as proof that citrate could not be on the pathway at all (§7.3's margin note, on Ogston).
 
 **Narrow composition.** Second composition. A ring with eight labelled nodes at 390 px puts every label either inside the ring, where they collide, or outside it, where they leave the stage. Below 800 px the ring keeps its shape and its carbon counts but **the intermediate names move into a numbered list beneath**, with the position the cycle is at marked in both; the two decarboxylations and the four oxidations stay marked on the ring, because they are the argument. The fuel entry points become one line of type naming the entry rather than three drawn routes. The tallies re-stack to five rows.
 
 ---
 
-## 7.4 · `respiratory-chain` — The fall, in four steps
+## 7.3 · `respiratory-chain` — The fall, in four steps
 
 **What it shows.** The inner membrane drawn edge-on across the width of the stage, matrix below and intermembrane space above, with the four complexes in it, ubiquinone diffusing within the bilayer and cytochrome c skating along the outer face. A vertical axis of reduction potential runs down the left, from −0.4 V at the top to +0.9 V at the bottom, and **every carrier is placed on the membrane at the height its own potential puts it at** — so the drawing is also the graph, and a pair of electrons is seen falling from rung to rung rather than travelling sideways. Protons cross where a complex pumps them, and are counted. It opens with the chain idle, oxygen present, nothing blocked.
 
 **What the reader does.**
-- **Deliver a pair from NADH** (at complex I) or **from FADH₂** (at complex II), and run. The two donors are the figure's central comparison: the second enters four rungs lower and drives four fewer protons, and both counters are on screen at once.
+- **Deliver a pair from NADH** (at complex I) or **from the cycle's FADH₂** (at complex II), and run. That FADH₂ is the Krebs cycle's, whose enzyme *is* complex II. §7.4 says the other FAD enzymes, β-oxidation's and the glycerol 3-phosphate shuttle's, hand their electrons to ubiquinone through doors of their own, so the donor's label names the cycle and never says "any FADH₂". The two donors are the figure's central comparison: the second enters four rungs lower and drives four fewer protons, and both counters are on screen at once.
 - **Block a complex**: rotenone at I, malonate at II, antimycin A at III, cyanide at IV, each named with its target. The carriers above the block fill and the ones below empty, drawn and reported, with the crossover named. **Malonate is the exception and the figure must model it correctly**: electrons from NADH enter at complex I and never pass through complex II, so with `donor: 'nadh'` a block at II changes nothing — `protonsPumped` keeps rising and `crossoverAt` stays null. It backs the chain up only with `donor: 'fadh2'`. A figure that flattens the trace for malonate on an NADH donor contradicts §7.8's own paragraph about it, which is there because that is the mistake.
 - **Remove the oxygen**, which backs the whole chain up from the bottom in the same way and is the state §7.7 opens in.
+- **Change the acceptor** (added for review finding 17, so that `anaerobic-respiration` has something to grade): oxygen, nitrate, fumarate, sulfate or carbon dioxide, at the potentials of §7.7's table. The bottom of the potential axis moves to the chosen rung, and `potentialDropV`, `energyReleasedKj` and `protonsPumped` are recomputed from it. This is the mitochondrial chain with its bottom rung moved, which is the simplification §7.7 makes in words ("the machinery is the same"); it is not any one organism's chain, and the module header says so. The rule: electrons can reach the acceptor only through carriers more reducing than it, so a complex whose output sits below the acceptor's rung is bypassed and pumps nothing. From NADH, that gives:
+
+  | acceptor | E°′ (V) | `energyReleasedKj` | `protonsPumped` | why |
+  |---|---|---|---|---|
+  | oxygen | +0.82 | 220 | 10 | all three pumps |
+  | nitrate | +0.42 | 143 | 8 | complexes I and III; complex IV is bypassed |
+  | fumarate | +0.03 | 68 | 4 | complex I only. Ubiquinone (+0.045) sits just below fumarate, and the organisms that do this use menaquinone (about −0.07) instead; the figure swaps the quinone's rung when fumarate is chosen and says so |
+  | sulfate | −0.22 | 19 | 0 | above ubiquinone, so the electrons never leave complex I's rung |
+  | carbon dioxide | −0.24 | 15 | 0 | the same |
+
+  The two zeros are the hard case. A readout that says only "0 protons" tells a reader that sulfate reducers and methanogens get nothing, and §7.7 says they live on 19 and 15 kilojoules a pair. So for those two the readout says that the fall from NADH pays for less than one proton at 200 millivolts (19.3 kilojoules), and that these organisms live on other fuels than NADH and on much smaller gradients made by other machinery. That is the one sentence in this brief the prose does not already carry, and a reviewer should check it against the figure before it ships. `atpMadeHere` stays 0 under every acceptor.
 - **Readouts**, as a typographic table: protons pumped, potential drop in volts, free energy released in kJ per mole, the gradient as a pH difference and as a voltage, and an **ATP counter that stays at zero in every reachable state**.
 
-**Objectives it teaches.** `chain-components`, `redox-ladder`, `chain-pumps-protons`, `oxygen-is-the-acceptor`, `fadh2-enters-lower`, and `blocking-the-chain` jointly with 7.8.
+**Objectives it teaches.** `chain-components`, `redox-ladder`, `chain-pumps-protons`, `oxygen-is-the-acceptor`, `fadh2-enters-lower`, `blocking-the-chain`, `proton-motive-force` (through `gradientPH` and `gradientMv`), `diagnose-respiration` (the sort's blocked-chain and nowhere-to-unload bins), and `anaerobic-respiration` jointly with 7.4 (through the acceptor control). No field below grades `chain-components`, a recall objective about which carriers are fixed and which move; it is tested by questions only (review finding 30).
 
 **`describe()`**
 
@@ -246,13 +231,15 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 |---|---|---|
 | `donor` | string | `'nadh' \| 'fadh2'` |
 | `pairsDelivered` | number | since reset |
-| `protonsPumped` | number | 10 per pair from NADH, 6 from FADH₂ |
-| `potentialDropV` | number | 1.14 for the NADH route, 0.79 for the other |
-| `energyReleasedKj` | number | per mole of pairs; about 220 and about 150 |
+| `protonsPumped` | number | 10 per pair from NADH and 6 from FADH₂ with oxygen; for the other acceptors, the table under the acceptor control |
+| `potentialDropV` | number | 1.14 for the NADH route and 0.79 for the other, with oxygen; otherwise the acceptor's potential minus the donor's |
+| `energyReleasedKj` | number | per mole of pairs; about 220 and about 150 with oxygen, and from NADH 143, 68, 19 and 15 for the other four, which is §7.7's table |
 | `atpMadeHere` | number | **0 in every reachable state.** A run reporting anything else is a defect, not a setting |
 | `gradientPH` | number | matrix minus intermembrane space |
 | `gradientMv` | number | the voltage term |
 | `oxygenPresent` | boolean | |
+| `acceptor` | string | `'oxygen' \| 'nitrate' \| 'fumarate' \| 'sulfate' \| 'carbon-dioxide'`; `'oxygen'` in the opening state |
+| `acceptorPotentialV` | number | +0.82, +0.42, +0.03, −0.22, −0.24, as §7.7's table has them |
 | `blockedAt` | string \| null | `'I' \| 'II' \| 'III' \| 'IV' \| null` |
 | `blockedBy` | string \| null | the substance's name, as the prose spells it |
 | `reducedCarriers` | string[] | computed from the block, never listed by the button |
@@ -267,92 +254,7 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 
 ---
 
-## 7.5 · `atp-synthase` — The rotor, the shaft and the three sites
-
-**What it shows.** ATP synthase in a patch of inner membrane, in three dimensions, large enough that the ring of subunits reads as a ring and the three catalytic sites read as three. Protons are drawn entering the outer half-channel from the intermembrane space, binding to one subunit of the ring, riding round with it, and leaving by the inner half-channel into the matrix. The bent shaft turns with the ring inside the three-fold head, and **each of the three sites is drawn and labelled in whichever of its three shapes it is currently in**, with ADP and phosphate binding, joining, and the ATP being released. It opens intact and stalled, at a default view stated in the module header: the membrane edge-on and the rotor's axis vertical, so that the ring and the head are both seen as what they are.
-
-**What the reader does.**
-- **Orbit** by drag or arrow keys, zoom with + and −, as in `cell3d` and `membrane3d`. `setView({ theta, phi, distance })` for the sweep gate.
-- **The force, in its two parts**: a pH-difference slider and a membrane-voltage slider, with a readout that adds them into one figure in millivolts and prints both terms, because §7.5's claim is that one of the two carries three-quarters of it.
-- **The ATP-to-ADP ratio**, which is the other half of what decides the direction.
-- **Run**, **pause**, **step one third of a turn**, which is one ATP.
-- **Ring size**: 8, 10 or 14 subunits, and the protons-per-ATP readout moves with it. A line names which organism each is, and the 14 names Section 6.5.
-- **Watch one site**: a control that follows a single catalytic site round, so the three shapes are seen as three stages of one cycle rather than three different things.
-
-**Objectives it teaches.** `proton-motive-force`, `chemiosmosis-principle`, `sealed-compartment`, `synthase-is-a-motor`, `synthase-reversible`, `chemiosmosis-evidence`.
-
-**`describe()`**
-
-| field | type | meaning |
-|---|---|---|
-| `view` | object | `{ theta, phi, distance }`, distance non-zero |
-| `drawCalls`, `triangles` | number | |
-| `deltaPH` | number | matrix minus intermembrane space |
-| `membraneMv` | number | the charge term |
-| `pmfMv` | number | the two added; about 200 at the opening values |
-| `chargeFraction` | number | 0–1, the share of the force that is charge; about 0.75 |
-| `cSubunits` | number | 8, 10 or 14 |
-| `protonsPerAtp` | number | `cSubunits ÷ 3`, computed and not tabulated |
-| `revolutions` | number | since reset, to one decimal |
-| `atpMade`, `protonsUsed` | number | |
-| `siteShapes` | string[] | three entries, each `'loose' \| 'tight' \| 'open'`; never all the same |
-| `watchedSite` | number \| null | 0, 1 or 2 |
-| `atpRatio` | number | ATP to ADP |
-| `direction` | string | `'synthesis' \| 'stalled' \| 'hydrolysis'`, computed from `pmfMv` and `atpRatio` and never set by a button |
-| `membraneIntact` | boolean | |
-| `t` | number | clock, seconds, three decimals |
-| `playing` | boolean | |
-
-**Why it is a mechanism.** The reader lowers the force until the machine stalls and then further until it runs backwards, spending the ATP it had been making — which is §5.4's claim about a coupled machine near its limit, §4.7's pump run as a generator, and §7.5's reversibility, all as one slider. And the gear ratio is arithmetic the reader performs: change the ring from eight to fourteen and `protonsPerAtp` moves, because it is computed from the ring and not looked up.
-
-**Narrow composition.** Shrinks honestly at `narrowAspect: 1`, as `cell3d`, `water3d`, `membrane3d` and `atp3d` do. What does not shrink is the readout: below 800 px it moves under the stage at full width as a seven-row table rather than being inset over the molecule, and the two force sliders collapse to one row of steppers that keep their desktop labels. The three site labels are drawn on the model at desktop and become a three-row table at 390 px, because three labels on a rotating object at that size collide with each other at some angles and with the toolbar at others.
-
----
-
-## 7.6 · `yield-ledger` — Build the number yourself
-
-**What it shows.** A ledger the reader assembles rather than reads. Four rows across the top for the four stages, each carrying what it made directly and what carriers it produced. Beneath them the conversion is done in the open, with every assumption as a control rather than a constant. A total sits at the foot, and beside it a band marking the honest range of 30 to 32, so that a reader can see when their assumptions have taken them outside it. It opens at the measured values with the malate–aspartate shuttle and transport charged, reading 32.
-
-**What the reader does.**
-- **ATP per NADH** and **ATP per FADH₂**, each stepping between the measured value and the old round one — 2.5 or 3, 1.5 or 2.
-- **Shuttle**: malate–aspartate or glycerol 3-phosphate, with a line naming a tissue that uses each and what the choice costs.
-- **Charge for transport**, on or off, with a line saying what is being charged for: the ATP going out, the phosphate coming in.
-- **Fuel**: glucose, a sixteen-carbon fatty acid, or an amino acid, with totals per molecule, per carbon and per gram. The per-gram figure is the one §7.3's cross-check uses.
-- **Count in protons instead**, which redoes the same sum in protons rather than in ATP, so the two ways of counting can be compared and the reader can see which step the conversion happens at.
-- **A marker that lights when the assumptions are exactly the ones producing 38**, and names all three of them. It is not a preset button: a reader has to arrive at it, which is the difference between being shown the error and making it.
-
-**Objectives it teaches.** `yield-arithmetic`, `p-o-ratio`, `shuttle-cost`, `why-not-38`, `respiration-efficiency`.
-
-**`describe()`**
-
-| field | type | meaning |
-|---|---|---|
-| `fuel` | string | `'glucose' \| 'fatty-acid' \| 'amino-acid'` |
-| `atpPerNadh`, `atpPerFadh2` | number | |
-| `shuttle` | string | `'malate-aspartate' \| 'glycerol-phosphate'` |
-| `transportCharged` | boolean | |
-| `nadhMatrix`, `nadhCytosol`, `fadh2Count` | number | the three carrier populations, counted separately because the shuttle only touches one |
-| `atpDirect` | number | 4 for glucose in every state |
-| `atpFromCarriers` | number | computed |
-| `atpTotal` | number | the sum |
-| `inHonestRange` | boolean | 30 to 32 inclusive; computed from `atpTotal`, not from the controls |
-| `matchesTextbook38` | boolean | |
-| `assumptionsFor38` | string[] | the three, named; empty unless `matchesTextbook38` |
-| `efficiencyPercent` | number | against 2870 kJ/mol, at the standard 30.5 per ATP |
-| `heatKj` | number | the remainder |
-| `atpPerGram` | number | |
-| `countingIn` | string | `'atp' \| 'protons'` |
-| `protonsPerGlucose` | number \| null | null while counting in ATP |
-| `t` | number | clock, seconds, three decimals |
-| `playing` | boolean | |
-
-**Why it is a mechanism.** The reader makes 38 appear and then has to take it apart, which is a different experience from being told it is wrong. Every term in the sum is a control, so "the number is a range" stops being a hedge and becomes something the figure demonstrates: three moves, each of them defensible-sounding, and the total walks from 30 to 38.
-
-**Narrow composition.** Second composition. A four-column ledger with a control row under each column is a table at desktop and a mess at 390 px. Below 800 px it becomes **one column of labelled rows** — stage rows first, then a hairline, then the assumption rows, then a hairline, then the total — with the numbers right-aligned in tabular figures and the range band drawn as a marked span on the total row rather than as a band beside it. The controls become steppers interleaved with the rows they change, which is the only arrangement at that width where a reader can tell which control moved which number. The fuel selector keeps its desktop labels.
-
----
-
-## 7.7 · `fermentation` — What actually runs out
+## 7.4 · `fermentation` — What actually runs out
 
 **What it shows.** A cell with its NAD pool drawn between glycolysis and the chain as a small closed loop, and — this is the composition decision — **the pool is drawn as a count of discs, empty and loaded, and not as a bar**, because the argument of §7.7 is that the pool is small and countable and a bar says nothing about how small. Glycolysis is on the left, the chain on the right, the pool between them. It opens aerobic and running steadily, with the pool mostly empty, because the reader's first act should be to take the oxygen away.
 
@@ -363,7 +265,7 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 - **Muscle** and **yeast** presets, which set the route, the demand and what happens to the product.
 - **Restore the oxygen** after a lactate run, and the clearance is timed: some oxidised where it stands, some sent to the liver, with a ledger showing the liver spending six ATP to rebuild the glucose the muscle got two from.
 
-**Objectives it teaches.** `carrier-pool-limit`, `fermentation-purpose`, `two-fermentations`, `lactate-facts`, and `anaerobic-respiration` jointly with 7.4.
+**Objectives it teaches.** `carrier-pool-limit`, `fermentation-purpose`, `two-fermentations`, `lactate-facts`, and `anaerobic-respiration` jointly with 7.3.
 
 **`describe()`**
 
@@ -378,10 +280,10 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 | `ranOutOf` | string \| null | what stopped it; `'nad'` and never `'atp'` |
 | `glycolysisRate` | number | arbitrary units on one scale, stated in the module header |
 | `secondsStalled` | number | figure time since glycolysis stopped |
-| `atpPerGlucose` | number | 2 without oxygen, about 30 with |
+| `atpPerGlucose` | number | 2 without oxygen, about 30 with: the skeletal-muscle end of §7.6's range of 30 to 32, and the readout names the tissue |
 | `atpFromFermentationStep` | number | **0 in every reachable state.** A run reporting otherwise is a defect |
 | `lactateMM`, `ethanolPercent` | number | |
-| `co2Released` | number | ethanol route only |
+| `co2Released` | number | ethanol route only. Per glucose, 2 carbons leave as carbon dioxide and 4 stay in two ethanols (§7.7); the first draft's "two and two" is the error to avoid |
 | `demand` | number | |
 | `clearedSeconds` | number \| null | how long the lactate took to clear after oxygen returned |
 | `lactateOxidised`, `lactateToLiver` | number | the two fates |
@@ -395,52 +297,13 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 
 ---
 
-## 7.8 · `uncoupler-bench` — Two ways to stop it, on one trace
-
-**What it shows.** An oxygen-electrode trace, drawn live, beneath a suspension of mitochondria — the instrument Chance and Williams used, and the only figure in the chapter that is a recording rather than a scene. The trace is oxygen remaining against time, so respiration is its slope. Beside it, as a typographic table: the proton gradient, the ATP production rate, the heat production rate, and the respiratory control ratio with the two slopes it was taken from printed under it, because §5.7's rule is that an exemption prints its own measurement. It opens with fuel added and no ADP, so the trace is nearly flat and the reader's first addition does something.
-
-**What the reader does.**
-- **Add, in any order**: fuel, ADP, oligomycin, an uncoupler, cyanide. Each is named and each does something different to the slope, and the order matters — an uncoupler added after oligomycin restarts the trace, which is the classic demonstration and the thing no chemical-intermediate story can account for.
-- **The list of additions so far**, printed in order, so a reader can reproduce the experiment and say what they did.
-- **Second scene: a brown fat cell.** The same uncoupling, done deliberately by a protein in the membrane. A **cold** control turns it on; the mitochondria run flat out, the ATP readout stays near zero, and a body-temperature readout rises. The protein's channel can be opened and closed so the two states are comparable.
-- **Reset the chamber**, which clears the additions and the trace.
-
-**Objectives it teaches.** `blocking-the-chain` (jointly with 7.4), `uncoupling`, `respiratory-control`, `uncoupling-on-purpose`, `diagnose-respiration`.
-
-**`describe()`**
-
-| field | type | meaning |
-|---|---|---|
-| `scene` | string | `'chamber' \| 'brown-fat'` |
-| `added` | string[] | in the order added |
-| `oxygenRemaining` | number | per cent of the chamber's starting oxygen |
-| `oxygenRateNmolPerMin` | number | the current slope |
-| `atpRateNmolPerMin` | number | |
-| `heatRateKjPerMin` | number | |
-| `gradientMv` | number | |
-| `controlRatio` | number \| null | the ratio of the two slopes; null until both have been measured |
-| `ratioFromSlopes` | number[] \| null | the two slopes it was computed from, printed with it |
-| `verdict` | string | one of `'coupled and respiring'`, `'coupled, waiting for ADP'`, `'uncoupled'`, `'synthase blocked'`, `'chain blocked'`; computed from the additions and the rates, never set by a button |
-| `cold` | boolean | brown-fat scene |
-| `leakOpen` | boolean | brown-fat scene |
-| `bodyTemperatureC` | number | brown-fat scene |
-| `t` | number | clock, seconds, three decimals |
-| `playing` | boolean | |
-
-**Why it is a mechanism.** An uncoupler makes the trace *steeper* and the ATP go to nothing, and a blocker makes it flat. Those two are opposite in a way that is obvious on one instrument and invisible in any diagram, and between them they are the evidence chemiosmosis rests on. The reader performs the discrimination rather than being told its outcome.
-
-**Narrow composition.** Second composition. The trace and the readout table cannot share a 390 px width. Below 800 px **the trace keeps the full width** and the table moves beneath it as six rows, because a slope read at half width is not a slope; the tray of substances becomes a single row of steppers above the trace, and the list of additions becomes a line of type rather than a column. The brown-fat scene re-stacks — cell above, readouts below — and loses nothing.
-
----
-
 ## Notes for whoever registers these
 
-- **`narrowAspect` for all eight**, values in the table at the head of this brief. **Six carry a genuine second composition** — `respiration-tour`, `glycolysis`, `krebs`, `respiratory-chain`, `yield-ledger` and `uncoupler-bench` — each for the reason stated in its own block. That is one more than chapter 5 needed, and the reason is the subject: five of this chapter's eight figures are a scene beside a graph, a ledger or a long line, which is the shape that never survives a 390 px stage. The other two, `atp-synthase` and `fermentation`, shrink honestly and each says what it re-stacks.
-- **One WebGL figure**, `atp-synthase`, so it is `npm run sweep3d`'s only chapter-7 entry. Its default view is the membrane edge-on with the rotor's axis vertical, stated in the module header, so that the ring reads as a ring and the three-fold head as three.
-- **Every kind needs a recipe in `tools/drive.js` or `npm run drive` fails**, so the recipes can be written from this brief before the modules exist. The fields worth asserting after driving are the **computed** ones and never the ones a button sets: `carbonsReleased` and `capturedFraction` and `temperatureC` (7.1), `atpNet` and `committedStepOpen` and `closedBy` (7.2), `labelReleasedOnTurn` and `stalled` and `carbonsOut` (7.3), `atpMadeHere` and `crossoverAt` and `protonsPumped` (7.4), `direction` and `protonsPerAtp` and `siteShapes` (7.5), `atpTotal` and `inHonestRange` and `assumptionsFor38` (7.6), `ranOutOf` and `poolFull` and `atpFromFermentationStep` (7.7), `verdict` and `controlRatio` (7.8).
+- **`narrowAspect` for all four**, values in the table at the head of this brief. **Three carry a genuine second composition** — `glycolysis`, `krebs` and `respiratory-chain` — each for the reason stated in its own block. `fermentation` shrinks honestly and says what it re-stacks.
+- **No WebGL figure**, so this chapter adds nothing to `npm run sweep3d`.
+- **Every kind needs a recipe in `tools/drive.js` or `npm run drive` fails**, so the recipes can be written from this brief before the modules exist. The fields worth asserting after driving are the **computed** ones and never the ones a button sets: `atpNet` and `committedStepOpen` and `closedBy` (7.1); `labelFirstLeftOnTurn` and `labelRemaining` and `stalled` and `carbonsOut` (7.2); `atpMadeHere` and `crossoverAt` and `protonsPumped` and `energyReleasedKj` under a changed acceptor (7.3); `ranOutOf` and `poolFull` and `atpFromFermentationStep` (7.4).
 - **`tools/pages-exclude.txt` needs no new line, and adding one would be a mistake.** The list holds `**/*.md`, which is a class and not an instance, and `tools/pages-exclude.js` compiles `**/` so that it may match zero segments, so `biology/ch07-cellular-respiration/FIGURES.md` is already excluded from the published tree without anybody naming it. Confirm rather than assume: `node tools/pages-exclude.js` prints this file among the paths it trims.
-- **Four invariants a reviewer must check by hand, because no gate can.** Each is the figure's whole claim reduced to one field, and each would look perfectly healthy if it were quietly wrong. `atpMadeHere` is 0 in every reachable state of 7.4, including with the oxygen removed and with every complex blocked in turn. `atpFromFermentationStep` is 0 in every reachable state of 7.7, on both routes and at every demand. `nadhPerTurn` is 3 and `fadh2PerTurn` is 1 in every reachable state of 7.3, including while the cycle is stalled. And `labelReleasedOnTurn` is never 1 for either acetyl carbon in 7.3 — which is the hardest of the four to get right and the one most likely to be quietly wrong, because the obvious implementation releases whichever carbons the decarboxylation steps happen to point at.
-- **Three numbers a figure may not invent**, because the prose derives them and a figure disagreeing with the prose is the defect the brief's last section is about: 10 protons per NADH and 6 per FADH₂ (7.1, 7.4, 7.6); 2.5 ATP per NADH and 1.5 per FADH₂ as the *measured* values, with 3 and 2 available only as the reader's own wrong assumption (7.6); and 2870 kJ/mol for glucose, shared by 7.1's two scenes so that the comparison is one number and not two.
-- **If one has to be cut**, `respiration-tour` is the one §7.1 survives without, at the cost of the chapter losing its hero and of four objectives losing their figure; §7.1 is an orientation section and its argument is carried by the prose and by the four-stage table better than any other section's is. **`respiratory-chain` and `atp-synthase` cannot be cut**: between them they carry eleven objectives, the correction to "the chain makes ATP", and the debt this chapter owes Chapter 4. Do not split `yield-ledger` into a table and a calculator — the whole figure is the argument that the number is a range, and a table of the honest values with a calculator beside it would be two figures each making half a claim.
-- **Chapter 6 will not mount `atp-synthase`, and it was asked.** Its author's answer, 2026-09-17: §6.5's claim is about where the protons come from and what the gradient is worth, not about how the rotor works, so it draws the thylakoid in cross-section as a ledger with the synthase as one more path through the membrane and a turn counter, and a 3D rotary motor there would be a second figure answering a question that section does not ask. Chapter 6's prose states the chloroplast ring at fourteen against the mitochondrial eight and cites Figure 7.5 as where the rotor is actually turned. So **keep the `cSubunits` control and keep 14 among its values**, even though no chapter-7 sentence needs the chloroplast figure: it is what makes chapter 6's cross-reference land. This paragraph is here so that the next reader does not re-open a question that has been answered.
-- **Chapter 8 will want two of these back.** `yield-ledger`'s fuel switch and `krebs`'s biosynthetic drains are both the opening move of a chapter about what a cell builds and what decides it. Build them so that a later chapter can mount them with a different preset rather than needing its own copy, and say in each module header which later chapter is expected to ask — the convention chapter 5's brief established and chapter 6 has already used.
+- **Four invariants a reviewer must check by hand, because no gate can.** Each is the figure's whole claim reduced to one field, and each would look perfectly healthy if it were quietly wrong. `atpMadeHere` is 0 in every reachable state of 7.3, with the oxygen removed, with every complex blocked in turn, and under every acceptor. `atpFromFermentationStep` is 0 in every reachable state of 7.4, on both routes and at every demand. `nadhPerTurn` is 3 and `fadh2PerTurn` is 1 in every reachable state of 7.2, including while the cycle is stalled. And in 7.2, `labelReleasedByTurn` for `acetyl-1` is `[0, 1]` and for `acetyl-2` is `[0, 0, 0.5, 0.25, …]` — the hardest of the four to get right and the one most likely to be quietly wrong, because the obvious implementation releases whichever carbons the decarboxylation steps happen to point at.
+- **Two numbers a figure may not invent**, because the prose derives them and a figure disagreeing with the prose is the defect the brief's section on prose is about: 10 protons per NADH and 6 per FADH₂ with oxygen (7.3); and about 30 to 32 ATP per glucose with oxygen, of which 2 without (7.4), never 36 or 38.
+- **Nothing here is shared with chapter 6, and nothing is kept for chapter 8.** Chapter 6 declined to mount `atp-synthase` and then cut its own `proton-ledger`, so it draws no synthase at all, and neither chapter now does. Chapter 6's `FIGURES.md` still says "Chapter 7 owns the rotary motor. Its `atp-synthase` figure takes a `cSubunits` control"; that sentence is now stale and is chapter 6's to correct. The first plan said chapter 8 would want `yield-ledger`'s fuel switch and `krebs`'s drains back; chapter 8 is now DNA, `yield-ledger` is cut and will not come back, and `krebs`'s drains are built with presets so that a later chapter about biosynthesis can mount it rather than copy it, which its module header says.
+- **What each figure builder must read before starting**, because the prose moved under these briefs after they were first written: the chapter's §7.2 to §7.8 as they now stand in `index.html`, not as the first draft had them; the paragraphs "A figure's words are prose" and the six corrections under it; and the review of 2026-09-22 (`docs/work/2_rest-of-the-book/reviews/2026-09-22-ch06-ch07-prose.md`), findings 6, 17, 26 and 30. For `glycolysis`, the four sources behind finding 6: Kengen et al., *J. Biol. Chem.* 269:17537 (1994), on *Pyrococcus*'s ADP-dependent kinases; Selig et al., *Arch. Microbiol.* 167:217 (1997), comparing the archaeal Embden–Meyerhof and Entner–Doudoroff routes; Kouril et al., *PLoS ONE* (2017), on *Sulfolobus*'s branched Entner–Doudoroff pathway; and Siebers & Schönheit, *Curr. Opin. Microbiol.* (2005). For `krebs`, the label rule in its own block, which was derived for this brief from the cycle's chemistry and should be checked against any biochemistry text's treatment of the randomisation at succinate before the module is written. For `respiratory-chain`, the acceptor table in its own block, whose zeros are the one claim here the prose does not make.

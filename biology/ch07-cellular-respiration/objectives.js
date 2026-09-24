@@ -10,14 +10,16 @@
 // Four of the eight figures this chapter was planned with were cut on 2026-09-24, as chapter 6's were,
 // and the chapter is reviewed with questions rather than figure tasks: respiration-tour (§7.1),
 // atp-synthase (§7.5), yield-ledger (§7.6) and uncoupler-bench (§7.8). The objectives those four taught
-// are unchanged and are still taught by their sections; they now name no figure (`figures: []`), which
-// is what npm run check accepts: it requires every objective to name a section, and every figure an
-// objective does name to exist (tools/check-content.js, checkChapterData). The rest name only figures
-// that are still on the page: fig-glycolysis (7.1), fig-krebs (7.2), fig-chain (7.3), fig-fermentation
-// (7.4). Three objectives moved onto fig-chain rather than to nothing, because its brief carries a field
-// that grades them: `proton-motive-force` (it reports the gradient as a pH difference and as a voltage),
-// `diagnose-respiration` (its inhibitors and its oxygen switch are two of the sort's four bins), and
-// `anaerobic-respiration` (its acceptor control, added on the review's finding 17).
+// are unchanged and are still taught by their sections. Twenty objectives named a cut figure, and
+// seventeen now name none (`figures: []`), which is what npm run check accepts: it requires every
+// objective to name a section, and every figure an objective does name to exist
+// (tools/check-content.js, checkChapterData). The rest name only figures that are still on the page:
+// fig-glycolysis (7.1), fig-krebs (7.2), fig-chain (7.3), fig-fermentation (7.4). `proton-motive-force`
+// moved onto fig-chain rather than to nothing, because that figure reports the gradient as a pH
+// difference and as a voltage. `blocking-the-chain` and `diagnose-respiration` keep the fig-chain they
+// already named beside the cut figure (its inhibitors and its oxygen switch are two of the sort's four
+// bins). And `anaerobic-respiration` gains fig-chain for the acceptor control the review's finding 17
+// added to its brief.
 //
 // This chapter is where the unit's debts are paid, so the graph reaches out further than any other in the
 // book: fifty-one edges name thirty-eight objectives of chapters 1 to 6. Chapter 1 promised that energy
