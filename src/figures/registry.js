@@ -91,6 +91,12 @@ export const FIGURES = Object.freeze({
   'feedback-pathway': { url: new URL('./feedback-pathway.js', import.meta.url).href, title: 'A loop, and what happens when you cut it', needsWebGL: false, aspect: 16 / 10, narrowAspect: 3 / 4 },
   'metabolic-map': { url: new URL('./metabolic-map.js', import.meta.url).href, title: 'The hourglass, and the ladder under it', needsWebGL: false, aspect: 16 / 10, narrowAspect: 4 / 5 },
 
+  // Chapter 6, Photosynthesis: Figure 6.1. The title is the brief's headline and the two aspects are the
+  // table's (biology/ch06-photosynthesis/FIGURES.md); below 800 px it carries a real second composition,
+  // one chart at a time with the other drawn faintly behind it. Placed on its own lines, apart from the
+  // chapter's other three kinds, which were added in parallel.
+  'pigment-spectra': { url: new URL('./pigment-spectra.js', import.meta.url).href, title: 'What is absorbed, and what it drives', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
+
   // 《资治通鉴》 卷一 周纪一 — the second book. Its figures are about a text and a history, not a
   // specimen: where the three states sat and when, what a character becomes when it joins another, and
   // which year the book chose to begin at. Each was added here by the integration owner from the
