@@ -52,21 +52,47 @@
 // THE NUMBERS. ATP at 50 kJ/mol (§5.3's value for a cell), NADPH at 220 (§5.8), a glucose 2870, which is
 // §6.6's own arithmetic: eighteen ATP and twelve NADPH per glucose are 900 and 2640 kJ, 3540 in all.
 // Per three carbon dioxides, 9 ATP and 6 NADPH: 6 and 6 in the reduction, 3 ATP in the regeneration.
+// The ledger's per-CO2, per-glucose and kilojoule lines are read off the books as they stood at the end
+// of the last complete turn (`m.book`), never off a turn in progress: half way round, the reduction has
+// been paid for and the regeneration has not, and a ratio taken then said 2 ATP per CO2. `kjSpent` is
+// the running total, 50 × atpSpent + 220 × nadphSpent.
 //
 // THE SIX-CARBON COMPOUND never leaves the enzyme: it is only ever in rubisco's site (`six`) or being
 // cut there (`event.six`). `sixCarbonLeftEnzyme` is computed, not written as false: it looks for a
 // six-carbon molecule anywhere else on the ring, and there is no path by which one gets there.
 //
-// COMPOSITION. Two panes. Wide, the ring fills a left column and the ledger the right. Narrow (below
-// NARROW_W of stage width), the ring stays and the ledger goes beneath it as rows, one per phase with
-// the phase named on the row. The carbon-count line keeps its wording at both widths.
+// COMPOSITION. Two panes. Wide, the ring fills a left column and the ledger the right. Round the ring,
+// the four pools take the four diagonals, where a pane has most room outside a circle; the carbon
+// dioxide comes in at the top, ATP and NADPH at the sides, and the sugar leaves at the bottom. The
+// enzymes are on the ring: rubisco holding its active site at twelve o'clock, the kinase and GAPDH as two
+// sites at the reduction (ATP goes to the kinase, NADPH to GAPDH, and only GAPDH is thioredoxin's), and
+// FBPase, SBPase and PRK in the regeneration. Each regulated one says its switch under its name. The
+// phase names sit inside the ring, square to the page, and the counter in the middle. The ring's radius
+// is solved (`solveRing`) as the largest at which all of that still fits at its fullest.
+// A square stage wider than a phone's (a tablet held upright; below 800 px of viewport the registry
+// makes every stage square) keeps the wide drawing and stacks the ledger under the ring in two columns,
+// the books on the left and what is happening now, with the sugar, on the right: `arrange()`.
+// Narrow (below NARROW_W of stage width, which is every phone: the stage is square there and the
+// toolbar takes three rows of it), the ring stays and the ledger goes beneath it as rows, one per phase
+// with the phase named on the row. What a 140 px ring cannot carry is dropped rather than shrunk below
+// 7 px: the enzymes lose their names but keep their fill, which is their switch; only the phase at work
+// is named, under the sum; the pools' names run beside them. The carbon-count line keeps its wording at
+// both widths, and on a phone it opens the ledger. The toolbar is what a square phone stage cannot
+// spare: at 320 px it took five rows and left the ring 110 px, so on a phone the supplies' values drop
+// their per cent sign and Label takes its short form, the same word, which brings it back to three.
 //
-// WHAT THE BENCH COULD NOT DO, and where the figure drops through. (1) A readout row, a note and a
-// button label are set as plain text, and a formula needs a subscript: every string here is written
-// with `_2` and `^{2+}` and `typeset()` rebuilds those as tspans after each draw (and `markupButton` as
-// <sub>/<sup> in a button), so CO₂ is CO<sub>2</sub> and never a Unicode subscript digit, which the
-// font census would also fail. (2) Phase names follow the ring, which needs a <textPath> in <defs>; they
-// go in through `pane.add()`.
+// MOTION. Run moves the reactions where they happen: the carbon dioxide comes down onto C2, the cut
+// opens the C2–C3 bond, the ATP and NADPH travel into the site that spends them. A G3P that goes into
+// the shuffle or out of the cycle does not travel across the ring, because any path from its pool
+// crosses the exit or a pool's name: it fades where it stood while its carbons fade in where they go,
+// and an exported one runs only down the exit's stem. Step jumps to the end of a reaction and draws the
+// molecules it made with an ink edge.
+//
+// WHAT THE BENCH COULD NOT DO, and where the figure drops through. A readout row, a note and a button
+// label are set as plain text, and a formula needs a subscript: every string here is written with `_2`
+// and `^{2+}`, `typeset()` rebuilds those as tspans after each draw, and `markupButton` rebuilds the
+// Label button's two spans with <sub>, so CO<sub>2</sub> is never a Unicode subscript digit, which the
+// font census would also fail. The button's accessible name is still the bench's, "Label a CO2, …".
 import { C, el, clamp, lerp, polar } from './lib/svg.js';
 import { INK, element } from './lib/mol-draw.js';
 import { metabolismPart, membranePart } from '../palette.js';
@@ -146,7 +172,6 @@ ${scope} .cc-num { fill: var(--ink); font-weight: 650; font-variant-numeric: lin
 ${scope} .cc-tab { font-variant-numeric: lining-nums tabular-nums; }
 ${scope} .cc-alert { fill: var(--coral-text); font-weight: 600; }
 ${scope} .cc-gold { fill: ${INK.gold}; font-weight: 600; }
-${scope} .cc-halo { paint-order: stroke; stroke: var(--paper-2); stroke-width: 3px; stroke-linejoin: round; }
 `;
 
 const fmt = (v, dp = 1) => Number(v).toFixed(dp);
@@ -267,7 +292,6 @@ function complete(m, env) {
     last.made = [ev.mol];
   } else if (ev.kind === 'export') {
     m.g3pExported += 1;
-    m.book = { co2: m.co2Fixed, atp: sum(m.atp), nadph: sum(m.nadph) };
     if (env.exportTo === 'starch') m.starch.push(ev.mol.lab >= 0);
     else {
       m.sucrose += 1;
@@ -287,6 +311,10 @@ function complete(m, env) {
     last.before = last.after + 5;
   }
   m.last = last;
+  if (m.co2Fixed > 0 && m.co2Fixed === 3 * m.g3pExported && m.rubp.length === ACCEPTORS && !m.six
+    && !m.pga.length && !m.bpg && !m.g3p.length && !m.shuffle.length) {
+    m.book = { co2: m.co2Fixed, atp: sum(m.atp), nadph: sum(m.nadph) };
+  }
 }
 
 // Hand a reaction's inputs back. Only the three that need a supply can be cut off part way, and only
@@ -428,8 +456,7 @@ function segments(str) {
 const plain = (str) => segments(str).map((s) => s.text).join('');
 
 function typeset(svg) {
-  for (const t of svg.querySelectorAll('text, textPath')) {
-    if (t.tagName === 'text' && t.querySelector('textPath')) continue;
+  for (const t of svg.querySelectorAll('text')) {
     const s = t.textContent;
     if (!s || !/[_^]/.test(s)) continue;
     t.textContent = '';
@@ -440,10 +467,10 @@ function typeset(svg) {
   }
 }
 
-function markupButton(node, str) {
+function markupButton(node, str, short = str) {
   for (const span of node.querySelectorAll('.tb-long, .tb-short')) {
     span.textContent = '';
-    for (const part of segments(str)) {
+    for (const part of segments(span.classList.contains('tb-short') ? short : str)) {
       if (!part.shift) span.append(part.text);
       else {
         const tag = document.createElement(part.shift);
@@ -475,10 +502,15 @@ export function mount(root, ctx) {
   const ledger = b.pane('ledger', { as: 'svg' });
 
   b.compose({
+    // Side by side on a wide stage; stacked, the ledger under the ring, on a square one. Below 800 px
+    // of viewport the registry makes the stage square at any width, so a tablet held upright has a
+    // 720 px square that the bench's one width threshold calls wide, and side by side it left a small
+    // ring in a tall pane with its counter running into GAPDH's name. `arrange()` reads the stage's
+    // shape and writes these properties; the fallbacks are the side-by-side arrangement.
     wide: {
-      columns: 'minmax(0, 60fr) minmax(0, 40fr)',
-      rows: 'minmax(0, 1fr)',
-      at: { ring: [1, 1], ledger: [2, 1] },
+      columns: 'var(--cc-cols, minmax(0, 60fr) minmax(0, 40fr))',
+      rows: 'var(--cc-rows, minmax(0, 1fr))',
+      at: { ring: [1, 1], ledger: ['var(--cc-lc, 2)', 'var(--cc-lr, 1)'] },
     },
     narrow: {
       columns: 'minmax(0, 1fr)',
@@ -488,7 +520,7 @@ export function mount(root, ctx) {
   });
 
   // ---- controls: what to run, what to switch, what to supply, where the sugar goes ----
-  const stepBtn = b.action('Step', () => { stepOnce(); }, { primary: true, aria: 'Step, turn the cycle on by one reaction' });
+  b.action('Step', () => { stepOnce(); }, { primary: true, aria: 'Step, turn the cycle on by one reaction' });
   const runCtl = b.run({ primary: false, onChange: () => { stepNote = null; b.redraw(); b.announce(); } });
   b.action('Reset', () => reset(), { aria: 'Reset, put the cycle back as it opened' });
   b.divide();
@@ -506,12 +538,12 @@ export function mount(root, ctx) {
     b.redraw();
     b.announce();
   }, { aria: 'Label a CO2, mark the next carbon dioxide with carbon-14 and follow its carbon round' });
-  markupButton(labelBtn, 'Label a CO_2');
+  markupButton(labelBtn, 'Label a CO_2', 'Label');
   b.divide();
 
   const supply = (label, short, key) => b.stepper(label, {
     min: 0, max: 100, step: 10, value: 100, short,
-    format: (v) => (Number(v) === 0 ? 'none' : `${v}%`),
+    format: (v, { narrow }) => (narrow ? String(v) : Number(v) === 0 ? 'none' : `${v}%`),
     onInput: (v) => {
       env[key] = Number(v) / 100;
       stepNote = null;
@@ -660,7 +692,7 @@ export function mount(root, ctx) {
     '1,3-bisphosphoglycerate': 'a 1,3-bisphosphoglycerate',
     G3P: 'a G3P',
     shuffle: 'the regeneration’s sugars',
-    sucrose: 'sucrose, exported',
+    sucrose: 'the sucrose shipped out',
     starch: 'the starch grain',
   };
 
@@ -679,10 +711,10 @@ export function mount(root, ctx) {
       case 'revert': return { sum: '3 = 3', says: 'no NADPH: the phosphate comes off' };
       case 'export': {
         const onRing = carbonsOnRing(m);
-        return running ? { sum: `${onRing} − 3`, says: 'every sixth G3P leaves' } : { sum: `${onRing + 3} − 3 = ${onRing}`, says: `the sixth G3P leaves, as ${last.to}` };
+        return running ? { sum: `${onRing} − 3`, says: 'every sixth G3P leaves' } : { sum: `${onRing + 3} − 3 = ${onRing}`, says: `the sixth G3P leaves, for ${last.to}` };
       }
       case 'shuffle':
-        return running ? { sum: `${m.shuffle.length} + 3`, says: 'into the regeneration' } : { sum: `${last.before} + 3 = ${last.after}`, says: 'into the regeneration' };
+        return running ? { sum: `${m.shuffle.length} + 3`, says: 'a G3P’s carbons go into the shuffle' } : { sum: `${last.before} + 3 = ${last.after}`, says: 'three carbons into the shuffle' };
       case 'rebuild':
         return running ? { sum: `${m.shuffle.length + 5} = 5 + ${m.shuffle.length}`, says: 'ATP finishes a RuBP' } : { sum: `${last.before} = 5 + ${last.after}`, says: 'ATP finishes a RuBP' };
       default: return { sum: '', says: '' };
@@ -705,10 +737,10 @@ export function mount(root, ctx) {
     }
     if (!d.lightOn) {
       if (short) return 'Dark: rubisco and thioredoxin’s four are off, so the cycle barely turns.';
-      return 'The light is off. The stroma is at pH 7 with no Mg^{2+}, so rubisco is off, and thioredoxin is oxidised, so its four enzymes are off too. With ATP and NADPH supplied by hand it still barely turns: the light does not merely supply this cycle, it turns it on.';
+      return 'The light is off. The stroma is back at pH 7 with less Mg^{2+}, so rubisco is off; thioredoxin is oxidised, so its four enzymes are off too. With ATP and NADPH supplied by hand the cycle still barely turns: the light does not merely supply this cycle, it turns it on.';
     }
     if (m.six || m.event?.kind === 'cut') {
-      if (short) return 'The six-carbon compound never leaves the enzyme.';
+      if (short) return 'The six-carbon compound never leaves the enzyme: catching it took acid, 12 ms in.';
       return 'The six-carbon compound never leaves the enzyme: the active site adds water and cuts it in two within a fraction of a second. Catching it took stopping the enzyme with acid about twelve thousandths of a second in. Off the enzyme, half of it is still intact after an hour; it is the active site that is quick.';
     }
     if (d.labelledAtomAt) {
@@ -716,7 +748,7 @@ export function mount(root, ctx) {
       if (short) return `The labelled carbon is in ${where}.`;
       if (d.labelledAtomAt === '3-phosphoglycerate') return `The labelled carbon is in ${where}: the first compound Calvin’s group found the label in, a few seconds after feeding the algae ^{14}CO_2.`;
       if (d.labelledAtomAt === 'sucrose' || d.labelledAtomAt === 'starch') return `The labelled carbon has left the cycle, in ${where}. One G3P in every six leaves; the other five rebuild the acceptor.`;
-      if (d.labelledAtomAt === 'RuBP') return `The labelled carbon is back in ${where}, rebuilt: five of every six G3P go on rebuilding the acceptor, so it goes round again.`;
+      if (d.labelledAtomAt === 'RuBP') return 'The labelled carbon is back in a rebuilt acceptor, RuBP: five of every six G3P go on rebuilding the acceptor, so it goes round again.';
       return `The labelled carbon is in ${where}.`;
     }
     if (short) return 'Nine ATP and six NADPH per three CO_2.';
@@ -753,8 +785,8 @@ export function mount(root, ctx) {
   // side, the ring's radius from what the pools, the inputs and the exit leave room for.
   function geometry(w, hgt, narrow) {
     const short = Math.min(w, hgt);
-    const fs = narrow ? clamp(Math.min(w / 40, hgt / 17), 7.2, 8.8) : clamp(short / 46, 8.8, 10.8);
-    const r = narrow ? clamp(short * 0.0195, 2.5, 3.8) : clamp(short * 0.0128, 3.4, 6.4);
+    const fs = narrow ? clamp(Math.min(w / 40, hgt / 17), 7.2, 8.8) : clamp(short / 46, 8.8, 11.4);
+    const r = narrow ? clamp(short * 0.0195, 2.5, 3.8) : clamp(short * 0.0128, 3.4, 7.4);
     const s = r * 2.3;
     const g = { w, h: hgt, narrow, fs, r, s };
     // Rubisco holds the six-carbon compound and its own name under it; the other sites hold a chain.
@@ -766,15 +798,65 @@ export function mount(root, ctx) {
     g.site5 = { rx: 2 * s + r + pad, ry: r + pad };
     g.dr = r * 1.3; // a currency disc
     g.gap = narrow ? r * 2.4 : r * 3;
-    const top = g.rub.ry + r * 4.6 + 3;
-    const bottom = narrow ? fs * 2.4 + 3 : fs * 5.4 + 4;
-    const inLabel = fs * 0.56 * (narrow ? 'NADPH'.length : 'NADPH 100%'.length);
-    const side = narrow
-      ? Math.max(g.site3.ry + r * 2 + g.dr * 2 + inLabel + 6, w * 0.2)
-      : Math.max(g.site3.ry + r * 3 + g.dr * 2 + inLabel + 10, 4 * s + 2 * r + 30);
-    g.R = clamp(Math.min(w / 2 - side, (hgt - top - bottom) / 2), 24, 260);
     g.cx = w / 2;
-    g.cy = top + g.R + Math.max(0, hgt - top - bottom - 2 * g.R) / 2;
+    if (narrow) {
+      const top = g.rub.ry + r * 4.6 + 3;
+      const bottom = fs * 2.4 + 3;
+      const side = Math.max(g.site3.ry + r * 2 + g.dr * 2 + fs * 0.56 * 'NADPH'.length + 6, w * 0.2);
+      g.R = clamp(Math.min(w / 2 - side, (hgt - top - bottom) / 2), 24, 260);
+      g.cy = top + g.R + Math.max(0, hgt - top - bottom - 2 * g.R) / 2;
+      return g;
+    }
+    return solveRing(g);
+  }
+
+  // The wide ring's radius is the largest one at which everything round it still fits the pane, at
+  // its fullest: a pile of eight 3-phosphoglycerates with two lines of name over it, three acceptors,
+  // ten carbons in the shuffle, the exit's fork and the two pools under it, the inputs' words at the
+  // sides, and the carbon dioxide's name clear of the stroma's heading. Sized from a fixed band above
+  // and below instead, a short pane (an 820 px window, a tablet held upright) put the carbon dioxide's
+  // name on the heading and a full pile's "piling up" off the top of the pane.
+  function solveRing(g) {
+    const { w, h: hgt, fs, r, s } = g;
+    const k = Math.SQRT1_2;
+    const pitch = r * 2 + s * 0.46;
+    const pile = (rows) => rows * pitch - (pitch - r * 2);
+    const charW = fs * 0.56;
+    // Above: the carbon dioxide over rubisco, and its name clear of the heading if they share columns.
+    const headingRight = 4 + charW * 0.9 * 'pH 8 · less Mg2+ · thioredoxin oxidised'.length;
+    const co2Left = g.cx - s * 1.95 - charW * '14CO2, labelled'.length;
+    const clearHeading = co2Left < headingRight + 6 ? 7 + fs * 3.3 : r + 2;
+    const aboveRing = g.rub.ry + r * 3 + clearHeading;
+    const abovePile = pile(4) + fs * 2.65 + 2;
+    // Below: the exit's stem, fork, sugar disc and name; and the G3P pile or the shuffle with theirs.
+    const belowRing = fs * 4.5 + r * 1.2 + 4;
+    const belowPile = Math.max(pile(3), r * 2.55 + r * 2) + fs * 1.55 + 2;
+    const fitsHeight = (R) => {
+      const lo = Math.max(aboveRing + R, abovePile + k * (R + g.gap));
+      const hi = Math.min(hgt - belowRing - R, hgt - belowPile - k * (R + g.gap));
+      return lo <= hi ? (lo + hi) / 2 : null;
+    };
+    // Across: the inputs' words to the right, PRK's to the left, the piles' names at the diagonals.
+    const half = w / 2 - 2;
+    const inR = g.site3.ry + r * 2 + g.dr;
+    const widths = [
+      // Five capitals and a per cent sign run wider than mixed case: "NADPH 100%" set at weight 600 is
+      // 0.681 em a character, measured in the lab on 2026-09-23, where the mixed-case names here are
+      // all 0.53 or under. The 0.56 above is for those; this one is given 0.7.
+      (half - g.dr - fs * 0.45 - fs * 0.7 * 'NADPH 100%'.length) / 0.978 - inR,
+      (half - charW * '3-phosphoglycerate · 8'.length) / k - g.gap,
+      (half - charW * 'the shuffle · 10 carbons'.length) / k - g.gap,
+      (half - (4 * s + 2 * r)) / k - g.gap,
+      (half - fs * 0.2 - charW * 'sucrose, shipped · 10'.length) / 0.56,
+    ];
+    let R = clamp(Math.min(...widths), 24, 260);
+    let cy = fitsHeight(R);
+    while (cy === null && R > 24) {
+      R -= 1;
+      cy = fitsHeight(R);
+    }
+    g.R = R;
+    g.cy = cy ?? hgt / 2;
     return g;
   }
 
@@ -791,7 +873,7 @@ export function mount(root, ctx) {
     ring.circle(x, y, g.r, {
       fill: labelled ? INK.gold : CARBON.fill,
       stroke: touched ? C.ink : 'var(--paper-2)',
-      'stroke-width': fmt(touched ? Math.max(0.9, g.r * 0.26) : g.r * 0.32, 2),
+      'stroke-width': fmt(touched ? Math.max(0.9, g.r * 0.26) : Math.max(0.7, g.r * 0.17), 2),
     }, parent);
     if (labelled) ring.circle(x, y, g.r * 1.66, { fill: 'none', stroke: INK.gold, 'stroke-width': fmt(Math.max(1, g.r * 0.3), 2) }, parent);
   }
@@ -825,25 +907,39 @@ export function mount(root, ctx) {
 
   // A stack of chains, rows first then columns. (ax, ay) is the corner nearest the ring; `dx` and `dy`
   // say which way the stack grows from it. Returns the box it drew in.
-  function stack(mols, n, ax, ay, dx, dy, g, { maxRows = 3, touched = [] } = {}) {
+  function stack(mols, n, ax, ay, dx, dy, g, { maxRows = 3, touched = [], ghost = null } = {}) {
     const cw = chainW(n, g) + g.r * 2;
     const colGap = g.s * 0.9;
     const pitch = g.r * 2 + g.s * 0.46;
-    const rows = Math.max(1, Math.min(maxRows, mols.length));
-    const cols = Math.max(1, Math.ceil(mols.length / maxRows));
+    // A molecule on its way out keeps its slot until it has gone, so nothing is written over it.
+    const held = mols.length + (ghost && ghost.opacity > 0.01 ? 1 : 0);
+    const rows = Math.max(1, Math.min(maxRows, held));
+    const cols = Math.max(1, Math.ceil(held / maxRows));
     const bw = cols * cw + (cols - 1) * colGap;
     const bh = rows * pitch - (pitch - g.r * 2);
     const x0 = dx > 0 ? ax : ax - bw;
     const y0 = dy > 0 ? ay : ay - bh;
-    mols.forEach((mol, i) => {
+    const place = (i) => {
       const col = Math.floor(i / maxRows);
       const row = i % maxRows;
       // Rows fill from the ring outwards, so a pool that shrinks shrinks back towards the ring.
       const yRow = dy > 0 ? y0 + g.r + row * pitch : y0 + bh - g.r - row * pitch;
       const xCol = dx > 0 ? x0 + cw / 2 + col * (cw + colGap) : x0 + bw - cw / 2 - col * (cw + colGap);
-      chain(xCol, yRow, n, g, { lab: mol.lab, touched: touched.includes(mol) });
+      return [xCol, yRow];
+    };
+    mols.forEach((mol, i) => {
+      const [xc, yc] = place(i);
+      chain(xc, yc, n, g, { lab: mol.lab, touched: touched.includes(mol) });
     });
-    return { x: x0, y: y0, w: mols.length ? bw : 0, h: mols.length ? bh : 0 };
+    // A molecule on its way out is drawn where it stood, fading, and only there: a transfer that
+    // travelled would cross the exit and the pools' names on its way.
+    // Only a stack that grows away from its anchor on both axes (the G3P pool) is given one, so the
+    // next slot is where it stood whatever the count.
+    if (ghost && ghost.opacity > 0.01) {
+      const [xc, yc] = place(mols.length);
+      chain(xc, yc, n, g, { lab: ghost.mol.lab, parent: ring.group({ opacity: fmt(ghost.opacity, 3) }) });
+    }
+    return { x: x0, y: y0, w: held ? bw : 0, h: held ? bh : 0 };
   }
 
   const SWITCHED_OFF = { fill: 'var(--paper-3)', stroke: C.ruleStrong, 'stroke-width': 1.1, 'stroke-dasharray': '3 2.4' };
@@ -900,7 +996,7 @@ export function mount(root, ctx) {
     const d = state();
 
     // ---- the ring, the arc of the phase now working, the phase boundaries, the direction ----
-    ring.circle(g.cx, g.cy, g.R, { fill: 'none', stroke: C.ruleStrong, 'stroke-width': 1.3 });
+    ring.circle(g.cx, g.cy, g.R, { fill: 'none', stroke: C.ruleStrong, 'stroke-width': 1.3, class: 'cc-ring' });
     const [a1, a2] = ARC[d.phase];
     ring.path(arcD(g, g.R, a1, a2), { fill: 'none', stroke: C.ink, 'stroke-width': 2.2 });
     for (const at of [AT.pga, AT.exit, AT.rubp]) {
@@ -950,7 +1046,7 @@ export function mount(root, ctx) {
     // ---- rubisco at twelve o'clock: its active site, and its name under what it holds ----
     const [rx0, ry0] = P(g, AT.rubisco);
     ring.ellipse(rx0, ry0, g.rub.rx, g.rub.ry, lit ? { fill: ENZ.color } : SWITCHED_OFF);
-    const siteY = ry0 - s * 0.12;
+    const siteY = ry0 - s * (g.narrow ? 0.3 : 0.12);
     if (ev?.kind === 'fix') {
       chain(rx0, siteY, 5, g, { lab: ev.rubp.lab });
     } else if (ev?.kind === 'cut') {
@@ -961,7 +1057,7 @@ export function mount(root, ctx) {
     const nameFs = g.narrow ? Math.max(6.8, fs * 0.84) : fs * 0.88;
     ring.text(rx0, ry0 + g.rub.ry * 0.66, 'rubisco', { anchor: 'middle', 'font-size': fmt(nameFs), 'font-weight': 600, style: `fill:${lit ? ENZ.symbolColor : 'var(--ink-soft)'}` });
     // Its switch is the stroma's pH and magnesium, and it is not one of thioredoxin's.
-    if (!g.narrow) ring.text(rx0, ry0 + g.rub.ry + fs * 1.3, lit ? 'on: pH 8, Mg^{2+}' : 'off: pH 7, no Mg^{2+}', { anchor: 'middle', 'font-size': fmt(fs * 0.86), class: 'cc-note cc-tab' });
+    if (!g.narrow) ring.text(rx0, ry0 + g.rub.ry + fs * 1.3, lit ? 'on: pH 8 and Mg^{2+}' : 'off: pH 7, too little Mg^{2+}', { anchor: 'middle', 'font-size': fmt(fs * 0.86), class: 'cc-note cc-tab' });
 
     // The carbon dioxide waits above the enzyme, and comes down onto C2.
     const co2Y = ry0 - g.rub.ry - r * 3;
@@ -1006,7 +1102,9 @@ export function mount(root, ctx) {
     }
 
     const [gx, gy] = P(g, AT.g3p, g.R + g.gap);
-    const g3pBox = stack(m.g3p, 3, gx, gy, 1, 1, g, { maxRows: g.narrow ? 1 : 3, touched });
+    const leaving = ev && (ev.kind === 'shuffle' || ev.kind === 'export') ? ev : null;
+    const fade = leaving ? (leaving.kind === 'shuffle' ? 1 - leaving.p : 1 - Math.min(1, leaving.p / 0.35)) : 0;
+    const g3pBox = stack(m.g3p, 3, gx, gy, 1, 1, g, { maxRows: g.narrow ? 1 : 3, touched, ghost: leaving ? { mol: leaving.mol, opacity: fade } : null });
     if (g.narrow) ring.text(gx + g3pBox.w + fs * 0.5, gy + g.r + fs * 0.35, count('G3P', m.g3p.length), { 'font-size': fmt(fs), class: 'cc-name cc-tab' });
     else ring.text(gx, gy + g3pBox.h + fs * 1.3, count('G3P', m.g3p.length), { 'font-size': fmt(fs), class: 'cc-name cc-tab' });
 
@@ -1016,11 +1114,22 @@ export function mount(root, ctx) {
     const pitch = r * 2.55;
     const n = m.shuffle.length;
     const justIn = !ev && m.last?.kind === 'shuffle' ? m.last.before : Infinity;
+    const at = (i) => [sx - r - (i % perRow) * pitch, sy + r + Math.floor(i / perRow) * pitch];
     for (let i = 0; i < n; i += 1) {
-      carbon(sx - r - (i % perRow) * pitch, sy + r + Math.floor(i / perRow) * pitch, g, { labelled: m.shuffle[i], touched: i >= justIn });
+      const [cx1, cy1] = at(i);
+      carbon(cx1, cy1, g, { labelled: m.shuffle[i], touched: i >= justIn });
     }
-    const poolRows = Math.ceil(n / perRow);
-    if (g.narrow) ring.text(sx - Math.min(n, perRow) * pitch - fs * 0.4, sy + r + fs * 0.35, count('shuffle', n), { anchor: 'end', 'font-size': fmt(fs), class: 'cc-name cc-tab' });
+    if (ev?.kind === 'shuffle') {
+      const grp = ring.group({ opacity: fmt(ev.p, 3) });
+      for (let k = 0; k < 3; k += 1) {
+        const [cx1, cy1] = at(n + k);
+        carbon(cx1, cy1, g, { labelled: ev.mol.lab === k, parent: grp });
+      }
+    }
+    // The label is placed for the carbons on their way in as well, which fade in beside the others.
+    const shown = n + (ev?.kind === 'shuffle' ? 3 : 0);
+    const poolRows = Math.ceil(shown / perRow);
+    if (g.narrow) ring.text(sx - Math.min(shown, perRow) * pitch - fs * 0.4, sy + r + fs * 0.35, count('shuffle', n), { anchor: 'end', 'font-size': fmt(fs), class: 'cc-name cc-tab' });
     else ring.text(sx, sy + poolRows * pitch + fs * 1.3, `the shuffle · ${n} ${n === 1 ? 'carbon' : 'carbons'}`, { anchor: 'end', 'font-size': fmt(fs), class: 'cc-name cc-tab' });
 
     // ---- the inputs: ATP into the kinase, NADPH into GAPDH, ATP into PRK ----
@@ -1053,10 +1162,6 @@ export function mount(root, ctx) {
     const forkY = ey0 + (g.narrow ? fs * 0.8 : fs * 1.9);
     const spread = g.R * (g.narrow ? 0.5 : 0.56);
     const drop = g.narrow ? fs * 0.7 : fs * 1.2;
-    if (ev?.kind === 'shuffle') {
-      const [x, y] = P(g, lerp(AT.g3p, AT.pool, ev.p), g.R + g.gap + r * 1.6);
-      chain(x, y, 3, g, { lab: ev.mol.lab });
-    }
 
     // ---- the exit: every sixth G3P leaves, to sucrose or to starch ----
     ring.line(ex0, ey0, ex0, forkY, { stroke: C.ink, 'stroke-width': 1.3 });
@@ -1069,30 +1174,55 @@ export function mount(root, ctx) {
       });
       const pool = key === 'sucrose' ? m.sucrose : m.starch.length;
       const word = g.narrow ? key : (key === 'sucrose' ? 'sucrose, shipped' : 'starch, stored');
-      const at = g.narrow ? [endX + side * fs * 0.45, endY + fs * 0.35] : [endX + side * fs * 0.2, endY + fs * 1.3];
+      const sr = g.r * 1.2;
+      // Filled once the pool holds anything, whichever way the fork points: the branch's own line says
+      // where new sugar goes, the disc says whether any has gone there.
+      ring.circle(endX, endY, sr, pool > 0 ? { fill: SUGAR.color, stroke: 'var(--paper-2)', 'stroke-width': fmt(g.r * 0.3, 2) } : { fill: 'none', stroke: C.ruleStrong, 'stroke-width': 1.1 });
+      const at = g.narrow ? [endX + side * (sr + fs * 0.45), endY + fs * 0.35] : [endX + side * fs * 0.2, endY + sr + fs * 1.15];
       ring.text(at[0], at[1], count(word, pool), { anchor: side < 0 ? 'end' : 'start', 'font-size': fmt(fs), class: on ? 'cc-name cc-tab' : 'cc-note cc-tab' });
     }
-    if (ev?.kind === 'export') {
+    if (ev?.kind === 'export' && ev.p > 0.35) {
+      // Down the stem to the fork, then a little way along the chosen branch, and gone into the pool.
       const side = env.exportTo === 'sucrose' ? -1 : 1;
-      const k = ev.p;
-      const [fx, fy] = P(g, AT.g3p, g.R + g.gap + r);
-      const x = k < 0.45 ? lerp(fx, ex0, k / 0.45) : lerp(ex0, ex0 + side * spread, (k - 0.45) / 0.55);
-      const y = k < 0.45 ? lerp(fy, forkY, k / 0.45) : lerp(forkY, forkY + drop, (k - 0.45) / 0.55);
-      chain(x, y, 3, g, { lab: ev.mol.lab });
+      const k = (ev.p - 0.35) / 0.65;
+      const x = k < 0.5 ? ex0 : lerp(ex0, ex0 + side * spread * 0.5, (k - 0.5) / 0.5);
+      const y = k < 0.5 ? lerp(ey0 + r * 1.2, forkY, k / 0.5) : lerp(forkY, forkY + drop * 0.35, (k - 0.5) / 0.5);
+      chain(x, y, 3, g, { lab: ev.mol.lab, parent: ring.group({ opacity: fmt(k < 0.75 ? 1 : 1 - (k - 0.75) / 0.25, 3) }) });
     }
   }
 
+  // How wide a line may be inside the ring, dy below its centre, keeping clear of the stroke.
+  const chordAt = (g, dy) => 2 * Math.sqrt(Math.max(0, g.R * g.R - dy * dy)) - 10;
+
   function drawCentre(g) {
     const c = counter();
-    const big = g.narrow ? clamp(g.R * 0.3, 11, 17) : clamp(g.R * 0.16, 15, 28);
     const y0 = g.cy - g.R * (g.narrow ? 0.0 : 0.05);
-    ring.text(g.cx, y0, c.sum, { anchor: 'middle', 'font-size': fmt(big), class: 'cc-num' });
+    // On a phone the ring can be 38 px across its radius, and a sum like "18 − 3 = 15" set at its
+    // usual size is wider than the ring there, so it is fitted to the chord it sits on.
+    const big = g.narrow
+      ? Math.min(clamp(g.R * 0.3, 11, 17), chordAt(g, g.fs * 0.5) / (0.62 * c.sum.length))
+      : clamp(g.R * 0.175, 15, 34);
+    ring.text(g.cx, y0, c.sum, { anchor: 'middle', 'font-size': fmt(Math.max(8, big)), class: 'cc-num' });
     if (!g.narrow) {
-      ring.text(g.cx, y0 + g.fs * 1.8, c.says, { anchor: 'middle', 'font-size': fmt(g.fs * 0.96), class: 'cc-note' });
+      // A Step that finished nothing says so in place of what the last reaction did, at both widths:
+      // in a corner it sat five pixels above the tallest pile's own label.
+      if (stepNote) ring.text(g.cx, y0 + g.fs * 1.8, stepNote === 'stuck' ? 'Nothing can happen next.' : 'No reaction finished in that step.', { anchor: 'middle', 'font-size': fmt(g.fs * 0.96), class: 'cc-alert' });
+      else ring.text(g.cx, y0 + g.fs * 1.8, c.says, { anchor: 'middle', 'font-size': fmt(g.fs * 0.96), class: 'cc-note' });
       ring.text(g.cx, y0 + g.fs * 3.55, booksLine(), { anchor: 'middle', 'font-size': fmt(g.fs * 0.9), class: 'cc-faint cc-tab' });
+    } else if (stepNote) {
+      // On a phone the corners belong to the pools' names, so a Step that finished nothing says so
+      // here, under the sum, where the phase's name would otherwise be.
+      const note = stepNote === 'stuck' ? 'stalled' : 'none finished';
+      const size = Math.min(Math.max(7, g.fs * 0.86), chordAt(g, g.fs * 1.9) / (0.56 * note.length));
+      // Below 6.5 px it is left to the live region, which says it in full, rather than set over the ring.
+      if (size >= 6.5) ring.text(g.cx, y0 + g.fs * 1.55, note, { anchor: 'middle', 'font-size': fmt(size), class: 'cc-alert' });
     } else {
       const phase = m.event ? PHASE_OF[m.event.kind] : m.lastPhase;
-      ring.text(g.cx, y0 + g.fs * 1.55, phase.toUpperCase(), { anchor: 'middle', 'font-size': fmt(Math.max(6.8, g.fs * 0.8)), class: 'cc-phase is-now' });
+      // Capitals tracked at 0.08 em here rather than the wide layout's 0.14: "REGENERATION" is the
+      // longest name, and in a ring of radius 38 it has 66 px.
+      const size = Math.min(Math.max(6.8, g.fs * 0.8), chordAt(g, g.fs * 1.9) / (0.8 * phase.length));
+      // Below 6.5 px the name is left out: the arc drawn in ink and the ledger's rows still name it.
+      if (size >= 6.5) ring.text(g.cx, y0 + g.fs * 1.55, phase.toUpperCase(), { anchor: 'middle', 'font-size': fmt(size), class: 'cc-phase is-now', style: 'letter-spacing:0.08em' });
     }
   }
 
@@ -1101,13 +1231,7 @@ export function mount(root, ctx) {
     const pad = 4;
     const lit = env.lightOn;
     ring.text(pad, pad + fs * 0.9, lit ? 'THE STROMA, LIT' : 'THE STROMA, DARK', { 'font-size': fmt(fs * 0.84), class: 'cc-head' });
-    if (!g.narrow) ring.text(pad, pad + fs * 2.25, lit ? 'thioredoxin reduced' : 'thioredoxin oxidised', { 'font-size': fmt(fs * 0.9), class: 'cc-note' });
-    if (stepNote) {
-      const msg = stepNote === 'stuck' ? 'Nothing can happen next.' : g.narrow ? 'No reaction finished.' : 'No reaction finished in that step.';
-      // On a phone the foot holds the two sugar pools, so the note takes the line under the heading.
-      if (g.narrow) ring.text(pad, pad + fs * 2.2, msg, { 'font-size': fmt(fs), class: 'cc-alert' });
-      else ring.text(g.w - pad, pad + fs * 0.9, msg, { anchor: 'end', 'font-size': fmt(fs * 0.95), class: 'cc-alert' });
-    }
+    if (!g.narrow) ring.text(pad, pad + fs * 2.25, lit ? 'pH 8 · more Mg^{2+} · thioredoxin reduced' : 'pH 7 · less Mg^{2+} · thioredoxin oxidised', { 'font-size': fmt(fs * 0.9), class: 'cc-note cc-tab' });
   }
 
   // ---------------------------------------------------------------- the ledger
@@ -1142,24 +1266,57 @@ export function mount(root, ctx) {
       typeset(ledger.node);
       return;
     }
-    const traceH = clamp(hgt * 0.17, 46, 90);
-    const r = ledger.readout({ title: 'THE LEDGER', columns: ['ATP', 'NADPH'], x: pad, width, size: 10.4, minRow: 13, maxRow: 24 });
+    if (w > hgt * 1.4) {
+      drawLedgerSplit(w, hgt, d, pt);
+      typeset(ledger.node);
+      return;
+    }
+    // The chart is a fixed band at the foot; the table's rows are solved to fill everything above it.
+    const traceH = clamp(hgt * 0.15, 50, 78);
+    const r = ledger.readout({ title: 'THE LEDGER', columns: ['ATP', 'NADPH'], x: pad, width, size: 10.4, minRow: 15, maxRow: 34 });
     const dash = '—';
-    r.fit(hgt - traceH - 12, (t, level) => {
+    r.fit(hgt - traceH - 14, (t, level) => {
       for (const ph of PHASES) t.row(PHASE_WORD[ph], [String(d.atpByPhase[ph]), String(d.nadphByPhase[ph])]);
       t.sum('Spent so far', [String(d.atpSpent), String(d.nadphSpent)]);
       t.head('PER COMPLETE TURN');
       t.row('Per CO_2 fixed', pt ? [num(pt.atp, 2), num(pt.nadph, 2)] : [dash, dash]);
-      t.row('Per glucose, six CO_2', pt ? [num(pt.atpGlucose, 1), num(pt.nadphGlucose, 1)] : [dash, dash]);
+      if (level < 3) t.row('Per glucose, six CO_2', pt ? [num(pt.atpGlucose, 1), num(pt.nadphGlucose, 1)] : [dash, dash]);
       t.row('In kJ, at 50 and 220', pt ? [num(pt.atpGlucose * ATP_KJ), num(pt.nadphGlucose * NADPH_KJ)] : [dash, dash]);
       t.sum('Spent per glucose, kJ', ['', pt ? num(pt.kjGlucose) : dash]);
       t.row('A glucose holds, kJ', ['', String(GLUCOSE_KJ)]);
       if (level < 2) t.note(efficiencySentence(pt));
       t.head('NOW');
       t.note(nowSentence(d, level >= 1));
-    }, { levels: 3 });
-    drawTrace(pad, hgt - traceH, width, traceH - 4);
+    }, { levels: 4 });
+    drawTrace(pad, hgt - traceH, width, traceH - 2);
     typeset(ledger.node);
+  }
+
+  function drawLedgerSplit(w, hgt, d, pt) {
+    const pad = 6;
+    const gutter = Math.max(18, w * 0.04);
+    const colW = (w - pad * 2 - gutter) / 2;
+    const dash = '—';
+    const left = ledger.readout({ title: 'THE LEDGER', columns: ['ATP', 'NADPH'], x: pad, width: colW, size: 10.2, minRow: 15, maxRow: 26 });
+    left.fit(hgt, (t, level) => {
+      for (const ph of PHASES) t.row(PHASE_WORD[ph], [String(d.atpByPhase[ph]), String(d.nadphByPhase[ph])]);
+      t.sum('Spent so far', [String(d.atpSpent), String(d.nadphSpent)]);
+      t.head('PER COMPLETE TURN');
+      t.row('Per CO_2 fixed', pt ? [num(pt.atp, 2), num(pt.nadph, 2)] : [dash, dash]);
+      if (level < 2) t.row('Per glucose, six CO_2', pt ? [num(pt.atpGlucose, 1), num(pt.nadphGlucose, 1)] : [dash, dash]);
+      t.row('In kJ, at 50 and 220', pt ? [num(pt.atpGlucose * ATP_KJ), num(pt.nadphGlucose * NADPH_KJ)] : [dash, dash]);
+      t.sum('Spent per glucose, kJ', ['', pt ? num(pt.kjGlucose) : dash]);
+      t.row('A glucose holds, kJ', ['', String(GLUCOSE_KJ)]);
+    }, { levels: 3 });
+    const x2 = pad + colW + gutter;
+    const traceH = clamp(hgt * 0.34, 50, 78);
+    const right = ledger.readout({ x: x2, width: colW, size: 10.2, minRow: 15, maxRow: 22 });
+    right.fit(hgt - traceH - 10, (t, level) => {
+      t.head('NOW');
+      t.note(nowSentence(d, level >= 1));
+      if (level < 2) t.note(efficiencySentence(pt));
+    }, { levels: 3 });
+    drawTrace(x2, hgt - traceH, colW, traceH - 2);
   }
 
   function efficiencySentence(pt) {
@@ -1217,15 +1374,53 @@ export function mount(root, ctx) {
       lower.y = mid + need / 2;
     }
     for (const e of ends) ledger.text(x0 + plotW + 8, e.y + fs * 0.35, `${e.word} ${e.v}`, { 'font-size': fmt(fs), class: 'cc-note cc-tab' });
-    if (kept.length < 2) ledger.text(x0 + plotW / 2, (top + base) / 2 + fs * 0.35, 'fills as the cycle runs', { anchor: 'middle', 'font-size': fmt(fs), class: 'cc-faint' });
+    if (!rows.some((r) => r.sucrose || r.starch)) ledger.text(x0 + plotW / 2, (top + base) / 2 + fs * 0.35, 'empty until the first G3P leaves', { anchor: 'middle', 'font-size': fmt(fs), class: 'cc-faint' });
   }
 
   // ---------------------------------------------------------------- drawing
 
+  // The stage's shape, not its width, decides between the two wide arrangements, so the answer cannot
+  // flip as the panes it produces are measured. Returns true when it changed the grid.
+  let stacked = null;
+  function arrange() {
+    const r = b.wrap.getBoundingClientRect();
+    const want = !b.narrow && r.height > r.width * 0.78;
+    if (want === stacked) return false;
+    stacked = want;
+    b.setVar('--cc-cols', want ? 'minmax(0, 1fr)' : 'minmax(0, 60fr) minmax(0, 40fr)');
+    b.setVar('--cc-rows', want ? 'minmax(0, 60fr) minmax(0, 40fr)' : 'minmax(0, 1fr)');
+    b.setVar('--cc-lc', want ? '1' : '2');
+    b.setVar('--cc-lr', want ? '2' : '1');
+    return true;
+  }
+
   b.onDraw(() => {
+    if (arrange()) b.remeasure();
     drawRing();
     drawLedger();
   });
 
+  // describe() reports, on top of the frame's id/kind/number/state and the bench's `layout`:
+  //   phase                 the phase of the reaction in progress, or of the last one: carboxylation,
+  //                         reduction or regeneration; carboxylation at the opening
+  //   turns, co2Fixed       complete turns (three CO2 in, one G3P out) and carbon dioxides fixed
+  //   carbonsIn, carbonsOut the running balance; equal at the end of every complete turn
+  //   sixCarbonLeftEnzyme   computed: a six-carbon molecule anywhere but rubisco's site; always false
+  //   labelledAtomAt        null until Label is pressed; then 'carbon dioxide', 'six-carbon compound',
+  //                         '3-phosphoglycerate', '1,3-bisphosphoglycerate', 'G3P', 'shuffle', 'RuBP',
+  //                         'sucrose' or 'starch'
+  //   atpSpent, nadphSpent  running totals; a phosphorylation that runs back gives its ATP back
+  //   atpByPhase, nadphByPhase   the same, keyed by phase; regeneration holds a third of the ATP
+  //   g3pExported           G3P that left, one in every six made
+  //   kjSpent               50 × atpSpent + 220 × nadphSpent; kjNeededPerGlucose is 2870
+  //   atpSupply, nadphSupply     0–1, from the two sliders
+  //   stalledPhase          'reduction' when either supply is at zero, else null: from the supplies
+  //   accumulating          '3-phosphoglycerate' while stalled with any on the ring, else null
+  //   lightOn, stromaPh, magnesiumInStroma, thioredoxinReduced   the light and its three changes
+  //   rubiscoActivated      pH 8 with magnesium moved in
+  //   activatedEnzymes      thioredoxin's four switched on, counted from TARGETS, which rubisco is not in
+  //   exportTo, sucrosePool, starchPool   where the leaving G3P goes, and each pool in G3P
+  //   t                     the cycle's own clock, seconds, three decimals; Reset puts it back to 0
+  //   playing               whether Run is on
   return b.handle();
 }
