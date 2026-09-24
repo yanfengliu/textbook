@@ -48,8 +48,12 @@
 // citrate 0.2 mM, I = 0.47), that raising ATP alone shuts it at 7 mM (6 is open), that from there one
 // press of AMP (0.2 mM) opens it again, that ATP at 10 mM needs AMP at 0.3, and that citrate alone shuts
 // it at 1.6 mM (1.4 is open). The real enzyme's response is graded and cooperative; a switch is the
-// figure's simplification of §5.7's loop, in which ATP binds a regulatory site as well as the active
-// site, AMP and ADP displace it there, and citrate inhibits. On the controls' own grids I never equals 1
+// figure's simplification of §5.7's loop, in which ATP binds an inhibitory site of its own as well as the
+// active site, AMP and ADP bind an activating site of their own and turn the enzyme back to its active
+// shape, and citrate inhibits (§7.2 as the accuracy review of 2026-09-24 corrected it, finding 17, which
+// replaced "displace"). AMP's term divides I, which is the form either mechanism would give, so the
+// arithmetic takes no side; the words do, and nothing on the stage says or draws AMP pushing ATP off its
+// site. On the controls' own grids I never equals 1
 // (it would need 19 to divide ATP × (5 + 5 × citrate), and neither factor reaches 19), so no setting sits
 // on the fence. When it is shut, `closedBy` names whichever of ATP and citrate has risen further from
 // its resting level, as a ratio: ATP / 3 against (1 + citrate) / 1.2. AMP never shuts it. A shut step
