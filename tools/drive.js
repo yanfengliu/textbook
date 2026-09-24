@@ -3089,6 +3089,153 @@ const RECIPES = {
       expect(d.view && d.view.distance > 0, `Reset view left no view: ${JSON.stringify(d)}`);
     }],
   ],
+
+  // Chapter 6, Figure 6.2. At the end of the table so that it shares no line with the chapter's other
+  // three recipes, which are being written at the same time. After every press the assertion is on what
+  // the figure COMPUTED — stalledAt, starvedAt, clusterCount, oxygenReleased, capturedFraction,
+  // flashOxygen — and never only on the count the button itself moved.
+  zscheme: [
+    ['opens-dark-with-nothing-fired', async (h) => {
+      const d = await h.describe();
+      expect(d.path === 'linear' && d.playing === false, `it should open on the linear path, unrun: ${JSON.stringify({ path: d.path, playing: d.playing })}`);
+      expect(d.photonsAtPsii === 0 && d.photonsAtPsi === 0 && d.clusterCount === 0, `nothing fired and the counter at zero: ${JSON.stringify({ ii: d.photonsAtPsii, i: d.photonsAtPsi, cluster: d.clusterCount })}`);
+      expect(d.oxygenReleased === 0 && d.nadphMade === 0 && d.protonsToLumen === 0, `the three counters should open at zero: ${JSON.stringify({ o2: d.oxygenReleased, nadph: d.nadphMade, h: d.protonsToLumen })}`);
+      expect(Object.values(d.carrierFill).every((v) => v === 0), `every carrier should open empty: ${JSON.stringify(d.carrierFill)}`);
+      expect(d.stalledAt === null && d.starvedAt === null && d.flashTrain === false && d.flashOxygen.length === 0, `nothing stalled and no train: ${JSON.stringify({ stalledAt: d.stalledAt, starvedAt: d.starvedAt, flashOxygen: d.flashOxygen })}`);
+      expect(d.climbVolts === 1.14 && d.climbKjPerTwoElectrons === 220, `the ledger should read §6.4's 1.14 V and §5.8's 220 kJ/mol: ${d.climbVolts} V, ${d.climbKjPerTwoElectrons} kJ/mol`);
+    }],
+    ['three-photons-at-II-release-no-oxygen', async (h) => {
+      const fireII = h.button(/^Fire at photosystem II,/);
+      for (let i = 1; i <= 3; i += 1) {
+        await fireII.click();
+        await until(h, (x) => x.photonsAtPsii === i, 5_000);
+      }
+      const d = await h.describe();
+      expect(d.photonsAtPsii === 3, `three presses should have fired three photons: ${d.photonsAtPsii}`);
+      expect(d.clusterCount === 3 && d.oxygenReleased === 0, `three holes on the cluster and no oxygen: ${JSON.stringify({ cluster: d.clusterCount, o2: d.oxygenReleased })}`);
+    }],
+    ['the-fourth-releases-one-oxygen-and-four-protons', async (h) => {
+      const before = await h.describe();
+      await h.button(/^Fire at photosystem II,/).click();
+      const d = await until(h, (x) => x.oxygenReleased === 1, 5_000);
+      expect(d.oxygenReleased === 1 && d.clusterCount === 0, `the fourth photon should release one oxygen and empty the counter: ${JSON.stringify({ o2: d.oxygenReleased, cluster: d.clusterCount })}`);
+      expect(d.protonsToLumen - before.protonsToLumen === 4, `and its two waters should drop four protons into the lumen: ${before.protonsToLumen} -> ${d.protonsToLumen}`);
+    }],
+    ['photosystem-II-alone-stalls-at-plastoquinone', async (h) => {
+      await h.button(/^Fire at photosystem II,/).click();
+      const d = await until(h, (x) => x.photonsAtPsii === 5, 5_000);
+      expect(d.stalledAt === 'plastoquinone' && d.starvedAt === 'ferredoxin', `photosystem II alone should jam: ${JSON.stringify({ stalledAt: d.stalledAt, starvedAt: d.starvedAt })}`);
+      expect(d.carrierFill.plastoquinone === 1 && d.carrierFill.cytochromeB6f === 1 && d.carrierFill.plastocyanin === 1, `with every carrier between the photosystems full: ${JSON.stringify(d.carrierFill)}`);
+      expect(d.clusterCount === 0 && d.oxygenReleased === 1, `a closed photosystem II should move the cluster not at all: ${JSON.stringify({ cluster: d.clusterCount, o2: d.oxygenReleased })}`);
+      expect(d.photonKjSupplied > 870 && d.capturedFraction === 0, `five photons' worth of light and nothing kept: ${d.photonKjSupplied} kJ/mol, ${d.capturedFraction}`);
+    }],
+    ['photosystem-I-unjams-it-and-makes-nadph', async (h) => {
+      const fireI = h.button(/^Fire at photosystem I,/);
+      await fireI.click();
+      const one = await until(h, (x) => x.photonsAtPsi === 1, 5_000);
+      expect(one.stalledAt === null && one.carrierFill.plastoquinone === 0.5, `one photon at photosystem I should make room: ${JSON.stringify({ stalledAt: one.stalledAt, fill: one.carrierFill })}`);
+      await fireI.click();
+      const d = await until(h, (x) => x.nadphMade === 1, 5_000);
+      expect(d.nadphMade === 1, `two electrons at NADP+ should make one NADPH: ${d.nadphMade}`);
+      expect(d.capturedFraction > 0.1 && d.capturedFraction < 0.317, `and some of the light is now kept, less than the best case: ${d.capturedFraction}`);
+    }],
+    ['photosystem-I-alone-stalls-at-P700', async (h) => {
+      await h.button(/^Reset/).click();
+      await until(h, (x) => x.photonsAtPsii === 0 && x.photonsAtPsi === 0, 5_000);
+      const fireI = h.button(/^Fire at photosystem I,/);
+      await fireI.click();
+      const d = await until(h, (x) => x.stalledAt === 'P700', 5_000);
+      expect(d.stalledAt === 'P700' && d.starvedAt === 'plastocyanin', `photosystem I alone should drain the chain after one electron: ${JSON.stringify({ stalledAt: d.stalledAt, starvedAt: d.starvedAt })}`);
+      await fireI.click();
+      const again = await until(h, (x) => x.photonsAtPsi === 2, 5_000);
+      expect(again.carrierFill.ferredoxin === 0 && again.nadphMade === 0 && again.stalledAt === 'P700', `a second photon at an oxidised P700 should move nothing: ${JSON.stringify({ fill: again.carrierFill, nadph: again.nadphMade, stalledAt: again.stalledAt })}`);
+    }],
+    ['both-in-turn-run-water-to-nadph-at-the-ledger-rate', async (h) => {
+      await h.button(/^Reset/).click();
+      await until(h, (x) => x.photonsAtPsii === 0 && x.photonsAtPsi === 0, 5_000);
+      for (let i = 1; i <= 4; i += 1) {
+        await h.button(/^Fire at photosystem II,/).click();
+        await until(h, (x) => x.photonsAtPsii === i, 5_000);
+        await h.button(/^Fire at photosystem I,/).click();
+        await until(h, (x) => x.photonsAtPsi === i, 5_000);
+      }
+      const d = await h.describe();
+      expect(d.nadphMade === 2 && d.oxygenReleased === 1 && d.stalledAt === null, `four electrons from water should make two NADPH and one oxygen without a stall: ${JSON.stringify({ nadph: d.nadphMade, o2: d.oxygenReleased, stalledAt: d.stalledAt })}`);
+      expect(d.protonsToLumen === 12, `four from the water and two per electron through the cytochrome complex: ${d.protonsToLumen}`);
+      expect(Math.abs(d.capturedFraction - 0.317) < 0.002, `four photons per NADPH keeps 220 of 693.6 kJ/mol: ${d.capturedFraction}`);
+    }],
+    ['cyclic-flow-moves-protons-and-makes-no-nadph-or-oxygen', async (h) => {
+      await h.button(/^Cyclic flow/).click();
+      const before = await until(h, (x) => x.path === 'cyclic', 5_000);
+      expect(before.path === 'cyclic', `the path switch did not take: ${before.path}`);
+      for (let i = 1; i <= 6; i += 1) {
+        await h.button(/^Fire at photosystem I,/).click();
+        await until(h, (x) => x.photonsAtPsi === before.photonsAtPsi + i, 5_000);
+      }
+      const d = await h.describe();
+      expect(d.nadphMade === before.nadphMade && d.oxygenReleased === before.oxygenReleased, `no NADPH and no oxygen on the cyclic path: ${JSON.stringify({ nadph: [before.nadphMade, d.nadphMade], o2: [before.oxygenReleased, d.oxygenReleased] })}`);
+      expect(d.protonsToLumen === before.protonsToLumen + 12, `six turns of the loop should move twelve protons: ${before.protonsToLumen} -> ${d.protonsToLumen}`);
+      expect(d.stalledAt === null, `photosystem I alone keeps an electron going round the loop without stalling: ${d.stalledAt}`);
+    }],
+    ['on-the-cyclic-path-photosystem-II-jams-and-the-oxygen-stops', async (h) => {
+      const fireII = h.button(/^Fire at photosystem II,/);
+      let d = await h.describe();
+      for (let i = 0; i < 6 && d.stalledAt !== 'plastoquinone'; i += 1) {
+        const n = d.photonsAtPsii;
+        await fireII.click();
+        d = await until(h, (x) => x.photonsAtPsii === n + 1, 5_000);
+      }
+      expect(d.stalledAt === 'plastoquinone' && d.starvedAt === null, `with nothing leaving the loop, photosystem II should fill it and jam: ${JSON.stringify({ stalledAt: d.stalledAt, starvedAt: d.starvedAt })}`);
+      const jammed = d;
+      for (let i = 1; i <= 4; i += 1) {
+        await fireII.click();
+        d = await until(h, (x) => x.photonsAtPsii === jammed.photonsAtPsii + i, 5_000);
+      }
+      expect(d.oxygenReleased === jammed.oxygenReleased && d.nadphMade === jammed.nadphMade, `four more photons at a jammed photosystem II should release no oxygen: ${JSON.stringify({ o2: [jammed.oxygenReleased, d.oxygenReleased], nadph: d.nadphMade })}`);
+    }],
+    ['the-flash-train-counts-in-fours', async (h) => {
+      await h.button(/^Linear flow/).click();
+      await until(h, (x) => x.path === 'linear', 5_000);
+      await h.button(/^Flash train/).click();
+      const started = await until(h, (x) => x.flashTrain === true, 5_000);
+      expect(started.flashTrain === true && started.clusterCount === 1 && started.oxygenReleased === 0, `the train should start from the dark, the cluster one step along: ${JSON.stringify({ train: started.flashTrain, cluster: started.clusterCount, o2: started.oxygenReleased })}`);
+      const mid = await until(h, (x) => x.flashOxygen.length >= 4, 30_000);
+      expect(mid.flashOxygen.length >= 4, `the train should be firing: ${mid.flashOxygen.length} flashes`);
+      await h.button(/^Pause/).click();
+      const paused = await until(h, (x) => x.playing === false, 5_000);
+      expect(paused.playing === false && paused.flashTrain === true && paused.flashOxygen.length < 12, `Pause should stop the train part-way: ${JSON.stringify({ playing: paused.playing, flashes: paused.flashOxygen.length })}`);
+      await h.button(/^Run/).click();
+      const d = await until(h, (x) => x.flashOxygen.length === 12 && x.flashTrain === false, 60_000);
+      const y = d.flashOxygen;
+      expect(y.length === 12 && d.flashTrain === false, `Run should carry the train on to twelve flashes: ${y.length}`);
+      const peak = (n) => y[n - 1] > y[n - 2] && y[n - 1] > y[n];
+      expect(y[0] === 0 && y[1] < 0.1, `almost nothing on the first two flashes: ${y.join(', ')}`);
+      expect(y[2] === Math.max(...y), `the third flash should give the most: ${y.join(', ')}`);
+      expect(peak(3) && peak(7) && peak(11), `peaks on flashes 3, 7 and 11: ${y.join(', ')}`);
+      expect(y[2] > y[6] && y[6] > y[10], `each lower than the last, as the population drifts out of step: ${y.join(', ')}`);
+      expect(d.oxygenReleased === 3, `the drawn cluster, starting one step along, should release on flashes 3, 7 and 11: ${d.oxygenReleased}`);
+    }],
+    ['keys-fire-and-reset', async (h) => {
+      await h.focusable().focus();
+      await h.page.keyboard.press('Home');
+      await until(h, (x) => x.photonsAtPsii === 0 && x.flashOxygen.length === 0, 5_000);
+      await h.page.keyboard.press('2');
+      const d = await until(h, (x) => x.photonsAtPsii === 1, 5_000);
+      expect(d.photonsAtPsii === 1 && d.clusterCount === 1, `2 should fire at photosystem II: ${JSON.stringify({ ii: d.photonsAtPsii, cluster: d.clusterCount })}`);
+      await h.page.keyboard.press('1');
+      const e = await until(h, (x) => x.photonsAtPsi === 1, 5_000);
+      expect(e.photonsAtPsi === 1 && e.carrierFill.ferredoxin === 0, `1 should fire at photosystem I: ${JSON.stringify({ i: e.photonsAtPsi, fill: e.carrierFill })}`);
+    }],
+    ['reset-puts-everything-back', async (h) => {
+      await h.button(/^Cyclic flow/).click();
+      await until(h, (x) => x.path === 'cyclic', 5_000);
+      await h.button(/^Reset/).click();
+      const d = await until(h, (x) => x.photonsAtPsii === 0 && x.path === 'linear', 5_000);
+      expect(d.path === 'linear' && d.playing === false && d.t === 0, `Reset should leave the linear path, unrun, at t = 0: ${JSON.stringify({ path: d.path, playing: d.playing, t: d.t })}`);
+      expect(d.photonsAtPsi === 0 && d.oxygenReleased === 0 && d.nadphMade === 0 && d.protonsToLumen === 0 && d.clusterCount === 0, `Reset left counts behind: ${JSON.stringify({ i: d.photonsAtPsi, o2: d.oxygenReleased, nadph: d.nadphMade, h: d.protonsToLumen, cluster: d.clusterCount })}`);
+      expect(d.stalledAt === null && d.flashOxygen.length === 0 && d.photonKjSupplied === 0, `Reset left ${JSON.stringify({ stalledAt: d.stalledAt, flashOxygen: d.flashOxygen, kj: d.photonKjSupplied })}`);
+    }],
+  ],
 };
 
 rmSync(OUT, { recursive: true, force: true });

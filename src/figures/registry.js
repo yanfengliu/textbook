@@ -105,6 +105,12 @@ export const FIGURES = Object.freeze({
   'zj-split': { url: new URL('./zj-split.js', import.meta.url).href, title: '三家分晋：从灭智到命侯', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
   'zj-timeline': { url: new URL('./zj-timeline.js', import.meta.url).href, title: '周纪一的年表', needsWebGL: false, aspect: 16 / 9, narrowAspect: 2 / 3 },
   'zj-words': { url: new URL('./zj-words.js', import.meta.url).href, title: '字与词', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
+
+  // Chapter 6, Photosynthesis: Figure 6.2. The title is the brief's headline and the two aspects are the
+  // table's (biology/ch06-photosynthesis/FIGURES.md); the figure carries a real second composition below
+  // 800 px, the two climbs stacked. Added at the end of the table so that it does not share a line with
+  // the chapter's other three kinds, which are being added in parallel.
+  zscheme: { url: new URL('./zscheme.js', import.meta.url).href, title: 'Fire the photons yourself', needsWebGL: false, aspect: 16 / 10, narrowAspect: 3 / 4 },
 });
 
 export const KINDS = Object.freeze(Object.keys(FIGURES));
