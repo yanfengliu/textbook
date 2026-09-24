@@ -108,7 +108,7 @@ export const FIGURES = Object.freeze({
   // not survive a 390 px stage.
   'rubisco-fork': { url: new URL('./rubisco-fork.js', import.meta.url).href, title: 'One site, two gases, four steps of arithmetic', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
   // Chapter 7, Cellular respiration. Figure 7.3: the chain against its potentials. Below 800 px the stage
-  // is portrait and the table goes beneath the stair.
+  // is portrait and the readout goes beneath the drawing.
   'respiratory-chain': { url: new URL('./respiratory-chain.js', import.meta.url).href, title: 'The fall, in four steps', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
 
   // 《资治通鉴》 卷一 周纪一 — the second book. Its figures are about a text and a history, not a

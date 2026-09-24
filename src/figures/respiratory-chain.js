@@ -83,8 +83,8 @@
 //     potential, which is what the brief asks the drawing to do.
 //
 // TWO ARRANGEMENTS of one drawing, chosen by the pane's shape rather than by a flag: landscape with the
-// readout in a column at the right, and portrait (the phone's 2 / 3 stage) with the readout beneath. The
-// toolbar's short labels come in below a 600 px stage. Every label is measured and placed against every
+// readout in a column at the right, and portrait (the phone's 2 / 3 stage) with the readout beneath, its two
+// tables side by side where their rows fit. The toolbar's short labels come in below a 600 px stage. Every label is measured and placed against every
 // mark, line and label already placed, as in zscheme; in the lab a label nothing clears is thrown as a
 // defect.
 //
@@ -490,6 +490,8 @@ export function mount(root, ctx) {
     widths.set(key, w);
     return w;
   }
+  // A readout title's width: set in capitals, weight 600, letter-spaced by a tenth of an em.
+  const capsWidth = (str, size) => textWidth(str.toUpperCase(), size, 600) + str.length * size * 0.1;
 
   // ---- controls ----
   function afterAction() {
@@ -686,7 +688,9 @@ export function mount(root, ctx) {
     const kj = kjOf(fallOf(donor, a));
     const entry = entryOf(donor);
     const x = crossoverAt();
-    const unusedBlock = bl.at && !inPlay(a).includes(bl.at) ? ` ${cap(bl.by)} blocks complex${NB}${bl.at}, which this route does not use.` : '';
+    const unused = bl.at && !inPlay(a).includes(bl.at);
+    const unusedBlock = unused ? ` ${cap(bl.by)} blocks complex${NB}${bl.at}, which this route does not use.` : '';
+    const unusedShort = unused ? ` ${cap(bl.by)}: no complex${NB}${bl.at} in this chain.` : '';
     // The donor cannot give to this acceptor at all.
     if (entry === 'no-fall') {
       return short ? 'No fall: FADH₂ and fumarate are level.' : `The cycle's FADH₂ sits at +0.03${NB}V, level with fumarate: there is no fall, so no pair goes.`;
@@ -700,7 +704,7 @@ export function mount(root, ctx) {
     const full = refused === 'backed-up' ? ' A new pair has nowhere to go.' : '';
     if (x) {
       if (routeOpen(donor)) {
-        return short ? `${cap(bl.by ?? 'the block')} holds NADH; FADH₂ runs.` : `${cap(bl.by ?? 'the block')} holds NADH's pairs at complex${NB}I, but the cycle's FADH₂ enters below it, at complex${NB}II, and still moves ${per} charges a pair.`;
+        return short ? `${cap(bl.by ?? 'the block')} holds NADH; FADH₂ runs.` : `${cap(bl.by ?? 'the block')} holds NADH's pairs at complex${NB}I, but the cycle's FADH₂ enters below it, at complex${NB}II, and ${a.id === 'oxygen' ? `still moves ${per} charges a pair` : `still pays for at most ${per} ${per === 1 ? 'charge' : 'charges'} a pair`}.`;
       }
       if (bl.at !== x && x === 'IV' && a.id === 'oxygen' && !oxygenOn) {
         return short ? 'No oxygen: backed up from the bottom.' : `No oxygen: complex${NB}IV has nothing to hand its pair to, so the chain backs up from the bottom and the gradient runs down.${full}`;
@@ -712,7 +716,7 @@ export function mount(root, ctx) {
     }
     if (a.id === 'sulfate' || a.id === 'carbon-dioxide') {
       return short
-        ? `${kj}${NB}kJ/mol: less than one charge.`
+        ? `${kj}${NB}kJ/mol: less than one charge.${unusedShort}`
         : `${kj}${NB}kJ/mol from NADH is not quite one charge's worth (19.3${NB}kJ/mol). These organisms take their electrons from fuels other than NADH, mostly hydrogen, and move only a few ions per reaction.${unusedBlock}`;
     }
     const idle = pairs.nadh + pairs.fadh2 === 0;
@@ -727,14 +731,19 @@ export function mount(root, ctx) {
     }
     const ceiling = `${kj}${NB}kJ/mol pays for at most ${per} ${per === 1 ? 'charge' : 'charges'} at 200${NB}mV (19.3${NB}kJ/mol each): a ceiling, not any organism's count.`;
     if (a.id === 'nitrate') {
-      if (short) return `At most ${per} charges: a ceiling.`;
+      if (short) return `At most ${per} charges: a ceiling.${unusedShort}`;
       return `${malonate}${ceiling}${donor === 'nadh' ? ' A real nitrate chain in a bacterium moves about 6.' : ''}${unusedBlock}`;
     }
     // fumarate, from NADH (FADH₂ has no fall to it, above)
-    if (short) return `Menaquinone; at most ${per} charges.`;
+    if (short) return `Menaquinone; at most ${per} charges.${unusedShort}`;
     return `Menaquinone (−0.07${NB}V) stands in for ubiquinone (+0.04${NB}V), which sits past fumarate (+0.03${NB}V) and could not hand it a pair. ${ceiling}${unusedBlock}`;
   }
   const SAME_KIND = 'The mitochondrial chain with its bottom rung moved: the same kind of machinery, not any one organism\'s chain.';
+  // The readout's row names, shared by the tables and by the test of whether they fit side by side.
+  const ROW = {
+    fall: 'Fall, V', kj: 'Released, kJ/mol', moved: 'Charges moved', most: 'Charges, at most', pairs: 'Pairs delivered',
+    all: 'Charges moved in all', ph: 'pH difference', psi: 'Membrane potential', atp: 'ATP made here',
+  };
 
   // ---------------------------------------------------------------- the drawing's clock-side state
 
@@ -766,6 +775,26 @@ export function mount(root, ctx) {
     return g;
   }
 
+  // The type size, from `top` down to 9.6 px, at which the readout's two tables fit side by side in
+  // columns `cw` wide, or null if none does: each row's name, a gap and its value inside its column, the
+  // FADH₂ figures inside their quarter, and the second table's title inside its half. The widest values
+  // any state reaches are measured, a three-digit pair count and a four-digit charge count among them,
+  // so the layout does not change as the numbers climb.
+  const READ_GUTTER = 14;
+  function sideSize(cw, top) {
+    const gap = 8;
+    const fits = (label, value, room, size, weight = 400) => textWidth(label, size, weight) + gap + textWidth(value, size, weight) <= room;
+    for (let size = top; size >= 9.6 - 1e-6; size = Math.round((size - 0.2) * 10) / 10) {
+      const ok = [[ROW.fall, '1.14'], [ROW.kj, '220'], [ROW.moved, '10'], [ROW.most, '10'], [ROW.pairs, '100']].every(([l, v]) => fits(l, v, 0.75 * cw, size))
+        && ['0.79', '152', '−52', '100'].every((v) => textWidth(v, size) + gap <= 0.25 * cw)
+        && [[ROW.all, '1000'], [ROW.ph, '0.75 units'], [ROW.psi, '150 mV']].every(([l, v]) => fits(l, v, cw, size))
+        && fits(ROW.atp, '0', cw, size, 600)
+        && capsWidth('Across the membrane', size * 0.88) <= cw;
+      if (ok) return size;
+    }
+    return null;
+  }
+
   function frame(w, hh) {
     const portrait = hh > w * 0.92;
     const g = { w, h: hh, portrait };
@@ -773,14 +802,25 @@ export function mount(root, ctx) {
     // drawing's right and bottom limits in pane coordinates, not its size.
     const M = 8;
     g.M = M;
+    g.readSide = false;
     if (portrait) {
-      const RH = clamp(Math.round(hh * 0.37), 160, 280);
-      g.read = { x: M, y: hh - M - RH, w: w - 2 * M, h: RH };
+      // Under the drawing the readout's two tables stand side by side when every row fits its half, at
+      // down to 9.6 px type, and stack when not. The readout takes about a third of the height, unless
+      // that would leave the drawing under 200 px; then it gives way down to what its tersest level needs,
+      // about 100 px side by side and 150 px stacked. A toolbar that wraps to another row takes its height
+      // from here. Past that the drawing is what gives way, and it never runs into the table.
+      const RW = w - 2 * M;
+      const side = sideSize((RW - READ_GUTTER) / 2, clamp(RW * 0.038, 9.6, 10.6));
+      g.readSide = side != null;
+      g.readSize = side ?? clamp(RW * 0.038, 9.6, 10.6);
+      const RH = Math.max(g.readSide ? 100 : 150, Math.min(clamp(Math.round(hh * 0.37), 160, 280), hh - 2 * M - 4 - 200));
+      g.read = { x: M, y: hh - M - RH, w: RW, h: RH };
       g.dw = w - M;
-      g.dh = Math.max(120, hh - M - RH - 12);
+      g.dh = hh - M - RH - 12;
       g.memY1 = g.dh + 4;
     } else {
       const RW = clamp(Math.round(w * 0.34), 172, 330);
+      g.readSize = clamp(RW * 0.038, 9.6, 12.6);
       g.read = { x: w - M - RW, y: M, w: RW, h: hh - 2 * M };
       g.dw = Math.max(160, w - M - RW - 18);
       g.dh = hh - M;
@@ -812,9 +852,10 @@ export function mount(root, ctx) {
     g.AH = clamp(pxV * 0.04, 4.5, 8 * k);
     g.BH = clamp(g.dw * 0.034, 13, 20 * k);
     g.headR = clamp(g.BH * 0.2, 2.6, 3.6 * k);
-    // The membrane's centre line: the matrix side needs room for NADH's arm, complex II and the acceptor,
-    // the intermembrane side for the names of the two mobile carriers.
-    const imsMin = Math.max(textWidth('cytochrome ~c~', g.size, 600), textWidth('intermembrane space', g.small)) + 18;
+    // The membrane's centre line: the matrix side needs room for NADH's arm, complex II, the acceptor and an
+    // inhibitor's name, the intermembrane side for cytochrome c's name, set past the charges crossing beside
+    // it. On a narrow stage the compartment's own name takes its short form rather than squeeze the matrix.
+    const imsMin = textWidth('cytochrome ~c~', g.size, 600) + 2 * g.RC + 19 * k;
     g.sx = Math.round(clamp(g.left + 0.56 * (g.right - g.left), g.left + 96, g.right - g.BH - imsMin));
     const mL = g.sx - g.BH;
     const mR = g.sx + g.BH;
@@ -1104,12 +1145,36 @@ export function mount(root, ctx) {
     }
     if (g.blockBar) {
       const bl = block();
-      const inStrip = bl.at !== 'II';
-      add('block', bl.by, { x: g.blockBar.x, y: g.blockBar.y }, inStrip ? g.BH : g.blockBar.w / 2, 3, { cls: 'rc-block', prefer: inStrip ? 'right' : 'left' });
+      const bar = g.blockBar;
+      const hw = bl.at === 'II' ? bar.w / 2 : g.BH;
+      // Level with the bar, or a row or two off it when that row is taken, on the side with room first:
+      // the intermembrane side for complex I (complex II stands on its matrix side), the matrix side for
+      // III and IV, and complex II's own outer side. Then the ring, with a leader.
+      const rows = (x, anchor, sz) => [0, 0.5, -0.5, 1, -1, 1.5, -1.5, 2, -2].map((j) => ({ x, y: bar.y + sz * 0.36 + j * sz * 1.15, anchor, far: 0 }));
+      const right = (sz) => rows(g.mR + 9 * g.k + 7, 'start', sz);
+      const left = (sz) => rows(g.mL - 9 * g.k - 7, 'end', sz);
+      add('block', bl.by, { x: bar.x, y: bar.y }, hw, 3, {
+        cls: 'rc-block',
+        cands: (out, sz) => {
+          let near;
+          if (bl.at === 'II') near = [...rows(B.II.x0 - 5, 'end', sz), ...(a.id === 'fumarate' ? rows(s.out.x - g.RA - 6, 'end', sz) : [])];
+          else if (bl.at === 'I') near = [...right(sz), ...left(sz)];
+          else near = [...left(sz), ...right(sz)];
+          return [...near, ...[0, 13, 26].flatMap((far) => ring({ x: bar.x, y: bar.y }, hw, 3, sz, far))];
+        },
+      });
     }
     const mid = { x: g.bracket.x, y: (g.bracket.y0 + g.bracket.y1) / 2 };
     const fall = fallOf(donor, a);
-    add('bracket', `${fall < 0 ? '−' : ''}${b.num(Math.abs(fall), 2)}${NB}V`, mid, 2, Math.max(6, Math.abs(g.bracket.y1 - g.bracket.y0) / 2 - 4), { cls: 'rc-axisval', size: g.small, prefer: 'right' });
+    const bhh = Math.max(6, Math.abs(g.bracket.y1 - g.bracket.y0) / 2 - 4);
+    add('bracket', `${fall < 0 ? '−' : ''}${b.num(Math.abs(fall), 2)}${NB}V`, mid, 2, bhh, {
+      cls: 'rc-axisval', size: g.small,
+      // Beside the bracket, at its middle or wherever along it is free, then around it.
+      cands: (out, sz) => [
+        ...[0.5, 0.38, 0.62, 0.26, 0.74, 0.14, 0.86].map((f) => ({ x: g.bracket.x + 6, y: lerp(g.bracket.y0, g.bracket.y1, f) + sz * 0.36, anchor: 'start', far: 0 })),
+        ...[0, 13, 26].flatMap((far) => ring(mid, 2, bhh, sz, far)),
+      ],
+    });
     add('bracketSub', `${si(kjOf(fall))}${NB}kJ/mol`, mid, 2, 6, {
       cls: 'rc-cap', size: g.small * 0.96, weight: 400, optional: true,
       // Under the fall's label, or over it: far enough that the two boxes clear the placer's 2 px margin.
@@ -1153,7 +1218,9 @@ export function mount(root, ctx) {
       const x0 = c.anchor === 'end' ? c.x - w : c.anchor === 'middle' ? c.x - w / 2 : c.x;
       return { x0: x0 - 1.5, y0: c.y - sz * 0.92, x1: x0 + w + 1.5, y1: c.y + sz * 0.34 };
     };
-    for (const it of items) {
+    // Every label the drawing needs before any it can do without, so an optional one never takes the only
+    // place a needed one had.
+    for (const it of [...items.filter((i) => !i.optional), ...items.filter((i) => i.optional)]) {
       let chosen = null;
       let first = null;
       search:
@@ -1201,7 +1268,7 @@ export function mount(root, ctx) {
     // The gradient's signs, down both faces of the membrane, wherever nothing else stands.
     // A charge crossing passes over them, with its halo, and that is the one thing allowed to.
     const keep = (p) => !Object.values(g.body).some((r) => boxHit(grow(r, 3), { x0: p.x - 4, y0: p.y - 6, x1: p.x + 4, y1: p.y + 3 }))
-      && !placed.some((r) => boxHit(r, { x0: p.x - 5, y0: p.y - 7, x1: p.x + 5, y1: p.y + 4 }))
+      && !placed.some((r) => boxHit(r, { x0: p.x - 6, y0: p.y - 8, x1: p.x + 6, y1: p.y + 7 }))
       && !rects.some((r) => !r.crossing && !r.membrane && boxHit(r, { x0: p.x - 3, y0: p.y - 5, x1: p.x + 3, y1: p.y + 2 }))
       && !segs.some((sg) => segHitsBox(sg.a, sg.b, { x0: p.x - 4, y0: p.y - 5, x1: p.x + 4, y1: p.y + 3 }, 1))
       && p.y > g.top && p.y < g.bottom;
@@ -1421,13 +1488,15 @@ export function mount(root, ctx) {
   //
   // Two tables: what one pair releases and moves, per donor, and what the membrane holds, with the sentence
   // on the state under them. Beside the drawing they stack; under it, on a phone, they stand side by side
-  // with the sentence across both, so that the column is not half empty. Level 0 is the fullest; each level
-  // after gives up the row the stage already shows, and the ATP row and the sentence are never given up.
+  // with the sentence across both when their rows fit (frame() decides), so that the drawing keeps its
+  // height. Level 0 is the fullest; each level after gives up the row the stage already shows, and the ATP
+  // row and the sentence are never given up.
   function drawReadout(g, t) {
     const R = g.read;
     const a = acc();
-    // The table's type grows with its column, and its rows spread to fill the column's height.
-    const size = clamp(R.w * 0.038, 9.6, g.portrait ? 10.6 : 12.6);
+    // The table's type grows with its column (frame() chose it), and its rows spread to fill the column's
+    // height.
+    const size = g.readSize;
     const level = gradShown(t);
     const col = (dn) => {
       const fall = fallOf(dn, a);
@@ -1436,52 +1505,48 @@ export function mount(root, ctx) {
     const cn = col('nadh');
     const cf = col('fadh2');
     const build1 = (r, lv) => {
-      if (lv < 1) r.row('Fall, V', [cn.fall, cf.fall]);
-      r.row('Released, kJ/mol', [cn.kj, cf.kj]);
-      r.row(a.id === 'oxygen' ? 'Charges moved' : 'Charges, at most', [cn.n, cf.n]);
-      if (lv < 2) r.row('Pairs delivered', [cn.pairs, cf.pairs]);
+      if (lv < 1) r.row(ROW.fall, [cn.fall, cf.fall]);
+      r.row(ROW.kj, [cn.kj, cf.kj]);
+      r.row(a.id === 'oxygen' ? ROW.moved : ROW.most, [cn.n, cf.n]);
+      if (lv < 2) r.row(ROW.pairs, [cn.pairs, cf.pairs]);
     };
     const entry = entryOf(donor);
     const jammed = Boolean(crossoverAt()) || refused === 'backed-up' || entry === 'no-fall' || entry === 'uphill' || (donor === 'fadh2' && block().at === 'II') || (a.id === 'oxygen' && !oxygenOn);
     const build2 = (r, lv) => {
-      if (a.id === 'oxygen' && lv < 2) r.row('Charges moved in all', String(chargesShown(t)));
-      r.row('pH difference', `${(PH_DIFF * level).toFixed(2)} units`);
-      r.row('Membrane potential', `${Math.round(PSI_MV * level)} mV`);
-      r.sum('ATP made here', '0');
+      if (a.id === 'oxygen' && lv < 2) r.row(ROW.all, String(chargesShown(t)));
+      r.row(ROW.ph, `${(PH_DIFF * level).toFixed(2)} units`);
+      r.row(ROW.psi, `${Math.round(PSI_MV * level)} mV`);
+      r.sum(ROW.atp, '0');
     };
     const build3 = (r, lv) => {
       r.note(status(lv >= 3), jammed ? { accent: C.coralText } : {});
       if (lv < 1 && a.id !== 'oxygen') r.note(SAME_KIND);
     };
-    const title1 = `Per pair, to ${a.word}`;
-    const base = { size, titleSize: size * 0.88, headSize: size * 0.86, minRow: 13, maxRow: 36 };
-    const side = g.portrait && R.w >= 300;
-    const gutter = 14;
+    const base = { size, titleSize: size * 0.88, headSize: size * 0.86, minRow: 13, maxRow: 32 };
+    const side = g.readSide;
+    const gutter = READ_GUTTER;
     const cw = side ? (R.w - gutter) / 2 : R.w;
+    // The first table's title names the acceptor, by its formula when the word would run past the column.
+    const title1 = [`Per pair, to ${a.word}`, `Per pair, to ${a.plain}`].find((str) => capsWidth(str, base.titleSize) <= cw - 6) ?? `To ${a.plain}`;
     const gap = 10;
     const LEVELS = 4;
-    // The three readouts at a given top; beside each other or stacked, the sentence always last.
-    const make = (lv, y1, y3) => {
+    // The sentence keeps a reading leading however far the table rows spread.
+    const NOTE_ROW = 13;
+    // The three readouts at given tops: the two tables beside each other or stacked, the sentence last.
+    const make = (lv, y1, y2, y3) => {
       const title2 = lv < 3 ? 'Across the membrane' : null;
       const r1 = pane.readout({ ...base, x: R.x, width: cw, y: y1, title: title1, columns: ['NADH', 'FADH₂'] });
       build1(r1, lv);
-      if (side) {
-        const r2 = pane.readout({ ...base, x: R.x + cw + gutter, width: cw, y: y1, title: title2 });
-        build2(r2, lv);
-        const r3 = pane.readout({ ...base, x: R.x, width: R.w, y: y3 });
-        build3(r3, lv);
-        return { r1, r2, r3 };
-      }
-      const r2 = pane.readout({ ...base, x: R.x, width: R.w, y: y3, title: title2 });
+      const r2 = pane.readout({ ...base, x: side ? R.x + cw + gutter : R.x, width: cw, y: side ? y1 : y2, title: title2 });
       build2(r2, lv);
-      build3(r2, lv);
-      return { r1, r2, r3: null };
+      const r3 = pane.readout({ ...base, x: R.x, width: R.w, y: y3 });
+      build3(r3, lv);
+      return { r1, r2, r3 };
     };
-    const need = (m, rowH) => (side
-      ? Math.max(m.r1.height(rowH), m.r2.height(rowH)) + gap + m.r3.height(rowH)
-      : m.r1.height(rowH) + gap + m.r2.height(rowH));
+    const tables = (m, rowH) => (side ? Math.max(m.r1.height(rowH), m.r2.height(rowH)) : m.r1.height(rowH) + gap + m.r2.height(rowH));
+    const need = (m, rowH) => tables(m, rowH) + gap + m.r3.height(NOTE_ROW);
     for (let lv = 0; lv < LEVELS; lv += 1) {
-      const m = make(lv, R.y, R.y);
+      const m = make(lv, R.y, R.y, R.y);
       if (lv < LEVELS - 1 && need(m, base.minRow) > R.h) continue;
       let lo = base.minRow;
       let hi = base.maxRow;
@@ -1490,10 +1555,12 @@ export function mount(root, ctx) {
         if (need(m, mid) <= R.h) lo = mid;
         else hi = mid;
       }
-      const bottom = side ? Math.max(m.r1.draw(lo, R.h), m.r2.draw(lo, R.h)) : m.r1.draw(lo, R.h);
-      const y3 = bottom + gap;
-      const d = make(lv, R.y, y3);
-      (side ? d.r3 : d.r2).draw(lo, R.y + R.h - y3);
+      const y2 = R.y + m.r1.height(lo) + gap;
+      const y3 = R.y + tables(m, lo) + gap;
+      const d = make(lv, R.y, y2, y3);
+      d.r1.draw(lo, R.h);
+      d.r2.draw(lo, side ? R.h : R.y + R.h - y2);
+      d.r3.draw(NOTE_ROW, R.y + R.h - y3);
       return lv;
     }
     return LEVELS - 1;
