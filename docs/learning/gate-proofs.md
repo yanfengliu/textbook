@@ -61,6 +61,9 @@ Grouped by the file the gate lives in, because that is how they are looked up. S
 - [atp3d's ladder is drawn the chapter's way up, its verdict names what is phosphorylated, and up moves the marker up](#drive-atp3ds-ladder-is-drawn-the-chapters-way-up-its-verdict-names-what-is-phosphorylated-and-up-moves-the-marker-up-toolsdrivejs-atp3d-recipe) — four steps that read the ladder's drawn text rather than describe(), which reports ids and is the same whichever way up the rail is drawn or the controls run. Nine arms, all red, and the chapter-table parse proved on two mutations.
 - [at 90 °C the bilayer tank says Dispersed at every one of sixty reads across 30 s of its own clock](#drive-at-90-c-the-bilayer-tank-says-dispersed-at-every-one-of-sixty-reads-across-30-s-of-its-own-clock-toolsdrivejs-bilayer-hot-enough-and-nothing-assembles) — the step that asserted once at an instant the machine chose, red on GitHub and green here; now walked by Step. Its bound is demonstrated: it cannot see any tank but the lab's.
 - [after Curl the bilayer reading says what Curl did, and stops calling closed rims open](#drive-after-curl-the-bilayer-reading-says-what-curl-did-and-stops-calling-closed-rims-open-toolsdrivejs-bilayer-curl-takes-the-wrap-away-and-the-sheet-rolls-up) — the words, proved red three ways, and the step that was red on 2 of 5 runs of an unchanged recipe.
+- [a whole leaf absorbs about three-quarters of the green at 550 nm, and the extract about a third](#drive-a-whole-leaf-absorbs-about-three-quarters-of-the-green-at-550-nm-and-the-extract-about-a-third-toolsdrivejs-pigment-spectra-the-whole-leaf-catches-three-quarters-of-the-green) — `pigment-spectra` with its leaf path factor set to 1 reads 0.322. The step holds a band, not the constant.
+- [the Calvin cycle recipe goes red at the step that names each of four defects put back](#drive-the-calvin-cycle-recipe-goes-red-at-the-step-that-names-each-of-four-defects-put-back-toolsdrivejs-calvin-cycle) — `accumulating` never set, a six-carbon leak, rubisco among thioredoxin's four, and a dark that changes nothing.
+- [the carbon dioxide range tells a screen reader its concentration, not its rung](#drive-the-carbon-dioxide-range-tells-a-screen-reader-its-concentration-not-its-rung-toolsdrivejs-rubisco-fork) — `rubisco-fork`; its other three ranges are asserted nowhere.
 
 **`tools/check-content.js`** — the authored chapter.
 
@@ -102,6 +105,7 @@ Grouped by the file the gate lives in, because that is how they are looked up. S
 **`npm run unit`** — the fast checks.
 
 - [the CSS tokens and the JS palette are one table](#palette-the-css-tokens-and-the-js-palette-are-one-table-testpalettetestjs).
+- [`spectrumColour` is a valid sRGB colour at every nanometre from 380 to 750, and `pigment-spectra` is its one importer](#unit-spectrumcolour-is-a-valid-srgb-colour-at-every-nanometre-from-380-to-750-and-pigment-spectra-is-its-one-importer-testpalettetestjs) — the two conditions the book's one measured colour was approved on.
 - [at 90 °C the bilayer tank stays dispersed at the flattest shape the figure draws](#unit-at-90-c-the-bilayer-tank-stays-dispersed-at-the-flattest-shape-the-figure-draws-testbilayer-modeltestjs) — the figure's own model in Node, at the tank a 1024 px page used to jam; red with the old floor put back.
 - [one element table for the chapter-2 molecular figures](#unit-one-element-table-for-the-chapter-2-molecular-figures-testelement-tabletestjs) · [one structure table for chapter 3](#unit-one-structure-table-for-chapter-3-and-every-colour-still-derived-from-the-palette-testorganelle-tabletestjs) · [one membrane table](#unit-one-membrane-table-every-colour-derived-every-label-legible-on-its-own-fill-testmembrane-tabletestjs) — **one lesson in three chapters' words**: a shared table duplicated across figure modules drifts, and the fix is one table with a test. The membrane entry adds label contrast on the fill; the element entry also holds the no-`Math.random` check for everything under `src/figures/`.
 - [a symbol on a fill is legible, and the colour it takes cannot be resolved through the theme](#element-table-organelle-table-membrane-table-a-symbol-on-a-fill-is-legible-and-the-colour-it-takes-cannot-be-resolved-through-the-theme-testelement-tabletestjs-testorganelle-tabletestjs-testmembrane-tabletestjs) — `element-table`, `organelle-table` and `membrane-table`, after chapter 2 shipped an O at 3.32:1, an N at 4.33:1 and an S at 2.26:1.
@@ -124,6 +128,88 @@ Grouped by the file the gate lives in, because that is how they are looked up. S
 - [the flags that keep chromium's crash dialog off the desktop](#browser-quiet-the-flags-that-keep-chromiums-crash-dialog-off-the-desktop-testbrowser-quiettestjs) — and see the defect register, 2026-09-16, for the round where this test was green while the preload never ran.
 
 `# Six gates that were shipped unproved (2026-09-16)` below is a batch heading, not a claim: it marks six proofs written after the fact for gates that had already reached main.
+
+## drive: a whole leaf absorbs about three-quarters of the green at 550 nm, and the extract about a third (`tools/drive.js`, `pigment-spectra the-whole-leaf-catches-three-quarters-of-the-green`)
+
+- **The tree.** `633ba26`, branch `land-3`: main `fff1646` with `ch04-figs`, `site-and-ci`, `term-markup`, `ch06` and the four chapter 6 figure branches merged, chapter 6's item bank taken from `items-ch06`, and the chapter joined to the book. The `fig-pigment` worker ran this mutation on its own branch and reported 0.322, but could not record it; what is quoted here is the re-run on `633ba26`.
+- **Claim**, from the recipe's own comment: *"Every assertion is on a computed field — absorbedFraction, actionPoints, and actionAt against absorbanceAt — never on the field a button sets. The numbers are §6.3's: about a third of the green absorbed by the extracted pigment and about three-quarters by the whole leaf, at 550 nm."* The step holds the leaf's `absorbedFraction` to 0.72–0.78 and to more than the extract's by 0.3. **Bound**, from the gate's header: one viewport (1000x640), the light theme, the steps listed, and `describe()`'s account of state, not the pixels.
+- **Why it was needed.** The leaf's number is the figure's answer to why a leaf is green, §6.3's "the leaf's scattering fills the green trough most of the way in", and it rests on one fitted constant, `PATH = 3.86`: how many times longer a photon's path is inside a leaf than straight through the same pigment. Without the scattering a leaf absorbs what the extract absorbs, less the light its surface reflects.
+- **The mutation and the failure.** `const PATH = 3.86;` made `const PATH = 1;` in `src/figures/pigment-spectra.js`. `DRIVE_KINDS=pigment-spectra npm run drive`, exit 1, one step of five red:
+  ```text
+  FAIL pigment-spectra the-whole-leaf-catches-three-quarters-of-the-green: a whole leaf absorbs roughly three-quarters of the green (§6.3): 0.322
+  ```
+  0.322 is the extract's 0.346 less the 7 % the leaf's surface reflects: without the scattering, the leaf absorbs no more than the extract does.
+- **The restoration.** `src/figures/pigment-spectra.js` sha256 `b238479602d7e287236cdfa209e81a2a3a9399e412b5ae0c91b1ee8e690a4db4` before and after; `git status --short` empty.
+- **What it does not prove.** The constant: the step holds the leaf's number to a band, and any path factor from about 3.5 to 4.3 lands in 0.72–0.78 (arithmetic on the figure's own formula, `(1 − 0.07)(1 − 10^(−PATH·A))` with the extract's A at 550 nm). Any wavelength but 550 nm. The swatch's colour: `describe()` gives its name, and the step checks only that the name says green. The narrow composition, which is `npm run narrow`'s.
+
+## unit: `spectrumColour` is a valid sRGB colour at every nanometre from 380 to 750, and `pigment-spectra` is its one importer (`test/palette.test.js`)
+
+- **The tree.** `633ba26`, as the entry above says. The `fig-pigment` worker ran both mutations on its own branch and could not record them; these are the re-runs.
+- **Claim**, from the test's own header: *"It also holds the two conditions `spectrumColour` was approved on (2026-09-23, chapter 6's brief): a valid sRGB hex at every whole nanometre from 380 to 750, and exactly one importer, `pigment-spectra`."* **Bound**, from the same header: *"it reads every .js file under src/ as text for the name, so a module that reached the function under another name through a re-export would not be seen — and palette.js re-exports nothing, which is why a text match is enough today."*
+- **Why it was needed.** `spectrumColour` is the book's one colour that is a measurement rather than a choice, approved for Figure 6.1 alone (`src/palette.js`, the comment above it). The two conditions are the approval, and without a test they would be a sentence.
+- **The mutations and the failures.** Each is `node --test test/palette.test.js`, exit 1, with 7 of the file's 8 tests passing and only the one the mutation aims at failing.
+  - A second importer: a new file, `src/figures/lib/proof-second-importer.js`, holding `import { spectrumColour } from '../../palette.js';`.
+    ```text
+    ✖ spectrumColour has exactly one importer, pigment-spectra (10.8ms)
+      AssertionError [ERR_ASSERTION]: spectrumColour is the book's one colour that is a measurement and was approved for Figure 6.1 alone (src/palette.js, the comment above it); it is named in src/figures/lib/proof-second-importer.js, src/figures/pigment-spectra.js
+    ```
+  - A NaN colour: `const top = Math.max(...linear) || 1;` made `const top = NaN;` in `src/palette.js`, so every channel of a single wavelength's colour is NaN.
+    ```text
+    ✖ spectrumColour gives a valid sRGB colour at every nanometre from 380 to 750 (3.3171ms)
+      AssertionError [ERR_ASSERTION]: spectrumColour returned something that is not #rrggbb at 371 wavelength(s): 380 nm -> "#NaNNaNNaN", 381 nm -> "#NaNNaNNaN", 382 nm -> "#NaNNaNNaN", 383 nm -> "#NaNNaNNaN", 384 nm -> "#NaNNaNNaN"
+    ```
+- **The restoration.** The new file deleted, so absent before and after; `src/palette.js` sha256 `2e3ba92b7da41e17ad10553d9d722d47ef3a834cd6d557ff7c38afff7a06258b` before and after; `git status --short` empty.
+- **What it does not prove.** That a colour is the right one: the first test checks the form of all 371 and that 650, 530 and 450 nm come out red, green and blue, so a hue shifted along the spectrum passes. The fraction form is checked at three samples, all light through, none, and a 500–600 nm band. The importer check reads only `src/`, and only by name, as its header says.
+
+## drive: the Calvin cycle recipe goes red at the step that names each of four defects put back (`tools/drive.js`, `calvin-cycle`)
+
+- **The tree.** `633ba26`, as the pigment entry above says. The `fig-calvin` worker put these four defects back on its own branch with a script that restores the file's exact bytes, saw each fail at its step, and could not record it; the same four mutations were re-run on `633ba26`, and what is quoted is that run.
+- **Claim**, from the recipe's own comment: *"Every step presses the figure's own Step, Run, Light, Label and Starch buttons and its two supply sliders; what it asserts is what the model computed from those, never what a control set: `stalledPhase`, `accumulating`, `activatedEnzymes`, the books at the end of a turn, and `sixCarbonLeftEnzyme`, which is read after every single reaction of a turn."* **Bound**, from the gate's header: one viewport (1000x640), the light theme, the steps listed, and `describe()`'s account of state, not the pixels.
+- **Why it was needed.** Two of the four are the 2026-09-22 prose review's corrections to §6.6, and the figure is where a reader would see them undone: the six-carbon compound never leaves rubisco's site (finding 1, which also renamed the field that says so), and rubisco is not one of thioredoxin's four targets (finding 18). The other two are the section's own claims: with a supply starved, 3-phosphoglycerate piles up behind the stall, and in the dark the cycle barely turns even with ATP and NADPH supplied by hand.
+- **The mutations and the failures.** Each is `DRIVE_KINDS=calvin-cycle npm run drive`, exit 1, with only the steps quoted red of nine.
+  - `accumulating` never set: `return stalledPhase() === 'reduction' && m.pga.length > 0 ? '3-phosphoglycerate' : null;` made `return null;`.
+    ```text
+    FAIL calvin-cycle starving-atp-piles-up-3-phosphoglycerate: 3-phosphoglycerate should pile up behind the stall: null
+    FAIL calvin-cycle starving-nadph-from-the-opening-drains-all-three-acceptors: the phosphorylation lies far on the side of 3-phosphoglycerate, so that is what piles up with no NADPH too: null
+    ```
+  - The six-carbon compound leaking off the enzyme: `m.pga.push(lower, upper);` made `m.pga.push(lower, upper, { c: 6, lab: -1 });`.
+    ```text
+    FAIL calvin-cycle five-and-one-make-six-and-the-six-never-leaves-the-enzyme: the cut should leave nothing six carbons long anywhere but the enzyme: {"six":true,"fixed":1}
+    FAIL calvin-cycle one-turn-balances-the-books: a six-carbon molecule left the enzyme at step 0, in reduction
+    ```
+  - Rubisco counted among thioredoxin's four: `activatedEnzymes: TARGETS.filter(() => thioredoxinReduced).length,` given `+ (stromaPh === 8 ? 1 : 0)`.
+    ```text
+    FAIL calvin-cycle opens-paused-at-the-start-of-carboxylation: lit, the stroma should be switched on: {"ph":8,"mg":true,"trx":true,"rub":true,"n":5}
+    FAIL calvin-cycle dark-with-both-supplies-full-it-barely-turns: lit again, rubisco and all four should be back on: {"rub":true,"n":5}
+    ```
+  - A dark that changes nothing: `const DARK = 0.02;` made `const DARK = 1;`.
+    ```text
+    FAIL calvin-cycle dark-with-both-supplies-full-it-barely-turns: dark, the cycle should barely turn even with ATP and NADPH supplied by hand: 3 fixed in 8.033 s
+    ```
+- **The restoration.** `src/figures/calvin-cycle.js` sha256 `0de4ed14ed941feb9e803c913a2d72efa3cb1c4fa09563c95e80bcd23d6bb200` before and after each arm; `git status --short` empty.
+- **What it does not prove.**
+  - Which enzymes are on. `activatedEnzymes` is a count, so the step can say there are five and not which: a defect that put rubisco in place of one of the four, keeping the count at four, passes.
+  - How dark the dark is. The step allows one carbon dioxide fixed in 8 s of dark, where the lit cycle fixes about three, so it proves the dark is much slower than the light, not that it is a fiftieth of it.
+  - A leak the figure's own search does not look for. `sixCarbonLeftEnzyme` is computed by the figure, from the pools it names, and the gate reads that answer: a six-carbon molecule put somewhere the function does not look passes. It is read after every reaction of the first turn only, so a leak that begins in a later turn passes too.
+
+## drive: the carbon dioxide range tells a screen reader its concentration, not its rung (`tools/drive.js`, `rubisco-fork`)
+
+- **The tree.** `633ba26`, as the pigment entry says. The `fig-rubisco` worker made this assertion go red on its own branch at `1d10007` by emptying the list the words are read from, and both steps read `null`; it could not record the proof. The two arms here put the defect back as it shipped before `1d10007`, and were run on `633ba26`.
+- **Claim**, from the step's own comment: *"The carbon dioxide range holds a rung, an index into the figure's list of concentrations, so what a screen reader hears is only right if the figure says it: aria-valuetext, in the stage's own units."* It is asserted at the opening, `420 parts per million`, in `opens-on-todays-air-with-no-turns-taken`, and after the move to the rung for 1000 ppm in `more-carbon-dioxide-moves-the-first-step`. **Bound**, from the gate's header: one viewport (1000x640), the light theme, the steps listed.
+- **Why it was needed.** Until `1d10007` the range announced its bare value, which is the rung: a screen reader said "12" where the stage said 420 ppm (that commit's message).
+- **The mutations and the failures.** Each is `DRIVE_KINDS=rubisco-fork npm run drive`, exit 1, with the same two steps of twelve red and no other.
+  - Nothing said, the state before `1d10007`: the line in `speakRanges()` that sets `aria-valuetext` taken out.
+    ```text
+    FAIL rubisco-fork opens-on-todays-air-with-no-turns-taken: the carbon dioxide range should say its concentration, not its rung: null
+    FAIL rubisco-fork more-carbon-dioxide-moves-the-first-step: the carbon dioxide range should say 1000 parts per million after the move: null
+    ```
+  - The rung said: the carbon dioxide range's words made `` (i) => `${i}` ``.
+    ```text
+    FAIL rubisco-fork opens-on-todays-air-with-no-turns-taken: the carbon dioxide range should say its concentration, not its rung: "12"
+    FAIL rubisco-fork more-carbon-dioxide-moves-the-first-step: the carbon dioxide range should say 1000 parts per million after the move: "20"
+    ```
+- **The restoration.** `src/figures/rubisco-fork.js` sha256 `79eb57120b7062c51864d1ce67cbda324d90df7cac752bdd1f6b92455a0af56a` before and after each arm; `git status --short` empty.
+- **What it does not prove.** The other three ranges: the temperature, the pore and the leaf's protein share take their words from the same function and are asserted nowhere, so a defect in any of those alone passes. Two rungs of the carbon dioxide range, not all of them. The stepper buttons a phone's width grows, which this viewport never shows.
 
 ## check: which chapters a page says can be read agrees with the chapter directories on disk (`tools/check-content.js`, `checkChapterAvailability`)
 
