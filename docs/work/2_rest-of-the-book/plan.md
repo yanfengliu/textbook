@@ -1,39 +1,43 @@
 # The rest of The Living World: chapters 2 to 32
 
-Status: active
+Status: complete
 Owner: Integration owner (textbook session, 2026-09-10)
 Created: 2026-09-10
 Updated: 2026-09-23
 
 ## Where this round stands
 
-Updated 2026-09-23. **This section and the chapter table under it are the live state; everything below them is the round's narrative, oldest first, and it is history** — what was believed, what proved false, what a review caught, what a number was before it moved. Read the narrative for the evidence behind a decision, not for what to do next.
+Updated 2026-09-23, at chapter 6's landing. **This section and the chapter table under it are the live state; everything below them is the round's narrative, oldest first, and it is history** — what was believed, what proved false, what a review caught, what a number was before it moved. Read the narrative for the evidence behind a decision, not for what to do next.
 
-**Owner, 2026-09-23: "Reduce scope and stop at your current chapter's completion." Chosen: chapter 6 only, at reduced scope.** That means:
+**The round stops here, by the owner's decision of 2026-09-23: "Reduce scope and stop at your current chapter's completion." Chapter 6 was that chapter, and it is on main.** It shipped at reduced scope:
 
 - 4 of its 8 figures: `pigment-spectra`, `zscheme`, `calvin-cycle`, `rubisco-fork`;
 - questions in place of figure tasks;
-- the one independent prose review already done;
+- two independent reviews, both applied: the prose review of chapters 6 and 7 ([reviews/2026-09-22-ch06-ch07-prose.md](reviews/2026-09-22-ch06-ch07-prose.md)), and the accuracy review against OpenStax *Biology 2e* chapter 8 that the owner's direction now asks of every chapter before it ships, which covered the prose, the item bank and the four figures against their captions ([reviews/2026-09-24-ch06-accuracy.md](reviews/2026-09-24-ch06-accuracy.md));
 - no new gates.
 
-Land it, then stop. Chapters 7 and 8 stay unpublished on `origin/ch06-07`, `origin/items-ch07` and `origin/ch08-dna`. This supersedes the standing goal of writing the whole book, which is what this file's title and the chapter table below still describe.
+Chapters 7 and 8 stay unpublished: chapter 7's prose on `origin/ch06-07` and its items on `origin/items-ch07`, and chapter 8 on `origin/ch08-dna`. Nothing is dispatched until the owner says otherwise. This supersedes the standing goal of writing the whole book, which is what this file's title and the chapter table below still describe.
+
+The peer session's branch `autocompact-setting` (`55fee72`, which sets `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=25` in `.claude/settings.json`) is configuration and waits for the owner's decision. It is not to be landed on a peer's request.
 
 ### On main
 
-Biology chapters 1 to 5 are published, and so are the second book's chapters 1 to 3.
+Biology chapters 1 to 6 are published, and so are the second book's chapters 1 to 3.
 
-- `5e9c981` (2026-09-22) landed chapters 4 and 5 and the week's gate work. Its local chain ran 12 of 12 green in 2322 s. GitHub's `test` job went red at `drive`, on `bilayer`'s 90 °C step, which is the flicker listed under Open.
+- `5e9c981` (2026-09-22) landed chapters 4 and 5 and the week's gate work. Its local chain ran 12 of 12 green in 2322 s. GitHub's `test` job went red at `drive`, on `bilayer`'s 90 °C step.
 - `26d47cf` (2026-09-23) applies the reader's theme before first paint, makes `npm run shot` wait for the page to stop moving before it photographs, adds `npm run theme` as a chain step, and says what a shot frame is for. Its review is [reviews/2026-09-22-shot-reproducibility-review.md](reviews/2026-09-22-shot-reproducibility-review.md).
-- The landing of 2026-09-23 merged five branches, each cut from `5e9c981`. `fix-ch04` and `fix-ch05` apply [reviews/2026-09-22-ch04-ch05-prose.md](reviews/2026-09-22-ch04-ch05-prose.md), balance option lengths so the longest option no longer gives the answer away, take the markup out of glossary terms, and add a content rule against markup in a term. `choice-order` shows the options of Today and of the chapter checks in a drawn order, and adds a content rule against an explanation that names an option by its place. `sort-layout` wraps a sort's rows instead of collapsing names to 0 px, and makes `npm run shot` fail a text box narrower than its own words. `atp-ladder` makes Figure 5.3's verdict say the donor phosphorylates ADP, and makes up move the marker up.
-- No independent review of `5e9c981` or of the 2026-09-23 landing has been done. Both CLI review lanes are down; see Review under Open.
+- The first landing of 2026-09-23 merged five branches, each cut from `5e9c981`. `fix-ch04` and `fix-ch05` apply [reviews/2026-09-22-ch04-ch05-prose.md](reviews/2026-09-22-ch04-ch05-prose.md), balance option lengths so the longest option no longer gives the answer away, take the markup out of glossary terms, and add a content rule against markup in a term. `choice-order` shows the options of Today and of the chapter checks in a drawn order, and adds a content rule against an explanation that names an option by its place. `sort-layout` wraps a sort's rows instead of collapsing names to 0 px, and makes `npm run shot` fail a text box narrower than its own words. `atp-ladder` makes Figure 5.3's verdict say the donor phosphorylates ADP, and makes up move the marker up.
+- Chapter 6's landing, 2026-09-23, from branch `land-3`, merged eight branches and took chapter 6's bank from `items-ch06` as a file, leaving chapter 7 on that branch:
+  - `ch04-figs` reads `bilayer`'s verdict over a window of its own clock instead of one sweep, and raises its tank floor, which ends the 90 °C flicker that turned GitHub's run of `5e9c981` red. It also fixes the Curl words and the osmometer's, fixes chapter 4's 30 contrast pairs, and takes chapter 4 off `npm run legible`'s deferred list.
+  - `site-and-ci` stops the library page and `README.md` naming chapters, and adds `checkChapterAvailability` to `npm run check`. CI now runs on three engines for up to 240 minutes, on a pinned image.
+  - `term-markup` keeps a glossary term's markup in its label, and keeps its card on a phone's screen.
+  - `ch06` and the four figure branches bring the chapter itself.
+  - The landing's own edits join chapter 6 to the contents page, chapter 5's card and Today, and apply the accuracy review's ten figure findings. They also fix two defects only the combined tree had: the glossary's term column was too narrow for "Photophosphorylation", and a hyphen Figure 6.1 draws was missing from chapter 6's font subset.
+- No independent review has been done of `5e9c981`, of the first 2026-09-23 landing, or of chapter 6's landing beyond the accuracy review of its figures; see Review under Open.
 
 ### In progress
 
-- `fix-ch06` on branch `ch06` (worktree `textbook-ch06`): chapter 6's prose, cut to four figures.
-- `items-ch06-final`: third questions in place of the task slots in chapter 6's bank.
-- Then four figure workers, one per kind above, then a final landing.
-
-Seen on disk on 2026-09-23 and not described here by their owners: the worktrees `textbook-ch04-figs`, `textbook-ch04-contrast` and `textbook-ch04-osmo` at `4b6899b` (branch `ch04-figs`, pushed, "Measure chapter 4's figures in the legibility gate: take them off DEFERRED"), `textbook-site-and-ci` at `f7cb330`, and `textbook-owner-direction` at `26d47cf`.
+Nothing. The round stops here by the owner's decision. The landing removes the worktrees of every branch it merged and of the two held chapters, whose branches stay on origin. The `textbook-wt-*` worktrees, the `provenance-*` and `autocompact-setting` branches and `stash@{0}` belong to other sessions.
 
 ### Open
 
@@ -46,22 +50,31 @@ Open, not scheduled. Nothing below is dispatched, and any of it that is picked u
 - A precomposed "NAD⁺" passes the glossary rule but looks wrong at 3x. The recipe's §7 says super- and subscripts are markup.
 - Two decisions: curly or straight quotes book-wide, and whether "carbon–carbon" may break after the dash on a phone.
 - The second book's character card runs its unbound-sense note out of the card at 390 px. Found by `sort-layout`.
-- The library page (`index.html`) and `README.md` say only chapter 1 exists. A check on what the contents pages claim has now been wanted four times.
-- Chapter 4, left open by `fix-ch04`: `bilayer.js`'s overlay says "the sheet has two open ends" after the ends have sealed, and its side sentence shows the heal time; `osmometer.js`'s "pull" wording contradicts the corrected account of osmosis; §4.1 says a needle hole self-heals, where living cells actively patch it (McNeil & Steinhardt 2003); "electron micrographs of the day" is dated 1935; the claim that aquaporins refuse protons is contested; and `i-tonicity-animal-1`'s distractor is "true as far as it goes".
+- Chapter 4, left open by `fix-ch04`: §4.1 says a needle hole self-heals, where living cells actively patch it (McNeil & Steinhardt 2003); "electron micrographs of the day" is dated 1935; the claim that aquaporins refuse protons is contested; and `i-tonicity-animal-1`'s distractor is "true as far as it goes". The other two it left, `bilayer`'s "two open ends" and the osmometer's "pull", were fixed by `ch04-figs`.
+- Chapter 4, left open by `ch04-figs`:
+  - `gradient-battery` at 390 px prints "1.00 × the untreated contraction" over the next heading;
+  - a tank of pure cholesterol at 37 °C reads "Bilayer";
+  - ions overlap at 390 px in `permeability`, `transport-lab` and `gradient-battery`;
+  - the osmometer shows mmol/L before a slider moves and mM after, and draws stray dots on a burst.
+- Chapter 6's closing card names "7 · Cellular respiration" and links to the contents page, where chapter 7 is in preparation. That is the shape of the 2026-09-22 prose review's finding 27.
+- `i-cyclic-flow-2` asks the objective's old question, "Name the two things it therefore cannot be used for". Its rubric covers both wordings.
 - The multiple-choice length tell in chapters 1 to 3: the correct option is the longest in 42 of 49, 49 of 52 and 43 of 45. Rebalance by rewording, never by reordering the options of a shipped bank, and add a bank-level binomial check to `tools/check-content.js`.
 - `soup.js` should redraw when the webfonts arrive; bundle it with the next change to a chapter 2 figure. `docs/learning/defect-register.md` already records soup, so the fix updates that entry with its gate rather than adding one.
+- `docs/design/textbook.md` lines 3 and 194 still say only chapter 1 exists. It is a design doc, so the change needs review. Found by `site-and-ci`.
+
+**Study system**
+
+- "Export on Today", which the 2026-09-23 project audit recommended.
 
 **Gates and CI**
 
-- `bilayer`'s 90 °C step flickers: `bilayer.js:765` holds a 0.62 threshold, and `tools/drive.js:1711` sleeps until t > 8. It turned GitHub's run of `5e9c981` red.
-- `npm run flow` drives the checks of chapter 1 and the second book only, so it says nothing about the checks of chapters 2 to 5.
-- `npm run legible` still defers chapter 4's eight figures, which had 13 text pairs under AA on 2026-09-16.
-- `.github/workflows/ci.yml` caps the job at 30 minutes against a chain of about 39, and installs Chromium only, where `npm run devices` also runs WebKit and Firefox.
-
-**Chapter 6**
-
-- Chapter 6's half of the queued `ch67-contract`: registering its four kinds, their drive recipes, and the palette questions queued with it (enzyme against channel, the chlorophyll value, and `spectrumColour(nm)` accepted in `palette.js`, scoped by a test). Whether the figure workers carry it is not recorded here.
-- `choice-order`'s rule fails a check or item explanation that names an option by its place. On the branches still out, chapter 6 has about 12 such phrases, chapter 7 about 10 and chapter 8 about 9. `fix-ch06` rewords chapter 6's by content before it lands.
+- `npm run flow` drives the checks of chapter 1 and the second book only, so it says nothing about the checks of chapters 2 to 6.
+- `npm run devices` cannot see a glossary card that runs off a phone's screen. It measures against `innerWidth`, which the card inflates, and it checks sideways scroll before any card opens. The bound is stated in its header and in `docs/policies/gates.md`. The defect it missed, chapter 5's NAD⁺ card at 63–415 px, fixed by `term-markup`, has no entry in `docs/learning/defect-register.md` and no gate, under the owner's "no new gates".
+- Figure 6.1's alga panel draws its light only while the slider stands where it was lit (the accuracy review's finding 15). `describe()` does not report the panel and no `drive` step reads its label, so nothing gates it.
+- The lab page's font link lacks U+2010, λ, Ψ and Δ, which chapter 6's figures draw. `npm run shot` does not visit the lab, so no gate sees it.
+- `npm run pinned` starts eight shards by default, and GitHub's runner has 4 CPUs. A press that misses its 5 s timeout is skipped, not failed, so the gate cannot tell a press that did nothing from one that never ran. Found by `site-and-ci`.
+- `docs/policies/local-rules.md` says `node --test "test/*.test.js"` cannot run on this machine (`spawn EPERM`). On 2026-09-23 it ran 260 of 260 here, so the note may be stale.
+- The audit's gate recommendations are still owed: a core gate per commit, the full chain at a chapter's landing, and CI blocking Pages. `npm test` stays the commit gate until a core gate exists.
 
 **Docs and records**
 
@@ -72,12 +85,12 @@ Open, not scheduled. Nothing below is dispatched, and any of it that is picked u
 
 **Review**
 
-- Independent code review is owed for `5e9c981`, for `choice-order`'s `mastery.js` diff, and for the 2026-09-23 landing. `mastery.js`, the content checker's rules and `AGENTS.md` are on the high-risk list.
+- Independent code review is owed for `5e9c981`, for `choice-order`'s `mastery.js` diff, for the first 2026-09-23 landing, and for the integration edits of chapter 6's landing. Those edits are the merges' conflict resolutions, the registry order, the glossary column, the font subset, `tools/drive.js`'s header, the `devices` bound in `docs/policies/gates.md` and in the gate's header, and four gate-proof entries. `mastery.js`, the content checker's rules, `docs/policies/gates.md` and `AGENTS.md` are on the high-risk list.
 - The lanes, as a peer session reported them on 2026-09-23: the `claude` CLI's login has expired and the owner must log in again; Codex is out of usage until 2026-09-26 16:29, and CLI 0.148.0 is too old for its pinned model. Until then an independent review is a fresh read-only subagent, and the work says so.
 
 **Out of scope under the owner's decision, kept in case it changes**
 
-- `fix-ch07`: chapter 7's half of the chapter 6 and 7 prose review, which is at `worktrees/reviews/2026-09-22-ch06-ch07-prose.md`, outside this repository.
+- `fix-ch07`: chapter 7's half of the chapter 6 and 7 prose review, which is now committed at [reviews/2026-09-22-ch06-ch07-prose.md](reviews/2026-09-22-ch06-ch07-prose.md).
 - `ch67-contract`'s chapter 7 half: registering chapter 7's kinds and writing their drive recipes.
 - Chapter 7's figures, its task items on `items-ch07`, and landing chapter 7.
 - `ch08-finish`: a review of chapter 8, the typographic-quote pass it held back, and the gloss that ¹⁵N differs by weight, not by radioactivity.
@@ -97,7 +110,7 @@ Under the owner's decision of 2026-09-23, chapters 9 to 32 will not be started.
 | 3 | Cells | done | 0482dde |
 | 4 | Membranes and transport | done | 5e9c981; review fixes f7cf38f |
 | 5 | Energy and metabolism | done | 5e9c981; review fixes d1f9db2 |
-| 6 | Photosynthesis | build, reduced scope | branch `ch06` |
+| 6 | Photosynthesis | done, reduced scope | `land-3`: prose b35cdc1, figures eb6c2c8–7dfe80d, items fa104a5 |
 | 7 | Cellular respiration | held | `origin/ch06-07`, `origin/items-ch07` |
 | 8 | DNA | held | `origin/ch08-dna` |
 | 9 | From genes to proteins | — | |
@@ -142,10 +155,11 @@ The only shared files are `src/figures/registry.js`, `tools/drive.js` and the ch
 ## Acceptance criteria, per chapter
 
 - [ ] Prose reads as a book, is accurate at first-year undergraduate level, and hedges where the science hedges.
-- [ ] Six to nine figures, each showing a mechanism the reader can push on rather than a labelled picture.
+- [ ] At most about four bespoke interactive figures, each showing a mechanism the reader can push on rather than a labelled picture, with authored static SVG elsewhere. This is the owner's direction of 2026-09-23; until then the criterion was six to nine.
+- [ ] An independent accuracy review against the matching OpenStax *Biology 2e* section, covering the prose, the figures against their captions and the item bank, applied before the chapter ships. Also the owner's direction of 2026-09-23.
 - [ ] Twenty to thirty-five objectives with a sound prerequisite graph, which may reach back into earlier chapters.
 - [ ] Three or more items per objective, mixing the formats, every distractor carrying the misconception it encodes.
-- [ ] Every figure has a `drive` recipe and `npm test` passes all ten steps. The chapter no longer needs adding to `PAGES`: chapters are discovered from disk (2026-09-11), so a chapter is gated from the moment its `index.html` exists.
+- [ ] Every figure has a `drive` recipe and `npm test` passes all thirteen steps. The chapter no longer needs adding to `PAGES`: chapters are discovered from disk (2026-09-11), so a chapter is gated from the moment its `index.html` exists.
 - [ ] Frames looked at by the integration owner at desktop and phone, in both themes.
 - [ ] Committed and pushed on its own.
 
