@@ -3313,6 +3313,150 @@ const RECIPES = {
     }],
   ],
 
+  // Figure 6.3, chapter 6. Every step presses the figure's own Step, Run, Light, Label and Starch
+  // buttons and its two supply sliders; what it asserts is what the model computed from those, never
+  // what a control set: `stalledPhase`, `accumulating`, `activatedEnzymes`, the books at the end of a
+  // turn, and `sixCarbonLeftEnzyme`, which is read after every single reaction of a turn.
+  'calvin-cycle': [
+    ['opens-paused-at-the-start-of-carboxylation', async (h) => {
+      const d = await h.describe();
+      expect(d.phase === 'carboxylation' && d.co2Fixed === 0 && d.turns === 0 && d.playing === false, `it should open paused at the start of carboxylation: ${JSON.stringify({ phase: d.phase, fixed: d.co2Fixed, turns: d.turns, playing: d.playing })}`);
+      expect(d.labelledAtomAt === null && d.atpSupply === 1 && d.nadphSupply === 1, `with nothing labelled and both supplies full: ${JSON.stringify({ lab: d.labelledAtomAt, atp: d.atpSupply, nadph: d.nadphSupply })}`);
+      expect(d.lightOn && d.stromaPh === 8 && d.magnesiumInStroma && d.thioredoxinReduced && d.rubiscoActivated && d.activatedEnzymes === 4, `lit, the stroma should be switched on: ${JSON.stringify({ ph: d.stromaPh, mg: d.magnesiumInStroma, trx: d.thioredoxinReduced, rub: d.rubiscoActivated, n: d.activatedEnzymes })}`);
+      expect(d.stalledPhase === null && d.accumulating === null && d.sixCarbonLeftEnzyme === false && d.kjNeededPerGlucose === 2870, `nothing stalled at the opening: ${JSON.stringify({ stalled: d.stalledPhase, acc: d.accumulating, six: d.sixCarbonLeftEnzyme, kj: d.kjNeededPerGlucose })}`);
+    }],
+    ['five-and-one-make-six-and-the-six-never-leaves-the-enzyme', async (h) => {
+      await h.button(/^Step/).click();
+      let d = await until(h, (x) => x.co2Fixed === 1, 5_000);
+      expect(d.co2Fixed === 1 && d.carbonsIn === 1 && d.phase === 'carboxylation', `one Step should fix one carbon dioxide onto an acceptor: ${JSON.stringify({ fixed: d.co2Fixed, in: d.carbonsIn, phase: d.phase })}`);
+      expect(d.sixCarbonLeftEnzyme === false, 'the six-carbon compound is on the enzyme, not off it');
+      expect(d.playing === false, 'a Step does not set the cycle running');
+      const t = d.t;
+      await h.button(/^Step/).click();
+      d = await until(h, (x) => x.t > t, 5_000);
+      expect(d.sixCarbonLeftEnzyme === false && d.co2Fixed === 1, `the cut should leave nothing six carbons long anywhere but the enzyme: ${JSON.stringify({ six: d.sixCarbonLeftEnzyme, fixed: d.co2Fixed })}`);
+    }],
+    ['one-turn-balances-the-books', async (h) => {
+      // Step to the end of the first complete turn, reading describe() after every reaction: the
+      // six-carbon compound must never be anywhere but the enzyme, at any point in the turn.
+      let d = await h.describe();
+      for (let i = 0; i < 60 && d.turns < 1; i += 1) {
+        const before = d.t;
+        await h.button(/^Step/).click();
+        d = await until(h, (x) => x.t > before || x.turns >= 1, 5_000);
+        expect(d.sixCarbonLeftEnzyme === false, `a six-carbon molecule left the enzyme at step ${i}, in ${d.phase}`);
+      }
+      expect(d.turns === 1, `the first turn should end within sixty steps: ${d.turns} turns, ${d.co2Fixed} fixed`);
+      expect(d.carbonsIn === 3 && d.carbonsOut === 3 && d.g3pExported === 1, `the books should balance at the end of the turn, three in and three out: ${JSON.stringify({ in: d.carbonsIn, out: d.carbonsOut, g3p: d.g3pExported })}`);
+      expect(d.atpSpent === 9 && d.nadphSpent === 6, `nine ATP and six NADPH per three CO2: ${d.atpSpent} and ${d.nadphSpent}`);
+      expect(d.atpByPhase.carboxylation === 0 && d.nadphByPhase.carboxylation === 0, `rubisco needs neither: ${JSON.stringify({ atp: d.atpByPhase, nadph: d.nadphByPhase })}`);
+      expect(d.atpByPhase.reduction === 6 && d.nadphByPhase.reduction === 6, `the reduction takes six and six: ${JSON.stringify({ atp: d.atpByPhase, nadph: d.nadphByPhase })}`);
+      expect(d.atpByPhase.regeneration * 3 === d.atpSpent && d.nadphByPhase.regeneration === 0, `the regeneration holds a third of the ATP and no NADPH: ${JSON.stringify({ atp: d.atpByPhase, nadph: d.nadphByPhase })}`);
+      expect(d.kjSpent === 9 * 50 + 6 * 220, `nine ATP at 50 and six NADPH at 220 are ${9 * 50 + 6 * 220} kJ: ${d.kjSpent}`);
+      expect(d.sucrosePool === 1 && d.starchPool === 0 && d.exportTo === 'sucrose', `the G3P that left went to sucrose: ${JSON.stringify({ suc: d.sucrosePool, starch: d.starchPool, to: d.exportTo })}`);
+    }],
+    ['a-labelled-carbon-can-be-followed-round', async (h) => {
+      await h.button(/^Label/).click();
+      let d = await until(h, (x) => x.labelledAtomAt === 'carbon dioxide', 5_000);
+      expect(d.labelledAtomAt === 'carbon dioxide', `Label should mark the next carbon dioxide: ${d.labelledAtomAt}`);
+      const seen = new Set([d.labelledAtomAt]);
+      for (let i = 0; i < 40 && !['RuBP', 'sucrose', 'starch'].includes(d.labelledAtomAt); i += 1) {
+        const before = d.t;
+        await h.button(/^Step/).click();
+        d = await until(h, (x) => x.t > before, 5_000);
+        seen.add(d.labelledAtomAt);
+      }
+      for (const place of ['six-carbon compound', '3-phosphoglycerate', 'G3P']) {
+        expect(seen.has(place), `the labelled carbon should pass through ${place}; it was seen in ${[...seen].join(', ')}`);
+      }
+      expect(['RuBP', 'sucrose'].includes(d.labelledAtomAt), `it should end in the exported sugar or the rebuilt acceptor: ${d.labelledAtomAt}`);
+    }],
+    ['starving-atp-piles-up-3-phosphoglycerate', async (h) => {
+      const atp = h.stage.getByRole('slider', { name: 'ATP supply' });
+      await atp.fill('0');
+      await atValue(h, atp, 0);
+      let d = await until(h, (x) => x.atpSupply === 0, 5_000);
+      expect(d.stalledPhase === 'reduction', `with no ATP the reduction should stall: ${d.stalledPhase}`);
+      const fixed = d.co2Fixed;
+      const regen = d.atpByPhase.regeneration;
+      const t = d.t;
+      await ensureRunning(h);
+      // Poll the figure's own clock: rubisco carries on until the acceptor is used up.
+      d = await until(h, (x) => x.accumulating === '3-phosphoglycerate' && x.t > t + 4, 30_000);
+      await h.button(/^Pause/).click();
+      d = await until(h, (x) => x.playing === false, 5_000);
+      expect(d.accumulating === '3-phosphoglycerate', `3-phosphoglycerate should pile up behind the stall: ${d.accumulating}`);
+      expect(d.co2Fixed > fixed, `rubisco needs no ATP, so carboxylation should carry on: ${fixed} -> ${d.co2Fixed}`);
+      expect(d.atpByPhase.regeneration === regen, `with no ATP the regeneration stalls as well: its ATP went ${regen} -> ${d.atpByPhase.regeneration}`);
+      await atp.fill('100');
+      await atValue(h, atp, 100);
+      d = await until(h, (x) => x.atpSupply === 1 && x.stalledPhase === null, 5_000);
+      expect(d.stalledPhase === null && d.accumulating === null, `fed again, nothing should be stalled: ${JSON.stringify({ stalled: d.stalledPhase, acc: d.accumulating })}`);
+    }],
+    ['starving-nadph-from-the-opening-drains-all-three-acceptors', async (h) => {
+      // From the opening, so the pile is this starvation's own and not the last one's.
+      await h.button(/^Reset/).click();
+      await until(h, (x) => x.co2Fixed === 0 && x.t === 0, 5_000);
+      const nadph = h.stage.getByRole('slider', { name: 'NADPH supply' });
+      await nadph.fill('0');
+      await atValue(h, nadph, 0);
+      let d = await until(h, (x) => x.nadphSupply === 0, 5_000);
+      expect(d.stalledPhase === 'reduction', `with no NADPH the reduction should stall: ${d.stalledPhase}`);
+      await ensureRunning(h);
+      d = await until(h, (x) => x.co2Fixed === 3 && x.accumulating === '3-phosphoglycerate' && x.t > 4, 30_000);
+      await h.button(/^Pause/).click();
+      d = await until(h, (x) => x.playing === false, 5_000);
+      expect(d.accumulating === '3-phosphoglycerate', `the phosphorylation lies far on the side of 3-phosphoglycerate, so that is what piles up with no NADPH too: ${d.accumulating}`);
+      expect(d.co2Fixed === 3 && d.nadphSpent === 0, `rubisco carried on until all three acceptors were used, and not one NADPH was spent: ${JSON.stringify({ fixed: d.co2Fixed, nadph: d.nadphSpent })}`);
+      expect(d.atpByPhase.reduction === 0, `nothing was phosphorylated that could not then be reduced: ${JSON.stringify(d.atpByPhase)}`);
+      await nadph.fill('100');
+      await atValue(h, nadph, 100);
+      await until(h, (x) => x.nadphSupply === 1, 5_000);
+    }],
+    ['dark-with-both-supplies-full-it-barely-turns', async (h) => {
+      // From the opening, so there are acceptors for a lit cycle to fix carbon onto.
+      await h.button(/^Reset/).click();
+      await until(h, (x) => x.co2Fixed === 0 && x.t === 0, 5_000);
+      await h.button(/^Light/).click();
+      let d = await until(h, (x) => x.lightOn === false, 5_000);
+      expect(d.stromaPh === 7 && !d.magnesiumInStroma && !d.thioredoxinReduced, `dark, the stroma should be at pH 7 with no magnesium and thioredoxin oxidised: ${JSON.stringify({ ph: d.stromaPh, mg: d.magnesiumInStroma, trx: d.thioredoxinReduced })}`);
+      expect(d.rubiscoActivated === false && d.activatedEnzymes === 0, `rubisco and thioredoxin's four should all be off: ${JSON.stringify({ rub: d.rubiscoActivated, n: d.activatedEnzymes })}`);
+      expect(d.atpSupply === 1 && d.nadphSupply === 1 && d.stalledPhase === null, `both supplies are full by hand, so nothing is starved: ${JSON.stringify({ atp: d.atpSupply, nadph: d.nadphSupply, stalled: d.stalledPhase })}`);
+      await ensureRunning(h);
+      // The elapsed model time IS the measurement here: lit, eight seconds of the cycle fix about
+      // three carbon dioxides; dark, at a fiftieth of the rate, at most the one already on the way.
+      d = await until(h, (x) => x.t > 8, 30_000);
+      expect(d.t > 8, `the clock should have run eight seconds: ${d.t}`);
+      expect(d.co2Fixed <= 1, `dark, the cycle should barely turn even with ATP and NADPH supplied by hand: ${d.co2Fixed} fixed in ${d.t} s`);
+      const t = d.t;
+      await h.button(/^Light/).click();
+      d = await until(h, (x) => x.lightOn === true && x.co2Fixed >= 3, 30_000);
+      await h.button(/^Pause/).click();
+      d = await until(h, (x) => x.playing === false, 5_000);
+      expect(d.rubiscoActivated === true && d.activatedEnzymes === 4, `lit again, rubisco and all four should be back on: ${JSON.stringify({ rub: d.rubiscoActivated, n: d.activatedEnzymes })}`);
+      expect(d.co2Fixed >= 3, `and the same cycle, lit, should turn: ${d.co2Fixed} fixed by ${d.t} s, having been dark until ${t} s`);
+    }],
+    ['export-to-starch-and-the-pool-grows', async (h) => {
+      await h.button(/^Starch/).click();
+      let d = await until(h, (x) => x.exportTo === 'starch', 5_000);
+      const starch = d.starchPool;
+      const exported = d.g3pExported;
+      await ensureRunning(h);
+      d = await until(h, (x) => x.g3pExported > exported, 40_000);
+      await h.button(/^Pause/).click();
+      d = await until(h, (x) => x.playing === false, 5_000);
+      expect(d.starchPool > starch, `a G3P exported with Starch chosen should grow the starch pool: ${starch} -> ${d.starchPool}`);
+      expect(d.carbonsOut === 3 * d.g3pExported, `three carbons leave with every G3P: ${d.carbonsOut} for ${d.g3pExported}`);
+    }],
+    ['reset-returns-it-to-the-state-it-mounted-in', async (h) => {
+      await h.button(/^Reset/).click();
+      const d = await until(h, (x) => x.co2Fixed === 0 && x.t === 0, 5_000);
+      expect(d.co2Fixed === 0 && d.turns === 0 && d.atpSpent === 0 && d.nadphSpent === 0 && d.labelledAtomAt === null, `Reset left ${JSON.stringify({ fixed: d.co2Fixed, turns: d.turns, atp: d.atpSpent, nadph: d.nadphSpent, lab: d.labelledAtomAt })}`);
+      expect(d.exportTo === 'sucrose' && d.sucrosePool === 0 && d.starchPool === 0 && d.lightOn && d.atpSupply === 1 && d.nadphSupply === 1, `Reset left ${JSON.stringify({ to: d.exportTo, suc: d.sucrosePool, starch: d.starchPool, light: d.lightOn, atp: d.atpSupply, nadph: d.nadphSupply })}`);
+      expect(d.playing === false && d.phase === 'carboxylation', `Reset left ${JSON.stringify({ playing: d.playing, phase: d.phase })}`);
+    }],
+  ],
+
   cell3d: [
     ['cut-open', async (h) => {
       await h.button(/^Cut open/).click();
