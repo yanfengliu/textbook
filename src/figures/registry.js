@@ -91,16 +91,22 @@ export const FIGURES = Object.freeze({
   'feedback-pathway': { url: new URL('./feedback-pathway.js', import.meta.url).href, title: 'A loop, and what happens when you cut it', needsWebGL: false, aspect: 16 / 10, narrowAspect: 3 / 4 },
   'metabolic-map': { url: new URL('./metabolic-map.js', import.meta.url).href, title: 'The hourglass, and the ladder under it', needsWebGL: false, aspect: 16 / 10, narrowAspect: 4 / 5 },
 
-  // Chapter 6, Photosynthesis: Figure 6.1. The title is the brief's headline and the two aspects are the
-  // table's (biology/ch06-photosynthesis/FIGURES.md); below 800 px it carries a real second composition,
-  // one chart at a time with the other drawn faintly behind it. Placed on its own lines, apart from the
-  // chapter's other three kinds, which were added in parallel.
+  // Chapter 6, Photosynthesis, in figure order. Each `aspect` and `narrowAspect` is the brief's
+  // (biology/ch06-photosynthesis/FIGURES.md, the table at its head). The four were written in parallel and
+  // registered apart to keep their branches off one another's lines; the landing put them back together.
+  //
+  // Figure 6.1. The title is the brief's headline. Below 800 px it carries a real second composition, one
+  // chart at a time with the other drawn faintly behind it.
   'pigment-spectra': { url: new URL('./pigment-spectra.js', import.meta.url).href, title: 'What is absorbed, and what it drives', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
-
-  // Chapter 6, Photosynthesis: Figure 6.3. `aspect` and `narrowAspect` are the brief's
-  // (biology/ch06-photosynthesis/FIGURES.md, the table at its head): a ring is the one shape that wants a
-  // square, so on a phone the stage is square and the ledger goes beneath the ring as rows.
+  // Figure 6.2. The title is the brief's headline. Below 800 px it carries a real second composition, the
+  // two climbs stacked.
+  zscheme: { url: new URL('./zscheme.js', import.meta.url).href, title: 'Fire the photons yourself', needsWebGL: false, aspect: 16 / 10, narrowAspect: 3 / 4 },
+  // Figure 6.3. A ring is the one shape that wants a square, so on a phone the stage is square and the
+  // ledger goes beneath the ring as rows.
   'calvin-cycle': { url: new URL('./calvin-cycle.js', import.meta.url).href, title: 'The cycle with its books open', needsWebGL: false, aspect: 16 / 10, narrowAspect: 1 },
+  // Figure 6.4. It carries a genuine second composition, because a site drawn beside a four-row table does
+  // not survive a 390 px stage.
+  'rubisco-fork': { url: new URL('./rubisco-fork.js', import.meta.url).href, title: 'One site, two gases, four steps of arithmetic', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
 
   // 《资治通鉴》 卷一 周纪一 — the second book. Its figures are about a text and a history, not a
   // specimen: where the three states sat and when, what a character becomes when it joins another, and
@@ -116,16 +122,6 @@ export const FIGURES = Object.freeze({
   'zj-split': { url: new URL('./zj-split.js', import.meta.url).href, title: '三家分晋：从灭智到命侯', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
   'zj-timeline': { url: new URL('./zj-timeline.js', import.meta.url).href, title: '周纪一的年表', needsWebGL: false, aspect: 16 / 9, narrowAspect: 2 / 3 },
   'zj-words': { url: new URL('./zj-words.js', import.meta.url).href, title: '字与词', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
-
-  // Chapter 6, Photosynthesis: Figure 6.2. The title is the brief's headline and the two aspects are the
-  // table's (biology/ch06-photosynthesis/FIGURES.md); the figure carries a real second composition below
-  // 800 px, the two climbs stacked. Added at the end of the table so that it does not share a line with
-  // the chapter's other three kinds, which are being added in parallel.
-  zscheme: { url: new URL('./zscheme.js', import.meta.url).href, title: 'Fire the photons yourself', needsWebGL: false, aspect: 16 / 10, narrowAspect: 3 / 4 },
-
-  // Chapter 6, Figure 6.4. The brief's aspect and narrow aspect; it carries a genuine second composition,
-  // because a site drawn beside a four-row table does not survive a 390 px stage.
-  'rubisco-fork': { url: new URL('./rubisco-fork.js', import.meta.url).href, title: 'One site, two gases, four steps of arithmetic', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
 });
 
 export const KINDS = Object.freeze(Object.keys(FIGURES));

@@ -25,8 +25,12 @@
 // through `until` below, never by sleeping; docs/policies/local-rules.md, "A wait in a gate must poll
 // the artefact, never the wall clock". The recipes held 263.9 s of `waitForTimeout` on 2026-09-16 — half
 // this gate's 542.9 s — and every one of them was an assertion about how busy the machine was rather
-// than a wait for the figure. The recipes hold 165 polls where they held 8, and 48.9 s of sleep is
-// left over 81 calls, every second of it named:
+// than a wait for the figure. The round of 2026-09-17 put 165 polls where there had been 8, and left
+// 48.9 s of sleep over 81 calls. Counted again at chapter 6's landing (2026-09-23), one per call site
+// between `const RECIPES` and its closing brace, comment lines skipped, so a sleep inside a loop counts
+// once: 390 calls to the poll helpers (`until` 344, `atValue` 37, `atLeast` 9), one retry loop of its
+// own in `cilium`, and 66 sleeps holding 47.0 s. Chapter 6's four recipes added 92 of those polls and no
+// sleep. Every second of the sleep is named:
 // a sleep survives here only where the ELAPSED TIME IS THE MEASUREMENT — where the step's claim is that
 // something did NOT happen while time passed (pond's paused clock, bilayer's, water3d's idle count,
 // membrane3d's "nothing crosses", prokaryote's untouched wall, permeability's rate over a window), or
@@ -3575,8 +3579,8 @@ const RECIPES = {
     }],
   ],
 
-  // Chapter 6, Figure 6.2. At the end of the table so that it shares no line with the chapter's other
-  // three recipes, which are being written at the same time. After every press the assertion is on what
+  // Chapter 6, Figure 6.2. Written at the end of the table, apart from the chapter's other three recipes,
+  // which were being written at the same time. After every press the assertion is on what
   // the figure COMPUTED — stalledAt, starvedAt, clusterCount, oxygenReleased, capturedFraction,
   // flashOxygen — and never only on the count the button itself moved.
   zscheme: [
