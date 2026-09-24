@@ -7,6 +7,18 @@
 // `level` is recall (say it), explain (say why), or apply (use it on a case they have not seen).
 // `teaches` points back at the prose and the figures, so a wrong answer leads somewhere.
 //
+// Four of the eight figures this chapter was planned with were cut on 2026-09-24, as chapter 6's were,
+// and the chapter is reviewed with questions rather than figure tasks: respiration-tour (§7.1),
+// atp-synthase (§7.5), yield-ledger (§7.6) and uncoupler-bench (§7.8). The objectives those four taught
+// are unchanged and are still taught by their sections; they now name no figure (`figures: []`), which
+// is what npm run check accepts: it requires every objective to name a section, and every figure an
+// objective does name to exist (tools/check-content.js, checkChapterData). The rest name only figures
+// that are still on the page: fig-glycolysis (7.1), fig-krebs (7.2), fig-chain (7.3), fig-fermentation
+// (7.4). Three objectives moved onto fig-chain rather than to nothing, because its brief carries a field
+// that grades them: `proton-motive-force` (it reports the gradient as a pH difference and as a voltage),
+// `diagnose-respiration` (its inhibitors and its oxygen switch are two of the sort's four bins), and
+// `anaerobic-respiration` (its acceptor control, added on the review's finding 17).
+//
 // This chapter is where the unit's debts are paid, so the graph reaches out further than any other in the
 // book: fifty-one edges name thirty-eight objectives of chapters 1 to 6. Chapter 1 promised that energy
 // flows while matter cycles; chapter 2 built the bonds and the electronegativity; chapter 3 said a
@@ -18,8 +30,9 @@
 // For each external edge, what a reader who failed the objective is missing:
 //
 // From chapter 1, because this is the mechanism under two of its sections:
-//   `three-domains`        — §7.2's argument is that glycolysis is in all three of them, which says nothing
-//                            to a reader who does not know there are three or how far apart they are
+//   `three-domains`        — §7.2's argument is that some version of glycolysis is in all three of them,
+//                            which says nothing to a reader who does not know there are three or how far
+//                            apart they are
 //   `hypothesis-vs-theory` — §7.5 is the chapter's one piece of history told as method: Mitchell proposed
 //                            something that could have been shown false, and a reader who cannot tell a
 //                            hypothesis from a settled theory cannot see what was at stake
@@ -89,32 +102,32 @@ export const OBJECTIVES = [
     id: 'respiration-definition',
     statement: 'Say what cellular respiration is, distinguish it from breathing, and give the overall equation for the oxidation of glucose together with the free energy it releases.',
     prereqs: ['catabolism-anabolism', 'redox-basics'],
-    teaches: { sections: ['burning'], figures: ['fig-respiration'] },
+    teaches: { sections: ['burning'], figures: [] },
     level: 'recall',
   },
   {
     id: 'respiration-vs-combustion',
     statement: 'Explain why burning glucose and respiring it have the same equation and the same free energy change, and say what a cell gets from its version that a flame cannot give it.',
     prereqs: ['respiration-definition', 'second-law-life', 'electron-carriers'],
-    teaches: { sections: ['burning'], figures: ['fig-respiration'] },
+    teaches: { sections: ['burning'], figures: [] },
     level: 'explain',
   },
   {
     id: 'four-stages',
     statement: 'Name the four stages of respiration in order and say which compartment of a cell each one happens in.',
     prereqs: ['respiration-definition', 'organelle-architecture'],
-    teaches: { sections: ['burning'], figures: ['fig-respiration'] },
+    teaches: { sections: ['burning'], figures: [] },
     level: 'recall',
   },
   {
     id: 'cristae-area',
     statement: 'Explain why a mitochondrion\'s inner membrane is folded, and predict how the folding differs between a heart muscle cell and a liver cell.',
     prereqs: ['four-stages', 'sav-arithmetic'],
-    teaches: { sections: ['burning'], figures: ['fig-respiration'] },
+    teaches: { sections: ['burning'], figures: [] },
     level: 'explain',
   },
 
-  // ---- 7.2 The oldest pathway runs in the cytosol ----
+  // ---- 7.2 A very old pathway runs in the cytosol ----
   {
     id: 'glycolysis-ledger',
     statement: 'State what one molecule of glucose costs and yields in glycolysis: the ATP spent, the ATP made, the reduced carriers and the two three-carbon products.',
@@ -138,7 +151,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'glycolysis-universal',
-    statement: 'Explain what follows from glycolysis sitting in the cytosol of all three domains and needing no oxygen and no organelle.',
+    statement: 'Explain what follows from glycolysis, in one version or another, sitting in the cytosol of all three domains and needing no oxygen and no organelle.',
     prereqs: ['glycolysis-ledger', 'three-domains', 'endosymbiosis-evidence'],
     teaches: { sections: ['glycolysis'], figures: ['fig-glycolysis'] },
     level: 'explain',
@@ -154,7 +167,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'krebs-carbon-accounting',
-    statement: 'Account for all six carbon atoms of a glucose molecule, saying at which step each one leaves and in what form.',
+    statement: 'Account for the six carbons of a glucose molecule as a count, saying at which steps carbon leaves and in what form, and explain why the carbons that leave on a turn of the Krebs cycle are not the two that have just arrived.',
     prereqs: ['link-reaction', 'four-stages'],
     teaches: { sections: ['krebs'], figures: ['fig-krebs'] },
     level: 'apply',
@@ -182,7 +195,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'other-fuels',
-    statement: 'Say where a fatty acid and an amino acid join these pathways, and use their entry points to explain why a fat yields more per gram than a sugar.',
+    statement: 'Say where a fatty acid and an amino acid join these pathways, and use how reduced their carbons are to explain why a fat yields more per gram than a sugar.',
     prereqs: ['krebs-carbon-accounting', 'why-electrons-fall', 'condensation-hydrolysis'],
     teaches: { sections: ['krebs'], figures: ['fig-krebs'] },
     level: 'apply',
@@ -230,42 +243,42 @@ export const OBJECTIVES = [
     id: 'proton-motive-force',
     statement: 'Say what the proton-motive force is, name its two parts, and say which of the two carries most of it across a mitochondrion\'s inner membrane.',
     prereqs: ['chain-pumps-protons', 'electrochemical-gradient', 'membrane-potential', 'ph-scale', 'thylakoid-gradient'],
-    teaches: { sections: ['chemiosmosis'], figures: ['fig-synthase'] },
+    teaches: { sections: ['chemiosmosis'], figures: ['fig-chain'] },
     level: 'explain',
   },
   {
     id: 'chemiosmosis-principle',
     statement: 'Explain how a gradient made by one set of proteins is spent by another with no chemical intermediate passing between them, and say what carries the energy instead.',
     prereqs: ['proton-motive-force', 'shared-intermediate', 'gradient-energy'],
-    teaches: { sections: ['chemiosmosis'], figures: ['fig-synthase'] },
+    teaches: { sections: ['chemiosmosis'], figures: [] },
     level: 'explain',
   },
   {
     id: 'sealed-compartment',
     statement: 'Explain why chemiosmosis needs an unbroken membrane, and predict what a torn one does to ATP production while the chain runs as fast as it ever did.',
     prereqs: ['chemiosmosis-principle', 'ion-barrier', 'bilayer-properties'],
-    teaches: { sections: ['chemiosmosis'], figures: ['fig-synthase'] },
+    teaches: { sections: ['chemiosmosis'], figures: [] },
     level: 'explain',
   },
   {
     id: 'synthase-is-a-motor',
     statement: 'Describe ATP synthase as a rotary machine: what the protons turn, what the turning does to the three catalytic sites, and how many ATP one full rotation makes.',
     prereqs: ['chemiosmosis-principle', 'pump-cycle', 'motor-direction', 'photophosphorylation'],
-    teaches: { sections: ['chemiosmosis'], figures: ['fig-synthase'] },
+    teaches: { sections: ['chemiosmosis'], figures: [] },
     level: 'explain',
   },
   {
     id: 'synthase-reversible',
     statement: 'Predict which way ATP synthase runs from the proton-motive force and the ratio of ATP to ADP, and say what a cell whose gradient has collapsed does with the ATP it has left.',
     prereqs: ['synthase-is-a-motor', 'pump-efficiency', 'concentrations-decide'],
-    teaches: { sections: ['chemiosmosis'], figures: ['fig-synthase'] },
+    teaches: { sections: ['chemiosmosis'], figures: [] },
     level: 'apply',
   },
   {
     id: 'chemiosmosis-evidence',
     statement: 'State what observation would have shown the chemiosmotic hypothesis to be false, and describe an experiment that made a gradient with no chain at all and got ATP out of it.',
     prereqs: ['chemiosmosis-principle', 'hypothesis-vs-theory', 'acid-bath'],
-    teaches: { sections: ['chemiosmosis'], figures: ['fig-synthase'] },
+    teaches: { sections: ['chemiosmosis'], figures: [] },
     level: 'explain',
   },
 
@@ -274,35 +287,35 @@ export const OBJECTIVES = [
     id: 'yield-arithmetic',
     statement: 'Add up the ATP one glucose molecule yields, taking each term from the stage that produced it and each carrier at its measured value.',
     prereqs: ['krebs-output', 'glycolysis-ledger', 'chemiosmosis-principle'],
-    teaches: { sections: ['yield'], figures: ['fig-yield'] },
+    teaches: { sections: ['yield'], figures: [] },
     level: 'apply',
   },
   {
     id: 'p-o-ratio',
     statement: 'Explain why about two and a half ATP are made per NADH rather than three, from the protons the chain pumps and the protons the synthase and the transporters need.',
     prereqs: ['yield-arithmetic', 'synthase-is-a-motor', 'chain-pumps-protons'],
-    teaches: { sections: ['yield'], figures: ['fig-yield'] },
+    teaches: { sections: ['yield'], figures: [] },
     level: 'explain',
   },
   {
     id: 'shuttle-cost',
-    statement: 'Explain why the two NADH made in the cytosol are worth less than the eight made in the matrix, and say which shuttle a skeletal muscle uses and which a liver uses.',
+    statement: 'Explain why the two NADH made in the cytosol can be worth less than the eight made in the matrix, and say which shuttle a fast skeletal muscle uses and which a liver uses.',
     prereqs: ['p-o-ratio', 'ion-barrier', 'four-stages'],
-    teaches: { sections: ['yield'], figures: ['fig-yield'] },
+    teaches: { sections: ['yield'], figures: [] },
     level: 'apply',
   },
   {
     id: 'why-not-38',
     statement: 'Say which assumptions produce the textbook figure of thirty-eight ATP per glucose, and which of those assumptions are false.',
     prereqs: ['p-o-ratio', 'shuttle-cost'],
-    teaches: { sections: ['yield'], figures: ['fig-yield'] },
+    teaches: { sections: ['yield'], figures: [] },
     level: 'explain',
   },
   {
     id: 'respiration-efficiency',
     statement: 'Work out what fraction of glucose\'s free energy a cell captures as ATP, and say what becomes of the rest.',
     prereqs: ['yield-arithmetic', 'atp-cellular-value', 'second-law-life'],
-    teaches: { sections: ['yield'], figures: ['fig-yield'] },
+    teaches: { sections: ['yield'], figures: [] },
     level: 'apply',
   },
 
@@ -339,7 +352,7 @@ export const OBJECTIVES = [
     id: 'anaerobic-respiration',
     statement: 'Distinguish anaerobic respiration from fermentation by what accepts the electrons at the end, and predict from an acceptor\'s reduction potential how much less it yields.',
     prereqs: ['redox-ladder', 'oxygen-is-the-acceptor', 'fermentation-purpose'],
-    teaches: { sections: ['anaerobic'], figures: ['fig-fermentation'] },
+    teaches: { sections: ['anaerobic'], figures: ['fig-fermentation', 'fig-chain'] },
     level: 'apply',
   },
 
@@ -348,28 +361,28 @@ export const OBJECTIVES = [
     id: 'blocking-the-chain',
     statement: 'Predict which carriers go reduced and which go oxidised when a named inhibitor blocks one point in the chain, and say why everything downstream of the fuel stops.',
     prereqs: ['chain-components', 'redox-ladder', 'inhibition-types'],
-    teaches: { sections: ['poisons'], figures: ['fig-chain', 'fig-uncoupling'] },
+    teaches: { sections: ['poisons'], figures: ['fig-chain'] },
     level: 'apply',
   },
   {
     id: 'uncoupling',
     statement: 'Predict what an uncoupler does to oxygen consumption, to ATP production and to a body\'s temperature, and explain why the three move in those directions.',
     prereqs: ['chemiosmosis-principle', 'proton-motive-force', 'sealed-compartment'],
-    teaches: { sections: ['poisons'], figures: ['fig-uncoupling'] },
+    teaches: { sections: ['poisons'], figures: [] },
     level: 'apply',
   },
   {
     id: 'respiratory-control',
     statement: 'Explain why blocking ATP synthase also stops the chain, and say what that shows about how the two machines are joined.',
-    prereqs: ['uncoupling', 'chemiosmosis-principle', 'feedback-inhibition'],
-    teaches: { sections: ['poisons'], figures: ['fig-uncoupling'] },
+    prereqs: ['chain-pumps-protons', 'chemiosmosis-principle', 'feedback-inhibition'],
+    teaches: { sections: ['poisons'], figures: [] },
     level: 'explain',
   },
   {
     id: 'uncoupling-on-purpose',
     statement: 'Explain how brown fat warms a newborn, and say what an animal gains from a mitochondrion built to make no ATP at all.',
     prereqs: ['uncoupling', 'homeostasis', 'feedback-direction'],
-    teaches: { sections: ['poisons'], figures: ['fig-uncoupling'] },
+    teaches: { sections: ['poisons'], figures: [] },
     level: 'apply',
   },
   {
@@ -380,9 +393,9 @@ export const OBJECTIVES = [
     // individual ideas are taught in would list this objective four times in the reader's section headers
     // and claim each of those sections teaches the comparison. The prerequisites are what send a reader
     // who fails it back to what they are actually missing.
-    prereqs: ['blocking-the-chain', 'uncoupling', 'carrier-pool-limit'],
+    prereqs: ['blocking-the-chain', 'uncoupling', 'respiratory-control', 'carrier-pool-limit'],
     statement: 'Decide from a measurement or a symptom which part of respiration has been interfered with: the chain blocked, the membrane leaking, the synthase stopped, or the carriers with nowhere to unload.',
-    teaches: { sections: ['poisons'], figures: ['fig-uncoupling', 'fig-chain'] },
+    teaches: { sections: ['poisons'], figures: ['fig-chain'] },
     level: 'apply',
   },
 ];
