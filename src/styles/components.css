@@ -1173,12 +1173,17 @@ tb-glossary {
 
 /* A glossary is a two-column table of terms, not a stack of paragraphs: the term hangs in its own column
    and the definitions all start on one edge, so thirty-one entries can be scanned down rather than read
-   through. A hairline opens each entry, and the two halves share it because the columns touch. */
+   through. A hairline opens each entry, and the two halves share it because the columns touch.
+   The term column is 11.5rem, and wider only when one of the page's terms holds a single word longer
+   than that leaves room for: min-content is the longest word, and it wins only when it is the larger.
+   Chapter 6's "Photophosphorylation" needs 171.1 px where 11.5rem leaves a term 158.4 px after its
+   padding, and a word is never broken mid-way or set smaller to fit (npm run shot's text-box check).
+   Every other chapter's longest word fits, so its column is the 11.5rem it always was. */
 tb-glossary dl {
   margin: 0;
   max-width: var(--measure);
   display: grid;
-  grid-template-columns: 11.5rem minmax(0, 1fr);
+  grid-template-columns: minmax(11.5rem, min-content) minmax(0, 1fr);
 }
 
 tb-glossary dt {
