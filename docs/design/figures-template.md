@@ -104,7 +104,7 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 |---|---|---|
 | `t` | number | clock, seconds |
 
-**Why it is a mechanism.** One sentence: what the reader can falsify here that a static picture could only assert.
+**Why it is a mechanism.** One sentence: what handling it teaches that prose cannot.
 
 **Narrow composition.** What changes below 800 px, and what is dropped rather than shrunk.
 

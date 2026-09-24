@@ -10,7 +10,7 @@ Non-goals: a content management system, accounts or progress sync, server-side r
 
 Stack: plain HTML, CSS, and ES modules on Node 24 (`.nvmrc`); Three.js pinned through an import map for the 3D figures; Playwright chromium for the gates. Repo-only rules: `docs/policies/local-rules.md`.
 
-**Current direction** (the owner, 2026-09-23). The weekly usage allowance is the budget: about 40M price-weighted tokens a chapter, spent on what a reader sees first. Contexts stay small. A chapter has at most about four bespoke interactive figures, with authored static SVG elsewhere. No chapter ships without an accuracy review against OpenStax Biology 2e. The study loop must run before more study features are built. `npm test` stays the commit gate until a core gate exists. One textbook session runs at a time, the biology book's Chinese edition is parked, and the current scope stops once chapter 6 has landed. The ten points and their evidence are in [docs/policies/local-rules.md](docs/policies/local-rules.md#the-usage-allowance-is-the-budget-the-owners-direction-of-2026-09-23).
+**Current direction** (the owner, 2026-09-23). The weekly usage allowance is the budget: about 40M price-weighted tokens a chapter, spent on what a reader sees first. Contexts stay small. A chapter has at most about four bespoke interactive figures, with authored static SVG elsewhere. No chapter ships without an accuracy review against OpenStax Biology 2e. The study loop must run before more study features are built. `npm test` stays the commit gate until a core gate exists. One textbook session runs at a time. The biology book's Chinese edition is parked. Work stops once chapter 6 has landed, until the owner says otherwise. The ten points and their evidence are in [docs/policies/local-rules.md](docs/policies/local-rules.md#the-usage-allowance-is-the-budget-the-owners-direction-of-2026-09-23).
 
 <!-- FLEET-CANON:BEGIN sha=95bcbcb491dd generated from ../fleet/FLEET.md by `npm run sync-canon` — do not edit inside this block; this repo's own rules go in docs/policies/local-rules.md -->
 ## Fleet constitution
@@ -149,7 +149,7 @@ Do not declare the result fully verified while material findings or required che
 - **No word the book shows about a reader may claim more than the record supports.** "Learned well" is the store's verdict — high recall, about a week of stability, a recent success, and success in two formats — and not the scheduler's `review` state, which only means a card is past its learning steps. `npm run sitting` holds this.
 - **The prose is never hidden, locked, gated or reordered by the study system.** It annotates and it reorders practice. A reader may always read anything, including the parts they are bad at.
 - **The reader's record is theirs and stays local.** `progress/` is git-ignored, nothing leaves the machine, and there are no accounts. What a round commits is its conclusions, not the raw log.
-- Locally high-risk, so it gets independent review: the figure contract, the handshake, the scheduler and the mastery thresholds, the content checker's rules, and any change to `AGENTS.md`, `docs/policies/gates.md` or `docs/design/`.
+- Locally high-risk, so it gets independent review: the figure contract, the handshake, the scheduler and the mastery thresholds, the content checker's rules, and any change to `AGENTS.md`, `docs/policies/gates.md`, `docs/policies/local-rules.md` or `docs/design/`.
 
 ## Conventions
 
