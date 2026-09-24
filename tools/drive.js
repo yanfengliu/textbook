@@ -3946,6 +3946,7 @@ const RECIPES = {
       const done = await until(h, (x) => x.clearedSeconds !== null, 60_000);
       expect(done.clearedSeconds !== null && done.lactateMM === 0 && done.situation === 'cleared', `the extra lactate should clear: ${JSON.stringify({ clearedSeconds: done.clearedSeconds, lactateMM: done.lactateMM, situation: done.situation })}`);
       expect(done.lactateOxidised > 0 && done.lactateOxidisedElsewhere > 0 && done.lactateToLiver > 0 && done.liverAtpSpent === 6, `what cleared should have gone three ways, and the liver should spend 6 ATP a glucose: ${JSON.stringify({ lactateOxidised: done.lactateOxidised, lactateOxidisedElsewhere: done.lactateOxidisedElsewhere, lactateToLiver: done.lactateToLiver, liverAtpSpent: done.liverAtpSpent })}`);
+      expect(done.readoutClipped === false, `the readout, at its fullest here, should draw every line it chose: readoutClipped ${JSON.stringify(done.readoutClipped)}`);
     }],
     ['the-yeast-makes-ethanol-without-oxygen-and-respires-with-it', async (h) => {
       await h.button(/^Yeast/).click();

@@ -69,10 +69,13 @@
 // 720 and not the book's usual 800 because a wide figure's stage is at least 723 px wherever the stage is
 // 16 : 9 (every viewport of 800 px and up) and tall below that; an 800 threshold would put the tall
 // composition into a 16 : 9 stage on an iPad or a phone held sideways.
-// narrowAspect is 9 / 16, not the brief's 4 / 5: the ring's discs must stay discs with a letter on them
-// (radius 9 px at least, so the ring at least 45 px) and still leave the four stations room, and a 342 px
-// stage at 4 / 5 left the drawing about 180 px after a three-row toolbar and the readout. 9 / 16 is the
-// wide stage turned, as the drawing is.
+// narrowAspect is 2 / 3, not the brief's 4 / 5: the ring's twelve discs must stay discs with a letter on
+// them (radius about 9 px, on a ring of about 47 px so that they do not touch), and a 342 px stage at
+// 4 / 5 left the drawing about 180 px after a three-row toolbar and the readout, which is less than the
+// ring and the four stations need; 3 / 4 is still short. 2 / 3 is the squarest stage that holds them.
+// 9 / 16 held them with room to spare, but its stage was 1229 px tall on an iPad Mini held upright and
+// 581 on an iPhone SE; at 2 / 3 they are 1046 and 491, so the phone's fits its screen and the iPad's is
+// still a little taller than its screen.
 //
 // describe() reports, beyond the frame's and the bench's fields:
 //   oxygen, route ('none' | 'lactate' | 'ethanol'), preset ('muscle' | 'yeast' | null), demand (ATP/s)
@@ -91,6 +94,7 @@
 //   lactateOxidised, lactateOxidisedElsewhere, lactateToLiver   the three fates of what cleared, mmol/L
 //   liverAtpSpent                                 6, per glucose the liver rebuilds
 //   situation                                     which sentence the readout is showing
+//   readoutClipped                                true if even the tersest readout left a line undrawn
 //   t, playing                                    the clock
 import { C, clamp, tint, polar } from './lib/svg.js';
 import { bench } from './lib/bench.js';
@@ -101,7 +105,7 @@ export const meta = {
   title: 'What actually runs out',
   needsWebGL: false,
   aspect: 16 / 9,
-  narrowAspect: 9 / 16,
+  narrowAspect: 2 / 3,
 };
 
 // ---------------------------------------------------------------- the model
@@ -261,7 +265,7 @@ function situation(s, f) {
   }
   if (s.route === 'none' && f.full) return { key: 'throttled', warn: !f.keepingUp, text: 'Every carrier is loaded and the chain empties them only so fast, so glycolysis runs at the chain\'s pace. With no fermentation there is no faster way.' };
   if (s.route === 'none' && f.chain >= f.o.chainMax - EPS && f.want > f.chain + 1e-6) return { key: 'rising', warn: false, text: 'NADH is piling up: glycolysis is loading carriers faster than the chain can empty them.' };
-  if (f.want <= EPS) return { key: 'backlog', warn: false, text: 'The chain is working through NADH that piled up, and for now that alone meets the demand, so glycolysis waits.' };
+  if (f.want <= EPS) return { key: 'backlog', warn: false, text: 'The chain is emptying carriers loaded earlier, and for now that alone meets the demand, so glycolysis waits.' };
   if (s.lactate > 0) {
     if (clearingNow(s, f)) return { key: 'clearing', warn: false, text: `The chain has room to spare, so the lactate goes back to pyruvate and is oxidised: in this ${who}, in the heart, slow fibres and brain, or made back into glucose by the liver.` };
     return { key: 'waiting', warn: false, text: `The lactate clears once the chain has room to spare: bring the demand to ${Math.floor(f.o.aMax - 1e-9)} or less.` };
@@ -277,6 +281,14 @@ function tissueNote(o, level) {
 
 const ETHANOL_NOTE = 'Two carbons leave as CO₂ for good. The ethanol keeps the other four, and a yeast with oxygen respires it once the sugar is gone.';
 const CLEAR_NOTE = 'In a body the extra lactate is gone within an hour or so of stopping, sooner with gentle exercise. The figure\'s clock runs far faster.';
+const CLEAR_NOTE_SHORT = 'In a body it clears within an hour or so, sooner with gentle exercise. This clock is far faster.';
+
+// A per cent that stays readable from a few seconds' worth (thousandths of one) up to a brew's.
+function percentText(v) {
+  if (!(v > 0)) return '0';
+  if (v < 1e-4) return 'under 0.0001';
+  return v < 0.01 ? v.toPrecision(2) : v.toFixed(2);
+}
 
 const wholeOr = (v, dp) => (Math.abs(v - Math.round(v)) < 0.05 ? String(Math.round(v)) : v.toFixed(dp));
 const round = (v, dp) => Number(v.toFixed(dp));
@@ -293,6 +305,9 @@ const EMPTY = metabolismPart('electronCarrier');
 const LOADED = metabolismPart('electronCarrierLoaded');
 const ENZ = metabolismPart('enzyme');
 const MITO = ORGANELLE_BY_ID.mitochondrion.color;
+// Coral type on the mitochondrion's tint is 4.26 : 1 in the light theme, under the 4.5 : 1 that small bold
+// type needs, so the word the capsule says when the chain stops is mixed a little towards the ink.
+const WARN_ON_MITO = tint(C.coralText, 85, C.ink);
 
 const CELL_ARIA = 'A cell\'s NAD pool, twelve carriers on a ring, each drawn empty or loaded, between glycolysis, the chain in a mitochondrion and a fermentation route. O takes the oxygen away or gives it back; N, L and E choose no fermentation, lactate or ethanol; the arrow keys change the demand; M and Y load the muscle and yeast presets; Space runs or pauses; Home resets.';
 
@@ -319,7 +334,7 @@ export function mount(root, ctx) {
     },
     narrow: {
       columns: 'minmax(0, 1fr)',
-      rows: 'minmax(0, 64fr) minmax(0, 36fr)',
+      rows: 'minmax(0, 62fr) minmax(0, 38fr)',
       rowGap: 'var(--space-1)',
       at: { cell: [1, 1], readout: [1, 2] },
     },
@@ -329,7 +344,7 @@ export function mount(root, ctx) {
   const oxyCtl = b.toggle('Oxygen', (on) => {
     m.oxygen = on;
     if (!syncing) afterChange();
-  }, { pressed: OPEN.oxygen, primary: true, aria: 'Oxygen, on or off: off stops the chain' });
+  }, { pressed: OPEN.oxygen, aria: 'Oxygen, on or off: off stops the chain' });
   const demandCtl = b.stepper('Demand', {
     min: DEMAND.min, max: DEMAND.max, step: 1, value: OPEN.demand, unit: 'ATP/s',
     valueText: (v) => `${v} ATP a second`,
@@ -467,6 +482,7 @@ export function mount(root, ctx) {
       lactateToLiver: round(m.fates.liver, 3),
       liverAtpSpent: LIVER_ATP_PER_GLUCOSE,
       situation: situation(m, f).key,
+      readoutClipped,
       t: round(b.time, 3),
       playing: b.playing,
     };
@@ -635,7 +651,7 @@ export function mount(root, ctx) {
     // ---- the pool, its legend above it ----
     say(p, cx, ringTop - 27, 'The NAD pool', { size: 10.5 * t, weight: 700, anchor: 'middle' });
     const ls = 9.5 * t;
-    const dr = clamp(r * 0.6, 6.5, 8);
+    const dr = clamp(r * 0.7, 7.5, 9);
     const wide1 = 2 * dr + 4 + 'empty NAD⁺'.length * 0.53 * ls;
     const wide2 = 2 * dr + 4 + 'loaded NADH'.length * 0.53 * ls;
     const lx = cx - (wide1 + 14 + wide2) / 2;
@@ -667,7 +683,7 @@ export function mount(root, ctx) {
     p.rect(mx0, my0, mW, my1 - my0, { rx: f2(mW / 2), fill: tint(MITO, 14, 'var(--paper-2)'), stroke: MITO, 'stroke-width': 1.6 });
     say(p, mcx, my0 + mW * 0.3 + 4, 'Mitochondrion', { fit: [10.5 * t, 8], width: mW * 0.84, anchor: 'middle', weight: 600 });
     say(p, mcx, cy - 3, 'Chain', { size: 11 * t, weight: 700, anchor: 'middle' });
-    say(p, mcx, cy + 11 * t, m.oxygen ? 'O₂ → H₂O' : 'stopped', { size: 9.5 * t, anchor: 'middle', fill: m.oxygen ? C.soft : C.coralText, weight: m.oxygen ? null : 700 });
+    say(p, mcx, cy + 11 * t, m.oxygen ? 'O₂ → H₂O' : 'stopped', { size: 9.5 * t, anchor: 'middle', fill: m.oxygen ? C.soft : WARN_ON_MITO, weight: m.oxygen ? null : 700 });
     const idle = f.chain <= 1e-6;
     say(p, mcx, cy + 40 * t, `${o.mitoAtp} ATP`, { fit: [11 * t, 8], width: mW * 0.84, anchor: 'middle', weight: 700, num: true, fill: idle ? C.soft : C.ink });
     say(p, mcx, cy + 53 * t, 'per glucose', { size: 9 * t, anchor: 'middle', fill: C.soft });
@@ -725,7 +741,7 @@ export function mount(root, ctx) {
   function drawNarrow(p, f) {
     const { w, h } = p.box;
     const o = f.o;
-    const k = clamp(Math.min(w / 342, h / 300), 0.85, 1.8);
+    const k = clamp(Math.min(w / 342, h / 260), 0.85, 1.8);
     const t = clamp(k, 0.95, 1.3);
     const stalled = stalledNow(f);
 
@@ -738,20 +754,22 @@ export function mount(root, ctx) {
     const ey = 10 * t;
     const sRx = 20 * t;
     const sRy = 11 * t;
-    const capH = 44 * k;
-    const yc1 = h - 8;
+    const capH = 38 * k;
+    const yc1 = h - 6;
     const yc0 = yc1 - capH;
     const xc0 = 30 * k;
     const xc1 = w - 26 * k;
-    const laneN = 28 * k;
-    const laneS = 28 * k;
+    const laneN = 20 * k;
+    const laneS = 24 * k;
     const top = yg + sRy + 3 + laneN;
     const Rr = Math.max(45, Math.min((yc0 - laneS - top) / 2, sx - 92 * t, xe - ex - 40 * k - sx));
     const slack = Math.max(0, yc0 - laneS - top - 2 * Rr);
     const ringTop = top + slack * 0.5;
     const cx = sx;
     const cy = ringTop + Rr;
-    const r = clamp(Rr * 0.16, 9, 24);
+    // Neighbouring discs sit 2 (Rr - r) sin 15 degrees apart, and keep 3 px between them: on the smallest
+    // phones (a 327 px stage) that takes the disc a little under 9 px rather than letting the ring touch.
+    const r = Math.max(8, Math.min(clamp(Rr * 0.16, 9, 24), (0.5176 * Rr - 3) / 2.5176));
     const R = Rr - r;
     const mr = clamp(r * 0.55, 4, 7);
 
@@ -779,10 +797,10 @@ export function mount(root, ctx) {
     // ---- the pool, its legend to the west ----
     ring(p, cx, cy, R, r, f);
     const lsz = 9 * t;
-    const dr = clamp(r * 0.6, 6.5, 8);
+    const dr = clamp(r * 0.7, 7.5, 9);
     say(p, 8, ringTop + 14 * t, 'The NAD pool', { size: 10 * t, weight: 700 });
-    legendItem(p, 8, ringTop + 32 * t, false, 'empty NAD⁺', lsz, dr);
-    legendItem(p, 8, ringTop + 49 * t, true, 'loaded NADH', lsz, dr);
+    legendItem(p, 8, ringTop + 34 * t, false, 'empty NAD⁺', lsz, dr);
+    legendItem(p, 8, ringTop + 54 * t, true, 'loaded NADH', lsz, dr);
 
     // ---- the mitochondrion, a capsule along the bottom ----
     const idle = f.chain <= 1e-6;
@@ -792,7 +810,7 @@ export function mount(root, ctx) {
     say(p, (lA + lB) / 2, yc0 + capH / 2 + 3.5 * t, 'Mitochondrion', { fit: [10 * t, 7.5], width: lB - lA, anchor: 'middle', weight: 600 });
     const cRow = yc0 + capH * 0.44;
     say(p, cx, cRow, 'Chain', { size: 10.5 * t, weight: 700, anchor: 'middle' });
-    say(p, cx, cRow + 12 * t, m.oxygen ? 'O₂ → H₂O' : 'stopped', { size: 9 * t, anchor: 'middle', fill: m.oxygen ? C.soft : C.coralText, weight: m.oxygen ? null : 700 });
+    say(p, cx, cRow + 12 * t, m.oxygen ? 'O₂ → H₂O' : 'stopped', { size: 9 * t, anchor: 'middle', fill: m.oxygen ? C.soft : WARN_ON_MITO, weight: m.oxygen ? null : 700 });
     const rA = cx + 30 * t;
     const rB = xc1 - capH * 0.45;
     say(p, (rA + rB) / 2, cRow, `${o.mitoAtp} ATP`, { fit: [10.5 * t, 7.5], width: rB - rA, anchor: 'middle', weight: 700, num: true, fill: idle ? C.soft : C.ink });
@@ -837,16 +855,30 @@ export function mount(root, ctx) {
 
   // ---------------------------------------------------------------- the readout
 
-  // What the readout gives up when it is short of room, fullest first. Level 1 drops the two rows the
-  // drawing already shows (the empty count and glycolysis's rate); level 2 shortens the tissue note.
-  const PLANS = [
-    { level: 0, extras: ['clear', 'cori'] },
-    { level: 1, extras: ['clear', 'cori'] },
-    { level: 2, extras: ['clear', 'cori'] },
-    { level: 1, extras: ['clear'] },
-    { level: 2, extras: ['clear'] },
-    { level: 2, extras: [] },
-  ];
+  // What the readout gives up when it is short of room, fullest first. `a` is the first table's level
+  // (null leaves it out): level 1 drops the two rows the drawing already shows, the empty count and
+  // glycolysis's rate; level 2 shortens the notes; level 3 drops Spent and Made, which the sentence says
+  // in words when it matters; level 4 drops the note on the yield with oxygen; level 5, the last resort,
+  // keeps only the yield and what was made. `clear: 'short'` is the clearance table without the liver's
+  // row and with the short note. While lactate is clearing, the clearance table outranks the first
+  // table's detail, because it is the one place the clearance is shown; otherwise the first table's
+  // sentence outranks both extras.
+  const PLANS = Object.freeze({
+    usual: [
+      { a: 0, clear: true, cori: true }, { a: 1, clear: true, cori: true }, { a: 2, clear: true, cori: true },
+      { a: 1, clear: true }, { a: 2, clear: true }, { a: 1, cori: true }, { a: 2, cori: true },
+      { a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 },
+    ],
+    clearing: [
+      { a: 0, clear: true, cori: true }, { a: 1, clear: true, cori: true }, { a: 2, clear: true, cori: true },
+      { a: 3, clear: true, cori: true }, { a: 2, clear: true }, { a: 3, clear: true }, { a: 4, clear: true },
+      { a: null, clear: true }, { a: null, clear: 'short' },
+    ],
+  });
+  const CLEAR_PHASE = new Set(['clearing', 'cleared', 'waiting']);
+  // True when even the tersest plan ran out of room and a line was left undrawn: a probe and the drive
+  // read it, because a line that was never painted leaves nothing on the page to find.
+  let readoutClipped = false;
 
   function drawReadout(f) {
     const p = paneR;
@@ -863,15 +895,17 @@ export function mount(root, ctx) {
     const cleared = m.fates.here + m.fates.elsewhere + m.fates.liver;
     const shown = {
       clear: m.clearedAt !== null || clearingNow(m, f) || cleared > 0,
-      cori: m.route === 'lactate' || m.lactate > 0 || cleared > 0,
+      cori: m.route === 'lactate' || m.clearedAt !== null || clearingNow(m, f) || cleared > 0,
     };
 
     const buildA = (r, level) => {
-      r.row('Spent', `${m.demand} ATP/s`);
-      r.row('Made', `${f.made.toFixed(1)} ATP/s`, f.keepingUp ? {} : { accent: C.coralText });
+      if (level < 3) {
+        r.row('Spent', `${m.demand} ATP/s`);
+        r.row('Made', `${f.made.toFixed(1)} ATP/s`, f.keepingUp ? {} : { accent: C.coralText });
+      }
       r.row('Per glucose', `${wholeOr(perGlucose(m, f), 1)} ATP`, { strong: true });
-      r.note(tissueNote(f.o, level), { size: noteSize });
-      r.row('From the fermentation step', `${m.fermStepAtp === 0 ? '0' : m.fermStepAtp.toFixed(2)} ATP`, { strong: true });
+      if (level < 4) r.note(tissueNote(f.o, level), { size: noteSize });
+      if (level < 5) r.row('From the fermentation step', `${m.fermStepAtp === 0 ? '0' : m.fermStepAtp.toFixed(2)} ATP`, { strong: true });
       if (level === 0) {
         r.row('Empty NAD⁺', `${nEmpty} of ${POOL}`, nEmpty === 0 ? { accent: C.coralText } : {});
         let gly = `${(f.load / 2).toFixed(2)} glucose/s`;
@@ -882,9 +916,9 @@ export function mount(root, ctx) {
       if (m.route === 'lactate' || m.lactate > 0) r.row('Extra lactate', `${m.lactate.toFixed(2)} mmol/L`);
       if (m.route === 'ethanol' || m.ethanol > 0) {
         r.row('Ethanol', `${m.ethanol.toFixed(2)} mmol/L`);
-        if (level === 0) r.row('Ethanol by volume', `${(m.ethanol * ETHANOL_PERCENT_PER_MM).toFixed(3)}%`);
+        if (level === 0) r.row('Ethanol by volume', `${percentText(m.ethanol * ETHANOL_PERCENT_PER_MM)}%`);
       }
-      r.note(sit.text, sit.warn ? { accent: C.coralText } : {});
+      if (level < 5) r.note(sit.text, sit.warn ? { accent: C.coralText } : {});
       if (m.route === 'ethanol' && level < 2) r.note(ETHANOL_NOTE, { size: noteSize });
     };
 
@@ -892,12 +926,14 @@ export function mount(root, ctx) {
       clear: {
         title: 'Clearing the lactate',
         columns: null,
-        build: (r) => {
+        // `liver`: the Cori table was left out for room, so its one number the brief asks for comes here.
+        build: (r, { liver, short }) => {
           r.row(m.clearedAt !== null ? 'Cleared in' : 'Clearing for', `${(m.clearedAt ?? m.clearingFor).toFixed(1)} s`);
           r.row('Oxidised where it was made', `${m.fates.here.toFixed(2)} mmol/L`);
           r.row('Heart, slow fibres, brain', `${m.fates.elsewhere.toFixed(2)} mmol/L`);
           r.row('To the liver', `${m.fates.liver.toFixed(2)} mmol/L`);
-          r.note(CLEAR_NOTE, { size: noteSize });
+          if (liver && !short) r.row('Liver spends, per glucose', `${LIVER_ATP_PER_GLUCOSE} ATP`, { strong: true });
+          r.note(short ? CLEAR_NOTE_SHORT : CLEAR_NOTE, { size: noteSize });
         },
       },
       cori: {
@@ -920,27 +956,37 @@ export function mount(root, ctx) {
 
     const seen = new Set();
     const plans = [];
-    for (const plan of PLANS) {
-      const extras = plan.extras.filter((key) => shown[key]);
-      const id = `${plan.level}:${extras.join(',')}`;
+    for (const plan of PLANS[shown.clear && CLEAR_PHASE.has(sit.key) ? 'clearing' : 'usual']) {
+      const next = { a: plan.a, clear: plan.clear && shown.clear ? plan.clear : false, cori: Boolean(plan.cori && shown.cori) };
+      const id = `${next.a}:${next.clear}:${next.cori}`;
       if (seen.has(id)) continue;
       seen.add(id);
-      plans.push({ level: plan.level, extras });
+      plans.push(next);
     }
     for (let i = 0; i < plans.length; i += 1) {
       const plan = plans[i];
-      const parts = [
-        (y) => {
+      const parts = [];
+      if (plan.a !== null) {
+        parts.push((y) => {
           const r = p.readout({ title: 'ATP and the NAD pool', x: 0, y, width: w, size });
-          buildA(r, plan.level);
+          buildA(r, plan.a);
           return r;
-        },
-        ...plan.extras.map((key) => (y) => {
-          const r = p.readout({ title: EXTRAS[key].title, columns: EXTRAS[key].columns, x: 0, y, width: w, size });
-          EXTRAS[key].build(r);
+        });
+      }
+      if (plan.clear) {
+        parts.push((y) => {
+          const r = p.readout({ title: EXTRAS.clear.title, x: 0, y, width: w, size });
+          EXTRAS.clear.build(r, { liver: shown.cori && !plan.cori, short: plan.clear === 'short' });
           return r;
-        }),
-      ];
+        });
+      }
+      if (plan.cori) {
+        parts.push((y) => {
+          const r = p.readout({ title: EXTRAS.cori.title, columns: EXTRAS.cori.columns, x: 0, y, width: w, size });
+          EXTRAS.cori.build(r);
+          return r;
+        });
+      }
       const total = (rh) => parts.reduce((s, make) => s + make(0).height(rh), 0) + GAP * (parts.length - 1);
       const least = narrow ? 15 : 16;
       if (i < plans.length - 1 && total(least) > H) continue;
@@ -952,7 +998,12 @@ export function mount(root, ctx) {
         else hi = mid;
       }
       let y = TOP;
-      for (const make of parts) y = make(y).draw(lo, TOP + H - y) + GAP;
+      readoutClipped = false;
+      for (const make of parts) {
+        const r = make(y);
+        y = r.draw(lo, TOP + H - y) + GAP;
+        if (r.dropped) readoutClipped = true;
+      }
       return;
     }
   }
