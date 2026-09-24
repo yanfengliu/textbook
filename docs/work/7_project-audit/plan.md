@@ -11,13 +11,13 @@ Decisions: the owner read the summary on 2026-09-23 and replied, in their words:
 
 - The figure cap, about four bespoke interactive figures a chapter with authored static SVG elsewhere, and the recipe rules it overrides: point 3. `docs/design/chapter-recipe.md` and `docs/design/figures-template.md` now say it in place of "six to nine figures" and "no static diagram".
 - The compaction threshold near 250k tokens and a fresh coordinator for each round: point 2. The threshold, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` set to `25` in `.claude/settings.json`, lands on its own from branch `autocompact-setting` once the book's coordinator session has stopped. The section says why, and gives the documentation it rests on.
-- Trimming `AGENTS.md` to its rules: point 9. The body of its Gates section moved word for word to `docs/policies/gates.md`, and `AGENTS.md` went from 56,528 to 36,171 bytes.
+- Trimming `AGENTS.md` to its rules: point 9. The body of its Gates section moved word for word to `docs/policies/gates.md`, and `AGENTS.md` went from 58,591 to 36,493 bytes.
 - Running one textbook session at a time: point 7.
 - Whether to buy more usage: not decided. Point 1 records that extra usage is the owner's lever, not an agent's.
 - Whether to park the Chinese edition: parked, point 8.
 - The rest of synthesis 5 is points 1 and 4–6: the budget of about 40M weighted tokens a chapter, the accuracy review before a chapter ships, the study loop first when study work resumes, and the verification target, with `npm test` as the commit gate until a core gate exists.
 
-The same day, the owner told the book's coordinator: "Reduce scope and stop at your current chapter's completion". That is chapter 6 only, then a stop, recorded as point 10. It overrides synthesis 5's one-week test, which wanted chapters 6–7 on main. Chapter 6 gets point 4's accuracy review before it lands. The chapter 4–5 reviews this audit found owed (F7, F28) stay open, and starting them waits on the owner.
+The same day, the owner told the book's coordinator: "Reduce scope and stop at your current chapter's completion". That is chapter 6 only, then a stop. The round's plan records it (`docs/work/2_rest-of-the-book/plan.md`, "Where this round stands"), and point 10 points there. It overrides synthesis 5's one-week test, which wanted chapters 6–7 on main. Chapter 6 gets point 4's accuracy review before it lands. The chapter 4–5 reviews this audit found owed (F7, F28) stay open, and starting them waits on the owner.
 
 Nothing else is open under this folder. Fixes already under way for things the audit found — the answer order on `choice-order`, chapter 5's errors on `fix-ch05` — are another session's work on its own branches, and are not tracked here.
 

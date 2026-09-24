@@ -68,8 +68,8 @@ Owner directive, 2026-09-23. The owner read the project audit ([7_project-audit]
 - **6.** Synthesis 5's target is a quick core gate on each commit, the full chain when a chapter lands, and a CI that fits its time limit and blocks the Pages deploy. CI had failed 43 runs in a row by the audit, and `pages.yml` deploys regardless (F24, F26). CI cannot finish in its 30 minutes even when green (F25), and the local chain took 36.3 min (F22).
 - **7.** During the audit's gate run the machine was 72–100% busy with other sessions' work (F23). The workers inside one session are still sized by the constitution.
 - **8.** None of the edition's 7 stages has started (F3). Its design stays in [i18n.md](../design/i18n.md).
-- **9.** `AGENTS.md` loaded into 119 of 124 agents and was 5.0% of weighted tokens (F16). With its Gates body moved to gates.md and this direction added, it went from 56,528 to 36,171 bytes.
-- **10.** The owner told the book's coordinator: *"Reduce scope and stop at your current chapter's completion"*. They chose chapter 6 only: 4 of its 8 planned figures (`pigment-spectra`, `zscheme`, `calvin-cycle`, `rubisco-fork`), questions in place of figure tasks, the one independent prose review already done, and no new gates. Point 4's review was added to chapter 6 afterwards. Chapters 7 and 8 stay unpublished on `origin/ch06-07`, `origin/items-ch07` and `origin/ch08-dna`. This supersedes the earlier standing goal to keep writing until the book is done.
+- **9.** `AGENTS.md` loaded into 119 of 124 agents and was 5.0% of weighted tokens (F16). With its Gates body moved to gates.md and this direction added, it went from 58,591 to 36,493 bytes.
+- **10.** The owner told the book's coordinator: *"Reduce scope and stop at your current chapter's completion"*. What they chose for chapter 6, and where chapters 7 and 8 wait, is recorded at the top of [2_rest-of-the-book/plan.md](../work/2_rest-of-the-book/plan.md). It supersedes the standing goal of writing the whole book. Point 4's review was added to chapter 6 afterwards.
 
 ### The compaction setting
 

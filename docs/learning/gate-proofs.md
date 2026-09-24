@@ -8,7 +8,7 @@ Every entry names the tree its numbers were taken on. Eight name none: the found
 
 ## Read one entry, not the file
 
-This file is long and gets longer with every gate, and it is **history rather than a rule**. What binds you is the claim in the gate's own header, and `AGENTS.md`'s Gates section lists every gate with its bound. Come here for one of three reasons and read only the entry the index sends you to:
+This file is long and gets longer with every gate, and it is **history rather than a rule**. What binds you is the claim in the gate's own header; `AGENTS.md`'s Gates section lists every gate, and [docs/policies/gates.md](../policies/gates.md) gives each one's bound. Come here for one of three reasons and read only the entry the index sends you to:
 
 - **You are changing a gate.** Read that gate's entries — *Claim* and *What it does not prove* — so the change does not quietly retire the proof. Behaviour that moves past what the entry measured needs a new proof in the same commit.
 - **You are writing a proof.** Copy the shape below. Reading a neighbouring entry for the form costs forty times as much and gets you the same six headings.
