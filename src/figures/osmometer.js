@@ -559,7 +559,12 @@ export function mount(root, ctx) {
     const labY = Math.max(lab, topY - 5);
     sceneSvg.append(text(leftX + limbW / 2, labY, 'outside', { anchor: 'middle', class: 'os-label', 'font-size': fmt(lab, 1) }));
     sceneSvg.append(text(rightX + limbW / 2, labY, 'inside', { anchor: 'middle', class: 'os-label', 'font-size': fmt(lab, 1) }));
-    sceneSvg.append(text(mid, chanTop - 7, narrow ? 'membrane: water only' : 'membrane: water yes, solute no', { anchor: 'middle', class: 'os-label', 'font-size': fmt(lab * 0.9, 1) }));
+    // Urea crosses this membrane too — the model moves it into the inside limb — so with urea chosen the
+    // label names it, rather than saying the membrane stops the solute while the urea is going through.
+    const passes = solute().permeant
+      ? (narrow ? 'membrane: water and urea only' : 'membrane: water and urea yes, the rest no')
+      : (narrow ? 'membrane: water only' : 'membrane: water yes, solute no');
+    sceneSvg.append(text(mid, chanTop - 7, passes, { anchor: 'middle', class: 'os-label', 'font-size': fmt(lab * 0.9, 1) }));
 
     const verdict = d.equilibrated && pistonMPa > 0
       ? (narrow ? `Stopped, at ${fmt(pistonMPa, 2)} MPa.` : `The flow has stopped, with the piston holding ${fmt(pistonMPa, 2)} MPa against it.`)
@@ -758,8 +763,8 @@ export function mount(root, ctx) {
   // the tonicity, and a turgid cell is only said to have stopped the water once the flow has stopped.
   function sentence(d, s) {
     if (s.permeant && scene !== 'osmometer') {
-      if (d.outcome === 'lysed') return 'Iso-osmotic is not isotonic: the urea equalised, and left the cell’s own solutes unbalanced.';
-      return 'Urea crosses the membrane and equalises, which leaves the cell’s own solutes unbalanced.';
+      if (d.outcome === 'lysed') return 'Iso-osmotic is not isotonic: the urea equalised; the cell’s own solutes could not.';
+      return 'Urea crosses and equalises, which leaves the cell’s own solutes unbalanced.';
     }
     if (scene === 'osmometer') {
       if (d.equilibrated && d.pistonMPa > 0) return `The piston has stopped the flow at ${fmt(d.pistonMPa, 2)} MPa, which is this pair’s osmotic pressure.`;
@@ -773,7 +778,7 @@ export function mount(root, ctx) {
           : `The wall is pushing back at ${fmt(d.psiPressureInside, 2)} MPa; water arrives until the potentials match.`;
       }
       if (d.outcome === 'plasmolysed') return 'The contents have shrunk away from the wall, which has kept its shape.';
-      if (d.tonicity === 'isotonic') return 'No pressure in the wall: the cell is slack, which is what an isotonic bath does to a plant.';
+      if (d.tonicity === 'isotonic') return 'No pressure in the wall: the cell is slack. In an isotonic bath, a plant wilts.';
       return 'No pressure in the wall: the cell is slack.';
     }
     if (d.outcome === 'lysed') return 'With no wall there is nothing to convert the arriving water into pressure.';
