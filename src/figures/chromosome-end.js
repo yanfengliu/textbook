@@ -485,7 +485,7 @@ export function mount(root, ctx) {
     const withInset = telomerase && !circ;
     let span;
     if (circ) span = narrow ? 360 : 560;
-    else span = narrow ? Math.max(360, 2 * O + 150) : Math.max(560, 2 * O + 280);
+    else span = narrow ? Math.max(300, 2 * O + 100) : Math.max(560, 2 * O + 280);
     const xMin = circ ? -span / 2 : -span;
     const xMax = circ ? span / 2 : 0;
     let P;
@@ -504,8 +504,8 @@ export function mount(root, ctx) {
       aLo = 12;
       aHi = circ ? w - 12 : w - 48;
     } else {
-      sep = clamp(w * 0.14, 34, 50);
-      g = 7;
+      sep = clamp(w * 0.2, 40, 72);
+      g = 9;
       const xMid = w * 0.4;
       P = (a, c) => [xMid - c, a];
       aLo = tvTop + 4;
@@ -800,8 +800,9 @@ export function mount(root, ctx) {
       lab.reserve(Math.min(ax, bx2) - 4, Math.min(ay, by2) - 4, Math.max(ax, bx2) + 4, Math.max(ay, by2) + 4);
     };
 
-    // The insets of letters, reserved before the labels so they keep clear of them.
-    if (!G.circ && m.phase === 'after' && telomerase && mk.fC > 0) drawInset(G, lab, mk.fC, telAt);
+    // The insets of letters, reserved before the labels so they keep clear of them. The letters telomerase
+    // copies run through their cycle while the enzyme extends the end, the first 0.7 of its beat, and hold.
+    if (!G.circ && m.phase === 'after' && telomerase && mk.fC > 0) drawInset(G, lab, clamp(mk.fC / 0.7, 0, 1), telAt);
     if (!G.circ && m.phase === 'before') drawJunction(G, lab);
 
     // ---- the labels, most important first ----
@@ -889,9 +890,11 @@ export function mount(root, ctx) {
       dimension(-O, 0, c);
       place(around(-O / 2, c - 2, -1, { offs: [11, 22, 33], shifts: [0, -20, -40, 20] }), `${O} bp shorter`);
     }
-    if (telAt) place([...around(0, loIn(0) + 10, 1, { offs: [12, 24], ...atTip }), ...around(0, loOut(0) - 10, -1, { offs: [12, 24], ...atTip })], 'telomerase');
-    if (mk.added) {
+    // The enzyme's name goes where the enzyme is, which moves out along the end as it adds repeats.
+    if (telAt) place([...around(telAt.x, loIn(telAt.x) + 10, 1, { offs: [12, 24], ...atTip }), ...around(telAt.x, loOut(telAt.x) - 10, -1, { offs: [12, 24], ...atTip })], 'telomerase');
+    if (mk.added && !narrow) {
       // On the strand telomerase extends: the short copy's new strand, on the side facing the other copy.
+      // A phone has no room between the copies for the words, and the letters beside the tip say it.
       bracket(-O, 0, loIn(-O / 2) + 3, 1);
       place(around(-O / 2, loIn(-O / 2) + 12, 1, { offs: [11, 22, 33], shifts: [0, -20, -40, -60, -80, -100] }), narrow ? `+${O} nt` : `${O} nt of repeats added`);
     }
@@ -905,15 +908,16 @@ export function mount(root, ctx) {
     place(around(nameX, loOut(nameX), -1, { offs: [12, 24, 36], shifts: [0, -40, 40, -80] }), narrow ? 'leading copy' : 'copied by the leading strand');
     endMark(0, upOut(0), '3′', 1);
     endMark(telomerase && mk.fC > 0 ? mk.telEnd : -O, loIn(-O), '3′', -1);
+    // The lagging copy has its tail once its new strand is trimmed back, not while only the primer is gone.
     const tailX = -O / 2;
-    place(around(tailX, upOut(tailX), 1, { offs: [11, 22, 33], shifts: [0, -24, 24, -48] }), `tail, ${O} nt`);
+    if (mk.fB > 0.5) place(around(tailX, upOut(tailX), 1, { offs: [11, 22, 33], shifts: [0, -24, 24, -48] }), `tail, ${O} nt`);
 
     function drawCircleLabels() {
       const aM = at(0, 0);
       if (m.phase === 'before') {
         const [px, py] = aM;
         p.path(narrow ? `M${(px - G.g * 1.6).toFixed(1)} ${py.toFixed(1)}H${(px + G.g * 1.6).toFixed(1)}` : `M${px.toFixed(1)} ${(py - G.g * 1.6).toFixed(1)}V${(py + G.g * 1.6).toFixed(1)}`, { stroke: C.ink, 'stroke-width': 1.2, 'stroke-dasharray': '2 2' }, proteins);
-        place(around(0, upOut(0), 1, { offs: [14, 26], shifts: [0] }), narrow ? 'where the forks meet' : 'the far side, where the two forks will meet');
+        place([...around(0, upOut(0), 1, { offs: [14, 26], shifts: [0] }), ...around(0, loOut(0), -1, { offs: [14, 26], shifts: [0] })], narrow ? 'where the forks meet' : 'the far side, where the two forks will meet');
         place(around(G.xMin + 40, loOut(G.xMin + 40), -1, { offs: [12, 24], shifts: [0, 20, 40] }), narrow ? 'from the origin' : 'from the origin, one way round');
         place(around(G.xMax - 40, loOut(G.xMax - 40), -1, { offs: [12, 24], shifts: [0, -20, -40] }), narrow ? 'the other way' : 'from the origin, the other way');
         return;
@@ -927,14 +931,20 @@ export function mount(root, ctx) {
         return;
       }
       const words = m.phase === 'after'
-        ? (narrow ? 'filled from the other fork' : 'last gap, filled from the other fork’s leading strand')
+        ? (narrow ? 'gap filled' : 'last gap, filled from the other fork’s leading strand')
         : (narrow ? 'last primer' : 'last primer, just short of the meeting point');
       // Each fork's last primer, 4 nt short of the meeting point: the left fork's on the upper copy, the
       // right fork's on the lower, each marked on the side facing the other copy.
       bracket(-4 - PRIMER_NT, -4, upIn(-9), -1);
       bracket(4, 4 + PRIMER_NT, loIn(9), 1);
-      place(around(-9, upIn(-9) - 8, -1, { offs: [9, 20, 31], shifts: [0, -30, 30, -60, 60] }), words);
-      place(around(9, loIn(9) + 8, 1, { offs: [9, 20, 31], shifts: [0, 30, -30, 60, -60] }), words);
+      if (narrow) {
+        // No room between the copies on a phone: each copy's words go outside it.
+        place(around(-9, upOut(-9), 1, { offs: [10, 20], shifts: [0, -16, 16, -32, 32] }), words);
+        place(around(9, loOut(9), -1, { offs: [10, 20], shifts: [0, 16, -16, 32, -32] }), words);
+      } else {
+        place(around(-9, upIn(-9) - 8, -1, { offs: [9, 20, 31], shifts: [0, -30, 30, -60, 60] }), words);
+        place(around(9, loIn(9) + 8, 1, { offs: [9, 20, 31], shifts: [0, 30, -30, 60, -60] }), words);
+      }
       place(around(G.xMin + 60, upOut(G.xMin + 60), 1, { offs: [12, 24], shifts: [0, 20, 40] }), narrow ? 'copy 1' : 'one copy');
       place(around(G.xMin + 60, loOut(G.xMin + 60), -1, { offs: [12, 24], shifts: [0, 20, 40] }), narrow ? 'copy 2' : 'the other copy');
     }
@@ -979,9 +989,9 @@ export function mount(root, ctx) {
     if (hatch) p.path(hatch, { stroke: C.faint, 'stroke-width': 0.8 });
     p.path(`M${xB.toFixed(1)} ${(yO - half).toFixed(1)}H${xT.toFixed(1)}M${xB.toFixed(1)} ${(yO + half).toFixed(1)}H${xT.toFixed(1)}`, { stroke: C.ink, 'stroke-width': 1.5, fill: 'none' });
     if (xS - xT > 0.8) p.path(`M${xT.toFixed(1)} ${yO.toFixed(1)}H${xS.toFixed(1)}`, { stroke: C.faint, 'stroke-width': 1.5, 'stroke-dasharray': '1 3' });
-    p.path(`M${xTh.toFixed(1)} ${(yO - 10).toFixed(1)}V${(yO + 10).toFixed(1)}`, { stroke: C.ink, 'stroke-width': 1.2, 'stroke-dasharray': '3 2' });
+    p.path(`M${xTh.toFixed(1)} ${(yO - 6).toFixed(1)}V${(yO + 6).toFixed(1)}`, { stroke: C.ink, 'stroke-width': 1.2, 'stroke-dasharray': '3 2' });
     lab.reserve(ov.x0, yO - half - 2, Math.max(xS, xT) + 2, yO + half + 2);
-    lab.reserve(xTh - 2, yO - 11, xTh + 2, yO + 11);
+    lab.reserve(xTh - 2, yO - 6.5, xTh + 2, yO + 6.5);
     // The stretch enlarged below: the last `span` nt of the end the division started from.
     const xA = X(INTERIOR_BP + m.T0);
     const xZ = Math.min(xA - 6, X(INTERIOR_BP + m.T0 - G.span));
@@ -993,16 +1003,16 @@ export function mount(root, ctx) {
     const below = yO + half + 7 + S * 0.8;
     // The bracket is named first, so that it keeps its place under itself as the telomere shortens.
     lab.place([[xA, below + 2, 'end'], [xZ - 4, below + 2, 'end'], [xA, below + 2 + S * 1.2, 'end']], narrow ? 'the tip, enlarged' : 'the tip, enlarged below', { size: S * 0.92 });
-    lab.place([[ov.x0, above, 'start']], narrow ? 'rest of the chromosome' : 'the rest of the chromosome', { size: S * 0.92 });
     lab.place([[(xB + xT) / 2, above, 'middle'], [xB + 6, above, 'start']], narrow ? `telomere, ${nt(T)} bp` : `the telomere, ${nt(T)} bp of repeats`, { size: S });
+    lab.place([[ov.x0, above, 'start']], narrow ? 'rest of the chromosome' : 'the rest of the chromosome', { size: S * 0.92 });
     lab.place([[xTh, below + 2, 'middle'], [xTh - 4, below + 2, 'end'], [xTh + 4, below + 2, 'start']], `the cell stops at ${nt(THRESHOLD_BP)} bp`, { size: S * 0.92 });
     const lostBp = START_BP - T;
     if (lostBp > 0) lab.place([[(xT + xS) / 2, above, 'middle'], [xS, above, 'end'], [xS, below + 2, 'end']], `lost ${nt(lostBp)} bp`, { size: S * 0.92 });
   }
 
   // The letters telomerase copies: the tail's 3′ end over the RNA template it carries, paired, a repeat
-  // added, the enzyme shifted six along, and the next repeat added. `phase` is the telomerase beat's
-  // share done; the pairs are drawn as pegs in the colours of their bases.
+  // added, the enzyme shifted six along, and the next repeat added. `phase` is the extension's share
+  // done; the pairs are drawn as pegs in the colours of their bases.
   function drawInset(G, lab, phase, telAt) {
     const p = endPane;
     const narrow = G.narrow;
