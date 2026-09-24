@@ -134,6 +134,10 @@ const FLASH_FIRST = Math.round(0.5 / STEP);
 const FLASH_GAP = Math.round(1.0 / STEP);
 
 const ease = (f) => f * f * (3 - 2 * f);
+// No-break spaces: SVG collapses a leading space, and a sentence must not break inside "photosystem II",
+// "flash 3" or "694 kJ/mol".
+const NB = ' ';
+const O2_TAIL = `${NB}+ 4${NB}H^{+}`;
 const WORD = ['no', 'One', 'Two', 'Three', 'Four'];
 
 // ---------------------------------------------------------------- type set as type
@@ -315,6 +319,7 @@ export function mount(root, ctx) {
         fd -= 1;
         fnr += 1;
         const m = hop('fd', 'nadp', t, T_HOP);
+        m.slot = fnr % 2 === 1 ? -1 : 1;
         if (fnr % 2 === 0) fx.push({ kind: 'nadph', at: m.t1 });
       } else return;
     }
@@ -385,7 +390,7 @@ export function mount(root, ctx) {
     },
     narrow: {
       columns: 'minmax(0, 1fr)',
-      rows: 'minmax(0, 70fr) 2.4rem minmax(0, 30fr)',
+      rows: 'minmax(0, 67fr) 2.4rem minmax(0, 33fr)',
       rowGap: 'var(--space-1)',
       at: { z: [1, 1], flash: [1, 2], readout: [1, 3] },
     },
@@ -417,8 +422,10 @@ export function mount(root, ctx) {
   }
 
   // ---- controls: fire, the train, the path, the clock ----
+  let handAfterTrain = 0;
   function fire(ps) {
     if (train) train = null; // a hand-fired photon disturbs the experiment, so the train stops there
+    handAfterTrain += 1;
     if (ps === 'II') firePSII();
     else firePSI();
     if (!b.playing) runCtl.set(true);
@@ -464,6 +471,7 @@ export function mount(root, ctx) {
   function startTrain() {
     clearModel({ keepPath: true });
     holes = 1; // dark-adapted: three clusters in four rest one step along
+    handAfterTrain = 0;
     train = { n: 0, due: steps + FLASH_FIRST, pop: [DARK_S0, 1 - DARK_S0, 0, 0] };
     if (!b.playing) runCtl.set(true);
     afterAction();
@@ -536,21 +544,34 @@ export function mount(root, ctx) {
   }
   b.onDescribe(state);
 
+  // What the readout shows at time t: the counters as the DRAWING has them, so that the oxygen is counted
+  // when it is seen to leave and the stall is named when the last electron is seen to arrive. describe()
+  // and the live region report the model, which is ahead of the drawing by the length of the motion.
+  function viewAt(t) {
+    const busy = moves.some((m) => m.t1 > t) || photons.some((p) => !p.wasted && p.t1 > t);
+    const h = holes - pendingTo('p680', t);
+    const o2 = Math.floor(h / 4);
+    const through = pumped - moves.filter((m) => m.from === 'b6f' && m.t0 > t).length;
+    const made = Math.floor((fnr - pendingTo('nadp', t)) / 2);
+    return { holes: h, oxygen: o2, protons: 4 * o2 + 2 * through, nadph: made, stall: busy ? { at: null, starved: null } : stall() };
+  }
+
   // The sentence under the counters, read in every state its parts can take: dark, counting towards an
-  // oxygen, stalled at either end, cyclic, and the train.
-  function status() {
-    const s = stall();
-    if (train) return `Flash ${train.n} of ${FLASHES}. The chart below counts the oxygen from each one.`;
+  // oxygen, stalled at either end, cyclic, the train running and the train done.
+  function status(v) {
+    const s = v.stall;
+    if (train) return `Flash ${train.n} of ${FLASHES}. Each flash's oxygen is plotted as it leaves the cluster.`;
+    if (flashYields.length === FLASHES && handAfterTrain === 0) return trainDone();
     if (s.at === 'plastoquinone') {
       return path === 'cyclic'
-        ? 'Photosystem II has stalled: plastoquinone is full, and on the cyclic path no electron leaves the loop to make room.'
-        : 'Stalled at plastoquinone: it is full, and P700 has no hole to take its electrons. Ferredoxin is starved. Fire at photosystem I.';
+        ? `Photosystem${NB}II has stalled: plastoquinone is full, and on the cyclic path no electron leaves the loop to make room.`
+        : `Stalled at plastoquinone: it is full, and P700 has no hole to take its electrons. Ferredoxin is starved. Fire at photosystem${NB}I.`;
     }
-    if (s.at === 'P700') return 'Stalled at P700: it has given its electron away, and plastocyanin is empty. Fire at photosystem II.';
+    if (s.at === 'P700') return `Stalled at P700: it has given its electron away, and plastocyanin is empty. Fire at photosystem${NB}II.`;
     if (photonsII + photonsI === 0 && !flashYields.length) return 'Dark: nothing fired yet. Fire a photon at either photosystem.';
     if (path === 'cyclic') return 'Cyclic flow: each electron comes back round to the cytochrome complex, so protons move and no NADPH or oxygen is made.';
-    const need = 4 - (holes % 4);
-    return `${WORD[need]} more ${need === 1 ? 'photon' : 'photons'} at photosystem II for the next oxygen.`;
+    const need = 4 - (((v.holes % 4) + 4) % 4);
+    return `${WORD[need]} more ${need === 1 ? 'photon' : 'photons'} at photosystem${NB}II for the next oxygen.`;
   }
 
   b.onAnnounce((dsc) => {
@@ -558,8 +579,22 @@ export function mount(root, ctx) {
     const trainNote = !dsc.flashTrain && dsc.flashOxygen.length === FLASHES
       ? ` Flash train done: oxygen peaked on flashes ${peaksOf(dsc.flashOxygen).join(', ')}.`
       : '';
-    return `${dsc.path === 'cyclic' ? 'Cyclic' : 'Linear'} flow. Cluster at ${dsc.clusterCount} of 4. ${dsc.oxygenReleased} oxygen, ${dsc.nadphMade} NADPH, ${dsc.protonsToLumen} protons into the lumen.${where}${trainNote}`;
+    return `${dsc.path === 'cyclic' ? 'Cyclic' : 'Linear'} flow. The manganese cluster holds ${dsc.clusterCount} of 4. Oxygen released ${dsc.oxygenReleased}, NADPH made ${dsc.nadphMade}, protons into the lumen ${dsc.protonsToLumen}.${where}${trainNote}`;
   });
+
+  // After a train, what it showed. On the cyclic path photosystem II fills the loop within four flashes
+  // and closes, so the oxygen stops; on the linear path it peaks every fourth flash from the third.
+  function trainDone() {
+    const last = flashYields.reduce((k, y, i) => (y > 0 ? i + 1 : k), 0);
+    if (flashYields.slice(last).length && flashYields[FLASHES - 1] === 0) {
+      return last
+        ? `Train done: photosystem${NB}II filled the loop and closed, so the oxygen stopped after flash${NB}${last}.`
+        : `Train done: photosystem${NB}II was closed, so no oxygen came at all.`;
+    }
+    const p = peaksOf(flashYields);
+    const list = p.length > 1 ? `flashes${NB}${p.slice(0, -1).join(', ')} and${NB}${p[p.length - 1]}` : `flash${NB}${p[0]}`;
+    return `Train done: the oxygen peaked on ${list}, blurring as the clusters drift out of step.`;
+  }
 
   function peaksOf(ys) {
     const out = [];
@@ -686,6 +721,11 @@ export function mount(root, ctx) {
     };
   }
 
+  // A carrier is a shelf at its potential and its electrons sit on it, rather than on the line itself,
+  // where a dot's paper halo would cut the bar in two.
+  const SHELF = new Set(['pq', 'b6f', 'pc', 'fd', 'nadp']);
+  const NADP_SLOT = DOT + 1.3;
+  const shelf = (st, dx = 0) => ({ x: st.x + dx, y: st.y - 1.5 - DOT - 0.9 });
   const barL = (s) => ({ x: s.x - BAR / 2, y: s.y });
   const barR = (s) => ({ x: s.x + BAR / 2, y: s.y });
   const toward = (a, b2, r) => {
@@ -757,13 +797,13 @@ export function mount(root, ctx) {
     const clusterTop = s.water.y - POS_R;
     // Oxygen and its four protons leave the cluster together, as one line rising from it.
     const fxSize = g.narrow ? 9.6 : 10.6;
-    g.o2Parts = [textWidth('O_{2}', fxSize, 700), textWidth(' + 4 H^{+}', fxSize - 0.6, 600)];
+    g.o2Parts = [textWidth('O_{2}', fxSize, 700), textWidth(O2_TAIL, fxSize - 0.6, 600)];
     const o2Half = (g.o2Parts[0] + g.o2Parts[1]) / 2 + 3;
-    const h2Half = textWidth('2 H^{+}', fxSize - 0.8, 600) / 2 + 2;
+    const h2Half = textWidth(`2${NB}H^{+}`, fxSize - 0.8, 600) / 2 + 2;
     const fxRise = g.narrow ? 18 : 26;
     g.zones = {
       o2: { x0: g.cluster.x - o2Half, x1: g.cluster.x + o2Half, y0: clusterTop - fxRise - 12, y1: clusterTop - 3 },
-      h2: { x0: s.b6f.x - h2Half, x1: s.b6f.x + h2Half, y0: s.b6f.y + 4, y1: s.b6f.y + fxRise },
+      h2: { x0: s.b6f.x + 4 - h2Half - 9, x1: s.b6f.x + 4 + h2Half + 9, y0: s.b6f.y + 4, y1: s.b6f.y + fxRise },
       nadph: { x0: s.nadp.x - 10, x1: s.nadp.x + (g.narrow ? 36 : 40), y0: s.nadp.y - fxRise - 10, y1: s.nadp.y - 4 },
     };
     // Keep every zone inside the pane.
@@ -777,10 +817,10 @@ export function mount(root, ctx) {
 
   // A token's route from one station to the next: the line it travels, and in the narrow composition the
   // two places where it leaves one half and enters the other.
-  function route(g, from, to) {
+  function route(g, from, to, slot = null) {
     const s = g.st;
     const line = (id) => g.lines.find((l) => l.id === id).pts;
-    const centre = (k) => ({ x: s[k].x, y: s[k].y });
+    const centre = (k) => (SHELF.has(k) ? shelf(s[k]) : { x: s[k].x, y: s[k].y });
     switch (`${from}>${to}`) {
       case 'water>p680': return [[{ x: g.cluster.x1, y: s.water.y }, ...line('water-p680').slice(1), centre('p680')]];
       case 'p680>p680x': return [[centre('p680'), centre('p680x')]];
@@ -792,7 +832,7 @@ export function mount(root, ctx) {
         : [[centre('pc'), ...line('pc-p700'), centre('p700')]];
       case 'p700>p700x': return [[centre('p700'), centre('p700x')]];
       case 'p700x>fd': return [[centre('p700x'), ...line('p700x-fd'), centre('fd')]];
-      case 'fd>nadp': return [[centre('fd'), ...line('fd-nadp'), centre('nadp')]];
+      case 'fd>nadp': return [[centre('fd'), ...line('fd-nadp'), shelf(s.nadp, (slot ?? 0) * NADP_SLOT)]];
       case 'fd>b6f': return g.narrow
         ? [[centre('fd'), ...line('cyc-out')], [...line('cyc-in'), centre('b6f')]]
         : [[centre('fd'), ...line('cyclic'), centre('b6f')]];
@@ -887,7 +927,7 @@ export function mount(root, ctx) {
     for (const wv of g.waves) polyline(wavePoints(wv.tail, wv.head, g.narrow ? 2.6 : 3.2), 4.6);
     for (const k of ['pq', 'b6f', 'pc', 'fd', 'nadp']) {
       const s = g.st[k];
-      rects.push({ x0: s.x - BAR / 2 - 2, y0: s.y - DOT - 3, x1: s.x + BAR / 2 + 2, y1: s.y + DOT + 3 });
+      rects.push({ x0: s.x - BAR / 2 - 2, y0: s.y - 2 * DOT - 4.5, x1: s.x + BAR / 2 + 2, y1: s.y + 3 });
     }
     for (const k of ['p680', 'p680x', 'p700', 'p700x']) {
       const s = g.st[k];
@@ -1229,7 +1269,10 @@ export function mount(root, ctx) {
     // Electrons at rest on the carriers.
     for (const k of ['pq', 'b6f', 'pc', 'fd']) {
       const n = clamp(shown(k, t), 0, k === 'pq' ? PQ_CAP : 1);
-      for (let i = 0; i < n; i += 1) electron(zPane, s[k].x + (n === 1 ? 0 : (i - 0.5) * 9), s[k].y);
+      for (let i = 0; i < n; i += 1) {
+        const at = shelf(s[k], n === 1 ? 0 : (i - 0.5) * (2 * DOT + 2.6));
+        electron(zPane, at.x, at.y);
+      }
     }
     // The reaction centres: their own electron, or the hole it left.
     for (const k of ['p680', 'p700']) {
@@ -1238,7 +1281,10 @@ export function mount(root, ctx) {
     }
     // NADP⁺ reductase's first electron, waiting for its second.
     const arrived = fnr - pendingTo('nadp', t);
-    if (arrived % 2 === 1) electron(zPane, s.nadp.x, s.nadp.y);
+    if (arrived % 2 === 1) {
+      const at = shelf(s.nadp, -NADP_SLOT);
+      electron(zPane, at.x, at.y);
+    }
 
     // Transient marks: oxygen leaving, protons dropping into the lumen, NADPH made.
     if (!instant()) {
@@ -1252,10 +1298,10 @@ export function mount(root, ctx) {
           const y = z.y1 - 3 - (z.y1 - z.y0 - size - 4) * ease(p);
           const x = g.cluster.x - (g.o2Parts[0] + g.o2Parts[1]) / 2;
           richLabel(zPane, x, y, 'O_{2}', { size, weight: 700, fill: C.coralText, opacity: fade });
-          richLabel(zPane, x + g.o2Parts[0], y, ' + 4 H^{+}', { size: size - 0.6, weight: 600, fill: C.leafText, opacity: fade });
+          richLabel(zPane, x + g.o2Parts[0], y, O2_TAIL, { size: size - 0.6, weight: 600, fill: C.leafText, opacity: fade });
         } else if (f.kind === 'h2') {
           const y = z.y0 + size + (z.y1 - z.y0 - size - 2) * ease(p);
-          richLabel(zPane, s.b6f.x, Math.min(y, z.y1 - 2), '2 H^{+}', { size: size - 0.8, anchor: 'middle', weight: 600, fill: C.leafText, opacity: fade });
+          richLabel(zPane, s.b6f.x + 4, Math.min(y, z.y1 - 2), `2${NB}H^{+}`, { size: size - 0.8, anchor: 'middle', weight: 600, fill: C.leafText, opacity: fade });
         } else if (f.kind === 'nadph') {
           const y = z.y1 - 4 - (z.y1 - z.y0 - 12) * ease(p);
           zPane.circle(s.nadp.x - 3, y - size * 0.34, 4.6, { fill: NADPH_FILL, stroke: C.ink, 'stroke-width': 0.8, opacity: b.num(fade, 3) });
@@ -1293,7 +1339,7 @@ export function mount(root, ctx) {
         const p = along(route(g, 'water', 'p680'), 1 - f);
         holeGlyph(zPane, p.x, p.y, POS_R);
       } else {
-        const p = along(route(g, m.from, m.to), f);
+        const p = along(route(g, m.from, m.to, m.slot), f);
         electron(zPane, p.x, p.y);
       }
     }
@@ -1304,8 +1350,7 @@ export function mount(root, ctx) {
     const g = geometry(w, h);
     // In the lab, and once the book's own face has arrived (before it the widths are a fallback's), a
     // label that nothing clears is a defect in this file, and the gates that drive the lab should say so.
-    const DEBUG = typeof location !== 'undefined' && location.search.includes('zsdebug');
-    if (!DEBUG && g.collisions.length && fontsKey() === 'loaded' && typeof location !== 'undefined' && location.pathname.includes('/lab/')) {
+    if (g.collisions.length && fontsKey() === 'loaded' && typeof location !== 'undefined' && location.pathname.includes('/lab/')) {
       throw new Error(`zscheme: at a ${w}×${h} ${g.narrow ? 'narrow' : 'wide'} pane no position clears the label(s) ${g.collisions.join(', ')}; every candidate overlaps a line, a mark or another label.`);
     }
     const t = now();
@@ -1314,12 +1359,6 @@ export function mount(root, ctx) {
     drawStations(g, t);
     drawLabels(g, t);
     drawDynamic(g, t);
-    if (DEBUG) {
-      const { rects } = obstaclesOf(g);
-      for (const r of rects) zPane.rect(r.x0, r.y0, Math.max(0, r.x1 - r.x0), Math.max(0, r.y1 - r.y0), { fill: 'none', stroke: 'var(--coral)', 'stroke-width': 0.5 });
-      for (const l of Object.values(g.labels)) zPane.rect(l.box.x0, l.box.y0, Math.max(0, l.box.x1 - l.box.x0), Math.max(0, l.box.y1 - l.box.y0), { fill: 'none', stroke: l.collided ? 'var(--coral)' : 'var(--water)', 'stroke-width': l.collided ? 1.5 : 0.5 });
-      if (g.collisions.length) console.warn(`zsdebug collisions: ${g.collisions.join(', ')}`);
-    }
     zPane.focusMark();
   }
 
@@ -1328,29 +1367,33 @@ export function mount(root, ctx) {
   function drawReadout() {
     const { w, h } = readPane.clear().box;
     const size = clamp(w * 0.031, 9.8, 11.4);
-    const s = stall();
-    const kj = (v) => `${n1(v)} kJ/mol`;
-    readPane.readout({ title: 'What the light has made', width: w, size, minRow: 13, maxRow: 24 })
+    const v = viewAt(now());
+    const s = v.stall;
+    const kj = (x) => `${n1(x)} kJ/mol`;
+    const kept = v.nadph * CLIMB_KJ;
+    // At a phone's width the table loses its title, which the three labels do not need, so that the
+    // sentence under them always has the room it takes: it is the one that says where the path jammed.
+    readPane.readout({ title: b.narrow ? null : 'What the light has made', width: w, size, minRow: 13, maxRow: 24 })
       .fit(h, (r, level) => {
-        r.row('NADPH made', String(nadph()));
-        r.row('Oxygen released', String(oxygen()));
-        r.row('Protons into the lumen', String(protons()));
-        r.note(status(), s.at ? { accent: C.coralText } : {});
+        r.row('NADPH made', String(v.nadph));
+        r.row('Oxygen released', String(v.oxygen));
+        r.row('Protons into the lumen', String(v.protons));
+        r.note(status(v), s.at ? { accent: C.coralText } : {});
         if (level < 2) {
           r.head('Ledger');
           r.row('Lift, water to NADPH', `${b.num(CLIMB_V, 2)} V`);
           if (level < 1) r.row('Two electrons up it', `${Math.round(CLIMB_KJ)} kJ/mol`);
           r.row('Light fired', kj(photonKj));
-          r.row('Stored in NADPH', kj(stored()));
-          r.sum('Captured', `${n1(captured() * 100)}%`);
-          if (level < 1) r.note(`Four photons per NADPH is the best there is: ${Math.round(BEST_KJ)} kJ/mol in, ${Math.round(CLIMB_KJ)} kept, ${Math.round((CLIMB_KJ / BEST_KJ) * 100)}%. The rest runs downhill, and part of it moves protons.`);
+          r.row('Stored in NADPH', kj(kept));
+          r.sum('Captured', `${n1(photonKj > 0 ? (kept / photonKj) * 100 : 0)}%`);
+          if (level < 1) r.note(`Four photons per NADPH is the best there is: ${Math.round(BEST_KJ)}${NB}kJ/mol in, ${Math.round(CLIMB_KJ)} kept, ${Math.round((CLIMB_KJ / BEST_KJ) * 100)}%. The rest runs downhill, and part of it moves protons.`);
         }
       }, { levels: 3 });
   }
 
   // ---------------------------------------------------------------- the flash train
 
-  const FLASH_NOTE = 'After darkness three clusters in four rest one step along, so the first oxygen comes on flash 3, not 4. About one flash in twelve misses, and the peaks blur.';
+  const FLASH_NOTE = `After darkness three clusters in four rest one step along, so the first oxygen comes on flash${NB}3, not${NB}4. About one flash in twelve misses, and the peaks blur.`;
   const Y_MAX = 0.6;
 
   function drawFlashChart() {
