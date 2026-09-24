@@ -630,17 +630,32 @@ export function mount(root, ctx) {
   //
   // Everything the Z draws is decided here, once per pane size and composition, and both the drawing and
   // the label placement read it, so a label is placed against exactly the lines that are drawn.
-  const BAR = 24;
-  const RC = 5.4;
-  const DOT = 3.3;
-  const POS_R = 4.4;
-  const POS_GAP = 2.8;
+  // The marks' sizes, scaled with the pane: a tablet's stage is twice a phone's, and type and marks set
+  // for 342 px would sit small and far apart in it. The scale stops at 1.25 wide and 1.35 narrow.
+  let BAR = 24;
+  let RC = 5.4;
+  let DOT = 3.3;
+  let POS_R = 4.4;
+  let POS_GAP = 2.8;
+  function applyScale(k) {
+    BAR = 24 * k;
+    RC = 5.4 * k;
+    DOT = 3.3 * k;
+    POS_R = 4.4 * k;
+    POS_GAP = 2.8 * k;
+  }
 
   let geo = null;
   function geometry(w, h) {
     const key = `${b.narrow ? 'n' : 'w'}|${w}|${h}|${fontsKey()}`;
-    if (geo?.key === key) return geo;
-    const g = b.narrow ? narrowFrame(w, h) : wideFrame(w, h);
+    if (geo?.key === key) {
+      applyScale(geo.k);
+      return geo;
+    }
+    const k = b.narrow ? clamp(Math.min(w / 330, h / 200), 1, 1.35) : clamp(Math.min(w / 560, h / 500), 1, 1.25);
+    applyScale(k);
+    const g = b.narrow ? narrowFrame(w, h, k) : wideFrame(w, h, k);
+    g.k = k;
     g.key = key;
     finishFrame(g);
     placeLabels(g);
@@ -648,10 +663,10 @@ export function mount(root, ctx) {
     return g;
   }
 
-  function wideFrame(w, h) {
-    const tick = 9.6;
+  function wideFrame(w, h, k) {
+    const tick = 9.6 * k;
     const ax = Math.ceil(Math.max(textWidth('−1.5', tick), textWidth('+1.5', tick))) + 7;
-    const top = 34;
+    const top = Math.round(22 + 12 * k);
     const bottom = h - 16;
     const left = ax + 16;
     const right = w - 12;
@@ -660,14 +675,14 @@ export function mount(root, ctx) {
     const X = (f) => left + f * pw;
     const P = (f, v) => ({ x: X(f), y: yOf(v) });
     return {
-      narrow: false, w, h, left, right, pw, X, size: 10.8, small: 9.8,
+      narrow: false, w, h, left, right, pw, X, size: 10.8 * k, small: 9.8 * k,
       st: {
         water: P(0.1, E.water), p680: P(0.2, E.p680), p680x: P(0.2, E.p680x),
         pq: P(0.35, E.pq), b6f: P(0.465, E.b6f), pc: P(0.57, E.pc),
         p700: P(0.665, E.p700), p700x: P(0.665, E.p700x), fd: P(0.81, E.fd), nadp: P(0.945, E.nadp),
       },
       axes: [{ x: ax, top, bottom, yOf, ticks: [-1.5, -1, -0.5, 0, 0.5, 1, 1.5], tick }],
-      caption: { x: 0, y: 12, src: 'Redox potential, V · higher up, an electron is held more loosely', size: 9.6 },
+      caption: { x: 0, y: Math.round(12 * k), src: 'Redox potential, V · higher up, an electron is held more loosely', size: 9.6 * k },
       bracket: { x: left - 8, y0: yOf(E.water), y1: yOf(E.nadp) },
       waves: [
         { ps: 'II', tail: P(0.2 + 0.085, 1.47), label: `680 nm · ${Math.round(KJ_680)} kJ/mol` },
@@ -679,10 +694,10 @@ export function mount(root, ctx) {
 
   // Stacked: photosystem II's climb and its run down to plastocyanin in the upper half, photosystem I's
   // climb, ferredoxin and NADP⁺ in the lower, both halves at one scale.
-  function narrowFrame(w, h) {
-    const tick = 9.2;
+  function narrowFrame(w, h, k) {
+    const tick = 9.2 * k;
     const ax = Math.ceil(Math.max(textWidth('−1.5', tick), textWidth('+1.0', tick))) + 6;
-    const top = 17;
+    const top = Math.round(6 + 11 * k);
     const gap = 14;
     const bottom = h - 6;
     const half = Math.max(44, (bottom - top - gap) / 2);
@@ -697,7 +712,7 @@ export function mount(root, ctx) {
     const yU = (v) => top + ((v - UP[0]) / (UP[1] - UP[0])) * half;
     const yL = (v) => lower + ((v - DN[0]) / (DN[1] - DN[0])) * half;
     return {
-      narrow: true, w, h, left, right, pw, X, size: 10, small: 9,
+      narrow: true, w, h, left, right, pw, X, size: 10 * k, small: 9 * k,
       st: {
         water: { x: X(0.1), y: yU(E.water) }, p680: { x: X(0.22), y: yU(E.p680) }, p680x: { x: X(0.22), y: yU(E.p680x) },
         pq: { x: X(0.45), y: yU(E.pq) }, b6f: { x: X(0.63), y: yU(E.b6f) }, pc: { x: X(0.8), y: yU(E.pc) },
@@ -708,14 +723,16 @@ export function mount(root, ctx) {
         { x: ax, top, bottom: top + half, yOf: yU, ticks: [-0.5, 0, 0.5, 1], tick },
         { x: ax, top: lower, bottom: lower + half, yOf: yL, ticks: [-1, -0.5, 0, 0.5], tick },
       ],
-      caption: { x: 0, y: 11, src: 'Redox potential, V', size: 9.2 },
+      caption: { x: 0, y: Math.round(11 * k), src: 'Redox potential, V', size: 9.2 * k },
       waves: [
         { ps: 'II', tail: { x: X(0.22 + 0.1), y: yU(1.27) }, label: '680 nm' },
         { ps: 'I', tail: { x: X(0.14 + 0.1), y: yL(0.59) }, label: '700 nm' },
       ],
       exit: { y: yU(E.pc), x1: X(0.93) },
       entry: { y: yL(E.p700), x0: X(0.035) },
-      list: { x: X(0.63), top: lower + 2, bottom: lower + half },
+      // The list starts as high as the upper half leaves room for — below the cytochrome complex and the
+      // two protons that drop from it — so that eight lines are never set tighter than their type.
+      list: { x: X(0.63), top: Math.max(yU(0.62), yU(E.b6f) + 18 * k + 9), bottom: lower + half + 4 },
       yU,
       yL,
     };
@@ -796,7 +813,7 @@ export function mount(root, ctx) {
     // Where the transient marks move, kept clear of every label.
     const clusterTop = s.water.y - POS_R;
     // Oxygen and its four protons leave the cluster together, as one line rising from it.
-    const fxSize = g.narrow ? 9.6 : 10.6;
+    const fxSize = (g.narrow ? 9.6 : 10.6) * g.k;
     g.o2Parts = [textWidth('O_{2}', fxSize, 700), textWidth(O2_TAIL, fxSize - 0.6, 600)];
     const o2Half = (g.o2Parts[0] + g.o2Parts[1]) / 2 + 3;
     const h2Half = textWidth(`2${NB}H^{+}`, fxSize - 0.8, 600) / 2 + 2;
@@ -961,7 +978,7 @@ export function mount(root, ctx) {
   }
 
   function legendBox(g) {
-    const size = 9.4;
+    const size = 9.4 * g.k;
     const w = 12 + textWidth('electron', size) + 16 + 12 + textWidth('hole', size);
     const y = g.axes[0].bottom - 2;
     return { x0: g.right - w - 2, y0: y - size - 2, x1: g.right + 1, y1: y + 4, size, y, w };
@@ -1001,81 +1018,95 @@ export function mount(root, ctx) {
     const size = g.size;
     // What each label is, where its mark is, and the widest it will ever be.
     const items = [];
-    const add = (key, src, mark, hw, hh, { cls = 'zs-name', sz = size, weight = 600, widest = src, prefer = null, cands = null } = {}) => {
-      items.push({ key, src, mark, hw, hh, cls, size: sz, weight, widest, prefer, cands });
+    const add = (key, src, mark, hw, hh, { cls = 'zs-name', sz = size, weight = 600, widest = src, prefer = null, cands = null, optional = false } = {}) => {
+      items.push({ key, src, mark, hw, hh, cls, size: sz, weight, widest, prefer, cands, optional });
     };
+    // A carrier's mark is its bar and the shelf of electrons over it, as one block.
+    const shelfMark = (st) => ({ x: st.x, y: st.y - (DOT + 1.5) });
+    const SH = DOT + 3;
     if (!g.narrow) {
-      add('bracket', `${b.num(CLIMB_V, 2)} V`, { x: g.bracket.x, y: (g.bracket.y0 + g.bracket.y1) / 2 }, 2, 6, { cls: 'zs-axisval', sz: 9.8, prefer: 'right' });
+      add('bracket', `${b.num(CLIMB_V, 2)} V`, { x: g.bracket.x, y: (g.bracket.y0 + g.bracket.y1) / 2 }, 2, 6, { cls: 'zs-axisval', sz: 9.8 * g.k, prefer: 'right' });
       // What the bracket spans, set under its figure, so that nothing has to be drawn across the plot.
       add('bracketSub', 'water to NADP^{+}', { x: g.bracket.x, y: (g.bracket.y0 + g.bracket.y1) / 2 }, 2, 6, {
-        cls: 'zs-cap', sz: 9.4, weight: 400,
-        cands: (placed) => (placed.bracket ? [{ x: placed.bracket.box.x0 + 1.5, y: placed.bracket.box.y1 + 10.5, anchor: 'start', far: 0 }] : []),
+        cls: 'zs-cap', sz: 9.4 * g.k, weight: 400, optional: true,
+        cands: (placed) => (placed.bracket ? [{ x: placed.bracket.box.x0 + 1.5, y: placed.bracket.box.y1 + 10.5 * g.k, anchor: 'start', far: 0 }] : []),
       });
       add('water', 'H_{2}O', s.water, (g.cluster.x1 - g.cluster.x0) / 2, POS_R, { prefer: 'left' });
-      add('cluster', 'Mn_{4}Ca', s.water, (g.cluster.x1 - g.cluster.x0) / 2, POS_R, { cls: 'zs-soft', weight: 500, sz: 9.8, prefer: 'down' });
+      add('cluster', 'Mn_{4}Ca', s.water, (g.cluster.x1 - g.cluster.x0) / 2, POS_R, { cls: 'zs-soft', weight: 500, sz: 9.8 * g.k, prefer: 'down' });
       add('p680', 'P680', s.p680, RC, RC);
       // Each climb is one photon's worth: E(photon) / F volts, the prose's "about 1.8 volts".
-      add('liftII', `${b.num(KJ_680 / FARADAY, 2)} V`, { x: s.p680.x, y: (s.p680.y + s.p680x.y) / 2 }, 1.5, 16, { cls: 'zs-axisval', sz: 9.8, prefer: 'right' });
-      add('liftI', `${b.num(KJ_700 / FARADAY, 2)} V`, { x: s.p700.x, y: (s.p700.y + s.p700x.y) / 2 }, 1.5, 16, { cls: 'zs-axisval', sz: 9.8, prefer: 'right' });
+      add('liftII', `${b.num(KJ_680 / FARADAY, 2)} V`, { x: s.p680.x, y: (s.p680.y + s.p680x.y) / 2 }, 1.5, 16, { cls: 'zs-axisval', sz: 9.8 * g.k, prefer: 'right' });
+      add('liftI', `${b.num(KJ_700 / FARADAY, 2)} V`, { x: s.p700.x, y: (s.p700.y + s.p700x.y) / 2 }, 1.5, 16, { cls: 'zs-axisval', sz: 9.8 * g.k, prefer: 'right' });
       add('p680x', 'P680*', s.p680x, RC, RC, { cls: 'zs-soft', weight: 500 });
       add('p700', 'P700', s.p700, RC, RC, { widest: `P700^{+} ${TAGS.stalled}` });
       add('p700x', 'P700*', s.p700x, RC, RC, { cls: 'zs-soft', weight: 500 });
-      add('b6f', 'cytochrome ~b~_{6}~f~', s.b6f, BAR / 2, 4);
-      add('pc', 'plastocyanin', s.pc, BAR / 2, 4, { widest: `plastocyanin ${TAGS.starved}` });
-      add('pq', 'plastoquinone', s.pq, BAR / 2, 4, { widest: `plastoquinone ${TAGS.full}` });
-      add('fd', 'ferredoxin', s.fd, BAR / 2, 4, { widest: `ferredoxin ${TAGS.starved}` });
-      add('nadp', 'NADP^{+}', s.nadp, BAR / 2, 4);
-      for (const wv of g.waves) add(`wave-${wv.ps}`, wv.label, wv.tail, 3, 3, { cls: 'zs-soft', weight: 500, sz: g.small, prefer: 'down' });
+      add('b6f', 'cytochrome ~b~_{6}~f~', shelfMark(s.b6f), BAR / 2, SH);
+      add('pc', 'plastocyanin', shelfMark(s.pc), BAR / 2, SH, { widest: `plastocyanin ${TAGS.starved}` });
+      add('pq', 'plastoquinone', shelfMark(s.pq), BAR / 2, SH, { widest: `plastoquinone ${TAGS.full}` });
+      add('fd', 'ferredoxin', shelfMark(s.fd), BAR / 2, SH, { widest: `ferredoxin ${TAGS.starved}` });
+      add('nadp', 'NADP^{+}', shelfMark(s.nadp), BAR / 2, SH);
+      for (const wv of g.waves) add(`wave-${wv.ps}`, wv.label, wv.tail, 3, 3, { cls: 'zs-soft', weight: 500, sz: g.small, prefer: 'down', optional: true });
     } else {
       const num = { cls: 'zs-num', weight: 700, sz: size };
       add('n1', '1', s.water, (g.cluster.x1 - g.cluster.x0) / 2, POS_R, num);
       add('n2', '2', s.p680, RC, RC, num);
       add('n6', '6', s.p700, RC, RC, num);
-      add('n4', '4', s.b6f, BAR / 2, 4, num);
-      add('n5', '5', s.pc, BAR / 2, 4, num);
-      add('n3', '3', s.pq, BAR / 2, 4, num);
-      add('n7', '7', s.fd, BAR / 2, 4, num);
-      add('n8', '8', s.nadp, BAR / 2, 4, num);
-      for (const wv of g.waves) add(`wave-${wv.ps}`, wv.label, wv.tail, 3, 3, { cls: 'zs-soft', weight: 500, sz: g.small, prefer: 'down' });
+      add('n4', '4', shelfMark(s.b6f), BAR / 2, SH, num);
+      add('n5', '5', shelfMark(s.pc), BAR / 2, SH, num);
+      add('n3', '3', shelfMark(s.pq), BAR / 2, SH, num);
+      add('n7', '7', shelfMark(s.fd), BAR / 2, SH, num);
+      add('n8', '8', shelfMark(s.nadp), BAR / 2, SH, num);
+      for (const wv of g.waves) add(`wave-${wv.ps}`, wv.label, wv.tail, 3, 3, { cls: 'zs-soft', weight: 500, sz: g.small, prefer: 'down', optional: true });
     }
     const out = {};
     for (const it of items) {
-      const w = textWidth(it.widest, it.size, it.weight);
-      const asc = it.size * 0.92;
-      const desc = it.size * 0.34;
-      let cands = it.cands ? it.cands(out) : [0, 13, 26].flatMap((far) => ring(it.mark, it.hw, it.hh, it.size, far));
-      if (it.prefer === 'up') cands = [...cands.filter((c) => c.y < it.mark.y && !c.far), ...cands];
-      if (it.prefer === 'down') cands = [...cands.filter((c) => c.y > it.mark.y && !c.far), ...cands];
-      if (it.prefer === 'right') cands = [...cands.filter((c) => c.anchor === 'start' && Math.abs(c.y - it.mark.y) < it.size && !c.far), ...cands];
-      if (it.prefer === 'left') cands = [...cands.filter((c) => c.anchor === 'end' && Math.abs(c.y - it.mark.y) < it.size && !c.far), ...cands];
+      // Tried at its own size first, then a tenth and a fifth smaller, before anything is given up: at a
+      // small phone's width a label that fits at 90% is better than one that is not there.
       let chosen = null;
-      for (const c of cands) {
-        const x0 = c.anchor === 'end' ? c.x - w : c.anchor === 'middle' ? c.x - w / 2 : c.x;
-        const box = { x0: x0 - 1.5, y0: c.y - asc, x1: x0 + w + 1.5, y1: c.y + desc };
-        if (box.x0 < bounds.x0 || box.x1 > bounds.x1 || box.y0 < bounds.y0 || box.y1 > bounds.y1) continue;
-        if (rects.some((r) => boxHit(box, r)) || placed.some((r) => boxHit(box, r))) continue;
-        if (segs.some((sg) => segHitsBox(sg.a, sg.b, box, sg.pad))) continue;
-        let leader = null;
-        if (c.far) {
-          const tx = clamp(it.mark.x, box.x0, box.x1);
-          const ty = clamp(it.mark.y, box.y0, box.y1);
-          const from = { x: clamp(tx, it.mark.x - it.hw, it.mark.x + it.hw), y: clamp(ty, it.mark.y - it.hh, it.mark.y + it.hh) };
-          leader = { a: from, b: { x: tx, y: ty } };
-          const hitsLabel = placed.some((r) => segHitsBox(leader.a, leader.b, r, 1));
-          const hitsMark = rects.some((r) => r !== undefined && segHitsBox(leader.a, leader.b, r, -1) && !(r.x0 <= it.mark.x && r.x1 >= it.mark.x && r.y0 <= it.mark.y && r.y1 >= it.mark.y));
-          if (hitsLabel || hitsMark) continue;
+      let first = null;
+      for (const shrink of [1, 0.9, 0.82]) {
+        const sz = it.size * shrink;
+        const w = textWidth(it.widest, sz, it.weight);
+        const asc = sz * 0.92;
+        const desc = sz * 0.34;
+        let cands = it.cands ? it.cands(out) : [0, 13, 26].flatMap((far) => ring(it.mark, it.hw, it.hh, sz, far));
+        if (it.prefer === 'up') cands = [...cands.filter((c) => c.y < it.mark.y && !c.far), ...cands];
+        if (it.prefer === 'down') cands = [...cands.filter((c) => c.y > it.mark.y && !c.far), ...cands];
+        if (it.prefer === 'right') cands = [...cands.filter((c) => c.anchor === 'start' && Math.abs(c.y - it.mark.y) < sz && !c.far), ...cands];
+        if (it.prefer === 'left') cands = [...cands.filter((c) => c.anchor === 'end' && Math.abs(c.y - it.mark.y) < sz && !c.far), ...cands];
+        if (!first && cands.length) {
+          const c = cands[0];
+          const x0 = c.anchor === 'end' ? c.x - w : c.anchor === 'middle' ? c.x - w / 2 : c.x;
+          first = { ...c, size: sz, box: { x0, y0: c.y - asc, x1: x0 + w, y1: c.y + desc }, leader: null, collided: true };
         }
-        chosen = { ...c, box, leader };
-        break;
+        for (const c of cands) {
+          const x0 = c.anchor === 'end' ? c.x - w : c.anchor === 'middle' ? c.x - w / 2 : c.x;
+          const box = { x0: x0 - 1.5, y0: c.y - asc, x1: x0 + w + 1.5, y1: c.y + desc };
+          if (box.x0 < bounds.x0 || box.x1 > bounds.x1 || box.y0 < bounds.y0 || box.y1 > bounds.y1) continue;
+          // Two labels closer than this read as one phrase ("1.82 V cytochrome b6f"), so a label keeps a
+          // clear margin from every other one, not just a pixel.
+          const clear = { x0: box.x0 - 6, y0: box.y0 - 2, x1: box.x1 + 6, y1: box.y1 + 2 };
+          if (rects.some((r) => boxHit(box, r)) || placed.some((r) => boxHit(clear, r))) continue;
+          if (segs.some((sg) => segHitsBox(sg.a, sg.b, box, sg.pad))) continue;
+          let leader = null;
+          if (c.far) {
+            const tx = clamp(it.mark.x, box.x0, box.x1);
+            const ty = clamp(it.mark.y, box.y0, box.y1);
+            const from = { x: clamp(tx, it.mark.x - it.hw, it.mark.x + it.hw), y: clamp(ty, it.mark.y - it.hh, it.mark.y + it.hh) };
+            leader = { a: from, b: { x: tx, y: ty } };
+            const hitsLabel = placed.some((r) => segHitsBox(leader.a, leader.b, r, 1));
+            const hitsMark = rects.some((r) => segHitsBox(leader.a, leader.b, r, -1) && !(r.x0 <= it.mark.x && r.x1 >= it.mark.x && r.y0 <= it.mark.y && r.y1 >= it.mark.y));
+            if (hitsLabel || hitsMark) continue;
+          }
+          chosen = { ...c, size: sz, box, leader };
+          break;
+        }
+        if (chosen) break;
       }
-      if (!chosen && !cands.length) continue;
-      if (!chosen) {
-        // Nothing clears: the label is set at its first position and the collision is recorded, so the
-        // lab throws rather than drawing an overprint nobody asked for.
-        const c = cands[0];
-        const x0 = c.anchor === 'end' ? c.x - w : c.anchor === 'middle' ? c.x - w / 2 : c.x;
-        chosen = { ...c, box: { x0, y0: c.y - asc, x1: x0 + w, y1: c.y + desc }, leader: null, collided: true };
-      }
+      // An optional label (a wavelength beside its wave, the bracket's second line) is left out when
+      // nothing clears; a station's name never is, and the lab throws instead.
+      if (!chosen && (it.optional || !first)) continue;
+      if (!chosen) chosen = first;
       placed.push(chosen.box);
       if (chosen.leader) segs.push({ a: chosen.leader.a, b: chosen.leader.b, pad: 1.5 });
       out[it.key] = { ...it, ...chosen };
@@ -1127,7 +1158,9 @@ export function mount(root, ctx) {
     for (const a of g.axes) {
       for (const v of a.ticks) {
         const y = a.yOf(v);
-        zp.line(a.x + 3, y, g.right, y, { class: 'zs-grid' });
+        // A gridline stops short of the list rather than running under its type.
+        const under = g.list && y > g.list.top - 6 && y < g.list.bottom + 4;
+        zp.line(a.x + 3, y, under ? g.list.x - 8 : g.right, y, { class: 'zs-grid' });
         const label = v === 0 ? '0' : `${v > 0 ? '+' : '−'}${Math.abs(v).toFixed(1)}`;
         zp.text(a.x - 4, y + a.tick * 0.35, label, { anchor: 'end', class: 'zs-tick', 'font-size': b.num(a.tick, 1) });
       }
@@ -1250,10 +1283,14 @@ export function mount(root, ctx) {
     const { x, top, bottom } = g.list;
     const avail = g.w - x - 2;
     const numW = 11;
-    let size = 9.4;
+    let size = 9.4 * g.k;
     const widest = Math.max(...LIST.map(([, name, key]) => textWidth(`${key === 'p700' ? 'P700^{+}' : name}${key ? ` ${key === 'pq' ? TAGS.full : key === 'p700' ? TAGS.stalled : TAGS.starved}` : ''}`, size)));
-    if (widest + numW > avail) size = Math.max(7.6, size * ((avail - numW) / widest));
-    const lineH = Math.min(size * 1.55, (bottom - top) / LIST.length);
+    if (widest + numW > avail) size *= (avail - numW) / widest;
+    // Eight lines in the height there is, never closer than 1.3 of their own size: the type gives way
+    // before the leading does.
+    const lineAvail = (bottom - top) / LIST.length;
+    size = Math.max(7, Math.min(size, lineAvail / 1.3));
+    const lineH = Math.min(size * 1.55, lineAvail);
     LIST.forEach(([n, name, key], i) => {
       const y = top + lineH * (i + 0.72);
       zPane.text(x + numW - 3, y, n, { anchor: 'end', class: 'zs-num', 'font-size': b.num(size, 2) });
@@ -1293,7 +1330,7 @@ export function mount(root, ctx) {
         if (p < 0 || p >= 1) continue;
         const fade = 1 - p * p;
         const z = g.zones[f.kind];
-        const size = g.narrow ? 9.6 : 10.6;
+        const size = (g.narrow ? 9.6 : 10.6) * g.k;
         if (f.kind === 'o2') {
           const y = z.y1 - 3 - (z.y1 - z.y0 - size - 4) * ease(p);
           const x = g.cluster.x - (g.o2Parts[0] + g.o2Parts[1]) / 2;
@@ -1404,7 +1441,10 @@ export function mount(root, ctx) {
     flashPane.line(0, title + 5.5, w, title + 5.5, { stroke: C.ruleStrong });
     const noteSize = 9.8;
     const lines = wrapText(FLASH_NOTE, w, noteSize);
-    const noteH = lines.length * (noteSize + 3.4);
+    // A small paragraph's own leading, 1.45, rather than the table's row rhythm: it is a note under a
+    // chart, not a row of one.
+    const lead = noteSize * 1.45;
+    const noteH = lines.length * lead;
     const tick = 9.2;
     const yLab = Math.ceil(textWidth('50%', tick)) + 5;
     const top = title + 16;
@@ -1438,7 +1478,7 @@ export function mount(root, ctx) {
       flashPane.text(x0 + (w - x0) / 2, top + plotH * 0.5, msg, { anchor: 'middle', class: 'tb-rt-note', fit: [10, 8], width: w - x0 - 8 });
     }
     lines.forEach((line, i) => {
-      flashPane.text(0, h - noteH + (i + 1) * (noteSize + 3.4) - 3, line, { class: 'tb-rt-note', 'font-size': b.num(noteSize, 1) });
+      flashPane.text(0, h - noteH + i * lead + noteSize, line, { class: 'tb-rt-note', 'font-size': b.num(noteSize, 1) });
     });
   }
 
