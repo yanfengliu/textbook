@@ -466,8 +466,8 @@ export function mount(root, ctx) {
   });
 
   // ---- controls: what to run, what to show, the rules, and the enzymes ----
-  const runCtl = b.run({ aria: 'Run, open the fork, or run the chromosome’s clock', onChange: (on) => onRun(on) });
-  b.action('Step', () => stepOnce(), { aria: 'Step, one second of the fork, or one step of the chromosome’s clock' });
+  const runCtl = b.run({ aria: 'Run, move the fork on, or run the chromosome’s clock', onChange: (on) => onRun(on) });
+  b.action('Step', () => stepOnce(), { aria: 'Step, a quarter of a second at the fork, or one step of the chromosome’s clock' });
   b.action('Reset', () => resetAll(), { aria: 'Reset, put the figure back as it opened' });
   b.divide();
   const sceneCtl = b.choice('Scene', [
@@ -631,6 +631,7 @@ export function mount(root, ctx) {
       rule,
       laggingContinuous: laggingIsContinuous(rule),
       removed: ENZYMES.filter((e) => removed.has(e.id)).map((e) => e.id),
+      forkTimeS: Number((fk.tau / SLOW).toFixed(3)),
       unwoundNt: Math.round(fk.F),
       leadingLengthNt: Math.round(fk.top.end),
       fragmentsStarted: fk.bot ? 0 : fk.frags.length,
@@ -641,6 +642,7 @@ export function mount(root, ctx) {
       forkStalled: stalledBecause() !== null,
       stalledBecause: stalledBecause(),
       chainTerminated: fk.terminated !== null,
+      terminatedStrand: fk.terminated,
       organism,
       origins,
       originCount: ch.originCount,
@@ -730,8 +732,10 @@ export function mount(root, ctx) {
     const { w, h: hgt } = pane.box;
     const boxes = [];
     const hits = (bx) => boxes.some((o) => bx.x0 < o.x1 && bx.x1 > o.x0 && bx.y0 < o.y1 && bx.y1 > o.y0);
-    const boxOf = (x, y, str, size, anchor) => {
-      const tw = String(str).length * size * 0.6;
+    // The width is estimated, not measured: measuring forces a layout per label per frame. Lower case
+    // in the book's face runs about 0.5 em a character, spaced capitals about 0.7.
+    const boxOf = (x, y, str, size, anchor, caps) => {
+      const tw = String(str).length * size * (caps ? 0.74 : 0.56);
       const x0 = anchor === 'middle' ? x - tw / 2 : anchor === 'end' ? x - tw : x;
       return { x0: x0 - 2, y0: y - size * 0.8 - 1.5, x1: x0 + tw + 2, y1: y + size * 0.25 + 1.5 };
     };
@@ -746,7 +750,7 @@ export function mount(root, ctx) {
       },
       place(cands, str, { size = 10.5, fill = C.ink, cls = null } = {}) {
         for (const [x, y, anchor] of cands) {
-          const bx = boxOf(x, y, str, size, anchor);
+          const bx = boxOf(x, y, str, size, anchor, cls === 'rf-caps');
           if (bx.x0 < 1 || bx.y0 < 1 || bx.x1 > w - 1 || bx.y1 > hgt - 1 || hits(bx)) continue;
           boxes.push(bx);
           pane.label(x, y, str, { size, anchor, fill, ...(cls ? { class: cls } : {}) });
@@ -784,7 +788,9 @@ export function mount(root, ctx) {
       // Nothing the polymerases make is drawn nearer the fork than this: the helicase and a polymerase
       // take up room that a few tens of nucleotides do not, so the drawing is not to scale there.
       gapPx: ringR + polRa + 3,
-      aEnd: along - (narrow ? 20 : 22),
+      // On a phone the helix stops short of the top under a hypothetical rule, for the banner that names
+      // the rule: the strands' end labels there are the rule's whole point.
+      aEnd: along - (narrow ? (rule === 'as-they-are' ? 20 : 36) : 22),
       size: narrow ? 10 : clamp(hgt * 0.036, 10, 11.5),
     };
   }
@@ -1109,8 +1115,12 @@ export function mount(root, ctx) {
     }
     const why = stalledBecause();
     if (why) {
-      const words = why === 'no-helicase' ? 'no helicase: the helix stays shut' : 'stalled: too much twist ahead';
-      place(around(G.aV + 30, helixC(G.aV + 30, 1) + G.A, 1, { offs: [16, 30, 44], shifts: [0, 30, 60, 90] }), words);
+      const words = why === 'no-helicase'
+        ? (narrow ? 'no helicase: helix shut' : 'no helicase: the helix stays shut')
+        : (narrow ? 'stalled by the twist' : 'stalled: too much twist ahead');
+      const opts = { offs: [16, 30, 44], shifts: [0, 30, 60, 90] };
+      const wr = writhe(G.aV + 30);
+      place([...around(G.aV + 30, wr + G.A, 1, opts), ...around(G.aV + 30, wr - G.A, -1, opts)], words);
     }
     if (helicaseAt) place(around(G.aV + G.ringR * 0.6, -G.A - G.ringR * 0.4, -1, { offs: [10, 20, 30], shifts: [18, 30, 44, 6] }), 'helicase');
     for (const q of polIII) {
@@ -1123,13 +1133,15 @@ export function mount(root, ctx) {
     const leadMid = nameAt(Math.max(aOrigin, 0), top.aEnd);
     place(around(leadMid, tmplTop(leadMid) + 1, 1, { offs: [11, 22, 33], shifts: [0, -30, 30, -60, 60] }), 'leading strand');
     // The lower strand's name goes over what has been made of it, not over bare template.
-    let lagMid;
+    // With no fragment in view (no primase, and the last one gone off the stage) the arm is bare template
+    // and goes unnamed; the table's note says why.
+    let lagMid = null;
     if (bot) lagMid = nameAt(Math.max(aOrigin, 0), bot.aEnd);
-    else {
+    else if (frags.length) {
       const seen = frags.map((f) => ({ f, len: f.aQ - Math.max(f.aE, 0) })).sort((x, y) => y.len - x.len)[0];
       lagMid = seen && seen.len > 40 ? clamp((Math.max(seen.f.aE, 0) + seen.f.aQ) / 2, 40, G.aV - 40) : G.aV - G.gapPx - 30;
     }
-    place(around(lagMid, tmplBot(lagMid) - 1, -1, { offs: [11, 22, 33], shifts: [0, -30, 30, -60, 60] }), fk.bot ? 'made continuously too' : 'lagging strand');
+    if (lagMid !== null) place(around(lagMid, tmplBot(lagMid) - 1, -1, { offs: [11, 22, 33], shifts: [0, -30, 30, -60, 60] }), fk.bot ? (narrow ? 'also continuous' : 'made continuously too') : 'lagging strand');
     // The newest primer on the lagging strand, or else the leading strand's own at the origin.
     const newest = frags.length ? frags[frags.length - 1] : null;
     if (newest && newest.aRna1 > newest.aRna0 + 1) {
@@ -1173,7 +1185,11 @@ export function mount(root, ctx) {
       const [x, y] = P(aStop, endC[k]);
       const up = k === upper;
       if (!narrow) lab.place([[x + 5, y + (up ? -2 : 9), 'start'], [x + 5, y + (up ? -8 : 15), 'start']], endWords[k], { size: S * 0.95 });
-      else lab.place([[x + (up ? -5 : 5), y - 4, up ? 'end' : 'start'], [x + (up ? -5 : 5), y + 6, up ? 'end' : 'start']], endWords[k], { size: S * 0.95 });
+      else {
+        // Above the strand's own end first: beside it, the strand's first turn is in the way.
+        const anchor = up ? 'end' : 'start';
+        lab.place([[x + (up ? -3 : 3), y - 8, anchor], [x + (up ? -5 : 5), y - 4, anchor], [x + (up ? -10 : 10), y + 4, anchor]], endWords[k], { size: S * 0.95 });
+      }
     }
     const aHelixName = Math.min(G.aEnd - 40, G.aV + (G.aEnd - G.aV) * 0.78);
     if (aHelixName > G.aV + 30) place(around(aHelixName, -G.A - 2, -1, { offs: [12, 24, 36], shifts: [0, -24, 24, -48] }), 'parent helix');
@@ -1240,7 +1256,7 @@ export function mount(root, ctx) {
     if (organism === 'e-coli') {
       const cx = narrow ? w / 2 : w * 0.36;
       const cy = narrow ? hgt * 0.4 : hgt * 0.5;
-      const R = narrow ? Math.min(w * 0.3, hgt * 0.28) : Math.min(hgt * 0.38, w * 0.22);
+      const R = narrow ? Math.min(w * 0.34, hgt * 0.3) : Math.min(hgt * 0.38, w * 0.22);
       const th = Math.PI * frac;
       const at = (phi, r) => [cx + r * Math.cos(phi), cy + r * Math.sin(phi)];
       const arc = (p0, p1, r) => {
@@ -1282,7 +1298,7 @@ export function mount(root, ctx) {
           const [lx, ly] = at(phi, R + 18);
           lab.place([[lx, ly + 4, 'middle'], [lx + dir * 10, ly + 14, 'middle']], 'fork', { size: S });
         }
-      } else {
+      } else if (frac >= 1) {
         lab.place([[cx, cy + R + 22, 'middle']], 'the forks meet', { size: S });
       }
       lab.place([[cx, cy + 4, 'middle']], '4.6 million bp', { size: S });
@@ -1451,6 +1467,7 @@ export function mount(root, ctx) {
   //   rule                'as-they-are' | 'same-direction' | 'either-end'
   //   laggingContinuous   computed from the two facts alone; false in every state under 'as-they-are'
   //   removed             the enzymes taken away, in the toolbar's order
+  //   forkTimeS           the time at the fork, in real seconds: a quarter of the figure's, as the table shows it
   //   unwoundNt           how far the fork has opened from its origin (opens at 1500)
   //   leadingLengthNt     the leading (top) strand, primer included
   //   fragmentsStarted    Okazaki fragments begun; 0 under either hypothetical rule
@@ -1461,6 +1478,7 @@ export function mount(root, ctx) {
   //   forkStalled         computed; true only with the helicase or the topoisomerase taken away
   //   stalledBecause      'no-helicase' | 'twist' | null
   //   chainTerminated     a strand has stopped at a terminator the reader added
+  //   terminatedStrand    which: 'leading' | 'lower' (under a hypothetical rule) | 'lagging' (a fragment) | null
   //   organism            'e-coli' | 'human-chr1'
   //   origins             'one' | 'all' (E. coli has one either way)
   //   originCount         1, 1, or 1606
