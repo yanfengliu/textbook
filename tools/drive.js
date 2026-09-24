@@ -1664,25 +1664,66 @@ const RECIPES = {
       expect(d.healSeconds !== null && d.healSeconds > 0, `nothing timed the healing: ${d.healSeconds}`);
     }],
     ['curl-takes-the-wrap-away-and-the-sheet-rolls-up', async (h) => {
-      // The baseline this step compares against has to be a SETTLED sheet. The needle two steps up leaves
-      // the edge still relaxing, and reading the baseline mid-relaxation sets a target the curl can never
-      // reach: measured 2026-09-16, a baseline of 5.5 nm against a settled one near 1 nm, and the step
-      // demands the edge open by 2 nm from wherever it is told the sheet started.
-      await stable(h, (x) => x.edgeLengthNm, 30_000);
-      const flat = await h.describe();
-      expect(flat.assembly === 'bilayer', `this step needs the sheet from the first one: ${flat.assembly}`);
-      await h.button(/^Curl/).click();
-      // The wrap was what held the sheet flat, so taking it away opens two rims. That is the whole of
-      // what this control does; the rolling up is the walk's, and it is what is asserted below.
-      const opened = await until(h, (x) => x.edgeLengthNm > flat.edgeLengthNm + 2, 10_000);
-      expect(opened.edgeLengthNm > flat.edgeLengthNm + 2, `taking the wrap away should open two rims: ${flat.edgeLengthNm} -> ${opened.edgeLengthNm} nm`);
+      // This step walks the clock with Step, half a second a press, from a fresh tank, so it reads the
+      // same tank at the same clock values on every machine. It used to press Curl on whatever the running
+      // walk held when the needle step above had finished, and whether that was a sheet reaching across
+      // the tank — the only thing the wrap holds flat, and the only thing with ends for Curl to open —
+      // depended on where the machine's load had left the clock: on 2026-09-23 it was red on 2 of 5 runs
+      // of an unchanged recipe, "taking the wrap away should open two rims: 0 -> 0 nm", because the
+      // needle's hole had healed as two capped pieces. A sheet that does not reach across is a real
+      // outcome of the walk, so the step does not insist on one: it takes a fresh tank, up to four times,
+      // until Curl opens rims, and fails only if none of the four does.
+      //   It asserts the words as well as the numbers: after Curl the reading speaks of what Curl did,
+      // not of the needle before it, and once the rims have closed it stops calling them open. Both were
+      // wrong until 2026-09-23 — the overlay said "the sheet has two open ends" for as long as the wrap
+      // was off, and the side sentence kept "The last hole closed in 1.00 s." (src/figures/bilayer.js).
+      const words = async () => ({
+        over: (await h.stage.locator('.bl-over').first().textContent()) || '',
+        side: (await h.stage.locator('.bl-side text').allTextContents()).join(' '),
+      });
+      const stepUntil = async (ok, presses) => {
+        let x = await h.describe();
+        for (let i = 0; i < presses && !ok(x); i += 1) {
+          const before = x.t;
+          await h.button(/^Step/).click();
+          x = await until(h, (y) => y.t > before, 10_000);
+        }
+        return x;
+      };
+      let flat = null;
+      let opened = null;
+      let tries = 0;
+      while (!opened && tries < 4) {
+        tries += 1;
+        await h.button(/^Reset/).click();
+        flat = await stepUntil((x) => x.t >= 10, 40);
+        if (flat.assembly !== 'bilayer') continue;
+        await h.button(/^Needle/).click();
+        const healed = await stepUntil((x) => !x.punctured, 40);
+        expect(!healed.punctured && healed.healSeconds !== null, `the needle's hole did not close within 20 s of clock: ${JSON.stringify(healed)}`);
+        expect(/last hole closed in/i.test((await words()).side), `the heal time is not in the reading after the hole closed: ${JSON.stringify((await words()).side)}`);
+        flat = healed;
+        await h.button(/^Curl/).click();
+        const after = await h.describe();
+        // The wrap was what held the sheet flat, so taking it away opens two rims. That is the whole of
+        // what this control does; the rolling up is the walk's, and it is what is asserted below.
+        if (after.edgeLengthNm > flat.edgeLengthNm + 2) opened = after;
+        else expect(/no ends opened/.test((await words()).over), `Curl opened no rims (${flat.edgeLengthNm} -> ${after.edgeLengthNm} nm) and the overlay did not say so: ${JSON.stringify((await words()).over)}`);
+      }
+      expect(opened, `in ${tries} fresh tanks Curl never opened two rims: the last went ${flat?.edgeLengthNm} -> ${(await h.describe()).edgeLengthNm} nm, ${flat?.assembly}`);
+      const open = await words();
+      expect(/two open ends/.test(open.over), `with the rims just opened the overlay should say so: ${JSON.stringify(open.over)}`);
+      expect(!/last hole closed/i.test(open.side), `after Curl the reading still speaks of the needle: ${JSON.stringify(open.side)}`);
       // What is asserted is that the edge GOES, which is the claim: an exposed rim is what a sheet
       // cannot tolerate. It closes by rolling its ends in and capping them rather than by making a ring
       // with water inside, because thirty-four molecules cannot make a ring — the figure's header has
       // the arithmetic, and its reading says which of the two it has done.
-      const closed = await until(h, (x) => x.sealed && x.tailsBuried > 0.95, 70_000);
-      expect(closed.sealed === true, `the sheet should have closed its rims: edge ${closed.edgeLengthNm} nm at t=${closed.t}`);
+      const closed = await stepUntil((x) => x.sealed && x.tailsBuried > 0.95, 140);
+      expect(closed.sealed === true, `the sheet should have closed its rims within 70 s of clock: edge ${closed.edgeLengthNm} nm at t=${closed.t}`);
       expect(closed.tailsBuried > 0.95, `and hidden nearly all its tail surface: ${closed.tailsBuried} at t=${closed.t}`);
+      const shut = await words();
+      expect(/sealed both ends/.test(shut.over) && !/open ends/.test(shut.over), `once the rims have closed the overlay should stop calling them open: ${JSON.stringify(shut.over)}`);
+      expect(/capped them/.test(shut.side), `and the reading should say what Curl did: ${JSON.stringify(shut.side)}`);
     }],
     ['a-detergent-cannot-make-a-sheet', async (h) => {
       await h.button(/^Detergent/).click();
