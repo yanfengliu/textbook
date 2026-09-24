@@ -197,6 +197,35 @@ const chapterLadder = () => {
   return table;
 };
 
+// `glycolysis`'s ledger, read off the DRAWING. describe() carries the tallies and names the donor, but
+// which of §5.3's rungs the figure prints, with what values and in what order, which two it lights, and
+// what it tells the reader about a donor, a shut step or a knock-out are only on the stage. A row is a
+// key paired with the nearest value to its right on the same line, so the tallies and the ladder, drawn
+// side by side, cannot borrow each other's numbers; `lit` is the inline colour the figure puts on the
+// two rungs in play. `words` is every text in the pane joined as it was wrapped, spaces collapsed.
+const glycolysisLedger = (h) => h.stage.locator('.tb-pane-ledger').first().evaluate((pane) => {
+  const texts = [...pane.querySelectorAll('text')];
+  const at = (t, a) => Number(t.getAttribute(a));
+  const vals = texts.filter((t) => t.classList.contains('tb-rt-val'));
+  const rows = texts.filter((t) => t.classList.contains('tb-rt-key')).map((k) => {
+    const right = vals.filter((v) => v.getAttribute('y') === k.getAttribute('y') && at(v, 'x') > at(k, 'x')).sort((a, b) => at(a, 'x') - at(b, 'x'))[0];
+    return { key: k.textContent, val: right ? right.textContent : null, y: at(k, 'y'), lit: Boolean(k.style.fill) };
+  });
+  return { rows, words: texts.map((t) => t.textContent).join(' ').replace(/\s+/g, ' ') };
+});
+// What a bench figure last said to a screen reader, polled until it matches. A press the figure refuses
+// changes nothing describe() reports, so its words are the only surface that shows the press arrived.
+// Returns the last text read, so the step's own assertion is what fails.
+const liveSays = async (h, re, budgetMs = 5_000) => {
+  const live = h.stage.locator('.tb-live').first();
+  const deadline = Date.now() + budgetMs;
+  for (;;) {
+    const got = (await live.textContent()) ?? '';
+    if (re.test(got) || Date.now() > deadline) return got;
+    await h.page.waitForTimeout(POLL_MS);
+  }
+};
+
 // Each recipe is a list of [name, async (h) => {}] steps. `h` gives the step the page, the stage, the
 // figure's current description, and helpers that all go through real input.
 const RECIPES = {
@@ -3868,6 +3897,265 @@ const RECIPES = {
       expect(d.airCo2Ppm === 420 && d.temperatureC === 25 && d.stomaOpen === 0.5 && d.rubiscoFractionOfProtein === 0.4, `Reset left the controls at ${JSON.stringify({ airCo2Ppm: d.airCo2Ppm, temperatureC: d.temperatureC, stomaOpen: d.stomaOpen, rubiscoFractionOfProtein: d.rubiscoFractionOfProtein })}`);
       expect(d.carboxylations === 0 && d.oxygenations === 0 && d.salvageStep === null && d.t === 0, `Reset left ${JSON.stringify({ carboxylations: d.carboxylations, oxygenations: d.oxygenations, salvageStep: d.salvageStep, t: d.t })}`);
       expect(near(d.workingRatio, 3, 0.02) && near(d.netGainPercent, 62.5, 0.1), `Reset left the table at ${JSON.stringify({ workingRatio: d.workingRatio, netGainPercent: d.netGainPercent })}`);
+    }],
+  ],
+  // Figure 7.1. The ledger's numbers below are §7.2's arithmetic, worked by hand from the steps and not
+  // read from the module: two ATP spent on the whole glucose at steps 1 and 3, and from step 4 two lanes,
+  // each making an NADH at step 6, an ATP at steps 7 and 10, and a pyruvate at step 10.
+  glycolysis: [
+    ['opens-on-one-glucose-paused-with-nothing-spent', async (h) => {
+      const d = await h.describe();
+      expect(d.step === 0 && d.playing === false && d.t === 0, `it should open before step 1, paused: ${JSON.stringify({ step: d.step, playing: d.playing, t: d.t })}`);
+      expect(d.phase === 'investment' && d.carbonsPerMolecule === 6 && d.moleculesInFlight === 1, `it should open on one six-carbon glucose: ${JSON.stringify({ phase: d.phase, carbonsPerMolecule: d.carbonsPerMolecule, moleculesInFlight: d.moleculesInFlight })}`);
+      expect(d.atpSpent === 0 && d.atpMade === 0 && d.atpNet === 0 && d.nadhMade === 0 && d.pyruvateMade === 0 && d.ledgerPer === 'glucose', `nothing should be counted yet, per glucose: ${JSON.stringify({ atpSpent: d.atpSpent, atpMade: d.atpMade, atpNet: d.atpNet, nadhMade: d.nadhMade, pyruvateMade: d.pyruvateMade, ledgerPer: d.ledgerPer })}`);
+      expect(d.atpMM === 3 && d.ampMM === 0.1 && d.citrateMM === 0.2 && d.committedStepOpen === true && d.closedBy === null, `it should open at a resting cell's levels with the committed step open: ${JSON.stringify({ atpMM: d.atpMM, ampMM: d.ampMM, citrateMM: d.citrateMM, committedStepOpen: d.committedStepOpen, closedBy: d.closedBy })}`);
+      expect(d.knockedOut === null && d.accumulating === null && Array.isArray(d.drainedAway) && d.drainedAway.length === 0 && d.donorForStep === null, `nothing should be knocked out and no donor named: ${JSON.stringify({ knockedOut: d.knockedOut, accumulating: d.accumulating, drainedAway: d.drainedAway, donorForStep: d.donorForStep })}`);
+    }],
+    ['the-net-goes-down-before-it-comes-up', async (h) => {
+      // After each step, per glucose: [net, spent, made, NADH, pyruvate, where the step's phosphate came from].
+      const WALK = [
+        null,
+        [-1, 1, 0, 0, 0, 'ATP'],
+        [-1, 1, 0, 0, 0, null],
+        [-2, 2, 0, 0, 0, 'ATP'],
+        [-2, 2, 0, 0, 0, null],
+        [-2, 2, 0, 0, 0, null],
+        [-2, 2, 0, 2, 0, 'inorganic phosphate'],
+        [0, 2, 2, 2, 0, '1,3-bisphosphoglycerate'],
+        [0, 2, 2, 2, 0, null],
+        [0, 2, 2, 2, 0, null],
+        [2, 2, 4, 2, 2, 'phosphoenolpyruvate'],
+      ];
+      const nets = [];
+      for (let k = 1; k <= 10; k += 1) {
+        await h.button(/^Step forward/).click();
+        const d = await until(h, (x) => x.step === k, 5_000);
+        expect(d.step === k, `Step forward should reach step ${k}: it is at ${d.step}`);
+        const [net, spent, made, nadh, pyr, donor] = WALK[k];
+        const got = { atpNet: d.atpNet, atpSpent: d.atpSpent, atpMade: d.atpMade, nadhMade: d.nadhMade, pyruvateMade: d.pyruvateMade };
+        expect(d.atpNet === net && d.atpSpent === spent && d.atpMade === made && d.nadhMade === nadh && d.pyruvateMade === pyr, `after step ${k} the ledger per glucose should read net ${net}, ${spent} spent, ${made} made, ${nadh} NADH and ${pyr} pyruvate: ${JSON.stringify(got)}`);
+        expect(d.donorForStep === donor, `step ${k}'s phosphate should come from ${donor === null ? 'nowhere (null)' : donor}: ${JSON.stringify(d.donorForStep)}`);
+        const cut = k >= 4;
+        expect(d.carbonsPerMolecule === (cut ? 3 : 6) && d.moleculesInFlight === (cut ? 2 : 1) && d.phase === (k <= 5 ? 'investment' : 'payoff'), `after step ${k}: ${JSON.stringify({ phase: d.phase, carbonsPerMolecule: d.carbonsPerMolecule, moleculesInFlight: d.moleculesInFlight })}`);
+        expect(d.playing === false, `a step should not start the run: after step ${k} playing is ${d.playing}`);
+        nets.push(d.atpNet);
+      }
+      expect(Math.min(...nets) < 0 && nets[nets.length - 1] > 0, `the net should go negative before it comes back positive: ${nets.join(', ')}`);
+      // There is no eleventh step: the press is refused, and the figure says why.
+      await h.button(/^Step forward/).click();
+      const said = await liveSays(h, /end of the line/);
+      expect(/end of the line/.test(said) && (await h.describe()).step === 10, `a press at pyruvate should be refused and say so: ${JSON.stringify(said)}`);
+    }],
+    ['the-ladder-is-the-chapters-and-lights-the-donor', async (h) => {
+      // §5.3's own table, parsed out of chapter 5, against the rungs the figure draws at step 10.
+      expect((await h.describe()).step === 10, 'this step reads the ladder at step 10');
+      const table = chapterLadder();
+      const { rows, words } = await glycolysisLedger(h);
+      const bare = (s) => String(s).replace(/†/g, '').trim().toLowerCase();
+      const kj = (s) => Number(String(s).replace('≈', '').replace('−', '-').trim());
+      const onTable = rows.filter((r) => table.some((t) => bare(t.name) === bare(r.key)));
+      for (const r of onTable) {
+        const t = table.find((x) => bare(x.name) === bare(r.key));
+        expect(kj(r.val) === t.kj, `the rung "${r.key}" should print §5.3's ${t.kj} kJ/mol: it prints ${JSON.stringify(r.val)}`);
+      }
+      for (const name of ['Phosphoenolpyruvate', 'Creatine phosphate', 'ATP', 'Glucose 6-phosphate']) {
+        expect(onTable.some((r) => bare(r.key) === bare(name)), `the ladder should print §5.3's rung "${name}": it prints ${JSON.stringify(rows.map((r) => r.key))}`);
+      }
+      const down = [...onTable].sort((a, b) => a.y - b.y).map((r) => kj(r.val));
+      expect(down.every((v, i) => i === 0 || v > down[i - 1]), `the rungs should run down the page as §5.3's table does, the most negative at the top: ${down.join(', ')}`);
+      // 1,3-Bisphosphoglycerate is not on the table, and the figure says so rather than that the table lists
+      // it: a dagger, an approximate value, and a place between creatine phosphate and the top rung.
+      expect(!table.some((t) => bare(t.name) === '1,3-bisphosphoglycerate'), `§5.3's table now lists 1,3-bisphosphoglycerate, so the figure's dagger saying it does not is wrong: ${JSON.stringify(table)}`);
+      const bpg = rows.find((r) => bare(r.key) === '1,3-bisphosphoglycerate');
+      expect(bpg && bpg.key.includes('†') && String(bpg.val).includes('≈'), `1,3-bisphosphoglycerate should be printed with a dagger and an approximate value: ${JSON.stringify(bpg)}`);
+      const pep = onTable.find((r) => bare(r.key) === 'phosphoenolpyruvate');
+      const crp = onTable.find((r) => bare(r.key) === 'creatine phosphate');
+      expect(kj(bpg.val) > kj(pep.val) && kj(bpg.val) < kj(crp.val) && bpg.y > pep.y && bpg.y < crp.y, `1,3-bisphosphoglycerate belongs between phosphoenolpyruvate and creatine phosphate, in value and on the page: ${JSON.stringify({ pep, bpg, crp })}`);
+      expect(words.includes('† Not on Section 5.3’s table'), `the dagger should be explained under the rungs: ${words}`);
+      // Step 10's phosphate runs from the top rung down to ATP, and the drawing lights exactly those two.
+      const lit = rows.filter((r) => r.lit);
+      const from = lit.find((r) => bare(r.key) === 'phosphoenolpyruvate');
+      const to = lit.find((r) => bare(r.key) === 'atp');
+      expect(lit.length === 2 && from && to && from.y < to.y, `step 10 should light phosphoenolpyruvate, above ATP, and ATP: it lights ${JSON.stringify(lit.map((r) => r.key))}`);
+    }],
+    ['stepping-back-walks-the-net-down-again', async (h) => {
+      for (const [k, net] of [[9, 0], [8, 0], [7, 0], [6, -2]]) {
+        await h.button(/^Step back/).click();
+        const d = await until(h, (x) => x.step === k, 5_000);
+        expect(d.step === k && d.atpNet === net, `Step back should reach step ${k} at net ${net} per glucose: step ${d.step}, net ${d.atpNet}`);
+        if (k !== 7) continue;
+        // The other ATP-making step: its donor, named, lit above ATP, and said to sit above it.
+        const { rows, words } = await glycolysisLedger(h);
+        const lit = rows.filter((r) => r.lit);
+        const from = lit.find((r) => r.key.startsWith('1,3-Bisphosphoglycerate'));
+        const to = lit.find((r) => r.key === 'ATP');
+        expect(lit.length === 2 && from && to && from.y < to.y, `step 7 should light 1,3-bisphosphoglycerate, above ATP, and ATP: it lights ${JSON.stringify(lit.map((r) => r.key))}`);
+        expect(d.donorForStep === '1,3-bisphosphoglycerate' && words.includes('above ATP'), `step 7 should name its donor and say it sits above ATP: ${JSON.stringify(d.donorForStep)}; the ledger says ${words}`);
+      }
+      const d = await h.describe();
+      expect(d.atpMade === 0 && d.nadhMade === 2 && d.pyruvateMade === 0, `back at step 6 the ATP made should be undone and the NADH kept: ${JSON.stringify({ atpMade: d.atpMade, nadhMade: d.nadhMade, pyruvateMade: d.pyruvateMade })}`);
+    }],
+    ['per-fragment-halves-every-tally', async (h) => {
+      await h.button(/^Per fragment/).click();
+      const d = await until(h, (x) => x.ledgerPer === 'fragment', 5_000);
+      expect(d.ledgerPer === 'fragment' && d.step === 6, `Per fragment should switch the ledger and leave the walk at step 6: ${JSON.stringify({ ledgerPer: d.ledgerPer, step: d.step })}`);
+      expect(d.atpNet === -1 && d.atpSpent === 1 && d.atpMade === 0 && d.nadhMade === 1 && d.pyruvateMade === 0, `a fragment's share at step 6 is net −1, 1 spent and 1 NADH: ${JSON.stringify({ atpNet: d.atpNet, atpSpent: d.atpSpent, atpMade: d.atpMade, nadhMade: d.nadhMade, pyruvateMade: d.pyruvateMade })}`);
+      for (let k = 7; k <= 10; k += 1) {
+        await h.button(/^Step forward/).click();
+        await until(h, (x) => x.step === k, 5_000);
+      }
+      const end = await h.describe();
+      expect(end.step === 10 && end.atpNet === 1 && end.atpSpent === 1 && end.atpMade === 2 && end.nadhMade === 1 && end.pyruvateMade === 1, `a fragment's share of the whole walk is net +1: 1 spent, 2 made, 1 NADH and 1 pyruvate: ${JSON.stringify({ step: end.step, atpNet: end.atpNet, atpSpent: end.atpSpent, atpMade: end.atpMade, nadhMade: end.nadhMade, pyruvateMade: end.pyruvateMade })}`);
+      await h.button(/^Per glucose/).click();
+      const back = await until(h, (x) => x.ledgerPer === 'glucose', 5_000);
+      expect(back.atpNet === 2 && back.atpMade === 4 && back.nadhMade === 2 && back.pyruvateMade === 2, `per glucose again the walk nets +2, with 4 made, 2 NADH and 2 pyruvate: ${JSON.stringify({ atpNet: back.atpNet, atpMade: back.atpMade, nadhMade: back.nadhMade, pyruvateMade: back.pyruvateMade })}`);
+    }],
+    ['raising-atp-shuts-the-committed-step', async (h) => {
+      await h.button(/^Reset/).click();
+      await until(h, (x) => x.step === 0 && x.ledgerPer === 'glucose', 5_000);
+      const atp = h.stage.getByRole('slider', { name: 'ATP', exact: true });
+      await atp.fill('6');
+      await atValue(h, atp, 6);
+      const six = await until(h, (x) => x.atpMM === 6, 5_000);
+      expect(six.atpMM === 6 && six.committedStepOpen === true && six.closedBy === null, `at 6 mM ATP the committed step should still be open: ${JSON.stringify({ atpMM: six.atpMM, committedStepOpen: six.committedStepOpen, closedBy: six.closedBy })}`);
+      await atp.fill('7');
+      await atValue(h, atp, 7);
+      const seven = await until(h, (x) => x.atpMM === 7, 5_000);
+      expect(seven.atpMM === 7 && seven.committedStepOpen === false && seven.closedBy === 'atp', `at 7 mM ATP it should be shut, by ATP: ${JSON.stringify({ atpMM: seven.atpMM, committedStepOpen: seven.committedStepOpen, closedBy: seven.closedBy })}`);
+      const { words } = await glycolysisLedger(h);
+      expect(/ATP has shut the committed step|Shut by ATP/.test(words), `the ledger should say that ATP shut it: ${words}`);
+      for (let i = 0; i < 3; i += 1) await h.button(/^Step forward/).click();
+      const said = await liveSays(h, /step 3 cannot be taken/);
+      const d = await h.describe();
+      expect(d.step === 2 && /shut by ATP: step 3 cannot be taken/.test(said), `the line should stop before step 3 and say which control shut it: step ${d.step}, ${JSON.stringify(said)}`);
+    }],
+    ['amp-opens-it-again', async (h) => {
+      const amp = h.stage.getByRole('slider', { name: 'AMP', exact: true });
+      await amp.fill('0.2');
+      await atValue(h, amp, 0.2);
+      const d = await until(h, (x) => x.ampMM === 0.2, 5_000);
+      expect(d.ampMM === 0.2 && d.atpMM === 7 && d.committedStepOpen === true && d.closedBy === null, `one press of AMP should open the step against 7 mM ATP: ${JSON.stringify({ ampMM: d.ampMM, atpMM: d.atpMM, committedStepOpen: d.committedStepOpen, closedBy: d.closedBy })}`);
+      await h.button(/^Step forward/).click();
+      const on = await until(h, (x) => x.step === 3, 5_000);
+      expect(on.step === 3 && on.atpNet === -2, `with the step open the glucose should take step 3: ${JSON.stringify({ step: on.step, atpNet: on.atpNet })}`);
+    }],
+    ['citrate-shuts-it-and-run-waits-at-the-gate', async (h) => {
+      await h.button(/^Reset/).click();
+      await until(h, (x) => x.step === 0 && x.atpMM === 3 && x.ampMM === 0.1, 5_000);
+      const cit = h.stage.getByRole('slider', { name: 'Citrate', exact: true });
+      await cit.fill('1.4');
+      await atValue(h, cit, 1.4);
+      const low = await until(h, (x) => x.citrateMM === 1.4, 5_000);
+      expect(low.citrateMM === 1.4 && low.committedStepOpen === true, `at 1.4 mM citrate the step should be open: ${JSON.stringify({ citrateMM: low.citrateMM, committedStepOpen: low.committedStepOpen })}`);
+      await cit.fill('1.6');
+      await atValue(h, cit, 1.6);
+      const high = await until(h, (x) => x.citrateMM === 1.6, 5_000);
+      expect(high.citrateMM === 1.6 && high.committedStepOpen === false && high.closedBy === 'citrate', `at 1.6 mM citrate it should be shut, by citrate: ${JSON.stringify({ citrateMM: high.citrateMM, committedStepOpen: high.committedStepOpen, closedBy: high.closedBy })}`);
+      await ensureRunning(h);
+      const at2 = await until(h, (x) => x.step === 2, 60_000);
+      expect(at2.step === 2 && at2.playing === true, `Run should carry the glucose to step 2: ${JSON.stringify({ step: at2.step, playing: at2.playing, t: at2.t })}`);
+      // Waiting is measured on the figure's own clock, not the wall's: two more steps' worth of Run, and
+      // the glucose is still in front of the shut step.
+      const later = await until(h, (x) => x.t >= at2.t + 2.5, 60_000);
+      expect(later.t >= at2.t + 2.5 && later.step === 2 && later.playing === true, `Run should wait before step 3 while citrate holds it shut: ${JSON.stringify({ from: at2.t, t: later.t, step: later.step, playing: later.playing })}`);
+      await cit.fill('1.4');
+      await atValue(h, cit, 1.4);
+      const on = await until(h, (x) => x.step >= 3, 60_000);
+      expect(on.step >= 3 && on.committedStepOpen === true, `lowering citrate should open the step and let the waiting run go on: ${JSON.stringify({ step: on.step, committedStepOpen: on.committedStepOpen })}`);
+      await h.button(/^Pause/).click();
+      await until(h, (x) => x.playing === false, 5_000);
+    }],
+    ['a-knocked-out-kinase-piles-up-its-substrate', async (h) => {
+      await h.button(/^Reset/).click();
+      await until(h, (x) => x.step === 0 && x.citrateMM === 0.2 && x.playing === false, 5_000);
+      for (let k = 1; k <= 10; k += 1) await h.button(/^Step forward/).click();
+      await until(h, (x) => x.step === 10, 5_000);
+      const ko = h.stage.getByRole('slider', { name: 'Knock out', exact: true });
+      await ko.fill('7');
+      await atValue(h, ko, 7);
+      const d = await until(h, (x) => x.knockedOut !== null, 5_000);
+      expect(d.knockedOut === 'phosphoglycerate kinase' && d.accumulating === '1,3-bisphosphoglycerate', `knocking out step 7 should pile up 1,3-bisphosphoglycerate: ${JSON.stringify({ knockedOut: d.knockedOut, accumulating: d.accumulating })}`);
+      const past = ['3-phosphoglycerate', '2-phosphoglycerate', 'phosphoenolpyruvate', 'pyruvate'];
+      expect(d.drainedAway.length === past.length && past.every((m) => d.drainedAway.includes(m)), `everything past step 7, and nothing before it, should drain away: ${JSON.stringify(d.drainedAway)}`);
+      // A glucose already past the gap is pulled back to it.
+      expect(d.step === 6 && d.atpNet === -2 && d.nadhMade === 2 && d.pyruvateMade === 0, `the glucose should be pulled back to the gap, before step 7: ${JSON.stringify({ step: d.step, atpNet: d.atpNet, nadhMade: d.nadhMade, pyruvateMade: d.pyruvateMade })}`);
+      await h.button(/^Step forward/).click();
+      const said = await liveSays(h, /is knocked out: nothing passes it/);
+      expect((await h.describe()).step === 6 && /phosphoglycerate kinase, is knocked out/.test(said), `step 7 should refuse the glucose and say why: ${JSON.stringify(said)}`);
+      const { words } = await glycolysisLedger(h);
+      expect(/1,3-bisphosphoglycerate piles up/.test(words), `the ledger should say what piles up: ${words}`);
+    }],
+    ['without-its-isomerase-one-piece-runs-the-payoff', async (h) => {
+      const ko = h.stage.getByRole('slider', { name: 'Knock out', exact: true });
+      await ko.fill('5');
+      await atValue(h, ko, 5);
+      const d = await until(h, (x) => x.knockedOut === 'triose phosphate isomerase', 5_000);
+      expect(d.knockedOut === 'triose phosphate isomerase' && d.accumulating === 'dihydroxyacetone phosphate' && d.drainedAway.length === 0, `without the isomerase dihydroxyacetone phosphate should pile up and nothing drain away: ${JSON.stringify({ knockedOut: d.knockedOut, accumulating: d.accumulating, drainedAway: d.drainedAway })}`);
+      for (let k = d.step + 1; k <= 10; k += 1) await h.button(/^Step forward/).click();
+      const end = await until(h, (x) => x.step === 10, 5_000);
+      expect(end.step === 10 && end.atpNet === 0 && end.atpSpent === 2 && end.atpMade === 2 && end.nadhMade === 1 && end.pyruvateMade === 1, `with one piece running the payoff a glucose nets 0 ATP, 1 NADH and 1 pyruvate: ${JSON.stringify({ step: end.step, atpNet: end.atpNet, atpSpent: end.atpSpent, atpMade: end.atpMade, nadhMade: end.nadhMade, pyruvateMade: end.pyruvateMade })}`);
+    }],
+    ['run-walks-the-line-and-stops-at-pyruvate', async (h) => {
+      await h.button(/^Reset/).click();
+      const d0 = await until(h, (x) => x.step === 0 && x.knockedOut === null && x.t === 0, 5_000);
+      expect(d0.step === 0 && d0.knockedOut === null && d0.t === 0 && d0.playing === false, `Reset should put the glucose back unrun: ${JSON.stringify({ step: d0.step, knockedOut: d0.knockedOut, t: d0.t, playing: d0.playing })}`);
+      await ensureRunning(h);
+      const mid = await until(h, (x) => x.step >= 2, 60_000);
+      await h.button(/^Pause/).click();
+      const paused = await until(h, (x) => x.playing === false, 5_000);
+      expect(mid.step >= 2 && mid.t > 0 && paused.playing === false, `Run should walk the glucose on, and Pause stop it: ${JSON.stringify({ step: mid.step, t: mid.t, playing: paused.playing })}`);
+      await ensureRunning(h);
+      const end = await until(h, (x) => x.step === 10 && x.playing === false, 90_000);
+      expect(end.step === 10 && end.playing === false && end.atpNet === 2, `Run should walk to pyruvate and stop there: ${JSON.stringify({ step: end.step, playing: end.playing, atpNet: end.atpNet, t: end.t })}`);
+    }],
+    ['the-keys-walk-count-and-run', async (h) => {
+      await h.button(/^Reset/).click();
+      await until(h, (x) => x.step === 0 && x.t === 0 && x.playing === false, 5_000);
+      await h.focusable().focus();
+      await h.page.keyboard.press('ArrowRight');
+      await h.page.keyboard.press('ArrowRight');
+      const two = await until(h, (x) => x.step === 2, 5_000);
+      expect(two.step === 2, `two presses of the right arrow should reach step 2: ${two.step}`);
+      await h.page.keyboard.press('ArrowLeft');
+      const one = await until(h, (x) => x.step === 1, 5_000);
+      expect(one.step === 1 && one.atpNet === -1, `the left arrow should step back to step 1: ${JSON.stringify({ step: one.step, atpNet: one.atpNet })}`);
+      await h.page.keyboard.press('f');
+      const frag = await until(h, (x) => x.ledgerPer === 'fragment', 5_000);
+      expect(frag.ledgerPer === 'fragment' && frag.atpNet === -0.5 && frag.atpSpent === 0.5, `F should count per fragment, half an ATP spent: ${JSON.stringify({ ledgerPer: frag.ledgerPer, atpNet: frag.atpNet, atpSpent: frag.atpSpent })}`);
+      await h.page.keyboard.press('g');
+      const glu = await until(h, (x) => x.ledgerPer === 'glucose', 5_000);
+      expect(glu.ledgerPer === 'glucose' && glu.atpNet === -1, `G should count per glucose again: ${JSON.stringify({ ledgerPer: glu.ledgerPer, atpNet: glu.atpNet })}`);
+      await h.page.keyboard.press('Space');
+      const on = await until(h, (x) => x.playing === true, 5_000);
+      expect(on.playing === true, 'Space should start the run');
+      await h.page.keyboard.press('Space');
+      const off = await until(h, (x) => x.playing === false, 5_000);
+      expect(off.playing === false, 'Space again should pause it');
+      await h.page.keyboard.press('Home');
+      const home = await until(h, (x) => x.step === 0 && x.t === 0, 5_000);
+      expect(home.step === 0 && home.t === 0 && home.playing === false, `Home should reset the walk: ${JSON.stringify({ step: home.step, t: home.t, playing: home.playing })}`);
+    }],
+    ['reset-puts-everything-back', async (h) => {
+      const slider = (name) => h.stage.getByRole('slider', { name, exact: true });
+      await h.button(/^Per fragment/).click();
+      for (const [name, v] of [['Knock out', 3], ['ATP', 9], ['AMP', 0.5], ['Citrate', 1]]) {
+        await slider(name).fill(String(v));
+        await atValue(h, slider(name), v);
+      }
+      await h.button(/^Step forward/).click();
+      const moved = await until(h, (x) => x.step === 1 && x.ledgerPer === 'fragment' && x.knockedOut === 'phosphofructokinase' && x.atpMM === 9 && x.ampMM === 0.5 && x.citrateMM === 1, 5_000);
+      expect(moved.step === 1 && moved.ledgerPer === 'fragment' && moved.knockedOut === 'phosphofructokinase' && moved.atpMM === 9 && moved.ampMM === 0.5 && moved.citrateMM === 1, `every control should have moved: ${JSON.stringify({ step: moved.step, ledgerPer: moved.ledgerPer, knockedOut: moved.knockedOut, atpMM: moved.atpMM, ampMM: moved.ampMM, citrateMM: moved.citrateMM })}`);
+      await h.button(/^Reset/).click();
+      const d = await until(h, (x) => x.step === 0 && x.ledgerPer === 'glucose' && x.knockedOut === null && x.atpMM === 3, 5_000);
+      expect(d.step === 0 && d.t === 0 && d.playing === false && d.ledgerPer === 'glucose' && d.atpNet === 0, `Reset left ${JSON.stringify({ step: d.step, t: d.t, playing: d.playing, ledgerPer: d.ledgerPer, atpNet: d.atpNet })}`);
+      expect(d.atpMM === 3 && d.ampMM === 0.1 && d.citrateMM === 0.2 && d.committedStepOpen === true && d.closedBy === null, `Reset left the committed step's levels at ${JSON.stringify({ atpMM: d.atpMM, ampMM: d.ampMM, citrateMM: d.citrateMM, committedStepOpen: d.committedStepOpen })}`);
+      expect(d.knockedOut === null && d.accumulating === null && d.drainedAway.length === 0, `Reset left a knock-out: ${JSON.stringify({ knockedOut: d.knockedOut, accumulating: d.accumulating, drainedAway: d.drainedAway })}`);
+      // And the controls say so, not only describe(): each range's own value, and which ledger button is down.
+      for (const [name, v] of [['Knock out', 0], ['ATP', 3], ['AMP', 0.1], ['Citrate', 0.2]]) {
+        const got = await atValue(h, slider(name), v);
+        expect(got === String(v), `Reset should put the ${name} range back to ${v}: it reads ${got}`);
+      }
+      expect((await h.button(/^Per glucose/).getAttribute('aria-pressed')) === 'true', 'Reset should press Per glucose again');
     }],
   ],
 };

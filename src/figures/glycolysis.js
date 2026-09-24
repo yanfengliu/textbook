@@ -719,13 +719,23 @@ export function mount(root, ctx) {
   const A_REACHED = { stroke: C.soft, 'stroke-width': 1.5 };
   const A_FUTURE = { stroke: C.ruleStrong, 'stroke-width': 1.3 };
   const A_DEAD = { stroke: C.ruleStrong, 'stroke-width': 1.2, 'stroke-dasharray': '3 2.6' };
+  // The stroke of anything drawn in a lane's state at a step: passed, stranded by a knock-out, or not yet.
+  const strokeOf = (kind) => (kind === 'reached' ? A_REACHED : kind === 'dead' ? A_DEAD : A_FUTURE);
 
   // One arrow along `d`, ending at `end`, drawn in the state of the step on that lane.
   function arrow(pane, d, end, dir, state, head, { noHead = false } = {}) {
-    const base = state.kind === 'reached' ? A_REACHED : state.kind === 'dead' ? A_DEAD : A_FUTURE;
-    pane.path(d, { fill: 'none', ...base });
+    pane.path(d, { fill: 'none', ...strokeOf(state.kind) });
     if (state.kind === 'progress') pane.path(d, { fill: 'none', ...A_REACHED, pathLength: 1, 'stroke-dasharray': `${fmt(state.frac, 3)} 1` });
     if (!noHead && state.kind !== 'dead') chevron(pane, end[0], end[1], head, dir, state.kind === 'reached' ? A_REACHED : A_FUTURE);
+  }
+
+  // The phosphate ion's tick into one lane at step 6, drawn as that lane's arrow is: a lane stranded by
+  // the isomerase's knock-out never takes one, so its tick is dashed and has no head.
+  function piTick(pane, x1, y1, x2, y2, dir, kind) {
+    if (Math.hypot(x2 - x1, y2 - y1) < 4) return;
+    const a = { ...strokeOf(kind), 'stroke-width': 1 };
+    pane.line(x1, y1, x2, y2, a);
+    if (kind !== 'dead') chevron(pane, x2, y2, 2.4, dir, a);
   }
 
   function cross(pane, x, y, k) {
@@ -744,7 +754,8 @@ export function mount(root, ctx) {
 
   // ATP to ADP (or back), NAD⁺ to NADH: the pair either side of the arrow's middle, and the curve that
   // dips to the arrow and comes back, as a coupled reaction is drawn.
-  function currencyPair(pane, gx, y, rx, ry, c, lit, dir, yArrow, fs) {
+  function currencyPair(pane, gx, y, rx, ry, c, kind, dir, yArrow, fs) {
+    const lit = kind === 'reached';
     const dx = rx + 1.5;
     const xl = gx - dx;
     const xr = gx + dx;
@@ -753,21 +764,23 @@ export function mount(root, ctx) {
     const y1 = dir === 'down' ? y + ry + 0.5 : y - ry - 0.5;
     const yT = dir === 'down' ? yArrow - 2.2 : yArrow + 2.2;
     const ctl = y1 + (yT - y1) / 0.75;
-    const a = lit ? A_REACHED : A_FUTURE;
-    pane.path(`M${f2(xl)} ${f2(y1)} C${f2(xl)} ${f2(ctl)} ${f2(xr)} ${f2(ctl)} ${f2(xr)} ${f2(y1)}`, { fill: 'none', ...a, 'stroke-width': 1.1 });
-    chevron(pane, xr, y1, 2.6, dir === 'down' ? 'u' : 'd', { ...a, 'stroke-width': 1.1 });
+    const a = { ...strokeOf(kind), 'stroke-width': 1.1 };
+    pane.path(`M${f2(xl)} ${f2(y1)} C${f2(xl)} ${f2(ctl)} ${f2(xr)} ${f2(ctl)} ${f2(xr)} ${f2(y1)}`, { fill: 'none', ...a });
+    if (kind !== 'dead') chevron(pane, xr, y1, 2.6, dir === 'down' ? 'u' : 'd', a);
   }
 
   // The one token that changes hands, and a stroke joining it to its arrow: pointing into the arrow for
-  // what a step spends, out of it for what a step makes.
-  function currencyOne(pane, x, y, rx, ry, str, part, lit, spends, yArrow, fs) {
-    token(pane, x, y, rx, ry, str, part, lit, fs);
+  // what a step spends, out of it for what a step makes. On a lane a knock-out has stranded the stroke is
+  // dashed and has no head, as that lane's arrows are: nothing changes hands there.
+  function currencyOne(pane, x, y, rx, ry, str, part, kind, spends, yArrow, fs) {
+    token(pane, x, y, rx, ry, str, part, kind === 'reached', fs);
     const down = yArrow > y;
     const y1 = down ? y + ry + 0.8 : y - ry - 0.8;
     const y2 = down ? yArrow - 2.4 : yArrow + 2.4;
     if (Math.abs(y2 - y1) < 4) return;
-    const a = { ...(lit ? A_REACHED : A_FUTURE), 'stroke-width': 1 };
+    const a = { ...strokeOf(kind), 'stroke-width': 1 };
     pane.line(x, y1, x, y2, a);
+    if (kind === 'dead') return;
     if (spends) chevron(pane, x, y2, 2.3, down ? 'd' : 'u', a);
     else chevron(pane, x, y1, 2.3, down ? 'u' : 'd', a);
   }
@@ -976,40 +989,32 @@ export function mount(root, ctx) {
       if (k <= g.first || k > g.last) continue;
       const c = CURRENCY[k];
       const spine = k <= 3;
-      const litOn = (lane) => arrowOf(st, k, lane).kind === 'reached';
+      const kindOn = (lane) => arrowOf(st, k, lane).kind;
       if (g.single) {
         const [str, part] = spine ? c.give : c.get;
         const rx = tokenRx([str], g.fsTok);
-        const one = (y, lit, yArrow) => currencyOne(walk, g.GX(k), y, rx, g.tokRy, str, part, lit, spine, yArrow, g.fsTok);
-        if (spine) one(g.spineFit ? g.yU : g.yTokU, litOn('spine'), g.yC);
+        const one = (y, kind, yArrow) => currencyOne(walk, g.GX(k), y, rx, g.tokRy, str, part, kind, spine, yArrow, g.fsTok);
+        if (spine) one(g.spineFit ? g.yU : g.yTokU, kindOn('spine'), g.yC);
         else {
-          one(g.yTokU, litOn('up'), g.yU);
-          one(g.yTokL, litOn('low'), g.yL);
+          one(g.yTokU, kindOn('up'), g.yU);
+          one(g.yTokL, kindOn('low'), g.yL);
         }
       } else {
         const rx = tokenRx([c.give[0], c.get[0]], g.fsTok);
-        const pair = (y, lit, dir, yArrow) => currencyPair(walk, g.GX(k), y, rx, g.tokRy, c, lit, dir, yArrow, g.fsTok);
-        if (spine) pair(g.spineFit ? g.yU : g.yTokU, litOn('spine'), 'down', g.yC);
+        const pair = (y, kind, dir, yArrow) => currencyPair(walk, g.GX(k), y, rx, g.tokRy, c, kind, dir, yArrow, g.fsTok);
+        if (spine) pair(g.spineFit ? g.yU : g.yTokU, kindOn('spine'), 'down', g.yC);
         else {
-          pair(g.yTokU, litOn('up'), 'down', g.yU);
-          pair(g.yTokL, litOn('low'), 'up', g.yL);
+          pair(g.yTokU, kindOn('up'), 'down', g.yU);
+          pair(g.yTokL, kindOn('low'), 'up', g.yL);
         }
       }
       if (k === 6) {
-        // The phosphate ion from solution, between the lanes, one to each.
-        const upLit = litOn('up');
-        const lowLit = litOn('low');
+        // The phosphate ion from solution, between the lanes, one to each lane that takes the step.
         const prx = tokenRx(['P_i'], g.fsTok);
         const x = g.GX(6);
-        const tick = (y1, y2, lit, dir) => {
-          if (Math.abs(y2 - y1) < 4) return;
-          const a = { ...(lit ? A_REACHED : A_FUTURE), 'stroke-width': 1 };
-          walk.line(x, y1, x, y2, a);
-          chevron(walk, x, y2, 2.4, dir, a);
-        };
-        tick(g.yC - g.tokRy - 1, g.yU + 2.5, upLit, 'u');
-        tick(g.yC + g.tokRy + 1, g.yL - 2.5, lowLit, 'd');
-        token(walk, x, g.yC, prx, g.tokRy, 'P_i', PI_PART, upLit || lowLit, g.fsTok);
+        piTick(walk, x, g.yC - g.tokRy - 1, x, g.yU + 2.5, 'u', kindOn('up'));
+        piTick(walk, x, g.yC + g.tokRy + 1, x, g.yL - 2.5, 'd', kindOn('low'));
+        token(walk, x, g.yC, prx, g.tokRy, 'P_i', PI_PART, kindOn('up') === 'reached' || kindOn('low') === 'reached', g.fsTok);
       }
     }
 
@@ -1280,17 +1285,14 @@ export function mount(root, ctx) {
         right -= 2 * rx + 4 + widthOf(amount, fs) + 8;
       }
       if (k === 6) {
-        // The phosphate ion from solution, between the columns, one to each.
+        // The phosphate ion from solution, between the columns, one to each column that takes the step
+        // (`states` is [upper lane, lower lane], the left column and the right).
         const prx = tokenRx(['P_i'], fsTok);
         if (xS - xU - prx - 1 > prx) {
-          const lit = states.some((s) => s === 'reached');
-          const a = { ...(lit ? A_REACHED : A_FUTURE), 'stroke-width': 1 };
-          for (const [xa, xb, dir] of [[xS - prx - 1, xU + 2.5, 'l'], [xS + prx + 1, xL - 2.5, 'r']]) {
-            if (Math.abs(xb - xa) < 4) continue;
-            walk.line(xa, gapMid[6], xb, gapMid[6], a);
-            chevron(walk, xb, gapMid[6], 2.4, dir, a);
-          }
-          token(walk, xS, gapMid[6], prx, tokRy, 'P_i', PI_PART, lit, fsTok);
+          const y = gapMid[6];
+          piTick(walk, xS - prx - 1, y, xU + 2.5, y, 'l', states[0]);
+          piTick(walk, xS + prx + 1, y, xL - 2.5, y, 'r', states[1]);
+          token(walk, xS, y, prx, tokRy, 'P_i', PI_PART, states.some((s) => s === 'reached'), fsTok);
         }
       }
       const room = right - xT;
@@ -1349,9 +1351,15 @@ export function mount(root, ctx) {
     if (domains && !status && !knock) r.note(DOMAINS, { size: size - 1.2 });
   }
 
+  // The toolbar starts where the panes end, so every table in the ledger stops this far short of the
+  // pane's bottom rather than laying its last rule along the buttons' top edge. `arrange()` gives a
+  // ledger that sits under the walk these pixels back; one beside the walk has height to spare.
+  const LEDGER_GAP = 6;
+
   function drawLedger() {
     ledger.clear();
-    const { w, h: hgt } = ledger.box;
+    const { w } = ledger.box;
+    const hgt = Math.max(0, ledger.box.h - LEDGER_GAP);
     const title = `Ledger · per ${env.per}`;
     if (mode === 'line') {
       const gut = 22;
@@ -1369,7 +1377,11 @@ export function mount(root, ctx) {
       const x = 10;
       const width = w - x;
       const size = clamp(Math.min(width / 21, hgt / 16), 9.2, 10.6);
-      ledger.readout({ title, x, y: 0, width, size, minRow: 13, maxRow: 17 }).fit(hgt, (r, lv) => {
+      // The title is set in spaced capitals at the readout's 9.4 px, about 0.68 em a letter as measured.
+      // A column too narrow for all of it drops the word "Ledger", as the ladder's does, in either unit,
+      // so the title does not change form when the reader changes the unit.
+      const head = widthOf('Ledger · per fragment', 9.4, 0.72) <= width ? title : `Per ${env.per}`;
+      ledger.readout({ title: head, x, y: 0, width, size, minRow: 13, maxRow: 17 }).fit(hgt, (r, lv) => {
         talliesInto(r);
         notesInto(r, { short: lv >= 2, domains: lv === 0, alertsOnly: lv >= 3, size });
       }, { levels: 4 });
@@ -1447,9 +1459,9 @@ export function mount(root, ctx) {
     let lr = 2;
     if (H > W * 0.6 || W < 400) {
       want = 'ladder';
-      rows = `minmax(0, 1fr) minmax(0, ${Math.round(clamp(H * 0.26, 80, 150))}px)`;
+      rows = `minmax(0, 1fr) minmax(0, ${Math.round(clamp(H * 0.26, 80, 150)) + LEDGER_GAP}px)`;
     } else {
-      const led = Math.round(clamp(H * 0.32, 112, 160));
+      const led = Math.round(clamp(H * 0.32, 112, 160)) + LEDGER_GAP;
       if (W >= 760 && H - led - 6 >= 210) {
         want = 'line';
         rows = `minmax(0, 1fr) minmax(0, ${led}px)`;
