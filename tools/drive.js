@@ -4087,6 +4087,139 @@ const RECIPES = {
       expect(d.organism === 'e-coli' && d.origins === 'one' && d.elapsedMinutes === 0, `Reset left the chromosome at ${JSON.stringify({ organism: d.organism, origins: d.origins, elapsedMinutes: d.elapsedMinutes })}`);
     }],
   ],
+  // Figure 8.4. Step, Divide and the telomerase and shape controls move the model inside the press, so
+  // each step polls describe() for the state its press makes and then reads the fields the brief names:
+  // gapAtEnd, lostLastDivisionBp and senescent. The numbers asserted exactly are the model's: a tail of
+  // twice the loss, one copy a whole tail short and the other not, so 50 bp an end at each division by
+  // default, and a stop at 7,500 bp after fifty divisions. Only the two run steps wait on the clock.
+  'chromosome-end': [
+    ['opens-before-the-first-division', async (h) => {
+      const d = await h.describe();
+      expect(d.phase === 'before' && d.divisions === 0 && d.playing === false, `it should open before the first division, paused: ${JSON.stringify({ phase: d.phase, divisions: d.divisions, playing: d.playing })}`);
+      expect(d.telomereBp === 10000 && d.startBp === 10000 && d.thresholdBp === 7500 && d.divisionsLeft === 50, `it should open at 10,000 bp, fifty divisions from the stop at 7,500: ${JSON.stringify({ telomereBp: d.telomereBp, startBp: d.startBp, thresholdBp: d.thresholdBp, divisionsLeft: d.divisionsLeft })}`);
+      expect(d.lossPerDivisionBp === 50 && d.overhangNt === 100 && d.lostLastDivisionBp === 0, `it should open at 50 bp an end from a 100-nt tail, nothing lost yet: ${JSON.stringify({ lossPerDivisionBp: d.lossPerDivisionBp, overhangNt: d.overhangNt, lostLastDivisionBp: d.lostLastDivisionBp })}`);
+      expect(d.gapAtEnd === false && d.senescent === false && d.telomerase === false && d.repeatsAdded === 0 && d.shape === 'linear', `it should open linear, with no gap, no stop and no telomerase: ${JSON.stringify({ gapAtEnd: d.gapAtEnd, senescent: d.senescent, telomerase: d.telomerase, repeatsAdded: d.repeatsAdded, shape: d.shape })}`);
+    }],
+    ['two-steps-copy-the-end-and-leave-the-last-gap', async (h) => {
+      await h.button(/^Step/).click();
+      const c = await until(h, (x) => x.phase === 'copying', 5_000);
+      expect(c.phase === 'copying' && c.divisions === 0 && c.gapAtEnd === false && c.telomereBp === 10000, `one step should copy the end, the division not yet counted: ${JSON.stringify({ phase: c.phase, divisions: c.divisions, gapAtEnd: c.gapAtEnd, telomereBp: c.telomereBp })}`);
+      await h.button(/^Step/).click();
+      const d = await until(h, (x) => x.phase === 'after', 5_000);
+      expect(d.phase === 'after' && d.divisions === 1 && d.gapAtEnd === true, `the second step should leave the last primer's gap open: ${JSON.stringify({ phase: d.phase, divisions: d.divisions, gapAtEnd: d.gapAtEnd })}`);
+      // One copy is a whole 100-nt tail short and the other is not: 50 bp from the average end.
+      expect(d.lostLastDivisionBp === 50 && d.telomereBp === 9950 && d.divisionsLeft === 49, `the division should take 50 bp from the average end: ${JSON.stringify({ lostLastDivisionBp: d.lostLastDivisionBp, telomereBp: d.telomereBp, divisionsLeft: d.divisionsLeft })}`);
+      expect(d.playing === false && d.senescent === false, `a step should leave it paused and still dividing: ${JSON.stringify({ playing: d.playing, senescent: d.senescent })}`);
+    }],
+    ['divide-to-the-stop-after-fifty-divisions', async (h) => {
+      for (let i = 0; i < 49; i += 1) await h.button(/^Divide/).click();
+      const d = await until(h, (x) => x.divisions === 50, 10_000);
+      expect(d.divisions === 50 && d.telomereBp === 7500 && d.senescent === true && d.divisionsLeft === 0, `fifty divisions should bring it to 7,500 bp and stop it: ${JSON.stringify({ divisions: d.divisions, telomereBp: d.telomereBp, senescent: d.senescent, divisionsLeft: d.divisionsLeft })}`);
+      expect(d.lostLastDivisionBp === 50 && d.gapAtEnd === true && d.phase === 'after', `the last division should still lose 50 bp at an open gap: ${JSON.stringify({ lostLastDivisionBp: d.lostLastDivisionBp, gapAtEnd: d.gapAtEnd, phase: d.phase })}`);
+      // Both presses act inside the click, so the state read straight after them is the state they made.
+      await h.button(/^Divide/).click();
+      await h.button(/^Step/).click();
+      const still = await h.describe();
+      expect(still.divisions === 50 && still.telomereBp === 7500 && still.phase === 'after' && still.senescent === true, `a cell that has stopped should not divide again: ${JSON.stringify({ divisions: still.divisions, telomereBp: still.telomereBp, phase: still.phase, senescent: still.senescent })}`);
+    }],
+    ['telomerase-at-the-stop-keeps-the-length', async (h) => {
+      await h.button(/^Telomerase/).click();
+      const d = await until(h, (x) => x.telomerase === true, 5_000);
+      // The division on show is re-done with the enzyme there: nothing lost, so nothing stops it.
+      expect(d.senescent === false && d.lostLastDivisionBp === 0 && d.gapAtEnd === false && d.telomereBp === 7550 && d.divisionsLeft === null, `telomerase should undo the last division's loss and the stop: ${JSON.stringify({ senescent: d.senescent, lostLastDivisionBp: d.lostLastDivisionBp, gapAtEnd: d.gapAtEnd, telomereBp: d.telomereBp, divisionsLeft: d.divisionsLeft })}`);
+      // 100 nt added back, six to a repeat: sixteen whole repeats.
+      expect(d.repeatsAdded === 16, `the tail's 100 nt should be sixteen whole repeats: ${d.repeatsAdded}`);
+      await h.button(/^Divide/).click();
+      const e = await until(h, (x) => x.divisions === 51, 5_000);
+      // Two divisions' tails, 200 nt, are 33 whole repeats: the count is of the nucleotides, not the divisions.
+      expect(e.divisions === 51 && e.telomereBp === 7550 && e.lostLastDivisionBp === 0 && e.repeatsAdded === 33 && e.senescent === false, `with telomerase a division should lose nothing: ${JSON.stringify({ divisions: e.divisions, telomereBp: e.telomereBp, lostLastDivisionBp: e.lostLastDivisionBp, repeatsAdded: e.repeatsAdded, senescent: e.senescent })}`);
+    }],
+    ['run-divisions-goes-on-and-pause-stops-it', async (h) => {
+      const before = await h.describe();
+      await ensureRunning(h);
+      const d = await until(h, (x) => x.divisions >= before.divisions + 2, 30_000);
+      await h.button(/^Pause/).click();
+      const p = await until(h, (x) => x.playing === false, 5_000);
+      expect(d.divisions >= before.divisions + 2, `a run should go on dividing: ${before.divisions} -> ${d.divisions} at t=${d.t}`);
+      expect(p.playing === false, 'Pause should stop the run');
+      expect(p.telomereBp === 7550 && p.senescent === false, `with telomerase on the length should hold through the run: ${JSON.stringify({ telomereBp: p.telomereBp, senescent: p.senescent })}`);
+    }],
+    ['a-run-stops-by-itself-at-the-threshold', async (h) => {
+      await h.button(/^Reset/).click();
+      await until(h, (x) => x.divisions === 0 && x.telomerase === false && x.phase === 'before', 5_000);
+      for (let i = 0; i < 48; i += 1) await h.button(/^Divide/).click();
+      const d = await until(h, (x) => x.divisions === 48, 10_000);
+      expect(d.divisions === 48 && d.telomereBp === 7600 && d.senescent === false && d.divisionsLeft === 2, `48 divisions should leave 7,600 bp, two from the stop: ${JSON.stringify({ divisions: d.divisions, telomereBp: d.telomereBp, divisionsLeft: d.divisionsLeft })}`);
+      await ensureRunning(h);
+      const end = await until(h, (x) => x.playing === false && x.senescent === true, 30_000);
+      expect(end.playing === false && end.senescent === true && end.divisions === 50 && end.telomereBp === 7500, `the run should stop itself at 7,500 bp after fifty divisions: ${JSON.stringify({ playing: end.playing, senescent: end.senescent, divisions: end.divisions, telomereBp: end.telomereBp })}`);
+    }],
+    ['the-loss-control-sets-the-tail', async (h) => {
+      await h.button(/^Reset/).click();
+      await until(h, (x) => x.divisions === 0 && x.phase === 'before', 5_000);
+      const slider = h.stage.getByRole('slider', { name: 'Loss per division' });
+      await slider.fill('100');
+      await atValue(h, slider, 100);
+      const d = await until(h, (x) => x.lossPerDivisionBp === 100, 5_000);
+      expect(d.lossPerDivisionBp === 100 && d.overhangNt === 200 && d.divisionsLeft === 25, `100 bp an end should come from a 200-nt tail, 25 divisions from the stop: ${JSON.stringify({ lossPerDivisionBp: d.lossPerDivisionBp, overhangNt: d.overhangNt, divisionsLeft: d.divisionsLeft })}`);
+      await h.button(/^Divide/).click();
+      const e = await until(h, (x) => x.divisions === 1, 5_000);
+      expect(e.lostLastDivisionBp === 100 && e.telomereBp === 9900 && e.gapAtEnd === true, `a division should take 100 bp: ${JSON.stringify({ lostLastDivisionBp: e.lostLastDivisionBp, telomereBp: e.telomereBp, gapAtEnd: e.gapAtEnd })}`);
+      await slider.fill('25');
+      await atValue(h, slider, 25);
+      const f = await until(h, (x) => x.lossPerDivisionBp === 25, 5_000);
+      // The division on show is re-done at the new setting.
+      expect(f.overhangNt === 50 && f.lostLastDivisionBp === 25 && f.telomereBp === 9975 && f.divisionsLeft === 99, `at 25 bp the division on show should be re-done from a 50-nt tail: ${JSON.stringify({ overhangNt: f.overhangNt, lostLastDivisionBp: f.lostLastDivisionBp, telomereBp: f.telomereBp, divisionsLeft: f.divisionsLeft })}`);
+    }],
+    ['a-circle-has-no-end-to-lose', async (h) => {
+      await h.button(/^Circular/).click();
+      const d = await until(h, (x) => x.shape === 'circular', 5_000);
+      expect(d.divisions === 0 && d.phase === 'before' && d.overhangNt === 0 && d.divisionsLeft === null && d.lossPerDivisionBp === 25, `a circle should start again, keep the setting, and have no tail and no stop: ${JSON.stringify({ divisions: d.divisions, phase: d.phase, overhangNt: d.overhangNt, divisionsLeft: d.divisionsLeft, lossPerDivisionBp: d.lossPerDivisionBp })}`);
+      for (let i = 0; i < 2; i += 1) await h.button(/^Step/).click();
+      const a = await until(h, (x) => x.phase === 'after', 5_000);
+      expect(a.divisions === 1 && a.gapAtEnd === false && a.lostLastDivisionBp === 0 && a.telomereBp === 10000, `the other fork's leading strand should fill the last gap, and nothing be lost: ${JSON.stringify({ divisions: a.divisions, gapAtEnd: a.gapAtEnd, lostLastDivisionBp: a.lostLastDivisionBp, telomereBp: a.telomereBp })}`);
+      for (let i = 0; i < 10; i += 1) await h.button(/^Divide/).click();
+      const many = await until(h, (x) => x.divisions === 11, 5_000);
+      expect(many.divisions === 11 && many.telomereBp === 10000 && many.gapAtEnd === false && many.senescent === false, `a circle should lose nothing however often it divides: ${JSON.stringify({ divisions: many.divisions, telomereBp: many.telomereBp, gapAtEnd: many.gapAtEnd, senescent: many.senescent })}`);
+      await h.button(/^Linear/).click();
+      const lin = await until(h, (x) => x.shape === 'linear', 5_000);
+      expect(lin.divisions === 0 && lin.phase === 'before' && lin.telomereBp === 10000 && lin.overhangNt === 50, `back to linear should start again with the setting kept: ${JSON.stringify({ divisions: lin.divisions, phase: lin.phase, telomereBp: lin.telomereBp, overhangNt: lin.overhangNt })}`);
+    }],
+    ['the-keys-step-divide-switch-and-reset', async (h) => {
+      await h.focusable().focus();
+      await h.page.keyboard.press('Enter');
+      const s = await until(h, (x) => x.phase === 'copying', 5_000);
+      expect(s.phase === 'copying' && s.divisions === 0, `Enter should step into copying: ${JSON.stringify({ phase: s.phase, divisions: s.divisions })}`);
+      await h.page.keyboard.press('d');
+      const d = await until(h, (x) => x.divisions === 1 && x.phase === 'after', 5_000);
+      expect(d.divisions === 1 && d.phase === 'after' && d.gapAtEnd === true, `D should finish the division: ${JSON.stringify({ divisions: d.divisions, phase: d.phase, gapAtEnd: d.gapAtEnd })}`);
+      await h.page.keyboard.press('t');
+      const t = await until(h, (x) => x.telomerase === true, 5_000);
+      expect(t.telomerase === true && t.lostLastDivisionBp === 0 && t.gapAtEnd === false, `T should switch telomerase on: ${JSON.stringify({ telomerase: t.telomerase, lostLastDivisionBp: t.lostLastDivisionBp })}`);
+      await h.page.keyboard.press('c');
+      const c = await until(h, (x) => x.shape === 'circular', 5_000);
+      expect(c.shape === 'circular' && c.divisions === 0 && c.telomerase === true, `C should move to the next shape and keep the settings: ${JSON.stringify({ shape: c.shape, divisions: c.divisions, telomerase: c.telomerase })}`);
+      await h.page.keyboard.press('Home');
+      const home = await until(h, (x) => x.shape === 'linear' && x.telomerase === false && x.lossPerDivisionBp === 50, 5_000);
+      expect(home.phase === 'before' && home.divisions === 0 && home.telomereBp === 10000 && home.overhangNt === 100 && home.playing === false, `Home should reset: ${JSON.stringify({ phase: home.phase, divisions: home.divisions, telomereBp: home.telomereBp, overhangNt: home.overhangNt, playing: home.playing })}`);
+    }],
+    ['reset-puts-everything-back', async (h) => {
+      await h.button(/^Telomerase/).click();
+      const slider = h.stage.getByRole('slider', { name: 'Loss per division' });
+      await slider.fill('80');
+      await atValue(h, slider, 80);
+      await h.button(/^Circular/).click();
+      for (let i = 0; i < 3; i += 1) await h.button(/^Divide/).click();
+      const changed = await until(h, (x) => x.shape === 'circular' && x.divisions === 3, 5_000);
+      expect(changed.shape === 'circular' && changed.divisions === 3 && changed.telomerase === true && changed.lossPerDivisionBp === 80, `the state to reset should have been reached: ${JSON.stringify({ shape: changed.shape, divisions: changed.divisions, telomerase: changed.telomerase, lossPerDivisionBp: changed.lossPerDivisionBp })}`);
+      await h.button(/^Reset/).click();
+      const d = await until(h, (x) => x.shape === 'linear' && x.divisions === 0 && x.telomerase === false && x.lossPerDivisionBp === 50, 5_000);
+      expect(d.phase === 'before' && d.divisions === 0 && d.telomereBp === 10000 && d.overhangNt === 100 && d.repeatsAdded === 0 && d.playing === false, `Reset left ${JSON.stringify({ phase: d.phase, divisions: d.divisions, telomereBp: d.telomereBp, overhangNt: d.overhangNt, repeatsAdded: d.repeatsAdded, playing: d.playing })}`);
+      expect(d.shape === 'linear' && d.telomerase === false && d.lossPerDivisionBp === 50, `Reset left the settings at ${JSON.stringify({ shape: d.shape, telomerase: d.telomerase, lossPerDivisionBp: d.lossPerDivisionBp })}`);
+      const shown = await atValue(h, slider, 50);
+      expect(shown === '50', `Reset should put the slider back at 50: ${shown}`);
+    }],
+  ],
 };
 
 rmSync(OUT, { recursive: true, force: true });

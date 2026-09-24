@@ -52,7 +52,11 @@
 // the old one, and the primer is removed to leave the tail. The length holds, `lostLastDivisionBp` is
 // 0, and `repeatsAdded` counts the whole repeats added since the reset, 16 a division at the default.
 // The enlarged letters beside the tip show one step of it: the pairing, a repeat added, the shift, and
-// the next repeat.
+// the next repeat, run through while the enzyme extends the end and then held.
+//
+// BEFORE A DIVISION the enlarged letters stand where the tail begins instead: the G-rich strand running
+// on to the tip over its partner, the C-rich strand, which ends there in ATC at its 5′ end, as most
+// human ones do (Sfeir et al. 2005). The prose does not say so, and nothing else depends on it.
 //
 // WHAT A SETTING CHANGES. The division on show is computed from the settings as they are, so switching
 // telomerase on in the 'after' phase re-does that division's end with the enzyme there — and switching
@@ -69,12 +73,24 @@
 // has the other fork's leading strand beyond it, which fills it. Nothing is lost, no tail is left, and
 // there is no telomere to count down, so `telomereBp` stays at the length the model started from.
 //
+// THE WIDE COMPOSITION. The chromosome end and the table each run the stage's full width, the end
+// because it is a long, flat thing whose repeats are legible only when it has the width. The whole
+// telomere is a band across the top, the enlarged tip fills the middle with the two copies one above
+// the other, and the table is a band along the foot: three short tables side by side, rows lined up
+// across them, and the sentence in a fourth column. On the smallest wide stage, about 810 px with a
+// two-row toolbar, the telomerase letters rise to stay inside the end, and the tables narrow so that the
+// longest sentence takes the three lines the band holds.
+//
 // THE NARROW COMPOSITION. Below 800 px the chromosome end runs down the stage, tip at the bottom: the copy
 // made by the lagging strand on the left, the one made by the leading strand on the right, and each
 // copy's labels to its outside. The whole telomere stays a band across the top, the letters telomerase
 // copies sit beside the tip in twelve columns rather than sixteen, and the table becomes two columns of
 // rows beneath, with its sentence under them. `narrowAspect` is 9/16 and not the brief's 4/5: see
-// NARROW_WHY below.
+// NARROW_WHY below. On phones narrower than the gate's 390 px the letters give up what does not fit
+// rather than touch a strand — tail columns before the tail begins, the '5′' in front of telomerase's —
+// and are left out when too few would remain; a sentence that cannot fit whole is left out rather than
+// cut, and the rows take its room. On a 320 px phone that leaves the copies, the labels that fit and
+// the table's rows, without the sentence.
 import { C, clamp, lerp, el } from './lib/svg.js';
 import { bench } from './lib/bench.js';
 import { hash2 } from './lib/chem-atoms.js';
@@ -88,9 +104,10 @@ export const meta = {
   narrowAspect: 9 / 16,
 };
 
-// NARROW_WHY: measured at the narrow gate's 342 px stage, the toolbar takes four rows for the seven
-// controls, and a 4/5 stage leaves the chromosome end and the table under 250 px between them, which
-// fits neither the repeats at a legible spacing nor the table's rows.
+// NARROW_WHY: measured at the narrow gate's 342 px stage, the seven controls take three toolbar rows,
+// 98 px. A 4/5 stage is 428 px tall and would leave about 330 px for the chromosome end and the table
+// together, which fits neither the two copies at a legible length nor the eight rows and the sentence.
+// At 9/16 the stage is 608 px tall: the end pane is 326 × 324 px and the table under it about 145.
 
 const CSS = `
 .tb-chromosome-end .ce-num { font-variant-numeric: lining-nums tabular-nums; }
