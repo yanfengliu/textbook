@@ -12,18 +12,17 @@ jobs:
     # the system libraries --with-deps installs were measured on 24.04, and a new image under them would
     # change both without a commit to show for it. Move it on purpose, and re-measure when you do.
     runs-on: ubuntu-24.04
-    # A guard against a hung run, sized so a healthy run never meets it. The old 30 could not be met:
-    # unit, check, shot, flow and drive alone used about 15 of those minutes here (910 s), and no run
-    # ever got past drive. The whole chain took 2180 s (36 min) on 32 logical CPUs on 2026-09-23
-    # (docs/work/7_project-audit/reviews/2_integration.md). On this 4-CPU, 15 GB runner (run 35938466158)
-    # only the gates up to drive have run: drive alone took 754 s against 513 s locally (run
-    # 35902188268), and theme, added since, 32 s. The gates after drive, scaled the way drive scaled,
-    # with pinned at its one-process time because its eight shards share the runner's cores, put the
-    # chain near 60 minutes on the 4-core runner a public repository gets and near 120 on the 2-core one
-    # a private repository gets. 180 covers the 2-core case half again and stays under GitHub's
-    # 360-minute ceiling. These are estimates: replace them with the duration of the first run that
-    # completes every step.
-    timeout-minutes: 180
+    # A guard against a hung run, sized so a healthy run never meets it. The old 30 could not be met: no
+    # run has ever got past drive, and the job reaches the end of drive at about 20.5 minutes on this
+    # 4-CPU, 15 GB runner (runs 35940597512 on main and 35941037349 on a branch, 2026-09-24). Drive
+    # alone took 936 s there against 513 s locally, 1.8 times as long. The gates after drive took 1721 s
+    # locally on 32 logical CPUs on 2026-09-23 (docs/work/7_project-audit/reviews/2_integration.md,
+    # with pinned at its one-process 410 s, because its eight shards share the runner's cores); at 1.8
+    # times that is about 52 minutes, so the whole job is near 72 minutes here, and near 145 on the
+    # 2-core runner a private repository gets if every step takes twice as long. 240 covers the 2-core
+    # case two thirds again and stays under GitHub's 360-minute ceiling. These are estimates: replace
+    # them with the duration of the first run that completes every step.
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
