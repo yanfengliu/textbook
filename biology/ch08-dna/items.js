@@ -49,9 +49,9 @@
 // No `task` items. Chapter 8 ships at reduced scope, cut to four figures, with no figure tasks, so
 // every objective's items are questions: 120 in all, 80 mcq and 40 free, three per objective and both
 // formats for each — the `-1` and `-2` items multiple choice and the `-3` item free. No item cites a
-// figure by number, because the chapter's figure numbers are changing with the cut, and no item needs a
-// figure to answer it. The `apply` objectives' items use cases the chapter does not work through:
-// other genomes, sizes and speeds, mutant strains, drugs, diseases and imagined organisms.
+// figure by number, since the numbers moved when the chapter was cut and would move again, and no item
+// needs a figure to answer it. The `apply` objectives' items use cases the chapter does not work
+// through: other genomes, sizes and speeds, mutant strains, drugs, diseases and imagined organisms.
 //
 // Option order and length: the correct option is spread across A to D, and each item's options are
 // written to comparable lengths, so that neither the position nor the length of an option says which
@@ -109,13 +109,16 @@
 // (`i-genome-composition-2`), and the enzymes and organisms that do not exist: the polymerase that
 // adds at either end, the 3′-to-5′ polymerase, the uracil-DNA organism and the two-partner bases.
 //
-// Written against the chapter on branch ch08-dna at 5126afa while a prose fix ran on branch ch08. No
-// item relies on a passage that fix may change: `i-lagging-strand-1` asks what an either-end polymerase
-// would do, not what parallel strands would do, because the prose's parallel-strand claim holds only
-// for a fork moving one way; `i-dna-damage-*` give no rate for ultraviolet dimers, which depends on the
-// light, and none for single-strand breaks, which the chapter does not state; and the telomere items
-// count from the shortest telomere, which reconciles ten thousand pairs at birth, fifty lost a division
-// and Hayflick's fifty (`i-divisions-counted-3` asks exactly that).
+// Written against the chapter on branch ch08-dna at 5126afa, then read against the prose fix on branch
+// ch08 at cb447d7. That fix changed no objective's id or statement and no number an item uses, except
+// that §8.5 now says "a small fraction" of the electrons on the respiratory chain leak, not "a per cent
+// or two", and `i-dna-damage-2` follows it. Three passages are avoided rather than relied on:
+// `i-lagging-strand-1` asks what an either-end polymerase would do, not what parallel strands would do,
+// because the prose's parallel-strand claim holds only for a fork moving one way; `i-dna-damage-*` give
+// no rate for ultraviolet dimers, which depends on the light, and none for single-strand breaks, which
+// the chapter does not state; and the telomere items count from the shortest telomere, which reconciles
+// ten thousand pairs at birth, fifty lost a division and Hayflick's fifty (`i-divisions-counted-3` asks
+// exactly that).
 //
 // Typography follows the chapter: primes are U+2032 (5′, 3′), units take a space (0.34 nm, 6 µm), and
 // species names are italic.
@@ -1331,7 +1334,7 @@ export const ITEMS = [
       'its copying would be expected to be much less accurate, near the one in a hundred thousand of the choice alone before mismatch repair, if it could not proofread',
       'the enzyme that starts a chain has no paired end to check against, so it cannot proofread; its product is made of RNA to mark it as provisional, so it can be recognised, removed and replaced by a polymerase that does check',
     ],
-    explain: 'Section 8.4 stated the one-way rule; this is why it holds. The direction every polymerase grows in is the only one that lets it undo a mistake without losing its power to go on.',
+    explain: 'Section 8.4 stated the one-way rule; this is why it holds. The direction every DNA polymerase grows in is the only one that lets it undo a mistake without losing its power to go on.',
   },
   {
     id: 'i-dna-damage-1',
@@ -1363,7 +1366,7 @@ export const ITEMS = [
       { text: 'Neither: damage to DNA comes from outside the cell, and both cultures are kept away from light.',
         why: 'Overlooks damage made by the cell\'s own chemistry. Water and the cell\'s respiration damage DNA thousands of times a day without any help from outside.' },
     ],
-    explain: 'Section 7.4 said that a per cent or two of the electrons passing along the respiratory chain escape early and make superoxide. Some of the reactive oxygen that follows reaches the DNA and turns guanine into a form that pairs with adenine, 500 to 1000 times a day in a human cell. With little oxygen, the escaping electrons find less of it to make reactive oxygen from.',
+    explain: 'Section 7.4 said that a small fraction of the electrons passing along the respiratory chain escape early and make superoxide. Some of the reactive oxygen that follows reaches the DNA and turns guanine into a form that pairs with adenine, 500 to 1000 times a day in a human cell. With little oxygen, the escaping electrons find less of it to make reactive oxygen from.',
   },
   {
     id: 'i-dna-damage-3',
