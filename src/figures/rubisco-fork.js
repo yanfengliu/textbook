@@ -143,11 +143,11 @@ const rowLabel = (i, tempC) => (i === 1 ? `Dissolved, at ${tempC} °C` : ROW[i])
 
 // The salvage's five stops, in order, and what happens at each. `id` is what describe() reports.
 const STOPS = [
-  { id: 'chloroplast', place: 'chloroplast', say: 'In the chloroplast the phosphate is taken off 2-phosphoglycolate, leaving glycolate.' },
-  { id: 'peroxisome', place: 'peroxisome', say: 'In the peroxisome the glycolate hands hydrogen straight to oxygen and makes peroxide, which a catalase destroys at once; it picks up a nitrogen.' },
-  { id: 'mitochondrion', place: 'mitochondrion', say: 'In the mitochondrion two of the two-carbon molecules become one three-carbon one: a carbon leaves as carbon dioxide, a nitrogen as ammonia.' },
-  { id: 'peroxisome-back', place: 'peroxisome', say: 'Back through the peroxisome, the three-carbon molecule hands its nitrogen on.' },
-  { id: 'chloroplast-back', place: 'chloroplast', say: 'Back in the chloroplast one ATP makes it 3-phosphoglycerate for the cycle, and a second, with reducing power, recaptures the ammonia.' },
+  { id: 'chloroplast', place: 'chloroplast', brief: 'The phosphate comes off, leaving glycolate.', say: 'In the chloroplast the phosphate comes off 2-phosphoglycolate, leaving glycolate.' },
+  { id: 'peroxisome', place: 'peroxisome', brief: 'Peroxide made and destroyed; a nitrogen on.', say: 'In the peroxisome the glycolate hands hydrogen straight to oxygen, making peroxide that a catalase destroys at once, and takes on a nitrogen: it is now glycine.' },
+  { id: 'mitochondrion', place: 'mitochondrion', brief: 'Two become one: a carbon and a nitrogen out.', say: 'In the mitochondrion two glycines become one three-carbon serine: a carbon leaves as carbon dioxide, a nitrogen as ammonia.' },
+  { id: 'peroxisome-back', place: 'peroxisome', brief: 'The nitrogen handed on, leaving glycerate.', say: 'Back through the peroxisome the serine hands its nitrogen on, leaving glycerate.' },
+  { id: 'chloroplast-back', place: 'chloroplast', brief: 'Two ATP: 3-phosphoglycerate back, ammonia too.', say: 'Back in the chloroplast one ATP makes it 3-phosphoglycerate for the cycle, and a second, with reducing power, recaptures the ammonia.' },
 ];
 const DWELL = 1.6; // s at each stop while running
 const LEG = 1.4; // s between stops
@@ -229,6 +229,30 @@ function spline(points, perSeg = 14) {
   const len = [0];
   for (let i = 1; i < out.length; i += 1) len.push(len[i - 1] + Math.hypot(out[i][0] - out[i - 1][0], out[i][1] - out[i - 1][1]));
   return { pts: out, len, total: len[len.length - 1] };
+}
+function closedSpline(points, perSeg = 10) {
+  const n = points.length;
+  const at = (i) => points[(i + n) % n];
+  const out = [];
+  for (let i = 0; i < n; i += 1) {
+    const p0 = at(i - 1);
+    const p1 = at(i);
+    const p2 = at(i + 1);
+    const p3 = at(i + 2);
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    for (let k = 0; k < perSeg; k += 1) {
+      const t = k / perSeg;
+      const u = 1 - t;
+      out.push([
+        u * u * u * p1[0] + 3 * u * u * t * c1[0] + 3 * u * t * t * c2[0] + t * t * t * p2[0],
+        u * u * u * p1[1] + 3 * u * u * t * c1[1] + 3 * u * t * t * c2[1] + t * t * t * p2[1],
+      ]);
+    }
+  }
+  const len = [0];
+  for (let i = 1; i < out.length; i += 1) len.push(len[i - 1] + Math.hypot(out[i][0] - out[i - 1][0], out[i][1] - out[i - 1][1]));
+  return { pts: out, len };
 }
 function along(path, s) {
   const d = clamp(s, 0, 1) * path.total;
@@ -641,17 +665,17 @@ export function mount(root, ctx) {
     const capH = clamp(hgt * 0.08, 18, 28);
     const chainL = 6 * sp + 2 * rr;
     const pw = chainL + rr * 2.4;
-    const pd = rr * 4.3;
+    const pd = rr * 5.2;
     const cx = w / 2;
     const y0 = Math.round(capH + (hgt - capH) * (hgt < 260 ? 0.53 : 0.46));
     const bodyW = Math.min(w * 0.52, Math.max(pw + rr * 9, w * 0.44));
     const floorY = y0 + pd;
     const rubY = floorY - rr * 1.3;
     const gasY = rubY - rr * 1.75; // a gas held on the acceptor's second carbon
-    const laneY = y0 - rr * 2.5; // the road out, over the lips
+    const laneY = y0 - rr * 2.3; // the road out, over the lobes
     const bandTop = capH + 2;
-    const bandBottom = y0 - rr * 5;
-    const bodyBottom = hgt - 3;
+    const bandBottom = y0 - rr * 4.6;
+    const bodyBottom = hgt - (hgt < 260 ? 3 : 10);
     const colW = (w - bodyW) / 2 - 10;
     const c2x = cx - sp; // the acceptor's second carbon, where a gas attacks
     return { r, rr, sp, capH, chainL, pw, pd, cx, y0, bodyW, floorY, rubY, gasY, laneY, bandTop, bandBottom, bodyBottom, colW, c2x };
@@ -660,50 +684,64 @@ export function mount(root, ctx) {
   // The tallies' type, bottom up from the pane's foot, so the products parked above them never meet them.
   function endType(w, hgt) {
     const small = w < 420;
-    const numSize = small ? 15 : 21;
-    const wordSize = small ? 9.4 : 10.6;
-    const whereSize = small ? 8.6 : 9.6;
-    const yWhere = hgt - 4;
+    const numSize = small ? 17 : 30;
+    const wordSize = small ? 9.4 : 11.2;
+    const whereSize = small ? 8.6 : 9.8;
+    const yWhere = hgt - (small ? 4 : 8);
     const yWord = yWhere - whereSize * 1.45;
     const yNum = yWord - wordSize * 1.3;
     return { small, numSize, wordSize, whereSize, yWhere, yWord, yNum, top: yNum - numSize * 0.78 };
   }
 
-  // The enzyme: a globular body with a cleft at its crown, drawn through points and smoothed. The cleft is
-  // where the site is, so it is deep enough to hold the acceptor below the rim and the gas above it.
+  // The enzyme: a globular body with a cleft at its crown between two rounded lobes, tapering below. The
+  // cleft is deep enough to hold the acceptor and the gas on it wholly below the rim, which is what makes
+  // it read as a site IN the protein rather than a tray on top of it.
   function enzymeShape(G) {
     const { cx, y0, pw, bodyW, bodyBottom, rr, floorY } = G;
-    const lip = rr * 3;
     const H = bodyBottom - y0;
     const at = (x, y) => [+x.toFixed(1), +y.toFixed(1)];
     const pocket = [
-      at(cx - pw / 2 + rr * 0.1, y0 + rr * 0.9),
-      at(cx - pw / 2 + rr * 0.5, floorY - rr * 1.2),
-      at(cx - pw / 2 + rr * 2.2, floorY),
-      at(cx + pw / 2 - rr * 2.2, floorY),
-      at(cx + pw / 2 - rr * 0.5, floorY - rr * 1.2),
-      at(cx + pw / 2 - rr * 0.1, y0 + rr * 0.9),
+      at(cx - pw / 2 + rr * 0.1, y0 + rr * 0.7),
+      at(cx - pw / 2 + rr * 0.35, floorY - rr * 1.4),
+      at(cx - pw / 2 + rr * 2, floorY),
+      at(cx + pw / 2 - rr * 2, floorY),
+      at(cx + pw / 2 - rr * 0.35, floorY - rr * 1.4),
+      at(cx + pw / 2 - rr * 0.1, y0 + rr * 0.7),
     ];
     const outline = [
-      at(cx - pw / 2 - lip * 1.7, y0 + rr * 2.2),
-      at(cx - pw / 2 - lip * 0.55, y0),
+      at(cx - pw / 2 - rr * 3.9, y0 + rr * 1.5),
+      at(cx - pw / 2 - rr * 1.5, y0 - rr * 0.5),
       ...pocket,
-      at(cx + pw / 2 + lip * 0.55, y0),
-      at(cx + pw / 2 + lip * 1.7, y0 + rr * 2.2),
-      at(cx + bodyW / 2 - rr * 0.6, y0 + H * 0.22),
-      at(cx + bodyW / 2, y0 + H * 0.5),
-      at(cx + bodyW * 0.45, y0 + H * 0.8),
-      at(cx + bodyW * 0.27, bodyBottom),
-      at(cx - bodyW * 0.05, bodyBottom - rr * 0.3),
-      at(cx - bodyW * 0.3, bodyBottom),
-      at(cx - bodyW * 0.46, y0 + H * 0.78),
-      at(cx - bodyW / 2, y0 + H * 0.48),
-      at(cx - bodyW / 2 + rr * 0.6, y0 + H * 0.2),
+      at(cx + pw / 2 + rr * 1.5, y0 - rr * 0.5),
+      at(cx + pw / 2 + rr * 3.9, y0 + rr * 1.5),
+      at(cx + bodyW / 2, y0 + H * 0.3),
+      at(cx + bodyW * 0.46, y0 + H * 0.64),
+      at(cx + bodyW * 0.3, bodyBottom - rr * 0.4),
+      at(cx + bodyW * 0.08, bodyBottom),
+      at(cx - bodyW * 0.14, bodyBottom - rr * 0.2),
+      at(cx - bodyW * 0.33, bodyBottom - rr * 0.7),
+      at(cx - bodyW * 0.48, y0 + H * 0.6),
+      at(cx - bodyW / 2, y0 + H * 0.28),
     ];
-    // The cleft's own floor, closed across its mouth: shaded, so the acceptor reads as lying IN the
-    // enzyme and not on it.
-    const mouth = [at(cx - pw / 2 - lip * 0.2, y0 + rr * 0.3), ...pocket, at(cx + pw / 2 + lip * 0.2, y0 + rr * 0.3)];
-    return { body: smooth(outline, { closed: true, tension: 6 }), cleft: smooth(mouth, { closed: true, tension: 6 }) };
+    const mouth = [at(cx - pw / 2 - rr * 0.6, y0 + rr * 0.1), ...pocket, at(cx + pw / 2 + rr * 0.6, y0 + rr * 0.1)];
+    // The outer surface is scalloped at about an atom's width, the way a space-filling protein's is, so the
+    // enzyme reads as made of the same stuff as the molecules on it. The cleft is left smooth: it is the
+    // one place the surface is shaped to fit something.
+    const dense = closedSpline(outline, 10);
+    const lambda = rr * 2.7;
+    const amp = rr * 0.34;
+    const inCleft = ([x, y]) => Math.abs(x - cx) < pw / 2 + rr * 0.9 && y < floorY + rr * 0.6;
+    const n = dense.pts.length;
+    const bumped = dense.pts.map((pt, i) => {
+      const a = dense.pts[(i - 1 + n) % n];
+      const bb = dense.pts[(i + 1) % n];
+      const tx = bb[0] - a[0];
+      const ty = bb[1] - a[1];
+      const tl = Math.hypot(tx, ty) || 1;
+      const k = inCleft(pt) ? 0 : amp * Math.abs(Math.sin((Math.PI * dense.len[i]) / lambda));
+      return [pt[0] + (ty / tl) * k, pt[1] - (tx / tl) * k];
+    });
+    return { body: `${dOf(bumped)} Z`, cleft: smooth(mouth, { closed: true, tension: 6 }) };
   }
 
   // The roads a product leaves by: up out of the pocket, over the lip, and down the enzyme's flank to the
@@ -815,10 +853,13 @@ export function mount(root, ctx) {
 
     // Which turns are in flight, and where. A turn's gas drops in over the first tenth of a second, joins
     // the acceptor, and the two halves leave; the pocket is empty for a moment and then refilled.
-    const ARRIVE = 0.1;
-    const JOIN = 0.16;
-    const REFILL = 0.3;
-    const FLY = 0.92;
+    // At three turns a second the next gas arrives a third of a second after the last. The products leave
+    // on an ease-out, so by then they are more than halfway down their road and the mouth is clear.
+    const ARRIVE = 0.09;
+    const JOIN = 0.13;
+    const REFILL = 0.27;
+    const FLY = 0.95;
+    const easeOut = (x) => 1 - (1 - x) ** 3;
     let acceptorShown = 1;
     for (const t of turns) {
       if (t.still) continue;
@@ -857,10 +898,10 @@ export function mount(root, ctx) {
       // half is where the fork is: after a carboxylation it carries the new carbon and is a second
       // 3-phosphoglycerate, beside the first; after an oxygenation it is 2-phosphoglycolate, to the
       // salvage. Over the first stretch each half closes on its place in the formation it travels in.
-      const s = t.still ? 1 : easeInOut(clamp((u - JOIN) / (FLY - JOIN), 0, 1));
-      const fade = t.still ? 1 : 1 - clamp((s - 0.86) / 0.14, 0, 1);
+      const s = t.still ? 1 : easeOut(clamp((u - JOIN) / (FLY - JOIN), 0, 1));
+      const fade = t.still ? 1 : 1 - clamp((s - 0.9) / 0.1, 0, 1);
       const g = site.group({ opacity: +fade.toFixed(3) });
-      const gather = clamp(s / 0.18, 0, 1);
+      const gather = clamp(s / 0.12, 0, 1);
       const carb = t.gas === 'CO2';
       const [rx, ry] = along(L.right, s);
       molecule(site, rx, ry + (carb ? pair * gather : 0), PGA_RIGHT, pr, { parent: g });
@@ -876,14 +917,21 @@ export function mount(root, ctx) {
     // both themes; the page's ink would invert on a dark page and vanish.
     const note = small ? 8.6 : 10;
     const nameSize = small ? 10.4 : 13;
-    const acceptor = small ? 'RuBP, the acceptor' : 'RuBP, the five-carbon acceptor';
-    site.text(cx, G.floorY + note * 1.6, acceptor, { anchor: 'middle', fill: ENZYME.symbolColor, 'font-size': note, fit: [note, 7.4], width: G.pw + rr * 3 });
-    const bodyMidY = G.floorY + note * 1.6 + (G.bodyBottom - G.floorY - note * 1.6) * 0.46;
-    site.text(cx, bodyMidY, 'rubisco', { anchor: 'middle', class: 'rf-cap', fill: ENZYME.symbolColor, 'font-size': nameSize });
+    // On a phone the body below the cleft holds two lines, not three, so the line under the cleft is the
+    // most recent news: the last single turn, else the count (the narrow table has no row for it), else
+    // the acceptor's name.
     let lastLine = null;
     if (last && last.still) lastLine = last.gas === 'CO2' ? 'last turn took CO₂' : 'last turn took O₂';
     else if (carboxylations + oxygenations && small) lastLine = countedLine(true);
-    if (lastLine) site.text(cx, bodyMidY + note * 1.9, lastLine, { anchor: 'middle', class: 'rf-num', fill: ENZYME.symbolColor, 'font-size': note, 'font-weight': 600, fit: [note, 7.4], width: G.bodyW * 0.7 });
+    const acceptor = small ? 'RuBP, the acceptor' : 'RuBP, the five-carbon acceptor';
+    const underCleft = small && lastLine ? lastLine : acceptor;
+    site.text(cx, G.floorY + note * 1.6, underCleft, {
+      anchor: 'middle', class: underCleft === lastLine ? 'rf-num' : null, fill: ENZYME.symbolColor, 'font-size': note,
+      'font-weight': underCleft === lastLine ? 600 : null, fit: [note, 7.4], width: G.pw + rr * 3,
+    });
+    const bodyMidY = G.floorY + note * 1.6 + (G.bodyBottom - G.floorY - note * 1.6) * (small ? 0.5 : 0.46);
+    site.text(cx, bodyMidY, 'rubisco', { anchor: 'middle', class: 'rf-cap', fill: ENZYME.symbolColor, 'font-size': nameSize });
+    if (lastLine && !small) site.text(cx, bodyMidY + note * 1.9, lastLine, { anchor: 'middle', class: 'rf-num', fill: ENZYME.symbolColor, 'font-size': note, 'font-weight': 600, fit: [note, 7.4], width: G.bodyW * 0.7 });
 
     drawRoadEnds(G, L, w, hgt, m);
     site.focusMark();
@@ -901,7 +949,7 @@ export function mount(root, ctx) {
   }
 
   function countedLine(short) {
-    if (!oxygenations) return short ? `counted ${carboxylations} : 0` : `${carboxylations} : 0`;
+    if (!oxygenations || !carboxylations || oxygenations === 1) return short ? `counted ${carboxylations} : ${oxygenations}` : `${carboxylations} : ${oxygenations}`;
     const r = carboxylations / oxygenations;
     return short ? `counted ${ratioText(r)} : 1` : `${carboxylations} : ${oxygenations}, or ${ratioText(r)} : 1`;
   }
@@ -918,8 +966,8 @@ export function mount(root, ctx) {
       site.text(x, E.yWhere, where, { anchor: 'middle', fill: C.faint, 'font-size': E.whereSize, fit: [E.whereSize, 7.2], width: colW });
     };
     const small = w < 420;
-    block(L.xL, oxygenations, 'oxygenations', !m.hasO2 ? 'nothing to salvage' : small ? 'to the salvage' : '2-phosphoglycolate, to the salvage', oColour);
-    block(L.xR, carboxylations, 'carboxylations', small ? 'to the Calvin cycle' : '3-phosphoglycerate, to the cycle', C.ink);
+    block(L.xL, oxygenations, oxygenations === 1 ? 'oxygenation' : 'oxygenations', !m.hasO2 ? 'nothing to salvage' : small ? 'to the salvage' : '2-phosphoglycolate, to the salvage', oColour);
+    block(L.xR, carboxylations, carboxylations === 1 ? 'carboxylation' : 'carboxylations', small ? 'to the Calvin cycle' : '3-phosphoglycerate, to the cycle', C.ink);
   }
 
   // ---------------------------------------------------------------- the table
@@ -942,7 +990,7 @@ export function mount(root, ctx) {
       m.hasO2 ? `${airO2} % oxygen against ${ppmText(airCo2)} ppm CO₂` : `no free oxygen, and ${ppmText(airCo2)} ppm CO₂`,
       `CO₂ ${m.sol.toFixed(1)} times as soluble as O₂ at ${tempC} °C`,
       `rubisco favours CO₂ ${Math.round(m.pref)}-fold at ${tempC} °C`,
-      `inside, ${Math.round(m.ci)} ppm: ${Math.round(m.ciShare * 100)} % of the air’s, the pore ${pore} % open`,
+      `inside, ${ppmText(m.ci)} ppm: ${Math.round(m.ciShare * 100)} % of the air’s, the pore ${pore} % open`,
     ];
     const counted = carboxylations + oxygenations ? countedLine(false) : 'no turns yet';
     const rate = leafRate(m);
@@ -976,160 +1024,204 @@ export function mount(root, ctx) {
 
   // ---------------------------------------------------------------- the salvage
 
+  // The route is a racetrack: straight out along the top from the chloroplast, through the peroxisome, a
+  // half turn inside the mitochondrion, and straight back along the bottom. Each compartment's name sits
+  // between the two tracks, each stop's mark on the outer side of its own track, and the molecule on the
+  // track — three bands that cannot meet, which is how the labels are kept apart in every state.
   function salvageLayout(w, hgt) {
+    // The width is shared out once: the chloroplast a third, the peroxisome a fifth and the mitochondrion
+    // the rest, with gaps between. The chloroplast may run into the margins above and below, because its
+    // marks sit inside it; the other two keep the margins for theirs.
     const small = w < 420;
-    const top = small ? 14 : 22;
-    const yc = top + (hgt - top) * 0.52;
-    const span = hgt - top;
-    const chl = { cx: w * 0.19, rx: w * 0.16, ry: Math.min(span * 0.4, w * 0.2) };
-    const per = { cx: w * 0.5, r: Math.min(w * 0.085, span * 0.2) };
-    const mit = { cx: w * 0.8, hw: w * 0.14, hh: Math.min(span * 0.3, w * 0.13) };
-    const up = yc - Math.min(chl.ry * 0.46, per.r * 0.55 + span * 0.05);
-    const down = yc + (yc - up);
-    const stops = [
-      [chl.cx + chl.rx * 0.3, up],
-      [per.cx, yc - per.r * 0.5],
-      [mit.cx + mit.hw * 0.25, yc],
-      [per.cx, yc + per.r * 0.5],
-      [chl.cx + chl.rx * 0.3, down],
-    ];
-    const route = spline([
-      stops[0],
-      [lerp(stops[0][0], per.cx, 0.5), up],
-      stops[1],
-      [lerp(per.cx, mit.cx, 0.5), up],
-      [mit.cx - mit.hw * 0.35, yc - mit.hh * 0.45],
-      stops[2],
-      [mit.cx - mit.hw * 0.35, yc + mit.hh * 0.45],
-      [lerp(per.cx, mit.cx, 0.5), down],
-      stops[3],
-      [lerp(stops[4][0], per.cx, 0.5), down],
-      stops[4],
-    ], 12);
+    const margin = small ? 26 : 40;
+    const span = hgt - margin * 2;
+    const yc = margin + span / 2;
+    const chl = { cx: w * 0.175, rx: w * 0.165 };
+    chl.ry = Math.min(span / 2 + margin * 0.6, chl.rx * 1.6);
+    const per = { cx: w * 0.47, r: Math.min(w * 0.11, span * 0.36) };
+    const mit = { cx: w * 0.795, hw: w * 0.185 };
+    mit.hh = Math.min(span * 0.36, mit.hw * 0.7);
+    const d = clamp(per.r * 0.55, 14, 46);
+    const x0 = chl.cx + chl.rx * 0.4;
+    const uX = mit.cx + mit.hw - d - (small ? 6 : 10);
+    const yO = yc - d;
+    const yR = yc + d;
+    const pts = [];
+    for (let i = 0; i <= 40; i += 1) pts.push([lerp(x0, uX, i / 40), yO]);
+    for (let i = 1; i < 24; i += 1) {
+      const a = -Math.PI / 2 + (Math.PI * i) / 24;
+      pts.push([uX + d * Math.cos(a), yc + d * Math.sin(a)]);
+    }
+    for (let i = 0; i <= 40; i += 1) pts.push([lerp(uX, x0, i / 40), yR]);
+    const len = [0];
+    for (let i = 1; i < pts.length; i += 1) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    const route = { pts, len, total: len[len.length - 1] };
+    const stops = [[x0, yO], [per.cx, yO], [uX + d, yc], [per.cx, yR], [x0, yR]];
     const at = stops.map(([x, y]) => sAt(route, x, y));
-    return { small, top, yc, chl, per, mit, stops, route, at };
+    return { small, yc, d, yO, yR, uX, x0, chl, per, mit, stops, route, at };
+  }
+
+  // A molecule laid along its direction of travel, each atom upright so its symbol stays readable, and
+  // never turned more than a quarter turn either way, so a chain does not read backwards on the way home.
+  function travelling(x, y, syms, r, angle) {
+    let a = angle % Math.PI;
+    if (a > Math.PI / 2 + 1e-6) a -= Math.PI;
+    if (a < -Math.PI / 2 - 1e-6) a += Math.PI;
+    const sp = r * 1.72;
+    const n = syms.length;
+    const pos = syms.map((_, i) => [x + (i - (n - 1) / 2) * sp * Math.cos(a), y + (i - (n - 1) / 2) * sp * Math.sin(a)]);
+    for (let i = 1; i < n; i += 1) {
+      const [x1, y1] = pos[i - 1];
+      const [x2, y2] = pos[i];
+      const f = (r * 0.9) / sp;
+      site.line(lerp(x1, x2, f), lerp(y1, y2, f), lerp(x2, x1, f), lerp(y2, y1, f), { stroke: C.soft, 'stroke-width': 1.2 });
+    }
+    syms.forEach((sym, i) => atom(site, pos[i][0], pos[i][1], sym, r));
   }
 
   function drawSalvage() {
     const { w, h: hgt } = site.clear().box;
     const S = salvageLayout(w, hgt);
-    const { small, yc, chl, per, mit } = S;
+    const { small, yc, d, yO, yR, uX, x0, chl, per, mit } = S;
     const pos = salvageStop(salvageTau);
     const k = pos.stop;
-    const nameSize = small ? 9 : 10.6;
-    const markSize = small ? 8.4 : 9.8;
+    const nameSize = small ? 8.8 : 10.6;
+    const markSize = small ? 8.2 : 9.8;
+    const r = small ? 4.6 : 6.2;
 
-    // The three compartments, each in its own colour from the organelle tables, as a tint of the paper so
-    // that ink reads on it in both themes.
-    site.ellipse(chl.cx, yc, chl.rx, chl.ry, { fill: tint(CHLORO.color, 16), stroke: CHLORO.color, 'stroke-width': 1.6 });
-    site.ellipse(chl.cx, yc, chl.rx - 4, chl.ry - 4, { fill: 'none', stroke: CHLORO.color, 'stroke-width': 0.9 });
-    for (const [gx, gy] of [[-0.45, 0.02], [-0.12, 0.02]]) {
-      for (let i = 0; i < 4; i += 1) {
-        const x = chl.cx + gx * chl.rx;
-        const y = yc + gy * chl.ry + (i - 1.5) * (small ? 3.2 : 4.4);
-        site.line(x - chl.rx * 0.11, y, x + chl.rx * 0.11, y, { stroke: THYLAKOID.color, 'stroke-width': small ? 2 : 2.8, 'stroke-linecap': 'round' });
+    // The three compartments, each in its colour from the organelle tables, filled with a tint of it so
+    // the page's ink reads on it in both themes.
+    site.ellipse(chl.cx, yc, chl.rx, chl.ry, { fill: tint(CHLORO.color, 15), stroke: CHLORO.color, 'stroke-width': 1.5 });
+    site.ellipse(chl.cx, yc, Math.max(4, chl.rx - 3.5), Math.max(4, chl.ry - 3.5), { fill: 'none', stroke: CHLORO.color, 'stroke-width': 0.8 });
+    // Grana: stacks of thylakoid discs joined by a lamella, in the chloroplast's left, where nothing runs.
+    const discW = chl.rx * 0.22;
+    const discH = small ? 2 : 2.8;
+    const discGap = discH + (small ? 0.9 : 1.2);
+    const stacks = [[chl.cx - chl.rx * 0.66, yc - chl.ry * 0.42], [chl.cx - chl.rx * 0.42, yc - chl.ry * 0.62], [chl.cx - chl.rx * 0.66, yc + chl.ry * 0.42], [chl.cx - chl.rx * 0.42, yc + chl.ry * 0.62]];
+    site.line(stacks[0][0], stacks[0][1], stacks[1][0], stacks[1][1], { stroke: THYLAKOID.color, 'stroke-width': 0.9, opacity: 0.8 });
+    site.line(stacks[2][0], stacks[2][1], stacks[3][0], stacks[3][1], { stroke: THYLAKOID.color, 'stroke-width': 0.9, opacity: 0.8 });
+    for (const [gx, gy] of stacks) {
+      for (let i = 0; i < 5; i += 1) {
+        const y = gy + (i - 2) * discGap;
+        site.line(gx - discW / 2, y, gx + discW / 2, y, { stroke: THYLAKOID.color, 'stroke-width': discH, 'stroke-linecap': 'round' });
       }
     }
-    site.circle(per.cx, yc, per.r, { fill: tint(PEROX.color, 20), stroke: PEROX.color, 'stroke-width': 1.5 });
+    site.circle(per.cx, yc, per.r, { fill: tint(PEROX.color, 18), stroke: PEROX.color, 'stroke-width': 1.5 });
     const capsule = (cx, cy, hw, hh) => {
       const rr = Math.min(hh, hw);
-      return `M${(cx - hw + rr).toFixed(1)} ${(cy - hh).toFixed(1)} L${(cx + hw - rr).toFixed(1)} ${(cy - hh).toFixed(1)} A${rr.toFixed(1)} ${hh.toFixed(1)} 0 0 1 ${(cx + hw - rr).toFixed(1)} ${(cy + hh).toFixed(1)} L${(cx - hw + rr).toFixed(1)} ${(cy + hh).toFixed(1)} A${rr.toFixed(1)} ${hh.toFixed(1)} 0 0 1 ${(cx - hw + rr).toFixed(1)} ${(cy - hh).toFixed(1)} Z`;
+      const f = (v) => v.toFixed(1);
+      return `M${f(cx - hw + rr)} ${f(cy - hh)} L${f(cx + hw - rr)} ${f(cy - hh)} A${f(rr)} ${f(hh)} 0 0 1 ${f(cx + hw - rr)} ${f(cy + hh)} L${f(cx - hw + rr)} ${f(cy + hh)} A${f(rr)} ${f(hh)} 0 0 1 ${f(cx - hw + rr)} ${f(cy - hh)} Z`;
     };
-    site.path(capsule(mit.cx, yc, mit.hw, mit.hh), { fill: tint(MITO.color, 16), stroke: MITO.color, 'stroke-width': 1.6 });
-    // Cristae: the inner membrane's folds, along the bottom of the capsule where the route does not run.
-    const folds = 5;
+    site.path(capsule(mit.cx, yc, mit.hw, mit.hh), { fill: tint(MITO.color, 15), stroke: MITO.color, 'stroke-width': 1.5 });
+    // Cristae, the inner membrane's folds, from the wall in towards the tracks and stopping short of them.
+    site.path(capsule(mit.cx, yc, mit.hw - 3.5, mit.hh - 3.5), { fill: 'none', stroke: MITO.color, 'stroke-width': 0.8 });
+    const folds = small ? 4 : 5;
     for (let i = 0; i < folds; i += 1) {
-      const x = mit.cx - mit.hw * 0.62 + (i * mit.hw * 1.24) / (folds - 1);
-      const y1 = yc + mit.hh * 0.94;
-      const y2 = yc + mit.hh * (i % 2 ? 0.66 : 0.72);
-      site.line(x, y1, x, y2, { stroke: MITO.color, 'stroke-width': 1, 'stroke-linecap': 'round' });
+      const x = mit.cx - mit.hw * 0.66 + (i * mit.hw * 1.12) / Math.max(1, folds - 1);
+      for (const sgn of [-1, 1]) {
+        const y1 = yc + sgn * (mit.hh - 3.5);
+        const y2 = yc + sgn * (d + (small ? 6 : 9));
+        if (Math.abs(y1 - yc) > Math.abs(y2 - yc) + 3) site.line(x, y1, x, y2, { stroke: MITO.color, 'stroke-width': small ? 2.2 : 3, 'stroke-linecap': 'round', opacity: 0.55 });
+      }
     }
 
-    // Names, above each compartment.
-    const nameY = (y) => y - (small ? 5 : 8);
-    site.text(chl.cx, nameY(yc - chl.ry), 'chloroplast', { anchor: 'middle', fill: C.soft, 'font-size': nameSize, 'font-weight': 600 });
-    site.text(per.cx, nameY(yc - per.r), 'peroxisome', { anchor: 'middle', fill: C.soft, 'font-size': nameSize, 'font-weight': 600 });
-    site.text(mit.cx, nameY(yc - mit.hh), 'mitochondrion', { anchor: 'middle', fill: C.soft, 'font-size': nameSize, 'font-weight': 600 });
+    // Names between the tracks.
+    const between = { anchor: 'middle', fill: C.soft, 'font-size': nameSize, 'font-weight': 600 };
+    site.text(chl.cx - chl.rx * 0.2, yc + nameSize * 0.35, 'chloroplast', { ...between, fit: [nameSize, 7.2], width: chl.rx * 1.1 });
+    site.text(per.cx, yc + nameSize * 0.35, 'peroxisome', { ...between, fit: [nameSize, 7.2], width: per.r * 1.8 });
+    const mitLeft = mit.cx - mit.hw + 6;
+    site.text((mitLeft + uX - 6) / 2, yc + nameSize * 0.35, 'mitochondrion', { ...between, fit: [nameSize, 7.2], width: uX - 6 - mitLeft });
 
-    // The route: travelled solid, still to come dotted.
+    // The route: travelled solid, still to come dotted, with a chevron on each leg showing which way.
     const at = S.at;
     const sNow = pos.moving ? lerp(at[k], at[k + 1], easeInOut(pos.legU)) : at[k];
-    const cut = Math.max(1, S.route.len.findIndex((d) => d >= sNow * S.route.total));
+    const cut = Math.max(1, S.route.len.findIndex((dd) => dd >= sNow * S.route.total));
     const done = S.route.pts.slice(0, cut + 1);
     const ahead = S.route.pts.slice(cut);
     if (ahead.length > 1) site.path(dOf(ahead), { class: 'rf-route', stroke: C.ruleStrong, 'stroke-dasharray': '1 5' });
     if (done.length > 1) site.path(dOf(done), { class: 'rf-route', stroke: C.soft });
-    const n = S.route.pts.length;
-    const [ex, ey] = S.route.pts[n - 1];
-    const [px, py] = S.route.pts[n - 4];
-    const ang = Math.atan2(ey - py, ex - px);
-    site.path(`M${(ex - 6 * Math.cos(ang - 0.45)).toFixed(1)} ${(ey - 6 * Math.sin(ang - 0.45)).toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} L${(ex - 6 * Math.cos(ang + 0.45)).toFixed(1)} ${(ey - 6 * Math.sin(ang + 0.45)).toFixed(1)}`, { class: 'rf-route', stroke: k >= 4 ? C.soft : C.ruleStrong });
+    const chevron = (x, y, dir, travelled) => {
+      const sz = small ? 4 : 5;
+      site.path(`M${(x - dir * sz).toFixed(1)} ${(y - sz).toFixed(1)} L${x.toFixed(1)} ${y.toFixed(1)} L${(x - dir * sz).toFixed(1)} ${(y + sz).toFixed(1)}`, { class: 'rf-route', stroke: travelled ? C.soft : C.ruleStrong });
+    };
+    const legMid = (a, bb) => (a + bb) / 2;
+    chevron(legMid(x0, per.cx - per.r), yO, 1, sNow > at[1] - 0.02);
+    chevron(legMid(per.cx + per.r, mit.cx - mit.hw), yO, 1, sNow > at[2] - 0.02);
+    chevron(legMid(per.cx + per.r, mit.cx - mit.hw), yR, -1, sNow > at[3] - 0.02);
+    chevron(legMid(x0, per.cx - per.r), yR, -1, sNow > at[4] - 0.02);
 
-    // What each stop did, once the molecule has been there.
-    const r = clamp(Math.min(w * 0.011, hgt * 0.02), 4.5, 6.4);
-    const label = (x, y, str, opts = {}) => site.label(x, y, str, { size: markSize, anchor: 'middle', fill: C.ink, halo: 3, ...opts });
+    // What each stop did, once the molecule has reached it, on the outer side of its own track.
+    const mark = (x, y, str, opts = {}) => site.label(x, y, str, { size: markSize, anchor: 'middle', fill: C.ink, halo: 3, ...opts });
+    const line2 = markSize * 1.25;
     {
-      atom(site, S.stops[0][0] - r * 3.2, S.stops[0][1] + r * 2.6, 'P', r);
-      label(S.stops[0][0] - r * 3.2, S.stops[0][1] + r * 2.6 + r + markSize + 2, 'phosphate off');
+      const px = x0 - (small ? 4 : 8);
+      const py = yO - r - (small ? 9 : 13);
+      atom(site, px, py, 'P', r);
+      mark(px, py - r - (small ? 4 : 6), 'phosphate off');
     }
     if (k >= 1) {
-      label(per.cx, yc + (small ? 1 : 2), 'H₂O₂ made,', { size: markSize * 0.95 });
-      label(per.cx, yc + markSize + (small ? 2 : 4), 'then destroyed', { size: markSize * 0.95, fill: C.soft });
+      const y = yc - per.r - (small ? 6 : 9);
+      if (small) {
+        mark(per.cx, y - line2, 'H₂O₂ made,');
+        mark(per.cx, y, 'then destroyed', { fill: C.soft });
+      } else {
+        mark(per.cx, y, 'H₂O₂ made, then destroyed');
+      }
     }
     if (k >= 2) {
-      const ox = mit.cx + mit.hw * 0.6;
-      gas(site, ox, yc - mit.hh - r * 2.4, 'CO2', r, 0);
-      label(ox, yc - mit.hh - r * 2.4 - r - 4, 'CO₂: a carbon lost', { anchor: 'end', size: markSize, fill: C.coralText });
-      atom(site, mit.cx + mit.hw + r * 2.2, yc + mit.hh * 0.2, 'N', r);
-      label(mit.cx + mit.hw + r * 2.2, yc + mit.hh * 0.2 + r + markSize + 3, 'NH₃', { size: markSize });
+      const y = yc - mit.hh - (small ? 6 : 9);
+      gas(site, mit.cx + mit.hw * 0.55, y - r * 0.2, 'CO2', r, 0);
+      mark(mit.cx + mit.hw * 0.55 - r * 3.4, y, small ? 'a carbon lost' : 'a carbon lost, as', { anchor: 'end', fill: C.coralText });
+      const ny = yc + mit.hh + (small ? 6 : 9) + r;
+      atom(site, mit.cx + mit.hw * 0.55, ny, 'N', r);
+      mark(mit.cx + mit.hw * 0.55 - r * 1.8, ny + markSize * 0.35, small ? 'NH₃ out' : 'a nitrogen out, as NH₃', { anchor: 'end' });
     }
-    if (k >= 3) label(per.cx, yc + per.r + markSize + 6, 'nitrogen handed on', { size: markSize, fill: C.soft });
+    if (k >= 3) mark(per.cx, yc + per.r + markSize + (small ? 5 : 8), 'nitrogen handed on', { fill: C.soft });
     if (k >= 4) {
-      const ax = chl.cx - chl.rx * 0.34;
-      const ay = S.stops[4][1] - (small ? 1 : 2);
-      const ar = small ? 8 : 10.5;
-      for (const [i, dx] of [[0, -ar * 1.15], [1, ar * 1.15]]) {
-        site.circle(ax + dx, ay, ar, { fill: ATP.color, stroke: 'none' });
-        site.text(ax + dx, ay + ar * 0.3, 'ATP', { anchor: 'middle', fill: ATP.symbolColor, 'font-size': +(ar * 0.78).toFixed(2), 'font-weight': 700, 'data-i': i });
+      const ar = small ? 7.5 : 10;
+      const ay = yR + r + ar + (small ? 5 : 8);
+      for (const dx of [-ar * 1.12, ar * 1.12]) {
+        site.circle(x0 - (small ? 2 : 6) + dx, ay, ar, { fill: ATP.color, stroke: 'none' });
+        site.text(x0 - (small ? 2 : 6) + dx, ay + ar * 0.29, 'ATP', { anchor: 'middle', fill: ATP.symbolColor, 'font-size': +(ar * 0.78).toFixed(2), 'font-weight': 700 });
       }
-      label(ax, ay + ar + markSize + 4, 'two ATP spent', { size: markSize });
+      mark(x0 - (small ? 2 : 6), ay + ar + markSize + 2, 'two ATP spent');
     }
 
-    // The molecule itself, where it is now.
-    const [mx, my] = along(S.route, sNow);
-    // What it is now: what the last stop it reached made of it.
+    // The molecule, on the track, as what the last stop made of it.
     const cargo = CARGO[Math.min(CARGO.length - 1, k + 1)];
-    const cr = r * 1.05;
     const syms = [];
-    if (cargo.phosphate && k < 4) syms.push('P');
+    if (cargo.phosphate) syms.push('P');
     for (let i = 0; i < cargo.carbons; i += 1) syms.push('C');
     if (cargo.nitrogen) syms.push('N');
-    if (cargo.phosphate && k >= 4) syms.push('P');
-    const len = chainLength(syms.length, cr);
-    const bx = clamp(mx, len / 2 + 2, w - len / 2 - 2);
-    molecule(site, bx, my, syms, cr);
-    const nameAbove = my < yc;
-    site.label(bx, nameAbove ? my - cr - 6 : my + cr + markSize + 5, cargo.name, { size: markSize, anchor: 'middle', fill: C.ink, halo: 3 });
+    const [mx, my, ang] = along(S.route, sNow);
+    travelling(mx, my, syms, r * 1.05, ang);
     site.focusMark();
   }
 
+  // The ledger: the five stops in order, each with what happened there once it has, then the count.
   function drawLedger() {
     const { w, h: hgt } = table.clear().box;
     const l = ledger();
     const size = clamp(w * 0.03, 9.6, 11.4);
     const k = Math.max(0, l.stop);
-    const rd = table.readout({ title: 'The salvage, for two glycolates', x: 12, width: w - 12, size, minRow: 14, maxRow: 27 });
+    const done = ['phosphate off', 'peroxide made, destroyed', 'two become one', 'nitrogen handed on', 'back as 3-phosphoglycerate'];
+    const rd = table.readout({ title: 'The salvage, for two glycolates', x: 12, width: w - 12, size, minRow: 14, maxRow: 26 });
     rd.fit(hgt, (r, level) => {
+      if (level === 0) {
+        r.head('Where the molecule has been');
+        STOPS.forEach((st, i) => {
+          const place = st.place[0].toUpperCase() + st.place.slice(1);
+          r.row(`${i + 1}  ${place}`, i <= k ? done[i] : '—', { accent: i === k ? C.waterText : undefined });
+        });
+        r.head('What it cost');
+      }
       r.row('Carbon in, as two glycolates', '4');
       r.row('Carbon lost, as CO₂', String(l.carbonLost), { accent: l.carbonLost ? C.coralText : undefined });
       r.row('Carbon recovered', String(l.carbonRecovered));
       r.row('Nitrogen released, as NH₃', l.nitrogenReleased ? (k >= 4 ? '1, recaptured' : '1') : '0');
       r.row('ATP spent', String(l.atpSpent));
-      if (level < 2) {
-        r.rule();
-        r.note(STOPS[k].say);
-      }
-      if (level < 1 && k >= 4) r.note('Three carbons in four come back. Doing nothing would lose all four and leave an inhibitor behind.');
+      if (level <= 1) r.note(w < 420 ? STOPS[k].brief : STOPS[k].say);
+      if (level === 0 && k >= 4) r.note('Three carbons in four come back. Doing nothing would lose all four and leave an inhibitor behind.');
     }, { levels: 3 });
   }
 
