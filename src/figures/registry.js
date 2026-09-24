@@ -107,6 +107,9 @@ export const FIGURES = Object.freeze({
   // Figure 6.4. It carries a genuine second composition, because a site drawn beside a four-row table does
   // not survive a 390 px stage.
   'rubisco-fork': { url: new URL('./rubisco-fork.js', import.meta.url).href, title: 'One site, two gases, four steps of arithmetic', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
+  // Figure 7.2. Below 600 px it carries a second composition: the ring keeps its carbon counts, the
+  // names become step numbers on the ring and a numbered list beneath it, and the books re-stack.
+  krebs: { url: new URL('./krebs.js', import.meta.url).href, title: 'The carbon, and where it goes', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
 
   // 《资治通鉴》 卷一 周纪一 — the second book. Its figures are about a text and a history, not a
   // specimen: where the three states sat and when, what a character becomes when it joins another, and
