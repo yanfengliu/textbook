@@ -111,8 +111,9 @@
 // toolbar. Names that do not fit a station's width are broken where the chemistry breaks them (`tight`),
 // not shrunk: the floor is 7.2 px of type, and no enzyme is named by an abbreviation §7.2 never uses. On
 // a phone the three committed-step sliders are steppers and keep their desktop labels, because an item's
-// goal quotes them; the three need about 378 px in a row and a 390 px phone's toolbar has 352, so they
-// wrap to two rows rather than the one FIGURES.md asks for.
+// goal quotes them, and their unit, because a bare 3 is not a concentration; the three need about 450 px
+// in a row and a 390 px phone's toolbar has 352, so they wrap to two rows rather than the one FIGURES.md
+// asks for.
 //
 // MOTION. Run moves the glucose along the arrows: the arrow to the next station fills and the next
 // molecule fades in as it does. Step jumps to the next station. Nothing else moves.
@@ -370,7 +371,7 @@ export function mount(root, ctx) {
 
   const level = (label, key, { min, max, step, dp }) => b.stepper(label, {
     min, max, step, value: REST[key],
-    format: (v, { narrow }) => (narrow ? fmt(v, dp) : `${fmt(v, dp)} mM`),
+    format: (v) => `${fmt(v, dp)}\u00a0mM`,
     valueText: (v) => `${fmt(v, dp)} mM`,
     onInput: (v) => {
       env[key] = round(v, 1);
@@ -527,7 +528,7 @@ export function mount(root, ctx) {
     switch (s) {
       case 0: return short ? 'One glucose, nothing spent yet.' : 'One glucose, six carbons, and nothing spent yet.';
       case 1: return short ? 'An ATP spent: glucose 6-phosphate cannot leave the cell.' : 'Hexokinase has spent an ATP to put a phosphate on carbon 6. Charged, glucose 6-phosphate cannot leave the cell.';
-      case 2: return short ? 'Glucose rearranged to fructose; nothing spent.' : 'The sugar is rearranged from glucose to fructose. Nothing is spent.';
+      case 2: return short ? 'Glucose rearranged to fructose, spending nothing.' : 'The sugar is rearranged from glucose to fructose, spending nothing.';
       case 3: return short ? 'The second ATP: the committed step.' : 'The second ATP, on carbon 1. This is the committed step: fructose 1,6-bisphosphate has nowhere else to go.';
       case 4: return short ? 'Six carbons cut into two threes.' : 'Aldolase cuts the six carbons into two three-carbon pieces, each carrying a phosphate.';
       case 5:
