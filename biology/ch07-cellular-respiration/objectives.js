@@ -227,7 +227,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'oxygen-is-the-acceptor',
-    statement: 'Say what oxygen does at the end of the chain, explain why everything upstream stops without it, and say why oxygen is not what the chain is for.',
+    statement: 'Say what oxygen does at the end of the chain, explain why everything upstream stops without it unless something else takes the electrons, and say why oxygen is not what the chain is for.',
     prereqs: ['chain-pumps-protons', 'redox-ladder', 'atmosphere-changed'],
     teaches: { sections: ['chain'], figures: ['fig-chain'] },
     level: 'explain',
@@ -324,14 +324,14 @@ export const OBJECTIVES = [
   // ---- 7.7 When nothing is there to take the electrons ----
   {
     id: 'carrier-pool-limit',
-    statement: 'Explain why glycolysis stops within seconds of the chain stopping, naming exactly what has run out.',
+    statement: 'Explain why, in a cell that cannot ferment, glycolysis stops within seconds of the chain stopping, naming exactly what has run out.',
     prereqs: ['electron-carriers', 'chain-pumps-protons', 'glycolysis-ledger'],
     teaches: { sections: ['anaerobic'], figures: ['fig-fermentation'] },
     level: 'explain',
   },
   {
     id: 'fermentation-purpose',
-    statement: 'Say what fermentation is for, and explain what is wrong with describing it as a way of producing energy.',
+    statement: 'Say what fermentation is for, and explain why, in the lactate and alcohol fermentations, the step after glycolysis makes no ATP of its own.',
     prereqs: ['carrier-pool-limit', 'glycolysis-ledger', 'redox-basics'],
     teaches: { sections: ['anaerobic'], figures: ['fig-fermentation'] },
     level: 'explain',
