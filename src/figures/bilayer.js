@@ -195,14 +195,17 @@ const DIRS = 12;
 // microstate of a thermal walk, and it flickers: measured 2026-09-23 over 30 s of clock with this file's
 // own model (three seeds, the lab's 13.8 nm tank), a formed sheet at 37 °C classified as micelles in 0.2%
 // of sweeps and at 48 °C in 2.7%, because the spanning sheet momentarily splits in two; and at 90 °C the
-// tank read micelles or a sheet in about one sweep in ten, because a tank this crowded buries half its
-// tail surface by jostling alone, 0.36-0.74 of it from one sweep to the next, astride the 0.62 line.
-// No line on one sweep can separate the two cases — a sheet at 65 °C dips to 0.65 and a hot tank at
-// 90 °C reaches 0.74 — so the verdict is read from the history instead: a sample every SAMPLE_SWEEPS
-// sweeps, and the arrangement the most samples in the last VERDICT_SAMPLES of them agree on. A spike
-// lasts a few hundredths of a second of clock, so a second holds twenty of the walk's own fluctuations
-// and a spike cannot outvote them; a sheet that has formed holds, and is reported from the second after
-// it does. Every sample is taken at a fixed sweep count, so the verdict is still a function of the clock.
+// tank read micelles or a sheet in about one sweep in ten (8.8-12.8% of reads, 23 seeds), because a tank
+// this crowded buries half its tail surface by jostling alone, 0.37-0.75 of it from one sweep to the
+// next, astride the 0.62 line. No line on one sweep can separate the two cases — a sheet at 65 °C dips
+// to 0.65 and a hot tank at 90 °C reaches 0.75 — so the verdict is read from the history instead: a
+// sample every SAMPLE_SWEEPS sweeps, and the arrangement the last VERDICT_SAMPLES of them plainly agree
+// on (nextVerdict has the rule, and its hysteresis). A spike lasts a few hundredths of a second of
+// clock, so a second holds twenty of the walk's own fluctuations and a spike cannot outvote them; a
+// sheet that has formed holds, and is reported within the second after it does. Every sample is taken
+// at a fixed sweep count, so the verdict is still a function of the clock and the reader's actions.
+// Measured the same way after the change: at 90 °C no read of the verdict was anything but dispersed
+// in 23 runs of 30 s, where one sweep had changed its word about 100 times a run.
 const SAMPLE_SWEEPS = 70; // 0.05 s of clock
 const VERDICT_SAMPLES = 20; // one second of clock
 // An end is open when the exposed edge, averaged over that same second, is more than a lone molecule
