@@ -843,7 +843,10 @@ export function mount(root, ctx) {
     barSvg.replaceChildren();
     const d = state();
     const padT = 16;
-    const padB = 20;
+    // On the wide stage the two lines under the bar need the axis to stop above them: at 20 the axis,
+    // its bottom tick and the foot of the bar ran into the ascenders of "molecules per second", and the
+    // note measured 4.18:1 light and 4.10:1 dark on them (npm run legible, 2026-09-23).
+    const padB = narrow ? 20 : 30;
     const h0 = Math.max(24, hgt - padT - padB);
     const x = narrow ? 27 : Math.min(26, w * 0.34);
     const Y = (e) => padT + h0 * (1 - (e - BAR_LO) / (BAR_HI - BAR_LO));
