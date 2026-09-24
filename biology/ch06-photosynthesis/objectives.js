@@ -242,7 +242,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'cyclic-flow',
-    statement: 'Say what cyclic electron flow around photosystem I produces and what it does not produce, naming the two products of the straight-through path that it never makes.',
+    statement: 'Say what cyclic electron flow around photosystem\u00a0I produces and what it does not produce, naming the two products of the straight-through path that it never makes.',
     prereqs: ['electron-path', 'nadph-role'],
     teaches: { sections: ['lightreactions'], figures: ['fig-zscheme'] },
     level: 'explain',
