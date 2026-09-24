@@ -57,6 +57,8 @@ class TbPopover extends HTMLElement {
     button.setAttribute('aria-expanded', 'false');
     this.replaceChildren(button);
     this.button = button;
+    // Inside the guard above, which matters: holding moves the element, and a move runs this again.
+    this.holdTrailing();
     // Hover opens a popover that closes when the pointer leaves; a click pins it open until Escape or a
     // click elsewhere. A click while the hover popover is showing must pin, not close: the mouse arrives
     // before the click, so "toggle" would close what hover had just opened.
@@ -109,6 +111,12 @@ class TbPopover extends HTMLElement {
   hoverable() {
     return true;
   }
+
+  /**
+   * Keep what is written against the element's end on the element's line. A term does (`holdAfter`,
+   * below). A character does not: 資治通鑑 binds each of its marks in the 原文's own markup (`.zj-kn`).
+   */
+  holdTrailing() {}
 
   /** Put what the reader sees into the button: the element's text. A term keeps some markup too. */
   fillLabel(button) {
@@ -320,6 +328,66 @@ function copyLabel(from, into) {
   }
 }
 
+// **A mark written against a term stays on the term's line.** The term's button is an atomic inline —
+// HTML lays out a `<button>` as an inline-block whatever its `display` says — and a line may break after
+// an atomic inline even when a comma comes next. So `…a <tb-term>pyrimidine dimer</tb-term>, which…` could
+// end one line on the term and begin the next with the comma, alone. Measured on 2026-09-24 over chapters
+// 1–8: 218 terms are followed directly by a mark (`,` 129, `.` 44, `:` 39, `;` 6). At a 390 px phone 4 of
+// them began a line with it, and 6 others did at 320 px; across every width from 320 to 1440 px, 172 of
+// the 218 did at some width.
+//
+// So the element, once built, takes the run glued to its end into a `<tb-term-hold>` with it, and the
+// stylesheet sets that wrapper `white-space: nowrap` (and puts a zero-width space after it, for a
+// Chromium quirk the stylesheet describes). Whether a line may break between two characters is decided by
+// the `white-space` of their nearest common ancestor, and for the term and its comma that is now the
+// wrapper. Nothing weaker holds. In a replica swept over 301 widths, a U+2060 WORD JOINER after the term,
+// written as text or as a `::after`, left the count of stranded marks where it was: 180 in Chromium 149
+// and WebKit 26.5, 179 in Firefox 151, against 0 for the wrapper. None of the three joins across an
+// atomic inline. The wrapper is not a `<span>` because a page styles some of its spans by tag: in chapter
+// 1's list of the properties of life, `.tb-props li span` made a span wrapper a block, and "cells," stood
+// on a line of its own.
+//
+// Bound: only a text node directly after the element is read. A mark after another element in between
+// (`</tb-term><sup>…`) is not held, and neither is an opening mark before a term, which no biology chapter
+// has. 資治通鑑's marks are already bound in its 原文 markup (`.zj-kn`), and a wrapper inside that span
+// changes nothing.
+const HELD_MARK = /[\p{Pe}\p{Pf}\p{Po}\p{Pd}]/u;
+const WORD_CHAR = /[\p{L}\p{N}\p{M}]/u;
+/** A script written without spaces between words, which a line may break inside. */
+const UNSPACED = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
+const spacedWordChar = (c) => c !== undefined && WORD_CHAR.test(c) && !UNSPACED.test(c);
+
+/**
+ * How many code units at the start of `text` must stay on the line of a label ending in `last`: the
+ * closing, final, other and dash punctuation there, and a word the label runs on into — a plural's `s`,
+ * or `’s`. What an opening mark or a space begins is the next word's, and so is a Han character, which a
+ * line may begin with.
+ */
+export function heldRun(text, last) {
+  let n = 0;
+  let prev = last;
+  for (const ch of text) {
+    const runsOn = spacedWordChar(ch) && (spacedWordChar(prev) || prev === '’' || prev === "'");
+    if (!HELD_MARK.test(ch) && !runsOn) break;
+    n += ch.length;
+    prev = ch;
+  }
+  return n;
+}
+
+/** Wrap `el` and the run glued to its end in a `<tb-term-hold>`; do nothing when there is none. */
+export function holdAfter(el) {
+  const next = el.nextSibling;
+  if (!next || next.nodeType !== Node.TEXT_NODE) return null;
+  const n = heldRun(next.data, Array.from(el.textContent).at(-1));
+  if (!n) return null;
+  if (n < next.data.length) next.splitText(n);
+  const hold = document.createElement('tb-term-hold');
+  el.before(hold);
+  hold.append(el, next);
+  return hold;
+}
+
 export class TbTerm extends TbPopover {
   /** The glossary reference. A property as well as an attribute, as it always was. */
   get ref() {
@@ -329,6 +397,10 @@ export class TbTerm extends TbPopover {
   /** The label as it was written, less every tag LABEL_TAGS does not name. */
   fillLabel(button) {
     copyLabel(this, button);
+  }
+
+  holdTrailing() {
+    holdAfter(this);
   }
 
   lookupKey() {

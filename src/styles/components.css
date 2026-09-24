@@ -534,8 +534,36 @@ tb-term {
   position: relative;
 }
 
+/* A term and the mark written against its end, which term.js wraps together (`holdAfter`). A line may
+   break after the term's button even before a comma, because the button is an atomic inline, and
+   `nowrap` on the pair's nearest common ancestor is the one thing Chromium, WebKit and Firefox all honour.
+   The term inherits it, so an open card's place in the line cannot part them either; the button and the
+   card set their own `white-space` back, below. The wrapper is an element of its own name, not a span,
+   so no rule written for a page's spans reaches it: `.tb-props li span` below is a block. */
+tb-term-hold {
+  white-space: nowrap;
+}
+
+/* A zero-width space (U+200B) after the pair, which wraps as the paragraph does. Without it, Chromium
+   with `hyphens: auto` (every paragraph below 600 px) counts the space after a `nowrap` run as part of
+   the run, and sends the pair down a line when it would have fitted with up to a space to spare.
+   Chapter 7 at 390 px lost a line that way in a paragraph that had stranded nothing. In a replica swept
+   over 801 widths with `text-wrap: pretty`, the pair alone re-broke 2.26% of the paragraphs that had
+   stranded nothing, and with this space 0.02%; WebKit and Firefox re-broke none either way. The space
+   needs its own `white-space: normal`: inheriting the pair's `nowrap`, it changed nothing. It is the
+   character itself between the quotes, not the escape `\200B`, whose `B` test/strings.test.js would
+   read as an English word that a Chinese page has to replace. The empty alternative text keeps it out
+   of what a screen reader reads. */
+tb-term-hold::after {
+  content: "​";
+  content: "​" / "";
+  white-space: normal;
+}
+
 tb-term > button {
   all: unset;
+  /* A label wider than the column still wraps inside itself, as it did before it was held. */
+  white-space: normal;
   cursor: help;
   color: inherit;
   text-decoration: underline dotted;
@@ -576,6 +604,9 @@ tb-term > button:focus-visible {
   text-indent: 0;
   font-weight: 400;
   font-style: normal;
+  /* The card is inside its term, and a term inside a `nowrap` run (`tb-term-hold` above, 資治通鑑's
+     `.zj-kn`) would otherwise set the whole card on one line, clipped at the card's edge. */
+  white-space: normal;
 }
 
 /* A dictionary entry: the term is a name, so it is set in the display face and keeps its own case,
