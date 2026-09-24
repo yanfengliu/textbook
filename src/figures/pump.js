@@ -554,8 +554,13 @@ export function mount(root, ctx) {
     if (pumpHalf > 34) {
       // In the solid half, which is the one the cavity is not open into.
       const nameY = open < 0 ? top + (mid - top) * 0.55 : bot - (bot - mid) * 0.45;
+      // The word straddles the seam between the two lobes, and the seam is a gap onto the stage: bare, the
+      // "u" and "m" crossing it put paper on the light theme's paper, 1.11:1 (npm run legible, 2026-09-23).
+      // A halo in the protein's own fill closes the seam under the letters and nowhere else, so the word
+      // sits on the pump and the two halves still read as two halves.
       sceneSvg.append(text(pumpCx, nameY, 'pump', {
         anchor: 'middle', 'font-size': fmt1(nameSize), 'font-weight': 600, style: `fill:${PUMP_LABEL}`,
+        stroke: PUMP_FILL, 'stroke-width': 3, 'stroke-linejoin': 'round', 'paint-order': 'stroke',
       }));
     }
 

@@ -29,7 +29,9 @@
 // The claim the figure makes is that one rule is enough. A figure that quietly helped the lipids into
 // line would be making a different claim, and this header would be the only place the difference showed.
 //
-// One drawing unit is one nanometre. The tank is 20 nm wide; its height follows the shape of its pane.
+// One drawing unit is one nanometre. The tank is 20 nm wide; its height follows the shape of its pane,
+// between MIN_RATIO and MAX_RATIO of its width, and a pane flatter than that is given the whole tank at
+// the scale its height allows, with paper beside it.
 // It is periodic left to right, so a bilayer spanning it is a closed bag with no rim — and that wrap is
 // what holds the sheet flat. `Curl` takes the wrap away and does nothing else; the two rims it opens
 // are what the sheet then rolls up to be rid of, and it does: the exposed edge goes to nothing and the
@@ -140,8 +142,11 @@ function recipeFor(molecule, i) {
 
 // What each arrangement is, and the sentence the reading gives for it. These are prose: they are read
 // by the same reader who reads the chapter, and they say what the tank has done, never what to expect.
+// Dispersed said "nothing is together yet, and almost every tail is in the water", which broke that rule
+// with "yet" and was false where it is read most: a tank held at 90 °C, beside a reading of 55-60% of
+// its tail surface hidden, because a crowded tank's molecules touch whether or not anything assembles.
 const ARRANGEMENT = {
-  dispersed: { word: 'Dispersed', line: 'nothing is together yet, and almost every tail is in the water' },
+  dispersed: { word: 'Dispersed', line: 'nothing holds together: molecules meet and part again, and much of every tail is in the water' },
   micelle: { word: 'Micelles', line: 'a wedge cannot tile a sheet, so the tails hide in small balls' },
   bilayer: { word: 'Bilayer', line: 'cylinders tile flat: tails inward, heads facing the water on both sides' },
   vesicle: { word: 'Vesicle', line: 'the sheet has closed on itself, and the edge that cost has gone' },
@@ -151,7 +156,17 @@ const ARRANGEMENT = {
 // ---------------------------------------------------------------- the model
 
 const TANK_W = 20; // nm
-const MIN_RATIO = 0.52; // the tank never gets flatter than this, nor taller than MAX_RATIO, of its width
+// The tank never gets flatter than MIN_RATIO of its width, nor taller than MAX_RATIO. The floor is physics,
+// not layout: the count is fixed, so a flatter tank is a more crowded one, and a crowded enough tank
+// cannot be taken apart by any heat the slider offers — its molecules have nowhere to go that is not
+// against another's tails. The floor was 0.52, a 10.4 nm tank, which is what a chapter page at 1024 px
+// gave; measured 2026-09-23 with this file's model over 30 s of clock at 90 °C, that tank was a sheet or
+// micelles in 89% of sweeps where the lab's 13.8 nm tank was in 10%, so the figure's claim that heat
+// wins held on one screen and not on another. With the verdict held over a second (SAMPLE_SWEEPS), over
+// nine seeds and 30 s of clock each, a tank came together at 90 °C in 3 runs at 12.0 nm, 1 at 12.4 nm and
+// none at 12.8 nm, which still came together once at 88 °C; at 13.2 nm no run did at 88 °C or 90 °C. So
+// 0.66, a 13.2 nm tank, and a pane flatter than that is drawn narrower rather than holding a flatter tank.
+const MIN_RATIO = 0.66;
 const MAX_RATIO = 1.15;
 
 const WELL = 1.0; // the water contact one touching pair of tail beads removes, in model units
@@ -175,7 +190,30 @@ const MAX_SWEEPS_PER_CALL = 24000; // one setTime may not run for ever; a longer
 
 const PROBE = 0.30; // the water probe that measures exposure, nm
 const DIRS = 12;
-const SEALED_NM = 0.5; // exposed rim under which the tank counts as sealed
+// What the reader is told the tank IS — its arrangement, and whether its edge has sealed — is what the
+// tank has HELD over the last second of its own clock, not what one sweep shows. One sweep is a single
+// microstate of a thermal walk, and it flickers: measured 2026-09-23 over 30 s of clock with this file's
+// own model (three seeds, the lab's 13.8 nm tank), a formed sheet at 37 °C classified as micelles in 0.2%
+// of sweeps and at 48 °C in 2.7%, because the spanning sheet momentarily splits in two; and at 90 °C the
+// tank read micelles or a sheet in about one sweep in ten (8.8-12.8% of reads, 23 seeds), because a tank
+// this crowded buries half its tail surface by jostling alone, 0.37-0.75 of it from one sweep to the
+// next, astride the 0.62 line. No line on one sweep can separate the two cases — a sheet at 65 °C dips
+// to 0.65 and a hot tank at 90 °C reaches 0.75 — so the verdict is read from the history instead: a
+// sample every SAMPLE_SWEEPS sweeps, and the arrangement the last VERDICT_SAMPLES of them plainly agree
+// on (nextVerdict has the rule, and its hysteresis). A spike lasts a few hundredths of a second of
+// clock, so a second holds twenty of the walk's own fluctuations and a spike cannot outvote them; a
+// sheet that has formed holds, and is reported within the second after it does. Every sample is taken
+// at a fixed sweep count, so the verdict is still a function of the clock and the reader's actions.
+// Measured the same way after the change: at 90 °C no read of the verdict was anything but dispersed
+// in 23 runs of 30 s, where one sweep had changed its word about 100 times a run.
+const SAMPLE_SWEEPS = 70; // 0.05 s of clock
+const VERDICT_SAMPLES = 20; // one second of clock
+// An end is open when the exposed edge, averaged over a second of samples, is more than a lone molecule
+// shows. A closed sheet's thermal rim is one molecule at a time — about 1.6 nm of edge on and off, which
+// the one-sweep test this replaced (under 0.5 nm) called unsealed for most of the time after a sheet had
+// capped both its ends — while two open ends keep three or four molecules' tails in the water, 3-6 nm.
+// 2.5 nm is between the two.
+const HELD_SEALED_NM = 2.5;
 const PUNCTURE_R = 3.2; // nm the needle clears
 const NEEDLE_SHOW_S = 0.7;
 const TRACE_S = 6;
@@ -272,6 +310,7 @@ class Tank {
     this.cell = 2 * Math.max(...Object.values(SPECIES).map((sp) => sp.reach)) + RANGE; // for the energy neighbours
     this.bcell = 1.15; // a probe's reach, for the exposure measurement
     this.rebuild();
+    this.startHistory();
   }
 
   // Bead positions in tank coordinates, from the molecule's centre and its angle.
@@ -494,6 +533,40 @@ class Tank {
       }
     }
     this.rebuild();
+  }
+
+  // What the tank has held, begun when it is filled. Until a full second of samples has come in, the tank
+  // as it was filled stands for the rest of the second — so the first verdict changes once, when the
+  // samples that disagree with it are a majority, rather than following the first two or three samples
+  // wherever they point. The arrangement's history then runs on through anything the reader does,
+  // because no press changes where the molecules are: a first version began it again at Curl from one
+  // sweep's classification, which gave that one sweep a whole second's weight (review, 2026-09-23: at
+  // 90 °C, 86 of 1806 Curl instants read as something other than dispersed, and would have been reported
+  // for 0.7 s).
+  startHistory() {
+    this.history = [];
+    this.edges = [];
+    this.baseline = { assembly: classify(this) };
+    this.verdict = this.baseline.assembly;
+  }
+
+  // The exposed edge's own history, begun again whenever a press changes the edge without moving a
+  // molecule: Curl, which uncovers the ends, and the needle, which opens a hole. Whether the ends have
+  // sealed is then read only off samples taken since, so it cannot be answered by the edge the tank had
+  // before the press — the first version counted that edge for the whole second, and a Curl that opened
+  // 1.76 nm was reported as sealed at the instant it opened.
+  restartEdges() {
+    this.edges = [];
+  }
+
+  // One sample of what the tank is, for the verdict the reader is shown. Called at fixed sweep counts
+  // only, so the history — and every verdict read off it — is a function of the clock.
+  remember() {
+    this.history.push({ assembly: classify(this) });
+    if (this.history.length > VERDICT_SAMPLES) this.history.shift();
+    this.edges.push(this.measure().edgeLengthNm);
+    if (this.edges.length > VERDICT_SAMPLES) this.edges.shift();
+    this.verdict = nextVerdict(this.verdict, heldSamples(this));
   }
 
   // Keep the molecules inside a tank whose pane has changed shape.
@@ -769,10 +842,7 @@ function classify(tank) {
   // molecules' offsets from one another wrap, so the centre of the cluster comes out somewhere in the
   // water and every hollowness test below reads it as a ring. That is exactly what happened — a flat
   // spanning bilayer was reported as a vesicle, on and off, as the walk ran.
-  const bins = 12;
-  const seen = new Array(bins).fill(false);
-  for (const i of big) seen[clamp(Math.floor((tank.mol[i].x / tank.w) * bins), 0, bins - 1)] = true;
-  if (tank.wrapped && seen.every(Boolean)) return 'bilayer';
+  if (spansTank(tank, big)) return 'bilayer';
   const s = spreadOf(tank, big, false);
   // A ring is hollow AND even: nothing within half its radius of the centre, and every molecule at
   // about the same distance from it. Asked on hollowness alone, two bilayer patches with water between
@@ -788,6 +858,67 @@ function classify(tank) {
   if (big.length > ballMax && s.rg > span * 1.15 && s.inner < 0.06 && s.elongation < 1.9 && s.evenness < 0.24) return 'vesicle';
   if (big.length > ballMax) return 'bilayer';
   return 'micelle';
+}
+
+// The last second of samples, with the tank as it was filled standing in for any of the second that has
+// not come in yet. See startHistory().
+function heldSamples(tank) {
+  const pad = VERDICT_SAMPLES - tank.history.length;
+  return pad > 0 ? [...Array(pad).fill(tank.baseline), ...tank.history] : tank.history;
+}
+
+// Whether a cluster reaches right across the wrapped tank: something in every twelfth of its width.
+function spansTank(tank, idxs) {
+  if (!tank.wrapped) return false;
+  const bins = 12;
+  const seen = new Array(bins).fill(false);
+  for (const i of idxs) seen[clamp(Math.floor((tank.mol[i].x / tank.w) * bins), 0, bins - 1)] = true;
+  return seen.every(Boolean);
+}
+
+// The arrangement the tank has held, moved on only when the last second says so plainly: to the one the
+// most samples agree on (the most recent of them on a tie) once that one holds SWITCH_SAMPLES of the
+// second, or once the arrangement being reported has fallen under KEEP_SAMPLES of it. Between the two
+// the reading stays where it was. A plain majority was not enough on its own: at 80 °C, where the sheet
+// is melting, the tank spends the second split between a sheet and nothing, and a majority vote flipped
+// the word 65 times in 30 s of clock where a single sweep flipped it 307. This is hysteresis, and it is
+// honest to the model rather than a filter laid over it: the tank near its melting point genuinely holds
+// neither arrangement for long, and the reading changes when the tank has plainly changed.
+const SWITCH_SAMPLES = 14; // seven tenths of the second
+const KEEP_SAMPLES = 5; // a quarter of it
+function nextVerdict(current, samples) {
+  const count = new Map();
+  let most = 0;
+  for (const s of samples) {
+    const c = (count.get(s.assembly) || 0) + 1;
+    count.set(s.assembly, c);
+    most = Math.max(most, c);
+  }
+  let mode = samples[samples.length - 1].assembly;
+  for (let i = samples.length - 1; i >= 0; i -= 1) if (count.get(samples[i].assembly) === most) { mode = samples[i].assembly; break; }
+  if (mode === current || most >= SWITCH_SAMPLES || (count.get(current) || 0) < KEEP_SAMPLES) return mode;
+  return current;
+}
+
+function heldArrangement(tank) {
+  return tank.verdict;
+}
+
+// Whether the tank has held no open end: a full second of samples since the edge last changed under a
+// press, and its exposed edge averaged over them less than two rim molecules show. See HELD_SEALED_NM.
+function heldSealed(tank) {
+  if (tank.edges.length < VERDICT_SAMPLES) return false;
+  let sum = 0;
+  for (const e of tank.edges) sum += e;
+  return sum / tank.edges.length < HELD_SEALED_NM;
+}
+
+// One sweep of the walk, the whole-aggregate moves on their own schedule, and a sample of what the tank
+// is on its. The figure's clock and anything that replays it go through here, so the three cannot drift.
+function stepTank(tank, kT) {
+  tank.sweep(kT);
+  if (tank.sweeps % CLUSTER_EVERY === 0) tank.clusterSweep(kT);
+  if (tank.sweeps % SAMPLE_SWEEPS === 0) tank.remember();
 }
 
 // ---------------------------------------------------------------- style
@@ -895,6 +1026,18 @@ export function mount(root, ctx) {
   let edgeBefore = 0;
   let edgeAtPuncture = 0;
   let healSeconds = null;
+  // The last thing the reader did to the tank, needle or curl, so the reading speaks of that and not of
+  // an older one: a heal time is news until the reader curls the sheet, and then it is history.
+  let lastEvent = null;
+  // What the last Curl found: 'opened' when the tank held a sheet and taking the wrap away uncovered its
+  // ends, 'none' when it held a sheet that did not reach across the tank, so the wrap was holding
+  // nothing flat and no ends opened, and null when no Curl has been pressed on a sheet in this tank —
+  // including a tank filled with the wrap already off, which never had one. The reading says which,
+  // rather than describe ends that were never there: a sheet the needle had split into two short pieces
+  // was reported as having "sealed both ends" by rolling them in, when nothing had rolled; and a Curl
+  // pressed on a dispersed tank before Release was later reported as having rolled up a sheet.
+  let curl = null;
+  const OPENED_NM = 1.0; // less than the tails of one molecule at an open end
   let trace = [{ t: 0, edge: tank.measure().edgeLengthNm }];
 
   // ---- DOM ----
@@ -958,6 +1101,8 @@ export function mount(root, ctx) {
     punctureAt = null;
     puncturePoint = null;
     healSeconds = null;
+    lastEvent = null;
+    curl = null;
     trace = [{ t: 0, edge: tank.measure().edgeLengthNm }];
     molLayer = null;
   }
@@ -973,9 +1118,25 @@ export function mount(root, ctx) {
   }
 
   function setWrapped(next) {
+    const edgeAsWas = tank.measure().edgeLengthNm;
+    const heldAsWas = heldArrangement(tank);
     wrapped = next;
     tank.wrapped = wrapped;
+    lastEvent = 'curl';
     tank.rebuild();
+    // Taking the wrap away changes the edge without moving a molecule: a flat sheet's last second says
+    // "sealed", and the two ends Curl has just uncovered say otherwise. So whether the ends have sealed is
+    // read again from samples taken after the press. The arrangement's history runs on: see startHistory.
+    tank.restartEdges();
+    // The same molecules, measured with the wrap and without it: whatever edge that exposes is the ends
+    // the Curl opened. It is exact rather than a guess at whether the sheet reached across — the first
+    // version asked whether the biggest cluster had a molecule in every twelfth of the tank, and a sheet
+    // just healed from the needle failed that while unwrapping it opened 4.5 nm of edge. It is asked only
+    // of a tank that held a sheet, because a dispersed tank's molecules at the two ends lose neighbours
+    // too, and that was once read as ends opened (review, 2026-09-23).
+    const sheetAsWas = heldAsWas === 'bilayer' || heldAsWas === 'vesicle';
+    if (!next && sheetAsWas) curl = tank.measure().edgeLengthNm - edgeAsWas > OPENED_NM ? 'opened' : 'none';
+    else curl = null;
     btnCurl.setAttribute('aria-pressed', String(!wrapped));
     paint();
     announce();
@@ -1015,6 +1176,8 @@ export function mount(root, ctx) {
     punctured = true;
     punctureAt = t;
     healSeconds = null;
+    lastEvent = 'needle';
+    tank.restartEdges();
     record();
     paint();
     announce();
@@ -1072,6 +1235,8 @@ export function mount(root, ctx) {
       punctureAt = null;
       puncturePoint = null;
       healSeconds = null;
+      lastEvent = null;
+      curl = null;
       trace = [{ t: 0, edge: tank.measure().edgeLengthNm }];
       molLayer = null;
     }
@@ -1082,8 +1247,7 @@ export function mount(root, ctx) {
     // all — which looks exactly like a figure that has hung.
     const until = performance.now() + budgetMs;
     while (tank.sweeps < limit) {
-      tank.sweep(kT);
-      if (tank.sweeps % CLUSTER_EVERY === 0) tank.clusterSweep(kT);
+      stepTank(tank, kT);
       if (performance.now() > until) break;
     }
     // The clock follows the walk and not the other way round: a jump that ran out of sweeps or of
@@ -1141,7 +1305,7 @@ export function mount(root, ctx) {
   // ---- what describe() reports ----
   function state() {
     const m = tank.measure();
-    const assembly = classify(tank);
+    const assembly = heldArrangement(tank);
     return {
       molecule,
       count: tank.mol.length,
@@ -1149,7 +1313,8 @@ export function mount(root, ctx) {
       tailsBuried: round(m.tailsBuried, 3),
       edgeLengthNm: round(m.edgeLengthNm, 1),
       thicknessNm: round(thickness(assembly), 2),
-      sealed: m.edgeLengthNm < SEALED_NM,
+      sealed: heldSealed(tank),
+      curl,
       punctured,
       healSeconds,
       temperatureC: tempC,
@@ -1206,26 +1371,34 @@ export function mount(root, ctx) {
   // Everything in the tank pane that does not change from frame to frame.
   function layoutTank(w, hgt) {
     tankSvg.setAttribute('viewBox', `0 0 ${w} ${hgt}`);
-    const scale = w / TANK_W;
-    const wantH = clamp(hgt / scale, TANK_W * MIN_RATIO, TANK_W * MAX_RATIO);
+    const wantH = clamp(hgt / (w / TANK_W), TANK_W * MIN_RATIO, TANK_W * MAX_RATIO);
     if (Math.abs(wantH - tank.h) > 0.05) {
       tankH = wantH;
       tank.reshape(TANK_W, tankH);
     }
+    // The tank fills the pane's width, unless the pane is flatter than MIN_RATIO: then the whole tank is
+    // drawn at the scale the pane's height allows rather than cut off at top and bottom, and it keeps the
+    // left edge the toolbar keeps, with the paper it does not need between it and the reading.
+    const scale = Math.min(w / TANK_W, hgt / tank.h);
     scalePx = scale;
+    const drawnW = TANK_W * scale;
     const drawnH = tank.h * scale;
     tankTop = (hgt - drawnH) / 2;
     const visTop = Math.max(0, tankTop);
     const visH = Math.max(1, Math.min(drawnH, hgt - visTop));
 
     tankSvg.replaceChildren();
-    // The water is the pane: a tint from edge to edge with no rule round it, because the stage is the
-    // only rectangle the book draws. The one line is the surface at the top.
-    tankSvg.append(el('rect', { x: 0, y: fmt(visTop, 1), width: fmt(Math.max(1, w), 1), height: fmt(visH, 1), fill: tint(C.water, 13) }));
-    tankSvg.append(el('line', { x1: 0, y1: fmt(visTop, 1), x2: fmt(w, 1), y2: fmt(visTop, 1), stroke: tint(C.water, 46) }));
+    // The water is the tank: a tint from edge to edge of the pane with no rule round it, because the
+    // stage is the only rectangle the book draws, and paper beside it only on a pane too flat for it.
+    // The one line is the surface at the top.
+    tankSvg.append(el('rect', { x: 0, y: fmt(visTop, 1), width: fmt(Math.max(1, drawnW), 1), height: fmt(visH, 1), fill: tint(C.water, 13) }));
+    tankSvg.append(el('line', { x1: 0, y1: fmt(visTop, 1), x2: fmt(drawnW, 1), y2: fmt(visTop, 1), stroke: tint(C.water, 46) }));
 
+    // The clip is written in the holder's own coordinates, because a clip-path on a transformed group is
+    // read after that group's transform: written in the pane's, it sat one offset too far down whenever
+    // the tank did not fill the pane's height, and cut off the part of the tank it was meant to show.
     const clipId = `${ns}-clip`;
-    tankSvg.append(el('defs', {}, [el('clipPath', { id: clipId }, [el('rect', { x: 0, y: fmt(visTop, 1), width: fmt(Math.max(1, w), 1), height: fmt(visH, 1) })])]));
+    tankSvg.append(el('defs', {}, [el('clipPath', { id: clipId }, [el('rect', { x: 0, y: fmt(visTop - tankTop, 1), width: fmt(Math.max(1, drawnW), 1), height: fmt(visH, 1) })])]));
     molLayer = el('g');
     molGroups = tank.mol.map((m) => {
       const g = moleculeShape(m.recipe, scale);
@@ -1238,7 +1411,7 @@ export function mount(root, ctx) {
 
     // The scale bar, so the seven nanometres of the prose is measured here rather than asserted.
     const barNm = 5;
-    const bx = w - barNm * scale - 10;
+    const bx = drawnW - barNm * scale - 10;
     if (bx > 14 && hgt > 74) tankSvg.append(scaleBar(bx, hgt - 9, barNm * scale, '5 nm', { fontSize: narrow ? 9.6 : 10.5 }));
 
     overText.setAttribute('x', '9');
@@ -1271,9 +1444,20 @@ export function mount(root, ctx) {
     overText.textContent = overlayNote() || '';
   }
 
+  // What the wrap coming off has done, said about the tank as it is now. It said "two open ends" for as
+  // long as the wrap was off, so a sheet that had rolled both ends in and capped them was still described
+  // as open beside a reading that said it had closed; and it said "the sheet" of a tank that had none.
+  function curlNote() {
+    const assembly = heldArrangement(tank);
+    if (assembly !== 'bilayer' && assembly !== 'vesicle') return 'the wrap is off';
+    if (curl === 'none') return narrow ? 'the wrap is off: no ends opened' : 'the wrap is off, and no ends opened';
+    if (heldSealed(tank)) return narrow ? 'the wrap is off: ends sealed' : 'the wrap is off, and the sheet has sealed both ends';
+    return narrow ? 'the wrap is off: two open ends' : 'the wrap is off: the sheet has two open ends';
+  }
+
   function overlayNote() {
     if (punctured) return narrow ? 'a hole, and only the walk to close it' : 'a hole, and nothing is closing it but the walk';
-    if (!wrapped) return narrow ? 'the wrap is off: two open ends' : 'the wrap is off: the sheet has two open ends';
+    if (!wrapped) return curlNote();
     if (!playing && tank.sweeps === 0) return narrow ? 'nothing has been let go yet' : 'dispersed, and nothing has been let go yet';
     return null;
   }
@@ -1320,13 +1504,20 @@ export function mount(root, ctx) {
   }
 
   // A sentence about the state the tank is in, assembled so that it is grammatical in every one of
-  // them. It says what has happened, not what the reader should expect.
+  // them. It says what has happened, not what the reader should expect. A heal time is spoken only while
+  // the needle is the last thing the reader did: once the sheet has been curled the reading is about what
+  // Curl did, and "the last hole closed in 0.9 s" beside a sheet rolling its ends up answered a question
+  // nobody had just asked. "No tail left in the water" was dropped for the same honesty: a capped sheet
+  // still shows the one-molecule rim any closed sheet shows, and the readout beside it says so.
   function sentence(d) {
+    const sheet = d.assembly === 'bilayer' || d.assembly === 'vesicle';
     if (d.punctured) return 'The hole is open, and the edge below is what is closing it.';
-    if (d.healSeconds !== null && d.assembly !== 'dispersed') return `The last hole closed in ${fmt(d.healSeconds, 2)} s.`;
+    if (lastEvent === 'needle' && d.healSeconds !== null && d.assembly !== 'dispersed') return `The last hole closed in ${fmt(d.healSeconds, 2)} s.`;
+    if (!wrapped && sheet && curl === 'none') return 'The wrap is off, but the sheet did not reach across the tank, so taking the wrap away opened no ends.';
     if (!wrapped && d.assembly === 'vesicle') return 'With the wrap gone the sheet rolled up into a ring, and the edge went with it.';
-    if (!wrapped && d.sealed) return `With the wrap gone the sheet rolled its ends in until no tail was left in the water. A ring with water inside needs about ninety molecules at this thickness; these ${d.count} close by capping.`;
-    if (!wrapped) return 'The wrap is off: the two open ends are what the sheet is working on.';
+    if (!wrapped && sheet && d.sealed && curl === 'opened') return `With the wrap gone the sheet rolled both ends in and capped them. A ring with water inside needs about ninety molecules at this thickness; these ${d.count} close by capping.`;
+    if (!wrapped && sheet && d.sealed) return `Both ends of the sheet are capped. A ring with water inside needs about ninety molecules at this thickness; these ${d.count} close by capping.`;
+    if (!wrapped && sheet) return 'The wrap is off: the two open ends are what the sheet is working on.';
     if (d.assembly === 'dispersed' && tank.sweeps === 0) return 'Nothing has been released yet. Press Release.';
     // The one place the tank has to say which of two numbers it is quoting. Section 4.1's 7 nm is a
     // plasma membrane, half of whose mass is protein; this is bare lipid, and its core is what the same
@@ -1458,13 +1649,20 @@ export function mount(root, ctx) {
     },
     // molecule       which of the five is in the tank
     // count          molecules in it
-    // assembly       dispersed | micelle | bilayer | vesicle | droplet, classified from the geometry.
+    // assembly       dispersed | micelle | bilayer | vesicle | droplet, classified from the geometry
+    //                every 0.05 s of clock, and reported as the one the most of the last second's twenty
+    //                samples agree on (see SAMPLE_SWEEPS), so a one-sweep spike is not a verdict.
     //                'vesicle' means a closed ring with water inside, and a tank of this size does not
     //                reach one: thirty-four molecules close their rims by capping. See the header.
     // tailsBuried    0-1, the fraction of tail surface a water probe cannot reach
     // edgeLengthNm   the exposed tail perimeter, nm; about 0 for a sheet with no rim
     // thicknessNm    measured across the sheet, and 0 when there is no sheet
-    // sealed         no exposed tail edge left anywhere
+    // curl           what the last Curl found: 'opened' (the sheet's ends uncovered), 'none' (a sheet that
+    //                did not reach across, so no ends opened), or null (no Curl on a sheet in this tank)
+    // sealed         no open end: the exposed tail edge, averaged over a full second of samples taken
+    //                since the last press that changed it (Curl or the needle), is under
+    //                HELD_SEALED_NM, less than two rim molecules show. The lone thermal rim molecule any
+    //                closed sheet shows is not an open end.
     // punctured      true from the needle until the hole closes
     // healSeconds    how long the last puncture took to close, null until one is made
     // temperatureC   the slider
@@ -1477,3 +1675,7 @@ export function mount(root, ctx) {
     },
   };
 }
+
+// The model, for test/bilayer-model.test.js, which runs it in Node over windows of clock no browser gate
+// can afford. Nothing in the book reads this; the figure is still `meta` and `mount`.
+export const model = { Tank, stepTank, heldArrangement, heldSealed, kTat, TANK_W, MIN_RATIO, MAX_RATIO, SWEEPS_PER_SECOND };

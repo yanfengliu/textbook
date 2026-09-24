@@ -1718,25 +1718,74 @@ const RECIPES = {
       expect(d.healSeconds !== null && d.healSeconds > 0, `nothing timed the healing: ${d.healSeconds}`);
     }],
     ['curl-takes-the-wrap-away-and-the-sheet-rolls-up', async (h) => {
-      // The baseline this step compares against has to be a SETTLED sheet. The needle two steps up leaves
-      // the edge still relaxing, and reading the baseline mid-relaxation sets a target the curl can never
-      // reach: measured 2026-09-16, a baseline of 5.5 nm against a settled one near 1 nm, and the step
-      // demands the edge open by 2 nm from wherever it is told the sheet started.
-      await stable(h, (x) => x.edgeLengthNm, 30_000);
-      const flat = await h.describe();
-      expect(flat.assembly === 'bilayer', `this step needs the sheet from the first one: ${flat.assembly}`);
-      await h.button(/^Curl/).click();
-      // The wrap was what held the sheet flat, so taking it away opens two rims. That is the whole of
-      // what this control does; the rolling up is the walk's, and it is what is asserted below.
-      const opened = await until(h, (x) => x.edgeLengthNm > flat.edgeLengthNm + 2, 10_000);
-      expect(opened.edgeLengthNm > flat.edgeLengthNm + 2, `taking the wrap away should open two rims: ${flat.edgeLengthNm} -> ${opened.edgeLengthNm} nm`);
+      // This step walks the clock with Step, half a second a press, from a fresh tank, so it reads the
+      // same tank at the same clock values on every machine. It used to press Curl on whatever the running
+      // walk held when the needle step above had finished, and whether that was a sheet reaching across
+      // the tank — the only thing the wrap holds flat, and the only thing with ends for Curl to open —
+      // depended on where the machine's load had left the clock: on 2026-09-23 it was red on 2 of 5 runs
+      // of an unchanged recipe, "taking the wrap away should open two rims: 0 -> 0 nm", because the
+      // needle's hole had healed as two capped pieces. A sheet that does not reach across is a real
+      // outcome of the walk, so the step does not insist on one: it takes a fresh tank, up to four times,
+      // until Curl opens rims, and fails only if none of the four does.
+      //   It asserts the words as well as the numbers: after Curl the reading speaks of what Curl did,
+      // not of the needle before it, and once the rims have closed it stops calling them open. Both were
+      // wrong until 2026-09-23 — the overlay said "the sheet has two open ends" for as long as the wrap
+      // was off, and the side sentence kept "The last hole closed in 1.00 s." (src/figures/bilayer.js).
+      const words = async () => ({
+        over: (await h.stage.locator('.bl-over').first().textContent()) || '',
+        side: (await h.stage.locator('.bl-side text').allTextContents()).join(' '),
+      });
+      const stepUntil = async (ok, presses) => {
+        let x = await h.describe();
+        for (let i = 0; i < presses && !ok(x); i += 1) {
+          const before = x.t;
+          await h.button(/^Step/).click();
+          x = await until(h, (y) => y.t > before, 10_000);
+        }
+        return x;
+      };
+      let flat = null;
+      let opened = null;
+      let tries = 0;
+      while (!opened && tries < 4) {
+        tries += 1;
+        await h.button(/^Reset/).click();
+        flat = await stepUntil((x) => x.t >= 10, 40);
+        if (flat.assembly !== 'bilayer') continue;
+        await h.button(/^Needle/).click();
+        const healed = await stepUntil((x) => !x.punctured, 40);
+        expect(!healed.punctured && healed.healSeconds !== null, `the needle's hole did not close within 20 s of clock: ${JSON.stringify(healed)}`);
+        expect(/last hole closed in/i.test((await words()).side), `the heal time is not in the reading after the hole closed: ${JSON.stringify((await words()).side)}`);
+        flat = healed;
+        await h.button(/^Curl/).click();
+        const after = await h.describe();
+        // The wrap was what held the sheet flat, so taking it away opens two rims. That is the whole of
+        // what this control does; the rolling up is the walk's, and it is what is asserted below. Whether
+        // it opened any is the figure's own finding (`curl`), read here rather than re-derived with a
+        // threshold of this step's own: the first version demanded 2 nm where the figure decides at 1, so a
+        // Curl that opened 1.5 nm was a false red here (review, 2026-09-23). What this step adds is that
+        // the edge rose when the figure says it opened, and that the overlay says so when it did not.
+        if (after.curl === 'opened') {
+          expect(after.edgeLengthNm > flat.edgeLengthNm, `the figure says Curl opened the ends, and the exposed edge did not rise: ${flat.edgeLengthNm} -> ${after.edgeLengthNm} nm`);
+          opened = after;
+        } else if (after.curl === 'none') {
+          expect(/no ends opened/.test((await words()).over), `Curl opened no rims (${flat.edgeLengthNm} -> ${after.edgeLengthNm} nm) and the overlay did not say so: ${JSON.stringify((await words()).over)}`);
+        }
+      }
+      expect(opened, `in ${tries} fresh tanks Curl never opened two rims: the last went ${flat?.edgeLengthNm} -> ${(await h.describe()).edgeLengthNm} nm, ${flat?.assembly}`);
+      const open = await words();
+      expect(/two open ends/.test(open.over), `with the rims just opened the overlay should say so: ${JSON.stringify(open.over)}`);
+      expect(!/last hole closed/i.test(open.side), `after Curl the reading still speaks of the needle: ${JSON.stringify(open.side)}`);
       // What is asserted is that the edge GOES, which is the claim: an exposed rim is what a sheet
       // cannot tolerate. It closes by rolling its ends in and capping them rather than by making a ring
       // with water inside, because thirty-four molecules cannot make a ring — the figure's header has
       // the arithmetic, and its reading says which of the two it has done.
-      const closed = await until(h, (x) => x.sealed && x.tailsBuried > 0.95, 70_000);
-      expect(closed.sealed === true, `the sheet should have closed its rims: edge ${closed.edgeLengthNm} nm at t=${closed.t}`);
+      const closed = await stepUntil((x) => x.sealed && x.tailsBuried > 0.95, 140);
+      expect(closed.sealed === true, `the sheet should have closed its rims within 70 s of clock: edge ${closed.edgeLengthNm} nm at t=${closed.t}`);
       expect(closed.tailsBuried > 0.95, `and hidden nearly all its tail surface: ${closed.tailsBuried} at t=${closed.t}`);
+      const shut = await words();
+      expect(/sealed both ends/.test(shut.over) && !/open ends/.test(shut.over), `once the rims have closed the overlay should stop calling them open: ${JSON.stringify(shut.over)}`);
+      expect(/capped them/.test(shut.side), `and the reading should say what Curl did: ${JSON.stringify(shut.side)}`);
     }],
     ['a-detergent-cannot-make-a-sheet', async (h) => {
       await h.button(/^Detergent/).click();
@@ -1772,14 +1821,39 @@ const RECIPES = {
       await h.button(/^Reset/).click();
       await h.stage.locator('input[type=range]').fill('90');
       expect((await h.describe()).temperatureC === 90, 'the temperature slider did not reach 90 °C');
-      await h.button(/^Release/).click();
+      // The claim is about a WINDOW of the tank's own clock, so it is asserted across one: thirty seconds
+      // of clock walked forward with Step, half a second a press, and the verdict read after every press.
+      // Step is real input and moves the clock by exactly half a second, so every run on every machine
+      // reads the verdict at the same sixty clock values, and a tank that is dispersed at t = 8 and says
+      // "Micelles" at t = 9.5 fails here instead of passing on whichever instant the machine landed on.
+      //   It used to press Release, sleep 500 ms at a time until the clock passed 8 s, and assert once,
+      // at a t the load on the machine chose — a wall-clock wait (docs/policies/local-rules.md, "A wait
+      // in a gate must poll the artefact, never the wall clock"). GitHub's runner read "micelle at
+      // t=8.033, 0.641 buried" where this machine had read dispersed. The figure was wrong and the gate
+      // could only see it by luck: one sweep at 90 °C was a sheet or micelles about one time in ten, and
+      // the verdict is now what the tank has held over the last second (src/figures/bilayer.js,
+      // SAMPLE_SWEEPS). Run against the figure as it was, this step failed at the fourth read, t = 2, and
+      // in a second run at the sixth, t = 3 (docs/learning/gate-proofs.md).
+      //   Bound: one seed — whichever Reset gives at this point of the recipe, which the Curl step's
+      // fresh tanks move on — the lab's tank shape, 90 °C, and sixty instants half a second apart. It
+      // proves nothing at the temperatures between, nothing about a verdict that holds for less than half
+      // a second between two reads, and nothing about any other tank shape: with the tank allowed as flat
+      // as a 1024 px page once drew it, where 90 °C came together, this step stays green, which is why
+      // test/bilayer-model.test.js holds the flattest shape the figure draws.
+      const WINDOW_S = 30;
+      const reads = [];
       let d = await h.describe();
-      for (let i = 0; i < 30; i += 1) {
-        await h.page.waitForTimeout(500);
-        d = await h.describe();
-        if (d.t > 8) break;
+      expect(d.t === 0 && d.playing === false, `Reset should leave a fresh tank, unrun: ${JSON.stringify(d)}`);
+      while (d.t < WINDOW_S) {
+        const before = d.t;
+        await h.button(/^Step/).click();
+        d = await until(h, (x) => x.t > before, 10_000);
+        expect(d.t > before, `Step did not move the tank's clock past ${before}: ${JSON.stringify(d)}`);
+        expect(d.playing === false, `Step set the walk running, so the reads are no longer at fixed clock values: ${JSON.stringify(d)}`);
+        reads.push(d.tailsBuried);
+        expect(d.assembly === 'dispersed', `at 90 °C the jostling should win at every point of ${WINDOW_S} s of clock: ${d.assembly} at t=${d.t}, ${d.tailsBuried} buried, after ${reads.length} reads`);
       }
-      expect(d.assembly === 'dispersed', `at 90 °C the jostling should win: ${d.assembly} at t=${d.t}, ${d.tailsBuried} buried`);
+      expect(reads.length >= WINDOW_S / 0.5, `the window was not walked: ${reads.length} reads to t=${d.t}`);
     }],
     ['step-moves-the-walk-without-running-it', async (h) => {
       await h.button(/^Pause|^Release/).click();

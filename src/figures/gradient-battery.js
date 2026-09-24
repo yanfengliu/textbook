@@ -67,7 +67,7 @@
 // is fixed too and the measured ratio holds on either paper.
 import { el, h, text, C, tint, clamp, uid } from './lib/svg.js';
 import { atom, readoutCss, readoutTable, fitRows, round, INK, mulberry32 } from './lib/mol-draw.js';
-import { membranePart, LIGHT, ORGANELLE_BY_ID } from '../palette.js';
+import { membranePart, LIGHT } from '../palette.js';
 
 export const meta = { kind: 'gradient-battery', title: 'The battery charged, and spent', needsWebGL: false, aspect: 16 / 10 };
 
@@ -216,11 +216,15 @@ export function mount(root, ctx) {
   const CHANNEL_FILL = membranePart('channel').color;
   const GLUCOSE_FILL = membranePart('glucose').color;
   const HEAD_FILL = membranePart('lipidHead').color;
-  // The interior is the book's cytoplasm colour MIXED INTO THE PAPER, not the flat colour: the voltmeter,
-  // the protein names and the ions' charge signs are all set over it, and the flat colour is a fixed
-  // light cream in both themes, so `var(--ink)` over it was near-white on near-white in dark mode. Mixed
-  // into the paper it follows the theme and everything written on it reads in both.
-  const CYTO_FILL = tint(ORGANELLE_BY_ID.cytoplasm.color, 30);
+  // The interior is a wash of the gold token mixed into the paper, which is how permeability and
+  // bulk-transport draw the same cytoplasm: the voltmeter, the protein names and the ions' charge signs
+  // are all set over it, so it has to follow the theme. The flat ORGANELLES.cytoplasm is a fixed light
+  // cream, and mixing THAT into the paper only half works: 30% of it put `var(--ink)` right in both themes
+  // but made a mid-grey slab of the dark theme's cell (#575652), on which the --ink-faint names measured
+  // 2.15:1 (npm run legible, 2026-09-23). 8 and not the 9 or 10 of the other two figures because notes are
+  // set straight on this one with no halo: --ink-faint on it is 4.78:1 light and 4.53:1 dark, where 9
+  // gives 4.44:1 dark and 10 gives 4.34:1.
+  const CYTO_FILL = tint(C.gold, 8);
 
   // ---- state ----
   let scene = 'gut-cell';
@@ -496,11 +500,13 @@ export function mount(root, ctx) {
       if (pw > 19) g.append(text(cx, yy + 3.2, label, { anchor: 'middle', 'font-size': f1(Math.min(9.6, pw * 0.46)), 'font-weight': 700, style: `fill:${labelInk}` }));
     };
     // A blocked protein is drawn in the rule colour, which is pale, so its letter takes the ink rather
-    // than the paper its own fill would have asked for.
-    protein(symX, apical, symporter ? CARRIER_FILL : C.ruleStrong, 'S', symporter ? CARRIER_LABEL : C.soft);
-    protein(pumpX, basal, pumpRunning ? PUMP_FILL : C.ruleStrong, 'P', pumpRunning ? PUMP_LABEL : C.soft);
+    // than the paper its own fill would have asked for. The ink itself and not --ink-soft: the soft ink
+    // on --rule-strong is 4.37:1 light and 3.88:1 dark (npm run legible, 2026-09-23), and --ink is 10.32:1
+    // and 8.23:1. The grey of the fill is what says "blocked"; the letter still has to say which one.
+    protein(symX, apical, symporter ? CARRIER_FILL : C.ruleStrong, 'S', symporter ? CARRIER_LABEL : C.ink);
+    protein(pumpX, basal, pumpRunning ? PUMP_FILL : C.ruleStrong, 'P', pumpRunning ? PUMP_LABEL : C.ink);
     protein(glutX, basal, CARRIER_FILL, 'G', CARRIER_LABEL);
-    protein(leakX, basal, leakOpen ? CHANNEL_FILL : C.ruleStrong, 'K', leakOpen ? LIGHT.ink : C.soft);
+    protein(leakX, basal, leakOpen ? CHANNEL_FILL : C.ruleStrong, 'K', leakOpen ? LIGHT.ink : C.ink);
     const ls = f1(Math.max(7.8, sz - 1.4));
     if (!narrow) {
       g.append(text(symX, apical + memH * 1.5 + 10, 'symporter', { anchor: 'middle', class: 'mol-rt-note', 'font-size': ls }));
@@ -600,7 +606,8 @@ export function mount(root, ctx) {
     const antiX = cellL + (cellR - cellL) * 0.3;
     const pumpX = cellL + (cellR - cellL) * 0.7;
     protein(antiX, cy - halfH, CARRIER_FILL, 'A', CARRIER_LABEL);
-    protein(pumpX, cy - halfH, digoxin ? C.ruleStrong : PUMP_FILL, 'P', digoxin ? C.soft : PUMP_LABEL);
+    // Blocked by digoxin, it takes the gut cell's blocked colours: the ink on --rule-strong.
+    protein(pumpX, cy - halfH, digoxin ? C.ruleStrong : PUMP_FILL, 'P', digoxin ? C.ink : PUMP_LABEL);
     const ls = f1(Math.max(7.8, sz - 1.4));
     if (!narrow) {
       // Under the membrane, inside the cell: above it the two names shared a line with the heading, the
@@ -726,7 +733,10 @@ export function mount(root, ctx) {
     if (gapBot - gapTop > 3) {
       g.append(el('rect', { x: f1(X0 + 1), y: f1(gapTop), width: f1(Math.max(1, pw - 2)), height: f1(gapBot - gapTop), fill: tint(C.water, 12) }));
       if (gapBot - gapTop > 22) {
-        g.append(text(X0 + pw / 2, f1((gapTop + gapBot) / 2 + 3), `the sodium leak's ${Math.abs(potential() - nernstK()).toFixed(0)} mV`, { anchor: 'middle', class: 'mol-rt-note', 'font-size': 9 }));
+        // In --ink-soft rather than the notes' --ink-faint, because it is set on the band and names it:
+        // --ink-faint on the 12% water was 4.39:1 light and 4.30:1 dark (npm run legible, 2026-09-23),
+        // --ink-soft is 5.92:1 and 5.48:1, and a paler band would lose the one thing the plot is about.
+        g.append(text(X0 + pw / 2, f1((gapTop + gapBot) / 2 + 3), `the sodium leak's ${Math.abs(potential() - nernstK()).toFixed(0)} mV`, { anchor: 'middle', 'font-size': 9, style: `fill:${C.soft}` }));
       }
     }
     // Where it stands now, straight across, so a figure that has not been run yet still shows its state

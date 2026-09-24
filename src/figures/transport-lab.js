@@ -95,6 +95,8 @@ const CSS = `${readoutCss('.tb-tlab')}
 .tb-tlab .tl-key { fill: var(--ink-soft); }
 .tb-tlab .tl-val { fill: var(--ink); font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
 .tb-tlab .tl-line { fill: var(--ink-soft); }
+.tb-tlab .tl-over { font-weight: 600; stroke: var(--paper); stroke-width: 3px; stroke-linejoin: round;
+  paint-order: stroke; }
 .tb-tlab .fig-toolbar { justify-content: flex-start; }
 .tb-tlab .tl-group { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
 .tb-tlab .tl-sep { width: 1px; min-height: 1.4rem; align-self: center; margin: 0 var(--space-1);
@@ -659,7 +661,9 @@ export function mount(root, ctx) {
       }));
     }
     if (poreHalf > 34) {
-      g.append(text(cx - poreHalf - 6, (memTop + memBot) / 2, 'channel', { anchor: 'end', 'font-size': 9.6, 'font-weight': 600, style: `fill:${INK.water}` }));
+      // Set on the lipid tails, so it carries the paper with it, as permeability's own channel label does:
+      // bare, it measured 3.38:1 light and 1.25:1 dark on the tails (npm run legible, 2026-09-23).
+      g.append(text(cx - poreHalf - 6, (memTop + memBot) / 2, 'channel', { anchor: 'end', 'font-size': 9.6, class: 'tl-over', style: `fill:${INK.water}` }));
     }
     void CHANNEL_LABEL;
 
@@ -723,7 +727,7 @@ export function mount(root, ctx) {
     });
 
     // The filter overlay: the oxygens against the ghosts of the water this ion was wearing.
-    if (filterShown) drawFilterOverlay(g, cx, filterY, pmScale, filterR, oxR);
+    if (filterShown) drawFilterOverlay(g, cx, filterY, pmScale, filterR, oxR, top - 8);
 
     svg.append(g);
 
@@ -813,7 +817,7 @@ export function mount(root, ctx) {
     g.append(atom(px, y, s.sym, r, { charge: '+' }));
   }
 
-  function drawFilterOverlay(g, cx, filterY, pmScale, filterR, oxR) {
+  function drawFilterOverlay(g, cx, filterY, pmScale, filterR, oxR, noteBase) {
     const sym = ion === 'sodium' ? 'Na' : 'K';
     const shellR = shellPm(sym) * pmScale;
     g.append(el('circle', { cx: f1(cx), cy: f1(filterY), r: f1(shellR), fill: 'none', stroke: C.soft, 'stroke-width': 1.1, 'stroke-dasharray': '3 3' }));
@@ -822,11 +826,25 @@ export function mount(root, ctx) {
       g.append(el('circle', { cx: f1(cx + Math.cos(a) * shellR), cy: f1(filterY + Math.sin(a) * shellR), r: f1(Math.max(2.2, oxR * 0.8)), fill: 'none', stroke: C.soft, 'stroke-dasharray': '2 2' }));
     }
     g.append(el('circle', { cx: f1(cx), cy: f1(filterY), r: f1(filterR), fill: 'none', stroke: INK.coral, 'stroke-width': 1.1 }));
+    // Above the protein, in the strip of fluid the ion slots leave empty over it, and in two lines so it
+    // stays inside that strip. It was set across the filter itself, over the lipid heads and the
+    // channel's own wall, where it measured 2.95:1 light and 1.08:1 dark (npm run legible, 2026-09-23).
+    // A phone's fluid is too shallow to leave that strip empty — the sentence landed on three sodium
+    // ions — so there it is the tally's sentence instead (drawTally).
+    if (narrow) return;
+    const [first, second] = filterNote();
+    g.append(text(cx, noteBase - 12, first, { anchor: 'middle', 'font-size': 9.4, class: 'tl-line' }));
+    g.append(text(cx, noteBase, second, { anchor: 'middle', 'font-size': 9.4, class: 'tl-line' }));
+  }
+
+  // What the filter overlay shows, in words, as two halves so the wide stage can set it in two lines.
+  function filterNote() {
+    const sym = ion === 'sodium' ? 'Na' : 'K';
     const gapPm = FILTER_PM - shellPm(sym);
-    const note = gapPm < 6
-      ? `${sym === 'K' ? 'Potassium' : 'Sodium'}’s water sat exactly where the oxygens are.`
-      : `${sym === 'K' ? 'Potassium' : 'Sodium'}’s water sat ${Math.round(gapPm)} pm short of the oxygens.`;
-    g.append(text(cx, filterY - filterR - 9, note, { anchor: 'middle', 'font-size': 9.4, class: 'tl-line' }));
+    return [
+      `${sym === 'K' ? 'Potassium' : 'Sodium'}’s water sat`,
+      gapPm < 6 ? 'exactly where the oxygens are.' : `${Math.round(gapPm)} pm short of the oxygens.`,
+    ];
   }
 
   function drawTally(x, y, w, hgt) {
@@ -845,6 +863,7 @@ export function mount(root, ctx) {
         ['Gate', gdef.label.toLowerCase()],
         ['K⁺ over Na⁺, so far', ratioWord],
         ['Measured, for a real one', `${grouped(TRUE_SELECTIVITY)} ×`],
+        ...(filterShown ? notes(filterNote().join(' '), w, size) : []),
         ...notes('Sodium is the smaller ion. It is not blocked; it is priced out.', w, size),
       ]
       : [
