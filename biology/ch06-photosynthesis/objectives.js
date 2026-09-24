@@ -15,6 +15,11 @@
 // has ten objectives of this shape. The rest name only figures that are still on the page:
 // fig-pigments (6.1), fig-zscheme (6.2), fig-calvin (6.3), fig-rubisco (6.4).
 //
+// Figure 6.1 was then built without its second scene, the antenna and the four exits (its module's
+// header, "WHAT IS NOT HERE"): it draws the three absorption curves, the action spectrum and the leaf. So
+// `chlorophyll-structure` and `antenna-and-protection`, which named it for that scene, name no figure
+// either, and §6.3's prose is what teaches them.
+//
 // This is the chapter where the energy enters. Chapter 5 built the whole machinery of free energy,
 // coupling, catalysis and redox and then deliberately spent none of it; chapter 4 built a membrane and
 // called a gradient a battery; chapter 3 built the compartment; chapter 2 built the bonds and the
@@ -167,7 +172,7 @@ export const OBJECTIVES = [
     id: 'chlorophyll-structure',
     statement: 'Describe a chlorophyll molecule — the ring, the magnesium ion at its centre and the long tail — and say what each part is for.',
     prereqs: ['chloroplast-compartments', 'amphipathic'],
-    teaches: { sections: ['pigments'], figures: ['fig-pigments'] },
+    teaches: { sections: ['pigments'], figures: [] },
     level: 'recall',
   },
   {
@@ -195,7 +200,7 @@ export const OBJECTIVES = [
     id: 'antenna-and-protection',
     statement: 'Explain what an antenna of several hundred pigments is for, name the four things that can happen to an excited chlorophyll, and say which one photosynthesis needs and what carotenoids do about the others.',
     prereqs: ['excited-electron', 'why-pigments-absorb'],
-    teaches: { sections: ['pigments'], figures: ['fig-pigments'] },
+    teaches: { sections: ['pigments'], figures: [] },
     level: 'explain',
   },
 
