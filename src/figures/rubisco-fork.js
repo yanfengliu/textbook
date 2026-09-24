@@ -384,6 +384,22 @@ export function mount(root, ctx) {
   // stays the words.
   co2Ctl.node.querySelector('.tb-short')?.replaceChildren('CO', h('sub', { text: '2' }));
 
+  // What a screen reader says for each range. The carbon dioxide range's value is a rung, an index into
+  // CO2_RUNGS, so without this it announces "12" where the stage says 420 ppm; the other three get their
+  // units. Set on the input the bench made, after every change; a bench with its own valueText option
+  // would do the same job, and this one predates it.
+  const spoken = [
+    [co2Ctl, (i) => `${CO2_RUNGS[clamp(Math.round(i), 0, CO2_RUNGS.length - 1)]} parts per million`],
+    [tempCtl, (v) => `${v} degrees Celsius`],
+    [poreCtl, (v) => `${v} per cent open`],
+    [shareCtl, (v) => `${v} per cent of the leaf’s protein`],
+  ];
+  function speakRanges() {
+    for (const [ctl, words] of spoken) ctl.input.setAttribute('aria-valuetext', words(Number(ctl.input.value)));
+  }
+  for (const [ctl] of spoken) ctl.input.addEventListener('input', speakRanges);
+  speakRanges();
+
   b.keys({
     ' ': () => runCtl.toggle(),
     Enter: () => (scene === 'site' ? takeTurn() : nextStep()),
@@ -425,6 +441,7 @@ export function mount(root, ctx) {
     poreCtl.set(pore);
     shareCtl.set(share);
     syncing = false;
+    speakRanges();
   }
 
   function setEra(which) {

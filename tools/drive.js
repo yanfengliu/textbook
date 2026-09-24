@@ -3102,6 +3102,10 @@ const RECIPES = {
       // §6.7's four steps, to the prose's own numbers.
       expect(near(d.airRatio, 500, 0.5) && near(d.dissolvedRatio, 20, 0.05) && near(d.preference, 100, 0.1) && near(d.workingRatio, 3, 0.02), `the table should open at 500, 20, a hundredfold and 3: ${JSON.stringify({ airRatio: d.airRatio, dissolvedRatio: d.dissolvedRatio, preference: d.preference, workingRatio: d.workingRatio })}`);
       expect(near(d.netGainPercent, 62.5, 0.1), `net carbon gain should open at 62.5 %: ${d.netGainPercent}`);
+      // The carbon dioxide range holds a rung, an index into the figure's list of concentrations, so what a
+      // screen reader hears is only right if the figure says it: aria-valuetext, in the stage's own units.
+      const spoken = await h.stage.getByRole('slider', { name: 'Carbon dioxide' }).getAttribute('aria-valuetext');
+      expect(spoken === '420 parts per million', `the carbon dioxide range should say its concentration, not its rung: ${JSON.stringify(spoken)}`);
     }],
     ['warming-moves-the-solubility-and-the-preference', async (h) => {
       const before = await h.describe();
@@ -3139,6 +3143,8 @@ const RECIPES = {
       await atValue(h, co2, 20);
       const d = await until(h, (x) => x.airCo2Ppm === 1000, 5_000);
       expect(d.airCo2Ppm === 1000, `the air did not reach 1000 ppm: ${d.airCo2Ppm}`);
+      const spoken = await co2.getAttribute('aria-valuetext');
+      expect(spoken === '1000 parts per million', `the carbon dioxide range should say 1000 parts per million after the move: ${JSON.stringify(spoken)}`);
       expect(near(d.airRatio, 210, 0.5) && d.dissolvedRatio < before.dissolvedRatio / 2, `the first two steps should fall with more carbon dioxide: ${JSON.stringify({ airRatio: d.airRatio, dissolvedRatio: d.dissolvedRatio })}`);
       expect(d.preference === before.preference, `the enzyme's preference moved with the air: ${before.preference} -> ${d.preference}`);
       expect(d.workingRatio > 6 && d.netGainPercent > before.netGainPercent, `more carbon dioxide should raise the working ratio and the gain: ${JSON.stringify({ workingRatio: d.workingRatio, netGainPercent: d.netGainPercent })}`);
