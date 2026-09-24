@@ -3721,6 +3721,151 @@ const RECIPES = {
       expect(d.stalledAt === null && d.flashOxygen.length === 0 && d.photonKjSupplied === 0, `Reset left ${JSON.stringify({ stalledAt: d.stalledAt, flashOxygen: d.flashOxygen, kj: d.photonKjSupplied })}`);
     }],
   ],
+
+  // Chapter 6, Figure 6.4. The fields asserted are the computed ones — dissolvedRatio, workingRatio,
+  // netGainPercent — each after the control that should move it and alongside the ones it should not,
+  // because the figure's claim is WHICH line of §6.7's arithmetic each slider moves.
+  'rubisco-fork': [
+    ['opens-on-todays-air-with-no-turns-taken', async (h) => {
+      const d = await h.describe();
+      expect(d.scene === 'site' && d.era === 'today' && d.playing === false, `it should open on the site in today's air, unrun: ${JSON.stringify({ scene: d.scene, era: d.era, playing: d.playing })}`);
+      expect(d.airCo2Ppm === 420 && d.airO2Percent === 21 && d.temperatureC === 25 && d.stomaOpen === 0.5, `it should open at 420 ppm, 21 %, 25 °C and the pore half open: ${JSON.stringify({ airCo2Ppm: d.airCo2Ppm, airO2Percent: d.airO2Percent, temperatureC: d.temperatureC, stomaOpen: d.stomaOpen })}`);
+      expect(d.carboxylations === 0 && d.oxygenations === 0, `no turns should have been taken: ${d.carboxylations}/${d.oxygenations}`);
+      // §6.7's four steps, to the prose's own numbers.
+      expect(near(d.airRatio, 500, 0.5) && near(d.dissolvedRatio, 20, 0.05) && near(d.preference, 100, 0.1) && near(d.workingRatio, 3, 0.02), `the table should open at 500, 20, a hundredfold and 3: ${JSON.stringify({ airRatio: d.airRatio, dissolvedRatio: d.dissolvedRatio, preference: d.preference, workingRatio: d.workingRatio })}`);
+      expect(near(d.netGainPercent, 62.5, 0.1), `net carbon gain should open at 62.5 %: ${d.netGainPercent}`);
+      // The carbon dioxide range holds a rung, an index into the figure's list of concentrations, so what a
+      // screen reader hears is only right if the figure says it: aria-valuetext, in the stage's own units.
+      const spoken = await h.stage.getByRole('slider', { name: 'Carbon dioxide' }).getAttribute('aria-valuetext');
+      expect(spoken === '420 parts per million', `the carbon dioxide range should say its concentration, not its rung: ${JSON.stringify(spoken)}`);
+    }],
+    ['warming-moves-the-solubility-and-the-preference', async (h) => {
+      const before = await h.describe();
+      const temp = h.stage.getByRole('slider', { name: 'Temperature' });
+      await temp.fill('35');
+      await atValue(h, temp, 35);
+      const d = await until(h, (x) => x.temperatureC === 35, 5_000);
+      expect(d.temperatureC === 35, `the temperature did not reach 35 °C: ${d.temperatureC}`);
+      expect(d.airRatio === before.airRatio, `warming moved the air's ratio, which has no temperature in it: ${before.airRatio} -> ${d.airRatio}`);
+      expect(d.dissolvedRatio > before.dissolvedRatio + 1, `carbon dioxide should dissolve less well warm, raising the dissolved ratio: ${before.dissolvedRatio} -> ${d.dissolvedRatio}`);
+      expect(d.preference < 70, `the enzyme's own preference should fall as it warms: ${d.preference}`);
+      expect(d.workingRatio < 2.1 && d.netGainPercent < before.netGainPercent - 10, `both terms should take the working ratio and the gain down: ${JSON.stringify({ workingRatio: d.workingRatio, netGainPercent: d.netGainPercent })}`);
+    }],
+    ['closing-the-pore-lowers-only-the-last-step', async (h) => {
+      const temp = h.stage.getByRole('slider', { name: 'Temperature' });
+      await temp.fill('25');
+      await atValue(h, temp, 25);
+      const before = await until(h, (x) => x.temperatureC === 25, 5_000);
+      const pore = h.stage.getByRole('slider', { name: 'Pore' });
+      await pore.fill('10');
+      await atValue(h, pore, 10);
+      const d = await until(h, (x) => x.stomaOpen === 0.1, 5_000);
+      expect(d.stomaOpen === 0.1, `the pore did not close to 10 %: ${d.stomaOpen}`);
+      expect(d.internalCo2Ppm < before.internalCo2Ppm - 100, `the leaf's internal carbon dioxide should fall well below the air's: ${before.internalCo2Ppm} -> ${d.internalCo2Ppm}`);
+      expect(d.airRatio === before.airRatio && d.dissolvedRatio === before.dissolvedRatio && d.preference === before.preference, `the pore moved a step it does not enter: ${JSON.stringify({ airRatio: d.airRatio, dissolvedRatio: d.dissolvedRatio, preference: d.preference })}`);
+      expect(d.workingRatio < 1.5 && d.netGainPercent < before.netGainPercent - 15, `closing the pore should take the working ratio and the gain down: ${JSON.stringify({ workingRatio: d.workingRatio, netGainPercent: d.netGainPercent })}`);
+    }],
+    ['more-carbon-dioxide-moves-the-first-step', async (h) => {
+      const pore = h.stage.getByRole('slider', { name: 'Pore' });
+      await pore.fill('50');
+      await atValue(h, pore, 50);
+      const before = await until(h, (x) => x.stomaOpen === 0.5, 5_000);
+      const co2 = h.stage.getByRole('slider', { name: 'Carbon dioxide' });
+      await co2.fill('20'); // the rung for 1000 ppm
+      await atValue(h, co2, 20);
+      const d = await until(h, (x) => x.airCo2Ppm === 1000, 5_000);
+      expect(d.airCo2Ppm === 1000, `the air did not reach 1000 ppm: ${d.airCo2Ppm}`);
+      const spoken = await co2.getAttribute('aria-valuetext');
+      expect(spoken === '1000 parts per million', `the carbon dioxide range should say 1000 parts per million after the move: ${JSON.stringify(spoken)}`);
+      expect(near(d.airRatio, 210, 0.5) && d.dissolvedRatio < before.dissolvedRatio / 2, `the first two steps should fall with more carbon dioxide: ${JSON.stringify({ airRatio: d.airRatio, dissolvedRatio: d.dissolvedRatio })}`);
+      expect(d.preference === before.preference, `the enzyme's preference moved with the air: ${before.preference} -> ${d.preference}`);
+      expect(d.workingRatio > 6 && d.netGainPercent > before.netGainPercent, `more carbon dioxide should raise the working ratio and the gain: ${JSON.stringify({ workingRatio: d.workingRatio, netGainPercent: d.netGainPercent })}`);
+    }],
+    ['the-turns-settle-near-the-working-ratio', async (h) => {
+      await h.button(/^Reset/).click();
+      await until(h, (x) => x.airCo2Ppm === 420 && x.carboxylations === 0 && x.playing === false, 5_000);
+      await ensureRunning(h);
+      const d = await until(h, (x) => x.carboxylations + x.oxygenations >= 90, 90_000);
+      await h.button(/^Pause/).click();
+      await until(h, (x) => x.playing === false, 5_000);
+      expect(d.carboxylations + d.oxygenations >= 90, `90 turns should have been taken at three a second: ${d.carboxylations}/${d.oxygenations} at t=${d.t}`);
+      expect(d.oxygenations > 0, 'in today\'s air some turns should be oxygenations');
+      const counted = d.carboxylations / d.oxygenations;
+      expect(Math.abs(counted - d.workingRatio) < 0.6, `the counted ratio should have settled near the table's: counted ${counted.toFixed(2)} against ${d.workingRatio}`);
+    }],
+    ['one-turn-at-a-time', async (h) => {
+      const before = await h.describe();
+      const n0 = before.carboxylations + before.oxygenations;
+      for (let i = 0; i < 4; i += 1) await h.button(/^Take a turn/).click();
+      const d = await until(h, (x) => x.carboxylations + x.oxygenations === n0 + 4, 5_000);
+      expect(d.carboxylations + d.oxygenations === n0 + 4, `four presses should be four turns: ${n0} -> ${d.carboxylations + d.oxygenations}`);
+      expect(d.playing === false, 'a single turn should not leave the figure running');
+    }],
+    ['the-keys-take-a-turn', async (h) => {
+      const before = await h.describe();
+      const n0 = before.carboxylations + before.oxygenations;
+      await h.focusable().focus();
+      await h.page.keyboard.press('Enter');
+      const d = await until(h, (x) => x.carboxylations + x.oxygenations === n0 + 1, 5_000);
+      expect(d.carboxylations + d.oxygenations === n0 + 1, `Enter on the site should take one turn: ${n0} -> ${d.carboxylations + d.oxygenations}`);
+    }],
+    ['archaean-air-turns-oxygenation-off', async (h) => {
+      await h.button(/^Archaean air/).click();
+      const on = await until(h, (x) => x.era === 'archaean', 5_000);
+      expect(on.era === 'archaean' && on.airO2Percent === 0 && on.airCo2Ppm === 10000, `Archaean air should hold no oxygen and far more carbon dioxide: ${JSON.stringify({ era: on.era, airO2Percent: on.airO2Percent, airCo2Ppm: on.airCo2Ppm })}`);
+      expect(on.workingRatio === Infinity && on.netGainPercent === 100, `with no oxygen every turn is a carboxylation: ${JSON.stringify({ workingRatio: on.workingRatio, netGainPercent: on.netGainPercent })}`);
+      expect(on.carboxylations === 0 && on.oxygenations === 0, `the count should start again with the new air: ${on.carboxylations}/${on.oxygenations}`);
+      expect(on.preference === 100, `the enzyme itself should not have changed: preference ${on.preference}`);
+      await ensureRunning(h);
+      const d = await until(h, (x) => x.carboxylations >= 30, 60_000);
+      await h.button(/^Pause/).click();
+      await until(h, (x) => x.playing === false, 5_000);
+      expect(d.carboxylations >= 30, `30 turns should have been taken: ${d.carboxylations}`);
+      expect(d.oxygenations === 0, `no oxygenation is possible with no oxygen: ${d.oxygenations}`);
+    }],
+    ['the-salvage-counts-what-comes-back', async (h) => {
+      await h.button(/^Salvage route/).click();
+      const d0 = await until(h, (x) => x.scene === 'salvage', 5_000);
+      expect(d0.scene === 'salvage' && d0.salvageStep === 'chloroplast', `the salvage should open in the chloroplast: ${JSON.stringify({ scene: d0.scene, salvageStep: d0.salvageStep })}`);
+      expect(d0.carbonLost === 0 && d0.carbonRecovered === 0 && d0.atpSpentOnSalvage === 0, `nothing should be counted yet: ${JSON.stringify({ carbonLost: d0.carbonLost, carbonRecovered: d0.carbonRecovered, atpSpentOnSalvage: d0.atpSpentOnSalvage })}`);
+      await h.button(/^Next step/).click();
+      await until(h, (x) => x.salvageStep === 'peroxisome', 5_000);
+      await h.button(/^Next step/).click();
+      const d2 = await until(h, (x) => x.salvageStep === 'mitochondrion', 5_000);
+      expect(d2.salvageStep === 'mitochondrion' && d2.carbonLost === 1 && d2.carbonRecovered === 0, `the mitochondrion should release one carbon and recover none yet: ${JSON.stringify({ salvageStep: d2.salvageStep, carbonLost: d2.carbonLost, carbonRecovered: d2.carbonRecovered })}`);
+      await h.button(/^Next step/).click();
+      await until(h, (x) => x.salvageStep === 'peroxisome-back', 5_000);
+      await h.button(/^Next step/).click();
+      const d4 = await until(h, (x) => x.salvageStep === 'chloroplast-back', 5_000);
+      expect(d4.carbonRecovered === 3 && d4.carbonLost === 1 && d4.atpSpentOnSalvage === 2, `three carbons in four should come back, for two ATP: ${JSON.stringify({ salvageStep: d4.salvageStep, carbonRecovered: d4.carbonRecovered, carbonLost: d4.carbonLost, atpSpentOnSalvage: d4.atpSpentOnSalvage })}`);
+    }],
+    ['running-the-salvage-stops-at-the-end', async (h) => {
+      await h.button(/^Next step/).click();
+      await until(h, (x) => x.salvageStep === 'chloroplast', 5_000);
+      await ensureRunning(h);
+      const d = await until(h, (x) => x.salvageStep === 'chloroplast-back' && x.playing === false, 40_000);
+      expect(d.salvageStep === 'chloroplast-back' && d.playing === false, `a run should carry the molecule round and stop: ${JSON.stringify({ salvageStep: d.salvageStep, playing: d.playing, t: d.t })}`);
+      expect(d.carbonRecovered === 3 && d.atpSpentOnSalvage === 2, `and leave the ledger complete: ${JSON.stringify({ carbonRecovered: d.carbonRecovered, atpSpentOnSalvage: d.atpSpentOnSalvage })}`);
+    }],
+    ['less-rubisco-leaves-the-odds-alone', async (h) => {
+      await h.button(/^Active site/).click();
+      const before = await until(h, (x) => x.scene === 'site', 5_000);
+      const share = h.stage.getByRole('slider', { name: 'Rubisco' });
+      await share.fill('10');
+      await atValue(h, share, 10);
+      const d = await until(h, (x) => x.rubiscoFractionOfProtein === 0.1, 5_000);
+      expect(d.rubiscoFractionOfProtein === 0.1, `rubisco should be a tenth of the leaf's protein: ${d.rubiscoFractionOfProtein}`);
+      expect(d.workingRatio === before.workingRatio && d.netGainPercent === before.netGainPercent && d.dissolvedRatio === before.dissolvedRatio, `how much rubisco there is changes the rate, not the odds: ${JSON.stringify({ workingRatio: d.workingRatio, netGainPercent: d.netGainPercent })}`);
+    }],
+    ['reset-puts-everything-back', async (h) => {
+      await h.button(/^Reset/).click();
+      const d = await until(h, (x) => x.era === 'today' && x.rubiscoFractionOfProtein === 0.4 && x.salvageStep === null, 5_000);
+      expect(d.scene === 'site' && d.era === 'today' && d.playing === false, `Reset left ${JSON.stringify({ scene: d.scene, era: d.era, playing: d.playing })}`);
+      expect(d.airCo2Ppm === 420 && d.temperatureC === 25 && d.stomaOpen === 0.5 && d.rubiscoFractionOfProtein === 0.4, `Reset left the controls at ${JSON.stringify({ airCo2Ppm: d.airCo2Ppm, temperatureC: d.temperatureC, stomaOpen: d.stomaOpen, rubiscoFractionOfProtein: d.rubiscoFractionOfProtein })}`);
+      expect(d.carboxylations === 0 && d.oxygenations === 0 && d.salvageStep === null && d.t === 0, `Reset left ${JSON.stringify({ carboxylations: d.carboxylations, oxygenations: d.oxygenations, salvageStep: d.salvageStep, t: d.t })}`);
+      expect(near(d.workingRatio, 3, 0.02) && near(d.netGainPercent, 62.5, 0.1), `Reset left the table at ${JSON.stringify({ workingRatio: d.workingRatio, netGainPercent: d.netGainPercent })}`);
+    }],
+  ],
 };
 
 rmSync(OUT, { recursive: true, force: true });

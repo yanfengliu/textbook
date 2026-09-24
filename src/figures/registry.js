@@ -122,6 +122,10 @@ export const FIGURES = Object.freeze({
   // 800 px, the two climbs stacked. Added at the end of the table so that it does not share a line with
   // the chapter's other three kinds, which are being added in parallel.
   zscheme: { url: new URL('./zscheme.js', import.meta.url).href, title: 'Fire the photons yourself', needsWebGL: false, aspect: 16 / 10, narrowAspect: 3 / 4 },
+
+  // Chapter 6, Figure 6.4. The brief's aspect and narrow aspect; it carries a genuine second composition,
+  // because a site drawn beside a four-row table does not survive a 390 px stage.
+  'rubisco-fork': { url: new URL('./rubisco-fork.js', import.meta.url).href, title: 'One site, two gases, four steps of arithmetic', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
 });
 
 export const KINDS = Object.freeze(Object.keys(FIGURES));
