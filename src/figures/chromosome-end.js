@@ -89,8 +89,8 @@
 // NARROW_WHY below. On phones narrower than the gate's 390 px the letters give up what does not fit
 // rather than touch a strand — tail columns before the tail begins, the '5′' in front of telomerase's —
 // and are left out when too few would remain; a sentence that cannot fit whole is left out rather than
-// cut, and the rows take its room. On a 320 px phone that leaves the copies, the labels that fit and
-// the table's rows, without the sentence.
+// cut, and the rows take its room. Down to a 360 px phone every sentence fits. On a 320 px phone that
+// leaves the copies, the labels that fit and the table's rows, without the sentence.
 import { C, clamp, lerp, el } from './lib/svg.js';
 import { bench } from './lib/bench.js';
 import { hash2 } from './lib/chem-atoms.js';
@@ -427,7 +427,8 @@ export function mount(root, ctx) {
     }
     if (m.phase === 'copying') return 'The leading strand runs off the end with its template. The last lagging-strand fragment starts on a primer at the very tip.';
     if (telomerase) return `Telomerase adds ${O} nt of repeats back to the short copy from its own RNA template, and primase and polymerase fill in the partner strand. The length holds.`;
-    return `The last primer’s gap has nothing beyond it to fill it from. Trimmed to leave a tail, one copy is ${O} bp shorter than its parent and the other is not: ${loss} bp an end, on average.`;
+    // Kept to three lines of a 360 px phone's table, which leaves a sentence out rather than cut it.
+    return `The last primer’s gap has nothing beyond it to fill it from. Trimmed to leave a tail, one copy is ${O} bp shorter and the other is not: ${loss} bp an end, on average.`;
   }
 
   b.onAnnounce(() => {
@@ -1244,9 +1245,12 @@ export function mount(root, ctx) {
     const noteT = table.readout({ x: 0, width: w, size });
     noteT.note(words, { size: 9.4 });
     // The rows make room for the sentence under them only when it can fit there whole; when it cannot,
-    // they have the pane.
-    const spare = hgt - noteT.height(14) - 2;
-    const into = spare >= 60 ? spare : hgt;
+    // they have the pane. The pane ends at the toolbar, so a three-line sentence would put its last rule
+    // against the buttons: 6 px are kept clear under it when the rows can spare them.
+    const foot = hgt - noteT.height(14) - 8 >= 60 ? 6 : 0;
+    const H = hgt - foot;
+    const spare = H - noteT.height(14) - 2;
+    const into = spare >= 60 ? spare : H;
     const half = Math.ceil(rows.length / 2);
     const left = table.readout({ title, x: 0, width: colW, size, minRow: 13, maxRow: 20 });
     for (const [k, v] of rows.slice(0, half)) left.row(k, v);
@@ -1257,7 +1261,7 @@ export function mount(root, ctx) {
     const noteAt = table.readout({ x: 0, y: Math.max(bl, br) + 2, width: w, size });
     noteAt.note(words, { size: 9.4 });
     // Whole or not at all, as in the wide table: on a stage narrower than a 360 px phone's it is left out.
-    const room = hgt - Math.max(bl, br) - 2;
+    const room = H - Math.max(bl, br) - 2;
     if (noteAt.height(14) <= room + 0.01) noteAt.draw(14, room);
   }
 
