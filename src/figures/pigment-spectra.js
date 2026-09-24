@@ -60,18 +60,31 @@
 //   Light is not a colour anywhere else here: a photon on its way to the filament is a travelling mark in
 //   inkSoft with its wavelength written beside it, and its wave is drawn longer the redder it is.
 //
+// THE ACTION CHART'S OUTLINE is the pigments shown on the oxygen's own scale: what the alga would make if
+// they were all it had. It therefore sits under the points everywhere, touching them only where the
+// pigments shown are the only ones absorbing, and the room between the two is the work of the pigments
+// not shown. An outline scaled to its own peak instead stood ABOVE the oxygen at 662 nm with
+// chlorophyll a alone, which read as the opposite of the argument.
+//
 // TWO COMPOSITIONS.
 //   wide   — the two charts stacked on the left, sharing one wavelength axis drawn as the spectrum; the
 //            filament and its bacteria top right; the swatch and its two numbers bottom right.
 //   narrow — below 800 px, one chart at a time, chosen by Absorption / Action, with the other drawn
-//            faintly behind it so the comparison survives; the filament under the chart; the swatch and
-//            its two numbers under that, with the same labels. The three curve toggles become one
+//            faintly behind it so the comparison survives, and the three curve toggles become one
 //            three-state stepper — chlorophyll a, then a and b, then all three — which is the order the
-//            argument is made in.
+//            argument is made in. The swatch and its two numbers keep the same labels. Below 800 px is two
+//            stages in this book, so the panes follow the stage's shape: a phone's (390 by 520) stacks
+//            the chart, the filament and the swatch; a small laptop's (656 by 369, the chapter column at a
+//            1024 px window) keeps the wide arrangement with one chart in its left column.
+//
+// THE KEYS are placed by search, not by position: see key() below.
 //
 // WHAT IS NOT HERE. The brief's second scene — a few hundred antenna pigments round one reaction centre,
-// the four exits and the carotenoids' protection — is not built; this figure is the spectra, the extract
-// against the leaf, and the swatch.
+// the four exits, the queue and the carotenoids' protection — is not built. It is a second simulation
+// with a toolbar of its own, and this figure is the spectra, the extract against the leaf, and the
+// swatch, built to the bench's bar rather than two scenes built short of it. The objective it would have
+// taught, `antenna-and-protection`, and the sentences in §6.3 and the caption that point to it, are the
+// chapter's to settle.
 //
 // describe() is documented at the foot of this file.
 import { C, el, clamp } from './lib/svg.js';
@@ -290,7 +303,7 @@ export function mount(root, ctx) {
   };
   const WIDE_GRID = {
     columns: 'minmax(0, 60fr) minmax(0, 40fr)',
-    rows: 'minmax(0, 55fr) minmax(0, 45fr)',
+    rows: 'minmax(0, 57fr) minmax(0, 43fr)',
     at: { chart: [1, '1 / 3'], alga: [2, 1], swatch: [2, 2] },
   };
   const TALL_GRID = {
@@ -324,7 +337,7 @@ export function mount(root, ctx) {
   toggles.carotenoid = b.toggle('Carotenoids', (on) => pressShown('carotenoid', on), { only: 'wide', aria: 'Carotenoids, show or hide their absorption curve' });
   const pigments = b.stepper('Pigments', {
     min: 1, max: 3, step: 1, value: 1, short: 'Show', only: 'narrow',
-    format: (v, o) => (o.narrow ? ['a', 'a and b', 'all three'] : ['chlorophyll a', 'a and b', 'all three'])[v - 1],
+    format: (v, o) => (o.narrow ? ['a only', 'a and b', 'all three'] : ['chlorophyll a', 'a and b', 'all three'])[v - 1],
     onInput: (v) => { if (syncing) return; shown = [...STEPS[v - 1]]; syncControls(); after(); },
   });
   const chartChoice = b.choice('Chart', CHARTS, (id) => { view = id; after(); }, { value: 'absorption', segmented: true, only: 'narrow' });
@@ -429,14 +442,17 @@ export function mount(root, ctx) {
 
   // ---------------------------------------------------------------- type
 
-  // One scale of type for the whole stage, read off the stage's width, so the three panes agree.
+  // One scale of type for the whole stage, read off the stage's width, so the three panes agree. The
+  // floors are the book's: nothing under 8.4 px, which is 25 device pixels on a phone and, on the one
+  // stage where the figure is small at a device ratio of one — a 1024 px laptop, 656 px of stage — is
+  // still the size `enzyme-kinetics` sets its tick figures at.
   let S = null;
   const measureType = () => {
-    const stageW = b.narrow ? chart.box.w : chart.box.w + alga.box.w;
+    const stageW = root.getBoundingClientRect().width || chart.box.w;
     S = {
-      title: clamp(stageW * 0.0094, 8.2, 9.4),
-      axis: clamp(stageW * 0.009, 7.8, 8.8),
-      key: clamp(stageW * 0.0098, 8.4, 9.8),
+      title: clamp(stageW * 0.0096, 8.6, 9.6),
+      axis: clamp(stageW * 0.0096, 8.4, 9.6),
+      key: clamp(stageW * 0.0104, 9, 10.4),
     };
   };
 
@@ -448,22 +464,34 @@ export function mount(root, ctx) {
     return d;
   }
 
-  // A key set as a short column of type, in the one stretch of a chart every curve leaves empty: above
-  // the green trough, from 496 to 632 nm, where nothing drawn rises past a sixth of the height. It takes
-  // whichever end of that stretch the wavelength marker is not in, and its words carry a paper halo, so
-  // that where a narrow stage leaves no room the marker runs behind them rather than through them.
-  function key(rows, { X, top, markerX }) {
+  // A key set as a short column of type at the top of a chart, placed where nothing drawn reaches it.
+  // Where that is depends on the state — which curves are shown, where the points are, where the marker
+  // stands — so it is not a place but a search: every position along the top, nearest the green trough
+  // first (486 nm, where every curve is lowest), is tested against the marker and against each thing
+  // actually drawn under it, sampled every two pixels across the key's width. The first that clears all
+  // of them wins. At a phone's width with the marker in the trough nothing may clear, and then the key
+  // takes the trough anyway and its words, which carry a paper halo, stand in front of the marker.
+  // `under` is what is drawn: functions from wavelength to the chart's own value.
+  function key(rows, { X, Y, top, markerX, padL, pw, under }) {
     const size = S.key;
     const rowH = size + 4.5;
     const mark = 17;
-    const wide = Math.max(...rows.map((r) => widthOf(r.text, size))) + mark + 5;
-    const lo = X(486);
-    const hi = X(636);
-    const clear = (x) => markerX < x - 8 || markerX > x + wide + 8;
-    // At the start of the stretch, else hard against the marker on whichever side has the room, else
-    // at its end; and if a phone's stage leaves none of those clear, at the start, behind the halo.
-    const tries = [lo, markerX - 9 - wide, markerX + 9, hi - wide].filter((x) => x >= lo - 0.5 && x + wide <= hi + 0.5);
-    const x = tries.find(clear) ?? lo;
+    const wide = Math.max(...rows.map((r) => widthOf(r.text, size) + (r.mark ? mark + 5 : 0)));
+    const bottom = top + rows.length * rowH + 4;
+    const nmAt = (x) => LO + ((x - padL) / pw) * (HI - LO);
+    const clear = (x) => {
+      if (markerX >= x - 8 && markerX <= x + wide + 8) return false;
+      for (let px = x - 3; px <= x + wide + 3; px += 2) {
+        const nm = nmAt(px);
+        if (under.some((f) => Y(f(nm)) < bottom + 3)) return false;
+      }
+      return true;
+    };
+    const home = X(486);
+    const room = [];
+    for (let x = padL + 6; x + wide <= padL + pw; x += 3) room.push(x);
+    room.sort((p, q) => Math.abs(p - home) - Math.abs(q - home));
+    const x = room.find(clear) ?? clamp(home, padL + 6, padL + pw - wide);
     rows.forEach((r, i) => {
       const y = top + rowH * i + size;
       const my = y - size * 0.34;
@@ -570,7 +598,20 @@ export function mount(root, ctx) {
     const rows = shown.map((id) => ({ mark: 'line', stroke: PIGMENT[id].stroke, dash: PIGMENT[id].dash, text: PIGMENT[id].name, colour: PIGMENT[id].text }));
     if (!rows.length) rows.push({ text: 'no pigment shown' });
     if (faintAction && points.length) rows.push({ mark: 'ring', text: `oxygen, ${points.length} ${points.length === 1 ? 'point' : 'points'}` });
-    key(rows, { X, top: top + 1, markerX });
+    const under = shown.map((id) => (nm) => absorbanceOf(id, nm) / CHL_A_PEAK);
+    if (faintAction) under.push(pointsAt);
+    key(rows, { X, Y, top: top + 1, markerX, padL, pw, under });
+  }
+
+  // The reader's points as a line, for the key to stay clear of: between two points the segment joining
+  // them, a few nanometres either side of the ends the mark itself, and a little over its height so the
+  // ring round the latest one is kept clear too.
+  function pointsAt(nm) {
+    if (!points.length || nm < points[0].nm - 4 || nm > points[points.length - 1].nm + 4) return 0;
+    const i = points.findIndex((p) => p.nm >= nm);
+    if (i <= 0) return (i === 0 ? points[0].o2 : points[points.length - 1].o2) + 0.06;
+    const [p, q] = [points[i - 1], points[i]];
+    return p.o2 + ((nm - p.nm) / (q.nm - p.nm)) * (q.o2 - p.o2) + 0.06;
   }
 
   function action({ X, top, height, padL, pw, markerX }) {
@@ -596,7 +637,7 @@ export function mount(root, ctx) {
       shown.length ? { mark: 'hill', text: `predicted from ${shownWords(shown)}` } : { text: 'no pigment shown' },
       { mark: 'dot', text: points.length ? `oxygen measured, ${points.length} ${points.length === 1 ? 'point' : 'points'}` : 'oxygen measured: none yet', colour: C.ink },
     ];
-    key(rows, { X, top: top + 1, markerX });
+    key(rows, { X, Y, top: top + 1, markerX, padL, pw, under: shown.length ? [shownAbsorbance, pointsAt] : [pointsAt] });
   }
 
   function drawChart() {
@@ -751,21 +792,38 @@ export function mount(root, ctx) {
   function drawSwatch() {
     const { w, h } = swatch.clear().box;
     const narrow = b.narrow;
-    const r = clamp(Math.min(h * (narrow ? 0.36 : 0.22), w * 0.12), 14, 36);
-    const discX = r + 2;
-    const discY = clamp(h * (narrow ? 0.5 : 0.36), r + 3, h - r - 3);
-    swatch.circle(discX, discY, r, { fill: SWATCH[sample], stroke: C.ruleStrong, 'stroke-width': 1 });
-    const tx = discX + r + (narrow ? 16 : 20);
+    const r = clamp(Math.min(h * (narrow ? 0.34 : 0.24), w * 0.12), 14, 38);
+    // A table's values belong near their labels: past about 330 px the rows stop reading as rows, so on
+    // a pane wider than the unit needs — a tablet held upright gives this one 750 — the disc and its
+    // table keep their measure and stand together in the middle of it.
+    const gap = narrow ? 16 : 20;
+    const measure = Math.min(w - 2 * r - 2 - gap, 330);
+    const left = Math.max(0, (w - (2 * r + 2 + gap + measure)) / 2);
+    const discX = left + r + 2;
+    const tx = discX + r + gap;
     const size = clamp(S.key + 1.2, 9.6, 11.2);
-    swatch.readout({ title: `Absorbed at ${wavelength} nm`, x: tx, y: 0, width: Math.max(80, w - tx), size, titleSize: S.title, minRow: 13, maxRow: 22 })
-      .fit(h - 9, (t, level) => {
-        const pick = (id, label, value) => (sample === id ? t.sum(label, value) : t.row(label, value));
-        pick('extracted', 'Extracted', f2(absorbed('extracted', wavelength)));
-        pick('leaf', 'Whole leaf', f2(absorbed('leaf', wavelength)));
-        t.rule();
-        t.row('Gets through', shownName(SWATCH_NAME[sample]));
-        if (level < 1) t.note(sentence());
-      }, { levels: 2 });
+    const table = { title: `Absorbed at ${wavelength} nm`, x: tx, width: Math.max(80, measure), size, titleSize: S.title, minRow: 13, maxRow: 27 };
+    const build = (t, level) => {
+      const pick = (id, label, value) => (sample === id ? t.sum(label, value) : t.row(label, value));
+      pick('extracted', 'Extracted', f2(absorbed('extracted', wavelength)));
+      pick('leaf', 'Whole leaf', f2(absorbed('leaf', wavelength)));
+      t.rule();
+      t.row('Gets through', shownName(SWATCH_NAME[sample]));
+      if (level < 1) t.note(sentence());
+    };
+    // Set at its fullest the table may be shorter than a tall pane — a tablet held upright — and then the
+    // unit stands in the middle of the pane rather than at its top over an empty band. Measured on a
+    // table that is built and never drawn.
+    const whole = swatch.readout({ ...table, y: 0 });
+    build(whole, 0);
+    const room = h - 9;
+    const top = Math.max(0, (room - whole.height(27)) / 2);
+    swatch.readout({ ...table, y: top }).fit(room - 2 * top, build, { levels: 2 });
+    // The swatch stands beside the three rows it answers, centred on them rather than on the pane, which
+    // is read off the rows as drawn: their height is solved by the table to fill the pane.
+    const rows = [...swatch.node.querySelectorAll('.tb-rt-key')].map((t) => Number(t.getAttribute('y')));
+    const middle = rows.length ? (rows[0] - size * 0.9 + rows[rows.length - 1] + size * 0.4) / 2 : h / 2;
+    swatch.circle(discX, clamp(middle, r + 3, h - r - 3), r, { fill: SWATCH[sample], stroke: C.ruleStrong, 'stroke-width': 1 });
   }
 
   // What the two numbers mean, chosen by the numbers themselves rather than by a band of wavelengths, so
