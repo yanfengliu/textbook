@@ -10,7 +10,7 @@ The book's design is [textbook.md](textbook.md); the order a chapter is built in
 
 # Chapter N — figure brief
 
-Six to nine figures, in the order they appear in `index.html`. The figure number is fixed by that order and the prose cites every one of them by number, so the order does not change without editing the prose.
+At most about four bespoke interactive figures, each justified below by what handling it teaches that prose cannot, in the order they appear in `index.html`. The figure number is fixed by that order and the prose cites every one of them by number, so the order does not change without editing the prose.
 
 | # | Kind | Id | Section | WebGL | `aspect` | `narrowAspect` |
 |---|---|---|---|---|---|---|
@@ -104,7 +104,7 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 |---|---|---|
 | `t` | number | clock, seconds |
 
-**Why it is a mechanism.** One sentence: what the reader can falsify here that a static picture could only assert.
+**Why it is a mechanism.** One sentence: what handling it teaches that prose cannot.
 
 **Narrow composition.** What changes below 800 px, and what is dropped rather than shrunk.
 

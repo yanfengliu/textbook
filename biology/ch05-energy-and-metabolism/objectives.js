@@ -30,7 +30,7 @@
 //   `hydrophobic-effect`    — the case where a change that takes heat in still runs, because the entropy
 //                             term wins (§5.2)
 //   `nucleotide-parts`      — ATP is a nucleotide (§5.3), and NAD⁺ is two of them joined (§5.8)
-//   `functional-groups`     — the phosphate group, and §2.7's table, which this chapter has to correct (§5.3)
+//   `functional-groups`     — the phosphate group, and §2.5's table, which this chapter has to correct (§5.3)
 //   `water-solvent`         — one reason ATP's products are more stable is that water surrounds them
 //                             better than it surrounded ATP (§5.3)
 //   `protein-levels`        — an active site is a pocket made by a tertiary fold (§5.5), and an allosteric
@@ -317,7 +317,9 @@ export const OBJECTIVES = [
   {
     id: 'redox-basics',
     statement: 'Say what is oxidised and what is reduced in a given reaction, whether the change is written as electrons moving or as hydrogen atoms leaving.',
-    prereqs: ['polar-bonds', 'catabolism-anabolism'],
+    // Electronegativity alone. A reader who cannot say what is oxidised is not missing the
+    // catabolism/anabolism distinction, and an edge to it would send them there to practise.
+    prereqs: ['polar-bonds'],
     teaches: { sections: ['pathways'], figures: ['fig-metabolism'] },
     level: 'apply',
   },
