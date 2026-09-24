@@ -500,11 +500,9 @@ export function mount(root, ctx) {
       } else if (r.mark === 'hill') {
         chart.path(`M${n1(x)} ${n1(my + 3.6)}Q${n1(x + mark / 2)} ${n1(my - 7)} ${n1(x + mark)} ${n1(my + 3.6)}Z`, { fill: C.paper3, stroke: C.ruleStrong, 'stroke-width': 1 });
       } else if (r.mark === 'dot') {
-        chart.line(x + 1, my, x + mark - 1, my, { stroke: C.ink, 'stroke-width': 1.3 });
-        chart.circle(x + mark / 2, my, 3, { fill: C.ink, stroke: C.paper, 'stroke-width': 1 });
+        chart.circle(x + mark / 2, my, 3.6, { fill: C.ink, stroke: C.paper, 'stroke-width': 1 });
       } else if (r.mark === 'ring') {
-        chart.line(x + 1, my, x + mark - 1, my, { stroke: C.faint, 'stroke-width': 1, 'stroke-dasharray': '3 2.5' });
-        chart.circle(x + mark / 2, my, 2.4, { fill: C.paper, stroke: C.soft, 'stroke-width': 1.1 });
+        chart.circle(x + mark / 2, my, 2.6, { fill: C.paper, stroke: C.soft, 'stroke-width': 1.1 });
       }
       chart.label(r.mark ? x + mark + 5 : x, y, r.text, { size, anchor: 'start', fill: r.colour ?? C.soft, halo: 3, 'font-weight': 500 });
     });
@@ -532,11 +530,14 @@ export function mount(root, ctx) {
     const size2 = Math.min(S.axis - 0.4, h2 - 3.5);
     chart.text(x0 + 4, y + h1 / 2 + size1 * 0.36, 'daylight', { 'font-size': n1(size1), style: `fill:${ON_STRIP}`, 'font-weight': 500 });
     chart.text(x0 + 4, y + h1 + 2 + h2 / 2 + size2 * 0.36, sample === 'leaf' ? 'through the leaf' : 'through the extract', { 'font-size': n1(size2), style: `fill:${ON_STRIP}`, 'font-weight': 500 });
-    // Two carets, pointing at the wavelength the slider stands on from above and below.
+    // The marker comes down from the chart above to the strips' top edge, and one caret under them points
+    // up at the wavelength from the label it stands over. There was a caret above the strips as well, and
+    // on a phone's action chart the ring round a point measured near nothing, which sits on the baseline,
+    // touched it.
     const x = X(wavelength);
     const s = 4;
     const bottom = y + h1 + 2 + h2;
-    chart.path(`M${n1(x - s)} ${n1(y - s - 1.5)}L${n1(x + s)} ${n1(y - s - 1.5)}L${n1(x)} ${n1(y - 1)}Z`, { fill: C.ink });
+    chart.line(x, y - 8, x, y, { stroke: C.ink, 'stroke-width': 1, opacity: 0.5 });
     chart.path(`M${n1(x - s)} ${n1(bottom + s + 1.5)}L${n1(x + s)} ${n1(bottom + s + 1.5)}L${n1(x)} ${n1(bottom + 1)}Z`, { fill: C.ink });
   }
 
@@ -580,8 +581,7 @@ export function mount(root, ctx) {
     if (faintAction && points.length) {
       // Behind the curves, on a phone: the oxygen measured so far, faint, so the comparison survives
       // the one-chart-at-a-time composition.
-      if (points.length > 1) chart.path(points.map((p, i) => `${i ? 'L' : 'M'}${n1(X(p.nm))} ${n1(Y(p.o2))}`).join(''), { fill: 'none', stroke: C.faint, 'stroke-width': 1, 'stroke-dasharray': '3 2.5' });
-      for (const p of points) chart.circle(X(p.nm), Y(p.o2), 2.4, { fill: C.paper, stroke: C.soft, 'stroke-width': 1.1 });
+      for (const p of points) chart.circle(X(p.nm), Y(p.o2), 2.6, { fill: C.paper, stroke: C.soft, 'stroke-width': 1.1 });
     }
     chart.line(markerX, top, markerX, top + height, { stroke: C.ink, 'stroke-width': 1, opacity: 0.5 });
     for (const id of IDS) {
@@ -603,15 +603,12 @@ export function mount(root, ctx) {
     key(rows, { X, Y, top: top + 1, markerX, padL, pw, under });
   }
 
-  // The reader's points as a line, for the key to stay clear of: between two points the segment joining
-  // them, a few nanometres either side of the ends the mark itself, and a little over its height so the
-  // ring round the latest one is kept clear too.
+  // The reader's points, for the key to stay clear of: each mark a few nanometres either side of where
+  // it stands, and a little over its height so the ring round the latest one is kept clear too.
   function pointsAt(nm) {
-    if (!points.length || nm < points[0].nm - 4 || nm > points[points.length - 1].nm + 4) return 0;
-    const i = points.findIndex((p) => p.nm >= nm);
-    if (i <= 0) return (i === 0 ? points[0].o2 : points[points.length - 1].o2) + 0.06;
-    const [p, q] = [points[i - 1], points[i]];
-    return p.o2 + ((nm - p.nm) / (q.nm - p.nm)) * (q.o2 - p.o2) + 0.06;
+    let top = 0;
+    for (const p of points) if (Math.abs(p.nm - nm) <= 5) top = Math.max(top, p.o2 + 0.07);
+    return top;
   }
 
   function action({ X, top, height, padL, pw, markerX }) {
@@ -626,11 +623,11 @@ export function mount(root, ctx) {
       chart.path(d, { fill: C.paper3, stroke: C.ruleStrong, 'stroke-width': 1.2, 'stroke-linejoin': 'round' });
     }
     chart.line(markerX, top, markerX, top + height, { stroke: C.ink, 'stroke-width': 1, opacity: 0.5 });
-    if (points.length > 1) {
-      chart.path(points.map((p, i) => `${i ? 'L' : 'M'}${n1(X(p.nm))} ${n1(Y(p.o2))}`).join(''), { fill: 'none', stroke: C.ink, 'stroke-width': 1.5, 'stroke-linejoin': 'round' });
-    }
+    // The measurements are points and are drawn as points. A line joining them was drawn until a sweep in
+    // steps of 25 nm, which steps over the red peak at 662, left the line cutting under the prediction
+    // there — reading as the prediction exceeding the oxygen, which no measurement ever does.
     for (const p of points) {
-      chart.circle(X(p.nm), Y(p.o2), 3.3, { fill: C.ink, stroke: C.paper, 'stroke-width': 1.2 });
+      chart.circle(X(p.nm), Y(p.o2), 3.6, { fill: C.ink, stroke: C.paper, 'stroke-width': 1.2 });
       if (p.nm === lit) chart.circle(X(p.nm), Y(p.o2), 6.6, { fill: 'none', stroke: C.ink, 'stroke-width': 1.1 });
     }
     const rows = [
