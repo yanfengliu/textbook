@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "node --require ./tools/zj-quiet-browser.cjs tools/serve.js",
     "check": "node --require ./tools/zj-quiet-browser.cjs tools/check-content.js",
+    "theme": "node --require ./tools/zj-quiet-browser.cjs tools/theme.js",
     "shot": "node --require ./tools/zj-quiet-browser.cjs tools/shot.js",
     "sweep3d": "node --require ./tools/zj-quiet-browser.cjs tools/sweep3d.js",
     "perf": "node --require ./tools/zj-quiet-browser.cjs tools/perf.js",

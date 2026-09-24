@@ -54,7 +54,7 @@ test('one bad name among good ones still throws: the run must not quietly drop i
 });
 
 test('no gate splits a trimming variable itself any more', () => {
-  for (const t of ['shot', 'devices', 'narrow', 'drive', 'sweep3d', 'sitting']) {
+  for (const t of ['theme', 'shot', 'devices', 'narrow', 'drive', 'sweep3d', 'sitting']) {
     const src = readFileSync(new URL(`../tools/${t}.js`, import.meta.url), 'utf8');
     const own = src.match(/process\.env\.[A-Z_]+\.split\(/g) || [];
     assert.deepEqual(own, [], `tools/${t}.js splits a variable itself: ${own.join(', ')}; read it through trim() in tools/lib/trim.js so a value naming nothing fails`);
