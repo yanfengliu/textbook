@@ -36,7 +36,8 @@
 // a density label is a radioactive one; that a diffraction pattern is a picture of the molecule; that
 // 5′ and 3′ are counts; that antiparallel templates alone force fragments, whatever the polymerase;
 // that ATP pays for each nucleotide; that topoisomerase joins Okazaki fragments; that forks from one
-// origin number one or four; that mismatch repair finds abnormal bases; that ultraviolet damage is the
+// origin number one or four; that one bacterium's copying time holds for every bacterium; that
+// mismatch repair finds abnormal bases; that ultraviolet damage is the
 // commonest; that thymine pairs more strongly than uracil; that histones read the bases; that
 // heterochromatin is not copied; that mitochondria carry telomerase; that cells stop when their
 // telomeres are used up; that a larger genome hides undiscovered genes; and that a transcribed stretch
@@ -100,8 +101,9 @@
 //   Kazazian et al., Nature 332:164 (1988) — new LINE-1 insertions in the factor VIII gene of two
 //     unrelated patients with haemophilia A (`i-transposable-elements-2`).
 //   Ibarra-Laclette et al., Nature 498:94 (2013) — Utricularia gibba, about 82 million pairs and about
-//     28,500 genes (`i-c-value-paradox-1`); Nóbrega et al., Nature 431:988 (2004) — mice lacking long
-//     gene-poor stretches with no evident defect (`i-junk-dna-debate-2`).
+//     28,500 genes, a typical number for a plant (`i-c-value-paradox-1`); Nóbrega et al., Nature
+//     431:988 (2004) — mice lacking two long gene-poor stretches, which held more than a thousand
+//     sequences conserved between humans and rodents, with no evident defect (`i-junk-dna-debate-2`).
 // Imagined cases, with their numbers stated in the item: the 6-million-pair bacterium and the
 // 150-million-pair chromosome at 30 nucleotides a second (`i-origins-arithmetic-*`), the 5-billion-pair
 // genome (`i-one-in-a-billion-1`), the 200-pair nucleosome repeat (`i-nucleosome-2`), the telomere
@@ -112,12 +114,17 @@
 // Written against the chapter on branch ch08-dna at 5126afa, then read against the prose fix on branch
 // ch08 at cb447d7. That fix changed no objective's id or statement and no number an item uses, except
 // that §8.5 now says "a small fraction" of the electrons on the respiratory chain leak, not "a per cent
-// or two", and `i-dna-damage-2` follows it. Three passages are avoided rather than relied on:
-// `i-lagging-strand-1` asks what an either-end polymerase would do, not what parallel strands would do,
-// because the prose's parallel-strand claim holds only for a fork moving one way; `i-dna-damage-*` give
-// no rate for ultraviolet dimers, which depends on the light, and none for single-strand breaks, which
-// the chapter does not state; and the telomere items count from the shortest telomere, which reconciles
-// ten thousand pairs at birth, fifty lost a division and Hayflick's fifty (`i-divisions-counted-3` asks
+// or two", and `i-dna-damage-2` follows it. Then corrected by the accuracy review against OpenStax
+// Biology 2e of 2026-09-24, findings 14 to 39 and the item writer's points it adjudicated. The same
+// review changed two objectives: `dna-damage` asks for a rate only for the kinds of damage that do not
+// depend on sunlight, and `packing-levels` asks which chromatin holds most of the genes being read and
+// what happens to nucleosomes when the DNA is copied. It also corrected the prose on parallel strands:
+// they would not remove the lagging strand but move it, to the fork leaving the origin the other way,
+// and only a polymerase able to add at either end removes it at every fork; `i-lagging-strand-1` asks
+// about the polymerase and `-3` about both. Two passages are avoided rather than relied on: `i-dna-damage-*` give no rate for
+// ultraviolet dimers, which depends on the light, and none for single-strand breaks, which the chapter
+// does not state; and the telomere items count from the shortest telomere, which reconciles ten
+// thousand pairs at birth, fifty lost a division and Hayflick's fifty (`i-divisions-counted-3` asks
 // exactly that).
 //
 // Typography follows the chapter: primes are U+2032 (5′, 3′), units take a space (0.34 nm, 6 µm), and
@@ -345,7 +352,7 @@ export const ITEMS = [
         why: 'Treats a small number as zero. A trace of protein reaching the offspring is the same kind of doubt Mirsky raised against Avery, and it cannot be excluded by one experiment.' },
       { text: 'Because Hershey and Chase repeated the blending until none of the sulfur stayed with the cells, and reported the clean result.',
         why: 'Tidies the experiment up. The separation was never complete, and Hershey and Chase themselves stopped short of saying DNA had been shown to be the genetic material.' },
-      { text: 'Because Avery\'s evidence owed nothing to blending, so an objection that explains the leftover sulfur away leaves his result standing.', correct: true },
+      { text: 'Because Avery\'s evidence owed nothing to blending, so an objection that rests on the leftover sulfur leaves his result standing.', correct: true },
     ],
     explain: 'Each experiment on its own left a door open: Avery\'s through the purity of his enzymes and extract, Hershey and Chase\'s through the blender. The doors were in different walls. An objection that could explain one result away could not touch the other, and the two reached the same molecule by different routes, in a bacterium and in a virus.',
   },
@@ -524,7 +531,7 @@ export const ITEMS = [
       { text: 'Purines carry a charge that repels another purine, while a pyrimidine carries the opposite charge and attracts one.',
         why: 'Invents charges on the bases. The charge on DNA is on its phosphates; the bases are held together by hydrogen bonds and fitted by shape.' },
       { text: 'Bases of the same shape cannot make hydrogen bonds with each other at all, so only different shapes can pair.',
-        why: 'Confuses fitting with bonding. Two identical bases can hydrogen-bond perfectly well in water; what they cannot do is sit at the helix\'s fixed width.' },
+        why: 'Confuses fitting with bonding. Two bases of the same shape can make hydrogen bonds with each other; what they cannot do is sit at the helix\'s fixed width.' },
     ],
     explain: 'The backbones of the helix run a fixed distance apart, and a pair has to span that distance exactly. A purine has two fused rings and a pyrimidine one, so only a purine across from a pyrimidine fits. Which purine goes with which pyrimidine is then decided by where the hydrogen bonds can form.',
   },
@@ -542,7 +549,7 @@ export const ITEMS = [
         why: 'Thinks a tautomer changes the ring system. Moving one hydrogen does not add a ring; a thymine in either form is still a pyrimidine and still needs a purine across from it.' },
       { text: 'It may pair with guanine rather than adenine, so the new strand gets a G where it should have had an A.', correct: true },
     ],
-    explain: 'The pairing rule depends on where the hydrogens sit, which is why the textbook drawings Watson first used, showing the rare forms, would not give the pairs. In its rare form thymine offers guanine the pattern it normally offers adenine. Watson and Crick suggested in 1953 that this is one way copying makes mistakes; the chance that a base is in its rare form at that instant is small, and it is part of why pairing alone is not precise enough.',
+    explain: 'The pairing rule depends on where the hydrogens sit, which is why the textbook drawings Watson first used, showing the rare forms, would not give the pairs. In its rare form thymine presents the pattern of hydrogen-bond donors and acceptors that cytosine normally presents, so guanine pairs with it. Watson and Crick suggested in 1953 that this is one way copying makes mistakes; the chance that a base is in its rare form at that instant is small, and it is part of why pairing alone is not precise enough.',
   },
   {
     id: 'i-pairing-geometry-3',
@@ -696,7 +703,7 @@ export const ITEMS = [
     id: 'i-three-models-3',
     objective: 'three-models',
     kind: 'free',
-    question: 'Start from one wholly old double helix and follow it through three rounds of copying in which all new material is new. For each scheme, semiconservative, conservative and dispersive, say how many molecules there are after each round and how the old material is shared among them.',
+    question: 'Start from one wholly old double helix and follow it through three rounds of copying, in which the only old material is what that first helix held. For each scheme, semiconservative, conservative and dispersive, say how many molecules there are after each round and how the old material is shared among them.',
     rubric: [
       'there are 2, then 4, then 8 molecules under every scheme',
       'semiconservative: after one round, two molecules each with one old strand and one new; after two, two such hybrids and two wholly new; after three, two hybrids and six wholly new',
@@ -714,7 +721,7 @@ export const ITEMS = [
     question: 'Why did Meselson and Stahl label their bacteria\'s DNA with heavy nitrogen in particular?',
     options: [
       { text: 'Nitrogen is found only in DNA, so a nitrogen label would mark the DNA and nothing else in the cell.',
-        why: 'Forgets that every amino acid contains nitrogen, so protein was labelled too. The method did not need a label confined to DNA, because the DNA was extracted and banded on its own.' },
+        why: 'Forgets that every amino acid contains nitrogen, so protein was labelled too. The method did not need a label confined to DNA, because in the gradient the DNA settles into bands of its own, far from the much less dense protein.' },
       { text: 'Every base contains nitrogen, so all the DNA was labelled, and the heavier isotope makes it measurably denser.', correct: true },
       { text: 'Heavy nitrogen is radioactive, and its radiation showed where each band of DNA lay in the centrifuge tube.',
         why: 'Confuses a density label with a radioactive one. <sup>15</sup>N is stable; the bands were seen by the ultraviolet light the bases absorb.' },
@@ -912,11 +919,11 @@ export const ITEMS = [
         why: 'Gives a DNA polymerase the one ability it lacks. It cannot start a chain; that is the whole reason a primer is needed.' },
       { text: 'Primase lays down about ten nucleotides of RNA; later the RNA is removed and replaced with DNA, and ligase seals the last gap.', correct: true },
       { text: 'Primase makes a short stretch of DNA, which ligase joins directly to the fragment made before it.',
-        why: 'Gets the material of the primer wrong. Primase makes RNA, like every enzyme that can start a chain from nothing, and the RNA has to be removed before the strand is finished.' },
+        why: 'Gets the material of the primer wrong. Primase makes RNA, and the RNA has to be removed and replaced with DNA before the strand is finished.' },
       { text: 'The primer is a short piece cut from the old strand, which is reused as the start of each new one.',
         why: 'Invents recycling. A primer is newly made against the template, as a short stretch paired to it.' },
     ],
-    explain: 'A DNA polymerase can only extend a strand. Primase, like every enzyme that makes RNA, can begin a chain from nothing, so it lays down about ten nucleotides of RNA for the polymerase to extend. Afterwards every primer is removed and replaced with DNA, in <i>E. coli</i> by polymerase I, and DNA ligase makes the final phosphodiester bond.',
+    explain: 'A DNA polymerase can only extend a strand. Primase, like the RNA polymerase that copies genes into RNA, can begin a chain from nothing, so it lays down about ten nucleotides of RNA for the polymerase to extend. Afterwards every primer is removed and replaced with DNA, in <i>E. coli</i> by polymerase I, and DNA ligase makes the final phosphodiester bond.',
   },
   {
     id: 'i-primer-needed-2',
@@ -926,10 +933,10 @@ export const ITEMS = [
     options: [
       { text: 'The leading strand, since it is the only one of the two that needs primase, to start it off at the origin.',
         why: 'Reverses the two strands\' needs. The leading strand needs a primer once; the lagging strand needs a new one for every fragment.' },
-      { text: 'Both at once, since primase is part of the polymerase and the two stop working together.',
-        why: 'Merges two enzymes into one. Primase is a separate enzyme; the polymerase goes on working, but on the lagging strand it soon has nothing new to extend.' },
-      { text: 'Neither, since once primase is gone the DNA polymerase starts each new strand itself.',
-        why: 'Gives the polymerase the power to start a chain, which no DNA polymerase has; that is why there is a primase at all.' },
+      { text: 'Both at once, since each new strand needs a fresh primer every thousand or two nucleotides.',
+        why: 'Gives the leading strand the lagging strand\'s need. Primed once at the origin, its 3′ end keeps pointing into newly opened template and can be extended without a break; only the lagging strand is made in pieces a thousand or two long.' },
+      { text: 'Neither, since the newest lagging-strand fragment can go on growing towards the fork.',
+        why: 'Forgets which way a fragment grows. A lagging-strand fragment\'s 3′ end points away from the fork, so it can only be extended back towards the fragment before it; template newly opened at the fork can be copied only from a new primer.' },
       { text: 'The lagging strand, since every new fragment needs a primer, while the leading strand was primed once.', correct: true },
     ],
     explain: 'The leading strand is primed once, at its origin, and after that its 3′ end keeps pointing into newly opened template. The lagging strand is made in fragments, each started on its own primer near the fork, so without primase no new fragment can begin. Temperature-sensitive mutants like this one are how the enzymes of a fork were first sorted out in bacteria.',
@@ -941,7 +948,7 @@ export const ITEMS = [
     question: 'Explain why every new strand of DNA has to begin on a primer, what makes the primer and what it is made of, how many primers the leading and the lagging strands each need, and what happens to the primers afterwards in <i>E. coli</i>.',
     rubric: [
       'a DNA polymerase can only add to a free 3′ hydroxyl on a strand already paired to the template; it can extend a strand but cannot start one',
-      'primase lays down a short piece of RNA, about ten nucleotides, paired to the template; like every enzyme that makes RNA it can start a chain from nothing',
+      'primase lays down a short piece of RNA, about ten nucleotides, paired to the template; like the RNA polymerase that copies genes into RNA it can start a chain from nothing',
       'the leading strand needs a primer once, at its origin',
       'the lagging strand needs one for every fragment: well over a thousand at each fork in <i>E. coli</i>, and tens of millions in a human cell every time it copies its DNA',
       'every primer is removed and replaced with DNA; in <i>E. coli</i> polymerase I cuts the RNA away ahead of itself while filling in DNA behind',
@@ -957,7 +964,7 @@ export const ITEMS = [
     options: [
       { text: 'Both continuously: on each template the new strand could grow into the fork from whichever end faced it.', correct: true },
       { text: 'Still one continuously and one in fragments, because the two templates would still run in opposite directions.',
-        why: 'Thinks antiparallel templates alone force fragments. It takes two facts together: antiparallel templates and a polymerase that can extend only one kind of end. Remove either and both strands can be continuous.' },
+        why: 'Thinks antiparallel templates alone force fragments. It takes two facts together: antiparallel templates and a polymerase that can extend only one kind of end. A polymerase that can extend either end removes the second fact, and the fragments go with it.' },
       { text: 'Both in fragments, since a polymerase able to work at either end would keep switching between them.',
         why: 'Invents an instability. A polymerase able to extend either end would simply extend whichever end pointed into the opening fork.' },
       { text: 'Both continuously, but only if the two templates were also made to run in the same direction.',
@@ -985,7 +992,7 @@ export const ITEMS = [
     id: 'i-lagging-strand-3',
     objective: 'lagging-strand',
     kind: 'free',
-    question: 'Derive, from the two facts that force it, why one new strand at a replication fork is made continuously and the other in short fragments. Say what change to either fact would remove the difference, and describe the experiment that found the fragments.',
+    question: 'Derive, from the two facts that force it, why one new strand at a replication fork is made continuously and the other in short fragments. Say what change to the polymerase would remove the difference, and why making the templates run the same way would not remove it at every fork, and describe the experiment that found the fragments.',
     rubric: [
       'the two template strands at a fork are antiparallel',
       'a DNA polymerase can only extend a 3′ end',
@@ -993,6 +1000,7 @@ export const ITEMS = [
       'on the other the new strand\'s 3′ end points away from the fork, so as the fork opens there is no 3′ end to extend; a polymerase must start again near the fork and work backwards to the previous piece',
       'those pieces are Okazaki fragments, and this is the lagging strand, named because its completion lags behind the fork',
       'a polymerase able to add to either end would remove the difference',
+      'templates running the same way would not remove it: at the fork leaving the origin one way both new strands could grow continuously, but at the fork leaving it the other way both would have to be made in fragments',
       'in 1968 the Okazakis gave growing <i>E. coli</i> radioactive thymidine for only a few seconds and found the label in short pieces, about 1000 to 2000 nucleotides; left longer, the label turned up in long DNA, because the pieces had been joined',
     ],
     explain: 'The lagging strand is not a quirk of the machinery but a consequence of two facts, and the Okazakis\' short pulse caught the consequence in the act.',
@@ -1056,8 +1064,8 @@ export const ITEMS = [
       { text: 'About 25 minutes, since each fork makes two new strands and so copies 2000 nucleotides a second.',
         why: 'Counts both new strands as progress along the chromosome. A fork\'s speed is how fast it moves along the DNA; both strands behind it are made at that rate.' },
       { text: 'About 50 minutes: two forks each copy 3 million pairs, which takes 3000 seconds.', correct: true },
-      { text: 'About 12 minutes, since each of the two parent strands is copied by a pair of forks of its own.',
-        why: 'Multiplies the forks. One origin gives two forks, and each fork copies both parent strands as it goes.' },
+      { text: 'About 38 minutes, the time <i>E. coli</i> takes, since one origin sets the same copying time in any bacterium.',
+        why: 'Takes one bacterium\'s result for a constant. Copying time is the length each fork must cover divided by its speed, and 6 million pairs is longer than <i>E. coli</i>\'s 4.6 million.' },
     ],
     explain: 'One origin fires two forks in opposite directions round the circle, and they meet on the far side. Each copies half the chromosome, 3 million pairs, and at 1000 nucleotides a second that takes 3000 seconds, 50 minutes. The same arithmetic gives <i>E. coli</i>\'s 38 minutes from its 4.6 million pairs.',
   },
@@ -1187,7 +1195,7 @@ export const ITEMS = [
       'the polymerase is slow to add anything to a badly paired end, which gives it time',
       'the badly paired end tends to come away from the template and slip into the second site, where it is cut off; the polymerase then tries again',
       'proofreading improves the error rate about a hundredfold, from about one in a hundred thousand to around one in ten million',
-      'once more nucleotides have been added after it, the wrong one is no longer at the end, so proofreading cannot reach it; it is left for mismatch repair after the polymerase has gone',
+      'once several nucleotides have been added after it, the wrong one is buried in paired DNA where the cutting site no longer reaches it; it is left for mismatch repair after the polymerase has gone',
     ],
     explain: 'Proofreading works because a wrong end is both slow to extend and prone to fraying, so the enzyme is most likely to cut exactly the nucleotides that are wrong. It depends on the strand growing at its 3′ end, for a reason the same section goes on to give.',
   },
@@ -1238,7 +1246,7 @@ export const ITEMS = [
       'it improves the rate about a hundredfold, between about twenty and four hundred times as measured in <i>E. coli</i>, bringing it to between one in a billion and one in ten billion',
       'people who inherit a faulty mismatch repair gene have Lynch syndrome, with a high risk of cancer of the colon at a young age',
     ],
-    explain: 'Mismatch repair is the only one of the three checks that works after copying is over, and so the only one that has to recover which strand was new. A signal that only lasts for a while is enough, because the repair has to happen before the next round of copying makes the error permanent in both daughters.',
+    explain: 'Mismatch repair is the only one of the three checks that works after copying is over, and so the only one that has to recover which strand was new. A signal that only lasts for a while is enough, because the repair has to happen before the next round of copying turns the mismatch into a properly paired mutation in one of the two daughters, where no check can see it.',
   },
   {
     id: 'i-one-in-a-billion-1',
@@ -1254,7 +1262,7 @@ export const ITEMS = [
       { text: 'About 2.5, since the 5 errors made while copying the genome are shared between two daughters.',
         why: 'Counts only one genome\'s worth of new nucleotides. Copying makes two new strands, one for each daughter, so there are 10 billion new nucleotides in all.' },
     ],
-    explain: 'Each daughter cell receives a whole genome in which one strand of every molecule is new, so it carries 5 billion newly made nucleotides. At one in a billion that is about five errors per daughter. The chapter\'s human figures work the same way: 6.2 billion pairs at one in ten billion is about 0.6 per daughter.',
+    explain: 'Each daughter cell receives a whole genome in which one strand of every molecule is new, so it carries 5 billion newly made nucleotides. At one in a billion that is about five errors per daughter. The chapter\'s human numbers work the same way: 6.2 billion pairs at one in ten billion is about 0.6 per daughter.',
   },
   {
     id: 'i-one-in-a-billion-2',
@@ -1348,7 +1356,7 @@ export const ITEMS = [
       { text: 'Ultraviolet dimers, which join two neighbouring thymines on the same strand every time sunlight strikes the skin.',
         why: 'Picks the best-known cause. Ultraviolet damage depends on the weather and falls only on cells light reaches; water acts on every cell, all the time.' },
       { text: 'The deamination of cytosine to uracil, at some hundreds of times a day, which is why DNA carries thymine.',
-        why: 'Remembers that deamination matters and overrates how often it happens. It is real and important, at 100 to 500 a day, but lost purines are several times commoner.' },
+        why: 'Remembers that deamination matters and overrates how often it happens. It is real and important, at 100 to 500 a day, but lost purines are many times commoner.' },
     ],
     explain: 'Lindahl\'s measurements put the loss of a purine at 2000 to 10,000 a day in each human cell, far ahead of oxidised guanine (500 to 1000), deaminated cytosine (100 to 500) and double-strand breaks (about fifty a cell cycle). Each reaction is slow, but a cell holds six billion targets, and slow on six billion targets is frequent.',
   },
@@ -1377,8 +1385,8 @@ export const ITEMS = [
       'loss of a purine: water breaks the bond between the base and its sugar, leaving a gap in the sequence; 2000 to 10,000 a day',
       'deamination of cytosine: cytosine loses its amino group and becomes uracil; 100 to 500 a day; also from water',
       'oxidation of guanine: guanine becomes a form that pairs with adenine; 500 to 1000 a day; from reactive oxygen leaking from the respiratory chain (Section 7.4)',
-      'ultraviolet dimers: two neighbouring pyrimidines on one strand, usually thymines, joined by new covalent bonds, kinking the helix and stopping a polymerase; from ultraviolet photons absorbed by the bases near 260 nm; how often depends on the light, so no single rate',
-      'broken backbones, including breaks through both at nearly the same place, about fifty in each cell cycle',
+      'ultraviolet dimers: two neighbouring pyrimidines on one strand, usually thymines, joined by new covalent bonds, kinking the helix and stopping a polymerase; from ultraviolet photons absorbed by the bases, which absorb most strongly near 260 nm; how often depends on the light, so no single rate',
+      'broken backbones: breaks in one backbone, for which the chapter gives no rate, and breaks through both at nearly the same place, about fifty in each cell cycle',
       'in all, some ten to twenty thousand lesions a day in each cell, by Lindahl\'s estimate',
       'these reactions are downhill but slow (Section 5.2), and a human cell holds six billion pairs of targets, so slow on six billion targets is frequent',
     ],
@@ -1463,7 +1471,7 @@ export const ITEMS = [
       { text: 'A break in both strands, because a methylated base that loses its amino group falls out of the helix.',
         why: 'Confuses deamination with the loss of a base. The base stays attached; it simply becomes a different, ordinary base.' },
     ],
-    explain: 'A methylated cytosine that loses its amino group becomes thymine, not uracil. All that is left to find is a thymine wrongly paired with a guanine, and since both are ordinary bases the repair cannot tell which is the damage. At methylated cytosines a C–G pair changes to T–A some ten to twenty times more often than elsewhere, and about a third of the single-letter changes known to cause inherited disease are of this kind.',
+    explain: 'A methylated cytosine that loses its amino group becomes thymine, not uracil. All that is left to find is a thymine wrongly paired with a guanine, and since both are ordinary bases the repair enzymes find it far less reliably than they find a uracil. At methylated cytosines a C–G pair changes to T–A some ten to twenty times more often than elsewhere, and about a third of the single-letter changes known to cause inherited disease are of this kind.',
   },
   {
     id: 'i-thymine-not-uracil-3',
@@ -1517,14 +1525,14 @@ export const ITEMS = [
     id: 'i-repair-choice-3',
     objective: 'repair-choice',
     kind: 'free',
-    question: 'For each case, name the system responsible and say what a person who lacks that system would suffer. (a) A heated cell\'s DNA contains uracils where cytosines were. (b) A chemical in grilled meat attaches a bulky group to bases and bends the helix. (c) A mutant bacterium whose main copying polymerase has lost its cutting site mutates far faster than normal. (d) A drug used against cancer cuts both strands of DNA at nearly the same place. (e) A tumour\'s DNA shows short repeated sequences changing length all over the genome, as if copying slipped and nothing corrected it.',
+    question: 'For each case, name the system responsible and say what goes wrong without it: name the condition where the chapter names one, and otherwise predict it from what the system prevents. (a) A heated cell\'s DNA contains uracils where cytosines were. (b) A chemical in grilled meat attaches a bulky group to bases and bends the helix. (c) A mutant bacterium whose main copying polymerase has lost its cutting site mutates far faster than normal. (d) A drug used against cancer cuts both strands of DNA at nearly the same place. (e) A tumour\'s DNA shows short repeated sequences changing length all over the genome, as if copying slipped and nothing corrected it.',
     rubric: [
       '(a) base excision repair: an enzyme recognises the uracil and cuts it from its sugar, and the gap is filled against the guanine',
       '(b) nucleotide excision repair, which deals with damage that distorts the helix; people lacking it have xeroderma pigmentosum and cannot remove ultraviolet damage, with skin cancers thousands of times more often',
       '(c) proofreading; a tumour with such a polymerase carries more mutations than almost any other',
       '(d) double-strand break repair, by joining the ends or by homologous recombination; a person lacking it would be damaged by ionising radiation and such drugs, and prone to rearranged chromosomes',
       '(e) mismatch repair, which corrects wrong pairs and slips left after copying; people who inherit a faulty copy have Lynch syndrome, with cancer of the colon at a young age',
-      'for (a), a person lacking the enzymes of base excision repair would accumulate the particular changes those enzymes prevent, such as C–G to T–A where uracils are copied past',
+      'for (a), a prediction is enough: without the enzyme that removes uracil, the uracils that deamination makes would stay, and each pairs with adenine when copied, so C–G pairs would turn to T–A far more often than usual',
     ],
     explain: 'Each system is identified by what it recognises and when: proofreading as a nucleotide is added, mismatch repair just after copying, base excision for small specific changes, nucleotide excision for anything that bends the helix, and break repair when both strands are cut.',
   },
@@ -1547,7 +1555,7 @@ export const ITEMS = [
       { text: 'About 200 metres: 60 billion pairs at 3.4 nm each.',
         why: 'Uses the length of a whole turn for each pair. 3.4 nm is what the helix rises in ten pairs; each pair adds 0.34 nm.' },
     ],
-    explain: 'Two sets of 30 billion pairs is 60 billion, and 60 billion × 0.34 nm is about 2 × 10<sup>10</sup> nm, 20 metres, about ten times the human figure of 2.1 metres. Salamanders such as the axolotl have among the largest animal genomes known, and their nuclei are correspondingly large.',
+    explain: 'Two sets of 30 billion pairs is 60 billion, and 60 billion × 0.34 nm is about 2 × 10<sup>10</sup> nm, 20 metres, about ten times the 2.1 metres of a human cell. Salamanders such as the axolotl have among the largest animal genomes known, and their nuclei are correspondingly large.',
   },
   {
     id: 'i-packing-problem-2',
@@ -1560,7 +1568,7 @@ export const ITEMS = [
       { text: 'About 800 times, the same as for the DNA of <i>E. coli</i> in its cell.',
         why: 'Borrows the bacterium\'s ratio. That was 1.6 mm in a cell 2 µm long; a single human chromosome is ten times longer, in a nucleus only a few times wider.' },
       { text: 'About 2600 times: its 1.6 cm of DNA set against the 6 µm nucleus.', correct: true },
-      { text: 'About 350,000 times, the figure for the whole of a cell\'s DNA in its nucleus.',
+      { text: 'About 350,000 times, the number for the whole of a cell\'s DNA in its nucleus.',
         why: 'Answers for the whole genome. Chromosome 21 holds under one per cent of a cell\'s DNA, so its thread is correspondingly shorter.' },
     ],
     explain: '46 million pairs × 0.34 nm is about 1.6 × 10<sup>7</sup> nm, 1.6 cm, which is about 2600 times 6 µm. And this is one unbroken molecule, the smallest of 46 in the nucleus; the whole 2.1 metres is a few hundred thousand times the width of the nucleus that holds it.',
@@ -1584,14 +1592,14 @@ export const ITEMS = [
     id: 'i-nucleosome-1',
     objective: 'nucleosome',
     kind: 'mcq',
-    question: 'Why can histones package any stretch of DNA equally well, whatever its sequence of bases?',
+    question: 'Why can histones package any stretch of DNA, whatever its sequence of bases?',
     options: [
       { text: 'Because each of the four kinds of histone recognises one of the four bases, so between them they bind every base.',
         why: 'Treats histones as sequence readers. They bind the backbone, not the bases, which is exactly why the sequence does not matter to them.' },
       { text: 'Because they bind by hydrogen bonds to the edges of the bases, which every stretch of DNA exposes.',
         why: 'Places the binding at the bases. A protein that bound the edges of bases would care which bases they were; histones bind the charged backbone.' },
       { text: 'Because they change their shape to fit each sequence, as an enzyme\'s active site closes around its substrate.',
-        why: 'Borrows induced fit, which is how an enzyme tells substrates apart. Histones are among the most unchanging proteins known, and what they bind does not change from one sequence to another.' },
+        why: 'Borrows induced fit, which is how an enzyme tells substrates apart. Histones have no need to tell sequences apart: what they bind, the charged backbone, is the same from one sequence to another.' },
       { text: 'Because their many lysines and arginines are positive, and bind the negative phosphates every stretch has.', correct: true },
     ],
     explain: 'Between a fifth and a quarter of the amino acids in each core histone are lysine or arginine, whose side chains are positively charged at a cell\'s pH. The backbone carries a negative charge on every phosphate and is the same backbone whatever the sequence, so histones bind DNA by charge all along it. That is exactly what a packaging protein has to do.',
@@ -1607,8 +1615,8 @@ export const ITEMS = [
         why: 'Takes the repeat for the linker. The repeat is the 147 pairs wound on the spool plus the linker to the next, so the linker is the difference.' },
       { text: 'About 42 million, with linkers of about 53 pairs.',
         why: 'Divides by the 147 pairs on each spool instead of by the repeat. Each nucleosome accounts for its 147 pairs and its linker, 200 in all.' },
-      { text: 'About 15 million, with linkers of about 53 pairs.',
-        why: 'Uses one set of chromosomes, 3.1 billion pairs. A body cell holds two, 6.2 billion.' },
+      { text: 'About 42 million, with linkers of some 200 pairs.',
+        why: 'Makes both slips: divides by the 147 pairs on each spool instead of by the repeat, and takes the repeat for the linker. Each nucleosome accounts for 200 pairs, 147 wound and 53 of linker.' },
     ],
     explain: '6.2 billion pairs divided by 200 is 31 million nucleosomes. Each winds 147 pairs round its eight histones, about one and two-thirds turns, and the remaining 53 pairs run on as linker to the next. Real repeats range from 160 to 240 pairs, so linkers range from about 15 to 90.',
   },
@@ -1663,7 +1671,7 @@ export const ITEMS = [
     id: 'i-packing-levels-3',
     objective: 'packing-levels',
     kind: 'free',
-    question: 'Put the levels of DNA packing in order, from the bare double helix to a chromosome at division, giving a size or length for each where you can. Say which levels are established and which are still argued over, and why. Then explain why tightly packed DNA is harder to read.',
+    question: 'Put the levels of DNA packing in order, from the bare double helix to a chromosome at division, giving a size or length for each where you can. Say which levels are established and which are still argued over, and why. Then say which kind of chromatin holds most of the genes being read, and what happens to nucleosomes when the DNA is copied.',
     rubric: [
       'the double helix, 2 nm wide',
       'nucleosomes on linker DNA, beads on a string about 11 nm across; the one level nobody disputes',
@@ -1671,7 +1679,7 @@ export const ITEMS = [
       'loops tens to hundreds of thousands of pairs long, held at their bases by ring-shaped protein complexes',
       'each chromosome occupies its own region, or territory, in the nucleus between divisions',
       'at division a related ring complex compacts each chromosome into a rod; chromosome 1\'s 8.5 cm becomes 7 to 10 µm, packed about ten thousand times',
-      'a polymerase cannot work on DNA wound on a histone core; tightly packed heterochromatin holds few of the genes being read, and loosely packed euchromatin most of them',
+      'tightly packed heterochromatin holds few of the genes being read, and loosely packed euchromatin most of them; a polymerase cannot copy DNA wound on a histone core, so at every fork the nucleosomes ahead are taken apart and assembled again behind',
     ],
     explain: 'The levels are not equally certain, and the 30 nm fibre is the instructive case: a structure that appeared in the test tube and in chemically fixed cells, and then failed to appear when samples were prepared more gently.',
   },
@@ -1685,7 +1693,7 @@ export const ITEMS = [
         why: 'Reverses the direction of descent. Archaea are not descended from eukaryotes; the shared features point to an ancestor in common.' },
       { text: 'They share an ancestor with archaeal histones, fitting the pattern for our machinery of information.', correct: true },
       { text: 'They came from the bacterium that became the mitochondrion, which carried them into our ancestors.',
-        why: 'Credits the wrong partner. Bacteria, and the mitochondria descended from one, have no histones to have passed on.' },
+        why: 'Credits the wrong partner. The bacterium that became the mitochondrion, like almost all bacteria, had no histones to pass on, and mitochondria have none today.' },
       { text: 'They evolved separately in archaea and in us, because any large genome needs packaging proteins.',
         why: 'Offers convergence where the evidence shows kinship. Archaeal and eukaryotic histones share a structure and an ancestor, and many archaea with histones have small genomes.' },
     ],
@@ -1718,7 +1726,7 @@ export const ITEMS = [
       'human nucleus: nucleosomes of eight histones carrying 147 pairs each, then higher levels of folding',
       'mitochondrion: no histones; its small circle is packed by a different protein, as befits its bacterial ancestry',
       'our histones and archaeal histones share an ancestor, the pattern Section 3.3 described for the machinery of information generally',
-      'histone H4 from a pea and from a cow differ at only two of their 102 amino acids, so almost any change seems to be fatal',
+      'histone H4 from a pea and from a cow differ at only two of their 102 amino acids, so almost any change seems to be harmful enough for selection to remove it',
     ],
     explain: 'The distribution of histones is a small piece of evidence about deep history: it groups our nuclei with archaea, and our mitochondria with bacteria, which is what the rest of the evidence in Sections 3.3 and 3.5 says too.',
   },
@@ -1752,7 +1760,7 @@ export const ITEMS = [
       { text: 'Mitochondria carry their own telomerase, which adds back whatever each round of copying loses.',
         why: 'Borrows the answer a linear chromosome needs. Mitochondrial DNA has no ends to protect or lengthen, and no telomeres.' },
       { text: 'Mitochondrial DNA is copied without primers, since its polymerase is descended from a bacterium\'s.',
-        why: 'Gives the mitochondrial polymerase an ability no DNA polymerase has. It too can only extend a strand; the difference is the shape of the molecule.' },
+        why: 'Gives the mitochondrial polymerase an ability it lacks. Like the polymerases that copy the chromosomes, it can only extend a strand; the difference is the shape of the molecule.' },
       { text: 'It is a circle, so every primer\'s gap has DNA beyond it from which a polymerase can extend into the gap.', correct: true },
       { text: 'It does get shorter, but it is so small that the loss makes no difference over one human lifetime.',
         why: 'Accepts a loss that does not happen. A circle has no end for the last primer\'s gap to fall at, so nothing is lost.' },
@@ -1770,7 +1778,7 @@ export const ITEMS = [
       'each primer gap is normally filled by a polymerase extending the fragment beyond it; the last primer\'s gap has nothing beyond it, no 3′ end to extend, so it cannot be filled',
       'the new strand is shorter than its template at that end, and each round of copying shortens it again',
       'most bacteria have a single circular chromosome, so every gap, the last included, has DNA beyond it to extend from',
-      'an organism with linear chromosomes needs some way to fill or replace the end: eukaryotes use telomeres, expendable repeats, and telomerase to add them back; <i>Streptomyces</i> uses a protein attached to each end that starts the last stretch itself',
+      'an organism with linear chromosomes needs some way to fill or replace the end: eukaryotes use telomeres, expendable repeats, and telomerase to add them back (another workable way also earns the point; <i>Streptomyces</i>, for one, uses a protein attached to each end that primes the last stretch)',
       'a linear end must also be kept from being treated as a double-strand break',
     ],
     explain: 'The problem was pointed out independently by Alexey Olovnikov and James Watson in the early 1970s. It follows directly from two facts of Section 8.4, primers and 3′-only extension, as soon as a chromosome has ends.',
@@ -1822,7 +1830,7 @@ export const ITEMS = [
       'making DNA from an RNA template is the reverse of the usual direction, so the protein is a reverse transcriptase',
       'primase and polymerase then fill in the partner strand as they would any lagging strand',
     ],
-    explain: 'Telomerase was found in 1985 by Carol Greider and Elizabeth Blackburn in <i>Tetrahymena</i>, whose many small chromosomes give it many ends. It solves the end problem the only way it can be solved without a circle: by bringing its own template.',
+    explain: 'Telomerase was found in 1985 by Carol Greider and Elizabeth Blackburn in <i>Tetrahymena</i>, whose many small chromosomes give it many ends. It solves the end problem by bringing its own template. It is not the only solution: the cancers that lack it keep their telomeres by recombination instead.',
   },
   {
     id: 'i-divisions-counted-1',
@@ -1906,7 +1914,7 @@ export const ITEMS = [
         why: 'Counts amino acids as base pairs. Each amino acid takes three bases, so 400 amino acids need 1200 base pairs.' },
       { text: 'About 2 per cent: 25,000 × 1200 is 30 million pairs out of 1.5 billion.', correct: true },
     ],
-    explain: '25,000 × 1200 = 30 million base pairs of coding sequence, and 30 million out of 1.5 billion is 2 per cent. It is the same arithmetic that gives the human figure of about one per cent: the coding sequence is small islands in a large sea.',
+    explain: '25,000 × 1200 = 30 million base pairs of coding sequence, and 30 million out of 1.5 billion is 2 per cent. It is the same arithmetic that gives the human share of about one per cent: the coding sequence is small islands in a large sea.',
   },
   {
     id: 'i-genome-composition-3',
@@ -1983,8 +1991,8 @@ export const ITEMS = [
       { text: 'Genes for complexity: an onion is a more complex organism, and needs more instructions to build it.',
         why: 'Ties genome size to complexity, which is exactly the relationship the paradox says is missing. An onion is no more complex than a bladderwort, and has five times a human\'s DNA.' },
       { text: 'Genes the bladderwort has lost, since a carnivorous plant can take what it needs from its prey.',
-        why: 'Explains the smaller genome by losing genes, when both plants have gene numbers in the same range. The difference is not in the genes.' },
-      { text: 'Repeated sequence, mostly transposable elements; the two plants have similar numbers of genes.', correct: true },
+        why: 'Explains the smaller genome by lost genes. The bladderwort has a typical number of genes for a plant, more than a human has; what it has lost is the DNA between them.' },
+      { text: 'Repeated sequence, mostly transposable elements; gene numbers vary far less than DNA does.', correct: true },
     ],
     explain: 'The onion\'s genome is about two hundred times the bladderwort\'s, and nothing like two hundred times as many genes. The difference is mostly transposable elements and other repeats. The C-value paradox stops being a paradox once most of a genome is known not to be genes.',
   },
@@ -1999,8 +2007,8 @@ export const ITEMS = [
         why: 'Assumes that gene density is fixed, so a larger genome must hold more genes. It is the assumption the comparison disproves.' },
       { text: 'About 31,000, close to the 20,000 found, so genes are spaced about alike in both.',
         why: 'Slips a factor of ten, and then reads agreement into the slip. 3.1 billion is 22 times 140 million, and 22 × 14,000 is about 310,000.' },
-      { text: 'About 20,000, as found, since in every animal genes take up the same share of the genome.',
-        why: 'Reads the answer back into the question. Gene density varies a great deal between genomes, which is the point of the comparison.' },
+      { text: 'About 310,000; since only about 20,000 are found, each of our genes must be present about fifteen times.',
+        why: 'Takes the extra DNA for copies of genes. Most of it is transposable elements and other repeats (Section 8.8), not extra copies of genes.' },
     ],
     explain: 'The fly has about 100 genes per million pairs, and at that density 3.1 billion pairs would hold about 310,000. The human genome holds about 20,000, a fifteenth of that. Genes are not what our extra DNA is made of.',
   },
@@ -2049,7 +2057,7 @@ export const ITEMS = [
       { text: 'It must be an undiscovered gene, since every stretch that is copied into RNA eventually turns out to be one.',
         why: 'Treats every transcribed stretch as a gene. Much transcription is noise, and this stretch shows no sign of being conserved.' },
     ],
-    explain: 'Three tests point the same way: the stretch is active, but unconserved, and its loss does no visible harm. That makes it a candidate for junk, in the sense that nothing depends on its sequence, without proving it. In 2004 mice lacking long stretches of such gene-poor DNA were found to be apparently normal, which is evidence of this kind.',
+    explain: 'Three tests point the same way: the stretch is active, but unconserved, and its loss does no visible harm. That makes it a candidate for junk, in the sense that nothing depends on its sequence, without proving it. In 2004 mice lacking two long gene-poor stretches were found to be apparently normal, even though the stretches held more than a thousand sequences conserved between humans and rodents: evidence of this kind, and a reminder that a laboratory can miss what selection sees.',
   },
   {
     id: 'i-junk-dna-debate-3',
