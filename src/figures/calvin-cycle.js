@@ -1332,9 +1332,10 @@ export function mount(root, ctx) {
     ledger.text(x, y + fs, 'SUGAR, IN G3P, OVER A DAY AND A NIGHT', { 'font-size': fmt(fs), class: 'tb-rt-head' });
     const top = y + fs + 9;
     const base = y + height - fs * 1.25;
-    const kept = m.trace.slice(-TRACE_WINDOW);
-    // A single sample is still a line: the pools as they stand, level, until the clock moves them.
-    const rows = kept.length >= 2 ? kept : [kept[0], kept[0]];
+    // The samples, and then the pools as they stand now, so the line and its end labels say what the
+    // ring says: a G3P exported since the last half-second sample was otherwise "starch 0" beside a
+    // ring that read "starch, stored · 1".
+    const rows = [...m.trace.slice(-(TRACE_WINDOW - 1)), { sucrose: m.sucrose, starch: m.starch.length, lit: env.lightOn }];
     const hi = Math.max(4, ...rows.map((r) => Math.max(r.sucrose, r.starch)));
     const scaleW = fs * 0.62 * String(hi).length + 5;
     const x0 = x + scaleW;
