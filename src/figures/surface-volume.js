@@ -396,7 +396,11 @@ export function mount(root, ctx) {
     // Fit the shape in view, and never let the equal-volume sphere behind it leave the frame either.
     const wantW = Math.max(geo.draw.w + 2 * villi, sphereD);
     const wantH = Math.max(geo.draw.h + 2 * villi, sphereD);
-    const scale = Math.min((cw - padX * 2) / wantW, (ch - padY * 2) / wantH);
+    // Never below zero. In an 800 to 860 px window the frame gives the wide box, the rail narrows it, and
+    // the drawing is left 0 to 26 px tall, less than its two pads take; the scale went negative, so did
+    // every radius below, and the canvas throws on a negative radius (docs/work/2_rest-of-the-book/reviews/
+    // 2026-09-25-wide-band-probe.md).
+    const scale = Math.max(0, Math.min((cw - padX * 2) / wantW, (ch - padY * 2) / wantH));
     const cx = cw / 2;
     const cy = ch / 2;
 
