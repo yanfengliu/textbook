@@ -111,7 +111,9 @@ const EXTRA_PARTS = {
 };
 
 const NARROW_W = 700;
-const NARROW_H = 440;
+// The wide layout's side column holds every control and the cell's fate only from about 540 px tall: at
+// the 782 x 489 box of an 1150 px window it cut off "Growing" and the fate under it.
+const NARROW_H = 540;
 const SHORT_W = 560;
 
 // ---------- the cell's model ----------
@@ -172,6 +174,28 @@ function layersOf(env, damage = 0) {
     .filter((l) => l.nm > 0.01);
 }
 const layerTotal = (env, damage = 0) => layersOf(env, damage).reduce((a, l) => a + l.nm, 0);
+// The thickest envelope, which sets the magnification of a callout laid across the stage: one scale for
+// all three, so switching them shows how different they are.
+const MAX_NM = Math.max(...ENV_IDS.map((id) => layerTotal(id)));
+// A thickness as a reader writes it: a wall thinning under an attack is 22 nm, not 21.999000000000002.
+const nmText = (nm) => `${nm >= 1 ? Math.round(nm) : nm.toFixed(1)} nm`;
+
+// Centres for labels of widths `ws` that want to sit at centres `cs`, in order along a line from `lo` to
+// `hi` and at least `gap` apart, each moved as little as the others allow. Null when they cannot fit.
+function spread(cs, ws, lo, hi, gap) {
+  const n = cs.length;
+  if (ws.reduce((a, w) => a + w, 0) + gap * Math.max(0, n - 1) > hi - lo) return null;
+  const out = cs.slice();
+  for (let i = 0; i < n; i += 1) {
+    const min = i === 0 ? lo + ws[0] / 2 : out[i - 1] + (ws[i - 1] + ws[i]) / 2 + gap;
+    out[i] = Math.max(out[i], min);
+  }
+  for (let i = n - 1; i >= 0; i -= 1) {
+    const max = i === n - 1 ? hi - ws[i] / 2 : out[i + 1] - (ws[i] + ws[i + 1]) / 2 - gap;
+    out[i] = Math.min(out[i], max);
+  }
+  return out;
+}
 
 // ---------- the figure ----------
 
@@ -217,8 +241,33 @@ const CSS = (s) => `${panelCss(s)}
 .${s}.is-narrow .pk-swim { display: none; }
 .${s}.is-narrow .pk-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 var(--space-3); align-items: start; }
 .${s}.is-narrow .pk-layers { display: none; }
-.${s}.is-narrow .pk-card { max-width: 80%; }
+/* The card comes down over the whole strip under the cell: stopping short of it left half of each layer's
+   name showing under the card's frosted edge. */
+.${s}.is-narrow .pk-card { max-width: 80%; bottom: 3px; }
 .${s}.is-narrow .pk-stainchip { left: var(--space-4); top: var(--space-3); }
+/* Flat: a box wider than it is tall and too small for the wide layout. The frame gives one from an 800 px
+   window up, where the rail beside the text keeps the stage at 480 to 863 px wide, and stacking the panel
+   under the drawing there left the drawing 12 to 135 px tall. So the controls stand beside the drawing at
+   the stage's full height, the two toolbar buttons keep to the drawing's column under it, and the envelope
+   is magnified across the foot of the drawing as on a phone. The slider names its own medium, so the
+   "Outside" heading goes; the envelope's layer line and the swimming line come back once the box is tall
+   enough to hold them. */
+.${s}.is-narrow.is-flat { grid-template-columns: minmax(0, 1fr) var(--pk-side, 44%); grid-template-rows: minmax(0, 1fr); padding-bottom: 0; }
+.${s}.is-narrow.is-flat .pk-stage { padding: var(--space-3) var(--space-1) var(--pk-pad, 3.1rem) var(--space-3); }
+.${s}.is-narrow.is-flat .pk-panel { grid-column: 2; grid-row: 1; padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2); }
+.${s}.is-narrow.is-flat .pk-two { display: flex; flex-direction: column; gap: 0.22rem; }
+.${s}.is-narrow.is-flat .pk-two > .pk-block:first-child > .cl-head { display: none; }
+.${s}.is-narrow.is-flat .pk-foot { margin-top: auto; }
+.${s}.is-narrow.is-flat .fig-toolbar { right: calc(var(--pk-side, 44%) + var(--space-1)); }
+.${s}.is-narrow.is-flat .pk-card { bottom: calc(var(--pk-pad, 3.1rem) + 3px); }
+.${s}.is-narrow.is-flat.is-roomy .pk-layers { display: block; }
+.${s}.is-narrow.is-flat.is-roomy .pk-swim { display: block; }
+.${s}.is-narrow.is-flat.is-roomy .pk-swim[hidden] { display: none; }
+/* Tight: the flat box of an 800 to 857 px window, 480 x 300 to 537 x 335, where the panel, 298 to 333 px
+   tall, needs 322 for the longest fate. The rule and the heading over the fate go, since the fate's first
+   word says what it is, and the panel's own padding halves. */
+.${s}.is-narrow.is-flat.is-tight .pk-panel { padding-top: var(--space-1); padding-bottom: var(--space-1); }
+.${s}.is-narrow.is-flat.is-tight .pk-foot > .cl-rule, .${s}.is-narrow.is-flat.is-tight .pk-foot > .cl-head { display: none; }
 `;
 
 export function mount(root, ctx) {
@@ -483,6 +532,9 @@ export function mount(root, ctx) {
   let dpr = 1;
   let narrow = null;
   let short = null;
+  let flat = null;
+  let roomy = null;
+  let tight = null;
   let padPx = 0;
   let hits = [];
 
@@ -492,13 +544,27 @@ export function mount(root, ctx) {
     const hh = Math.round(r.height);
     if (!w || !hh) return false;
     const wantNarrow = w < NARROW_W || hh < NARROW_H;
-    const wantShort = w < SHORT_W;
-    if (wantNarrow !== narrow || wantShort !== short) {
+    // A narrow box wider than it is tall takes the flat layout (see the CSS); a phone's tall one stacks.
+    // The flat layout's column is at most 300 px wide, too narrow for the long button labels at any width.
+    const wantFlat = wantNarrow && w > hh;
+    const wantShort = w < SHORT_W || wantFlat;
+    const wantRoomy = wantFlat && hh >= 440;
+    const wantTight = wantFlat && hh < 336;
+    if (wantNarrow !== narrow || wantShort !== short || wantFlat !== flat || wantRoomy !== roomy || wantTight !== tight) {
       narrow = wantNarrow;
       short = wantShort;
+      flat = wantFlat;
+      roomy = wantRoomy;
+      tight = wantTight;
       wrap.classList.toggle('is-narrow', narrow);
       wrap.classList.toggle('is-short', short);
+      wrap.classList.toggle('is-flat', flat);
+      wrap.classList.toggle('is-roomy', roomy);
+      wrap.classList.toggle('is-tight', tight);
     }
+    // At least 232 px, the width that holds the three envelope buttons on one row: at 220 the third went
+    // to a second row, and the panel of a 480 x 300 box ran 53 px past its foot with the longest fate.
+    if (flat) wrap.style.setProperty('--pk-side', `${Math.round(clamp(w * 0.44, 232, 300))}px`);
     const pad = Math.round(toolbar.getBoundingClientRect().height) + 22;
     if (pad > 20 && pad !== padPx) {
       padPx = pad;
@@ -506,8 +572,11 @@ export function mount(root, ctx) {
     }
     return true;
   }
+  // The canvas's own box, not its stage's. The stage's padding is outside the canvas, and a backing store
+  // sized to the whole stage was shrunk into the canvas, so every word was drawn smaller than its font and
+  // a click landed a few pixels from the part it hit.
   function sizeCanvas() {
-    const r = stage.getBoundingClientRect();
+    const r = canvas.getBoundingClientRect();
     const w = Math.round(r.width);
     const hh = Math.round(r.height);
     if (!w || !hh) return false;
@@ -667,8 +736,9 @@ export function mount(root, ctx) {
   }
 
   // Which way water is going, and how hard. Four arrows across the envelope, their length set by how far
-  // the medium is from isotonic.
-  function drawOsmosis(cx, cy, scale, C, st) {
+  // the medium is from isotonic, and never longer than the drawing has room for above and below the cell:
+  // on a phone the full length ran off the top of the canvas, and the label with it.
+  function drawOsmosis(cx, cy, scale, C, st, box) {
     const drive = state.solute - 1;
     if (Math.abs(drive) < 0.06) return;
     const inward = drive < 0;
@@ -678,14 +748,19 @@ export function mount(root, ctx) {
     const len = lerp(CELL_LEN, CELL_LEN * 0.72, clamp01((st.f.swell - 1) / 0.34)) * st.f.swell;
     const wid = lerp(CELL_W, CELL_W * 1.45, clamp01((st.f.swell - 1) / 0.34)) * st.f.swell;
     void env;
-    const arrow = 20 + 34 * mag;
+    const top = cy - (wid / 2 + outer) * scale;
+    const bottom = cy + (wid / 2 + outer) * scale;
+    const room = Math.min(top - box.y - 18, box.y + box.h - bottom - 2);
+    const arrow = clamp(20 + 34 * mag, 10, Math.max(10, room));
     g.strokeStyle = palette.water;
     g.fillStyle = palette.water;
     g.lineWidth = 1.6;
     for (const [ux, uy] of [[-0.62, -1], [0.62, -1], [-0.62, 1], [0.62, 1]]) {
       const px = cx + ux * (len / 2) * scale;
       const py = cy + uy * (wid / 2 + outer) * scale;
-      const dy = uy * (inward ? -1 : 1);
+      // Outside the envelope, where the water is, running in or out. The sign was flipped for water coming
+      // in, which drew those arrows inside the cell pointing out, under the words "water in".
+      const dy = uy;
       const from = { x: px, y: py + dy * (inward ? arrow : 4) };
       const to = { x: px, y: py + dy * (inward ? 4 : arrow) };
       g.beginPath();
@@ -704,7 +779,9 @@ export function mount(root, ctx) {
     g.textAlign = 'center';
     g.textBaseline = 'alphabetic';
     g.fillStyle = mix(palette.water, palette.ink, 0.3);
-    g.fillText(inward ? 'water in' : 'water out', cx, cy - (wid / 2 + outer) * scale - arrow - 8);
+    // Above the arrows where there is room, and otherwise between the two upper ones, halfway up them.
+    const over = top - arrow - 8;
+    g.fillText(inward ? 'water in' : 'water out', cx, over - 8 >= box.y + 2 ? over : Math.max(box.y + 10, top - arrow / 2 + 3.5));
   }
 
   function drawLps(cx, cy, box, scale, C) {
@@ -896,7 +973,10 @@ export function mount(root, ctx) {
     const env = { layers: layersOf(st.env, st.damage) };
     const total = Math.max(12, layerTotal(st.env, st.damage));
     const scaleW = 46; // room on the right for the nanometre bar and its label
-    const barPx = vertical ? Math.min(box.h - 40, total * 4.2) : Math.min(box.w - 120, total * 4.2);
+    // Across the stage, one magnification for all three envelopes, set by the thickest and by the width
+    // there is, so a strip's length is always its thickness: a cap on each strip alone would draw the
+    // 27 nm envelope as long as the 37 nm one in a drawing under 235 px wide.
+    const barPx = vertical ? Math.min(box.h - 40, total * 4.2) : total * Math.min(5, (box.w - 60) / MAX_NM);
     const px = barPx / total;
     const thick = vertical ? clamp(box.w * 0.32, 26, 54) : Math.min(46, box.h - 34);
 
@@ -905,7 +985,10 @@ export function mount(root, ctx) {
     g.textBaseline = 'middle';
     let at = 0;
     const labels = [];
-    const x0 = vertical ? box.x + box.w - thick - scaleW : box.x + 4;
+    // Across, the outer membrane's sugar fringe stands 7 nm out past the strip's outer end, so the strip
+    // starts that far in: from box.x + 4 the fringe ran off the canvas's left edge, 7 nm drawn as 2.
+    const fringe = !vertical && env.layers[0]?.lps ? 7 * px : 0;
+    const x0 = vertical ? box.x + box.w - thick - scaleW : box.x + 4 + fringe;
     const y0 = vertical ? box.y + (box.h - barPx) / 2 : box.y + 4;
 
     // the medium above the outermost layer
@@ -982,20 +1065,25 @@ export function mount(root, ctx) {
       at += size;
     }
 
-    // The names, laid out afterwards so two thin layers cannot write over each other: each is placed at
-    // its own layer's midpoint, then pushed down until it clears the one above, with a leader back.
+    // The names, laid out afterwards so two thin layers cannot write over each other. Down the side, each
+    // is placed at its own layer's midpoint, then pushed down until it clears the one above, with a leader
+    // back. Across the stage a name is wider than most layers, and centring each on its own layer wrote
+    // "Quasi-periplasm" over both its neighbours and dropped the gram-negative wall's name altogether. So
+    // across, the gaps between membranes are drawn and not named, as the panel's list of layers does not
+    // name them either, and the names are spread along the strip, each as near its own layer as the
+    // others allow, with a leader up to it when it had to move.
     g.font = `9.5px ${FONT}`;
-    let lastY = -Infinity;
-    for (const L of labels) {
-      const want = vertical ? y0 + L.mid : x0 + L.mid;
-      const place = Math.max(want, lastY + 21);
-      lastY = place;
-      if (vertical) {
+    if (vertical) {
+      let lastY = -Infinity;
+      for (const L of labels) {
+        const want = y0 + L.mid;
+        const place = Math.max(want, lastY + 21);
+        lastY = place;
         g.textAlign = 'right';
         g.fillStyle = C.soft;
         g.fillText(L.layer.name, x0 - 9, place - 5);
         g.fillStyle = C.faint;
-        g.fillText(`${L.layer.nm} nm`, x0 - 9, place + 5);
+        g.fillText(nmText(L.layer.nm), x0 - 9, place + 5);
         if (Math.abs(place - want) > 1.5) {
           g.strokeStyle = C.rule;
           g.lineWidth = 1;
@@ -1004,12 +1092,28 @@ export function mount(root, ctx) {
           g.lineTo(x0, want);
           g.stroke();
         }
-      } else if (L.size > 13) {
-        g.textAlign = 'center';
+      }
+    } else {
+      const named = labels.filter((L) => L.layer.colour !== 'periplasm');
+      const words = named.map((L) => L.layer.name.split(' ')[0]);
+      const sizes = named.map((L) => nmText(L.layer.nm));
+      const widths = named.map((L, i) => Math.max(g.measureText(words[i]).width, g.measureText(sizes[i]).width));
+      const want = named.map((L) => x0 + L.mid);
+      const at2 = spread(want, widths, box.x + 2, box.x + box.w - 2, 6) ?? want;
+      g.textAlign = 'center';
+      for (const [i, x] of at2.entries()) {
         g.fillStyle = C.soft;
-        g.fillText(L.layer.name.split(' ')[0], x0 + L.mid, y0 + thick + 11);
+        g.fillText(words[i], x, y0 + thick + 12);
         g.fillStyle = C.faint;
-        g.fillText(`${Math.round(L.layer.nm)} nm`, x0 + L.mid, y0 + thick + 22);
+        g.fillText(sizes[i], x, y0 + thick + 23);
+        if (Math.abs(x - want[i]) > 2) {
+          g.strokeStyle = C.rule;
+          g.lineWidth = 1;
+          g.beginPath();
+          g.moveTo(want[i], y0 + thick + 1);
+          g.lineTo(x, y0 + thick + 6);
+          g.stroke();
+        }
       }
     }
 
@@ -1032,16 +1136,19 @@ export function mount(root, ctx) {
       g.font = `600 9.5px ${FONT}`;
       g.fillText('20 nm', sx + 4, y0 + 10 * px);
     } else {
-      // Above the strip on a narrow stage, at its cytoplasm end: below it the layer names already have
-      // the line, and at the outer end the leader from the cell lands.
+      // Above the strip, at its cytoplasm end: below it the layer names already have the line, and at the
+      // outer end the leader from the cell lands. The bar is never longer than the strip, and its label
+      // stands past the strip's end: 20 nm reaching back from a 7 nm membrane, with its label beyond that,
+      // left the canvas.
       const sy = y0 - 5;
-      g.moveTo(x0 + at - 20 * px, sy);
+      const barNm = [20, 10, 5, 2, 1].find((n) => n * px <= at) ?? 1;
+      g.moveTo(x0 + at - barNm * px, sy);
       g.lineTo(x0 + at, sy);
       g.stroke();
-      g.textAlign = 'right';
+      g.textAlign = 'left';
       g.fillStyle = C.soft;
       g.font = `600 9.5px ${FONT}`;
-      g.fillText('20 nm', x0 + at - 20 * px - 5, sy + 3);
+      g.fillText(`${barNm} nm`, x0 + at + 5, sy);
     }
     g.restore();
     return { x0, y0, thick, barPx, vertical };
@@ -1080,20 +1187,29 @@ export function mount(root, ctx) {
     // fifth of the cell's length each side, left the cell 230 px long in a 614 px pane.
     const flag = state.appendages.has('flagella') ? 300 : 120;
     const needW = CELL_LEN * 1.1 + outer * 2 + flag;
-    const needH = CELL_W * 1.42 + outer * 2 + (state.appendages.has('pili') ? 700 : 0);
-    // Never below zero. In an 800 to 860 px window the drawing is left 27 to 65 px tall, less than the
-    // 90 px the cell's box and its pad take, and a negative scale made the torn envelope's ellipse
-    // throw (docs/work/2_rest-of-the-book/reviews/2026-09-25-wide-band-probe.md).
+    // A cell losing its wall in a dilute medium rounds up and swells to 1.94 times its width (fateOf), so
+    // from the moment the reader sets that up its box is kept for the swollen cell: kept for the rod alone,
+    // the swollen cell ran off the top of a phone's drawing. The burst's ring and debris may still fly out.
+    const swells = state.solute < 0.85 && (!w.intact || damageRate(w.env, w.treat, w.grow) > 0);
+    const needH = CELL_W * (swells ? 2.1 : 1.42) + outer * 2 + (state.appendages.has('pili') ? 700 : 0);
+    // Never below zero. Before the flat layout an 800 to 860 px window left the drawing 27 to 65 px tall,
+    // less than the 90 px the cell's box and its pad take, and a negative scale made the torn envelope's
+    // ellipse throw (docs/work/2_rest-of-the-book/reviews/2026-09-25-wide-band-probe.md).
     const scale = Math.max(0, Math.min((cellBox.w - 20) / needW, (cellBox.h - 20) / needH));
     // The cell swims across the field and comes back round; the wrap is centred on zero so a pinned
     // frame at t = 0 has it in the middle.
     const span = CELL_LEN * 2.4;
     const swimX = state.appendages.has('flagella') ? ((m.x + span / 2) % span + span) % span - span / 2 : 0;
-    const cx = cellBox.x + cellBox.w / 2 + flag * scale * 0.5 + swimX * scale * 0.2;
+    // Across a narrow box it swings only as far as the box has room for: in the flat box of an 800 to
+    // 1231 px window, whose width sets the scale, the full swing carried the cell's far end 20 px past the
+    // canvas's edge. The wide layout keeps the swing it was drawn with.
+    const room = vertical ? Infinity : Math.max(0, cellBox.w / 2 - 10 - (CELL_LEN / 2 + outer) * scale - flag * scale * 0.5);
+    const swing = Math.min((span / 2) * scale * 0.2, room);
+    const cx = cellBox.x + cellBox.w / 2 + flag * scale * 0.5 + (swimX / (span / 2)) * swing;
     const cy = cellBox.y + cellBox.h / 2 + (state.appendages.has('flagella') ? Math.sin(m.y / 3000) * cellBox.h * 0.1 : 0);
     drawMedium(cellBox, C);
     drawCell(cx, cy, scale, C, st);
-    drawOsmosis(cx, cy, scale, C, st);
+    drawOsmosis(cx, cy, scale, C, st, cellBox);
 
     // a leader from the cell's edge to the callout
     const geom = { len: CELL_LEN, wid: CELL_W, outer };

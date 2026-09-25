@@ -185,6 +185,26 @@ const CSS = (s) => `${panelCss(s)}
 .${s}.is-narrow .sv-note { display: none; }
 .${s}.is-narrow .sv-big { font-size: 16px; }
 .${s}.is-narrow .sv-mark { font-size: 9px; }
+/* Flat: a box wider than it is tall and too small for the wide layout. The frame gives one from an 800 px
+   window up, where the rail beside the text keeps the stage at 480 to 746 px wide, and the narrow stack
+   there left the drawing 0 to 74 px tall. So the readouts stand beside the drawing at the full height
+   above the toolbar, the size axis stays under the drawing it sizes, and the two bars share one line of
+   scale, since it is the same scale. */
+.${s}.is-narrow.is-flat { grid-template-columns: minmax(0, 1fr) var(--sv-side, 50%); grid-template-rows: minmax(0, 1fr) auto; }
+.${s}.is-narrow.is-flat .sv-stage { grid-column: 1; grid-row: 1; padding: var(--space-3) var(--space-1) 0 var(--space-3); }
+.${s}.is-narrow.is-flat .sv-axis { grid-column: 1; grid-row: 2; padding: 0 var(--space-1) 0 var(--space-3); }
+.${s}.is-narrow.is-flat .sv-panel { grid-column: 2; grid-row: 1 / -1; justify-content: center; padding: var(--space-2) var(--space-3) 0; gap: 0.42rem; }
+.${s}.is-narrow.is-flat .sv-two { grid-template-columns: minmax(0, 1fr); gap: 0.3rem 0; }
+.${s}.is-narrow.is-flat .sv-metric:first-child .sv-scale { display: none; }
+.${s}.is-narrow.is-flat .sv-off { display: none; }
+/* The verdict under its heading, not beside it: a column 240 to 330 px wide split the two, and each broke
+   onto a second line. */
+.${s}.is-narrow.is-flat .sv-head2 { flex-direction: column; align-items: flex-start; gap: 0; }
+/* Tight: the flat box of an 800 to 853 px window, 480 x 270 to 533 x 299, where the readouts' column, 216 to
+   245 px tall, cannot also hold the working under the two middle figures. The figures and their headings
+   stay, and so does the working at every larger size. */
+.${s}.is-narrow.is-flat.is-tight .sv-panel { padding-top: var(--space-1); gap: 0.3rem; }
+.${s}.is-narrow.is-flat.is-tight .sv-sub { display: none; }
 `;
 
 export function mount(root, ctx) {
@@ -347,6 +367,8 @@ export function mount(root, ctx) {
   let dpr = 1;
   let narrow = null;
   let short = null;
+  let flat = null;
+  let tight = null;
   let padPx = 0;
 
   function applyLayout() {
@@ -355,13 +377,22 @@ export function mount(root, ctx) {
     const hh = Math.round(r.height);
     if (!w || !hh) return false;
     const wantNarrow = w < NARROW_W || hh < NARROW_H;
+    // A narrow box wider than it is tall takes the flat layout (see the CSS); a phone's tall one stacks.
+    const wantFlat = wantNarrow && w > hh;
     const wantShort = w < SHORT_W;
-    if (wantNarrow !== narrow || wantShort !== short) {
+    const wantTight = wantFlat && hh < 300;
+    if (wantNarrow !== narrow || wantShort !== short || wantFlat !== flat || wantTight !== tight) {
       narrow = wantNarrow;
       short = wantShort;
+      flat = wantFlat;
+      tight = wantTight;
       wrap.classList.toggle('is-narrow', narrow);
       wrap.classList.toggle('is-short', short);
+      wrap.classList.toggle('is-flat', flat);
+      wrap.classList.toggle('is-tight', tight);
     }
+    // Half the box for the readouts, and never under the 230 px their two columns of figures need.
+    if (flat) wrap.style.setProperty('--sv-side', `${Math.round(clamp(w * 0.5, 230, 330))}px`);
     const pad = Math.round(toolbar.getBoundingClientRect().height) + 22;
     if (pad > 20 && pad !== padPx) {
       padPx = pad;
@@ -370,8 +401,11 @@ export function mount(root, ctx) {
     return true;
   }
 
+  // The canvas's own box, not its stage's. The stage's padding is outside the canvas, and a backing store
+  // sized to the whole stage was shrunk into the canvas: on a 390 px phone by 6 % across and 4 % down, so
+  // every word was drawn smaller than its font and a sphere came out a little oval.
   function sizeCanvas() {
-    const r = stage.getBoundingClientRect();
+    const r = canvas.getBoundingClientRect();
     const w = Math.round(r.width);
     const hh = Math.round(r.height);
     if (!w || !hh) return false;

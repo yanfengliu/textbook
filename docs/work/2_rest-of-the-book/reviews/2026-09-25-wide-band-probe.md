@@ -222,3 +222,5 @@ breaking figure was re-shot in dark theme (22 frames) and driven one step past i
 through its own controls (9 of 11 — the two crashes render no controls to click); all 30 of those
 confirmation frames were looked at the same way, and all confirmed the same fault the light-theme
 opening-state sweep found, unchanged or (gradient-battery) worse.
+
+Correction, 2026-09-25 (UTC), by land-4, the landing worker: 3.2 surface-volume and 3.3 prokaryote are scored ok at 860, 960 and 1024 above, but neither showed its cell at a readable size there. The frame's box at those widths is wider than it is tall, and both figures fell back in it to their phone layout, which stacks the controls under the drawing. At 860 that left the canvas 8 px tall in 3.2 and 65 px in 3.3, and neither drew a cell at all. At 960 and 1024 the canvas was 65 to 74 px tall in 3.2 and 125 to 135 px in 3.3, and the cell was drawn 16 to 20 px across in 3.2 and 30 to 40 px tall in 3.3. At 1150, 3.3 drew its cell, but the lower part of its control column ran off the stage: the Growing button, the cell's fate and its swimming.
