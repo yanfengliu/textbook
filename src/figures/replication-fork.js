@@ -449,6 +449,9 @@ function finishText(ch, organism, origins) {
   return `${(ch.finish / 60).toFixed(1)} h`;
 }
 
+// Narrow, the fork over its table; `arrange()` gives the table more when its sentences need it.
+const NARROW_ROWS = 'minmax(0, 71fr) minmax(0, 29fr)';
+
 export function mount(root, ctx) {
   const b = bench(root, ctx, { kind: meta.kind, css: CSS, narrowBelow: { width: 800 }, seed: 803 });
   const ENZYME = metabolismPart('enzyme');
@@ -479,7 +482,7 @@ export function mount(root, ctx) {
     },
     narrow: {
       columns: 'minmax(0, 1fr)',
-      rows: 'minmax(0, 71fr) minmax(0, 29fr)',
+      rows: `var(--rf-rows, ${NARROW_ROWS})`,
       at: { fork: [1, 1], table: [1, 2] },
     },
   });
@@ -677,9 +680,11 @@ export function mount(root, ctx) {
   b.onDescribe(state);
 
   // ---- the words: the rule, and what the fork is doing now ----
-  // `short` is the phone's wording. Its three lines under the readout hold about 180 characters at a
-  // 390 px stage, fewer at 360, and the banner across the top of the stage already says the rule is
-  // hypothetical. Every fact the long wording gives that the drawing does not show stays in the short one.
+  // `short` is the phone's wording. The narrow table grows to hold every line of it (`arrange()`), but
+  // each line it needs past three is taken from the fork, so a rule's sentence and an enzyme's together
+  // are kept to four lines at a 360 px stage. The banner across the top of the stage already says the
+  // rule is hypothetical. Every fact the long wording gives that the drawing does not show stays in the
+  // short one.
   function ruleWords(short = false) {
     if (rule === 'same-direction' && short) return 'At this fork both new strands grow towards it, each from one primer. At the other fork, not drawn, both would be made in fragments.';
     if (rule === 'either-end' && short) return 'A polymerase that could add at a 5′ end makes the lower new strand towards the fork too, from one primer: no fragments at any fork.';
@@ -696,7 +701,7 @@ export function mount(root, ctx) {
     if (!has('primase') && !fk.bot) return 'No primase: no new fragment can start, so the lagging template waits uncopied.';
     if (!has('primer-removal')) return 'No primer removal: the RNA primers stay in the strand, and the nick beside each cannot be sealed.';
     if (!has('ligase')) return 'No ligase: the fragments are made but never joined, so each nick stays open.';
-    if (fk.terminated === 'leading' && short) return 'A chain terminator has stopped the leading strand: nothing can be added after it. A real fork would slow, and might start again on a new primer.';
+    if (fk.terminated === 'leading' && short) return 'A chain terminator has stopped the leading strand: nothing can be added after it. A real fork slows, and may restart on a new primer.';
     if (fk.terminated === 'leading') return 'A chain terminator has stopped the leading strand: nothing can be added after it. In this drawing the fork keeps opening; a real fork slows, and may start the strand again beyond the block on a new primer.';
     if (fk.terminated) return `A chain terminator has stopped ${fk.terminated === 'lower' ? 'the lower strand' : 'a lagging fragment'}: nothing can be added after it.`;
     if (fk.pending > 0) return 'A chain terminator is in the pool: the next strand to take one in stops there.';
@@ -725,7 +730,30 @@ export function mount(root, ctx) {
   });
 
   // ---- drawing ----
+  // Narrow, the fork's table has 29 per cent of the height above the controls. At a 360 px phone that
+  // holds the eight rows and three lines of sentences; a changed rule with an enzyme gone or a terminator added needs four,
+  // and the last row of each column and the last line were cut. Then, and only then, the table takes
+  // the height its sentences need from the fork above it, and only on a stage taller than it is wide,
+  // which is a phone's: the narrow composition in a wide stage (a 656 px column at a 1024 px window)
+  // has no height to spare, and the fork would be squeezed to a strip. The share is worked out from the
+  // two panes together, which a changed grid does not change, so the answer cannot flip as the panes it
+  // produces are measured. Returns true when it changed the grid.
+  let tableRows = NARROW_ROWS;
+  function arrange() {
+    let want = NARROW_ROWS;
+    const stage = b.narrow && scene === 'fork' ? b.wrap.getBoundingClientRect() : null;
+    if (stage && stage.height > stage.width) {
+      const need = forkTableNeed(table.box.w);
+      if (need > (forkPane.box.h + table.box.h) * 0.29) want = `minmax(0, 1fr) minmax(0, ${Math.ceil(need)}px)`;
+    }
+    if (want === tableRows) return false;
+    tableRows = want;
+    b.setVar('--rf-rows', want);
+    return true;
+  }
+
   b.onDraw(() => {
+    if (arrange()) b.remeasure();
     forkPane.clear();
     table.clear();
     if (scene === 'fork') {
@@ -1253,20 +1281,30 @@ export function mount(root, ctx) {
     // Narrow: the rows in two columns, the sentences under them at full width.
     const size = 10;
     const colW = (w - 14) / 2;
-    const notes = [r, words].filter(Boolean);
-    const noteT = table.readout({ x: 0, width: w, size });
-    for (const n of notes) noteT.note(n, { size: 9.4 });
-    const noteH = noteT.height(14);
-    const into = Math.max(60, hgt - noteH - 2);
+    const into = Math.max(60, hgt - narrowNotes(w).height(14) - 2);
     const left = table.readout({ title: 'At the fork', x: 0, width: colW, size, minRow: 13, maxRow: 20 });
     for (const [k, v] of rows.slice(0, 4)) left.row(k, v);
     const bottomL = left.fill(into);
     const right = table.readout({ title: 'Made', x: colW + 14, width: colW, size, minRow: 13, maxRow: 20 });
     for (const [k, v] of rows.slice(4)) right.row(k === 'Pyrophosphate released' ? 'Pyrophosphate' : k, v);
     const bottomR = right.fill(into);
-    const noteAt = table.readout({ x: 0, y: Math.max(bottomL, bottomR) + 2, width: w, size });
-    for (const n of notes) noteAt.note(n, { size: 9.4 });
-    noteAt.draw(14, hgt - Math.max(bottomL, bottomR) - 2);
+    const bottom = Math.max(bottomL, bottomR);
+    narrowNotes(w, bottom + 2).draw(14, hgt - bottom - 2);
+  }
+
+  // The narrow table's sentences, at full width under its two columns.
+  function narrowNotes(w, y = 0) {
+    const t = table.readout({ x: 0, y, width: w, size: 10 });
+    for (const n of [ruleWords(true), forkWords(true)].filter(Boolean)) t.note(n, { size: 9.4 });
+    return t;
+  }
+
+  // The height the narrow table needs to show everything: a column of four rows at its least row
+  // height, the gap under it, every line of the sentences, and a pixel so the rows are solved inside.
+  function forkTableNeed(w) {
+    const column = table.readout({ title: 'At the fork', x: 0, width: (w - 14) / 2, size: 10 });
+    for (let i = 0; i < 4; i += 1) column.row('', '');
+    return column.height(13) + 2 + narrowNotes(w).height(14) + 1;
   }
 
   // ---- the whole chromosome ----

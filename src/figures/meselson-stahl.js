@@ -677,9 +677,13 @@ export function mount(root, ctx) {
       text: `Ruled out by the bands so far: ${ruled.length ? joinAnd(ruled.map((s) => `${s} at generation ${FIRST_FAIL[s]}`)) : 'none'}.`,
       accent: C.ink,
     });
+    // Narrow, two of these sentences have a phone's wording, a line shorter at a 360 px stage, so that a
+    // 360 px phone gives up no more of the heated table than a 390 px one: without them it lost the bands
+    // before heating at generation 1, and the dispersive scheme's sentence on what heat does.
     const heatNote = () => {
       if (gen === 0) return { text: 'Heat parts each molecule into its two strands. All are ¹⁵N, and a single strand bands denser than the molecule it came from.' };
       if (scheme === 'dispersive') return { text: 'Heat parts the strands, but each is a patchwork of ¹⁵N and ¹⁴N pieces, so all of them band together.' };
+      if (narrow) return { text: 'Heat parts the strands: ¹⁵N strands band at 1.740, ¹⁴N at 1.725.' };
       return { text: 'Heat parts the strands, and each bands by its own nitrogen: ¹⁵N strands at 1.740, ¹⁴N strands at 1.725.' };
     };
     const heatDataNote = () => {
@@ -692,6 +696,7 @@ export function mount(root, ctx) {
       }
       // Reached only by the dispersive scheme at generation 1: heated data exist only there, and the other
       // two schemes predict the two bands the data show. `ruledOut` stays the bands' verdict, and says so.
+      if (narrow) return { text: 'The 1958 heated hybrid DNA gave two bands, light and heavy, not one: each strand is wholly ¹⁵N or wholly ¹⁴N. Heat rules dispersive copying out at generation 1, a generation before the bands do.', accent: C.coralText };
       return { text: 'The 1958 heated DNA gave two bands, light and heavy, where dispersive copying predicts one: the hybrid band is made of a wholly heavy part and a wholly light one, not two patchworks. Heat rules the dispersive scheme out at generation 1, a generation before the bands alone do.', accent: C.coralText };
     };
 
