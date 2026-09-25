@@ -60,8 +60,10 @@ export function fitCanvas(canvas, w, h, dprCap = 2) {
   return { changed, dpr };
 }
 
+// The corner radius is floored at zero: a caller scales it with its drawing, a drawing squeezed past its
+// own padding hands in a negative one, and arcTo throws on a negative radius.
 export function roundRectPath(g, x, y, w, h, r) {
-  const rr = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+  const rr = Math.max(0, Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2));
   g.beginPath();
   g.moveTo(x + rr, y);
   g.lineTo(x + w - rr, y);
