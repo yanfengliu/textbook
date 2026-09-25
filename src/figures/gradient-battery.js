@@ -222,7 +222,7 @@ export function mount(root, ctx) {
   // cream, and mixing THAT into the paper only half works: 30% of it put `var(--ink)` right in both themes
   // but made a mid-grey slab of the dark theme's cell (#575652), on which the --ink-faint names measured
   // 2.15:1 (npm run legible, 2026-09-23). 8 and not the 9 or 10 of the other two figures because notes are
-  // set straight on this one with no halo: --ink-faint on it is 4.78:1 light and 4.53:1 dark, where 9
+  // set straight on this one with no paper halo: --ink-faint on it is 4.78:1 light and 4.53:1 dark, where 9
   // gives 4.44:1 dark and 10 gives 4.34:1.
   const CYTO_FILL = tint(C.gold, 8);
 
@@ -611,9 +611,13 @@ export function mount(root, ctx) {
     const ls = f1(Math.max(7.8, sz - 1.4));
     if (!narrow) {
       // Under the membrane, inside the cell: above it the two names shared a line with the heading, the
-      // scale note and the row of sodium ions.
-      g.append(text(antiX, cy - halfH + memH * 1.5 + 11, 'Na⁺/Ca²⁺ antiporter', { anchor: 'middle', class: 'mol-rt-note', 'font-size': ls }));
-      g.append(text(pumpX, cy - halfH + memH * 1.5 + 11, digoxin ? 'pump, part blocked' : 'pump', { anchor: 'middle', class: 'mol-rt-note', 'font-size': ls }));
+      // scale note and the row of sodium ions. A striation runs through each name, so each carries the
+      // cytoplasm with it as a halo, the way permeability's word over the membrane carries the paper.
+      // Without it, "pump" measured 4.33:1 in the dark theme on GitHub's runner where a striation crossed
+      // it, against the 4.53:1 of the cytoplasm alone (npm run legible, 2026-09-24).
+      const over = { stroke: CYTO_FILL, 'stroke-width': 3, 'stroke-linejoin': 'round', 'paint-order': 'stroke' };
+      g.append(text(antiX, cy - halfH + memH * 1.5 + 11, 'Na⁺/Ca²⁺ antiporter', { anchor: 'middle', class: 'mol-rt-note', 'font-size': ls, ...over }));
+      g.append(text(pumpX, cy - halfH + memH * 1.5 + 11, digoxin ? 'pump, part blocked' : 'pump', { anchor: 'middle', class: 'mol-rt-note', 'font-size': ls, ...over }));
     } else {
       g.append(text(x, cy + halfH + memH + sz, digoxin ? 'A antiporter · P pump, part blocked' : 'A antiporter · P pump', { class: 'mol-rt-note', 'font-size': ls }));
     }
