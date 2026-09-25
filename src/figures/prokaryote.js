@@ -1081,7 +1081,10 @@ export function mount(root, ctx) {
     const flag = state.appendages.has('flagella') ? 300 : 120;
     const needW = CELL_LEN * 1.1 + outer * 2 + flag;
     const needH = CELL_W * 1.42 + outer * 2 + (state.appendages.has('pili') ? 700 : 0);
-    const scale = Math.min((cellBox.w - 20) / needW, (cellBox.h - 20) / needH);
+    // Never below zero. In an 800 to 860 px window the drawing is left 27 to 65 px tall, less than the
+    // 90 px the cell's box and its pad take, and a negative scale made the torn envelope's ellipse
+    // throw (docs/work/2_rest-of-the-book/reviews/2026-09-25-wide-band-probe.md).
+    const scale = Math.max(0, Math.min((cellBox.w - 20) / needW, (cellBox.h - 20) / needH));
     // The cell swims across the field and comes back round; the wrap is centred on zero so a pinned
     // frame at t = 0 has it in the middle.
     const span = CELL_LEN * 2.4;
