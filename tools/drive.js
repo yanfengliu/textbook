@@ -4375,6 +4375,132 @@ const RECIPES = {
     }],
   ],
 
+  // Chapter 7, Figure 7.4. §7.7's claim is WHAT runs out when the oxygen goes, so the recipe stalls a cell
+  // that cannot ferment and reads ranOutOf, then restarts glycolysis with each route and reads the two
+  // numbers the figure exists for: ATP per glucose, still 2, and ATP made by the fermentation step itself,
+  // 0. Every wait polls describe(); the model runs on the figure's own clock.
+  fermentation: [
+    ['opens-aerobic-and-running', async (h) => {
+      const d = await until(h, (x) => x.playing === true && x.t > 0.2, 10_000);
+      expect(d.playing === true && d.t > 0.2, `it should open running: ${JSON.stringify({ playing: d.playing, t: d.t })}`);
+      expect(d.oxygen === true && d.route === 'none' && d.preset === null && d.demand === 4, `it should open with oxygen, no fermentation route, no preset and a demand of 4: ${JSON.stringify({ oxygen: d.oxygen, route: d.route, preset: d.preset, demand: d.demand })}`);
+      expect(d.nadPoolTotal === 12 && d.nadhLoaded <= 2 && d.poolFull === false && d.ranOutOf === null, `with oxygen the chain should keep the pool mostly empty: ${JSON.stringify({ nadPoolTotal: d.nadPoolTotal, nadhLoaded: d.nadhLoaded, poolFull: d.poolFull, ranOutOf: d.ranOutOf })}`);
+      expect(d.atpPerGlucose === 30 && d.yieldTissue === 'fast skeletal muscle' && d.atpFromFermentationStep === 0 && d.keepingUp === true, `with oxygen it should make about 30 per glucose, labelled as fast skeletal muscle's: ${JSON.stringify({ atpPerGlucose: d.atpPerGlucose, yieldTissue: d.yieldTissue, atpFromFermentationStep: d.atpFromFermentationStep, keepingUp: d.keepingUp })}`);
+      const spoken = await h.stage.getByRole('slider', { name: 'Demand' }).getAttribute('aria-valuetext');
+      expect(spoken === '4 ATP a second', `the demand range should say its value in words: ${JSON.stringify(spoken)}`);
+    }],
+    ['taking-the-oxygen-away-runs-out-of-nad-not-atp', async (h) => {
+      await h.button(/^Oxygen/).click();
+      const d = await until(h, (x) => x.oxygen === false && x.poolFull === true && x.secondsStalled > 0.2, 20_000);
+      expect(d.oxygen === false && d.chainRunning === false, `the oxygen should be off and the chain stopped: ${JSON.stringify({ oxygen: d.oxygen, chainRunning: d.chainRunning })}`);
+      expect(d.poolFull === true && d.ranOutOf === 'nad' && d.nadhLoaded === 12 && d.nadEmpty === 0, `with no route the pool should fill and the thing run out should be NAD+: ${JSON.stringify({ poolFull: d.poolFull, ranOutOf: d.ranOutOf, nadhLoaded: d.nadhLoaded, nadEmpty: d.nadEmpty, t: d.t })}`);
+      expect(d.glycolysisRate === 0 && d.atpMadePerSecond === 0 && d.keepingUp === false && d.situation === 'stalled', `glycolysis should have stopped, making nothing: ${JSON.stringify({ glycolysisRate: d.glycolysisRate, atpMadePerSecond: d.atpMadePerSecond, keepingUp: d.keepingUp, situation: d.situation })}`);
+      const pressed = await h.button(/^Oxygen/).getAttribute('aria-pressed');
+      expect(pressed === 'false', `the oxygen button should say it is off: aria-pressed ${JSON.stringify(pressed)}`);
+    }],
+    ['lactate-restarts-glycolysis-and-makes-no-atp', async (h) => {
+      await h.button(/^Lactate/).click();
+      const d = await until(h, (x) => x.route === 'lactate' && x.poolFull === false && x.glycolysisRate > 0.5, 10_000);
+      expect(d.route === 'lactate' && d.poolFull === false && d.ranOutOf === null && d.fermenting === true, `the lactate step should empty the pool: ${JSON.stringify({ route: d.route, poolFull: d.poolFull, ranOutOf: d.ranOutOf, fermenting: d.fermenting })}`);
+      expect(d.glycolysisRate > 0.5, `glycolysis should be running again: ${d.glycolysisRate} glucose a second`);
+      const later = await until(h, (x) => x.lactateMM > d.lactateMM + 0.05, 10_000);
+      expect(later.lactateMM > d.lactateMM + 0.05, `lactate should build up while it ferments: ${d.lactateMM} -> ${later.lactateMM} mmol/L`);
+      expect(later.atpPerGlucose === 2 && later.atpFromFermentationStep === 0, `fermenting to lactate should leave ATP per glucose at 2 and make none in the lactate step: ${JSON.stringify({ atpPerGlucose: later.atpPerGlucose, atpFromFermentationStep: later.atpFromFermentationStep })}`);
+    }],
+    ['ethanol-sends-two-carbons-off-as-carbon-dioxide', async (h) => {
+      await h.button(/^Ethanol/).click();
+      const d = await until(h, (x) => x.route === 'ethanol' && x.ethanolMM > 0.2, 15_000);
+      expect(d.route === 'ethanol' && d.ethanolMM > 0.2 && d.ethanolPercent > 0, `ethanol should build up: ${JSON.stringify({ route: d.route, ethanolMM: d.ethanolMM, ethanolPercent: d.ethanolPercent })}`);
+      expect(d.co2Released === 2 && d.carbonsInEthanol === 4, `two of the six carbons should leave as carbon dioxide and four stay in the ethanol: ${JSON.stringify({ co2Released: d.co2Released, carbonsInEthanol: d.carbonsInEthanol })}`);
+      expect(d.atpPerGlucose === 2 && d.atpFromFermentationStep === 0 && d.glycolysisRate > 0.5, `the ethanol steps should make no ATP and keep glycolysis going: ${JSON.stringify({ atpPerGlucose: d.atpPerGlucose, atpFromFermentationStep: d.atpFromFermentationStep, glycolysisRate: d.glycolysisRate })}`);
+      expect(d.lactateMM > 0 && d.clearing === false, `with no oxygen the lactate made before should stay: ${JSON.stringify({ lactateMM: d.lactateMM, clearing: d.clearing })}`);
+    }],
+    ['fermentation-cannot-make-glycolysis-faster', async (h) => {
+      const demand = h.stage.getByRole('slider', { name: 'Demand' });
+      await demand.fill('13');
+      await atValue(h, demand, 13);
+      const d = await until(h, (x) => x.demand === 13 && x.glycolysisRate > 5.9, 10_000);
+      expect(d.demand === 13 && d.keepingUp === false && near(d.atpMadePerSecond, 12, 0.01) && near(d.glycolysisRate, 6, 0.01), `with no oxygen glycolysis should top out at 12 ATP a second, short of 13: ${JSON.stringify({ demand: d.demand, keepingUp: d.keepingUp, atpMadePerSecond: d.atpMadePerSecond, glycolysisRate: d.glycolysisRate })}`);
+      expect(d.situation === 'short', `the readout should say it cannot keep up: ${d.situation}`);
+      await demand.fill('12');
+      await atValue(h, demand, 12);
+      const e = await until(h, (x) => x.demand === 12 && x.keepingUp === true, 10_000);
+      expect(e.keepingUp === true && near(e.atpMadePerSecond, 12, 0.01), `at 12 ATP a second it should keep up: ${JSON.stringify({ demand: e.demand, keepingUp: e.keepingUp, atpMadePerSecond: e.atpMadePerSecond })}`);
+    }],
+    ['no-route-stalls-it-again', async (h) => {
+      const before = await h.describe();
+      await h.button(/^No fermentation/).click();
+      const d = await until(h, (x) => x.route === 'none' && x.poolFull === true && x.secondsStalled > 0.1, 15_000);
+      expect(d.route === 'none' && d.ranOutOf === 'nad' && d.glycolysisRate === 0 && d.situation === 'stalled', `taking the route away with no oxygen should stall it again: ${JSON.stringify({ route: d.route, ranOutOf: d.ranOutOf, glycolysisRate: d.glycolysisRate, situation: d.situation })}`);
+      expect(d.ethanolMM >= before.ethanolMM && d.ethanolMM > 0.2, `the ethanol already made should stay: ${before.ethanolMM} -> ${d.ethanolMM}`);
+    }],
+    ['the-muscle-ferments-with-oxygen-present-and-clears-it-after', async (h) => {
+      await h.button(/^Muscle/).click();
+      const d = await until(h, (x) => x.preset === 'muscle' && x.fermenting === true && x.lactateMM > 0.1, 15_000);
+      expect(d.preset === 'muscle' && d.route === 'lactate' && d.oxygen === true && d.demand === 10, `the muscle preset should open on lactate, with oxygen, at a sprint's demand: ${JSON.stringify({ preset: d.preset, route: d.route, oxygen: d.oxygen, demand: d.demand })}`);
+      expect(d.fermenting === true && d.chainRunning === true && d.poolFull === false && d.situation === 'overflow', `a sprinting fibre should ferment with the chain still running: ${JSON.stringify({ fermenting: d.fermenting, chainRunning: d.chainRunning, poolFull: d.poolFull, situation: d.situation })}`);
+      expect(d.atpPerGlucose > 2 && d.atpPerGlucose < 30 && d.atpFromFermentationStep === 0, `buying rate with yield should put ATP per glucose between 2 and 30: ${JSON.stringify({ atpPerGlucose: d.atpPerGlucose, atpFromFermentationStep: d.atpFromFermentationStep })}`);
+      const routePressed = await h.button(/^Lactate/).getAttribute('aria-pressed');
+      expect(routePressed === 'true', `the preset should show its route as chosen: Lactate aria-pressed ${JSON.stringify(routePressed)}`);
+      const demand = h.stage.getByRole('slider', { name: 'Demand' });
+      await demand.fill('7');
+      await atValue(h, demand, 7);
+      const c = await until(h, (x) => x.demand === 7 && x.clearing === true, 15_000);
+      expect(c.clearing === true && c.fermenting === false, `easing off to 7 should stop the fermenting and start the clearing: ${JSON.stringify({ demand: c.demand, clearing: c.clearing, fermenting: c.fermenting, situation: c.situation })}`);
+      const done = await until(h, (x) => x.clearedSeconds !== null, 60_000);
+      expect(done.clearedSeconds !== null && done.lactateMM === 0 && done.situation === 'cleared', `the extra lactate should clear: ${JSON.stringify({ clearedSeconds: done.clearedSeconds, lactateMM: done.lactateMM, situation: done.situation })}`);
+      expect(done.lactateOxidised > 0 && done.lactateOxidisedElsewhere > 0 && done.lactateToLiver > 0 && done.liverAtpSpent === 6, `what cleared should have gone three ways, and the liver should spend 6 ATP a glucose: ${JSON.stringify({ lactateOxidised: done.lactateOxidised, lactateOxidisedElsewhere: done.lactateOxidisedElsewhere, lactateToLiver: done.lactateToLiver, liverAtpSpent: done.liverAtpSpent })}`);
+      expect(done.readoutClipped === false, `the readout, at its fullest here, should draw every line it chose: readoutClipped ${JSON.stringify(done.readoutClipped)}`);
+    }],
+    ['the-yeast-makes-ethanol-without-oxygen-and-respires-with-it', async (h) => {
+      await h.button(/^Yeast/).click();
+      const d = await until(h, (x) => x.preset === 'yeast' && x.ethanolMM > 0.05, 15_000);
+      expect(d.preset === 'yeast' && d.oxygen === false && d.route === 'ethanol' && d.demand === 3 && d.yieldTissue === 'yeast', `the yeast preset should open on ethanol, without oxygen: ${JSON.stringify({ preset: d.preset, oxygen: d.oxygen, route: d.route, demand: d.demand, yieldTissue: d.yieldTissue })}`);
+      expect(d.atpPerGlucose === 2 && d.co2Released === 2 && d.atpFromFermentationStep === 0 && d.lactateMM === 0, `a fermenting yeast should make 2 per glucose and none in the ethanol steps: ${JSON.stringify({ atpPerGlucose: d.atpPerGlucose, co2Released: d.co2Released, atpFromFermentationStep: d.atpFromFermentationStep, lactateMM: d.lactateMM })}`);
+      await h.button(/^Oxygen/).click();
+      const demand = h.stage.getByRole('slider', { name: 'Demand' });
+      await demand.fill('2');
+      await atValue(h, demand, 2);
+      const e = await until(h, (x) => x.oxygen === true && x.demand === 2 && x.fermenting === false && x.chainRunning === true, 20_000);
+      expect(e.oxygen === true && e.fermenting === false && e.chainRunning === true && e.preset === 'yeast', `with oxygen and a light demand the yeast should respire and stop fermenting: ${JSON.stringify({ oxygen: e.oxygen, fermenting: e.fermenting, chainRunning: e.chainRunning, preset: e.preset })}`);
+      expect(e.atpPerGlucose >= 16 && e.atpPerGlucose <= 20, `a yeast respiring should make 16 to 20 per glucose, not the muscle's 30: ${e.atpPerGlucose}`);
+    }],
+    ['the-keys-work-the-same-controls', async (h) => {
+      const before = await h.describe();
+      await h.focusable().focus();
+      await h.page.keyboard.press('o');
+      const a = await until(h, (x) => x.oxygen === !before.oxygen, 5_000);
+      expect(a.oxygen === !before.oxygen, `O should toggle the oxygen: ${before.oxygen} -> ${a.oxygen}`);
+      await h.page.keyboard.press('l');
+      const l = await until(h, (x) => x.route === 'lactate', 5_000);
+      expect(l.route === 'lactate' && l.preset === null, `L should choose lactate and leave the preset, whose route it was not: ${JSON.stringify({ route: l.route, preset: l.preset })}`);
+      const lactatePressed = await h.button(/^Lactate/).getAttribute('aria-pressed');
+      const yeastPressed = await h.button(/^Yeast/).getAttribute('aria-pressed');
+      expect(lactatePressed === 'true' && yeastPressed === 'false', `the buttons should follow the keys: Lactate ${lactatePressed}, Yeast ${yeastPressed}`);
+      await h.page.keyboard.press('ArrowUp');
+      const u = await until(h, (x) => x.demand === l.demand + 1, 5_000);
+      expect(u.demand === l.demand + 1, `ArrowUp should raise the demand by one: ${l.demand} -> ${u.demand}`);
+      const spoken = await h.stage.getByRole('slider', { name: 'Demand' }).getAttribute('aria-valuetext');
+      expect(spoken === `${u.demand} ATP a second`, `the range should follow the key: ${JSON.stringify(spoken)}`);
+      await h.page.keyboard.press('m');
+      const m = await until(h, (x) => x.preset === 'muscle', 5_000);
+      expect(m.preset === 'muscle' && m.demand === 10 && m.oxygen === true && m.route === 'lactate', `M should load the muscle preset: ${JSON.stringify({ preset: m.preset, demand: m.demand, oxygen: m.oxygen, route: m.route })}`);
+    }],
+    ['pause-then-reset-puts-everything-back', async (h) => {
+      await h.button(/^Pause/).click();
+      const p = await until(h, (x) => x.playing === false, 5_000);
+      expect(p.playing === false, 'Pause should stop the clock');
+      await h.button(/^Reset/).click();
+      const d = await until(h, (x) => x.oxygen === true && x.route === 'none' && x.preset === null && x.demand === 4 && x.playing === true, 5_000);
+      expect(d.oxygen === true && d.route === 'none' && d.preset === null && d.demand === 4 && d.playing === true, `Reset left ${JSON.stringify({ oxygen: d.oxygen, route: d.route, preset: d.preset, demand: d.demand, playing: d.playing })}`);
+      expect(d.lactateMM === 0 && d.ethanolMM === 0 && d.clearedSeconds === null && d.nadhLoaded <= 2 && d.t < 5, `Reset left ${JSON.stringify({ lactateMM: d.lactateMM, ethanolMM: d.ethanolMM, clearedSeconds: d.clearedSeconds, nadhLoaded: d.nadhLoaded, t: d.t })}`);
+      const value = await h.stage.getByRole('slider', { name: 'Demand' }).inputValue();
+      const nonePressed = await h.button(/^No fermentation/).getAttribute('aria-pressed');
+      const musclePressed = await h.button(/^Muscle/).getAttribute('aria-pressed');
+      expect(value === '4' && nonePressed === 'true' && musclePressed === 'false', `Reset should put the controls back too: ${JSON.stringify({ demand: value, none: nonePressed, muscle: musclePressed })}`);
+    }],
+  ],
+
   // Chapter 8, Figure 8.1. The fields asserted are the brief's — missingLayerLines and matchesPhotograph
   // for the photograph, pairFits and chargaffHolds for the pairs — each after the control that should move
   // it. The canvas is drawn from the same model describe() reports, so these hold the model; the frames

@@ -116,6 +116,9 @@ export const FIGURES = Object.freeze({
   // Figure 7.3: the chain against its potentials. Below 800 px the stage is portrait and the readout goes
   // beneath the drawing.
   'respiratory-chain': { url: new URL('./respiratory-chain.js', import.meta.url).href, title: 'The fall, in four steps', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
+  // Figure 7.4. Below a 720 px stage the drawing turns a quarter into one tall column, at 2 / 3 rather
+  // than the brief's 4 / 5 so the pool's carriers stay discs with a letter on them (see the module header).
+  fermentation: { url: new URL('./fermentation.js', import.meta.url).href, title: 'What actually runs out', needsWebGL: false, aspect: 16 / 9, narrowAspect: 2 / 3 },
 
   // Chapter 8, DNA and its copying (biology/ch08-dna/FIGURES.md).
   //
