@@ -707,12 +707,13 @@ export function mount(root, ctx) {
   // ---- the words: the rule, and what the fork is doing now ----
   // `short` is the phone's wording. The narrow table grows to hold every line of it (`arrange()`), but
   // each line it needs past three is taken from the fork, so a rule's sentence and an enzyme's together
-  // are kept to four lines at a 360 px stage. The banner across the top of the stage already says the
-  // rule is hypothetical. Every fact the long wording gives that the drawing does not show stays in the
-  // short one.
+  // are kept to four lines at a 360 px stage. Each rule's sentence, short or long, starts "Hypothetical":
+  // the banner across the top of the stage does not fit on a flat stage at 800 or 860 px windows, and the
+  // controls' visible labels do not say it. Every fact the long wording gives that the drawing does not
+  // show stays in the short one.
   function ruleWords(short = false) {
-    if (rule === 'same-direction' && short) return 'At this fork both new strands grow towards it, each from one primer. At the other fork, not drawn, both would be made in fragments.';
-    if (rule === 'either-end' && short) return 'A polymerase that could add at a 5′ end makes the lower new strand towards the fork too, from one primer: no fragments at any fork.';
+    if (rule === 'same-direction' && short) return 'Hypothetical: both new strands grow towards this fork, each from one primer. The other fork, not drawn, would make both in fragments.';
+    if (rule === 'either-end' && short) return 'Hypothetical: a polymerase adding at a 5′ end too makes the lower new strand towards the fork, from one primer: no fragments at any fork.';
     if (rule === 'same-direction') return 'Hypothetical: the two strands run the same way. At this fork both new strands grow at a 3′ end towards it, each from one primer. At the fork leaving the origin the other way, not drawn, both would grow away from their fork and be made in fragments: the fragments move to that fork, and do not go away.';
     if (rule === 'either-end') return 'Hypothetical: a polymerase that could add at a 5′ end makes the lower new strand towards the fork too, from one primer, and so at every fork: no fragments anywhere.';
     return null;
@@ -729,7 +730,7 @@ export function mount(root, ctx) {
     if (!has('primase') && !fk.bot) return 'No primase: no new fragment can start, so the lagging template waits uncopied.';
     if (!has('primase') && rule === 'same-direction') return short ? 'No primase: this fork needs no more primers, but the other fork could start none of its fragments.' : 'No primase: this fork needs no more primers than the two it began with, but the fork going the other way, not drawn, could start none of its fragments.';
     if (!has('primase')) return 'No primase: under this rule no fork needs more primers than the two it began with, so the fork runs on as before.';
-    if (!has('primer-removal') && fk.bot) return 'No primer removal: the primer each new strand began on stays in it, at the origin, and the nick beside it cannot be sealed.';
+    if (!has('primer-removal') && fk.bot) return 'No primer removal: each new strand\'s primer stays at the origin, and once the other fork\'s DNA meets it, the nick there cannot be sealed.';
     if (!has('primer-removal')) return 'No primer removal: the RNA primers stay in the strand, and the nick beside each cannot be sealed.';
     if (!has('ligase') && fk.bot && short) return 'No ligase: no fragments here, but once each new strand\'s primer at the origin is replaced, the nick left there stays open.';
     if (!has('ligase') && fk.bot) return 'No ligase: this fork has no fragments to join, but once each new strand\'s primer at the origin is replaced, the nick where it meets the other fork\'s DNA stays open.';
