@@ -113,6 +113,9 @@ export const FIGURES = Object.freeze({
   // Figure 7.1. Eleven stations in a row want a wide stage, and 16/9 rather than 21/9 leaves the walk
   // height for its carbons; below 800 px the line turns through 90 degrees and runs down a tall one.
   glycolysis: { url: new URL('./glycolysis.js', import.meta.url).href, title: 'Ten steps, two halves', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
+  // Figure 7.3: the chain against its potentials. Below 800 px the stage is portrait and the readout goes
+  // beneath the drawing.
+  'respiratory-chain': { url: new URL('./respiratory-chain.js', import.meta.url).href, title: 'The fall, in four steps', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
 
   // Chapter 8, DNA and its copying (biology/ch08-dna/FIGURES.md).
   //
