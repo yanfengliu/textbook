@@ -282,6 +282,8 @@ ${scope} .gl-num { font-weight: 700; font-variant-numeric: lining-nums tabular-n
 ${scope} .gl-alert { fill: var(--coral-text); font-weight: 600; }
 ${scope} .gl-note { fill: var(--ink-soft); }
 ${scope} .gl-tab { font-variant-numeric: lining-nums tabular-nums; }
+${scope}.is-narrow .tb-slider.gl-level { gap: 0.22rem; padding-inline: 0.25rem; }
+${scope}.is-narrow .gl-atp .tb-val { min-width: 2.6rem; }
 `;
 
 // ---------------------------------------------------------------- the figure
@@ -382,6 +384,12 @@ export function mount(root, ctx) {
   const atpCtl = level('ATP', 'atp', { min: 1, max: 10, step: 1, dp: 0 });
   const ampCtl = level('AMP', 'amp', { min: 0, max: 1, step: 0.1, dp: 1 });
   const citCtl = level('Citrate', 'cit', { min: 0, max: 2, step: 0.2, dp: 1 });
+  // On a stage under 700 px the three steppers share a row only if they are a little tighter than the
+  // bench sets them: at 452 px they wrapped to two rows in the 440 px toolbar of an 800 px window, the
+  // toolbar took four rows, 130 px of a 270 px stage, and the caption went under it. ATP's value keeps the
+  // width of "10 mM", so stepping it to 10 cannot wrap the row either.
+  for (const c of [atpCtl, ampCtl, citCtl]) c.node.classList.add('gl-level');
+  atpCtl.node.classList.add('gl-atp');
 
   b.keys({
     ArrowRight: () => forward(),
