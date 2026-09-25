@@ -1367,8 +1367,10 @@ export function mount(root, ctx) {
     draw();
     if (moving()) raf = requestAnimationFrame(frame);
   }
+  // Under a pinned clock nothing moves on its own, even once the figure scrolls into view: setTime and
+  // every control draw their own frame (review 3 of the cell fit, N1).
   function schedule() {
-    if (raf || destroyed || !visible || !moving()) return;
+    if (raf || destroyed || !visible || !moving() || ctx.pinnedTime !== null) return;
     last = 0;
     raf = requestAnimationFrame(frame);
   }
