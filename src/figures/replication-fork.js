@@ -64,7 +64,12 @@
 // removal: the primers stay in the finished strand (`primersInPlace` climbs), and the nick beside each
 // is counted as unsealed as well, because E. coli's ligase joins a 3′ end only to a 5′ monophosphate and
 // the primer's 5′ end, where primase began it, carries three phosphates. A stalled fork's polymerases
-// still finish the template already open to them.
+// still finish the template already open to them. Under a made-up rule this fork makes no fragments, so
+// the sentence under the table says what is left to fail: without primase the fork runs on, needing no
+// more primers than the two at the origin (under 'same-direction' the other fork, not drawn, could start
+// none of its fragments); without primer removal or ligase the two primers at the origin stay, or the
+// nicks left when they are replaced stay open. Before 2026-09-24 the ligase sentence spoke of fragments
+// never joined beside a rule's sentence saying there were none.
 //
 // THE CHAIN TERMINATOR goes into the pool on a press; the next strand being extended takes it in 30 nt
 // later and stops there for good. The leading strand is served first when both are extending. A stopped
@@ -708,7 +713,7 @@ export function mount(root, ctx) {
   function ruleWords(short = false) {
     if (rule === 'same-direction' && short) return 'At this fork both new strands grow towards it, each from one primer. At the other fork, not drawn, both would be made in fragments.';
     if (rule === 'either-end' && short) return 'A polymerase that could add at a 5′ end makes the lower new strand towards the fork too, from one primer: no fragments at any fork.';
-    if (rule === 'same-direction') return 'Hypothetical: the two strands run the same way. At this fork both new strands grow at a 3′ end towards it, each from one primer. At the fork leaving the origin the other way, not drawn, both would grow away from their fork and be made in fragments: the fragments move there, and do not go.';
+    if (rule === 'same-direction') return 'Hypothetical: the two strands run the same way. At this fork both new strands grow at a 3′ end towards it, each from one primer. At the fork leaving the origin the other way, not drawn, both would grow away from their fork and be made in fragments: the fragments move to that fork, and do not go away.';
     if (rule === 'either-end') return 'Hypothetical: a polymerase that could add at a 5′ end makes the lower new strand towards the fork too, from one primer, and so at every fork: no fragments anywhere.';
     return null;
   }
@@ -718,8 +723,16 @@ export function mount(root, ctx) {
     if (why === 'no-helicase') return 'No helicase: the parent helix stays shut, so the fork cannot move.';
     if (why === 'twist') return 'No topoisomerase: the twist ahead has built up until the fork has stalled.';
     if (!has('topoisomerase')) return 'No topoisomerase: every ten pairs opened add a turn ahead, and nothing takes them out.';
+    // Under a made-up rule this fork makes no fragments, so what primase, primer removal and ligase are
+    // missed for is the two primers the new strands began on, at the origin, and the nicks left there;
+    // under 'same-direction' the other fork's fragments as well, which the rule's sentence has named.
     if (!has('primase') && !fk.bot) return 'No primase: no new fragment can start, so the lagging template waits uncopied.';
+    if (!has('primase') && rule === 'same-direction') return short ? 'No primase: this fork needs no more primers, but the other fork could start none of its fragments.' : 'No primase: this fork needs no more primers than the two it began with, but the fork going the other way, not drawn, could start none of its fragments.';
+    if (!has('primase')) return 'No primase: under this rule no fork needs more primers than the two it began with, so the fork runs on as before.';
+    if (!has('primer-removal') && fk.bot) return 'No primer removal: the primer each new strand began on stays in it, at the origin, and the nick beside it cannot be sealed.';
     if (!has('primer-removal')) return 'No primer removal: the RNA primers stay in the strand, and the nick beside each cannot be sealed.';
+    if (!has('ligase') && fk.bot && short) return 'No ligase: no fragments here, but once each new strand\'s primer at the origin is replaced, the nick left there stays open.';
+    if (!has('ligase') && fk.bot) return 'No ligase: this fork has no fragments to join, but once each new strand\'s primer at the origin is replaced, the nick where it meets the other fork\'s DNA stays open.';
     if (!has('ligase')) return 'No ligase: the fragments are made but never joined, so each nick stays open.';
     if (fk.terminated === 'leading' && short) return 'A chain terminator has stopped the leading strand: nothing can be added after it. A real fork slows, and may restart on a new primer.';
     if (fk.terminated === 'leading') return 'A chain terminator has stopped the leading strand: nothing can be added after it. In this drawing the fork keeps opening; a real fork slows, and may start the strand again beyond the block on a new primer.';
