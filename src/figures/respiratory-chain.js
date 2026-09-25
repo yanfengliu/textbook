@@ -28,28 +28,34 @@
 //
 // THE OTHER FOUR ACCEPTORS SHOW A CEILING, NOT A COUNT (accuracy review of 2026-09-24, finding 9). A fall
 // of E kJ/mol can pay for at most E ÷ 19.3 charges against 200 mV, rounded down, and never more than the
-// chain moves with oxygen for that donor: from NADH 7 to nitrate, 3 to fumarate, 0 to sulfate and 0 to
-// carbon dioxide; from FADH₂ 3 to nitrate. The brief's first rule (a complex whose output sits below the
-// acceptor is bypassed and the rest pump as usual) gave 8 and 4, which cost 154 and 77 kJ/mol against falls
-// of 143 and 68. The stage names the number as a ceiling, "at most", and never as an organism's count,
-// because none of the organisms that use these acceptors runs this chain. With oxygen the ceiling would be
-// 11 and the count is 10, so the oxygen row is the chain's own count. No per-complex crossing is drawn for
-// the other acceptors, and chargesMoved is null under them: there is nothing honest to count.
+// chain moves with oxygen for that donor: from NADH 7 to nitrate, 3 to fumarate, 1 to sulfate and 0 to
+// carbon dioxide; from FADH₂ 3 to nitrate. The ceiling is taken from the unrounded energy (figure review of
+// 2026-09-24, finding 3): sulfate's 0.10 V fall is 19.3 kJ/mol, one charge's price exactly, and rounding it
+// to 19 before dividing had made it 0. The "Released" cell still shows the rounded 19. The brief's first
+// rule (a complex whose output sits below the acceptor is bypassed and the rest pump as usual) gave 8 and
+// 4, which cost 154 and 77 kJ/mol against falls of 143 and 68. The stage names the number as a ceiling,
+// "at most", and never as an organism's count, because none of the organisms that use these acceptors runs
+// this chain. With oxygen the ceiling would be 11 and the count is 10, so the oxygen row is the chain's own
+// count. No per-complex crossing is drawn for the other acceptors, and chargesMoved is null under them:
+// there is nothing honest to count.
 //   E. coli's own nitrate chain (NDH-1, 4, and the nitrate reductase's redox loop, 2) moves about 6: Unden,
 //   Steinmetz & Degreif-Dünnwald 2014, EcoSal Plus 6(1) (H⁺/2e⁻ of 2 to 6 across its chains); Bertero et al.
 //   2003, Nat. Struct. Biol. 10:681, for the redox loop; Simon, van Spanning & Richardson 2008, Biochim.
 //   Biophys. Acta 1777:1480, on redox loops in general. Its Δp on nitrate or fumarate is only about 20 mV
 //   below its aerobic −160 mV (Tran & Unden 1998, Eur. J. Biochem. 251:538), which is why the drawn gradient
 //   does not shrink with the acceptor.
-//   Sulfate and carbon dioxide from NADH (19 and 15 kJ/mol) pay for less than one charge. The stage says
-//   what the review wrote (finding 8): these organisms take their electrons from fuels other than NADH,
+//   Carbon dioxide from NADH (15 kJ/mol) pays for less than one charge, and sulfate (19.3) for one exactly,
+//   with nothing left over to drive it, which is why its gradient stays at 0. The stage says what the
+//   review wrote (finding 8): these organisms take their electrons from fuels other than NADH,
 //   mostly hydrogen, and move only a few ions per reaction. Schink 1997, Microbiol. Mol. Biol. Rev. 61:262
 //   (about 20 kJ/mol per reaction, one ion across the membrane, is the smallest quantum a cell can use);
 //   Thauer et al. 2008, Nat. Rev. Microbiol. 6:579 (methanogens on H₂ and CO₂); Pereira et al. 2011, Front.
 //   Microbiol. 2:69 (sulfate reducers' electron donors and ion translocation).
 //   Fumarate's reducers use menaquinone, whose rung sits above fumarate, because ubiquinone sits just below
-//   it; the stage swaps the quinone and says so. Parasitic worms use rhodoquinone, at about the same
-//   potential (Tielens & van Hellemond 1998, Biochim. Biophys. Acta 1365:71).
+//   it, about 0.01 V, so its pair would have to go slightly uphill (mammalian complex II does run that way
+//   when oxygen is short: Spinelli et al. 2021, Science 374:1227); the stage swaps the quinone and says
+//   so. Parasitic worms use rhodoquinone, at about the same potential (Tielens & van Hellemond 1998,
+//   Biochim. Biophys. Acta 1365:71).
 //
 // SIMPLIFICATIONS, stated rather than implied:
 //   - The other acceptors are the mitochondrial chain with its bottom rung moved: the same kind of
@@ -62,9 +68,15 @@
 //   - One pair per station. A complex, a quinone or a cytochrome c holds one pair or none, and a pair moves
 //     on the moment the next station is empty and its own exit is not blocked, the most downstream first.
 //   - Standard potentials throughout, as the prose uses them.
-//   - The gradient is a switch: 0.75 pH units and 150 mV once a pair has gone through a route that moves at
-//     least one charge, for as long as the chosen donor's route stays open; 0 before and after. It eases
-//     over 1.6 s on the stage; describe() reports where it is heading.
+//   - The gradient is a switch: 0.75 pH units and 150 mV once a pair has gone through the chain by a route
+//     that moves at least one charge, for as long as the chosen donor's route stays open; 0 before and
+//     after. NADH's pair to sulfate or carbon dioxide is drawn going straight to the acceptor, not through
+//     the chain (sulfate's fall buys one charge exactly, with nothing left over to drive it), so their
+//     gradient stays at 0. It eases over 1.6 s on the stage, a rise starting as the first charge crosses.
+//     describe() reports the charges and the gradient the stage shows at that moment, and beside them what
+//     is still on its way, so that a frame and the description read together always agree (they did not:
+//     right after Deliver the stage read 0 charges and 0.00 pH units while describe() already said 10 and
+//     0.75).
 //   - Malonate stops the cycle's FADH₂ at its source (the succinate site of complex II), so FADH₂'s pairs are
 //     refused and nothing below complex II is reduced. NADH's pairs never pass through complex II, so with
 //     NADH fed straight in the chain runs on. A real mitochondrion on pyruvate slows and stops too, because
@@ -131,11 +143,13 @@ const round2 = (v) => Math.round(v * 100) / 100;
 const donorE = (dn) => (dn === 'nadh' ? E.nadh : E.fad);
 const fallOf = (dn, a) => round2(a.E - donorE(dn));
 const kjOf = (fall) => Math.round(2 * FARADAY * fall);
+// The ceiling is taken from the unrounded energy: sulfate's 0.10 V fall is 19.3 kJ/mol, one charge's price
+// exactly, and 19 ÷ 19.3 would round it away. The 1e-9 keeps 19.3 ÷ 19.3 from landing a hair under 1.
 function chargesFor(dn, a) {
   if (a.id === 'oxygen') return OXYGEN_COUNT[dn];
-  const kj = kjOf(fallOf(dn, a));
+  const kj = 2 * FARADAY * fallOf(dn, a);
   if (kj <= 0) return 0;
-  return Math.min(OXYGEN_COUNT[dn], Math.floor(kj / PER_CHARGE));
+  return Math.min(OXYGEN_COUNT[dn], Math.floor(kj / PER_CHARGE + 1e-9));
 }
 
 // Where a pair goes from each station, by acceptor. Sulfate and carbon dioxide sit above complex I's
@@ -416,7 +430,9 @@ export function mount(root, ctx) {
     lastDepart[donor] = t;
     pairs[donor] += 1;
     if (entry === 'out') {
-      // 19 and 15 kJ/mol pay for no charge, so nothing is counted towards the gradient.
+      // Carbon dioxide's 15 kJ/mol pays for no charge, and sulfate's 19.3 for one exactly, with nothing left
+      // over to drive it, so the pair is drawn going straight to the acceptor and nothing counts towards
+      // the gradient.
       moves.push({ from: 'src', to: 'out', t0: t, t1: t + d(T_HOP * 1.4) });
       return true;
     }
@@ -442,8 +458,12 @@ export function mount(root, ctx) {
   function gradShown(t) {
     if (instant()) return grad.to;
     const f = clamp((t - grad.t0) / T_GRAD, 0, 1);
+    if (f >= 1) return grad.to;
     return grad.from + (grad.to - grad.from) * ease(f);
   }
+  // The gradient as the readout prints it at time t, and as describe() reports it: one rounding for both.
+  const phShown = (t) => Number((PH_DIFF * gradShown(t)).toFixed(2));
+  const mvShown = (t) => Math.round(PSI_MV * gradShown(t));
   function retarget() {
     const to = gradTarget();
     if (to === grad.to) return;
@@ -635,20 +655,24 @@ export function mount(root, ctx) {
   function state() {
     const a = acc();
     const fall = fallOf(donor, a);
-    const on = gradTarget();
     const cs = carriers();
+    const t = now();
+    const crossed = a.id === 'oxygen' ? chargesShown(t) : null;
     return {
       donor,
       pairsDelivered: pairs.nadh + pairs.fadh2,
       pairsByDonor: { nadh: pairs.nadh, fadh2: pairs.fadh2 },
-      chargesMoved: a.id === 'oxygen' ? charges : null,
+      chargesMoved: crossed,
+      chargesOnTheirWay: a.id === 'oxygen' ? charges - crossed : null,
       chargesPerPair: chargesFor(donor, a),
       chargesAreCeiling: a.id !== 'oxygen',
       potentialDropV: fall,
       energyReleasedKj: kjOf(fall),
       atpMadeHere: 0,
-      gradientPH: on ? PH_DIFF : 0,
-      gradientMv: on ? PSI_MV : 0,
+      gradientPH: phShown(t),
+      gradientMv: mvShown(t),
+      gradientHeadingPH: grad.to ? PH_DIFF : 0,
+      gradientHeadingMv: grad.to ? PSI_MV : 0,
       oxygenPresent: a.id === 'oxygen' && oxygenOn,
       acceptor: a.id,
       acceptorPotentialV: a.E,
@@ -659,7 +683,7 @@ export function mount(root, ctx) {
       oxidisedCarriers: cs.oxidised,
       crossoverAt: crossoverAt(),
       refused,
-      t: Number(now().toFixed(3)),
+      t: Number(t.toFixed(3)),
       playing: b.playing,
     };
   }
@@ -668,12 +692,14 @@ export function mount(root, ctx) {
   b.onAnnounce((s) => {
     const a = ACCEPTORS.find((x) => x.id === s.acceptor);
     const who = s.donor === 'nadh' ? 'NADH' : 'FADH2 from the cycle';
-    const count = s.chargesAreCeiling ? `at most ${s.chargesPerPair} charges a pair, a ceiling` : `${s.chargesMoved} charges moved`;
+    // What the press did, which is where the stage is heading: the charges still crossing count, and the
+    // gradient is the one it is easing to. "0 charges moved" just after a Deliver would be the wrong news.
+    const count = s.chargesAreCeiling ? `at most ${s.chargesPerPair} charges a pair, a ceiling` : `${s.chargesMoved + s.chargesOnTheirWay} charges moved`;
     const blocked = s.blockedBy ? ` ${cap(s.blockedBy)} blocks complex ${s.blockedAt}.` : '';
     const noO2 = s.acceptor === 'oxygen' && !s.oxygenPresent ? ' No oxygen.' : '';
     const cross = s.crossoverAt ? ` Crossover at ${nameOf(s.crossoverAt, a)}.` : '';
     const no = s.refused ? ` The last pair was refused: ${refusalWords(s.refused)}.` : '';
-    return `${who} to ${a.word}: ${s.pairsDelivered} ${s.pairsDelivered === 1 ? 'pair' : 'pairs'} delivered, ${count}. Gradient ${s.gradientPH} pH units and ${s.gradientMv} millivolts. ATP made here 0.${blocked}${noO2}${cross}${no}`;
+    return `${who} to ${a.word}: ${s.pairsDelivered} ${s.pairsDelivered === 1 ? 'pair' : 'pairs'} delivered, ${count}. Gradient ${s.gradientHeadingPH} pH units and ${s.gradientHeadingMv} millivolts. ATP made here 0.${blocked}${noO2}${cross}${no}`;
   });
   function refusalWords(r) {
     if (r === 'blocked-entry') return 'malonate holds the cycle at succinate, so no FADH2 is made';
@@ -717,10 +743,16 @@ export function mount(root, ctx) {
         ? `Crossover at ${cname(x)}.`
         : `${by} stops ${cname(x)}: the carriers above it are reduced and those below it oxidised, so the crossover is at ${cname(x)}, and the gradient runs down.${full}`;
     }
-    if (a.id === 'sulfate' || a.id === 'carbon-dioxide') {
+    const FUELS = 'These organisms take their electrons from fuels other than NADH, mostly hydrogen, and move only a few ions per reaction.';
+    if (a.id === 'sulfate') {
+      return short
+        ? `${kj}${NB}kJ/mol: one charge, no more.${unusedShort}`
+        : `${kj}${NB}kJ/mol from NADH (19.3 before rounding) pays for one charge at 200${NB}mV exactly, with nothing left over to drive it. ${FUELS}${unusedBlock}`;
+    }
+    if (a.id === 'carbon-dioxide') {
       return short
         ? `${kj}${NB}kJ/mol: less than one charge.${unusedShort}`
-        : `${kj}${NB}kJ/mol from NADH is not quite one charge's worth (19.3${NB}kJ/mol). These organisms take their electrons from fuels other than NADH, mostly hydrogen, and move only a few ions per reaction.${unusedBlock}`;
+        : `${kj}${NB}kJ/mol from NADH is less than one charge's worth (19.3${NB}kJ/mol). ${FUELS}${unusedBlock}`;
     }
     const idle = pairs.nadh + pairs.fadh2 === 0;
     const malonate = bl.at === 'II' && donor === 'nadh' && a.id !== 'fumarate' ? `Malonate blocks complex${NB}II, which NADH's pairs never pass through. ` : '';
@@ -730,7 +762,7 @@ export function mount(root, ctx) {
       if (donor === 'nadh') {
         return short ? '10 charges a pair, and no ATP.' : `${malonate}From NADH, 4 + 2 + 4 = 10 charges a pair${malonate ? ', as before' : ''}, and no ATP. The chain's product is the gradient.`;
       }
-      return short ? '6 charges a pair, and no ATP.' : `From FADH₂ the pair enters at complex${NB}II, past complex${NB}I: 2 + 4 = 6 charges a pair, and no ATP.`;
+      return short ? '6 charges a pair, and no ATP.' : `From the cycle's FADH₂ the pair enters at complex${NB}II, bypassing complex${NB}I: 2 + 4 = 6 charges a pair, and no ATP.`;
     }
     const ceiling = `${kj}${NB}kJ/mol pays for at most ${per} ${per === 1 ? 'charge' : 'charges'} at 200${NB}mV (19.3${NB}kJ/mol each): a ceiling, not any organism's count.`;
     if (a.id === 'nitrate') {
@@ -739,7 +771,7 @@ export function mount(root, ctx) {
     }
     // fumarate, from NADH (FADH₂ has no fall to it, above)
     if (short) return `Menaquinone; at most ${per} charges.${unusedShort}`;
-    return `Menaquinone (−0.07${NB}V) stands in for ubiquinone (+0.04${NB}V), which sits past fumarate (+0.03${NB}V) and could not hand it a pair. ${ceiling}${unusedBlock}`;
+    return `Menaquinone (−0.07${NB}V) stands in for ubiquinone (+0.04${NB}V), which sits just past fumarate (+0.03${NB}V), so its pair would have to go slightly uphill. ${ceiling}${unusedBlock}`;
   }
   const SAME_KIND = 'The mitochondrial chain with its bottom rung moved: the same kind of machinery, not any one organism\'s chain.';
   // The readout's row names, shared by the tables and by the test of whether they fit side by side.
@@ -789,7 +821,7 @@ export function mount(root, ctx) {
     const fits = (label, value, room, size, weight = 400) => textWidth(label, size, weight) + gap + textWidth(value, size, weight) <= room;
     for (let size = top; size >= 9.6 - 1e-6; size = Math.round((size - 0.2) * 10) / 10) {
       const ok = [[ROW.fall, '1.14'], [ROW.kj, '220'], [ROW.moved, '10'], [ROW.most, '10'], [ROW.pairs, '100']].every(([l, v]) => fits(l, v, 0.75 * cw, size))
-        && ['0.79', '152', '−52', '100'].every((v) => textWidth(v, size) + gap <= 0.25 * cw)
+        && ['0.79', '152', 'uphill', '100'].every((v) => textWidth(v, size) + gap <= 0.25 * cw)
         && [[ROW.all, '1000'], [ROW.ph, '0.75 units'], [ROW.psi, '150 mV']].every(([l, v]) => fits(l, v, cw, size))
         && fits(ROW.atp, '0', cw, size, 600)
         && capsWidth('Across the membrane', size * 0.88) <= cw;
@@ -876,8 +908,11 @@ export function mount(root, ctx) {
     g.play = play;
     const idle = (s) => !play.has(s);
 
-    // The bodies. Complex I is an L, its arm out in the matrix with NADH's site at the tip; complex II
-    // stands out of the membrane on the matrix side, where the cycle is.
+    // The bodies. Complex I is an L, its arm out in the matrix with NADH's site at the tip. Complex II is
+    // the cycle's one enzyme built into the membrane (§7.4): its head, which holds the FAD, stands out on
+    // the matrix side, where the cycle is, and its anchor reaches into the bilayer's matrix half, where its
+    // two membrane subunits hold ubiquinone's site (Sun et al. 2005, Cell 121:1043; figure review of
+    // 2026-09-24, finding 6). The anchor keeps clear of the complexes above and below it in the membrane.
     const B = {};
     B.Iarm = { x0: g.xN + g.RN + 3 * k, y0: y.N - g.AH, x1: g.sx, y1: y.N + g.AH };
     B.I = { x0: mL, y0: y.N - g.AH - 3 * k, x1: mR, y1: y.Q - g.RQ - g.GAP };
@@ -890,11 +925,16 @@ export function mount(root, ctx) {
       B.IV = { x0: mL, y0: y.C + gap2, x1: mR, y1: yOf(0.87) };
     }
     if (a.id === 'nitrate') B.Nar = { x0: mL, y0: y.Q + g.RQ + g.GAP, x1: mR, y1: yOf(0.47) };
+    // The anchor starts under the head's rounded corner, so the two read as one body, and keeps the same gap
+    // from the complexes above and below it that ubiquinone keeps: under oxygen or nitrate it is exactly
+    // ubiquinone's height, its site.
+    const under = B.III ?? B.Nar;
+    B.IIm = { x0: mL - 5 * k, y0: Math.max(B.II.y0, B.I.y1 + g.GAP), x1: g.sx, y1: Math.min(B.II.y1, under ? under.y0 - g.GAP : B.II.y1) };
     for (const [id, r] of Object.entries(B)) {
       if (!(r.x1 - r.x0 > 2 && r.y1 - r.y0 > 2)) throw new Error(`respiratory-chain: ${id} came out ${b.num(r.x1 - r.x0, 1)} × ${b.num(r.y1 - r.y0, 1)} px in a ${w}×${hh} pane; the potential scale (${b.num(pxV, 1)} px a volt) is too short to hold it.`);
     }
     g.body = B;
-    g.idleBody = { Iarm: idle('I'), I: idle('I'), II: idle('II'), III: false, IV: false, Nar: false };
+    g.idleBody = { Iarm: idle('I'), I: idle('I'), II: idle('II'), IIm: idle('II'), III: false, IV: false, Nar: false };
     const xII = (B.II.x0 + B.II.x1) / 2;
     g.xII = xII;
     // Each complex's numeral stands at the top of its block (complex II's at the foot, below the FAD), and
@@ -1183,7 +1223,7 @@ export function mount(root, ctx) {
         ...[0, 13, 26].flatMap((far) => ring(mid, 2, bhh, sz, far)),
       ],
     });
-    add('bracketSub', `${si(kjOf(fall))}${NB}kJ/mol`, mid, 2, 6, {
+    add('bracketSub', fall < 0 ? 'uphill' : `${si(kjOf(fall))}${NB}kJ/mol`, mid, 2, 6, {
       cls: 'rc-cap', size: g.small * 0.96, weight: 400, optional: true,
       // Under the fall's label, or over it: far enough that the two boxes clear the placer's 2 px margin.
       cands: (out, sz) => (out.bracket ? [
@@ -1392,8 +1432,10 @@ export function mount(root, ctx) {
     box(B.Iarm, fillOf(PUMP, idleI));
     box(B.I, fillOf(PUMP, idleI));
     numeral(g.sx, g.numY.I, 'I', PUMP, idleI);
-    // Complex II, with the cycle's FAD as a rung across it.
+    // Complex II, with the cycle's FAD as a rung across its head: the anchor first, so the head covers its
+    // root.
     const idleII = g.idleBody.II;
+    box(B.IIm, fillOf(ENZ, idleII));
     box(B.II, fillOf(ENZ, idleII));
     pane.line(B.II.x0 + 2, g.y.FAD, B.II.x1 - 2, g.y.FAD, { stroke: idleII ? C.ruleStrong : ENZ.symbolColor, 'stroke-width': 1.4 });
     if (acc().id !== 'fumarate') numeral(g.xII, g.numY.II, 'II', ENZ, idleII);
@@ -1505,9 +1547,11 @@ export function mount(root, ctx) {
     // The table's type grows with its column (frame() chose it), and its rows spread to fill the column's
     // height.
     const size = g.readSize;
-    const level = gradShown(t);
+    // An uphill step releases nothing, so it is named rather than printed as a negative energy "released",
+    // which a reader fresh from §7.4's table (ΔG°′ negative for energy released) would read as released.
     const col = (dn) => {
       const fall = fallOf(dn, a);
+      if (fall < 0) return { fall: 'uphill', kj: '—', n: '—', pairs: String(pairs[dn]) };
       return { fall: sv(fall).replace('+', ''), kj: si(kjOf(fall)), n: String(chargesFor(dn, a)), pairs: String(pairs[dn]) };
     };
     const cn = col('nadh');
@@ -1522,8 +1566,8 @@ export function mount(root, ctx) {
     const jammed = Boolean(crossoverAt()) || refused === 'backed-up' || entry === 'no-fall' || entry === 'uphill' || (donor === 'fadh2' && block().at === 'II') || (a.id === 'oxygen' && !oxygenOn);
     const build2 = (r, lv) => {
       if (a.id === 'oxygen' && lv < 2) r.row(ROW.all, String(chargesShown(t)));
-      r.row(ROW.ph, `${(PH_DIFF * level).toFixed(2)} units`);
-      r.row(ROW.psi, `${Math.round(PSI_MV * level)} mV`);
+      r.row(ROW.ph, `${phShown(t).toFixed(2)} units`);
+      r.row(ROW.psi, `${mvShown(t)} mV`);
       r.sum(ROW.atp, '0');
     };
     const build3 = (r, lv) => {
@@ -1615,20 +1659,29 @@ export function mount(root, ctx) {
   //   donor               'nadh' | 'fadh2', the donor the next pair comes from
   //   pairsDelivered      pairs that entered since the last reset or change of acceptor, both donors;
   //                       pairsByDonor splits it. A refused pair is not counted
-  //   chargesMoved        with oxygen, charges moved across the membrane since then: 4 as a pair leaves
-  //                       complex I, 2 as it leaves III, 4 as it leaves IV. null under any other acceptor,
-  //                       where the stage shows a ceiling and counts nothing
+  //   chargesMoved        with oxygen, charges moved across the membrane since then, as the stage shows them:
+  //                       4 as a pair leaves complex I, 2 as it leaves III, 4 as it leaves IV, each counted
+  //                       as it is drawn crossing. null under any other acceptor, where the stage shows a
+  //                       ceiling and counts nothing
+  //   chargesOnTheirWay   with oxygen, charges the pairs already delivered have moved in the model but the
+  //                       stage has not yet drawn crossing: 0 once the drawing has caught up, and always 0
+  //                       under a pinned clock or reduced motion, where nothing is animated. null otherwise
   //   chargesPerPair      10 from NADH and 6 from FADH₂ with oxygen; otherwise the ceiling, the fall's
-  //                       kJ/mol ÷ 19.3 rounded down: 7, 3, 0 and 0 from NADH, 3 from FADH₂ to nitrate,
-  //                       and 0 where FADH₂ has no fall or an uphill one
+  //                       unrounded kJ/mol ÷ 19.3 rounded down: 7, 3, 1 and 0 from NADH, 3 from FADH₂ to
+  //                       nitrate, and 0 where FADH₂ has no fall or an uphill one (the stage shows "—" and
+  //                       "uphill" there, never a negative energy)
   //   chargesAreCeiling   false with oxygen, true for the other four acceptors
   //   potentialDropV      the acceptor's potential minus the donor's, for the chosen donor: 1.14 and 0.79
   //                       with oxygen; negative where the acceptor sits above FADH₂ (uphill)
   //   energyReleasedKj    2 × 96.5 × potentialDropV, rounded: 220, 143, 68, 19, 15 from NADH; 152 from FADH₂
   //   atpMadeHere         0 in every reachable state. Anything else is a defect, not a setting
-  //   gradientPH, gradientMv   0.75 and 150 once a pair has gone through a route that moves a charge, while
-  //                       the chosen donor's route stays open; 0 and 0 otherwise. Where the stage is heading:
-  //                       the drawing eases to it over 1.6 s
+  //   gradientPH, gradientMv   the gradient the readout shows, rounded as it prints it: easing over 1.6 s,
+  //                       a rise starting as the first charge crosses, to where it is heading
+  //   gradientHeadingPH, gradientHeadingMv   where it is heading: 0.75 and 150 once a pair has gone through
+  //                       the chain by a route that moves a charge, while the chosen donor's route stays
+  //                       open; 0 and 0 otherwise, and always 0 for NADH's pairs to sulfate and carbon
+  //                       dioxide, which do not go through it. Equal to gradientPH and gradientMv once the
+  //                       drawing has caught up
   //   oxygenPresent       true only with oxygen as the acceptor and the Oxygen control on
   //   acceptor            'oxygen' | 'nitrate' | 'fumarate' | 'sulfate' | 'carbon-dioxide'
   //   acceptorPotentialV  +0.82, +0.42, +0.03, −0.22, −0.24
