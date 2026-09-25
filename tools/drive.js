@@ -4853,16 +4853,17 @@ const RECIPES = {
       await h.button(/^Divide/).click();
       const e = await until(h, (x) => x.divisions === 1, 5_000);
       expect(e.lostLastDivisionBp === 100 && e.telomereBp === 9900 && e.gapAtEnd === true, `a division should take 100 bp: ${JSON.stringify({ lostLastDivisionBp: e.lostLastDivisionBp, telomereBp: e.telomereBp, gapAtEnd: e.gapAtEnd })}`);
-      await slider.fill('25');
-      await atValue(h, slider, 25);
-      const f = await until(h, (x) => x.lossPerDivisionBp === 25, 5_000);
+      // The control's lowest setting, 40, whose 80-nt tail is inside the measured 75–300.
+      await slider.fill('40');
+      await atValue(h, slider, 40);
+      const f = await until(h, (x) => x.lossPerDivisionBp === 40, 5_000);
       // The division on show is re-done at the new setting.
-      expect(f.overhangNt === 50 && f.lostLastDivisionBp === 25 && f.telomereBp === 9975 && f.divisionsLeft === 99, `at 25 bp the division on show should be re-done from a 50-nt tail: ${JSON.stringify({ overhangNt: f.overhangNt, lostLastDivisionBp: f.lostLastDivisionBp, telomereBp: f.telomereBp, divisionsLeft: f.divisionsLeft })}`);
+      expect(f.overhangNt === 80 && f.lostLastDivisionBp === 40 && f.telomereBp === 9960 && f.divisionsLeft === 62, `at 40 bp the division on show should be re-done from an 80-nt tail: ${JSON.stringify({ overhangNt: f.overhangNt, lostLastDivisionBp: f.lostLastDivisionBp, telomereBp: f.telomereBp, divisionsLeft: f.divisionsLeft })}`);
     }],
     ['a-circle-has-no-end-to-lose', async (h) => {
       await h.button(/^Circular/).click();
       const d = await until(h, (x) => x.shape === 'circular', 5_000);
-      expect(d.divisions === 0 && d.phase === 'before' && d.overhangNt === 0 && d.divisionsLeft === null && d.lossPerDivisionBp === 25, `a circle should start again, keep the setting, and have no tail and no stop: ${JSON.stringify({ divisions: d.divisions, phase: d.phase, overhangNt: d.overhangNt, divisionsLeft: d.divisionsLeft, lossPerDivisionBp: d.lossPerDivisionBp })}`);
+      expect(d.divisions === 0 && d.phase === 'before' && d.overhangNt === 0 && d.divisionsLeft === null && d.lossPerDivisionBp === 40, `a circle should start again, keep the setting, and have no tail and no stop: ${JSON.stringify({ divisions: d.divisions, phase: d.phase, overhangNt: d.overhangNt, divisionsLeft: d.divisionsLeft, lossPerDivisionBp: d.lossPerDivisionBp })}`);
       for (let i = 0; i < 2; i += 1) await h.button(/^Step/).click();
       const a = await until(h, (x) => x.phase === 'after', 5_000);
       expect(a.divisions === 1 && a.gapAtEnd === false && a.lostLastDivisionBp === 0 && a.telomereBp === 10000, `the other fork's leading strand should fill the last gap, and nothing be lost: ${JSON.stringify({ divisions: a.divisions, gapAtEnd: a.gapAtEnd, lostLastDivisionBp: a.lostLastDivisionBp, telomereBp: a.telomereBp })}`);
@@ -4871,7 +4872,7 @@ const RECIPES = {
       expect(many.divisions === 11 && many.telomereBp === 10000 && many.gapAtEnd === false && many.senescent === false, `a circle should lose nothing however often it divides: ${JSON.stringify({ divisions: many.divisions, telomereBp: many.telomereBp, gapAtEnd: many.gapAtEnd, senescent: many.senescent })}`);
       await h.button(/^Linear/).click();
       const lin = await until(h, (x) => x.shape === 'linear', 5_000);
-      expect(lin.divisions === 0 && lin.phase === 'before' && lin.telomereBp === 10000 && lin.overhangNt === 50, `back to linear should start again with the setting kept: ${JSON.stringify({ divisions: lin.divisions, phase: lin.phase, telomereBp: lin.telomereBp, overhangNt: lin.overhangNt })}`);
+      expect(lin.divisions === 0 && lin.phase === 'before' && lin.telomereBp === 10000 && lin.overhangNt === 80, `back to linear should start again with the setting kept: ${JSON.stringify({ divisions: lin.divisions, phase: lin.phase, telomereBp: lin.telomereBp, overhangNt: lin.overhangNt })}`);
     }],
     ['the-keys-step-divide-switch-and-reset', async (h) => {
       await h.focusable().focus();
