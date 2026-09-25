@@ -197,6 +197,20 @@ const chapterLadder = () => {
   return table;
 };
 
+// `krebs`: take the cycle on by `n` reactions, one press at a time, polling after each press for the
+// figure's own clock to move, so no press is sent before the figure has taken the last one. `press` is
+// the input: the Step button, or a key on the focused ring. Returns the last description.
+const krebsSteps = async (h, n, press) => {
+  let d = await h.describe();
+  for (let i = 0; i < n; i += 1) {
+    const t = d.t;
+    await press();
+    d = await until(h, (x) => x.t > t, 5_000);
+    expect(d.t > t, `press ${i + 1} of ${n} did not take the cycle on: ${JSON.stringify({ turn: d.turn, position: d.position, refused: d.refused, stalled: d.stalled })}`);
+  }
+  return d;
+};
+
 // Each recipe is a list of [name, async (h) => {}] steps. `h` gives the step the page, the stage, the
 // figure's current description, and helpers that all go through real input.
 const RECIPES = {
@@ -3868,6 +3882,211 @@ const RECIPES = {
       expect(d.airCo2Ppm === 420 && d.temperatureC === 25 && d.stomaOpen === 0.5 && d.rubiscoFractionOfProtein === 0.4, `Reset left the controls at ${JSON.stringify({ airCo2Ppm: d.airCo2Ppm, temperatureC: d.temperatureC, stomaOpen: d.stomaOpen, rubiscoFractionOfProtein: d.rubiscoFractionOfProtein })}`);
       expect(d.carboxylations === 0 && d.oxygenations === 0 && d.salvageStep === null && d.t === 0, `Reset left ${JSON.stringify({ carboxylations: d.carboxylations, oxygenations: d.oxygenations, salvageStep: d.salvageStep, t: d.t })}`);
       expect(near(d.workingRatio, 3, 0.02) && near(d.netGainPercent, 62.5, 0.1), `Reset left the table at ${JSON.stringify({ workingRatio: d.workingRatio, netGainPercent: d.netGainPercent })}`);
+    }],
+  ],
+  // Figure 7.2. The claims are the accuracy review's of 2026-09-24, which counts carbon: the ring's counts
+  // move by what the books take in and let out, and the books balance at every turn's end; a labelled
+  // carbon leaves on the turns that review counts, and neither acetyl carbon on the turn it arrives; a
+  // drain stops the cycle for want of oxaloacetate and a top-up starts it again; the fuel sets where its
+  // carbon comes in and what a gram is worth. The first turns go by the Step button and the long runs by
+  // the right arrow on the focused ring, so both inputs are driven.
+  krebs: [
+    ['opens-paused-with-oxaloacetate-waiting', async (h) => {
+      const d = await h.describe();
+      expect(d.turn === 0 && d.position === 'oxaloacetate' && d.carbonsHere === 4 && d.playing === false, `it should open paused, with oxaloacetate waiting for the first acetyl group: ${JSON.stringify({ turn: d.turn, at: d.position, here: d.carbonsHere, playing: d.playing })}`);
+      expect(d.carbonsIn === 0 && d.carbonsOut === 0 && d.labelledCarbon === null && d.stalled === false && d.oxaloacetateLevel === 1 && d.refused === null, `with empty books, no label and the usual trace of oxaloacetate: ${JSON.stringify({ in: d.carbonsIn, out: d.carbonsOut, lab: d.labelledCarbon, stalled: d.stalled, level: d.oxaloacetateLevel, refused: d.refused })}`);
+      expect(d.nadhPerTurn === 3 && d.fadh2PerTurn === 1 && d.atpPerTurn === 1, `a turn makes 3 NADH, 1 FADH2 and 1 ATP: ${JSON.stringify({ nadh: d.nadhPerTurn, fadh2: d.fadh2PerTurn, atp: d.atpPerTurn })}`);
+      expect(d.fuel === 'glucose' && d.entryPoint === 'acetyl-CoA' && d.acetylPerFuel === 2 && d.atpPerFuel === 32 && d.atpPerGram === 0.18, `glucose, entering as acetyl-CoA: two turns, 32 ATP, 0.18 mol a gram: ${JSON.stringify({ fuel: d.fuel, entry: d.entryPoint, turns: d.acetylPerFuel, atp: d.atpPerFuel, perGram: d.atpPerGram })}`);
+    }],
+    ['each-step-moves-the-ring-by-the-books-and-each-turn-balances', async (h) => {
+      // Three turns by the Step button, reading describe() after every reaction.
+      const ring = ['citrate', 'isocitrate', 'α-ketoglutarate', 'succinyl-CoA', 'succinate', 'fumarate', 'malate', 'oxaloacetate'];
+      const carbons = [6, 6, 5, 4, 4, 4, 4, 4];
+      let d = await h.describe();
+      for (let i = 0; i < 24; i += 1) {
+        const before = d;
+        d = await krebsSteps(h, 1, () => h.button(/^Step/).click());
+        expect(d.position === ring[i % 8] && d.carbonsHere === carbons[i % 8], `reaction ${i + 1} should reach ${ring[i % 8]}, ${carbons[i % 8]} carbons: ${d.position}, ${d.carbonsHere}`);
+        const cin = d.carbonsIn - before.carbonsIn;
+        const cout = d.carbonsOut - before.carbonsOut;
+        expect(d.carbonsHere - before.carbonsHere === cin - cout, `reaction ${i + 1} took the ring from ${before.carbonsHere} carbons to ${d.carbonsHere}, while the books took in ${cin} and let out ${cout}`);
+        if (i % 8 !== 7) continue;
+        const n = (i + 1) / 8;
+        expect(d.turn === n && d.carbonsIn === 2 * n && d.carbonsOut === 2 * n, `turn ${n} should end with ${2 * n} carbons in and ${2 * n} out: ${JSON.stringify({ turn: d.turn, in: d.carbonsIn, out: d.carbonsOut })}`);
+        const tt = d.thisTurn;
+        expect(tt.cIn === 2 && tt.cOut === 2 && tt.nadh === 3 && tt.fadh2 === 1 && tt.atp === 1, `turn ${n} should take in 2 carbons and make 2 CO2, 3 NADH, 1 FADH2 and 1 ATP: ${JSON.stringify(tt)}`);
+        expect(d.nadhTotal === 3 * n && d.fadh2Total === n && d.atpTotal === n, `after ${n} turns: ${JSON.stringify({ nadh: d.nadhTotal, fadh2: d.fadh2Total, atp: d.atpTotal })}`);
+      }
+      expect(d.playing === false, 'a Step does not set the cycle running');
+    }],
+    ['run-turns-it-by-itself-and-a-step-stops-it', async (h) => {
+      const t0 = (await h.describe()).t;
+      await ensureRunning(h);
+      // Poll the figure's own clock: a reaction takes 0.7 s of it at the usual trace.
+      let d = await until(h, (x) => x.t > t0 + 1.5, 30_000);
+      expect(d.t > t0 + 1.5 && d.playing === true, `Run should take the cycle on by itself: its clock went ${t0} -> ${d.t}`);
+      await h.button(/^Step/).click();
+      d = await until(h, (x) => x.playing === false, 5_000);
+      expect(d.playing === false, 'a Step while it runs should stop it, so a reader can go one reaction at a time');
+      expect(d.carbonsIn === 2 * d.turn && d.carbonsHere === 4 + d.thisTurn.cIn - d.thisTurn.cOut, `wherever Run left it, the ring should hold what the books say: ${JSON.stringify({ turn: d.turn, at: d.position, here: d.carbonsHere, in: d.carbonsIn, thisTurn: d.thisTurn })}`);
+    }],
+    ['acetyl-c1-stays-its-first-turn-and-leaves-on-its-second', async (h) => {
+      // The label by its slider, from the keyboard. Choosing one puts the cycle back at its start, so the
+      // label's turns are the counter's.
+      const slider = h.stage.getByRole('slider', { name: 'Label a carbon' });
+      await slider.focus();
+      await h.page.keyboard.press('ArrowRight');
+      await atValue(h, slider, 1);
+      let d = await until(h, (x) => x.labelledCarbon === 'acetyl-1', 5_000);
+      expect(d.labelledCarbon === 'acetyl-1' && d.turn === 0 && d.t === 0 && d.labelPosition === 'acetyl-CoA' && d.labelRemaining === 1, `the slider's first stop should label the acetyl group's C1 and put the cycle back: ${JSON.stringify({ lab: d.labelledCarbon, turn: d.turn, t: d.t, at: d.labelPosition, left: d.labelRemaining })}`);
+      await h.focusable().focus();
+      const key = () => h.page.keyboard.press('ArrowRight');
+      d = await krebsSteps(h, 8, key);
+      expect(d.turn === 1 && JSON.stringify(d.labelReleasedByTurn) === '[0]' && d.labelRemaining === 1 && d.labelFirstLeftOnTurn === null, `none of it should leave on the turn it arrived: ${JSON.stringify({ turn: d.turn, byTurn: d.labelReleasedByTurn, left: d.labelRemaining, first: d.labelFirstLeftOnTurn })}`);
+      d = await krebsSteps(h, 3, key);
+      expect(d.position === 'α-ketoglutarate' && d.labelReleasedThisTurn === 0.5 && d.labelRemaining === 0.5, `half of it should leave at turn 2's first decarboxylation: ${JSON.stringify({ at: d.position, now: d.labelReleasedThisTurn, left: d.labelRemaining })}`);
+      d = await krebsSteps(h, 1, key);
+      expect(d.position === 'succinyl-CoA' && d.labelReleasedThisTurn === 1 && d.labelRemaining === 0 && d.labelPosition === 'carbon dioxide', `and the other half at its second: ${JSON.stringify({ at: d.position, now: d.labelReleasedThisTurn, left: d.labelRemaining, where: d.labelPosition })}`);
+      d = await krebsSteps(h, 4, key);
+      expect(d.turn === 2 && JSON.stringify(d.labelReleasedByTurn) === '[0,1]' && d.labelFirstLeftOnTurn === 2, `acetyl C1 should leave none on turn 1 and all on turn 2: ${JSON.stringify({ turn: d.turn, byTurn: d.labelReleasedByTurn, first: d.labelFirstLeftOnTurn })}`);
+    }],
+    ['acetyl-c2-stays-two-turns-then-halves', async (h) => {
+      const slider = h.stage.getByRole('slider', { name: 'Label a carbon' });
+      await slider.focus();
+      await h.page.keyboard.press('ArrowRight');
+      await atValue(h, slider, 2);
+      let d = await until(h, (x) => x.labelledCarbon === 'acetyl-2' && x.turn === 0, 5_000);
+      expect(d.labelledCarbon === 'acetyl-2' && d.turn === 0 && d.labelRemaining === 1, `the slider's second stop should label the methyl carbon and put the cycle back: ${JSON.stringify({ lab: d.labelledCarbon, turn: d.turn, left: d.labelRemaining })}`);
+      await h.focusable().focus();
+      d = await krebsSteps(h, 40, () => h.page.keyboard.press('ArrowRight'));
+      expect(d.turn === 5 && JSON.stringify(d.labelReleasedByTurn) === '[0,0,0.5,0.25,0.125]', `the methyl carbon should leave none on turns 1 and 2, half on turn 3 and half of what is left on each turn after: ${JSON.stringify({ turn: d.turn, byTurn: d.labelReleasedByTurn })}`);
+      expect(d.labelFirstLeftOnTurn === 3 && d.labelRemaining === 0.125 && d.labelPosition === 'oxaloacetate', `an eighth of it should still be in the cycle after five turns: ${JSON.stringify({ first: d.labelFirstLeftOnTurn, left: d.labelRemaining, where: d.labelPosition })}`);
+    }],
+    ['each-oxaloacetate-carbon-leaves-where-the-dehydrogenases-take-it', async (h) => {
+      // L on the focused ring moves the label on by one, as the ring's own label says; after acetyl C2
+      // come oxaloacetate's four. Isocitrate dehydrogenase takes C1, the carboxyl that hangs off citrate's
+      // middle carbon, and α-ketoglutarate dehydrogenase takes C4, both on turn 1; C3 leaves on turn 2,
+      // and C2, a middle carbon of succinate like acetyl C2, goes as acetyl C2 does.
+      await h.focusable().focus();
+      const key = () => h.page.keyboard.press('ArrowRight');
+      const pick = async (id) => {
+        await h.page.keyboard.press('l');
+        const d = await until(h, (x) => x.labelledCarbon === id && x.turn === 0, 5_000);
+        expect(d.labelledCarbon === id && d.turn === 0 && d.labelPosition === 'oxaloacetate' && d.labelRemaining === 1, `L should move the label on to ${id} and put the cycle back: ${JSON.stringify({ lab: d.labelledCarbon, turn: d.turn, where: d.labelPosition, left: d.labelRemaining })}`);
+      };
+      await pick('oxaloacetate-1');
+      let d = await krebsSteps(h, 2, key);
+      expect(d.position === 'isocitrate' && d.labelRemaining === 1, `oxaloacetate C1 should still be in isocitrate: ${JSON.stringify({ at: d.position, left: d.labelRemaining })}`);
+      d = await krebsSteps(h, 1, key);
+      expect(d.position === 'α-ketoglutarate' && d.labelRemaining === 0, `isocitrate dehydrogenase should take oxaloacetate C1: ${JSON.stringify({ at: d.position, left: d.labelRemaining })}`);
+      d = await krebsSteps(h, 5, key);
+      expect(JSON.stringify(d.labelReleasedByTurn) === '[1]' && d.labelFirstLeftOnTurn === 1, `oxaloacetate C1 should all leave on turn 1: ${JSON.stringify({ byTurn: d.labelReleasedByTurn, first: d.labelFirstLeftOnTurn })}`);
+      await pick('oxaloacetate-2');
+      d = await krebsSteps(h, 32, key);
+      expect(JSON.stringify(d.labelReleasedByTurn) === '[0,0,0.5,0.25]' && d.labelRemaining === 0.25, `oxaloacetate C2 should go as acetyl C2 does: ${JSON.stringify({ byTurn: d.labelReleasedByTurn, left: d.labelRemaining })}`);
+      await pick('oxaloacetate-3');
+      d = await krebsSteps(h, 16, key);
+      expect(JSON.stringify(d.labelReleasedByTurn) === '[0,1]' && d.labelFirstLeftOnTurn === 2, `oxaloacetate C3 should all leave on turn 2: ${JSON.stringify({ byTurn: d.labelReleasedByTurn, first: d.labelFirstLeftOnTurn })}`);
+      await pick('oxaloacetate-4');
+      d = await krebsSteps(h, 3, key);
+      expect(d.position === 'α-ketoglutarate' && d.labelRemaining === 1, `oxaloacetate C4 is not the carboxyl isocitrate dehydrogenase takes: ${JSON.stringify({ at: d.position, left: d.labelRemaining })}`);
+      d = await krebsSteps(h, 1, key);
+      expect(d.position === 'succinyl-CoA' && d.labelRemaining === 0, `α-ketoglutarate dehydrogenase should take oxaloacetate C4: ${JSON.stringify({ at: d.position, left: d.labelRemaining })}`);
+      d = await krebsSteps(h, 4, key);
+      expect(JSON.stringify(d.labelReleasedByTurn) === '[1]', `oxaloacetate C4 should all leave on turn 1: ${JSON.stringify(d.labelReleasedByTurn)}`);
+    }],
+    ['a-drain-stops-the-cycle-and-a-top-up-starts-it-again', async (h) => {
+      await h.button(/^Reset/).click();
+      let d = await until(h, (x) => x.turn === 0 && x.labelledCarbon === null && x.t === 0, 5_000);
+      expect(d.turn === 0 && d.labelledCarbon === null && d.t === 0, `Reset should put the cycle back with no label: ${JSON.stringify({ turn: d.turn, lab: d.labelledCarbon, t: d.t })}`);
+      // Acetyl C2 again, so that what the drain takes of the label is in the count below.
+      const slider = h.stage.getByRole('slider', { name: 'Label a carbon' });
+      await slider.focus();
+      await h.page.keyboard.press('ArrowRight');
+      await atValue(h, slider, 1);
+      await h.page.keyboard.press('ArrowRight');
+      await atValue(h, slider, 2);
+      d = await until(h, (x) => x.labelledCarbon === 'acetyl-2', 5_000);
+      expect(d.labelledCarbon === 'acetyl-2', `the slider should label acetyl C2: ${d.labelledCarbon}`);
+      await h.button(/^Drain for glutamate/).click();
+      d = await until(h, (x) => x.drainedTo === 'glutamate', 5_000);
+      expect(d.drainedTo === 'glutamate' && d.drainedFrom === 'α-ketoglutarate', `the drain should take α-ketoglutarate to glutamate: ${JSON.stringify({ to: d.drainedTo, from: d.drainedFrom })}`);
+      // Half the α-ketoglutarate leaves each turn, so the pool halves each turn, and at an eighth of the
+      // trace, under the fifth a join needs, the acetyl group waits.
+      const levels = [];
+      for (let n = 0; n < 3; n += 1) {
+        d = await krebsSteps(h, 8, () => h.button(/^Step/).click());
+        levels.push(d.oxaloacetateLevel);
+      }
+      expect(JSON.stringify(levels) === '[0.5,0.25,0.125]', `oxaloacetate should halve each turn: ${JSON.stringify(levels)}`);
+      expect(d.stalled === true && d.shortOf === 'oxaloacetate' && d.joinRate === 0 && d.position === 'oxaloacetate', `at an eighth of the trace the cycle should stop at the join: ${JSON.stringify({ stalled: d.stalled, shortOf: d.shortOf, rate: d.joinRate, at: d.position })}`);
+      expect(d.nadhPerTurn === 3 && d.fadh2PerTurn === 1 && d.atpPerTurn === 1, `a drain changes how many turns there are, not what a turn makes: ${JSON.stringify({ nadh: d.nadhPerTurn, fadh2: d.fadh2PerTurn, atp: d.atpPerTurn })}`);
+      const all = d.labelReleasedByTurn.reduce((a, v) => a + v, 0) + d.labelReleasedThisTurn + d.labelRemaining + d.labelDrained;
+      expect(near(all, 1, 1e-12) && d.labelDrained > 0 && d.labelDrainedInto.includes('glutamate'), `every share of the label should be somewhere: left as CO2, still in the cycle, or drained into glutamate: ${JSON.stringify({ byTurn: d.labelReleasedByTurn, left: d.labelRemaining, drained: d.labelDrained, into: d.labelDrainedInto })}`);
+      // A Step now moves nothing, and says why.
+      const t = d.t;
+      await h.button(/^Step/).click();
+      d = await until(h, (x) => x.refused === 'stalled', 5_000);
+      expect(d.refused === 'stalled' && d.t === t && d.turn === 3, `a Step with the cycle stopped should be refused and move nothing: ${JSON.stringify({ refused: d.refused, t: [t, d.t], turn: d.turn })}`);
+      await h.button(/^Top up/).click();
+      d = await until(h, (x) => x.toppedUp === true, 5_000);
+      expect(d.toppedUp === true, 'Top up should switch on');
+      d = await krebsSteps(h, 1, () => h.button(/^Step/).click());
+      expect(d.turn === 4 && d.position === 'citrate' && d.stalled === false && d.refused === null && d.oxaloacetateLevel >= 0.2, `with the top-up on, a Step should wait for enough oxaloacetate and then join: ${JSON.stringify({ turn: d.turn, at: d.position, stalled: d.stalled, refused: d.refused, level: d.oxaloacetateLevel })}`);
+    }],
+    ['the-fuel-sets-where-its-carbon-enters-and-what-a-gram-is-worth', async (h) => {
+      await h.button(/^Fatty acid/).click();
+      let d = await until(h, (x) => x.fuel === 'fatty-acid', 5_000);
+      expect(d.fuelMolecule === 'palmitate' && d.entryPoint === 'acetyl-CoA' && d.acetylPerFuel === 8 && d.atpPerFuel === 106 && d.atpPerGram === 0.41, `palmitate: eight acetyl-CoA, 106 ATP, 0.41 mol a gram: ${JSON.stringify({ fuel: d.fuelMolecule, entry: d.entryPoint, turns: d.acetylPerFuel, atp: d.atpPerFuel, perGram: d.atpPerGram })}`);
+      await h.button(/^Amino acid/).click();
+      d = await until(h, (x) => x.fuel === 'amino-acid', 5_000);
+      expect(d.fuelMolecule === 'glutamate' && d.entryPoint === 'α-ketoglutarate' && d.atpPerFuel === 20.5 && d.atpPerGram === 0.14, `glutamate enters as α-ketoglutarate: 20.5 ATP, 0.14 mol a gram: ${JSON.stringify({ fuel: d.fuelMolecule, entry: d.entryPoint, atp: d.atpPerFuel, perGram: d.atpPerGram })}`);
+      await h.button(/^Glucose/).click();
+      d = await until(h, (x) => x.fuel === 'glucose', 5_000);
+      expect(d.fuelMolecule === 'glucose' && d.entryPoint === 'acetyl-CoA' && d.atpPerFuel === 32 && d.atpPerGram === 0.18, `back to glucose: ${JSON.stringify({ fuel: d.fuelMolecule, entry: d.entryPoint, atp: d.atpPerFuel, perGram: d.atpPerGram })}`);
+    }],
+    ['the-keys-the-ring-names-work-its-controls', async (h) => {
+      // "Space to run, D to change the drain, T to top up, F to change the fuel, and Home to reset", on
+      // the focused ring; the arrow and L are driven above.
+      await h.focusable().focus();
+      await h.page.keyboard.press('f');
+      let d = await until(h, (x) => x.fuel === 'fatty-acid', 5_000);
+      expect(d.fuel === 'fatty-acid', `F should move the fuel on from glucose: ${d.fuel}`);
+      await h.page.keyboard.press('d');
+      d = await until(h, (x) => x.drainedTo === 'aspartate', 5_000);
+      expect(d.drainedTo === 'aspartate' && d.drainedFrom === 'oxaloacetate', `D should move the drain on from glutamate to aspartate: ${JSON.stringify({ to: d.drainedTo, from: d.drainedFrom })}`);
+      await h.page.keyboard.press('t');
+      d = await until(h, (x) => x.toppedUp === false, 5_000);
+      expect(d.toppedUp === false, 'T should switch the top-up off');
+      await h.page.keyboard.press(' ');
+      d = await until(h, (x) => x.playing === true, 5_000);
+      expect(d.playing === true, 'Space should set it running');
+      await h.page.keyboard.press(' ');
+      d = await until(h, (x) => x.playing === false, 5_000);
+      expect(d.playing === false, 'and Space again should stop it');
+      await h.page.keyboard.press('Home');
+      d = await until(h, (x) => x.fuel === 'glucose' && x.drainedTo === null && x.t === 0, 5_000);
+      expect(d.turn === 0 && d.t === 0 && d.fuel === 'glucose' && d.drainedTo === null && d.toppedUp === false && d.labelledCarbon === null, `Home should put everything back: ${JSON.stringify({ turn: d.turn, t: d.t, fuel: d.fuel, drain: d.drainedTo, top: d.toppedUp, lab: d.labelledCarbon })}`);
+    }],
+    ['reset-puts-every-control-back', async (h) => {
+      const slider = h.stage.getByRole('slider', { name: 'Label a carbon' });
+      await slider.focus();
+      await h.page.keyboard.press('ArrowRight');
+      await atValue(h, slider, 1);
+      await h.button(/^Drain for fat/).click();
+      await h.button(/^Top up/).click();
+      await h.button(/^Amino acid/).click();
+      let d = await until(h, (x) => x.labelledCarbon === 'acetyl-1' && x.drainedTo === 'fat' && x.toppedUp && x.fuel === 'amino-acid', 5_000);
+      expect(d.labelledCarbon === 'acetyl-1' && d.drainedTo === 'fat' && d.toppedUp && d.fuel === 'amino-acid', `the controls should have set a label, the fat drain, the top-up and glutamate: ${JSON.stringify({ lab: d.labelledCarbon, drain: d.drainedTo, top: d.toppedUp, fuel: d.fuel })}`);
+      d = await krebsSteps(h, 3, () => h.button(/^Step/).click());
+      await h.button(/^Reset/).click();
+      d = await until(h, (x) => x.t === 0 && x.labelledCarbon === null && x.fuel === 'glucose', 5_000);
+      expect(d.turn === 0 && d.t === 0 && d.position === 'oxaloacetate' && d.labelledCarbon === null && d.drainedTo === null && d.toppedUp === false && d.fuel === 'glucose' && d.oxaloacetateLevel === 1 && d.playing === false && d.refused === null, `Reset should put the figure back as it opened: ${JSON.stringify({ turn: d.turn, t: d.t, at: d.position, lab: d.labelledCarbon, drain: d.drainedTo, top: d.toppedUp, fuel: d.fuel, level: d.oxaloacetateLevel, playing: d.playing })}`);
+      expect(await atValue(h, slider, 0) === '0', 'and the label slider back to none');
+      for (const [name, on] of [[/^Glucose/, 'true'], [/^No drain/, 'true'], [/^Top up/, 'false']]) {
+        const pressed = await h.button(name).getAttribute('aria-pressed');
+        expect(pressed === on, `after Reset, ${name.source.slice(1)} should have aria-pressed ${on}, not ${pressed}`);
+      }
     }],
   ],
 };

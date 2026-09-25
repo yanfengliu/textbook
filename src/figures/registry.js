@@ -109,6 +109,10 @@ export const FIGURES = Object.freeze({
   'rubisco-fork': { url: new URL('./rubisco-fork.js', import.meta.url).href, title: 'One site, two gases, four steps of arithmetic', needsWebGL: false, aspect: 16 / 9, narrowAspect: 3 / 4 },
   // Figure 7.2. Below 600 px it carries a second composition: the ring keeps its carbon counts, the
   // names become step numbers on the ring and a numbered list beneath it, and the books re-stack.
+  // narrowAspect is 2/3, not FIGURES.md's 4/5. Once the toolbar's four rows and the books' 94 px are
+  // taken out, 4/5 leaves the ring at its 26 px floor, where the layout no longer fits, on the narrow
+  // gate's 342 px stage, and 35 px at 360; 2/3 gives 66 and 80, and 88 at 390 against 4/5's 60
+  // (measured 2026-09-24 by setting --fig-aspect-narrow on the lab's stage).
   krebs: { url: new URL('./krebs.js', import.meta.url).href, title: 'The carbon, and where it goes', needsWebGL: false, aspect: 16 / 10, narrowAspect: 2 / 3 },
 
   // 《资治通鉴》 卷一 周纪一 — the second book. Its figures are about a text and a history, not a
