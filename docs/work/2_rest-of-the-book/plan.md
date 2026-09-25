@@ -3,11 +3,11 @@
 Status: active
 Owner: Integration owner (textbook session, 2026-09-10)
 Created: 2026-09-10
-Updated: 2026-09-24
+Updated: 2026-09-25
 
 ## Where this round stands
 
-Updated 2026-09-24, when the round was reopened to publish chapters 7 and 8. **This section and the chapter table under it are the live state; everything below them is the round's narrative, oldest first, and it is history** — what was believed, what proved false, what a review caught, what a number was before it moved. Read the narrative for the evidence behind a decision, not for what to do next.
+Updated 2026-09-25, at the final landing of chapters 7 and 8; the round was reopened on 2026-09-24 to publish them. **This section and the chapter table under it are the live state; everything below them is the round's narrative, oldest first, and it is history** — what was believed, what proved false, what a review caught, what a number was before it moved. Read the narrative for the evidence behind a decision, not for what to do next.
 
 **The round stopped at chapter 6's landing, by the owner's decision of 2026-09-23: "Reduce scope and stop at your current chapter's completion." On 2026-09-24 the owner told the coordinator: "If chapters are written then of course publish them." Chapters 7 and 8 were the written ones, so the round is reopened to publish them. Nothing after chapter 8 starts until the owner asks** ([local-rules.md, point 10](../../policies/local-rules.md#the-usage-allowance-is-the-budget-the-owners-direction-of-2026-09-23)). Chapter 6 is on main, and it shipped at reduced scope:
 
@@ -40,19 +40,36 @@ Biology chapters 1 to 6 are published, and so are the second book's chapters 1 t
 
 ### In progress
 
-Publishing chapters 7 and 8. The landing is staged on `origin/land-4`, which is not merged to main. It holds:
+Publishing chapters 7 and 8. The final landing is staged on `origin/land-4` and is not merged to main. The coordinator merges it after a delta review of the integration.
 
-- merges of `term-comma` (a mark after a glossary term stays on the term's line; [the register's entry](../../learning/defect-register.md#2026-09-24--a-comma-after-a-glossary-term-began-a-line-on-its-own)), of `ch07` at `bc523ab` with all 67 findings of [its accuracy review](reviews/2026-09-24-ch07-accuracy.md) applied, of `fig-ch07-a` (Figure 7.1), and of `fig-ch08-a` and `fig-ch08-b` (Figures 8.1 to 8.4);
-- the landing's own edits: chapter 6's closing card and its `FIGURES.md`, the contents page and Today for chapters 7 and 8, chapter 5's pointer to gene control (Chapter 12, not 8), a no-break space between a name and its Roman numeral in chapters 1 to 7 (229 of them), the Figure 4.7 fix above, this section, and the owner's direction in `AGENTS.md` and `local-rules.md`.
+What lands:
 
-The final landing still needs, in this order:
+- Merges:
+  - `term-comma` (`65b9ea5`): a mark after a glossary term stays on the term's line ([the register's entry](../../learning/defect-register.md#2026-09-24--a-comma-after-a-glossary-term-began-a-line-on-its-own)).
+  - Chapter 7: `ch07` up to `bc523ab`, with all 67 findings of [its accuracy review](reviews/2026-09-24-ch07-accuracy.md); Figures 7.1 `glycolysis` (`fig-ch07-a`, `924381b`), 7.2 `krebs` (`fig-ch07-d`, `6a30a4c`), 7.3 `respiratory-chain` (`fig-ch07-b`, `c3485b9`) and 7.4 `fermentation` (`fig-ch07-c`, `6bec50f`); and `figfix-ch07` (`300da5f`), the figure review's fixes.
+  - Chapter 8: `fig-ch08-a` and `fig-ch08-b` (the prose and Figures 8.1 to 8.4), `ch08` (`b542ea1`, the bank and the accuracy review's findings), and `figfix-ch08` (`2f43ef8`, `0dd22d2`, `e29f6a0`), the figure review's fixes, the name–numeral pass and the phone layouts.
+  - `polish` (`feacf55`): typography and page-check fixes for chapters 1 to 6, the contents page and Today.
+- The landing's own edits:
+  - chapter 6's closing card and its `FIGURES.md`, the contents page and Today for chapters 7 and 8, and chapter 5's pointer to gene control (Chapter 12, not 8);
+  - a no-break space between a name and its Roman numeral in chapters 1 to 7 (229 of them), and the Figure 4.7 fix above;
+  - the term-hold also holds a no-break space and what it glues on (`36cbc2f`), from review 1's S1;
+  - Figures 3.2 and 3.3 draw their cell in every box the frame gives them (`1824eea`), with the scale and corner radius floored at zero (`247549c`, `131e49b`, `6e12dbc`);
+  - Figures 5.3 and 5.4 set the phosphate's subscript i as markup (`66a3cca`, `d487747`);
+  - the owner's direction in `AGENTS.md` and `local-rules.md` and its point 10 (`f1ae404`), five lessons, the defect register's term-comma entry, and the term-hold's gate proofs.
+- The fixes of 2026-09-25, one commit each:
+  - figures review 2: S1, 8.3's made-up rules each start "Hypothetical" (`efd6c8d`, with N1's "once"); S2, chapter 5's nine no-break joins kept in the merge (`dcf98d2`); N3, 7.3's charge counts drawn all together or not at all (`50c22a0`);
+  - text review 2: SF2 `1800637`, SF3 `26cb965`, SF4 `93f6b3e`, N1 `e7c6c97`, N2 `4976e83`, N3 `26a6a3f`, N4 `7f5c362`, N5 `91dc0d5`, N6 `0131456`, N7 `708a65b` and its red proofs `0075c60`, N8 `b547454`; SF1 is S2;
+  - review 3: N1, Figure 3.3 stays still under a pinned clock once scrolled into view (`58a2c72`); residual 4, the flagellum and archaellum can be clicked where they are drawn (`1779c36`).
 
-1. The branches still being worked on, merged: Figures 7.2 `krebs` (`fig-ch07-d`), 7.3 `respiratory-chain` (`fig-ch07-b`) and 7.4 `fermentation` (`fig-ch07-c`); `fig-ch07-a` again, which moved on to `924381b` after it was merged; chapter 8 from `origin/ch08`, which holds its bank and its accuracy review's findings; and `fig-ch08-a` and `fig-ch08-b` again if the review of chapter 8's four figures moves them. `npm run check` then finds chapter 7's four kinds registered and chapter 8's bank.
-2. Chapter 8's name–numeral pass (DNA polymerase I and III and the like), and the six "Unit I" to "Unit VI" labels on the biology contents page.
-3. Chapter 8's accuracy review, copied into reviews/.
-4. A look at two things in the shot frames: §7.7's acceptor table, which scrolls sideways at 390 px, and about 250 px of empty column before Figure 7.4 at 1440 px. Each is fixed if it falls short of how earlier chapters handle wide tables and margin notes.
-5. The fonts checked again once every figure is in, and the stranded-mark measurement repeated on chapters 7 and 8 as landed, since `term-comma` measured drafts.
-6. One full `npm test`, untrimmed, and an independent review of the integrated diff, before the push to main.
+What has been checked:
+
+- Four reviews of the landing, each copied into reviews/: [review 1](reviews/2026-09-25-land-4-review-1.md), [review 2 of the figures](reviews/2026-09-25-land-4-review-2-figures.md) (0 blockers), [review 2 of the text](reviews/2026-09-25-land-4-review-2-text.md) (0 blockers; all 67 chapter 7 and 39 chapter 8 accuracy findings verified fixed) and [review 3 of the cell fit](reviews/2026-09-25-land-4-review-3-cell.md) (0 blockers, 0 should-fix).
+- Chapters 7 and 8 at their final text (`1779c36`), light theme, every width from 320 to 1440 px, by scratch probes:
+  - no mark glued to a term begins a line: 17 of chapter 7's 30 terms and 38 of chapter 8's 51 have one, and none strands;
+  - review 1's S1 measure: chapter 8's two no-break-space dashes are held and never strand, while 32 of the 38 held cases strand once unheld, so the probe sees the class;
+  - every character chapters 7 and 8, Today and chapter 6 show is drawn by a face the page loaded.
+- Figure 3.3's two fixes, by a GPU probe on chapter 3 at 390, 1024 and 1440 px, both envelopes, on `?t=0`: the canvas holds still for 1.5 s after scrolling into view (it moved in all six cases before), and real clicks on the drawn filament select the flagellum or the archaellum: 2 of 7 sample points at 390 px and 6 of 7 at 1024 and 1440 px, where none of the 42 did before.
+- The full `npm test` runs once, untrimmed, on the final tree before the push. Its result is recorded here when it has run.
 
 `origin/ch06-07`, `origin/items-ch07`, `origin/items-ch07-final`, `origin/items-ch08` and `origin/ch08-dna` are not merged: `ch07` and `ch08` took their files from them. The `textbook-wt-*` worktrees, the `provenance-*` and `autocompact-setting` branches and `stash@{0}` belong to other sessions.
 
@@ -78,6 +95,16 @@ Open, not scheduled. Nothing below is dispatched, and any of it that is picked u
 - The multiple-choice length tell in chapters 1 to 3: the correct option is the longest in 42 of 49, 49 of 52 and 43 of 45. Rebalance by rewording, never by reordering the options of a shipped bank, and add a bank-level binomial check to `tools/check-content.js`.
 - `soup.js` should redraw when the webfonts arrive; bundle it with the next change to a chapter 2 figure. `docs/learning/defect-register.md` already records soup, so the fix updates that entry with its gate rather than adding one.
 - `docs/design/textbook.md` lines 3 and 194 still say only chapter 1 exists. It is a design doc, so the change needs review. Found by `site-and-ci`.
+- Left open by the chapter 7 and 8 landing (2026-09-25):
+  - Figure 8.3 at an 800 px window shows none of its table's eight counts in the fork scene, and its drawing names only helicase and topoisomerase. `efdafc4` says this is by design. N2 of [figures review 2](reviews/2026-09-25-land-4-review-2-figures.md).
+  - Small type at a device pixel ratio of 1 inside the 800 to 1150 px band: at 1024 px, Figure 7.1 draws 34 runs of text under 8.5 px; 8.4's enlargement labels are 8.6 to 8.8 px; and 8.1's legend is 8.5 px at 800. N4 of figures review 2; it predates the review's fixes.
+  - Figure 3.3, left by `1824eea`: four of the six residuals in [review 3](reviews/2026-09-25-land-4-review-3-cell.md)'s table. The sixth, the missing band gate, is under Gates and CI, and the fourth, the appendage no click reached, is fixed in `1779c36`.
+    - At 700 to 799 px windows the cell sits small in a tall, empty canvas, and 3.2 does the same from 640 px.
+    - At the end of its swing, the swimming cell's far end passes under the strip's names, at 1440 and at 768 px.
+    - Under penicillin the strip draws and labels the wall at 10 nm, while the panel's layer line and `describe().peptidoglycanNm` still say 30 nm.
+    - On a phone the stain message covers the cell: at 360 px about 20 px of it shows under the message, and at 390 px the lower two-thirds.
+  - In Figure 3.3, picking the archaeal quasi-periplasm selects `quasi`, and `describe()` reports it, but no card appears. N2 of review 3.
+  - Eight figures in chapters 2 to 5 still break somewhere in the 800 to 1150 px band: 2.6 `carbonkit`, 3.4 `secretion`, 3.5 `symbiont`, 4.3 `permeability`, 4.6 `pump`, 4.7 `gradient-battery`, 5.1 `entropy-ledger` and 5.3 `atp3d` ([the wide-band probe](reviews/2026-09-25-wide-band-probe.md)). Whether to fix them is the owner's decision.
 
 **Study system**
 
@@ -92,6 +119,8 @@ Open, not scheduled. Nothing below is dispatched, and any of it that is picked u
 - `npm run pinned` starts eight shards by default, and GitHub's runner has 4 CPUs. A press that misses its 5 s timeout is skipped, not failed, so the gate cannot tell a press that did nothing from one that never ran. Found by `site-and-ci`.
 - `docs/policies/local-rules.md` says `node --test "test/*.test.js"` cannot run on this machine (`spawn EPERM`). On 2026-09-23 it ran 260 of 260 here, so the note may be stale.
 - The audit's gate recommendations are still owed: a core gate per commit, the full chain at a chapter's landing, and CI blocking Pages. `npm test` stays the commit gate until a core gate exists.
+- No gate shoots or measures a figure at an 800 to 860 px window, where the flat compositions of chapters 3, 7 and 8 live: `npm run shot` uses 390, 1024 and 1440 px, and `npm run narrow` a 390 px stage. S3 of [figures review 2](reviews/2026-09-25-land-4-review-2-figures.md), and the sixth residual in [review 3](reviews/2026-09-25-land-4-review-3-cell.md)'s table. It is the gate the 2026-09-24 lesson "a figure must read well in the smallest wide box" owes, and the owner said no new gates.
+- `npm run pinned` would not catch a figure that starts moving when it scrolls into view after `setTime`, nor one whose `describe()` holds still while its drawing moves. Figure 3.3 did both, fixed in `58a2c72`; the lesson of 2026-09-25 names the gate owed.
 
 **Docs and records**
 
@@ -130,8 +159,8 @@ Under the owner's decisions of 2026-09-23 and 2026-09-24, chapters 9 to 32 are n
 | 4 | Membranes and transport | done | 5e9c981; review fixes f7cf38f |
 | 5 | Energy and metabolism | done | 5e9c981; review fixes d1f9db2 |
 | 6 | Photosynthesis | done, reduced scope | `land-3`: prose b35cdc1, figures eb6c2c8–7dfe80d, items fa104a5 |
-| 7 | Cellular respiration | build | prose and bank `origin/ch07` (`bc523ab`) and Figure 7.1, staged on `land-4`; Figures 7.2 to 7.4 on their branches |
-| 8 | DNA | build | prose and bank on `origin/ch08`, review findings being applied; Figures 8.1 to 8.4 staged on `land-4` |
+| 7 | Cellular respiration | gate | staged on `land-4` with its four figures and the reviews' fixes; not on main |
+| 8 | DNA | gate | staged on `land-4` with its four figures and the reviews' fixes; not on main |
 | 9 | From genes to proteins | — | |
 | 10 | The cell cycle and mitosis | — | |
 | 11 | Meiosis and inheritance | — | |
