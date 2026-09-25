@@ -5,7 +5,7 @@ Four figures, in the order they appear in `index.html`. The figure number is fix
 | # | Kind | Id | Section | WebGL | `aspect` | `narrowAspect` |
 |---|---|---|---|---|---|---|
 | 7.1 | `glycolysis` | `fig-glycolysis` | 7.2 | no | 16 / 9 | 3 / 4 |
-| 7.2 | `krebs` | `fig-krebs` | 7.3 | no | 16 / 10 | 4 / 5 |
+| 7.2 | `krebs` | `fig-krebs` | 7.3 | no | 16 / 10 | 2 / 3 |
 | 7.3 | `respiratory-chain` | `fig-chain` | 7.4, cited again in 7.7 and 7.8 | no | 16 / 10 | 2 / 3 |
 | 7.4 | `fermentation` | `fig-fermentation` | 7.7 | no | 16 / 9 | 2 / 3 |
 
@@ -161,7 +161,7 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 
 **Wide composition, as built.** The stage is 16 / 9, not the 21 / 9 a row of eleven seems to want: at 21 / 9 a 1280 px window gave the walk 176 px of height and carbons 6 px across, and an 800 px window gave it 81 px, drawn under the toolbar. The stage's shape picks one of three arrangements. The **line**, all eleven stations in a row with the ledger under it in three columns, needs 760 px of drawing and 210 px of height over the ledger. Short of that, the **phase** view shows one phase at a time, six stations, with the other phase collapsed to a column that says what it cost or will earn, and the ledger beside it. An 800 px window is the tightest the wide stage gets, 480 × 270 px, and there the phase view takes its compact form: where a station would be under 46 px wide or its carbons under 7 px across, the station names give way to a two-line caption naming the step just taken and what it made, the enzymes to their numbers, each currency pair to the one token that changes hands, and the other phase's column to the stations, leaving the ledger to say what that phase cost or earned. The third arrangement, the ladder, is the narrow composition. Past a knock-out the arrows are drawn dashed with no heads, on both lanes, or on the upper lane alone when the isomerase is out, and so are their phosphate ticks and currency strokes: nothing changes hands there.
 
-**Narrow composition.** Second composition. Ten steps in a row at 390 px gives each step 39 px, which puts the enzyme names under nine device pixels. Below 800 px of window the frame makes the stage 3 / 4, and the line turns through 90 degrees into a vertical ladder, centred in at most 600 px, that shows **one phase at a time** — five steps, with the other phase collapsed to a single summary row that says what it cost or earned — and the split becomes two columns within the ladder rather than two lanes across it. Where the stage is tall enough for carbons 10 px across, the ladder shows all eleven stations instead. The tallies move to a five-row table beneath, right-aligned in tabular figures. The three sliders become steppers and keep their desktop labels, because item goals quote them, and their unit, because a bare 3 is not a concentration. The three need about 450 px in a row and a 390 px phone's toolbar has 352, so on a phone they wrap to two rows, not the one this brief first asked for.
+**Narrow composition.** Second composition. Ten steps in a row at 390 px gives each step 39 px, which puts the enzyme names under nine device pixels. Below 800 px of window the frame makes the stage 3 / 4, and the line turns through 90 degrees into a vertical ladder, centred in at most 600 px, that shows **one phase at a time** — five steps, with the other phase collapsed to a single summary row that says what it cost or earned — and the split becomes two columns within the ladder rather than two lanes across it. Where the stage is tall enough for carbons 10 px across, the ladder shows all eleven stations instead. The tallies move to a five-row table beneath, right-aligned in tabular figures. The three sliders become steppers and keep their desktop labels, because item goals quote them, and their unit, because a bare 3 is not a concentration. Below a 700 px stage the three are set a little tighter, about 435 px in a row even with ATP at 10 mM, so that they keep one row in the 440 px toolbar of an 800 px window; at 452 px they wrapped there, and the toolbar took 130 px of a 270 px stage. A 390 px phone's toolbar has 352, so on a phone they wrap to two rows, not the one this brief first asked for.
 
 ---
 
@@ -176,7 +176,7 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 - **Label a carbon**: six choices, and a readout naming where the label sits, the share of it that left on each turn so far, and the share still in the cycle.
 - **Drain an intermediate** to a named biosynthetic route — the five-carbon one to glutamate, oxaloacetate to aspartate, citrate out for fat. Oxaloacetate runs down and the cycle slows and stops, with the readout saying what it is short of. **Top up** carboxylates pyruvate and restarts it.
 - **Fuel**: glucose, a sixteen-carbon fatty acid, or an amino acid. Each traces its own entry point into the ring, and the fatty acid's is drawn as repeated two-carbon cuts with the carriers each cut produces.
-- **Tallies**, per turn and cumulative: carbons in, carbons out, NADH, FADH₂, ATP.
+- **Tallies**, per turn and cumulative: carbons in as acetyl, carbons out as CO₂, NADH, FADH₂, ATP. The rows name the two kinds of carbon they count, because a drain, the top-up and glutamate move carbon the books do not count (figure review of 2026-09-24, finding 19).
 
 **Objectives it teaches.** `link-reaction`, `krebs-carbon-accounting`, `krebs-is-a-cycle`, `krebs-output`, `krebs-amphibolic`, `other-fuels`.
 
@@ -188,26 +188,39 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 | `position` | string | which of the eight intermediates the cycle is at |
 | `carbonsHere` | number | the current intermediate's carbon count, 4, 5 or 6 |
 | `carbonsIn`, `carbonsOut` | number | cumulative counts; equal at the end of every turn, which is a count and not a claim about which atoms left |
+| `thisTurn` | object | `{ cIn, cOut, nadh, fadh2, atp }` for the turn in progress, or the one just finished |
 | `nadhPerTurn`, `fadh2PerTurn`, `atpPerTurn` | number | 3, 1 and 1 in every state; a run reporting otherwise is a defect |
 | `nadhTotal`, `fadh2Total`, `atpTotal` | number | cumulative |
 | `labelledCarbon` | string \| null | `'acetyl-1' \| 'acetyl-2' \| 'oxaloacetate-1'…`; null when none |
 | `labelPosition` | string \| null | where the label currently sits |
 | `labelFirstLeftOnTurn` | number \| null | the first turn on which any of the label left: 2 for `acetyl-1`, 3 for `acetyl-2`, never 1 for either; null until some has |
 | `labelReleasedByTurn` | number[] | the share of the original label released on each completed turn, as fractions of 1: `[0, 1]` for `acetyl-1`, `[0, 0, 0.5, 0.25, …]` for `acetyl-2` |
-| `labelRemaining` | number | the share of the label still in the cycle, 1 down to 0; never reaches 0 for `acetyl-2` |
-| `oxaloacetateLevel` | number | arbitrary units on one scale, stated in the module header |
-| `drainedTo` | string \| null | the biosynthetic route taking an intermediate |
-| `stalled` | boolean | the cycle has stopped for want of oxaloacetate; computed |
+| `labelReleasedThisTurn` | number | the share of the label that has left so far in the turn in progress |
+| `labelRemaining` | number | the share of the label still in the cycle, 1 down to 0; never reaches 0 for `acetyl-2` or `oxaloacetate-2` |
+| `labelDrained` | number | the share of the label the drains have taken |
+| `labelDrainedInto` | string[] | what the drains took it into; empty when none has |
+| `oxaloacetateLevel` | number | in multiples of the usual trace, 1 being the trace a working mitochondrion keeps |
+| `joinRate` | number | the joining step's rate against the usual one: the level, capped at 1, or 0 when stalled |
+| `drainedTo`, `drainedFrom` | string \| null | the drain's product and the intermediate it takes; null with no drain |
+| `stalled` | boolean | the cycle has stopped for want of oxaloacetate: waiting at the join below a fifth of the trace; computed |
+| `shortOf` | string \| null | `'oxaloacetate'` while stalled, else null |
 | `toppedUp` | boolean | |
 | `fuel` | string | `'glucose' \| 'fatty-acid' \| 'amino-acid'` |
-| `entryPoint` | string | the intermediate the chosen fuel joins at |
+| `fuelMolecule` | string | the chosen fuel's molecule: `'glucose'`, `'palmitate'` or `'glutamate'` |
+| `entryPoint` | string | the intermediate the chosen fuel joins at: `'acetyl-CoA'`, or `'α-ketoglutarate'` for glutamate |
+| `acetylPerFuel` | number | the turns one molecule of the fuel pays for |
+| `atpPerFuel` | number | ATP a molecule, at 2.5 per NADH and 1.5 per FADH₂; the stage rounds it, so glutamate's 20.5 shows as about 21 (figure review of 2026-09-24, finding 20) |
 | `atpPerGram` | number | for the chosen fuel, so §7.3's cross-check is on the stage |
+| `cutsDone` | number \| null | the fatty acid's two-carbon cuts so far, 1 to 7; null for the other fuels |
+| `refused` | string \| null | `'stalled'` when the last Step could not take the cycle on, else null |
 | `t` | number | clock, seconds, three decimals |
 | `playing` | boolean | |
 
 **Why it is a mechanism.** Label an acetyl carbon and none of it comes out on the first turn, however many times the reader runs it, while the counters say two carbons left. A ring-with-arrows diagram not only fails to show that but suggests the opposite, and through most of the 1940s labelling results like it were read as proof that citrate could not be on the pathway at all (§7.3's margin note, on Ogston).
 
-**Narrow composition.** Second composition. A ring with eight labelled nodes at 390 px puts every label either inside the ring, where they collide, or outside it, where they leave the stage. Below 800 px the ring keeps its shape and its carbon counts but **the intermediate names move into a numbered list beneath**, with the position the cycle is at marked in both; the two decarboxylations and the four oxidations stay marked on the ring, because they are the argument. The fuel entry points become one line of type naming the entry rather than three drawn routes. The tallies re-stack to five rows.
+**Narrow composition.** Second composition. A ring with eight labelled nodes at 390 px puts every label either inside the ring, where they collide, or outside it, where they leave the stage. Below 800 px the box's shape decides, because the frame gives the 2 / 3 box only below an 800 px window; from an 800 px to about an 1170 px window the stage is 16 / 10, 480 to 800 px wide and as little as 300 px tall. In the tall box the ring keeps its shape and its carbon counts but **the intermediate names move into a numbered list beneath**, with the position the cycle is at marked in both; the two decarboxylations and the four oxidations stay marked on the ring, because they are the argument. The fuel entry points become one line of type naming the entry rather than three drawn routes. The tallies re-stack to five rows.
+
+In the flat box the ring and the ledger sit side by side, the ledger in a column of 190 to 250 px, and the names stay round the ring as the wide composition sets them, with the fuel's route as lines of type (figure review of 2026-09-24, finding 17). Every name, extra line and product is placed on a trial ring exactly as the drawing places it, and the ring is the largest whose box of all of them fits the pane. Where two of them would touch on that ring, which happens on a ring of 45 to 65 px, the ring goes **bare**: the CO₂ molecules lose their labels, as on the phone, and a drain or a feed is an arrow in its colour after the name rather than a line of its own, the name moving along its line to clear the arrow; what the drain makes and what the feed is are in the ledger and the fuel's line. Where the track has no room for the step numbers between the molecules, it goes without them, since the names say where the cycle is. The ledger is the books over as many of the label, pool and fuel blocks as fit.
 
 ---
 
@@ -311,7 +324,7 @@ A sentence inside a figure module is read by the same reader and is corrected wh
 
 **Why it is a mechanism.** The reader takes the oxygen away expecting the ATP to fail and watches the carriers fail first — and then switches on a fermentation and watches glycolysis restart with the ATP figure unchanged. Both halves are counters the reader put into that state, and both contradict the sentence most readers arrive with.
 
-**Narrow composition.** Shrinks honestly. Below a 720 px stage the same drawing turns a quarter into one column at 2 / 3: glycolysis a row along the top, the pool's ring in the middle, the chain a capsule along the bottom, the fermentation route down the right, and the readout under it all, which loses nothing. The Cori-cycle ledger, which is a two-column comparison at desktop, becomes four rows of type. The pool's discs stay discs at every width — that is the composition and it is the reason the aspect is what it is. Twelve discs with a letter on each need a radius of about 9 px, and a 342 px stage at 4 / 5 left the drawing about 180 px after the toolbar and the readout, less than the ring and the four stations need; 3 / 4 is still short, and 2 / 3 is the squarest stage that holds them.
+**Narrow composition.** Shrinks honestly. Below a 720 px stage the box's shape decides. In a phone's 2 / 3 box the same drawing turns a quarter into one column: glycolysis a row along the top, the pool's ring in the middle, the chain a capsule along the bottom, the fermentation route down the right, and the readout under it all, which loses nothing. In the frame's 16 / 9 box, 480 to 720 px wide in windows of about 800 to 1090 px, that column put the pool over the mitochondrion (figure review of 2026-09-24, finding 23), so there the wide arrangement is fitted to a box of about 255 to 450 by 175 to 345 px, with the readout in a column of 205 to 250 px beside it. A wide stage under about 760 px is too short for the wide drawing's labels and draws the same. Below 720 px the route's "No fermentation" reads "None", which keeps the toolbar to two rows on a 480 px stage. The Cori-cycle ledger, which is a two-column comparison at desktop, becomes four rows of type. The pool's discs stay discs at every width — that is the composition and it is the reason the aspect is what it is. Twelve discs with a letter on each need a radius of about 9 px, and a 342 px stage at 4 / 5 left the drawing about 180 px after the toolbar and the readout, less than the ring and the four stations need; 3 / 4 is still short, and 2 / 3 is the squarest stage that holds them.
 
 ---
 
