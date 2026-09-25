@@ -66,13 +66,20 @@
 //     mmol/L, about the most a working muscle holds.
 //   - Ethanol by volume is mmol/L × 46.07 g/mol ÷ 789 g/L, to show how far a few seconds are from a brew.
 //
-// THE TWO COMPOSITIONS. Wide: glycolysis a column on the left, the pool's ring in the middle, the
-// mitochondrion a capsule on the right, the fermentation row under the ring, the readout beside it all.
-// Narrow, below a 720 px stage: the same drawing turned a quarter, glycolysis a row along the top, the
-// chain a capsule along the bottom, the fermentation route down the right, and the readout under it.
-// 720 and not the book's usual 800 because a wide figure's stage is at least 723 px wherever the stage is
-// 16 : 9 (every viewport of 800 px and up) and tall below that; an 800 threshold would put the tall
-// composition into a 16 : 9 stage on an iPad or a phone held sideways.
+// THE THREE COMPOSITIONS. Wide, from a 720 px stage: glycolysis a column on the left, the pool's ring in
+// the middle, the mitochondrion a capsule on the right, the fermentation row under the ring, the readout
+// beside it all. Below 720 px the box's shape decides (arrange()). Tall, a phone's 2 : 3 stage: the same
+// drawing turned a quarter, glycolysis a row along the top, the chain a capsule along the bottom, the
+// fermentation route down the right, and the readout under it. Flat, the frame's 16 : 9 box, which is 480
+// to 720 px wide in windows of about 800 to 1090 px: the wide drawing's arrangement fitted to a box of
+// about 255 to 450 by 175 to 345 px beside a readout of 205 to 250 px (drawFlat(); figure review of
+// 2026-09-24, finding 23). The tall drawing needs about 220 px of height, which that box does not have:
+// drawn there, it put the pool over the capsule. The wide drawing needs about 325 px before "Chain" at the
+// lanes' height clears the mitochondrion's ATP, so on a wide stage under about 760 px drawWide() declines
+// the pane and the flat drawing is drawn in it.
+// The threshold is 720 because the wide drawing and its readout need about that side by side. The reason
+// once given here, that a 16 : 9 stage is never narrower than 723 px, was wrong: the frame keeps 16 : 9
+// down to an 800 px window, where the stage is 480 px.
 // narrowAspect is 2 / 3, not the brief's 4 / 5: the ring's twelve discs must stay discs with a letter on
 // them (radius about 9 px, on a ring of about 47 px so that they do not touch), and a 342 px stage at
 // 4 / 5 left the drawing about 180 px after a three-row toolbar and the readout, which is less than the
@@ -349,11 +356,13 @@ export function mount(root, ctx) {
       rows: 'minmax(0, 1fr)',
       at: { cell: [1, 1], readout: [2, 1] },
     },
+    // Below 720 px, tall (the drawing over the readout) or flat (side by side); arrange() sets which.
     narrow: {
-      columns: 'minmax(0, 1fr)',
-      rows: 'minmax(0, 62fr) minmax(0, 38fr)',
+      columns: 'var(--fe-ncols, minmax(0, 1fr))',
+      rows: 'var(--fe-nrows, minmax(0, 62fr) minmax(0, 38fr))',
       rowGap: 'var(--space-1)',
-      at: { cell: [1, 1], readout: [1, 2] },
+      columnGap: 'var(--space-1)',
+      at: { cell: [1, 1], readout: ['var(--fe-nrc, 1)', 'var(--fe-nrr, 2)'] },
     },
   });
 
@@ -373,7 +382,7 @@ export function mount(root, ctx) {
   demandCtl.node.classList.add('fe-demand');
   b.divide();
   const routeCtl = b.choice('Fermentation route', [
-    { id: 'none', label: 'No fermentation', aria: 'No fermentation, a cell with no way to empty NADH but the chain' },
+    { id: 'none', label: 'No fermentation', short: 'None', aria: 'No fermentation, a cell with no way to empty NADH but the chain' },
     { id: 'lactate', label: 'Lactate', aria: 'Lactate, one step: pyruvate takes the electrons and becomes lactate' },
     { id: 'ethanol', label: 'Ethanol', aria: 'Ethanol, two steps: carbon dioxide leaves, and acetaldehyde takes the electrons and becomes ethanol' },
   ], (id) => {
@@ -643,8 +652,6 @@ export function mount(root, ctx) {
     const t = clamp(k, 0.92, 1.12);
     const stalled = stalledNow(f);
 
-    say(p, 12, 19, titleOf(m), { fit: [12.5 * t, 9.5], width: w * 0.62, weight: 600 });
-
     const gx = 20 + 20 * k;
     const mW = clamp(w * 0.19, 88, 150);
     const mx1 = w - 12;
@@ -664,6 +671,12 @@ export function mount(root, ctx) {
     const mr = clamp(r * 0.55, 4, 7);
     const sRx = 20 * t;
     const sRy = 11 * t;
+    // "Chain" sits at the lanes' height, under the mitochondrion's name and ATP. A pane shorter than about
+    // 325 px (stages of 720 to about 760 px) brings the lanes up into those words, so this drawing declines
+    // it and the flat one, which stacks them itself, is drawn instead.
+    if (cy - 3 - (ringTop - 6 + mW * 0.3 + 4) < 54 * t) return false;
+
+    say(p, 12, 19, titleOf(m), { fit: [12.5 * t, 9.5], width: w * 0.62, weight: 600 });
 
     // ---- the pool, its legend above it ----
     say(p, cx, ringTop - 27, 'The NAD pool', { size: 10.5 * t, weight: 700, anchor: 'middle' });
@@ -732,7 +745,7 @@ export function mount(root, ctx) {
     const px0 = gx + 27 * t;
     if (m.route === 'none') {
       say(p, cx, yp + 4, 'no fermentation', { size: 9.5 * t, anchor: 'middle', fill: C.soft });
-      return;
+      return true;
     }
     const product = m.route === 'lactate' ? 'Lactate' : 'Ethanol';
     if (m.route === 'lactate') {
@@ -755,6 +768,7 @@ export function mount(root, ctx) {
     say(p, cx, yp + ey + (m.route === 'lactate' ? 25 : 13) * t, m.route === 'lactate' ? 'no ATP from this step' : 'no ATP from these steps', { size: 9 * t, anchor: 'middle', fill: C.soft });
     // The route takes loaded carriers from the pool and hands back empty ones.
     lanes(p, cx, cy + Rr + 3, cx, yp - ey - 3, { toB: 'loaded', active: fermActive, phase: m.phase.ferm, mr });
+    return true;
   }
 
   // ---------------------------------------------------------------- drawing: narrow
@@ -876,6 +890,158 @@ export function mount(root, ctx) {
     if (m.route === 'lactate') say(p, labelEnd, cy + ey + 45 * k, 'lactate dehydrogenase', { size: 9 * t, anchor: 'end', fill: C.soft });
     say(p, labelEnd, cy + ey + (m.route === 'lactate' ? 57 : 45) * k, m.route === 'lactate' ? 'no ATP from this step' : 'no ATP from these steps', { size: 9 * t, anchor: 'end', fill: C.soft });
     lanes(p, cx + Rr + 3, cy, xe - ex - 3, cy, { toB: 'loaded', active: fermActive, phase: m.phase.ferm, mr });
+  }
+
+  // ---------------------------------------------------------------- drawing: flat
+
+  // The wide drawing's arrangement in the frame's flat box under a 720 px stage, drawn to its height: the
+  // legend is a row under the title rather than a block over the ring, the enzyme's name sits over the
+  // product's arrow and its note under the enzyme, and the road to the mitochondrion runs along the foot.
+  // Words that need more room than the box has ("steps 1–5", "by a shuttle", "acetaldehyde", the pool's
+  // heading) are left out rather than squeezed; the tall and wide drawings carry them.
+  function drawFlat(p, f) {
+    const { w, h } = p.box;
+    const o = f.o;
+    const t = clamp(Math.min(w / 330, h / 200), 0.95, 1.1);
+    const stalled = stalledNow(f);
+    const idle = f.chain <= 1e-6;
+    const glyActive = f.load > 1e-6;
+    const fermActive = f.ferm > 1e-6;
+
+    const mW = clamp(w * 0.24, 66, 92);
+    const mx1 = w - 4;
+    const mx0 = mx1 - mW;
+    const mcx = (mx0 + mx1) / 2;
+    const capR = mW / 2;
+    const TOP = 35;
+    const gx = 25;
+    const sRx = 17 * t;
+    const sRy = 9.5 * t;
+    const ex = 13 * t;
+    const ey = 8 * t;
+    const gSize = 9.5 * t;
+    const lSize = 8.5 * t;
+    // From the foot up: the road, the enzyme's note, the fermentation row, its lanes, then the pool.
+    const roadY = h - 2.5;
+    const ypLow = roadY - 6 - ey - lSize - 0.5;
+    const room = ypLow - ey - 20 - TOP - 2;
+    const L0 = gx + sRx + 22;
+    const R0 = mx0 - 22;
+    const Rr = Math.max(45, Math.min(room / 2, (R0 - L0) / 2, 84));
+    const slack = Math.max(0, room - 2 * Rr);
+    const ringTop = TOP + 2 + slack * 0.3;
+    const cx = (L0 + R0) / 2;
+    const cy = ringTop + Rr;
+    const yp = cy + Rr + 20 + slack * 0.3 + ey;
+    const r = Math.max(8, Math.min(clamp(Rr * 0.16, 9, 24), (0.5176 * Rr - 3) / 2.5176));
+    const R = Rr - r;
+    const mr = clamp(r * 0.55, 4, 7);
+
+    // ---- the title, and the legend in a row under it ----
+    say(p, 8, 13, titleOf(m), { fit: [10.5 * t, 8.5], width: mx0 - 16, weight: 600 });
+    const yL = 30;
+    const dr = 7;
+    const w1 = 2 * dr + 4 + 'empty NAD⁺'.length * 0.53 * lSize;
+    const w2 = 2 * dr + 4 + 'loaded NADH'.length * 0.53 * lSize;
+    const head = 'The NAD pool';
+    const hw = head.length * 0.58 * lSize + 10;
+    let lx = 8;
+    if (lx + hw + w1 + 12 + w2 <= mx0 - 8) {
+      say(p, lx, yL, head, { size: lSize, weight: 700 });
+      lx += hw;
+    }
+    legendItem(p, lx, yL, false, 'empty NAD⁺', lSize, dr);
+    legendItem(p, lx + w1 + 12, yL, true, 'loaded NADH', lSize, dr);
+
+    // ---- glycolysis, a column on the left ----
+    const yG = TOP + 11;
+    say(p, gx, yG, 'Glucose', { size: gSize, weight: 700, anchor: 'middle' });
+    const u0 = yG + 4;
+    const u1 = cy - sRy - 3;
+    arrow(p, gx, u0, gx, u1, { colour: C.goldText, active: glyActive, phase: m.phase.gly });
+    const pair = (y0, y1, steps, atp) => {
+      const mid = (y0 + y1) / 2;
+      if (y1 - y0 >= 3 * lSize + 6) {
+        say(p, gx + 8, mid - 1, steps, { size: lSize, fill: C.soft });
+        say(p, gx + 8, mid + lSize + 1, atp, { size: lSize, weight: 600 });
+      } else {
+        say(p, gx + 8, mid + lSize * 0.36, atp, { size: lSize, weight: 600 });
+      }
+    };
+    pair(u0, u1, 'steps 1–5', '−2 ATP');
+    enzyme(p, gx, cy, sRx, sRy, { warn: stalled });
+    say(p, gx, cy + 3 * t, 'step 6', { size: lSize, weight: 700, anchor: 'middle', fill: ENZ.symbolColor });
+    const d0 = cy + sRy + 3;
+    const d1 = yp - 11 * t;
+    if (stalled) say(p, gx + 7, d0 + 8 * t, 'stopped', { size: 9 * t, weight: 700, fill: C.coralText });
+    arrow(p, gx, d0, gx, d1, { colour: C.goldText, active: glyActive, phase: m.phase.gly });
+    pair(stalled ? d0 + 12 * t : d0, d1, 'steps 7–10', '+4 ATP');
+    say(p, gx, yp + 3.5 * t, 'Pyruvate', { size: gSize, weight: 700, anchor: 'middle' });
+    // Step 6 takes an empty carrier and hands back a loaded one.
+    lanes(p, cx - Rr - 3, cy, gx + sRx + 3, cy, { toB: 'empty', active: glyActive, phase: m.phase.gly, mr });
+
+    // ---- the pool ----
+    ring(p, cx, cy, R, r, f);
+
+    // ---- the mitochondrion, a capsule on the right; its ATP under its name, as in the wide drawing ----
+    const my0 = 20;
+    const my1 = yp - ey - 12;
+    p.rect(mx0, my0, mW, my1 - my0, { rx: f2(capR), fill: tint(MITO, 14, 'var(--paper-2)'), stroke: MITO, 'stroke-width': 1.6 });
+    const yT = my0 + capR * 0.6 + 4;
+    say(p, mcx, yT, 'Mitochondrion', { fit: [10 * t, 7.5], width: mW * 0.84, anchor: 'middle', weight: 600 });
+    say(p, mcx, yT + 12 * t, `${o.mitoAtp} ATP`, { fit: [10.5 * t, 8], width: mW * 0.84, anchor: 'middle', weight: 700, num: true, fill: idle ? C.soft : C.ink });
+    say(p, mcx, yT + 22.5 * t, 'per glucose', { size: lSize, anchor: 'middle', fill: C.soft });
+    const yC = Math.max(cy + 3.5 * t, yT + 36 * t);
+    say(p, mcx, yC, 'Chain', { size: 10.5 * t, weight: 700, anchor: 'middle' });
+    say(p, mcx, yC + 11 * t, m.oxygen ? 'O₂ → H₂O' : 'stopped', { size: 9 * t, anchor: 'middle', fill: m.oxygen ? C.soft : WARN_ON_MITO, weight: m.oxygen ? null : 700 });
+    let side = 0;
+    for (let y = yC + 21 * t; y < my1 - capR * 0.9; y += 12) {
+      const len = mW * 0.42;
+      const xa = side ? mx1 - 2 : mx0 + 2;
+      p.line(xa, y, side ? xa - len : xa + len, y, { stroke: tint(MITO, 45, 'var(--paper-2)'), 'stroke-width': 2.4, 'stroke-linecap': 'round' });
+      side = 1 - side;
+    }
+    arrow(p, mcx, 3, mcx, my0 - 1, { colour: C.water, active: !idle, phase: m.phase.chain });
+    say(p, mcx - 6, my0 - 5, m.oxygen ? 'O₂' : 'no O₂', { size: 9.5 * t, weight: 700, anchor: 'end', fill: m.oxygen ? C.waterText : C.coralText });
+    // The chain takes loaded carriers and hands back empty ones, through a shuttle across the membrane.
+    const eA = cx + Rr + 3;
+    const eB = mx0 - 3;
+    lanes(p, eA, cy, eB, cy, { toB: 'loaded', active: !idle, phase: m.phase.chain, mr });
+    say(p, (eA + eB) / 2, cy + 17 * t, 'by a shuttle', { fit: [8.5 * t, 7], width: eB - eA - 2, anchor: 'middle', fill: C.soft });
+    // Pyruvate the chain can take goes on into the mitochondrion, along the foot.
+    road(p, [[gx, yp + 9 * t], [gx, roadY], [mcx, roadY], [mcx, my1 + 1]], { colour: C.goldText, active: !idle, phase: m.phase.chain });
+
+    // ---- the fermentation route, under the pool ----
+    if (m.route === 'none') {
+      say(p, cx, yp + 4, 'no fermentation', { size: 9 * t, anchor: 'middle', fill: C.soft });
+      return;
+    }
+    const lactate = m.route === 'lactate';
+    const px0 = gx + 24 * t;
+    const a1 = cx - ex - 3;
+    if (lactate) {
+      arrow(p, px0, yp, a1, yp, { colour: C.goldText, active: fermActive, phase: m.phase.ferm });
+    } else {
+      // Pyruvate gives up CO₂ first, upward, clear of the road along the foot.
+      const nrx = 9 * t;
+      const nry = 6.5 * t;
+      const n1 = px0 + 13 + nrx;
+      arrow(p, px0, yp, n1 - nrx - 3, yp, { colour: C.goldText, active: fermActive, phase: m.phase.ferm });
+      enzyme(p, n1, yp, nrx, nry);
+      arrow(p, n1, yp - nry - 3, n1, yp - nry - 16 * t, { colour: C.soft, active: fermActive, phase: m.phase.ferm });
+      say(p, n1 + 5, yp - nry - 9 * t, 'CO₂', { size: 9 * t, weight: 700, fill: C.soft });
+      const c0 = n1 + nrx + 3;
+      arrow(p, c0, yp, a1, yp, { colour: C.goldText, active: fermActive, phase: m.phase.ferm });
+      say(p, (c0 + a1) / 2, yp - 5, 'acetaldehyde', { fit: [lSize, 7], width: a1 - c0 - 4, anchor: 'middle', fill: C.soft });
+    }
+    enzyme(p, cx, yp, ex, ey);
+    const q0 = cx + ex + 3;
+    arrow(p, q0, yp, q0 + 16 * t, yp, { colour: C.goldText, active: fermActive, phase: m.phase.ferm });
+    say(p, q0 + 19 * t, yp + 3.5 * t, lactate ? 'Lactate' : 'Ethanol', { size: gSize, weight: 700 });
+    if (lactate) say(p, cx + 12, yp - ey - 4, 'lactate dehydrogenase', { fit: [lSize, 7], width: w - 4 - (cx + 12), fill: C.soft });
+    say(p, cx, yp + ey + lSize + 0.5, lactate ? 'no ATP from this step' : 'no ATP from these steps', { fit: [lSize, 7], width: 2 * Math.min(cx - 2, mcx - 8 - cx), anchor: 'middle', fill: C.soft });
+    // The route takes loaded carriers from the pool and hands back empty ones.
+    lanes(p, cx, cy + Rr + 3, cx, yp - ey - 3, { toB: 'loaded', active: fermActive, phase: m.phase.ferm, mr });
   }
 
   // ---------------------------------------------------------------- the readout
@@ -1036,11 +1202,42 @@ export function mount(root, ctx) {
 
   // ---------------------------------------------------------------- the frame
 
+  // Under a 720 px stage the box's shape picks the composition: tall where it is more than three quarters
+  // as tall as it is wide (a phone's 2 : 3 stage), flat otherwise (the frame's 16 : 9 box in windows of 800
+  // to about 1090 px), where the readout is a column of 205 to 250 px beside the drawing: 205 is what its
+  // longest row, "Oxidised where it was made" and its value, needs at the narrow readout's type.
+  let shape = 'wide';
+  let shapeKey = '';
+  function arrange() {
+    const rect = b.wrap.getBoundingClientRect();
+    const bar = b.wrap.querySelector('.tb-toolbar');
+    const barH = bar ? bar.getBoundingClientRect().height : 0;
+    const W = Math.max(0, rect.width - 14);
+    const H = Math.max(0, rect.height - barH - 28);
+    let want = 'wide';
+    let vars = null;
+    if (b.narrow && H > W * 0.75) {
+      want = 'tall';
+      vars = { '--fe-ncols': 'minmax(0, 1fr)', '--fe-nrows': 'minmax(0, 62fr) minmax(0, 38fr)', '--fe-nrc': '1', '--fe-nrr': '2' };
+    } else if (b.narrow) {
+      want = 'flat';
+      const col = Math.round(clamp(W * 0.4, 205, 250));
+      vars = { '--fe-ncols': `minmax(0, 1fr) minmax(0, ${col}px)`, '--fe-nrows': 'minmax(0, 1fr)', '--fe-nrc': '2', '--fe-nrr': '1' };
+    }
+    const key = `${want}|${JSON.stringify(vars)}`;
+    if (key === shapeKey) return false;
+    shapeKey = key;
+    shape = want;
+    if (vars) for (const [name, value] of Object.entries(vars)) b.setVar(name, value);
+    return true;
+  }
+
   b.onDraw(() => {
     const f = flows(m);
+    if (arrange()) b.remeasure();
     cell.clear();
-    if (b.narrow) drawNarrow(cell, f);
-    else drawWide(cell, f);
+    if (shape === 'tall') drawNarrow(cell, f);
+    else if (shape === 'flat' || !drawWide(cell, f)) drawFlat(cell, f);
     cell.focusMark();
     drawReadout(f);
     // A change the clock made, not the reader, is spoken too: the stall, and the lactate clearing.
