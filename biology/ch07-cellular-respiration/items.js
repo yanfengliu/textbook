@@ -1937,7 +1937,7 @@ export const ITEMS = [
     question: 'Predict what an uncoupler does to oxygen consumption, to ATP production and to body temperature, and explain why the three move in those directions. Say how chemiosmosis explains the first of them, and what about the uncouplers themselves the chemical-intermediate hypothesis could not explain. Then say why there is no safe dose of dinitrophenol.',
     rubric: [
       'an uncoupler carries protons across the inner membrane on its own, bypassing the synthase; dinitrophenol is a weak acid that dissolves in the bilayer both with its proton and without it',
-      'oxygen consumption rises to its maximum: the chain is no longer pumping against a gradient, so it runs as fast as its slowest enzyme allows',
+      'oxygen consumption rises (in isolated mitochondria given enough uncoupler, to its maximum): the chain is pumping against a smaller gradient, or none, so it runs faster, up to as fast as its slowest enzyme allows',
       'ATP synthesis falls (in isolated mitochondria given enough uncoupler, to nothing), because the protons return without turning the synthase',
       'body temperature rises: the energy that would have made ATP, all of the 220 kilojoules each NADH releases, comes out as heat',
       'and a body that gets less ATP from each unit of fuel burns more fuel to meet the same demand',
