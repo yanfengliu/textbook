@@ -1492,7 +1492,7 @@ export const ITEMS = [
       'it is driven one way, into the matrix, because the aspartate leaving is swapped for glutamate and a proton; that proton is its only cost',
       'the glycerol 3-\u2060phosphate shuttle, used by fast skeletal muscle and insect flight muscle, hands the electrons to an FAD on the outer face of the inner membrane; they enter the chain at ubiquinone, below complex\u00a0I, and are worth 1.5',
       'so it costs about one ATP per NADH, and what it buys is a route that does not depend on the matrix\'s own carriers: it hands the electrons straight to ubiquinone, however loaded the matrix is',
-      'which is why a liver cell gets 32 ATP from a glucose and a fast skeletal muscle cell 30',
+      'which is why a liver cell gets about 32 ATP from a glucose and a fast skeletal muscle cell 30',
     ],
     explain: 'Whether the cytosolic pair is worth less depends on the shuttle. Carried by malate and aspartate, it is worth almost what a matrix pair is worth: the shuttle spends one proton of the ten. Carried by glycerol 3-\u2060phosphate, it is worth what an FADH<sub>2</sub> is worth, and a fast muscle that needs its cytosolic NADH emptied however loaded its matrix is pays that price willingly.',
   },
