@@ -647,8 +647,8 @@ export class TbSitting extends HTMLElement {
     return steps;
   }
 
-  // A spread across the chapter rather than everything at once: one item each from objectives taken
-  // evenly down the bank, so the first sitting touches the start, the middle and the end.
+  // A spread across the book rather than everything at once: one item each from objectives taken
+  // evenly down the banks, in chapter order, so the first sitting touches the start, the middle and the end.
   calibrationSteps() {
     const ids = [...this.byObjective.keys()];
     const want = Math.min(6, ids.length);

@@ -114,7 +114,7 @@ Multiple choice measures recognition, and a reader who is assessed only by multi
 
 ## Cold start
 
-With no history every objective is `new`, and a queue of two hundred items on the first morning is how this kind of system dies. The first visit offers a two-minute calibration: a handful of items spread across the chapter, plus the option to mark what is already known. After that the queue introduces a few new objectives per sitting and lets the schedule do the rest.
+With no history every objective is `new`, and a queue of two hundred items on the first morning is how this kind of system dies. The first visit offers a two-minute calibration: a handful of items spread across the book, plus the option to mark what is already known. After that the queue introduces a few new objectives per sitting and lets the schedule do the rest.
 
 ## What this risks, and what holds it
 
