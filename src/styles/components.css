@@ -762,11 +762,13 @@ tb-check .tb-check__opt {
   transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
-tb-check .tb-check__opt:hover {
+/* Only a live option answers the pointer. Every option is disabled once the check is answered, so the
+   verdict tints below are never painted over by a hover (as they were when this rule applied to all). */
+tb-check .tb-check__opt:hover:not(:disabled) {
   background: var(--paper-2);
 }
 
-tb-check .tb-check__opt:hover .k {
+tb-check .tb-check__opt:hover:not(:disabled) .k {
   color: var(--ink);
 }
 
@@ -794,10 +796,6 @@ tb-check .tb-check__opt .k {
 
 tb-check[data-answered] .tb-check__opt {
   cursor: default;
-}
-
-tb-check[data-answered] .tb-check__opt:hover {
-  background: none;
 }
 
 /* After an answer the options that were not in play step back, so the two that matter carry the block. */

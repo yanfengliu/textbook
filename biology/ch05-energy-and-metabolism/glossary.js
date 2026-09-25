@@ -28,7 +28,7 @@
 // that lives here.
 export const GLOSSARY = {
   // ---- 5.1 Order costs, and something else pays ----
-  energy: { term: 'Energy', def: 'The capacity to cause change — to move something, heat something, or rearrange atoms. It is not a substance and not a fuel; it is a quantity that stays the same as it changes form.' },
+  energy: { term: 'Energy', def: 'The capacity to cause change\u00A0— to move something, heat something, or rearrange atoms. It is not a substance and not a fuel; it is a quantity that stays the same as it changes form.' },
   'kinetic-energy': { term: 'Kinetic energy', def: 'The energy of anything in motion, including the random motion of molecules, which is what heat is. A warm object holds more of it than a cold one of the same kind.' },
   'potential-energy': { term: 'Potential energy', def: 'Energy held by position or arrangement rather than by motion: a weight on a shelf, a charge separated from its opposite, an electron held by an atom that would rather not have it.' },
   'chemical-energy': { term: 'Chemical energy', def: 'The potential energy held in the arrangement of atoms and electrons in a molecule. It is released when the arrangement changes to a more stable one, which is what a chemical reaction is.' },
@@ -41,26 +41,26 @@ export const GLOSSARY = {
   'free-energy': { term: 'Free energy (G)', def: 'The part of a system\'s energy that is available to do work, in kilojoules per mole. The change in it, ΔG, decides which way a reaction goes: negative and it runs by itself, positive and the reverse does, zero and it is at equilibrium.' },
   exergonic: { term: 'Exergonic', def: 'Of a reaction: one that releases free energy, so ΔG is negative and it runs by itself. It says nothing at all about how fast.' },
   endergonic: { term: 'Endergonic', def: 'Of a reaction: one that takes free energy in, so ΔG is positive and it does not run by itself. A cell makes such a reaction go by coupling it to an exergonic one.' },
-  'standard-free-energy': { term: 'Standard free energy change (ΔG°′)', def: 'The free energy change measured with every reactant and product at one mole per litre, at pH 7 and 25 °C. It is a property of the reaction and a useful table entry, and it is a condition no cell is ever in.' },
+  'standard-free-energy': { term: 'Standard free energy change (ΔG°′)', def: 'The free energy change measured with every reactant and product at one mole per litre, at pH 7 and 25\u00A0°C. It is a property of the reaction and a useful table entry, and it is a condition no cell is ever in.' },
   'steady-state': { term: 'Steady state', def: 'A condition in which concentrations hold still because matter is flowing through at a constant rate, not because nothing is happening. A candle flame and a living cell are both steady states; an equilibrium is neither.' },
 
   // ---- 5.3 The cell spends one molecule ----
-  atp: { term: 'ATP (adenosine triphosphate)', def: 'The molecule a cell spends when it pays for something: adenine joined to ribose, with a chain of three phosphate groups. Splitting the outer phosphate off gives ADP and free phosphate and releases about 50 kJ per mole under the conditions inside a cell.' },
+  atp: { term: 'ATP (adenosine triphosphate)', def: 'The molecule a cell spends when it pays for something: adenine joined to ribose, with a chain of three phosphate groups. Splitting the outer phosphate off gives ADP and free phosphate and releases about 50\u00A0kJ per mole under the conditions inside a cell.' },
   adp: { term: 'ADP (adenosine diphosphate)', def: 'What is left of ATP when the outer phosphate has been taken off. Attaching a phosphate to it again is what "making ATP" means, and is what the whole of catabolism is for.' },
 
   // ---- 5.4 Nothing is paid for with heat ----
   'energy-coupling': { term: 'Energy coupling', def: 'Making an endergonic reaction go by joining it to an exergonic one through a shared chemical intermediate, so that the two are steps of one process and their free energy changes add. Heat released nearby cannot do this.' },
-  phosphorylation: { term: 'Phosphorylation', def: 'Transferring a phosphate group from ATP onto something else — a substrate, a transport protein, a target protein. The receiving molecule becomes less stable and therefore readier to react, or changes shape and so changes what it does.' },
+  phosphorylation: { term: 'Phosphorylation', def: 'Transferring a phosphate group from ATP onto something else\u00A0— a substrate, a transport protein, a target protein. The receiving molecule becomes less stable and therefore readier to react, or changes shape and so changes what it does.' },
 
   // ---- 5.5 An enzyme changes the route, not the destination ----
   enzyme: { term: 'Enzyme', def: 'A biological catalyst, almost always a protein and occasionally an RNA, that speeds one particular reaction by lowering its activation energy. It is not used up, it does not appear in the overall equation, and it changes no reaction\'s free energy or equilibrium.' },
   catalyst: { term: 'Catalyst', def: 'Anything that speeds a reaction without being consumed by it and without changing where the reaction ends up. It offers a different route between the same two places.' },
   'activation-energy': { term: 'Activation energy', def: 'The free energy a molecule must acquire to reach the transition state, the worst moment of a reaction. It is why an exergonic reaction can sit unchanged for years, and it is the only thing an enzyme changes.' },
-  'transition-state': { term: 'Transition state', def: 'The arrangement at the top of the barrier, with bonds part broken and part formed — less stable than either the reactant or the product, and too short-lived to isolate. An enzyme works by binding it more tightly than it binds the substrate.' },
+  'transition-state': { term: 'Transition state', def: 'The arrangement at the top of the barrier, with bonds part broken and part formed\u00A0— less stable than either the reactant or the product, and too short-lived to isolate. An enzyme works by binding it more tightly than it binds the substrate.' },
   substrate: { term: 'Substrate', def: 'The molecule an enzyme acts on. It binds in the active site, is turned into the product, and leaves; the enzyme is unchanged and takes the next one.' },
   'active-site': { term: 'Active site', def: 'The pocket on an enzyme where the substrate binds and the chemistry happens, made by the folding of the chain rather than by a run of neighbouring residues. A few side chains lining it do the work.' },
   'induced-fit': { term: 'Induced fit', def: 'The closing of an active site around its substrate as the substrate binds, which grips the molecule and often strains it towards the shape of the transition state. It replaced the older picture of a rigid lock and key.' },
-  cofactor: { term: 'Cofactor', def: 'A non-protein helper an enzyme needs in order to work at all. Many are metal ions — zinc, iron, magnesium — held in the active site and doing chemistry the twenty side chains cannot.' },
+  cofactor: { term: 'Cofactor', def: 'A non-protein helper an enzyme needs in order to work at all. Many are metal ions\u00A0— zinc, iron, magnesium\u00A0— held in the active site and doing chemistry the twenty side chains cannot.' },
   coenzyme: { term: 'Coenzyme', def: 'An organic cofactor, usually a small molecule that binds loosely and leaves again carrying something: a chemical group, or a pair of electrons. Most are made from vitamins, which is what a vitamin is for.' },
 
   // ---- 5.6 How fast, and what slows it down ----
@@ -87,5 +87,5 @@ export const GLOSSARY = {
   'redox-reaction': { term: 'Redox reaction', def: 'A reaction in which electrons move from one substance to another. Oxidation and reduction are two halves of one event and never happen apart: whatever is oxidised has reduced something else.' },
   'electron-carrier': { term: 'Electron carrier', def: 'A small molecule that picks up electrons from one reaction and delivers them to another, then goes back for more. A cell keeps very little of each and recycles it constantly, exactly as it does with ATP.' },
   nad: { term: 'Nicotinamide adenine dinucleotide', def: 'The main electron carrier of catabolism, written NAD<sup>+</sup> in the form that is ready to take electrons: two nucleotides joined tail to tail, which accepts two electrons and one proton to become NADH. A pool of NADH is a cell holding electrons it has not yet let fall.' },
-  fad: { term: 'FAD', def: 'The other common electron carrier, built around riboflavin — vitamin B<sub>2</sub>. It takes two electrons and two protons to become FADH<sub>2</sub>, and unlike NAD<sup>+</sup> it usually stays bound to the enzyme that uses it.' },
+  fad: { term: 'FAD', def: 'The other common electron carrier, built around riboflavin\u00A0— vitamin B<sub>2</sub>. It takes two electrons and two protons to become FADH<sub>2</sub>, and unlike NAD<sup>+</sup> it usually stays bound to the enzyme that uses it.' },
 };

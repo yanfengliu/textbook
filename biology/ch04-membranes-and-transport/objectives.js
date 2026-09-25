@@ -48,7 +48,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'bilayer-selfassembly',
-    statement: 'Predict which arrangement — a bilayer sheet, a micelle or an oil droplet — a given lipid will take in water, and say what drives it there.',
+    statement: 'Predict which arrangement\u00A0— a bilayer sheet, a micelle or an oil droplet\u00A0— a given lipid will take in water, and say what drives it there.',
     prereqs: ['amphipathic', 'hydrophobic-effect'],
     teaches: { sections: ['bilayer'], figures: ['fig-bilayer'] },
     level: 'apply',
@@ -71,7 +71,7 @@ export const OBJECTIVES = [
   // ---- 4.2 A mosaic that flows ----
   {
     id: 'mosaic-components',
-    statement: 'Name what a membrane contains besides phospholipid — proteins, cholesterol and surface carbohydrate — and say where in the sheet each one sits.',
+    statement: 'Name what a membrane contains besides phospholipid\u00A0— proteins, cholesterol and surface carbohydrate\u00A0— and say where in the sheet each one sits.',
     prereqs: ['bilayer-properties'],
     teaches: { sections: ['mosaic'], figures: ['fig-membrane'] },
     level: 'recall',
@@ -161,7 +161,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'water-potential',
-    statement: 'Use water potential — the solute term plus the pressure term — to predict which way water moves between two compartments, and say what pressure would stop it.',
+    statement: 'Use water potential\u00A0— the solute term plus the pressure term\u00A0— to predict which way water moves between two compartments, and say what pressure would stop it.',
     prereqs: ['osmosis-mechanism'],
     teaches: { sections: ['osmosis'], figures: ['fig-osmosis'] },
     level: 'apply',
@@ -182,7 +182,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'osmoregulation',
-    statement: 'Explain the three ways of living with osmosis — a wall, continuous bailing, and holding the surrounding fluid isotonic — and say which organisms use which.',
+    statement: 'Explain the three ways of living with osmosis\u00A0— a wall, continuous bailing, and holding the surrounding fluid isotonic\u00A0— and say which organisms use which.',
     // One prerequisite per strategy that has an objective of its own: the wall is `tonicity-walled`,
     // holding the fluid isotonic is `tonicity-animal` and `homeostasis`. Bailing has no objective; it is
     // §4.4's margin note and Chapter 1's paramecia.
@@ -252,7 +252,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'pump-consequences',
-    statement: 'Explain what the sodium–potassium pump is for — the gradients it holds, the cell volume it defends, and the share of a cell\'s energy it takes — and predict what happens when it is blocked.',
+    statement: 'Explain what the sodium–potassium pump is for\u00A0— the gradients it holds, the cell volume it defends, and the share of a cell\'s energy it takes\u00A0— and predict what happens when it is blocked.',
     prereqs: ['pump-cycle', 'tonicity-animal'],
     teaches: { sections: ['active'], figures: ['fig-pump'] },
     level: 'explain',

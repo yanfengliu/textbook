@@ -95,7 +95,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'resolution-limits',
-    statement: 'Say which instrument can resolve a given structure, and why an ordinary light microscope stops near 200 nm.',
+    statement: 'Say which instrument can resolve a given structure, and why an ordinary light microscope stops near 200\u00A0nm.',
     prereqs: ['cell-scale'],
     teaches: { sections: ['levels'], figures: ['fig-scale'] },
     level: 'apply',

@@ -86,7 +86,7 @@ export const OBJECTIVES = [
   // ---- 3.3 The prokaryotic cell ----
   {
     id: 'prokaryote-parts',
-    statement: 'Name the parts of a prokaryotic cell — nucleoid, plasmids, ribosomes, membrane, wall, capsule, pili, flagellum — and say what each is for.',
+    statement: 'Name the parts of a prokaryotic cell\u00A0— nucleoid, plasmids, ribosomes, membrane, wall, capsule, pili, flagellum\u00A0— and say what each is for.',
     prereqs: ['prokaryote-eukaryote'],
     teaches: { sections: ['prokaryote'], figures: ['fig-prokaryote'] },
     level: 'recall',
@@ -255,7 +255,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'junction-types',
-    statement: 'Decide which junction — tight, desmosome, gap or plasmodesma — explains a given observation about a tissue.',
+    statement: 'Decide which junction\u00A0— tight, desmosome, gap or plasmodesma\u00A0— explains a given observation about a tissue.',
     prereqs: ['wall-vs-matrix'],
     teaches: { sections: ['surface'], figures: [] },
     level: 'apply',

@@ -170,7 +170,7 @@ export const OBJECTIVES = [
   // ---- 6.3 Green is the part a leaf uses least ----
   {
     id: 'chlorophyll-structure',
-    statement: 'Describe a chlorophyll molecule — the ring, the magnesium ion at its centre and the long tail — and say what each part is for.',
+    statement: 'Describe a chlorophyll molecule\u00A0— the ring, the magnesium ion at its centre and the long tail\u00A0— and say what each part is for.',
     prereqs: ['chloroplast-compartments', 'amphipathic'],
     teaches: { sections: ['pigments'], figures: [] },
     level: 'recall',
@@ -207,7 +207,7 @@ export const OBJECTIVES = [
   // ---- 6.4 Two pushes, and water pays for both ----
   {
     id: 'two-photosystems',
-    statement: 'Explain what each photosystem would have to be able to do if there were only one, and describe the two measurements — the red drop and the enhancement effect — that showed there were two.',
+    statement: 'Explain what each photosystem would have to be able to do if there were only one, and describe the two measurements\u00A0— the red drop and the enhancement effect\u00A0— that showed there were two.',
     prereqs: ['excited-electron', 'controlled-experiment'],
     teaches: { sections: ['lightreactions'], figures: ['fig-zscheme'] },
     level: 'explain',
