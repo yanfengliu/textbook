@@ -1179,12 +1179,15 @@ export function mount(root, ctx) {
     if (B.Nar) add('nar', ['nitrate reductase', 'reductase'], { x: g.sx, y: (B.Nar.y0 + B.Nar.y1) / 2 }, g.BH, (B.Nar.y1 - B.Nar.y0) / 2, { cls: 'rc-soft', weight: 500, size: g.small, prefer: 'right' });
     // How many charges each complex moves, on the side they arrive at and nowhere else, and level with the
     // complex's own block: beside the next complex down it would be read as that one's count, so where
-    // the block is too short to hold it clear of its neighbours' labels it is left out.
+    // the block is too short to hold it clear of its neighbours' labels it is left out, and the other
+    // complexes' counts with it: they go on as a set, because with one missing the rest read as the whole
+    // (at an 800 px window complex III's "+2" alone was left out, and the drawing said +4 and +4 beside a
+    // table of 10 a pair).
     for (const st of Object.keys(g.cross)) {
       const cr = g.cross[st];
       const my = (Math.min(...cr.ys) + Math.max(...cr.ys)) / 2;
       add(`n${st}`, `+${CHARGES_AT[st]}`, { x: g.sx, y: my }, cr.x1 - g.sx + 3, 4, {
-        cls: 'rc-charge', optional: true,
+        cls: 'rc-charge', optional: true, set: 'charges',
         cands: (out, sz) => [0, -0.5, 0.5, -1, 1, -1.5, 1.5, -2, 2]
           .map((j) => my + j * sz * 1.1)
           .filter((cy) => cy >= B[st].y0 + 1 && cy <= B[st].y1 - 1)
@@ -1267,8 +1270,12 @@ export function mount(root, ctx) {
       return { x0: x0 - 1.5, y0: c.y - sz * 0.92, x1: x0 + w + 1.5, y1: c.y + sz * 0.34 };
     };
     // Every label the drawing needs before any it can do without, so an optional one never takes the only
-    // place a needed one had.
-    for (const it of [...items.filter((i) => !i.optional), ...items.filter((i) => i.optional)]) {
+    // place a needed one had. The members of a set are consecutive in that order, and the set is undone at
+    // its last member unless every one of them found a place.
+    const order = [...items.filter((i) => !i.optional), ...items.filter((i) => i.optional)];
+    let set = null;
+    for (const [n, it] of order.entries()) {
+      if (it.set && set?.name !== it.set) set = { name: it.set, placed: placed.length, segs: segs.length, keys: [], whole: true };
       let chosen = null;
       let first = null;
       search:
@@ -1305,11 +1312,20 @@ export function mount(root, ctx) {
           }
         }
       }
-      if (!chosen && (it.optional || !first)) continue;
-      if (!chosen) chosen = first;
-      placed.push(chosen.box);
-      if (chosen.leader) segs.push({ a: chosen.leader.a, b: chosen.leader.b, pad: 1.5 });
-      out[it.key] = { ...it, ...chosen };
+      if (!chosen && (it.optional || !first)) {
+        if (it.set) set.whole = false;
+      } else {
+        if (!chosen) chosen = first;
+        placed.push(chosen.box);
+        if (chosen.leader) segs.push({ a: chosen.leader.a, b: chosen.leader.b, pad: 1.5 });
+        out[it.key] = { ...it, ...chosen };
+        if (it.set) set.keys.push(it.key);
+      }
+      if (it.set && order[n + 1]?.set !== it.set && !set.whole) {
+        placed.length = set.placed;
+        segs.length = set.segs;
+        for (const k of set.keys) delete out[k];
+      }
     }
     g.labels = out;
     g.collisions = Object.values(out).filter((l) => l.collided).map((l) => l.key);
