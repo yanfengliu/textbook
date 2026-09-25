@@ -1584,7 +1584,7 @@ export const ITEMS = [
     kind: 'mcq',
     question: 'At standard prices, about two-thirds of glucose\'s free energy is not captured as ATP. What becomes of it?',
     options: [
-      { text: 'It leaves as heat, about a hundred watts from a resting adult, and that is no design fault: every transfer must shed some.', correct: true },
+      { text: 'It leaves as heat, part of the hundred watts a resting adult gives off, and that is no design fault: every transfer must shed some.', correct: true },
       { text: 'It is stored as fat for later use, since energy can never be destroyed and so has to be kept somewhere in the body.',
         why: 'Confuses fuel not yet burnt with energy already released. Fat is what a body makes from fuel it has not burnt; the free energy released by burning glucose cannot be put back into a fat, and what is not captured leaves as heat.' },
       { text: 'It stays in the proton gradient as a reserve that the cell can draw on when its fuel runs out.',
@@ -1592,7 +1592,7 @@ export const ITEMS = [
       { text: 'It is lost because the enzymes are imperfect, a waste that natural selection will go on reducing with time, until none is left.',
         why: 'Treats the loss as a flaw to be engineered away. Section\u00a05.1 established that every transfer must shed some energy as heat; evolution can narrow the loss, and has\u00a0— a cell beats a petrol engine\u00a0— but never to nothing.' },
     ],
-    explain: 'The rest\u00a0— two-thirds at standard prices, under half at the cell\'s own\u00a0— is simply the price, and it is the heat you are making now. That is also why the heat can be put to use: Section\u00a07.8 is about an animal that chooses to pay almost all of it, on purpose, to keep warm.',
+    explain: 'The rest\u00a0— two-thirds at standard prices, under half at the cell\'s own\u00a0— is simply the price, and it is part of the heat you are making now. That is also why the heat can be put to use: Section\u00a07.8 is about an animal that chooses to pay almost all of it, on purpose, to keep warm.',
   },
   {
     id: 'i-respiration-efficiency-3',
