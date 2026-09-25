@@ -239,14 +239,17 @@ test('heldRun holds the marks and the word glued to a label, and nothing a new w
     ['是諸侯', '夫', 0],
     ['、君子', '人', 1],
     // Glue: chapter 8's two no-break spaces before a dash, the other two kinds, a word, an opening mark and
-    // a Han character glued on, and glue with nothing held after it.
+    // a Han character glued on, glue after glue, glue after a held character, and glue with nothing held
+    // after it.
     ['\u00A0— a phosphate joining', 'd', 2],
     ['\u00A0— it loses its amino group', 'n', 2],
     ['\u202F—', 'd', 2],
     ['\u2060, and', 'r', 2],
     ['\u00A0µm across', '0', 3],
     ['\u00A0(DNA) and', 'd', 6],
+    ['s\u00A0(DNA) and', 'm', 7],
     ['\u00A0\u2060— and', 'd', 3],
+    ['\u2060\u00A0— and', 'd', 3],
     ['\u00A0是諸侯', '夫', 2],
     ['\u00A0 and', 'd', 1],
     ['\u00A0', 'd', 1],
