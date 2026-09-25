@@ -1836,7 +1836,7 @@ export const ITEMS = [
       'making DNA from an RNA template is the reverse of the usual direction, so the protein is a reverse transcriptase',
       'primase and polymerase then fill in the partner strand as they would any lagging strand',
     ],
-    explain: 'Telomerase was found in 1985 by Carol Greider and Elizabeth Blackburn in <i>Tetrahymena</i>, whose many small chromosomes give it many ends. It solves the end problem by bringing its own template. It is not the only solution: the cancers that lack it keep their telomeres by recombination instead.',
+    explain: 'Telomerase was found in 1985 by Carol Greider and Elizabeth Blackburn in <i>Tetrahymena</i>, whose many small chromosomes give it many ends. It solves the end problem by bringing its own template. It is not the only solution: most of the cancers that lack it keep their telomeres by recombination instead.',
   },
   {
     id: 'i-divisions-counted-1',
