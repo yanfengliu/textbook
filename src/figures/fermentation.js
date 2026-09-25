@@ -30,7 +30,10 @@
 // ATP of glycolysis's net two. So glycolysis's rate in carriers a second is also its net ATP a second, and
 // half of it is glucose a second — `glycolysisRate` is glucose a second of figure time.
 //   - The pool is 12 carriers; L of them are loaded (continuous; the ring draws floor(L)). At 0.04 mmol/L
-//     a carrier the pool is 0.48 mmol/L, "a fraction of a millimole per litre" as §7.7 says.
+//     a carrier the pool is 0.48 mmol/L, "a fraction of a millimole per litre" as §7.7 says. The rates are
+//     in discs' worth a second of figure time, illustrative rather than scaled (at 0.04 mmol/L a disc a
+//     sprinting fibre would spend far slower than §7.7's two seconds of ATP), so the readout says what a
+//     disc and a count stand for rather than printing a scale (figure review of 2026-09-24, finding 12).
 //   - The chain empties min(kC·L, chainMax) carriers a second while there is oxygen, saturating at L_C =
 //     2.25 loaded. Each carrier it empties is a pyruvate oxidised too, worth (yield − 2) / 2 ATP beyond
 //     glycolysis's: 14 in fast skeletal muscle, whose shuttle makes it 30 per glucose, and 8 in yeast (18,
@@ -48,7 +51,8 @@
 //     maximum), exponentially, with a half-time of 2.5 s of figure time at rest that halves at a middling
 //     demand: gentle exercise clears it faster than rest does. What clears is split 50 : 30 : 20 between
 //     oxidised where it was made, oxidised in the heart, slow fibres and brain, and sent to the liver; the
-//     split is illustrative, not measured. The liver spends 6 ATP rebuilding each glucose from two lactate.
+//     split is illustrative, not measured, and the note under the clearing table says so (finding 13). The
+//     liver spends 6 ATP rebuilding each glucose from two lactate.
 //
 // WHAT IT LEAVES OUT, and why.
 //   - The shuttle that carries glycolysis's electrons into the mitochondrion is a label on the lanes, "by
@@ -274,14 +278,27 @@ function situation(s, f) {
   return { key: 'aerobic', warn: false, text: 'With oxygen, the chain keeps the pool mostly empty. Take the oxygen away.' };
 }
 
-function tissueNote(o, level) {
+function tissueNote(o, level, s) {
   if (o.id === 'yeast') return level < 2 ? 'With oxygen, 16 to 20 in yeast, whose chain has no complex I.' : 'With oxygen, 16 to 20 in yeast.';
+  // One press from the opening puts a cell fermenting to ethanol beside a muscle fibre's 30, which invites
+  // "a yeast gets 30 with oxygen", so the note says whose 30 it is and what a yeast gets (figure review of
+  // 2026-09-24, finding 14).
+  if (s.route === 'ethanol') {
+    return level < 2
+      ? 'With oxygen, about 30 for a mitochondrion like a fast muscle fibre\'s; brewer\'s yeast, whose chain has no complex I, gets 16 to 20.'
+      : 'With oxygen, about 30 here; 16 to 20 in yeast.';
+  }
   return level < 2 ? 'With oxygen, about 30 in fast skeletal muscle and 32 in heart and liver.' : 'With oxygen, about 30 in fast skeletal muscle.';
 }
 
 const ETHANOL_NOTE = 'Two carbons leave as CO₂ for good. The ethanol keeps the other four, and a yeast with oxygen respires it once the sugar is gone.';
-const CLEAR_NOTE = 'In a body the extra lactate is gone within an hour or so of stopping, sooner with gentle exercise. The figure\'s clock runs far faster.';
-const CLEAR_NOTE_SHORT = 'In a body it clears within an hour or so, sooner with gentle exercise. This clock is far faster.';
+// The split between the three fates is illustrative (FATES), and printed to two decimals it would read as
+// measured, so the note says so (figure review of 2026-09-24, finding 13).
+const CLEAR_NOTE = 'In a body the extra lactate is gone within an hour or so of stopping, sooner with gentle exercise. The split between the three is illustrative, and the figure\'s clock runs far faster.';
+const CLEAR_NOTE_SHORT = 'In a body it clears within an hour or so, sooner with gentle exercise. The split is illustrative; this clock is far faster.';
+// What a disc and a count stand for: the figure's units are its own (figure review of 2026-09-24,
+// finding 12).
+const SCALE_NOTE = 'Each disc stands for millions of carriers or more, and each ATP or glucose in the rates for as many molecules.';
 
 // A per cent that stays readable from a few seconds' worth (thousandths of one) up to a brew's.
 function percentText(v) {
@@ -681,14 +698,18 @@ export function mount(root, ctx) {
     const my0 = ringTop - 6;
     const my1 = yb - 22;
     p.rect(mx0, my0, mW, my1 - my0, { rx: f2(mW / 2), fill: tint(MITO, 14, 'var(--paper-2)'), stroke: MITO, 'stroke-width': 1.6 });
-    say(p, mcx, my0 + mW * 0.3 + 4, 'Mitochondrion', { fit: [10.5 * t, 8], width: mW * 0.84, anchor: 'middle', weight: 600 });
+    // The ATP is the mitochondrion's (the synthase's, and the cycle's two), not the chain's, which makes
+    // none (§7.5; Figure 7.3's counter stays at 0). Drawn under "Chain" it read as the chain's, so it sits
+    // under the title, above the chain (figure review of 2026-09-24, finding 10).
+    const yT = my0 + mW * 0.3 + 4;
+    const idle = f.chain <= 1e-6;
+    say(p, mcx, yT, 'Mitochondrion', { fit: [10.5 * t, 8], width: mW * 0.84, anchor: 'middle', weight: 600 });
+    say(p, mcx, yT + 22 * t, `${o.mitoAtp} ATP`, { fit: [11 * t, 8], width: mW * 0.84, anchor: 'middle', weight: 700, num: true, fill: idle ? C.soft : C.ink });
+    say(p, mcx, yT + 35 * t, 'per glucose', { size: 9 * t, anchor: 'middle', fill: C.soft });
     say(p, mcx, cy - 3, 'Chain', { size: 11 * t, weight: 700, anchor: 'middle' });
     say(p, mcx, cy + 11 * t, m.oxygen ? 'O₂ → H₂O' : 'stopped', { size: 9.5 * t, anchor: 'middle', fill: m.oxygen ? C.soft : WARN_ON_MITO, weight: m.oxygen ? null : 700 });
-    const idle = f.chain <= 1e-6;
-    say(p, mcx, cy + 40 * t, `${o.mitoAtp} ATP`, { fit: [11 * t, 8], width: mW * 0.84, anchor: 'middle', weight: 700, num: true, fill: idle ? C.soft : C.ink });
-    say(p, mcx, cy + 53 * t, 'per glucose', { size: 9 * t, anchor: 'middle', fill: C.soft });
     let side = 0;
-    for (let y = cy + 70 * t; y < my1 - mW * 0.45; y += 13) {
+    for (let y = cy + 30 * t; y < my1 - mW * 0.45; y += 13) {
       const len = mW * 0.42;
       const xa = side ? mx1 - 2 : mx0 + 2;
       p.line(xa, y, side ? xa - len : xa + len, y, { stroke: tint(MITO, 45, 'var(--paper-2)'), 'stroke-width': 2.4, 'stroke-linecap': 'round' });
@@ -754,7 +775,8 @@ export function mount(root, ctx) {
     const ey = 10 * t;
     const sRx = 20 * t;
     const sRy = 11 * t;
-    const capH = 38 * k;
+    // Tall enough for three lines in its left cell: the mitochondrion's name and its ATP (finding 10).
+    const capH = 46 * k;
     const yc1 = h - 6;
     const yc0 = yc1 - capH;
     const xc0 = 30 * k;
@@ -805,16 +827,19 @@ export function mount(root, ctx) {
     // ---- the mitochondrion, a capsule along the bottom ----
     const idle = f.chain <= 1e-6;
     p.rect(xc0, yc0, xc1 - xc0, capH, { rx: f2(capH / 2), fill: tint(MITO, 14, 'var(--paper-2)'), stroke: MITO, 'stroke-width': 1.6 });
+    // The ATP is the mitochondrion's, not the chain's (the chain makes none), so it sits in the left cell
+    // under the mitochondrion's name, and "Chain" stands alone in the middle (figure review of 2026-09-24,
+    // finding 10: side by side in one row, the three read as "the chain makes 28 ATP a glucose").
     const lA = xc0 + capH * 0.45;
     const lB = cx - 26 * t;
-    say(p, (lA + lB) / 2, yc0 + capH / 2 + 3.5 * t, 'Mitochondrion', { fit: [10 * t, 7.5], width: lB - lA, anchor: 'middle', weight: 600 });
+    const lx = (lA + lB) / 2;
+    const mid = yc0 + capH / 2;
+    say(p, lx, mid - 7.5 * t, 'Mitochondrion', { fit: [10 * t, 7.5], width: lB - lA, anchor: 'middle', weight: 600 });
+    say(p, lx, mid + 4 * t, `${o.mitoAtp} ATP`, { fit: [10 * t, 7.5], width: lB - lA, anchor: 'middle', weight: 700, num: true, fill: idle ? C.soft : C.ink });
+    say(p, lx, mid + 15 * t, 'per glucose', { fit: [9 * t, 7], width: lB - lA, anchor: 'middle', fill: C.soft });
     const cRow = yc0 + capH * 0.44;
     say(p, cx, cRow, 'Chain', { size: 10.5 * t, weight: 700, anchor: 'middle' });
     say(p, cx, cRow + 12 * t, m.oxygen ? 'O₂ → H₂O' : 'stopped', { size: 9 * t, anchor: 'middle', fill: m.oxygen ? C.soft : WARN_ON_MITO, weight: m.oxygen ? null : 700 });
-    const rA = cx + 30 * t;
-    const rB = xc1 - capH * 0.45;
-    say(p, (rA + rB) / 2, cRow, `${o.mitoAtp} ATP`, { fit: [10.5 * t, 7.5], width: rB - rA, anchor: 'middle', weight: 700, num: true, fill: idle ? C.soft : C.ink });
-    say(p, (rA + rB) / 2, cRow + 12 * t, 'per glucose', { size: 9 * t, anchor: 'middle', fill: C.soft });
     const ox = xc0 + capH * 0.75;
     arrow(p, ox, yc0 - 24 * k, ox, yc0 - 1, { colour: C.water, active: !idle, phase: m.phase.chain });
     say(p, ox - 7, yc0 - 9, m.oxygen ? 'O₂' : 'no O₂', { size: 10 * t, weight: 700, anchor: 'end', fill: m.oxygen ? C.waterText : C.coralText });
@@ -904,7 +929,7 @@ export function mount(root, ctx) {
         r.row('Made', `${f.made.toFixed(1)} ATP/s`, f.keepingUp ? {} : { accent: C.coralText });
       }
       r.row('Per glucose', `${wholeOr(perGlucose(m, f), 1)} ATP`, { strong: true });
-      if (level < 4) r.note(tissueNote(f.o, level), { size: noteSize });
+      if (level < 4) r.note(tissueNote(f.o, level, m), { size: noteSize });
       if (level < 5) r.row('From the fermentation step', `${m.fermStepAtp === 0 ? '0' : m.fermStepAtp.toFixed(2)} ATP`, { strong: true });
       if (level === 0) {
         r.row('Empty NAD⁺', `${nEmpty} of ${POOL}`, nEmpty === 0 ? { accent: C.coralText } : {});
@@ -913,6 +938,7 @@ export function mount(root, ctx) {
         else if (f.want <= EPS) gly = 'waiting';
         r.row('Glycolysis', gly, stalledNow(f) ? { accent: C.coralText } : {});
       }
+      if (level < 2) r.note(SCALE_NOTE, { size: noteSize });
       if (m.route === 'lactate' || m.lactate > 0) r.row('Extra lactate', `${m.lactate.toFixed(2)} mmol/L`);
       if (m.route === 'ethanol' || m.ethanol > 0) {
         r.row('Ethanol', `${m.ethanol.toFixed(2)} mmol/L`);

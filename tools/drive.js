@@ -260,6 +260,22 @@ const chainSettles = async (h, ok, what) => {
   return d;
 };
 
+// `fermentation`'s drawing: every word on the stage, and the centres of three labels in the mitochondrion,
+// read in one evaluate.
+const fermentationWords = (h) => h.stage.evaluate((el) => {
+  const texts = [...el.querySelectorAll('text')];
+  const centre = (s) => {
+    const t = texts.find((x) => x.textContent === s);
+    if (!t) return null;
+    const b = t.getBBox();
+    return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) };
+  };
+  return {
+    words: texts.map((t) => t.textContent).join(' ').replace(/\s+/g, ' '),
+    mito: centre('Mitochondrion'), chain: centre('Chain'), atp: centre('+28 ATP'),
+  };
+});
+
 // Each recipe is a list of [name, async (h) => {}] steps. `h` gives the step the page, the stage, the
 // figure's current description, and helpers that all go through real input.
 const RECIPES = {
@@ -4458,6 +4474,14 @@ const RECIPES = {
       expect(d.atpPerGlucose === 30 && d.yieldTissue === 'fast skeletal muscle' && d.atpFromFermentationStep === 0 && d.keepingUp === true, `with oxygen it should make about 30 per glucose, labelled as fast skeletal muscle's: ${JSON.stringify({ atpPerGlucose: d.atpPerGlucose, yieldTissue: d.yieldTissue, atpFromFermentationStep: d.atpFromFermentationStep, keepingUp: d.keepingUp })}`);
       const spoken = await h.stage.getByRole('slider', { name: 'Demand' }).getAttribute('aria-valuetext');
       expect(spoken === '4 ATP a second', `the demand range should say its value in words: ${JSON.stringify(spoken)}`);
+      // The 28 is the mitochondrion's (the synthase's and the cycle's two); the chain makes none. So its
+      // number is drawn with the mitochondrion's name, nearer it than "Chain", in either composition. Drawn
+      // under "Chain" it read as the chain's (figure review of 2026-09-24, finding 10).
+      const fw = await fermentationWords(h);
+      const far = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+      expect(fw.mito && fw.chain && fw.atp && far(fw.atp, fw.mito) < far(fw.atp, fw.chain), `the mitochondrion's +28 ATP should be drawn with its name, not under "Chain": ${JSON.stringify({ mito: fw.mito, chain: fw.chain, atp: fw.atp })}`);
+      // The figure's units are its own, and the readout says what a disc and a count stand for (finding 12).
+      expect(/Each disc stands for millions of carriers or more/.test(fw.words), `the readout should say what a disc and a count stand for: ${JSON.stringify(fw.words.slice(-400))}`);
     }],
     ['taking-the-oxygen-away-runs-out-of-nad-not-atp', async (h) => {
       await h.button(/^Oxygen/).click();
@@ -4484,6 +4508,10 @@ const RECIPES = {
       expect(d.co2Released === 2 && d.carbonsInEthanol === 4, `two of the six carbons should leave as carbon dioxide and four stay in the ethanol: ${JSON.stringify({ co2Released: d.co2Released, carbonsInEthanol: d.carbonsInEthanol })}`);
       expect(d.atpPerGlucose === 2 && d.atpFromFermentationStep === 0 && d.glycolysisRate > 0.5, `the ethanol steps should make no ATP and keep glycolysis going: ${JSON.stringify({ atpPerGlucose: d.atpPerGlucose, atpFromFermentationStep: d.atpFromFermentationStep, glycolysisRate: d.glycolysisRate })}`);
       expect(d.lactateMM > 0 && d.clearing === false, `with no oxygen the lactate made before should stay: ${JSON.stringify({ lactateMM: d.lactateMM, clearing: d.clearing })}`);
+      // With no preset the cell fermenting to ethanol is not a yeast, so beside the muscle fibre's 30 the
+      // note says what a yeast gets (figure review of 2026-09-24, finding 14).
+      const { words } = await fermentationWords(h);
+      expect(/16 to 20/.test(words), `beside the 30, the note should say a yeast gets 16 to 20: ${JSON.stringify(words.slice(-500))}`);
     }],
     ['fermentation-cannot-make-glycolysis-faster', async (h) => {
       const demand = h.stage.getByRole('slider', { name: 'Demand' });
@@ -4521,6 +4549,9 @@ const RECIPES = {
       expect(done.clearedSeconds !== null && done.lactateMM === 0 && done.situation === 'cleared', `the extra lactate should clear: ${JSON.stringify({ clearedSeconds: done.clearedSeconds, lactateMM: done.lactateMM, situation: done.situation })}`);
       expect(done.lactateOxidised > 0 && done.lactateOxidisedElsewhere > 0 && done.lactateToLiver > 0 && done.liverAtpSpent === 6, `what cleared should have gone three ways, and the liver should spend 6 ATP a glucose: ${JSON.stringify({ lactateOxidised: done.lactateOxidised, lactateOxidisedElsewhere: done.lactateOxidisedElsewhere, lactateToLiver: done.lactateToLiver, liverAtpSpent: done.liverAtpSpent })}`);
       expect(done.readoutClipped === false, `the readout, at its fullest here, should draw every line it chose: readoutClipped ${JSON.stringify(done.readoutClipped)}`);
+      // The 50 : 30 : 20 split is illustrative, and the note under the table says so (finding 13).
+      const { words } = await fermentationWords(h);
+      expect(/split (between the three )?is illustrative/.test(words), `the clearing note should call the split illustrative: ${JSON.stringify(words.slice(-400))}`);
     }],
     ['the-yeast-makes-ethanol-without-oxygen-and-respires-with-it', async (h) => {
       await h.button(/^Yeast/).click();
