@@ -14,11 +14,11 @@
 //   Repeat       TTAGGG, six base pairs; one tick each in the enlarged view, which is drawn to scale.
 //   Start        10,000 bp (START_BP): about ten thousand at birth; the mean in newborns' blood cells is
 //                9.5 kb (Factor-Litvak et al. 2016).
-//   Loss         50 bp an end at each division by default, 25–100 on the control: fibroblasts growing in
+//   Loss         50 bp an end at each division by default, 40–100 on the control: fibroblasts growing in
 //                a dish lose about 50 (Levy et al. 1992, J Mol Biol).
 //   Tail         roughly 75–300 nt in human cells (Wright et al. 1997; Makarov et al. 1997). Here it is
-//                TWICE THE LOSS, 100 nt by default, for the reason under TWO COPIES; so the control's
-//                lowest settings, 25 to 35 bp, give tails of 50 to 70 nt, under the measured range.
+//                TWICE THE LOSS, 100 nt by default, for the reason under TWO COPIES, and the control
+//                starts at 40 so that the tail never falls below the measured 75.
 //   Template     telomerase's RNA carries 3′-CAAUCCCAAUC-5′, eleven nucleotides: its 3′ CAAUC pairs with
 //                the tail's last five, GTTAG, and the six beyond them template GGTTAG.
 //   Threshold    7,500 bp (THRESHOLD_BP). A MODEL VALUE, NOT A MEASUREMENT: it was chosen so that the
@@ -118,7 +118,7 @@ const CSS = `
 const START_BP = 10000;
 const THRESHOLD_BP = 7500; // a model value: 10,000 − 50 × 50
 const REPEAT_BP = 6;
-const LOSS = Object.freeze({ min: 25, max: 100, step: 5, open: 50 });
+const LOSS = Object.freeze({ min: 40, max: 100, step: 5, open: 50 });
 const PRIMER_NT = 10;
 const FRAG_MIN = 100;
 const FRAG_MAX = 200;
@@ -263,7 +263,7 @@ export function mount(root, ctx) {
   // ---- what the model says now ----
   const telomereNow = () => (m.phase === 'after' ? m.T0 - outcome(shape, telomerase, loss).lost : m.T0);
   const senescentNow = () => shape === 'linear' && telomereNow() <= THRESHOLD_BP;
-  const stoppedWords = () => `The cell has stopped dividing at ${nt(telomereNow())} base pairs. Switch telomerase on, or reset.`;
+  const stoppedWords = () => `The cell has stopped dividing at ${nt(telomereNow())} base pairs, this model’s limit; a real cell stops when its shortest telomeres, not the average, get too short. Reset, or switch telomerase on to run this division again with the enzyme there.`;
 
   // ---- reader actions ----
   function afterChange() {
@@ -420,7 +420,7 @@ export function mount(root, ctx) {
       if (m.phase === 'copying') return 'The two forks meet. Each one’s last lagging-strand fragment is started on a primer near the meeting point.';
       return 'Every gap, the last included, has DNA beyond it: the other fork’s leading strand is extended into it. Nothing is lost.';
     }
-    if (st.senescent) return `The telomere is down to ${nt(st.telomereBp)} bp, the length this model stops at: the cell stops dividing, after ${st.divisions} ${plural(st.divisions, 'division')}. Switch telomerase on and it goes on.`;
+    if (st.senescent) return `The cell stops here, after ${st.divisions} ${plural(st.divisions, 'division')}, at this model’s limit. A real cell stops when its shortest telomeres, not the average shown here, get too short.`;
     if (m.phase === 'before') {
       if (st.divisions === 0) return `Before the first division: ${nt(START_BP)} bp of TTAGGG repeats, and a ${O}-nucleotide tail on the strand whose 3′ end is at the tip.`;
       return `${st.divisions} ${plural(st.divisions, 'division')} done. The next copy starts from ${nt(st.telomereBp)} bp.`;
@@ -1026,7 +1026,7 @@ export function mount(root, ctx) {
     lab.place([[xA, below + 2, 'end'], [xZ - 4, below + 2, 'end'], [xA, below + 2 + S * 1.2, 'end']], narrow ? 'the tip, enlarged' : 'the tip, enlarged below', { size: S * 0.92 });
     lab.place([[(xB + xT) / 2, above, 'middle'], [xB + 6, above, 'start']], narrow ? `telomere, ${nt(T)} bp` : `the telomere, ${nt(T)} bp of repeats`, { size: S });
     lab.place([[ov.x0, above, 'start']], narrow ? 'rest of the chromosome' : 'the rest of the chromosome', { size: S * 0.92 });
-    lab.place([[xTh, below + 2, 'middle'], [xTh - 4, below + 2, 'end'], [xTh + 4, below + 2, 'start']], `the cell stops at ${nt(THRESHOLD_BP)} bp`, { size: S * 0.92 });
+    lab.place([[xTh, below + 2, 'middle'], [xTh - 4, below + 2, 'end'], [xTh + 4, below + 2, 'start']], `this model’s limit: ${nt(THRESHOLD_BP)} bp`, { size: S * 0.92 });
     const lostBp = START_BP - T;
     if (lostBp > 0) lab.place([[(xT + xS) / 2, above, 'middle'], [xS, above, 'end'], [xS, below + 2, 'end']], `lost ${nt(lostBp)} bp`, { size: S * 0.92 });
   }
@@ -1271,11 +1271,13 @@ export function mount(root, ctx) {
   //   divisions           completed; the division on show counts once it reaches 'after'
   //   telomereBp          the average end's telomere now: 10,000 less the loss at each division
   //   startBp             10,000, the length it opens at
-  //   lossPerDivisionBp   the setting, 25–100
+  //   lossPerDivisionBp   the setting, 40–100
   //   lostLastDivisionBp  computed: in 'after', what this division took from the average end; before
   //                       and during copying, what the last completed division took. 0 with telomerase
   //                       on or on a circle
-  //   gapAtEnd            computed: true in 'after' on a linear chromosome without telomerase
+  //   gapAtEnd            computed: true in 'after' on a linear chromosome without telomerase: a gap at
+  //                       the end that leaves the chromosome shorter. With telomerase on, the last
+  //                       primer's gap is still drawn, faint, because the enzyme lengthens the other copy
   //   overhangNt          the tail, twice the loss; 0 on a circle
   //   telomerase          the setting
   //   repeatsAdded        whole repeats telomerase has added since the reset

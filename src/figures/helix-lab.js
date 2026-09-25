@@ -50,8 +50,11 @@
 //     hydrogen bond. A donor facing a donor, or an acceptor an acceptor, is a clash, and a pair with a
 //     clash is scored no bonds: it cannot make them without pulling out of shape.
 //   - The rare form is guanine's and thymine's enol: the hydrogen of N1 (G) or N3 (T) carried on O6 or O4
-//     instead. Every G and T on the stage takes it at once, which is the simplification: it is the form
-//     the old textbook drawings showed, and in it the usual partner meets donor to donor.
+//     instead, the form the old textbook drawings showed. It is given to one base of the pair, never both:
+//     the left base if it is a G or a T, otherwise the right one, because a tautomeric shift happens in one
+//     base at a time. In it the usual partner meets donor to donor, and the wrong one pairs with three
+//     bonds at the right width: a rare G with T, a rare T with G. That is the mispair (`mispair` in
+//     describe()), and Add pair stays off for it, so the duplex built keeps to Chargaff's rules.
 //
 // The narrow composition (below 800 px), on a stage two wide by three tall. A helix beside its pattern would
 // put both below legibility on a phone, so the helix lies along the stage with its axis horizontal, above
@@ -285,8 +288,12 @@ function pairState(L, R, tautomer, run) {
   const pairType = PURINE[L] && PURINE[R] ? 'purine-purine' : !PURINE[L] && !PURINE[R] ? 'pyrimidine-pyrimidine' : 'purine-pyrimidine';
   const widthNm = (REACH[L] + GAP + REACH[R]) / 10;
   const widthOk = Math.abs(widthNm - SITE_SPAN) <= SITE_TOL;
-  const eL = edgeOf(L, rare);
-  const eR = edgeOf(R, rare);
+  // One base of the pair takes the rare form, never both: the left one if it is a G or a T, otherwise the
+  // right one. A tautomeric shift happens in one base at a time.
+  const rareL = rare && (L === 'G' || L === 'T');
+  const rareR = rare && !rareL && (R === 'G' || R === 'T');
+  const eL = edgeOf(L, rareL);
+  const eR = edgeOf(R, rareR);
   const links = [];
   const clashes = [];
   for (let i = 0; i < 3; i += 1) {
@@ -301,15 +308,26 @@ function pairState(L, R, tautomer, run) {
   let whyNot = null;
   if (!widthOk) whyNot = widthNm > SITE_SPAN ? 'too-wide' : 'too-narrow';
   else if (parallel) whyNot = 'sugars-misplaced';
-  else if (rare && WATSON_CRICK.has(L + R)) whyNot = 'rare-tautomer';
+  else if ((rareL || rareR) && WATSON_CRICK.has(L + R)) whyNot = 'rare-tautomer';
   else if (!bonds) whyNot = 'no-hydrogen-bonds';
-  return { L, R, pairType, widthNm, widthOk, links, clashes, bonds, whyNot, fits: whyNot === null, rare, parallel };
+  const mispair = (rareL || rareR) && whyNot === null;
+  return { L, R, pairType, widthNm, widthOk, links, clashes, bonds, whyNot, fits: whyNot === null, rare, rareL, rareR, mispair, parallel };
 }
 
 function pairVerdict(ps) {
+  const usual = ps.rare && !ps.rareL && !ps.rareR ? 'Neither base here is guanine or thymine, so both are drawn in their usual forms. ' : '';
+  return usual + verdictOf(ps);
+}
+
+function verdictOf(ps) {
   const kindOf = (x) => (PURINE[x] ? 'purine' : 'pyrimidine');
   switch (ps.whyNot) {
     case null:
+      if (ps.mispair) {
+        return (ps.rareL ? ps.L : ps.R) === 'G'
+          ? 'In its rare form guanine carries the hydrogen of N1 on O6 instead, and now pairs with thymine: three hydrogen bonds at the right width, with the wrong partner. A guanine copied in this form gets a thymine across from it where a cytosine belongs.'
+          : 'In its rare form thymine carries the hydrogen of N3 on O4 instead, which gives it cytosine’s pattern, and now pairs with guanine: three hydrogen bonds at the right width, with the wrong partner. A thymine copied in this form gets a guanine across from it where an adenine belongs.';
+      }
       return `${cap(BASE_NAME[ps.L])} across from ${BASE_NAME[ps.R]}: a ${kindOf(ps.L)} across from a ${kindOf(ps.R)}, ${fmt(ps.widthNm, 1)} nm from sugar to sugar, and ${ps.bonds === 3 ? 'three' : 'two'} hydrogen bonds, each donor facing an acceptor. It fits.`;
     case 'too-wide':
       return `Two purines: ${fmt(ps.widthNm, 1)} nm from sugar to sugar, and the backbones hold every pair at 1.1. Too wide.`;
@@ -530,7 +548,7 @@ export function mount(root, ctx) {
   rightCtl.node.classList.add('hl-base');
   const tautCtl = b.choice('Tautomer', [
     { id: 'usual', label: 'Usual form', short: 'Usual', aria: 'Usual form, guanine and thymine as they are in DNA' },
-    { id: 'rare', label: 'Rare form', short: 'Rare', aria: 'Rare form, guanine and thymine as the old drawings showed them' },
+    { id: 'rare', label: 'Rare form', short: 'Rare', aria: 'Rare form, one guanine or thymine as the old drawings showed it: the left base if it is one, otherwise the right' },
   ], (id) => { pair.tautomer = id; if (syncing) return; afterChange(); }, { segmented: true, value: pair.tautomer });
   const runCtl = b.choice('Strands run', [
     { id: 'antiparallel', label: 'Antiparallel', aria: 'Antiparallel, the partner strand runs the other way' },
@@ -572,7 +590,7 @@ export function mount(root, ctx) {
     const one = photo.strands < 2;
     for (const n of offsetCtl.node.querySelectorAll('input, button')) n.disabled = one;
     const ps = currentPair();
-    addBtn.disabled = !(ps.fits && built.length < MAX_PAIRS);
+    addBtn.disabled = !(ps.fits && !ps.mispair && built.length < MAX_PAIRS);
   }
 
   function setGridVars() {
@@ -608,7 +626,7 @@ export function mount(root, ctx) {
 
   function addPair() {
     const ps = currentPair();
-    if (!ps.fits || built.length >= MAX_PAIRS) return;
+    if (!ps.fits || ps.mispair || built.length >= MAX_PAIRS) return;
     built.push([ps.L, ps.R, ps.bonds]);
     afterChange();
   }
@@ -700,6 +718,7 @@ export function mount(root, ctx) {
       hydrogenBonds: ps.bonds,
       pairFits: ps.fits,
       whyNot: ps.whyNot,
+      mispair: ps.mispair,
       tautomer: pair.tautomer,
       strandsRun: pair.run,
       pairsBuilt: built.length,
@@ -1272,7 +1291,7 @@ export function mount(root, ctx) {
     const hydrogens = { left: [], right: [] };
     for (const sd of sides) {
       const at = placed[sd.key];
-      const edge = edgeOf(sd.base, ps.rare);
+      const edge = edgeOf(sd.base, sd.key === 'left' ? ps.rareL : ps.rareR);
       const donors = [];
       edge.forEach((e, i) => {
         if (e !== 'D') return;
@@ -1328,7 +1347,7 @@ export function mount(root, ctx) {
       p.circle(gx2, gy2, 2, { fill: C.ink });
       verts.forEach((v) => pts.push(v));
       // Groups off the ring, in the ink of a bond: double bonds as a pair of lines.
-      for (const [a, c, order] of (ps.rare && EXO_RARE[sd.base]) || EXO[sd.base]) {
+      for (const [a, c, order] of ((sd.key === 'left' ? ps.rareL : ps.rareR) && EXO_RARE[sd.base]) || EXO[sd.base]) {
         const [x1, y1] = S(at[a]);
         const [x2, y2] = S(at[c]);
         if (order === 2) {
@@ -1417,7 +1436,7 @@ export function mount(root, ctx) {
       bracket(p, cx - half, top - 31, cx + half, top - 31, { dir: -1, dash: '3 2.5' });
       p.text(cx, top - 36, 'every pair in the helix: 1.1 nm', { anchor: 'middle', 'font-size': 10.5, fill: C.soft, class: 'hl-num' });
       bracket(p, lc, top - 13, rc, top - 13, { dir: -1, colour: widthColour, width: 1.3 });
-      p.text(cx, top - 18, `this pair: ${wText} nm`, { anchor: 'middle', 'font-size': 10.5, 'font-weight': 600, fill: widthColour, class: 'hl-num' });
+      p.text(cx, top - 18, `this pair, C1′ to C1′: ${wText} nm`, { anchor: 'middle', 'font-size': 10.5, 'font-weight': 600, fill: widthColour, class: 'hl-num' });
       const c1l = S(placed.left["C1'"]);
       const c1r = S(placed.right["C1'"]);
       p.line(lc, top - 9, c1l[0], c1l[1] - 3, { stroke: C.faint, 'stroke-width': 0.8, 'stroke-dasharray': '1.5 2.5' });
@@ -1430,12 +1449,12 @@ export function mount(root, ctx) {
       p.text(cx, Math.min(cy + 5.15 * k + 4, loY + 19), 'minor-groove side', { anchor: 'middle', 'font-size': 10, fill: C.faint });
       const by = cy + 5.15 * k + 14;
       bracket(p, railX[0], by, railX[1], by, { dir: 1 });
-      p.text(cx, by + 15, 'backbones 2 nm apart', { anchor: 'middle', 'font-size': 10.5, fill: C.soft, class: 'hl-num' });
+      p.text(cx, by + 15, 'backbones 2 nm apart, at the phosphates', { anchor: 'middle', 'font-size': 10.5, fill: C.soft, class: 'hl-num' });
     } else {
       const yS = top - 4;
       bracket(p, lc, yS, rc, yS, { dir: -1, colour: widthColour, width: 1.3 });
       bracket(p, cx - half, yS - 4, cx + half, yS - 4, { dir: -1, dash: '3 2.5', tick: 3 });
-      p.text(cx, yS - 9, `this pair: ${wText} nm; every pair: 1.1 nm`, { anchor: 'middle', fit: [10, 8], width: railX[1] - railX[0] - 8, fill: widthColour, 'font-weight': 600, class: 'hl-num' });
+      p.text(cx, yS - 9, `C1′ to C1′: this pair ${wText} nm, every pair 1.1 nm`, { anchor: 'middle', fit: [10, 8], width: railX[1] - railX[0] - 8, fill: widthColour, 'font-weight': 600, class: 'hl-num' });
       // The grooves are named here too: the parallel pair's verdict is about which side its sugar is on.
       const band = pts.filter(([X]) => Math.abs(X - cx) < 45);
       const hiY = Math.min(...band.map(([, Y]) => Y));
@@ -1519,7 +1538,10 @@ export function mount(root, ctx) {
     const n = counts();
     const holds = built.length ? (n.A === n.T && n.G === n.C ? 'hold' : 'broken') : '—';
     const kindText = ps.pairType.replace('-', '–');
-    const verdict = (r) => r.note(pairVerdict(ps) + (ps.fits && built.length >= MAX_PAIRS ? ' The strip holds twelve pairs; Reset to start again.' : ''), { accent: ps.fits ? C.ink : C.coralText });
+    // Counted only for the Watson–Crick shape at the helix's width: a real mismatch makes two bonds in a
+    // shifted or wider shape, so "none" alone would overstate it.
+    const bondsText = ps.bonds ? String(ps.bonds) : ps.widthOk ? 'none in this shape' : 'none at this width';
+    const verdict = (r) => r.note(pairVerdict(ps) + (ps.fits && !ps.mispair && built.length >= MAX_PAIRS ? ' The strip holds twelve pairs; Reset to start again.' : ''), { accent: ps.fits && !ps.mispair ? C.ink : C.coralText });
     const countRows = (r, full) => {
       r.head('The duplex');
       if (full) r.row('Pairs built', String(built.length));
@@ -1540,7 +1562,7 @@ export function mount(root, ctx) {
             r.row('Right base', cap(BASE_NAME[ps.R]));
             r.row('Kind', kindText);
             r.row('Width, C1′ to C1′', `${fmt(ps.widthNm, 1)} nm`, ps.widthOk ? {} : { accent: C.coralText });
-            r.row('Hydrogen bonds', ps.bonds ? String(ps.bonds) : 'none');
+            r.row('Hydrogen bonds', bondsText);
             verdict(r);
             countRows(r, true);
             return;
@@ -1549,7 +1571,7 @@ export function mount(root, ctx) {
             r.head('This pair');
             if (!narrow) r.row('Kind', kindText);
             r.row('Width, C1′ to C1′', `${fmt(ps.widthNm, 1)} nm`, ps.widthOk ? {} : { accent: C.coralText });
-            r.row('Hydrogen bonds', ps.bonds ? String(ps.bonds) : 'none');
+            r.row('Hydrogen bonds', bondsText);
             verdict(r);
             countRows(r, true);
             return;
@@ -1578,7 +1600,8 @@ export function mount(root, ctx) {
       drawStrip();
       drawPairsTable();
     }
-    addBtn.disabled = !(currentPair().fits && built.length < MAX_PAIRS);
+    const cp = currentPair();
+    addBtn.disabled = !(cp.fits && !cp.mispair && built.length < MAX_PAIRS);
     main.focusMark();
     setSubscripts(main.node);
     drawn = true;
@@ -1603,10 +1626,14 @@ export function mount(root, ctx) {
   //   leftBase, rightBase    'A' | 'T' | 'G' | 'C'
   //   pairType               'purine-pyrimidine' | 'purine-purine' | 'pyrimidine-pyrimidine'
   //   pairWidthNm            C1′ to C1′ along the pair, one decimal: 1.1 for either Watson–Crick pair
-  //   hydrogenBonds          0, 2 or 3; 0 at the wrong width or with a donor facing a donor
+  //   hydrogenBonds          0, 2 or 3; 0 at the wrong width or with a donor facing a donor. Counted only
+  //                          for a pair in the Watson–Crick shape at the helix's width; real mismatches
+  //                          make two, in a shifted shape (the G·T wobble) or a wider, distorted one
   //   pairFits, whyNot       whyNot is 'too-wide' | 'too-narrow' | 'sugars-misplaced' | 'rare-tautomer' |
   //                          'no-hydrogen-bonds', checked in that order, and null when the pair fits
-  //   tautomer               'usual' | 'rare'
+  //   mispair                the rare form's wrong partner, G·T or T·G with the left base rare: it fits,
+  //                          with three bonds at 1.1 nm, and Add pair stays off for it
+  //   tautomer               'usual' | 'rare'; the rare form is one base's, the left if it is a G or a T
   //   strandsRun             'antiparallel' | 'parallel'
   //   pairsBuilt, countA, countT, countG, countC   the duplex built with Add pair, twelve pairs at most
   //   chargaffHolds          countA === countT and countG === countC

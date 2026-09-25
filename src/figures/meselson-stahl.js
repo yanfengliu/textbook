@@ -439,11 +439,15 @@ export function mount(root, ctx) {
   b.onAnnounce((d) => {
     const pr = PREDICTED[d.scheme][d.generation];
     const parts = [`${cap(d.scheme)}, generation ${d.generation}: ${bandWord(pr.bands.length)}, ${spoken(pr.bands)}.`];
-    if (d.heated) parts.push(`Heated, the strands make ${bandWord(pr.strands.length)}, ${spoken(pr.strands)}.`);
-    if (d.dataShown) {
-      parts.push(d.matchesData ? 'This is what was photographed in 1958.' : `The 1958 photograph shows ${bandWord(OBSERVED[d.generation].length)}, ${spoken(OBSERVED[d.generation])}.`);
-      parts.push(`Ruled out so far: ${d.ruledOut.length ? joinAnd(d.ruledOut) : 'none'}.`);
+    // Each prediction is followed by what 1958 found for it, so that "this" can only mean the bands: said
+    // after the heated strands, it told a listener that the dispersive scheme's one heated band was found.
+    if (d.dataShown) parts.push(d.matchesData ? 'This is what was photographed in 1958.' : `The 1958 photograph shows ${bandWord(OBSERVED[d.generation].length)}, ${spoken(OBSERVED[d.generation])}.`);
+    if (d.heated) {
+      parts.push(`Heated, the strands make ${bandWord(pr.strands.length)}, ${spoken(pr.strands)}.`);
+      const obsHeated = OBSERVED_HEATED[d.generation];
+      if (d.dataShown && obsHeated) parts.push(d.strandsMatchData ? 'The 1958 heated DNA gave the same.' : `The 1958 heated DNA gave ${bandWord(obsHeated.length)}, ${spoken(obsHeated)}, so heat rules this scheme out.`);
     }
+    if (d.dataShown) parts.push(`Ruled out by the bands so far: ${d.ruledOut.length ? joinAnd(d.ruledOut) : 'none'}.`);
     return parts.join(' ');
   });
 
@@ -670,7 +674,7 @@ export function mount(root, ctx) {
       return { text: `${cap(scheme)} copying predicts ${bandWord(pr.bands.length)}, ${namesOf(pr.bands)}; the photograph shows ${COUNT_WORDS[obs.length]}, ${namesOf(obs)}.`, accent: C.coralText };
     };
     const ruledNote = () => ({
-      text: `Ruled out so far: ${ruled.length ? joinAnd(ruled.map((s) => `${s} at generation ${FIRST_FAIL[s]}`)) : 'none'}.`,
+      text: `Ruled out by the bands so far: ${ruled.length ? joinAnd(ruled.map((s) => `${s} at generation ${FIRST_FAIL[s]}`)) : 'none'}.`,
       accent: C.ink,
     });
     const heatNote = () => {
@@ -686,7 +690,9 @@ export function mount(root, ctx) {
           ? { text: 'The 1958 heated DNA gave these two bands too, so heat cannot tell conservative copying from semiconservative.', accent: C.ink }
           : { text: 'In 1958 the heated hybrid DNA gave these two bands, in equal amounts.', accent: C.ink };
       }
-      return { text: `The 1958 heated DNA gave two bands, light and heavy, where this predicts ${bandWord(pr.strands.length)}.`, accent: C.coralText };
+      // Reached only by the dispersive scheme at generation 1: heated data exist only there, and the other
+      // two schemes predict the two bands the data show. `ruledOut` stays the bands' verdict, and says so.
+      return { text: 'The 1958 heated DNA gave two bands, light and heavy, where dispersive copying predicts one: the hybrid band is made of a wholly heavy part and a wholly light one, not two patchworks. Heat rules the dispersive scheme out at generation 1, a generation before the bands alone do.', accent: C.coralText };
     };
 
     // The table of this generation's bands. Level 0 is everything. Heated, 1 gives up the bands before

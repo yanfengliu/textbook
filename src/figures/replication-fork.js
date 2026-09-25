@@ -9,14 +9,19 @@
 // chromosome to scale with its origins, its forks and a clock.
 //
 // It is a mechanism because the reader takes away each fact the lagging strand depends on and watches
-// it go: remove an enzyme and its own failure appears; change either of the two rules §8.4 names — the
-// direction the strands run, or the end a polymerase can add to — and the fragments disappear.
+// it go: remove an enzyme and its own failure appears; change the end a polymerase can add to and the
+// fragments disappear; make the strands run the same way and they move to the other fork.
 //
 // THE TWO SENTENCES THIS FIGURE TURNS ON (FIGURES.md, "A figure's words are prose"). DNA polymerase adds
 // only to a 3′ end. And the lagging strand follows from that fact and the antiparallel strands, and from
-// nothing else. So `laggingContinuous` is COMPUTED from the two facts and nothing else —
-// `!(antiparallel && addsOnlyAtThreePrime)` — and no enzyme enters it: under 'as-they-are' it is false
-// in every reachable state, with any set of enzymes removed. Each hypothetical rule is marked as such
+// nothing else. So `laggingContinuous` and `strandsInFragments` are COMPUTED from the two facts and
+// nothing else, and no enzyme enters them. A lagging strand goes only when a polymerase can add at
+// either end: `laggingContinuous` is `!addsOnlyAtThreePrime`. Strands that run the same way only move
+// it, because the forks leave an origin in both directions: both new strands grow towards one fork and
+// away from the other, so `strandsInFragments`, [this fork, the other fork], is [0, 2]. Under
+// 'as-they-are' `laggingContinuous` is false in every reachable state, with any set of enzymes removed.
+// The fork drawn is the one both strands grow towards under 'same-direction', so it makes no fragments
+// under either hypothetical rule. Each hypothetical rule is marked as such
 // wherever it appears: in its control's accessible name, in a line on the drawing, and in the table.
 //
 // THE FORK IS AN E. COLI FORK, because §8.4 names E. coli's enzymes: polymerase III copies, polymerase I
@@ -28,7 +33,9 @@
 //   Fragments       1000–2000 nt each, §8.4's E. coli range; each fragment's length is drawn from that
 //                   range by a hash of its number, so a run is the same run every time.
 //   Primers         10 nt, §8.4 ("about ten nucleotides long"). DRAWN NOT TO SCALE: at the fork's scale
-//                   a primer would be a pixel long, so it is drawn at least 10–12 px.
+//                   a primer would be a pixel long, so it is drawn at least 10–12 px, about ten times
+//                   too long. The stage says so: in the opening sentence, and in the primer's name,
+//                   "RNA primer (not to scale)", wherever the longer name finds room.
 //   Twist           one extra turn ahead per 10 base pairs opened, §8.4. A topoisomerase takes turns out
 //                   at a rate proportional to how many there are (TOPO_RATE, a model value), which holds
 //                   about ten turns ahead at the fork's speed. With no topoisomerase the turns build and
@@ -36,8 +43,10 @@
 //                   left alone the twist "would soon stop the fork". It restarts below 85.
 //   Timings         polymerase I takes 0.6 s of the figure's clock to replace a primer and ligase 0.6 s
 //                   to seal a nick. Drawing values, chosen to be watchable, and not measured rates.
-//   Pyrophosphate   one per nucleotide added, RNA or DNA, polymerase I's replacements included, computed
-//                   from the lengths made (`forkCounts`). Ligase's step releases none in E. coli, whose
+//   Pyrophosphate   one per nucleotide joined to a chain, RNA or DNA, polymerase I's replacements
+//                   included: a primer's first nucleotide releases none, since nothing is added to it and
+//                   it keeps its 5′ triphosphate, so a 10-nt primer releases 9. Computed from the lengths
+//                   made (`forkCounts`): 1488 at the opening. Ligase's step releases none in E. coli, whose
 //                   ligase spends NAD⁺, so it is not counted.
 //   The origin      the fork opens 1500 nt from its origin, a second and a half after it left, with the
 //                   leading strand run up to the fork on its one primer and the lagging strand's first
@@ -65,10 +74,13 @@
 //
 // THE RULES. 'as-they-are': antiparallel templates and a polymerase that adds only at a 3′ end, so the
 // lower template's new strand runs away from the fork and is made in fragments. 'same-direction'
-// (HYPOTHETICAL): both templates run the same way, so both new strands grow at a 3′ end towards the fork,
-// each from one primer at the origin. 'either-end' (HYPOTHETICAL): the templates stay antiparallel, but a
-// polymerase may add at a 5′ end too, so the lower new strand grows towards the fork at its 5′ end, again
-// from one primer at the origin. Under either, `fragmentsStarted` is 0 and `laggingContinuous` is true.
+// (HYPOTHETICAL): both templates run the same way, so at the fork drawn both new strands grow at a 3′ end
+// towards the fork, each from one primer at the origin; at the fork leaving the origin the other way, not
+// drawn, both would grow away from their fork and be made in fragments, and the stage says so.
+// 'either-end' (HYPOTHETICAL): the templates stay antiparallel, but a polymerase may add at a 5′ end too,
+// so the lower new strand grows towards the fork at its 5′ end, again from one primer at the origin, and
+// so at every fork. Under either, `fragmentsStarted` at the fork drawn is 0; `laggingContinuous` is true
+// only under 'either-end'; `strandsInFragments` is [1, 1], [0, 2] and [0, 0] under the three rules.
 // Changing the rule starts the fork again from its origin, keeping the enzymes the reader has removed.
 //
 // THE WHOLE CHROMOSOME, every number from §8.4 and its table.
@@ -163,10 +175,15 @@ const RULES = Object.freeze([
   { id: 'either-end', label: 'Polymerase can add at either end', aria: 'Polymerase can add at either end, a hypothetical rule' },
 ]);
 
-// The two facts, and the lagging strand computed from them and from nothing else.
+// The two facts, and the lagging strand computed from them and from nothing else. A lagging strand goes
+// only if a polymerase can add at either end; strands running the same way move it to the other fork.
 const antiparallel = (rule) => rule !== 'same-direction';
 const addsOnlyAtThreePrime = (rule) => rule !== 'either-end';
-const laggingIsContinuous = (rule) => !(antiparallel(rule) && addsOnlyAtThreePrime(rule));
+const laggingIsContinuous = (rule) => !addsOnlyAtThreePrime(rule);
+// [this fork, the fork leaving the origin the other way]
+const strandsInFragments = (rule) => (!addsOnlyAtThreePrime(rule) ? [0, 0] : antiparallel(rule) ? [1, 1] : [0, 2]);
+// The fork drawn makes its lower new strand in one piece when it makes no strand in fragments.
+const bothContinuousHere = (rule) => strandsInFragments(rule)[0] === 0;
 
 // A fragment's length, from §8.4's range, by a hash of its number: the same run every time.
 const fragLen = (k) => FRAG_MIN + (FRAG_MAX - FRAG_MIN) * hash2(k + 1, 803);
@@ -271,7 +288,7 @@ function newFork(rule) {
   const f = {
     F: F0, tw: 0, stall: false, tau: 0,
     top: newStrand(),
-    bot: laggingIsContinuous(rule) ? newStrand() : null,
+    bot: bothContinuousHere(rule) ? newStrand() : null,
     frags: [], lagPol: -1, lastQ: 0, pending: 0, terminated: null,
   };
   if (!f.bot) {
@@ -389,19 +406,21 @@ function advanceFork(f, dt, has) {
 const replacedShare = (j) => (j.state === 'pol1' ? j.p : j.state === 'nick' || j.state === 'ligase' || j.state === 'sealed' ? 1 : 0);
 const unsealed = (j) => j.state === 'primer' || j.state === 'pol1' || j.state === 'nick' || j.state === 'ligase';
 
-// What the table counts, computed from the lengths made: one pyrophosphate per nucleotide added.
+// What the table counts, computed from the lengths made: one pyrophosphate per nucleotide joined to a
+// chain. Every strand and fragment starts on a primer laid whole, whose first nucleotide is joined to
+// nothing and releases none, hence the one taken off each.
 function forkCounts(f) {
   let primers = 0;
   let nicks = 0;
   let ppi = 0;
   for (const s of [f.top, f.bot]) {
     if (!s) continue;
-    ppi += s.end + PRIMER_NT * replacedShare(s.origin);
+    ppi += s.end - 1 + PRIMER_NT * replacedShare(s.origin);
     if (replacedShare(s.origin) < 1) primers += 1;
     if (unsealed(s.origin)) nicks += 1;
   }
   f.frags.forEach((g, i) => {
-    ppi += g.q - g.end; // its primer and the DNA polymerase III made on it
+    ppi += g.q - g.end - 1; // its primer, less the primer's first nucleotide, and the DNA polymerase III made on it
     if (g.k > 0) ppi += PRIMER_NT * replacedShare(g.junction); // polymerase I's DNA in the primer before it
     const next = f.frags[i + 1];
     if (!next || replacedShare(next.junction) < 1) primers += 1;
@@ -630,6 +649,7 @@ export function mount(root, ctx) {
       scene,
       rule,
       laggingContinuous: laggingIsContinuous(rule),
+      strandsInFragments: strandsInFragments(rule),
       removed: ENZYMES.filter((e) => removed.has(e.id)).map((e) => e.id),
       forkTimeS: Number((fk.tau / SLOW).toFixed(3)),
       unwoundNt: Math.round(fk.F),
@@ -657,13 +677,18 @@ export function mount(root, ctx) {
   b.onDescribe(state);
 
   // ---- the words: the rule, and what the fork is doing now ----
-  function ruleWords() {
-    if (rule === 'same-direction') return 'Hypothetical: the two strands run the same way, so both new strands grow at a 3′ end towards the fork, each from one primer.';
-    if (rule === 'either-end') return 'Hypothetical: a polymerase that could add at a 5′ end makes the lower new strand towards the fork too, from one primer.';
+  // `short` is the phone's wording. Its three lines under the readout hold about 180 characters at a
+  // 390 px stage, fewer at 360, and the banner across the top of the stage already says the rule is
+  // hypothetical. Every fact the long wording gives that the drawing does not show stays in the short one.
+  function ruleWords(short = false) {
+    if (rule === 'same-direction' && short) return 'At this fork both new strands grow towards it, each from one primer. At the other fork, not drawn, both would be made in fragments.';
+    if (rule === 'either-end' && short) return 'A polymerase that could add at a 5′ end makes the lower new strand towards the fork too, from one primer: no fragments at any fork.';
+    if (rule === 'same-direction') return 'Hypothetical: the two strands run the same way. At this fork both new strands grow at a 3′ end towards it, each from one primer. At the fork leaving the origin the other way, not drawn, both would grow away from their fork and be made in fragments: the fragments move there, and do not go.';
+    if (rule === 'either-end') return 'Hypothetical: a polymerase that could add at a 5′ end makes the lower new strand towards the fork too, from one primer, and so at every fork: no fragments anywhere.';
     return null;
   }
 
-  function forkWords() {
+  function forkWords(short = false) {
     const why = stalledBecause();
     if (why === 'no-helicase') return 'No helicase: the parent helix stays shut, so the fork cannot move.';
     if (why === 'twist') return 'No topoisomerase: the twist ahead has built up until the fork has stalled.';
@@ -671,18 +696,22 @@ export function mount(root, ctx) {
     if (!has('primase') && !fk.bot) return 'No primase: no new fragment can start, so the lagging template waits uncopied.';
     if (!has('primer-removal')) return 'No primer removal: the RNA primers stay in the strand, and the nick beside each cannot be sealed.';
     if (!has('ligase')) return 'No ligase: the fragments are made but never joined, so each nick stays open.';
-    if (fk.terminated === 'leading') return 'A chain terminator has stopped the leading strand: nothing can be added after it.';
+    if (fk.terminated === 'leading' && short) return 'A chain terminator has stopped the leading strand: nothing can be added after it. A real fork would slow, and might start again on a new primer.';
+    if (fk.terminated === 'leading') return 'A chain terminator has stopped the leading strand: nothing can be added after it. In this drawing the fork keeps opening; a real fork slows, and may start the strand again beyond the block on a new primer.';
     if (fk.terminated) return `A chain terminator has stopped ${fk.terminated === 'lower' ? 'the lower strand' : 'a lagging fragment'}: nothing can be added after it.`;
     if (fk.pending > 0) return 'A chain terminator is in the pool: the next strand to take one in stops there.';
     if (fk.bot) return null; // the rule's own sentence says what the fork is doing
-    if (fk.tau === 0) return 'The fork is just leaving its origin, with one primer on each template. Drawn four times slower than life.';
+    if (fk.tau === 0 && short) return 'The fork is just leaving its origin, one primer on each template. Drawn four times slower than life, and the 10-nucleotide primers ten times too long so they can be seen.';
+    if (fk.tau === 0) return 'The fork is just leaving its origin, with one primer on each template. Drawn four times slower than life, and the primers, 10 nucleotides each, about ten times too long, so that they can be seen.';
     return 'The leading strand grows towards the fork; the lagging strand is made backwards in fragments, each on its own primer.';
   }
 
-  function chromosomeWords(ch) {
+  // `short` as for ruleWords: two lines under the readout at a 360 px stage.
+  function chromosomeWords(ch, short = false) {
     if (organism === 'e-coli') return 'One circle and one origin: two forks at 1000 nt/s, each copying half the circle, meet on the far side.';
     if (origins === 'one') return 'One origin in the middle, with two forks at 50 nt/s: about a month to copy the chromosome.';
-    return `${nt(ch.originCount)} origins, fired at different times through the eight hours; the forks from neighbouring origins meet and join.`;
+    if (short) return `${nt(ch.originCount)} origins, fired over the eight hours; fired all at once, they would finish in under an hour.`;
+    return `${nt(ch.originCount)} origins, fired at different times through the eight hours; the forks from neighbouring origins meet and join. Fired all at once, these forks would finish in under an hour; the eight hours is how long the firing is spread over.`;
   }
 
   b.onAnnounce(() => {
@@ -1141,15 +1170,17 @@ export function mount(root, ctx) {
       const seen = frags.map((f) => ({ f, len: f.aQ - Math.max(f.aE, 0) })).sort((x, y) => y.len - x.len)[0];
       lagMid = seen && seen.len > 40 ? clamp((Math.max(seen.f.aE, 0) + seen.f.aQ) / 2, 40, G.aV - 40) : G.aV - G.gapPx - 30;
     }
-    if (lagMid !== null) place(around(lagMid, tmplBot(lagMid) - 1, -1, { offs: [11, 22, 33], shifts: [0, -30, 30, -60, 60] }), fk.bot ? (narrow ? 'also continuous' : 'made continuously too') : 'lagging strand');
-    // The newest primer on the lagging strand, or else the leading strand's own at the origin.
+    if (lagMid !== null) place(around(lagMid, tmplBot(lagMid) - 1, -1, { offs: [11, 22, 33], shifts: [0, -30, 30, -60, 60] }), !fk.bot ? 'lagging strand' : rule === 'same-direction' ? (narrow ? 'continuous here' : 'continuous at this fork only') : (narrow ? 'also continuous' : 'made continuously too'));
+    // The newest primer on the lagging strand, or else the leading strand's own at the origin. A primer
+    // is drawn about ten times its length, so its name says so wherever there is room for the words.
+    const primerName = (cands) => place(cands, 'RNA primer (not to scale)') || place(cands, 'RNA primer');
     const newest = frags.length ? frags[frags.length - 1] : null;
     if (newest && newest.aRna1 > newest.aRna0 + 1) {
       const a = (newest.aRna0 + newest.aRna1) / 2;
-      place([...around(a, newBot(a) + 2, 1, { offs: [9, 19], shifts: [-6, -20, 8, -34] }), ...around(a, tmplBot(a) - 1, -1, { offs: [22, 34], shifts: [-10, -30, -50] })], 'RNA primer');
+      primerName([...around(a, newBot(a) + 2, 1, { offs: [9, 19], shifts: [-6, -20, 8, -34] }), ...around(a, tmplBot(a) - 1, -1, { offs: [22, 34], shifts: [-10, -30, -50] })]);
     } else if (top.aP1 > 6 && replacedShare(fk.top.origin) < 1) {
       const a = (top.aP0 + top.aP1) / 2;
-      place(around(a, newTop(a) - 2, -1, { offs: [9, 19], shifts: [8, 22, 36] }), 'RNA primer');
+      primerName(around(a, newTop(a) - 2, -1, { offs: [9, 19], shifts: [8, 22, 36] }));
     }
     if (topoAt) place(around(topoAt[0], topoAt[1] + G.A + 9, 1, { offs: [8, 18, 28], shifts: [0, 22, -22, 44] }), 'topoisomerase');
     if (beads.length > 5) {
@@ -1208,8 +1239,8 @@ export function mount(root, ctx) {
       ['Pyrophosphate released', nt(c.ppi)],
       ['Twist ahead', `${Math.round(fk.tw)} turn${Math.round(fk.tw) === 1 ? '' : 's'}`],
     ];
-    const r = ruleWords();
-    const words = forkWords();
+    const r = ruleWords(b.narrow);
+    const words = forkWords(b.narrow);
     if (!b.narrow) {
       const size = clamp(Math.max(w * 0.04, hgt * 0.033), 9.6, 11.6);
       table.readout({ title: 'At the fork', x: 6, width: Math.min(w - 8, 320), size, minRow: 14, maxRow: 24 }).fit(hgt, (t, level) => {
@@ -1448,7 +1479,8 @@ export function mount(root, ctx) {
     const size = 10;
     const colW = (w - 14) / 2;
     const noteT = table.readout({ x: 0, width: w, size });
-    noteT.note(words, { size: 9.4 });
+    const brief = chromosomeWords(ch, true);
+    noteT.note(brief, { size: 9.4 });
     const into = Math.max(60, hgt - noteT.height(14) - 2);
     const left = table.readout({ title, x: 0, width: colW, size, minRow: 13, maxRow: 22 });
     for (const [k, v] of rows.slice(0, 3)) left.row(k, v);
@@ -1457,7 +1489,7 @@ export function mount(root, ctx) {
     for (const [k, v] of rows.slice(3)) right.row(k, v);
     const br = right.fill(into);
     const noteAt = table.readout({ x: 0, y: Math.max(bl, br) + 2, width: w, size });
-    noteAt.note(words, { size: 9.4 });
+    noteAt.note(brief, { size: 9.4 });
     noteAt.draw(14, hgt - Math.max(bl, br) - 2);
   }
 
@@ -1465,15 +1497,21 @@ export function mount(root, ctx) {
   // adds layout. The computed fields are the ones worth asserting:
   //   scene               'fork' | 'chromosome'
   //   rule                'as-they-are' | 'same-direction' | 'either-end'
-  //   laggingContinuous   computed from the two facts alone; false in every state under 'as-they-are'
+  //   laggingContinuous   computed from the two facts alone: true only under 'either-end', whose polymerase
+  //                       adds at either end; false in every state under 'as-they-are', and false under
+  //                       'same-direction', which moves the fragments to the other fork
+  //   strandsInFragments  [this fork, the fork leaving the origin the other way], computed from the two
+  //                       facts alone: [1, 1] under 'as-they-are', [0, 2] under 'same-direction', [0, 0]
+  //                       under 'either-end'
   //   removed             the enzymes taken away, in the toolbar's order
   //   forkTimeS           the time at the fork, in real seconds: a quarter of the figure's, as the table shows it
   //   unwoundNt           how far the fork has opened from its origin (opens at 1500)
   //   leadingLengthNt     the leading (top) strand, primer included
-  //   fragmentsStarted    Okazaki fragments begun; 0 under either hypothetical rule
+  //   fragmentsStarted    Okazaki fragments begun at the fork drawn; 0 under either hypothetical rule
   //   primersInPlace      RNA primers not yet replaced (2 at the opening)
   //   nicksUnsealed       joins not yet sealed, the primer-blocked ones included
-  //   pyrophosphateReleased  one per nucleotide added, from the lengths made
+  //   pyrophosphateReleased  one per nucleotide joined to a chain, from the lengths made; a primer's
+  //                       first nucleotide releases none (1488 at the opening)
   //   twistAheadTurns     turns of overwinding ahead of the fork
   //   forkStalled         computed; true only with the helicase or the topoisomerase taken away
   //   stalledBecause      'no-helicase' | 'twist' | null
