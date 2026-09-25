@@ -4,10 +4,10 @@ Four figures, in the order they appear in `index.html`. The figure number is fix
 
 | # | Kind | Id | Section | WebGL | `aspect` | `narrowAspect` |
 |---|---|---|---|---|---|---|
-| 8.1 | `helix-lab` | `fig-helix-lab` | 8.2 | no | 16 / 9 | 4 / 5 |
+| 8.1 | `helix-lab` | `fig-helix-lab` | 8.2 | no | 16 / 9 | 2 / 3 |
 | 8.2 | `meselson-stahl` | `fig-meselson-stahl` | 8.3 | no | 16 / 9 | 2 / 3 |
-| 8.3 | `replication-fork` | `fig-fork` | 8.4 | no | 21 / 9 | 3 / 4 |
-| 8.4 | `chromosome-end` | `fig-telomere` | 8.7 | no | 16 / 9 | 4 / 5 |
+| 8.3 | `replication-fork` | `fig-fork` | 8.4 | no | 21 / 9 | 9 / 16 |
+| 8.4 | `chromosome-end` | `fig-telomere` | 8.7 | no | 16 / 9 | 9 / 16 |
 
 **Four were cut on 2026-09-24**, at the reduced scope chapter 6 shipped with (`docs/policies/local-rules.md`, "The usage allowance is the budget"): four of the eight planned figures, and questions instead of figure tasks, so no item in `items.js` sets a task on any figure. The four kept are the chain the chapter argues along — the structure read off a photograph (8.1), the copying that structure predicts and the experiment that tested it (8.2), the fork that one-way chemistry forces (8.3), and the end that fork cannot finish (8.4). Each is a mechanism a reader has to move to see: a diffraction pattern changing with a helix, bands parting from a prediction one generation at a time, a lagging strand that vanishes from every fork when a polymerase can add at either end but only moves to the other fork when the strands run the same way, and a gap at the tip that nothing can fill. All four are 2D. The four cut, with the numbers they had in the first plan, and what their sections carry now:
 
@@ -241,14 +241,14 @@ The densities are the 1958 paper's (*PNAS* 44:671): <i>E. coli</i> DNA at about 
 ---
 ## 8.4 · `chromosome-end` — One round of copying at the tip
 
-**What it shows.** The last few thousand base pairs of a linear chromosome, drawn with its telomere repeats as a run of short ticks, six base pairs to a tick, and its single-stranded 3′ overhang at the tip. Two phases of one division can be stepped through. **Copying**: the fork arrives at the end, the leading strand runs off with its template, and the last lagging-strand fragment is begun on a primer at or near the tip. **After**: the primers are removed, every gap but the last is filled by extending the fragment beyond it, and the last gap stays open, because there is nothing beyond it; the end is trimmed to restore the overhang, and the new chromosome is shorter by a counted number of base pairs. It opens before the first division, paused, at the starting length stated in the header.
+**What it shows.** The last few thousand base pairs of a linear chromosome, drawn with its telomere repeats as a run of short ticks, six base pairs to a tick, and its single-stranded 3′ overhang at the tip. Two phases of one division can be stepped through. **Copying**: the fork arrives at the end, the leading strand runs off with its template, and the last lagging-strand fragment is begun on a primer at or near the tip. **After**: the primers are removed, every gap but the last is filled by extending the fragment beyond it, and the last gap stays open, because there is nothing beyond it; both new ends are trimmed to restore the overhang, and the one made by the leading strand is a tail's length shorter than its parent, the other no shorter, so the average end is shorter by a counted number of base pairs. It opens before the first division, paused, at the starting length stated in the header.
 
 The numbers, with their sources, for the header: the repeat is TTAGGG; a telomere is about 10,000 base pairs at birth (mean 9.5 kb in the blood cells of newborns, Factor-Litvak et al. 2016); fibroblasts in a dish lose about 50 base pairs per division (Levy et al. 1992, *J Mol Biol*, from the same group as Harley et al. 1990); the overhang is roughly 75 to 300 nucleotides (Wright et al. 1997; Makarov et al. 1997); and telomerase's RNA carries an 11-nucleotide template, 3′-CAAUCCCAAUC-5′, which is what the figure draws pairing with the overhang. **The threshold at which the cell stops is a model value, not a measurement**: it is set so that the defaults — 10,000 base pairs, 50 lost per division — stop the cell at about fifty divisions, which is Hayflick's figure for fetal fibroblasts (Hayflick 1965), and the header must say that it was chosen that way. With those defaults the cell stops with 7,500 of its 10,000 pairs left, three-quarters of where it began, so the stage must also say why a cell stops with so much left: it is the shortest of its telomeres, not the average one, that stop it (§8.7). Otherwise the stop looks arbitrary.
 
 **What the reader does.**
 - **Step** through the two phases of one division; **Divide** (the primary action) runs a whole division; **Run divisions** repeats until the cell stops or the reader pauses.
 - **Telomerase**, on or off. On, it is drawn as an enzyme carrying a short dashed RNA template whose bases pair with the overhang; it adds one repeat, shifts, adds another, and primase and polymerase then fill in the partner strand. The length holds.
-- **Loss per division**, from 25 to 100 base pairs, opening at 50.
+- **Loss per division**, from 40 to 100 base pairs, opening at 50.
 - **Shape**: *Linear* or *Circular*. Circular has no end, and the problem does not arise.
 - **Reset**.
 
