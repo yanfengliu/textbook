@@ -64,7 +64,12 @@
 // removal: the primers stay in the finished strand (`primersInPlace` climbs), and the nick beside each
 // is counted as unsealed as well, because E. coli's ligase joins a 3′ end only to a 5′ monophosphate and
 // the primer's 5′ end, where primase began it, carries three phosphates. A stalled fork's polymerases
-// still finish the template already open to them.
+// still finish the template already open to them. Under a made-up rule this fork makes no fragments, so
+// the sentence under the table says what is left to fail: without primase the fork runs on, needing no
+// more primers than the two at the origin (under 'same-direction' the other fork, not drawn, could start
+// none of its fragments); without primer removal or ligase the two primers at the origin stay, or the
+// nicks left when they are replaced stay open. Before 2026-09-24 the ligase sentence spoke of fragments
+// never joined beside a rule's sentence saying there were none.
 //
 // THE CHAIN TERMINATOR goes into the pool on a press; the next strand being extended takes it in 30 nt
 // later and stops there for good. The leading strand is served first when both are extending. A stopped
@@ -114,6 +119,20 @@
 // brief's 3/4: measured at the narrow gate's 342 px stage, the toolbar needs five rows for the fork
 // scene's eleven controls, and a 3/4 stage leaves the drawing and the table 284 px between them.
 //
+// THE FLAT COMPOSITION. The frame gives its flat box from an 800 px window up, and the rail keeps the
+// stage at 480 to 782 px wide there, so below an 800 px stage the stage can be wider than tall (`flat`).
+// An upright fork in a box that short was a strip, and its table lost rows and sentences under the
+// controls. Flat, the drawing is the desktop one, lying along the stage, and the table stands beside it
+// (FLAT_COLUMNS), 236 px at an 800 px window and 300 at 1150, its rows in two columns over the
+// sentences. The toolbar's groups give way so the controls wrap as one line, and the two made-up rules
+// take short labels (`rf-flat`; the tall phone keeps the long ones): the fork scene's controls take two
+// rows from a 960 px window and three at 800 and 860, which leave the panes 80 and 106 px. There the
+// table gives up its titles, then its rows, and last the rule's sentence, which the pressed control
+// names (`flatTable`); what the reader has done stays whole. A pane that short closes the arms up and
+// lets a strand's name go inside the fork. The chromosome scene draws its desktop picture beside a
+// table of one column, and under 200 px of height closes it up (`short`), the enlargement drawn only
+// with room for its name and the clock only where it fits, the table's elapsed time standing for it.
+//
 // CHAPTER 10 IS EXPECTED TO ASK for the whole-chromosome scene, for S phase. It is reached by `scene:
 // 'chromosome'` alone (OPEN below), and every number it uses is a named constant here rather than a
 // figure-private one, so chapter 10 mounts this kind with a different opening scene instead of keeping a
@@ -134,6 +153,9 @@ export const meta = {
 const CSS = `
 .tb-replication-fork .rf-num { font-variant-numeric: lining-nums tabular-nums; }
 .tb-replication-fork .rf-caps { letter-spacing: 0.08em; text-transform: uppercase; }
+.tb-replication-fork.rf-flat .tb-toolbar > .tb-group { display: contents; }
+.tb-replication-fork.is-narrow:not(.rf-flat) .rf-rules .tb-long { display: inline; }
+.tb-replication-fork.is-narrow:not(.rf-flat) .rf-rules .tb-short { display: none; }
 `;
 
 // ---- the opening state, which a later chapter changes to mount another scene ----
@@ -171,8 +193,8 @@ const ENZYMES = Object.freeze([
 
 const RULES = Object.freeze([
   { id: 'as-they-are', label: 'As they are', aria: 'As they are, antiparallel strands and a polymerase that adds only at a 3′ end' },
-  { id: 'same-direction', label: 'Strands run the same way', aria: 'Strands run the same way, a hypothetical rule' },
-  { id: 'either-end', label: 'Polymerase can add at either end', aria: 'Polymerase can add at either end, a hypothetical rule' },
+  { id: 'same-direction', label: 'Strands run the same way', short: 'Same way', aria: 'Strands run the same way, a hypothetical rule' },
+  { id: 'either-end', label: 'Polymerase can add at either end', short: 'Either end', aria: 'Polymerase can add at either end, a hypothetical rule' },
 ]);
 
 // The two facts, and the lagging strand computed from them and from nothing else. A lagging strand goes
@@ -451,6 +473,8 @@ function finishText(ch, organism, origins) {
 
 // Narrow, the fork over its table; `arrange()` gives the table more when its sentences need it.
 const NARROW_ROWS = 'minmax(0, 71fr) minmax(0, 29fr)';
+// Flat, the drawing beside its table: the table 236 px at an 800 px window, growing to 300.
+const FLAT_COLUMNS = 'minmax(0, 1fr) clamp(236px, calc(20% + 150px), 300px)';
 
 export function mount(root, ctx) {
   const b = bench(root, ctx, { kind: meta.kind, css: CSS, narrowBelow: { width: 800 }, seed: 803 });
@@ -481,9 +505,9 @@ export function mount(root, ctx) {
       at: { fork: [1, 1], table: [2, 1] },
     },
     narrow: {
-      columns: 'minmax(0, 1fr)',
+      columns: 'var(--rf-cols, minmax(0, 1fr))',
       rows: `var(--rf-rows, ${NARROW_ROWS})`,
-      at: { fork: [1, 1], table: [1, 2] },
+      at: { fork: [1, 1], table: ['var(--rf-table-c, 1)', 'var(--rf-table-r, 2)'] },
     },
   });
 
@@ -498,6 +522,7 @@ export function mount(root, ctx) {
   ], (id) => setScene(id), { segmented: true, value: OPEN.scene });
   b.divide();
   const ruleCtl = b.choice('Rules', RULES, (id) => setRule(id), { segmented: true, value: OPEN.rule });
+  ruleCtl.strip.classList.add('rf-rules');
   b.divide();
   const enzymeCtl = ENZYMES.map((e) => b.toggle(e.label, (on) => setEnzyme(e.id, on), {
     pressed: true,
@@ -688,7 +713,7 @@ export function mount(root, ctx) {
   function ruleWords(short = false) {
     if (rule === 'same-direction' && short) return 'At this fork both new strands grow towards it, each from one primer. At the other fork, not drawn, both would be made in fragments.';
     if (rule === 'either-end' && short) return 'A polymerase that could add at a 5′ end makes the lower new strand towards the fork too, from one primer: no fragments at any fork.';
-    if (rule === 'same-direction') return 'Hypothetical: the two strands run the same way. At this fork both new strands grow at a 3′ end towards it, each from one primer. At the fork leaving the origin the other way, not drawn, both would grow away from their fork and be made in fragments: the fragments move there, and do not go.';
+    if (rule === 'same-direction') return 'Hypothetical: the two strands run the same way. At this fork both new strands grow at a 3′ end towards it, each from one primer. At the fork leaving the origin the other way, not drawn, both would grow away from their fork and be made in fragments: the fragments move to that fork, and do not go away.';
     if (rule === 'either-end') return 'Hypothetical: a polymerase that could add at a 5′ end makes the lower new strand towards the fork too, from one primer, and so at every fork: no fragments anywhere.';
     return null;
   }
@@ -698,8 +723,16 @@ export function mount(root, ctx) {
     if (why === 'no-helicase') return 'No helicase: the parent helix stays shut, so the fork cannot move.';
     if (why === 'twist') return 'No topoisomerase: the twist ahead has built up until the fork has stalled.';
     if (!has('topoisomerase')) return 'No topoisomerase: every ten pairs opened add a turn ahead, and nothing takes them out.';
+    // Under a made-up rule this fork makes no fragments, so what primase, primer removal and ligase are
+    // missed for is the two primers the new strands began on, at the origin, and the nicks left there;
+    // under 'same-direction' the other fork's fragments as well, which the rule's sentence has named.
     if (!has('primase') && !fk.bot) return 'No primase: no new fragment can start, so the lagging template waits uncopied.';
+    if (!has('primase') && rule === 'same-direction') return short ? 'No primase: this fork needs no more primers, but the other fork could start none of its fragments.' : 'No primase: this fork needs no more primers than the two it began with, but the fork going the other way, not drawn, could start none of its fragments.';
+    if (!has('primase')) return 'No primase: under this rule no fork needs more primers than the two it began with, so the fork runs on as before.';
+    if (!has('primer-removal') && fk.bot) return 'No primer removal: the primer each new strand began on stays in it, at the origin, and the nick beside it cannot be sealed.';
     if (!has('primer-removal')) return 'No primer removal: the RNA primers stay in the strand, and the nick beside each cannot be sealed.';
+    if (!has('ligase') && fk.bot && short) return 'No ligase: no fragments here, but once each new strand\'s primer at the origin is replaced, the nick left there stays open.';
+    if (!has('ligase') && fk.bot) return 'No ligase: this fork has no fragments to join, but once each new strand\'s primer at the origin is replaced, the nick where it meets the other fork\'s DNA stays open.';
     if (!has('ligase')) return 'No ligase: the fragments are made but never joined, so each nick stays open.';
     if (fk.terminated === 'leading' && short) return 'A chain terminator has stopped the leading strand: nothing can be added after it. A real fork slows, and may restart on a new primer.';
     if (fk.terminated === 'leading') return 'A chain terminator has stopped the leading strand: nothing can be added after it. In this drawing the fork keeps opening; a real fork slows, and may start the strand again beyond the block on a new primer.';
@@ -737,16 +770,35 @@ export function mount(root, ctx) {
   // which is a phone's: the narrow composition in a wide stage (a 656 px column at a 1024 px window)
   // has no height to spare, and the fork would be squeezed to a strip. The share is worked out from the
   // two panes together, which a changed grid does not change, so the answer cannot flip as the panes it
-  // produces are measured. Returns true when it changed the grid.
+  // produces are measured. Flat is narrow and wider than tall, the frame's flat box below an 800 px
+  // stage: the table stands beside the drawing (see "The flat composition" in the header), and the
+  // toolbar's groups give way so its controls wrap as one line. Returns true when it changed the grid.
   let tableRows = NARROW_ROWS;
+  let flat = false;
+  let arranged = false;
   function arrange() {
+    const stage = b.narrow ? b.wrap.getBoundingClientRect() : null;
+    const nowFlat = Boolean(stage) && stage.width > stage.height;
+    let changed = false;
+    if (nowFlat !== flat || !arranged) {
+      arranged = true;
+      flat = nowFlat;
+      b.wrap.classList.toggle('rf-flat', flat);
+      b.setVar('--rf-cols', flat ? FLAT_COLUMNS : 'minmax(0, 1fr)');
+      b.setVar('--rf-table-c', flat ? '2' : '1');
+      b.setVar('--rf-table-r', flat ? '1' : '2');
+      tableRows = flat ? 'minmax(0, 1fr)' : NARROW_ROWS;
+      b.setVar('--rf-rows', tableRows);
+      b.remeasure();
+      changed = true;
+    }
+    if (flat) return changed;
     let want = NARROW_ROWS;
-    const stage = b.narrow && scene === 'fork' ? b.wrap.getBoundingClientRect() : null;
-    if (stage && stage.height > stage.width) {
+    if (stage && scene === 'fork' && stage.height > stage.width) {
       const need = forkTableNeed(table.box.w);
       if (need > (forkPane.box.h + table.box.h) * 0.29) want = `minmax(0, 1fr) minmax(0, ${Math.ceil(need)}px)`;
     }
-    if (want === tableRows) return false;
+    if (want === tableRows) return changed;
     tableRows = want;
     b.setVar('--rf-rows', want);
     return true;
@@ -824,10 +876,11 @@ export function mount(root, ctx) {
   // the leading strand's arm on the left and the lagging strand's on the right.
   function forkGeom() {
     const { w, h: hgt } = forkPane.box;
-    const narrow = b.narrow;
+    const narrow = b.narrow && !flat;
     const along = narrow ? hgt : w;
-    const armSep = narrow ? clamp(w * 0.17, 34, 110) : clamp(hgt * 0.27, 36, 110);
     const g = narrow ? 7.5 : clamp(hgt * 0.032, 8, 10);
+    // Flat, the arms close up until a polymerase on either one stays inside a pane 80 px tall.
+    const armSep = narrow ? clamp(w * 0.17, 34, 110) : Math.min(clamp(hgt * 0.27, 36, 110), flat ? hgt / 2 - g / 2 - 12 : Infinity);
     const aWork = along * 0.6;
     const a0 = narrow ? 14 : 18;
     const s = aWork / (narrow ? BEHIND_NT_NARROW : BEHIND_NT);
@@ -1168,7 +1221,8 @@ export function mount(root, ctx) {
       const words = rule === 'same-direction' ? 'Hypothetical: strands run the same way' : 'Hypothetical: polymerase adds at either end';
       const size = narrow ? 9 : S * 0.92;
       const spots = narrow ? [[6, 12, 'start'], [6, G.hgt - 6, 'start']] : [[6, 14, 'start'], [6, G.hgt - 8, 'start']];
-      lab.place(spots, words.toUpperCase(), { size, cls: 'rf-caps' });
+      // A flat stage's drawing can be too narrow for the rule's name: the pressed control carries it.
+      if (!lab.place(spots, words.toUpperCase(), { size, cls: 'rf-caps' }) && flat) lab.place(spots, 'HYPOTHETICAL RULE', { size, cls: 'rf-caps' });
     }
     const why = stalledBecause();
     if (why) {
@@ -1188,7 +1242,10 @@ export function mount(root, ctx) {
     if (primaseAt) place(around(primaseAt[0], primaseAt[1] - 3, -1, { offs: [10, 20, 30], shifts: [6, 20, -8, 34, -22] }), 'primase');
     const nameAt = (a0, a1) => clamp((a0 + a1) / 2, 40, G.aV - 50);
     const leadMid = nameAt(Math.max(aOrigin, 0), top.aEnd);
-    place(around(leadMid, tmplTop(leadMid) + 1, 1, { offs: [11, 22, 33], shifts: [0, -30, 30, -60, 60] }), 'leading strand');
+    // Flat, a short pane can leave no room outside an arm, so a strand's name may go inside it, over
+    // the new strand it names.
+    const inside = (a, c, side) => (flat ? around(a, c, side, { offs: [10, 20], shifts: [0, -30, 30, -60] }) : []);
+    place([...around(leadMid, tmplTop(leadMid) + 1, 1, { offs: [11, 22, 33], shifts: [0, -30, 30, -60, 60] }), ...inside(leadMid, newTop(leadMid) - 1, -1)], 'leading strand');
     // The lower strand's name goes over what has been made of it, not over bare template.
     // With no fragment in view (no primase, and the last one gone off the stage) the arm is bare template
     // and goes unnamed; the table's note says why.
@@ -1198,7 +1255,13 @@ export function mount(root, ctx) {
       const seen = frags.map((f) => ({ f, len: f.aQ - Math.max(f.aE, 0) })).sort((x, y) => y.len - x.len)[0];
       lagMid = seen && seen.len > 40 ? clamp((Math.max(seen.f.aE, 0) + seen.f.aQ) / 2, 40, G.aV - 40) : G.aV - G.gapPx - 30;
     }
-    if (lagMid !== null) place(around(lagMid, tmplBot(lagMid) - 1, -1, { offs: [11, 22, 33], shifts: [0, -30, 30, -60, 60] }), !fk.bot ? 'lagging strand' : rule === 'same-direction' ? (narrow ? 'continuous here' : 'continuous at this fork only') : (narrow ? 'also continuous' : 'made continuously too'));
+    if (lagMid !== null) {
+      const cands = [...around(lagMid, tmplBot(lagMid) - 1, -1, { offs: [11, 22, 33], shifts: [0, -30, 30, -60, 60] }), ...inside(lagMid, newBot(lagMid) + 1, 1)];
+      const phone = rule === 'same-direction' ? 'continuous here' : 'also continuous';
+      if (!fk.bot) place(cands, 'lagging strand');
+      else if (narrow) place(cands, phone);
+      else if (!place(cands, rule === 'same-direction' ? 'continuous at this fork only' : 'made continuously too') && flat) place(cands, phone);
+    }
     // The newest primer on the lagging strand, or else the leading strand's own at the origin. A primer
     // is drawn about ten times its length, so its name says so wherever there is room for the words.
     const primerName = (cands) => place(cands, 'RNA primer (not to scale)') || place(cands, 'RNA primer');
@@ -1269,13 +1332,31 @@ export function mount(root, ctx) {
     ];
     const r = ruleWords(b.narrow);
     const words = forkWords(b.narrow);
+    if (flat) {
+      // The sentences say what the reader has done, so the rows go before either of them; the rule's
+      // goes last of all, the pressed control and the drawing's banner still naming the rule.
+      const notes = [ruleWords(true), forkWords(true)].filter(Boolean);
+      const plans = [
+        { titled: true, rows: true, notes },
+        { titled: false, rows: true, notes },
+        { titled: false, rows: false, notes },
+      ];
+      if (notes.length > 1) plans.push({ titled: false, rows: false, notes: notes.slice(1) });
+      const made = rows.slice(4).map(([k, v]) => [k === 'Pyrophosphate released' ? 'Pyrophosphate' : k, v]);
+      flatTable(['At the fork', 'Made'], rows.slice(0, 4), made, plans);
+      return;
+    }
     if (!b.narrow) {
+      // The phone's shorter wordings before any sentence goes, and the rule's sentence kept to the last:
+      // at a 989 px stage the long ones left no room for what an enzyme taken away had done.
       const size = clamp(Math.max(w * 0.04, hgt * 0.033), 9.6, 11.6);
       table.readout({ title: 'At the fork', x: 6, width: Math.min(w - 8, 320), size, minRow: 14, maxRow: 24 }).fit(hgt, (t, level) => {
+        const rr = level < 1 ? r : ruleWords(true);
+        const ww = level < 1 ? words : forkWords(true);
         for (const [k, v] of rows) t.row(k, v);
-        if (r) t.note(r, { size: size - 0.6 });
-        if (words && (level < 1 || !r)) t.note(words, { size: size - 0.6 });
-      }, { levels: 2 });
+        if (rr) t.note(rr, { size: size - 0.6 });
+        if (ww && (level < 2 || !rr)) t.note(ww, { size: size - 0.6 });
+      }, { levels: 3 });
       return;
     }
     // Narrow: the rows in two columns, the sentences under them at full width.
@@ -1290,6 +1371,44 @@ export function mount(root, ctx) {
     const bottomR = right.fill(into);
     const bottom = Math.max(bottomL, bottomR);
     narrowNotes(w, bottom + 2).draw(14, hgt - bottom - 2);
+  }
+
+  // Flat: the table beside the drawing, its rows in two columns over the sentences. The plans are tried
+  // fullest first, each `{ titled, rows, notes }`, and the first that fits at its least row height and
+  // closest leading is drawn; the last is drawn whatever it needs. The sentences' leading opens up to a
+  // phone's as the height allows, and the rows take what is left, up to 18 px each.
+  function flatTable(titles, leftRows, rightRows, plans) {
+    const { w, h: hgt } = table.box;
+    const size = 10;
+    const gap = 12;
+    const colW = (w - gap) / 2;
+    const minRow = 12;
+    const notesAt = (list, y) => {
+      const t = table.readout({ x: 0, y, width: w, size });
+      for (const n of list) t.note(n, { size: 9.4 });
+      return t;
+    };
+    for (let i = 0; i < plans.length; i += 1) {
+      const pl = plans[i];
+      const cols = pl.rows ? (pl.titled ? 9.4 + 4.5 : 0) + Math.max(leftRows.length, rightRows.length) * minRow : 0;
+      const between = pl.rows && pl.notes.length ? 4 : 0;
+      const notes = notesAt(pl.notes, 0);
+      if (i < plans.length - 1 && cols + between + notes.height(0) > hgt) continue;
+      let lead = 14;
+      while (lead > 0 && cols + between + notes.height(lead) > hgt) lead -= 1;
+      let bottom = 0;
+      if (pl.rows) {
+        const into = hgt - between - notes.height(lead);
+        const column = (title, x, list) => {
+          const t = table.readout({ title: pl.titled ? title : null, x, width: colW, size, minRow, maxRow: 18 });
+          for (const [k, v] of list) t.row(k, v);
+          return t.fill(into);
+        };
+        bottom = Math.max(column(titles[0], 0, leftRows), column(titles[1], colW + gap, rightRows));
+      }
+      if (pl.notes.length) notesAt(pl.notes, bottom + between).draw(lead, hgt - bottom - between);
+      return;
+    }
   }
 
   // The narrow table's sentences, at full width under its two columns.
@@ -1311,21 +1430,25 @@ export function mount(root, ctx) {
   function drawChromosome() {
     const p = forkPane;
     const { w, h: hgt } = p.box;
-    const narrow = b.narrow;
+    const narrow = b.narrow && !flat;
     const ch = chromosome(organism, origins);
     const frac = ch.copied(chrMin);
     const lab = placer(p);
     const S = narrow ? 10 : clamp(hgt * 0.034, 10, 11.5);
     const clockSize = narrow ? 24 : clamp(hgt * 0.1, 22, 34);
-    const drawClock = (x, y, anchor) => {
-      p.text(x, y - clockSize - 6, 'Copying time', { anchor, class: 'tb-rt-title', 'font-size': 9.4 });
-      p.text(x, y, clockText(chrMin, organism, origins), { anchor, class: 'rf-num', 'font-size': clockSize.toFixed(1), 'font-weight': 600, style: `fill:${C.ink}` });
-      lab.reserve(anchor === 'middle' ? x - 110 : x - 2, y - clockSize - 18, anchor === 'middle' ? x + 110 : x + 230, y + 6);
+    const drawClock = (x, y, anchor, size = clockSize) => {
+      p.text(x, y - size - 6, 'Copying time', { anchor, class: 'tb-rt-title', 'font-size': 9.4 });
+      p.text(x, y, clockText(chrMin, organism, origins), { anchor, class: 'rf-num', 'font-size': size.toFixed(1), 'font-weight': 600, style: `fill:${C.ink}` });
+      lab.reserve(anchor === 'middle' ? x - 110 : x - 2, y - size - 18, anchor === 'middle' ? x + 110 : x + 230, y + 6);
     };
+    // Flat, the drawing has the column beside the table, which can be 216 px by 113: the clock is set no
+    // larger than its room, and below 200 px of height the drawing closes up (`short`).
+    const clockFits = (room) => Math.min(clockSize, room / (clockText(chrMin, organism, origins).length * 0.6));
+    const short = flat && hgt < 200;
     if (organism === 'e-coli') {
-      const cx = narrow ? w / 2 : w * 0.36;
+      const R = narrow ? Math.min(w * 0.34, hgt * 0.3) : Math.min(short ? (hgt - 54) / 2 : hgt * 0.38, w * 0.22);
+      const cx = narrow ? w / 2 : flat ? R + 30 : w * 0.36;
       const cy = narrow ? hgt * 0.4 : hgt * 0.5;
-      const R = narrow ? Math.min(w * 0.34, hgt * 0.3) : Math.min(hgt * 0.38, w * 0.22);
       const th = Math.PI * frac;
       const at = (phi, r) => [cx + r * Math.cos(phi), cy + r * Math.sin(phi)];
       const arc = (p0, p1, r) => {
@@ -1372,6 +1495,7 @@ export function mount(root, ctx) {
       }
       lab.place([[cx, cy + 4, 'middle']], '4.6 million bp', { size: S });
       if (narrow) drawClock(w / 2, hgt - 10, 'middle');
+      else if (flat) drawClock(cx + R + 32, hgt * 0.62, 'start', clockFits(w - cx - R - 36));
       else drawClock(w * 0.66, hgt * 0.62, 'start');
       return;
     }
@@ -1380,9 +1504,11 @@ export function mount(root, ctx) {
     const x0 = 12;
     const x1 = w - 12;
     const X = (bp) => x0 + ((x1 - x0) * bp) / CHR1_BP;
-    const yL = narrow ? hgt * 0.16 : hgt * 0.24;
+    const yL = narrow ? hgt * 0.16 : short ? 26 : hgt * 0.24;
     const half = 3.2;
-    lab.place([[x0, yL - 14, 'start']], narrow ? 'chromosome 1, 249 million bp' : 'human chromosome 1, 249 million bp', { size: S });
+    // Flat, a label too long for the column takes the phone's wording.
+    const name = (cands, long, phone, size = S) => (narrow ? lab.place(cands, phone, { size }) : lab.place(cands, long, { size }) || (flat && lab.place(cands, phone, { size })));
+    name([[x0, yL - 14, 'start']], 'human chromosome 1, 249 million bp', 'chromosome 1, 249 million bp');
     // The copied stretches, as the bubbles they are, and the rest as one line.
     const spans = [];
     const forks = [];
@@ -1449,17 +1575,23 @@ export function mount(root, ctx) {
     }
     lab.reserve(x0, tickY - 1, x1, tickY + 7);
     // Two bars to the same scale: fifty million pairs, and the whole of E. coli's chromosome.
-    const yBar = yL + (narrow ? 34 : 40);
+    const yBar = yL + (narrow ? 34 : short ? 32 : 40);
     const barX = x1 - (X(50e6) - x0);
     p.path(`M${barX.toFixed(1)} ${yBar.toFixed(1)}H${x1}M${barX.toFixed(1)} ${(yBar - 3).toFixed(1)}v6M${x1} ${(yBar - 3).toFixed(1)}v6`, { stroke: C.ink, 'stroke-width': 1.2 });
-    lab.place([[(barX + x1) / 2, yBar + 15, 'middle']], '50 million bp', { size: S * 0.95 });
+    lab.place([[(barX + x1) / 2, yBar + 15, 'middle'], [x1, yBar + 15, 'end']], '50 million bp', { size: S * 0.95 });
     const eW = Math.max(2, X(ECOLI_BP) - x0);
     p.path(`M${x0} ${yBar.toFixed(1)}h${eW.toFixed(1)}`, { stroke: C.ink, 'stroke-width': 3 });
-    lab.place([[x0, yBar + 15, 'start']], narrow ? 'E. coli, same scale' : 'E. coli’s whole chromosome, to the same scale', { size: S * 0.95 });
+    name([[x0, yBar + 15, 'start']], 'E. coli’s whole chromosome, to the same scale', 'E. coli, same scale', S * 0.95);
 
-    if (origins === 'all') {
+    // Flat and short, the enlargement goes only where its line, its ticks and its name all fit under
+    // the bars; the clock takes what room is left, and the table's elapsed time stands for it where
+    // none is.
+    const yZ = narrow ? hgt * 0.5 : short ? yBar + 40 : hgt * 0.58;
+    const zoomed = origins === 'all' && (!short || yZ + 34 <= hgt);
+    let clear = short ? yBar + 20 : 0;
+    if (zoomed) {
       // A stretch enlarged, where one origin's forks can be told from its neighbours'.
-      const yZ = narrow ? hgt * 0.5 : hgt * 0.58;
+      clear = short ? yZ + 34 : 0;
       const Z = (bp) => x0 + ((x1 - x0) * (bp - ZOOM[0])) / (ZOOM[1] - ZOOM[0]);
       const inZoom = spans.map(([s0, s1]) => [Math.max(ZOOM[0], s0), Math.min(ZOOM[1], s1)]).filter(([s0, s1]) => s1 > s0);
       p.path(`M${X(ZOOM[0]).toFixed(1)} ${(tickY + 7).toFixed(1)}L${x0} ${(yZ - 16).toFixed(1)}M${X(ZOOM[1]).toFixed(1)} ${(tickY + 7).toFixed(1)}L${x1} ${(yZ - 16).toFixed(1)}`, { stroke: C.faint, 'stroke-width': 0.8, 'stroke-dasharray': '2 3' });
@@ -1484,7 +1616,12 @@ export function mount(root, ctx) {
       }
       lab.reserve(x0, yZ - 8, x1, yZ + 15);
       const zoomWords = `${((ZOOM[1] - ZOOM[0]) / 1e6).toFixed(0)} million bp enlarged`;
-      lab.place([[x0, yZ + 30, 'start']], narrow ? `${zoomWords}: origins and forks` : `${zoomWords}: origins, and the forks leaving them`, { size: S * 0.95 });
+      name([[x0, yZ + 30, 'start']], `${zoomWords}: origins, and the forks leaving them`, `${zoomWords}: origins and forks`, S * 0.95);
+    }
+    if (short) {
+      const size = Math.min(clockFits(w - x0 - 4), hgt - 17 - clear);
+      if (size >= 14) drawClock(x0, origins === 'all' ? hgt - 4 : Math.min(hgt - 4, (clear + hgt) / 2 + size / 2 + 6), 'start', size);
+      return;
     }
     // The clock goes under the drawing, and for one origin, where there is no enlargement, in the middle
     // of the room the enlargement would have taken.
@@ -1506,6 +1643,22 @@ export function mount(root, ctx) {
     ];
     const words = chromosomeWords(ch);
     const title = organism === 'e-coli' ? 'E. coli' : 'Human chromosome 1';
+    if (flat) {
+      // One column beside the drawing, the phone's sentence under it. A short table gives up its title,
+      // then the sentence, never a row: the finishing time is the scene's answer.
+      const brief = chromosomeWords(ch, true);
+      const levels = [[true, true], [false, true], [true, false], [false, false]];
+      for (let i = 0; i < levels.length; i += 1) {
+        const [titled, noted] = levels[i];
+        const t = table.readout({ title: titled ? title : null, x: 0, width: w, size: 10, minRow: 12, maxRow: 22 });
+        for (const [k, v] of rows) t.row(k, v);
+        if (noted) t.note(brief, { size: 9.4 });
+        if (i === levels.length - 1 || t.height(12) <= hgt) {
+          t.fill(hgt);
+          return;
+        }
+      }
+    }
     if (!b.narrow) {
       const size = clamp(Math.max(w * 0.04, hgt * 0.033), 9.6, 11.6);
       table.readout({ title, x: 6, width: Math.min(w - 8, 320), size, minRow: 14, maxRow: 26 }).fit(hgt, (t, level) => {

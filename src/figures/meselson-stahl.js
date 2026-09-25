@@ -57,6 +57,14 @@
 // tree of descendants would fall below legibility, so the tube keeps its full height on the left, the
 // molecules of the generation shown stand to its right in a single column (one of each kind, with its
 // count), and the table runs beneath both. The scheme switch becomes a stepper that says the same words.
+//
+// THE FLAT COMPOSITION. The frame gives its flat box from an 800 px window up, and the rail keeps the
+// stage narrower than 800 there: 480 × 270 px at an 800 px window, 782 × 440 at 1150. The tube cut to the
+// top half of a box that short squeezes its scale's labels into one another, so on a narrow stage wider
+// than tall (`flat`) the three panes stand side by side (FLAT_COLUMNS), each the full height: the tube,
+// the molecules and the table, 186 px wide at an 800 px window and 434 at 1150. Under 250 px the table
+// gives up its density column, which the tube's scale beside it carries; at 800 px a table still too tall
+// gives up the schemes ruled out and then its title (drawTable's levels).
 
 import { C, clamp, el } from './lib/svg.js';
 import { bench } from './lib/bench.js';
@@ -64,6 +72,11 @@ import { bench } from './lib/bench.js';
 export const meta = { kind: 'meselson-stahl', title: 'The three schemes, on a switch', needsWebGL: false, aspect: 16 / 9, narrowAspect: 2 / 3 };
 
 const NARROW_W = 800;
+const NARROW_COLUMNS = 'minmax(0, 56fr) minmax(0, 44fr)';
+const NARROW_ROWS = 'minmax(0, 54fr) minmax(0, 46fr)';
+// Flat, the tube is as wide as its longest band name needs ("intermediate", at 9 px) and the molecules as
+// wide as "generation 1, on ¹⁴N" needs; the table takes the rest, 186 px at an 800 px window.
+const FLAT_COLUMNS = 'clamp(146px, 24%, 170px) clamp(100px, 18%, 130px) minmax(0, 1fr)';
 const TOL = 1e-9;
 const SCHEMES = ['semiconservative', 'conservative', 'dispersive'];
 const MAX_GEN = 4;
@@ -308,12 +321,29 @@ export function mount(root, ctx) {
       at: { molecules: [1, 1], tube: [2, 1], table: [3, 1] },
     },
     narrow: {
-      columns: 'minmax(0, 56fr) minmax(0, 44fr)',
-      rows: 'minmax(0, 54fr) minmax(0, 46fr)',
+      columns: `var(--ms-cols, ${NARROW_COLUMNS})`,
+      rows: `var(--ms-rows, ${NARROW_ROWS})`,
       rowGap: 'var(--space-1)',
-      at: { tube: [1, 1], molecules: [2, 1], table: ['1 / 3', 2] },
+      at: { tube: [1, 1], molecules: [2, 1], table: ['var(--ms-table-c, 1 / 3)', 'var(--ms-table-r, 2)'] },
     },
   });
+
+  // Flat is narrow and wider than tall: the frame's flat box below an 800 px stage (see "The flat
+  // composition" above). It is settled in onDraw, because the stage's shape can change without the
+  // scene changing.
+  let flat = false;
+  let arranged = null;
+  function arrange() {
+    const box = root.getBoundingClientRect();
+    flat = Boolean(b.narrow) && box.width > box.height;
+    if (flat === arranged) return false;
+    arranged = flat;
+    b.setVar('--ms-cols', flat ? FLAT_COLUMNS : NARROW_COLUMNS);
+    b.setVar('--ms-rows', flat ? 'minmax(0, 1fr)' : NARROW_ROWS);
+    b.setVar('--ms-table-c', flat ? '3' : '1 / 3');
+    b.setVar('--ms-table-r', flat ? '1' : '2');
+    return true;
+  }
 
   // ---- controls: the scheme, then the generation, then what to show and do ----
   const schemeCtl = b.choice('Scheme', SCHEMES.map((s) => ({ id: s, label: cap(s), aria: `${cap(s)}, ${SCHEME_ARIA[s]}` })), (id) => {
@@ -653,13 +683,22 @@ export function mount(root, ctx) {
     // The 1958 column, only while some row it would stand beside was measured: heated, only generation 1
     // was, and a table cut down to the strands elsewhere would carry an empty column.
     const with1958 = (level) => dataShown && (!heated || Boolean(obsHeated) || level < 1);
-    const columnsAt = (level) => (with1958(level) ? ['Density', 'Share', '1958'] : ['Density', 'Share']);
-    const title = `${cap(scheme)}, generation ${gen}`;
+    // Flat and under 250 px (an 800 or 860 px window), three heads do not fit over their columns, nor a
+    // strand's name beside two values at 800, so the table gives up its density column: the tube's scale
+    // beside it shows where each band lies, and the shares are what the data test.
+    const tight = flat && w < 250;
+    const columnsAt = (level) => (with1958(level) ? ['Density', 'Share', '1958'] : ['Density', 'Share']).slice(tight ? 1 : 0);
+    // The title is set in spaced capitals, about 0.72 em a letter. Where it would run past the column (the
+    // semiconservative one, on a flat stage at an 800 px window) it names the scheme alone, and the tube's
+    // heading beside it names the generation.
+    const fullTitle = `${cap(scheme)}, generation ${gen}`;
+    const title = fullTitle.length * titleSize * 0.72 <= w ? fullTitle : cap(scheme);
 
     const rows = (r, pred, observed, single, col) => {
       for (const u of union(pred, observed)) {
         const vals = [dens3(u.density), u.p ? fracText(u.p.fraction) : '—'];
         if (col) vals.push(observed ? (u.o ? fracText(u.o.fraction) : '—') : '');
+        if (tight) vals.shift();
         const bad = Boolean(observed) && !(u.p && u.o && Math.abs(u.p.fraction - u.o.fraction) < TOL);
         r.row(single ? `${cap(u.name)} strands` : cap(u.name), vals, bad ? { accent: C.coralText } : {});
       }
@@ -701,12 +740,15 @@ export function mount(root, ctx) {
     };
 
     // The table of this generation's bands. Level 0 is everything. Heated, 1 gives up the bands before
-    // heating, 2 the schemes ruled out (heat changes none of them), and 3 the sentence on what heat does,
-    // which is the last thing to go because it is the reason the strands band where they do.
+    // heating; heated or not, 2 gives up the schemes ruled out (heat changes none of them); heated, 3 gives
+    // up the sentence on what heat does, which is the last thing to go because it is the reason the strands
+    // band where they do. Level 4, for the shortest box (a flat stage at an 800 px window), gives up the
+    // title and the head over the strands, which the controls, the tube's heading and the rows' own names
+    // already say.
     const build = (r, level) => {
       const col = with1958(level);
       if (heated) {
-        r.head('Heated: single strands');
+        if (level < 4) r.head('Heated: single strands');
         rows(r, pr.strands, dataShown ? obsHeated : null, true, col);
         if (level < 3) note(r, heatNote());
         note(r, heatDataNote());
@@ -719,7 +761,7 @@ export function mount(root, ctx) {
       } else {
         rows(r, pr.bands, dataShown ? obs : null, false, col);
         note(r, duplexNote());
-        if (dataShown) note(r, ruledNote());
+        if (dataShown && level < 2) note(r, ruledNote());
       }
       r.rule();
     };
@@ -760,6 +802,7 @@ export function mount(root, ctx) {
       { extras: [], level: 1 },
       { extras: [], level: 2 },
       { extras: [], level: 3 },
+      { extras: [], level: 4 },
     ];
     const TOP = 2;
     const H = hh - TOP - 3;
@@ -769,7 +812,7 @@ export function mount(root, ctx) {
       const plan = PLANS[i];
       const parts = [
         (y) => {
-          const r = p.readout({ title, columns: columnsAt(plan.level), x: 0, y, width: w, size, titleSize });
+          const r = p.readout({ title: plan.level < 4 ? title : null, columns: columnsAt(plan.level), x: 0, y, width: w, size, titleSize });
           build(r, plan.level);
           return r;
         },
@@ -804,6 +847,7 @@ export function mount(root, ctx) {
   // ---------------------------------------------------------------- drawing
 
   b.onDraw(() => {
+    if (arrange()) b.remeasure();
     mol.clear();
     tube.clear();
     if (b.narrow) drawGroups();

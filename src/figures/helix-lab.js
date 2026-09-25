@@ -64,6 +64,17 @@
 // take short labels (Rise, Left, Right; their accessible names stay whole) and every value drops its nm,
 // which the table still prints, so the toolbar leaves the stage its room. The pairs scene stacks the pair,
 // with its two groove sides named, above the duplex strip, and the table beneath them.
+//
+// THE FLAT COMPOSITION. The frame gives its flat box from an 800 px window up, and the rail keeps the
+// stage narrower than 800 there: 480 × 270 px at an 800 px window, 782 × 440 at 1150. A pattern cut to a
+// band under a helix and over a table shows too little of itself to read, so on a narrow stage wider than
+// tall (`flat`) the grid takes two columns (FLAT). The pattern and its marks fill the left column's height
+// and the helix stands over the table in the right one, the helix's rise on a line above it and its pitch
+// and offset on a line below; in the pairs, the pair fills the left column and the duplex stands over the
+// table. The right column is 190 px at an 800 px window and grows to 300. Under 236 px it is too narrow
+// for the table's two columns of values, and the table holds the verdict alone, the marks under the
+// pattern carrying the comparison. The toolbar's groups give way (`hl-flat`), so its controls wrap as one
+// line and the photograph's take three rows at 480 px rather than four.
 
 import { C, clamp, tint, el, h } from './lib/svg.js';
 import { bench, fmt, EM_ADVANCE } from './lib/bench.js';
@@ -445,6 +456,7 @@ ${sel}.is-narrow .hl-offset .tb-val { min-width: 2.1rem; }
 ${sel} .hl-len .tb-val { min-width: 2.9rem; }
 ${sel}.is-narrow .hl-rise .tb-val { min-width: 2.2rem; }
 ${sel}.is-narrow .hl-len .tb-val { min-width: 1.4rem; }
+${sel}.hl-flat .tb-toolbar > .tb-group { display: contents; }
 `;
 
 // Each scene's share of the stage: wide columns (helix or pair | pattern | marks | table, the strip taking
@@ -453,6 +465,24 @@ const GRID = {
   photograph: { c: ['20fr', '40fr', '14fr', '26fr'], r: ['58fr', '137fr', '44px', '100fr'] },
   pairs: { c: ['55fr', '8fr', '7fr', '30fr'], r: ['185fr', '56fr', '0fr', '127fr'] },
 };
+// Where each pane stands in the narrow grid: one column on a tall stage, two on a flat one (see "The flat
+// composition" above). Flat, the pattern and its marks take the left column's whole height and the helix
+// stands over the table beside them; in the pairs, the pair takes the left column and the duplex stands
+// over the table. The rows are the narrow template's four.
+const NARROW_AT = { main: [1, 1], pattern: [1, 2], marks: [1, 3], strip: [1, '2 / 4'], table: [1, 4] };
+const FLAT = {
+  photograph: {
+    r: ['clamp(64px, 40%, 100px)', '1fr', '44px', '0px'],
+    at: { main: [2, 1], pattern: [1, '1 / 3'], marks: [1, 3], strip: [1, 1], table: [2, '2 / 5'] },
+  },
+  pairs: {
+    r: ['clamp(48px, 26%, 64px)', '1fr', '0px', '0px'],
+    at: { main: [1, '1 / 5'], pattern: [1, 1], marks: [1, 1], strip: [2, 1], table: [2, '2 / 5'] },
+  },
+};
+// The right-hand column grows faster than the stage from 190 px, so that by an 860 px window (a 516 px
+// grid) it is wide enough for the table's two columns of values, and stops at 300.
+const FLAT_COLUMNS = 'minmax(0, 1fr) clamp(190px, calc(112% - 336px), 300px)';
 
 const PHOTO_ARIA = 'A helix you build, drawn from the side, beside the X-ray diffraction pattern calculated from it and the positions measured on Franklin’s photograph. 1, 2 or 3 sets the strands, the up and down arrows the pitch, [ and ] the rise per base, the left and right arrows the radius, O the offset between the strands, M shows or hides the measurements, S switches to the pairs and Home resets.';
 const PAIRS_ARIA = 'One base pair drawn to scale between two backbones 2 nm apart. The left and right arrows change the left and the right base, T switches the tautomer, P the direction the strands run, Enter or A adds the pair to the duplex, S switches to the photograph and Home resets.';
@@ -494,10 +524,10 @@ export function mount(root, ctx) {
       at: { main: [1, 1], pattern: [2, 1], marks: [3, 1], strip: ['2 / 4', 1], table: [4, 1] },
     },
     narrow: {
-      columns: 'minmax(0, 1fr)',
+      columns: 'var(--hl-cols, minmax(0, 1fr))',
       rows: 'minmax(0, var(--hl-r1)) minmax(0, var(--hl-r2)) minmax(0, var(--hl-r3)) minmax(0, var(--hl-r4))',
       rowGap: 'var(--space-1)',
-      at: { main: [1, 1], pattern: [1, 2], marks: [1, 3], strip: [1, '2 / 4'], table: [1, 4] },
+      at: Object.fromEntries(Object.entries(NARROW_AT).map(([name, [c, r]]) => [name, [`var(--hl-${name}-c, ${c})`, `var(--hl-${name}-r, ${r})`]])),
     },
   });
 
@@ -593,10 +623,26 @@ export function mount(root, ctx) {
     addBtn.disabled = !(ps.fits && !ps.mispair && built.length < MAX_PAIRS);
   }
 
+  // Flat is narrow and wider than tall: the frame's flat box below an 800 px stage. It is settled in onDraw
+  // as well as here, because the stage's shape can change without the scene changing.
+  let flat = false;
+  let arranged = '';
   function setGridVars() {
+    const box = root.getBoundingClientRect();
+    flat = Boolean(b.narrow) && box.width > box.height;
+    const key = `${scene} ${flat}`;
+    if (key === arranged) return false;
+    arranged = key;
+    b.wrap.classList.toggle('hl-flat', flat);
     const g = GRID[scene];
     g.c.forEach((v, i) => b.setVar(`--hl-c${i + 1}`, v));
-    g.r.forEach((v, i) => b.setVar(`--hl-r${i + 1}`, v));
+    (flat ? FLAT[scene].r : g.r).forEach((v, i) => b.setVar(`--hl-r${i + 1}`, v));
+    b.setVar('--hl-cols', flat ? FLAT_COLUMNS : 'minmax(0, 1fr)');
+    for (const [name, [c, r]] of Object.entries(flat ? FLAT[scene].at : NARROW_AT)) {
+      b.setVar(`--hl-${name}-c`, String(c));
+      b.setVar(`--hl-${name}-r`, String(r));
+    }
+    return true;
   }
 
   function applyScene() {
@@ -774,10 +820,13 @@ export function mount(root, ctx) {
       zLen = Math.max(P, (g.yBot - g.yTop) / s);
       at = (z, th) => [g.cx + r * Math.cos(th) * s, g.yBot - z * s];
     } else {
+      // Flat, the helix has a narrow column of its own: the rise takes the line above it, the pitch and
+      // the offset the line below, and the width stays at its right.
       g.x0 = 16;
-      g.x1 = w - 78;
-      s = Math.max(4, Math.min((hh - 26) / 3.2, (g.x1 - g.x0) / 9));
-      g.cy = (18 + hh) / 2;
+      g.x1 = w - (flat ? 50 : 78);
+      const band = flat ? hh - 44 : hh - 26;
+      s = Math.max(4, Math.min(band / 3.2, (g.x1 - g.x0) / 9));
+      g.cy = flat ? (hh - 8) / 2 : (18 + hh) / 2;
       zLen = Math.max(P, (g.x1 - g.x0) / s);
       at = (z, th) => [g.x0 + z * s, g.cy + r * Math.cos(th) * s];
     }
@@ -856,23 +905,27 @@ export function mount(root, ctx) {
     } else {
       const { x0, x1, cy } = g;
       // Short of the corner, where the focus bracket is drawn when the pane holds the keyboard.
-      p.text(w - 9, 16, riseText, { anchor: 'end', fit: [10, 8], width: w * 0.5, fill: C.soft, class: 'hl-num' });
-      const by = cy - r * s - 6;
+      p.text(w - 9, flat ? 13 : 16, riseText, { anchor: 'end', fit: [10, 8], width: flat ? w - 18 : w * 0.5, fill: C.soft, class: 'hl-num' });
+      // Above the helix, or flat under it, where the line runs on past the width's two words above it.
+      const by = flat ? cy + r * s + 6 : cy - r * s - 6;
+      const ty = flat ? by + 12 : by - 4;
+      const dir = flat ? -1 : 1;
+      const margin = flat ? 4 : 8;
       const pitchLabel = `${fmt(P, 1)} nm a turn`;
       const pw = pitchLabel.length * EM_ADVANCE * 10;
       const pxA = x0 + (P / 2) * s;
       const pxB = x0 + ((3 * P) / 2) * s;
       let taken = null;
       if ((3 * P) / 2 <= zLen) {
-        bracket(p, pxA, by, pxB, by, { dir: 1 });
+        bracket(p, pxA, by, pxB, by, { dir });
         const pm = (pxA + pxB) / 2;
-        p.text(pm, by - 4, pitchLabel, { anchor: 'middle', 'font-size': 10, fill: C.soft, class: 'hl-num' });
-        taken = [pm - pw / 2 - 8, pm + pw / 2 + 8];
+        p.text(pm, ty, pitchLabel, { anchor: 'middle', 'font-size': 10, fill: C.soft, class: 'hl-num' });
+        taken = [pm - pw / 2 - margin, pm + pw / 2 + margin];
       }
       if (photo.strands > 1) {
         const label = `${FRACTION[photo.offset16]} turn apart`;
         const lw = label.length * EM_ADVANCE * 10;
-        for (let k = 2; ; k += 1) {
+        for (let k = flat ? 1 : 2; ; k += 1) {
           const za = (k + 0.5) * P;
           const zb = za + f * P;
           if (zb > zLen) break;
@@ -880,10 +933,10 @@ export function mount(root, ctx) {
           const xb = x0 + zb * s;
           const xm = (xa + xb) / 2;
           const span = [xm - lw / 2, xm + lw / 2];
-          if (span[0] < 0 || span[1] > x1 + 4) continue;
+          if (span[0] < 0 || span[1] > (flat ? w - 4 : x1 + 4)) continue;
           if (taken && span[1] > taken[0] && span[0] < taken[1]) continue;
-          bracket(p, xa, by, xb, by, { dir: 1 });
-          p.text(xm, by - 4, label, { anchor: 'middle', 'font-size': 10, fill: C.soft, class: 'hl-num' });
+          bracket(p, xa, by, xb, by, { dir });
+          p.text(xm, ty, label, { anchor: 'middle', 'font-size': 10, fill: C.soft, class: 'hl-num' });
           break;
         }
       }
@@ -1124,7 +1177,8 @@ export function mount(root, ctx) {
       }
       if (dd) p.path(dd, { stroke: C.ink, 'stroke-width': 1.2, fill: 'none' });
     }
-    p.text(0, 17, marksOn ? 'Calculated; marks: Franklin’s' : 'Calculated', { fit: [9.5, 8], width: geo.cx - 12, fill: C.faint });
+    // Flat, the pattern's column is narrow, and the words run on to just short of row 1's number.
+    p.text(0, 17, marksOn ? 'Calculated; marks: Franklin’s' : 'Calculated', { fit: [9.5, 8], width: flat ? xOf(1 / photo.pitch) - 8 : geo.cx - 12, fill: C.faint });
     let lastX = -Infinity;
     for (let l = 1; l <= 9; l += 1) {
       const x = xOf(l / photo.pitch);
@@ -1161,7 +1215,9 @@ export function mount(root, ctx) {
     for (let level = 0; level < levels; level += 1) {
       p.clear();
       const spec = build.columns(level);
-      const rt = p.readout({ columns: spec, x: 0, y: 2, width: w, size });
+      // Flat, a table that fits at no row height closes up its lines rather than losing the last of its
+      // sentence: a note's lead is a third of the row height. A table that fits at 14 px still gets 14 or more.
+      const rt = p.readout({ columns: spec, x: 0, y: 2, width: w, size, minRow: flat ? 0 : 14 });
       build.rows(rt, level);
       if (level === levels - 1 || rt.height(14) <= hh - 4) {
         rt.fill(hh - 4);
@@ -1205,12 +1261,15 @@ export function mount(root, ctx) {
       r.row('Rows missing', [d.missing.length ? d.missing.join(', ') : 'none', '4'], off(!d.missOk));
     };
     const all = { spacing: true, arc: true, spread: true };
-    const levels = narrow ? 4 : 3;
+    // Flat, a column under 236 px cannot set the model's value apart from Franklin's under their two heads,
+    // so it holds the verdict alone, and the marks under the pattern carry the comparison.
+    const cramped = flat && p.box.w < 236;
+    const levels = narrow ? (cramped ? 1 : 4) : 3;
     fitTable(p, {
       size: narrow ? 10 : 10.6,
       levels,
       build: {
-        columns: (level) => (narrow && level === levels - 1 ? null : ['Model', 'Franklin']),
+        columns: (level) => (narrow && (cramped || level === levels - 1) ? null : ['Model', 'Franklin']),
         rows: (r, level) => {
           if (!narrow) {
             if (level === 0) helixRows(r);
@@ -1218,10 +1277,13 @@ export function mount(root, ctx) {
             verdict(r, level < 2 ? 2 : 1);
             return;
           }
-          if (level === 0) patternRows(r, all);
-          else if (level === 1) patternRows(r, { spacing: true });
-          else if (level === 2) patternRows(r);
-          verdict(r, 1);
+          if (cramped) verdict(r, 1);
+          else {
+            if (level === 0) patternRows(r, all);
+            else if (level === 1) patternRows(r, { spacing: true });
+            else if (level === 2) patternRows(r);
+            verdict(r, 1);
+          }
         },
       },
     });
@@ -1249,7 +1311,10 @@ export function mount(root, ctx) {
       cy = (hh + 21) / 2;
     } else {
       k = Math.max(2, Math.min((w - 32) / 20, (hh - 27) / 10.3));
-      cy = 21 + 5.15 * k + Math.max(0, (hh - 27 - 10.3 * k) / 2);
+      // Flat, the pair is sized by its width and the spare height is small: centred, the width's line
+      // would run through the 5′ and 3′ at the rails' tops, so it stays at the top until it can clear them.
+      const slack = Math.max(0, hh - 27 - 10.3 * k);
+      cy = 21 + 5.15 * k + (flat && slack < 46 ? 0 : slack / 2);
     }
     const S = ([x, y]) => [cx + y * k, cy - x * k];
     const pts = [];
@@ -1590,6 +1655,7 @@ export function mount(root, ctx) {
   // ---------------------------------------------------------------- drawing
 
   b.onDraw(() => {
+    if (setGridVars()) b.remeasure();
     if (scene === 'photograph') {
       drawHelix();
       paintPattern();
