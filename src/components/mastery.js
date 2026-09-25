@@ -355,7 +355,7 @@ const REASONS = {
   blocked: 'The thing you wanted is blocked; this is what it needs.',
   'thin-evidence': 'One or two answers is not much to go on, so here it is again.',
   'stale-item': 'You have seen that question often enough to recognise it. Here is another for the same idea.',
-  calibration: 'Part of a spread across the chapter, to see where you already stand.',
+  calibration: 'Part of a spread across the book, to see where you already stand.',
 };
 
 function reasonText(reason) {
@@ -401,7 +401,7 @@ export class TbSitting extends HTMLElement {
     this.build();
     const l = await learning();
     if (!l) {
-      this.fail('The study record could not load', 'src/learning/store.js did not load, so there is nothing to schedule from. The chapters themselves are unaffected — the prose and every figure still work.');
+      this.fail('The study record could not load', 'src/learning/store.js did not load, so there is nothing to schedule from. The chapters themselves are unaffected\u00A0— the prose and every figure still work.');
       return;
     }
     this.l = l;
@@ -528,7 +528,7 @@ export class TbSitting extends HTMLElement {
     if (!this.started) {
       const waiting = this.byObjective.size;
       const tooMany = waiting > this.size ? ', which is more than any first morning should try' : '';
-      lede.textContent = `You have not answered anything yet, so nothing is scheduled. ${plural(waiting, 'idea in this book has', 'ideas in this book have')} a question waiting${tooMany}. Start instead with a short spread across the chapter — ${plural(this.steps.length, 'question', 'questions')}, about two minutes — and say which of them you already know.`;
+      lede.textContent = `You have not answered anything yet, so nothing is scheduled. ${plural(waiting, 'idea in this book has', 'ideas in this book have')} a question waiting${tooMany}. Start instead with a short spread across the book\u00A0— ${plural(this.steps.length, 'question', 'questions')}, about two minutes\u00A0— and say which of them you already know.`;
       this.standing.replaceChildren(head, lede);
       return;
     }
