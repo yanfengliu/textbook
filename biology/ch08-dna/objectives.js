@@ -153,7 +153,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'antiparallel',
-    statement: 'Say what the 5′ and 3′ ends of a strand are, explain what it means that the two strands of the helix are antiparallel, and say which measurement required it.',
+    statement: 'Say what the 5′\u00A0and 3′\u00A0ends of a strand are, explain what it means that the two strands of the helix are antiparallel, and say which measurement required it.',
     prereqs: ['nucleotide-parts', 'diffraction-reading'],
     teaches: { sections: ['structure'], figures: ['fig-helix-lab'] },
     level: 'explain',
@@ -206,7 +206,7 @@ export const OBJECTIVES = [
   // ---- 8.4 Copying runs one way, and the strands do not ----
   {
     id: 'polymerase-requirements',
-    statement: 'Name what DNA polymerase needs to add a nucleotide to a strand — a template, a primer ending in a free 3′ hydroxyl, and the four nucleoside triphosphates — and predict what a nucleotide lacking the 3′ hydroxyl does to a growing strand.',
+    statement: 'Name what DNA polymerase needs to add a nucleotide to a strand\u00A0— a template, a primer ending in a free 3′\u00A0hydroxyl, and the four nucleoside triphosphates\u00A0— and predict what a nucleotide lacking the 3′\u00A0hydroxyl does to a growing strand.',
     prereqs: ['antiparallel', 'template-principle', 'drugs-as-inhibitors'],
     teaches: { sections: ['fork'], figures: ['fig-fork'] },
     level: 'apply',
@@ -234,7 +234,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'fork-machinery',
-    statement: 'Name the proteins at a replication fork — helicase, single-strand binding protein, topoisomerase, primase, polymerase and ligase — say what each does, and explain why the helix ahead of the fork has to be cut.',
+    statement: 'Name the proteins at a replication fork\u00A0— helicase, single-strand binding protein, topoisomerase, primase, polymerase and ligase\u00A0— say what each does, and explain why the helix ahead of the fork has to be cut.',
     prereqs: ['lagging-strand', 'dna-structure', 'weak-bonds-matter'],
     teaches: { sections: ['fork'], figures: ['fig-fork'] },
     level: 'recall',
@@ -278,14 +278,14 @@ export const OBJECTIVES = [
   },
   {
     id: 'why-5-to-3',
-    statement: 'Explain why every DNA polymerase grows a strand at its 3′ end, what would become of proofreading if a strand grew at the other end, and why the primers are made of RNA.',
+    statement: 'Explain why every DNA polymerase grows a strand at its 3′\u00A0end, what would become of proofreading if a strand grew at the other end, and why the primers are made of RNA.',
     prereqs: ['proofreading', 'pyrophosphate-pull'],
     teaches: { sections: ['fidelity'], figures: [] },
     level: 'explain',
   },
   {
     id: 'dna-damage',
-    statement: 'Name the commonest kinds of damage DNA suffers in a living cell — lost bases, deaminated bases, oxidised bases, ultraviolet dimers and breaks through both strands — say roughly how often the kinds that do not depend on sunlight happen in one human cell, and say where each kind comes from.',
+    statement: 'Name the commonest kinds of damage DNA suffers in a living cell\u00A0— lost bases, deaminated bases, oxidised bases, ultraviolet dimers and breaks through both strands\u00A0— say roughly how often the kinds that do not depend on sunlight happen in one human cell, and say where each kind comes from.',
     prereqs: ['spontaneous-not-fast', 'why-pigments-absorb', 'photon-energy', 'oxygen-is-the-acceptor'],
     teaches: { sections: ['fidelity'], figures: [] },
     level: 'recall',
@@ -308,7 +308,7 @@ export const OBJECTIVES = [
     id: 'repair-choice',
     // The sort at the end of §8.5 asks for exactly this, which is why it is one objective and one section,
     // as chapter 7's `diagnose-respiration` is.
-    statement: 'Decide which system deals with a given mistake or piece of damage — proofreading, mismatch repair, base excision repair, nucleotide excision repair or double-strand break repair — and predict what a person who lacks it suffers.',
+    statement: 'Decide which system deals with a given mistake or piece of damage\u00A0— proofreading, mismatch repair, base excision repair, nucleotide excision repair or double-strand break repair\u00A0— and predict what a person who lacks it suffers.',
     prereqs: ['proofreading', 'mismatch-repair', 'excision-repair', 'pathway-blocked'],
     teaches: { sections: ['fidelity'], figures: [] },
     level: 'apply',
@@ -324,7 +324,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'nucleosome',
-    statement: 'Describe a nucleosome — the eight histones, the length of DNA wound round them and the linker between — and explain why histones can bind any DNA whatever its sequence.',
+    statement: 'Describe a nucleosome\u00A0— the eight histones, the length of DNA wound round them and the linker between\u00A0— and explain why histones can bind any DNA whatever its sequence.',
     prereqs: ['packing-problem', 'amino-acid-structure', 'bond-types'],
     teaches: { sections: ['packing'], figures: [] },
     level: 'explain',
