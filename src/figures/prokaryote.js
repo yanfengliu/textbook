@@ -941,7 +941,10 @@ export function mount(root, ctx) {
       g.lineTo(x0 + mr * 0.6 + Math.cos(a) * mr * 0.8, y0 + Math.sin(a) * mr * 0.8);
       g.stroke();
     }
-    hits.push({ id: st.env === 'archaeal' ? 'archaellum' : 'flagellum', x: x0 - L * 0.4, y: y0, r: Math.max(12, 200 * scale) });
+    // The filament runs off the canvas's left edge, so its spot sits on the part drawn: 0.4 of the way along
+    // it, or halfway from the cell to the edge when that point is off the canvas, and never over the cell.
+    const r = Math.max(12, 200 * scale);
+    hits.push({ id: st.env === 'archaeal' ? 'archaellum' : 'flagellum', x: Math.min(Math.max(x0 - L * 0.4, x0 / 2), x0 - r), y: y0, r });
     hits.push({ id: 'motor', x: x0 + mr * 0.6, y: y0, r: mr });
   }
 
