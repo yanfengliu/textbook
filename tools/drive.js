@@ -4330,6 +4330,38 @@ const RECIPES = {
       const u = await until(h, (x) => x.tautomer === 'usual', 5_000);
       expect(u.pairFits === true, `back in the usual form A·T should fit again: ${JSON.stringify({ tautomer: u.tautomer, pairFits: u.pairFits, whyNot: u.whyNot })}`);
     }],
+    // The rare form is one base's, never both, so it makes the mispair the prose describes: a rare G pairs
+    // with T and a rare T with G, three bonds at the right width. Add pair stays off for it, by the button
+    // and by the key, so the duplex keeps to Chargaff's rules. Ends back on A·T in the usual form.
+    ['the-rare-form-pairs-with-the-wrong-partner', async (h) => {
+      const left = h.stage.getByRole('slider', { name: 'Left base' });
+      const right = h.stage.getByRole('slider', { name: 'Right base' });
+      await h.button(/^Rare form/).click();
+      await until(h, (x) => x.tautomer === 'rare', 5_000);
+      for (const [l, r, L, R] of [[1, 3, 'G', 'T'], [3, 1, 'T', 'G']]) {
+        await left.fill(String(l));
+        await atValue(h, left, l);
+        await right.fill(String(r));
+        await atValue(h, right, r);
+        const d = await until(h, (x) => x.leftBase === L && x.rightBase === R, 5_000);
+        expect(d.pairFits === true && d.whyNot === null && d.hydrogenBonds === 3 && d.pairWidthNm === 1.1 && d.mispair === true, `in the rare form ${L} across from ${R} should pair with three bonds at 1.1 nm, as a mispair: ${JSON.stringify({ pairFits: d.pairFits, whyNot: d.whyNot, hydrogenBonds: d.hydrogenBonds, pairWidthNm: d.pairWidthNm, mispair: d.mispair })}`);
+        expect(await h.button(/^Add pair/).isDisabled(), `Add pair should stay off for the mispair ${L}·${R}`);
+      }
+      // Keys are handled in order, so once T has switched back to the usual form, a pair that Enter added
+      // would already be counted.
+      const before = (await h.describe()).pairsBuilt;
+      await h.focusable().focus();
+      await h.page.keyboard.press('Enter');
+      await h.page.keyboard.press('t');
+      const u = await until(h, (x) => x.tautomer === 'usual', 5_000);
+      expect(u.pairsBuilt === before, `Enter should not add the mispair: ${before} pairs before it, ${u.pairsBuilt} after`);
+      expect(u.pairFits === false && u.whyNot === 'no-hydrogen-bonds' && u.mispair === false, `in the usual form T across from G should not pair: ${JSON.stringify({ pairFits: u.pairFits, whyNot: u.whyNot, mispair: u.mispair })}`);
+      await left.fill('0');
+      await atValue(h, left, 0);
+      await right.fill('3');
+      await atValue(h, right, 3);
+      await until(h, (x) => x.leftBase === 'A' && x.rightBase === 'T' && x.pairFits === true, 5_000);
+    }],
     ['parallel-strands-put-the-sugar-on-the-wrong-side', async (h) => {
       await h.button(/^Parallel/).click();
       const at = await until(h, (x) => x.strandsRun === 'parallel', 5_000);
