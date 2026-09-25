@@ -286,13 +286,13 @@ function situation(s, f) {
 }
 
 function tissueNote(o, level, s) {
-  if (o.id === 'yeast') return level < 2 ? 'With oxygen, 16 to 20 in yeast, whose chain has no complex I.' : 'With oxygen, 16 to 20 in yeast.';
+  if (o.id === 'yeast') return level < 2 ? 'With oxygen, 16 to 20 in yeast, whose chain has no complex\u00a0I.' : 'With oxygen, 16 to 20 in yeast.';
   // One press from the opening puts a cell fermenting to ethanol beside a muscle fibre's 30, which invites
   // "a yeast gets 30 with oxygen", so the note says whose 30 it is and what a yeast gets (figure review of
   // 2026-09-24, finding 14).
   if (s.route === 'ethanol') {
     return level < 2
-      ? 'With oxygen, about 30 for a mitochondrion like a fast muscle fibre\'s; brewer\'s yeast, whose chain has no complex I, gets 16 to 20.'
+      ? 'With oxygen, about 30 for a mitochondrion like a fast muscle fibre\'s; brewer\'s yeast, whose chain has no complex\u00a0I, gets 16 to 20.'
       : 'With oxygen, about 30 here; 16 to 20 in yeast.';
   }
   return level < 2 ? 'With oxygen, about 30 in fast skeletal muscle and 32 in heart and liver.' : 'With oxygen, about 30 in fast skeletal muscle.';
