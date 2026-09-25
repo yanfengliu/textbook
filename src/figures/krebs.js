@@ -72,11 +72,14 @@
 // 20.5 / 147.13 = 0.14 mol per gram. The handoff says this number is the figure's own arithmetic, since
 // the chapter gives none for protein.
 //
-// THE COMPOSITIONS. Wide: the ring on the left at about the pane's height and the ledger in a column to
-// its right; on a stage taller than it is wide the ledger goes under the ring in two columns. The ring's
-// radius leaves room above it for the lines a drain or the top-up adds over the two top names, so those
-// lines never run into the fuel's route and switching one on does not move the ring.
-//   Narrow (a stage below 600 px): the ring keeps its shape and its carbon counts. Each name becomes the
+// THE COMPOSITIONS. Wide (a stage of 800 px or more): the ring on the left at about the pane's height and
+// the ledger in a column to its right; on a stage taller than it is wide the ledger goes under the ring in
+// two columns. The ring's radius leaves room above it for the lines a drain or the top-up adds over the two
+// top names, so those lines never run into the fuel's route and switching one on does not move the ring.
+//   Narrow (a stage below 800 px) takes the controls' short forms and then goes by the box's shape, because
+// the frame gives a 2/3 box only below an 800 px window: from 800 px to about 1170 px of window the box is
+// 16/10, 480 to 800 px wide and as little as 300 px tall, and the controls take a third of it.
+//   Narrow and tall (the phone's box): the ring keeps its shape and its carbon counts. Each name becomes the
 // number of the step that makes it, set just outside its node, and the names are listed by number under
 // the ring, four to a row, or three on a pane under 372 px; the current one is underlined on the ring
 // and has a dot and bold type in the list. The track's own step numbers go, since the names' numbers
@@ -87,7 +90,22 @@
 // books in five rows beside one block, chosen by what the reader has set going (narrowColumn()). The
 // drain choice shortens to None, Fat, Glutamate and Aspartate, and the label stepper's value has a fixed
 // width, so the stepper's buttons stay put while a reader steps through the carbons. narrowAspect is 2/3
-// rather than FIGURES.md's 4/5; the registry comment has the measurements.
+// rather than FIGURES.md's first 4/5; the registry comment has the measurements.
+//   Narrow and flat (flatGeometry()): the ring and the ledger side by side, with the names round the ring
+// and the fuel's route as lines of type. Every name, extra line and product is placed on a trial ring
+// exactly as the draw places it, and the ring is the largest whose box of all of them fits the pane; it
+// is centred on that box rather than on itself, because α-ketoglutarate runs further right than any name
+// runs left. The names are set as wide sets them where, on that ring, no two of those words and marks
+// touch. Where two would, the ring goes bare: on a ring of 45 to 65 px a diagonal step's products and its
+// CO₂'s label fill the gap between the names either side of it, and a drain's or a feed's line under a
+// name runs into the next step's token. Bare, the CO₂ molecules lose their labels, as on the phone, and a
+// drain or a feed is an arrow in its colour after the name rather than a line of its own, the name moving
+// along its line to clear the arrow at the node; what the drain makes and what the feed is are in the
+// ledger and the fuel's line. Where the track has no room between the molecules for the step numbers, it
+// goes without them, since the names say where the cycle is. The ledger is the books over as many of the
+// label, pool and fuel blocks as fit, and over the one block narrowColumn() chooses when they do not.
+//   In every composition the middle of the ring holds the sentence only where each line of it clears the
+// carbon counts; a smaller ring keeps the turn and the arithmetic, and the live region says the sentence.
 //
 // WHAT THE BENCH COULD NOT DO. A label and a readout row are plain text, and CO₂, FADH₂ and NAD⁺ need a
 // subscript and a superscript, as does 2ᵏ in a share: those strings carry `_2`, `^+` and `^{40}` marks
@@ -96,7 +114,7 @@
 import { C, clamp, lerp, easeInOut, polar, el } from './lib/svg.js';
 import { INK, element } from './lib/mol-draw.js';
 import { metabolismPart } from '../palette.js';
-import { bench, wrapText, fmt } from './lib/bench.js';
+import { bench, wrapText, fmt, EM_ADVANCE } from './lib/bench.js';
 
 export const meta = {
   kind: 'krebs',
@@ -425,7 +443,9 @@ export function mount(root, ctx) {
 }
 
 export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
-  const NARROW_W = 600;
+  // The stage width below which the controls take their short forms. The composition under it goes by
+  // the box's shape (arrange()): the frame's 16/10 box at these widths is flat, a phone's 2/3 box tall.
+  const NARROW_W = 800;
   const b = bench(root, ctx, { kind: meta.kind, css: CSS, narrowBelow: { width: NARROW_W }, seed: 20260924 });
   const reduce = Boolean(ctx.reducedMotion);
   const DRAIN_IDS = Object.keys(drains);
@@ -468,9 +488,9 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
     at: { ring: [1, 1], ledger: ['var(--kb-lc, 2)', 'var(--kb-lr, 1)'] },
   };
   const NARROW = {
-    columns: 'minmax(0, 1fr)',
+    columns: 'var(--kb-ncols, minmax(0, 1fr))',
     rows: 'var(--kb-nrows, minmax(0, 1fr) minmax(0, 118px))',
-    at: { ring: [1, 1], ledger: [1, 2] },
+    at: { ring: [1, 1], ledger: ['var(--kb-nlc, 1)', 'var(--kb-nlr, 2)'] },
   };
   b.compose({ wide: WIDE, narrow: NARROW });
 
@@ -796,7 +816,7 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
     const where = d.turn === 0 && st.k === 0
       ? 'Before the first join: oxaloacetate, with an acetyl group waiting.'
       : `Turn ${d.turn}, after step ${((st.k - 1) % 8) + 1}: ${d.position}, ${d.carbonsHere} carbons. ${STEPS[(st.k - 1) % 8].words}`;
-    const books = `So far ${d.carbonsIn} carbons in and ${d.carbonsOut} out; NADH ${d.nadhTotal}, FADH2 ${d.fadh2Total}, ATP ${d.atpTotal}.`;
+    const books = `So far ${d.carbonsIn} carbons in as acetyl and ${d.carbonsOut} out as CO2; NADH ${d.nadhTotal}, FADH2 ${d.fadh2Total}, ATP ${d.atpTotal}.`;
     const pool = poolWords();
     const lab = labelWords();
     const fuel = `Fuel: ${FUELS[d.fuel].name}, entering as ${d.entryPoint}.`;
@@ -822,6 +842,8 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
   });
   const ROUTE_BAND = 56;
   const LINE_BAND = 20;
+  // Each further line of the route in type, which wraps where the pane is too narrow for one.
+  const FEED_LH = 12;
   // Narrow, under the ring: the sentence and the list of names, in 9.5 px type. The list is four
   // columns of two rows where four fit (a 372 px pane) and three of three below that. The sentence
   // takes the room of the longest one it can say at this width, so the ring is the same size at every
@@ -842,14 +864,16 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
   }
   const listCols = (w) => (w >= 372 ? 4 : 3);
 
-  // `compact`: the route as one line of type, with the acetyl group waiting just over the ring.
+  // `compact`: the route as lines of type, with the acetyl group waiting just over the ring.
   function geometry(w, h, compact = false) {
+    if (mode === 'nside') return flatGeometry(w, h);
     const nar = Boolean(b.narrow);
     const line = nar || compact;
     const room = nar ? ROOM.narrow : ROOM.wide;
     const cols = listCols(w);
     const listH = nar ? Math.ceil(8 / cols) * LIST_LH + 6 : 0;
-    const feedH = line ? LINE_BAND : ROUTE_BAND;
+    const feed = line ? feedLines(w, nar) : [];
+    const feedH = line ? LINE_BAND + (feed.length - 1) * FEED_LH : ROUTE_BAND;
     const byWidth = (w - 2 * room.side) / 2;
     const usable = h - feedH - room.topGap - room.below - listH;
     let sentH = nar ? mostLines(w - 16) * SENT_LH + 8 : 0;
@@ -878,11 +902,106 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
     const tokFs = nar ? 9 : clamp(R * 0.06, 9.5, 11);
     const feedY = line ? 13 : 28;
     return {
-      w, h, nar, line, cx, cy, R, r, sp, dA, numFs, nameFs, tokFs, feedH, feedY, listH, sentH, cols,
+      w, h, nar, line, cx, cy, R, r, sp, dA, numFs, nameFs, tokFs, feedH, feedY, listH, sentH, cols, feed,
+      steps: !nar,
       numR: R - sp * 2.35,
       waitX: cx,
       waitY: line ? cy - R - room.topGap * 0.5 : feedY,
     };
+  }
+
+  // Narrow and flat. The ring's size comes from measuring, not from a budget: on a trial ring at the
+  // origin every name and extra line (drawNames), every product and its CO2's label (productSpots,
+  // drawProducts) and the waiting acetyl group are placed as the draw will place them, and the ring is the
+  // largest whose box of all of them fits under the route's lines. A drain or the top-up adds a line over
+  // a top name, so on this stage switching one on can make the ring a little smaller. Cached, because the
+  // ring is drawn every frame while the cycle runs and the answer changes only with the stage, the fuel,
+  // a drain or the top-up.
+  let flatKey = '';
+  let flatBase = null;
+  function flatGeometry(w, h) {
+    const key = [w, h, set.fuel, set.drain, set.topUp, cutsDone(booksNow().all.turn)].join('|');
+    if (key !== flatKey) {
+      flatKey = key;
+      flatBase = solveFlat(w, h);
+    }
+    return { ...flatBase };
+  }
+  function solveFlat(w, h) {
+    const feed = feedLines(w, false);
+    const feedH = LINE_BAND + (feed.length - 1) * FEED_LH;
+    const topGap = ROOM.wide.topGap;
+    const trial = (R, bare) => {
+      const r = clamp(R * 0.043, 2.4, 7.2);
+      const sp = r * 2.3;
+      return {
+        w, h, nar: false, bare, line: true, cx: 0, cy: 0, R, r, sp, dA: (sp / R) / RAD,
+        numFs: clamp(R * 0.082, 9.5, 14), nameFs: clamp(R * 0.068, 10, 12.5), tokFs: clamp(R * 0.06, 9.5, 11),
+        feedH, feedY: 13, listH: 0, sentH: 0, cols: 4, feed, numR: R - sp * 2.35,
+      };
+    };
+    // Every word and mark round the trial ring, as [x0, x1, y0, y1, whose]: a node's name and its extras,
+    // or a step's CO2, the CO2's label and the step's token. The ring and the acetyl group waiting over the
+    // join are 'ring', which counts towards the box and never as a clash.
+    const items = (g) => {
+      const out = [[-g.R - g.r, g.R + g.r, -g.R - topGap * 0.5 - g.r * 1.7, g.R + g.r, 'ring']];
+      const text = (x, base, str, fs, anchor, who) => {
+        const tw = widthOf(str, fs);
+        const left = anchor === 'start' ? x : anchor === 'end' ? x - tw : x - tw / 2;
+        out.push([left, left + tw, base - fs * 0.78, base + fs * 0.28, who]);
+      };
+      for (let n = 0; n < 8; n += 1) {
+        const p = namePlace(g, n);
+        text(p.x, p.base, NODES[n].name + (g.bare ? nameMarks(p.extras) : ''), g.nameFs, p.anchor, `n${n}`);
+        if (!g.bare) p.extras.forEach((x, i) => text(p.x, p.base + (p.up ? -1 : 1) * p.lh * (i + 1), x.text, g.nameFs * 0.92, p.anchor, `n${n}`));
+      }
+      for (let k = 0; k < 8; k += 1) {
+        const spots = productSpots(g, k);
+        if (spots.co2) {
+          const [x, y] = spots.co2;
+          const half = g.sp * 0.92 + g.r * 0.9;
+          out.push([x - half, x + half, y - g.r, y + g.r, `s${k}`]);
+          if (!g.bare) text(x, y + g.r * 2.1 + g.tokFs * 0.8, 'CO_2', Math.max(9, g.tokFs * 0.92), 'middle', `s${k}`);
+        }
+        if (spots.tok) out.push([spots.tok[0] - spots.tokRx, spots.tok[0] + spots.tokRx, spots.tok[1] - g.tokFs * 0.85, spots.tok[1] + g.tokFs * 0.85, `s${k}`]);
+      }
+      return out;
+    };
+    const box = (list) => ({
+      x0: Math.min(...list.map((q) => q[0])), x1: Math.max(...list.map((q) => q[1])),
+      y0: Math.min(...list.map((q) => q[2])), y1: Math.max(...list.map((q) => q[3])),
+    });
+    // A node's own words, or a step's own marks, may sit close; anyone else's keep 1.5 px apart.
+    const clash = (list) => list.some((p, i) => p[4] !== 'ring' && list.slice(i + 1).some((q) => q[4] !== 'ring' && q[4] !== p[4]
+      && Math.min(p[1], q[1]) - Math.max(p[0], q[0]) > -1.5 && Math.min(p[3], q[3]) - Math.max(p[2], q[2]) > -1.5));
+    const fits = (bx) => bx.x1 - bx.x0 <= w - 16 && bx.y1 - bx.y0 <= h - feedH - 4;
+    // The box grows with the ring, so the largest ring that fits is found by halving.
+    const largest = (bare) => {
+      let lo = 26;
+      let hi = Math.max(lo, Math.min(250, (w - 16) / 2));
+      if (fits(box(items(trial(hi, bare))))) lo = hi;
+      for (let i = 0; i < 24 && hi - lo > 0.25; i += 1) {
+        const mid = (lo + hi) / 2;
+        if (fits(box(items(trial(mid, bare))))) lo = mid;
+        else hi = mid;
+      }
+      return trial(lo, bare);
+    };
+    // Named as wide names them where nothing round the largest ring touches, and bare where something
+    // would: a smaller named ring only brings its words closer.
+    let g = largest(false);
+    let list = items(g);
+    if (clash(list)) {
+      g = largest(true);
+      list = items(g);
+    }
+    const bx = box(list);
+    const cx = 8 + (w - 16 - (bx.x1 - bx.x0)) / 2 - bx.x0;
+    const cy = feedH + 2 + Math.max(0, h - feedH - 4 - (bx.y1 - bx.y0)) / 2 - bx.y0;
+    // The step numbers sit on the track between two molecules; a five-carbon chain reaches 2sp + r
+    // along the ring from its node, and the number needs about 6 px either side of its middle.
+    const steps = 0.3927 * g.R - (2 * g.sp + g.r) >= 6;
+    return { ...g, cx, cy, steps, waitX: cx, waitY: cy - g.R - topGap * 0.5 };
   }
 
   function slotPolar(g, node, i) {
@@ -1026,11 +1145,13 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
     const stalled = stalledNow();
     for (let r = 0; r < 8; r += 1) {
       // An arrowhead on the ring just past each step, pointing the way round.
-      const a = 45 * r + (g.nar ? 4 : 6.5) * (g.R > 80 ? 1 : 1.4);
+      // A flat stage's small ring has no step numbers, and its arrowhead takes the number's place in the
+      // gap between two molecules rather than lying under the next one.
+      const a = 45 * r + (g.nar ? 4 : g.steps ? 6.5 : 0) * (g.R > 80 ? 1 : 1.4);
       const [x, y] = polar(g.cx, g.cy, g.R, a);
       const [x2, y2] = polar(g.cx, g.cy, g.R, a + 1);
       arrowHead(ring, x, y, x2 - x, y2 - y, clamp(g.r * 1.3, 4, 7), C.ruleStrong);
-      if (g.nar) continue;
+      if (!g.steps) continue;
       const [nx, ny] = polar(g.cx, g.cy, g.R, 45 * r);
       const t = haloText(ring, nx, ny + g.numFs * 0.3, String(r + 1), { size: Math.max(10, g.numFs * 0.8), cls: `kb-step${r === next ? ' is-next' : ''}` });
       if (r === 0 && stalled) t.setAttribute('class', 'kb-alert');
@@ -1079,8 +1200,8 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
   function spur(g, n, dir, colour, side = 0) {
     const a = nodeAngle(n);
     const r0 = g.R + g.r * 1.9;
-    const r1 = r0 + (g.nar ? 9 : 12);
-    const d = side * (g.nar ? 3.5 : 4.5);
+    const r1 = r0 + (g.nar || g.bare ? 9 : 12);
+    const d = side * (g.nar || g.bare ? 3.5 : 4.5);
     const [x0, y0] = polar(g.cx, g.cy, r0, a).map((v, i) => v + d * (i ? Math.sin(a * RAD) : Math.cos(a * RAD)));
     const [x1, y1] = polar(g.cx, g.cy, r1, a).map((v, i) => v + d * (i ? Math.sin(a * RAD) : Math.cos(a * RAD)));
     ring.line(x0, y0, x1, y1, { stroke: colour, 'stroke-width': 1.6, 'stroke-linecap': 'round' });
@@ -1098,16 +1219,35 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
     return { x, y, fs, x0: x - fs * 0.34, x1: x + fs * 0.34, y0: y - fs * 0.74, y1: y + fs * 0.26 + 2.5 };
   }
 
+  // Where node n's name goes on a named ring. Set as wide sets it, the name moves out to clear the arrow
+  // a drain or a feed puts at the node, and each extra is a line of its own: over the name in the top
+  // half, under it in the bottom half, so the line always points away from the ring's middle. Bare, the
+  // name keeps its place out from the ring and moves along its line instead, and the extras are arrows
+  // after it (nameMarks()), the drain's pointing out and the feed's in, in their colours.
+  function namePlace(g, n) {
+    const extras = extrasAt(n);
+    const a = nodeAngle(n);
+    const s = Math.sin(a * RAD);
+    const c = -Math.cos(a * RAD); // positive below the centre
+    const [ox, oy] = polar(g.cx, g.cy, g.R + g.r * 1.9 + (extras.length && !g.bare ? 17 : 5), a);
+    const along = g.bare && extras.length ? (8 + 3 * extras.length) * Math.sign(s) : 0;
+    return {
+      extras,
+      anchor: s > 0.2 ? 'start' : s < -0.2 ? 'end' : 'middle',
+      x: ox + along,
+      base: oy + g.nameFs * (0.34 + 0.42 * c),
+      up: c < 0,
+      lh: g.nameFs * 1.22,
+    };
+  }
+  const nameMark = (x) => `\u00a0${x.dir === 'out' ? '→' : '←'}`;
+  const nameMarks = (extras) => extras.map(nameMark).join('');
+
   function drawNames(g) {
     const here = nodeNow();
     for (let n = 0; n < 8; n += 1) {
       const extras = extrasAt(n);
       extras.forEach((x, i) => spur(g, n, x.dir, x.dir === 'out' ? INK.coral : INK.leaf, extras.length > 1 ? (i ? 1 : -1) : 0));
-      const a = nodeAngle(n);
-      const gap = g.r * 1.9 + (extras.length ? (g.nar ? 13 : 17) : (g.nar ? 3 : 5));
-      const [ox, oy] = polar(g.cx, g.cy, g.R + gap, a);
-      const s = Math.sin(a * RAD);
-      const c = -Math.cos(a * RAD); // positive below the centre
       if (g.nar) {
         // The step number that makes it, where the name would be, and under the current one a rule.
         const nb = numberAt(g, n);
@@ -1115,15 +1255,14 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
         if (n === here) ring.line(nb.x0, nb.y + nb.fs * 0.26 + 1.5, nb.x1, nb.y + nb.fs * 0.26 + 1.5, { stroke: C.ink, 'stroke-width': 1.3 });
         continue;
       }
-      const anchor = s > 0.2 ? 'start' : s < -0.2 ? 'end' : 'middle';
-      const lh = g.nameFs * 1.22;
-      // The name, and one line for whatever else the node carries: over the name in the top half, under
-      // it in the bottom half, so the line always points away from the ring's middle.
-      const base = oy + g.nameFs * (0.34 + 0.42 * c);
-      const up = c < 0;
-      ring.text(ox, base, NODES[n].name, { anchor, class: `kb-name${n === here ? ' is-now' : ''}`, 'font-size': fmt(g.nameFs) });
+      const p = namePlace(g, n);
+      const name = ring.text(p.x, p.base, NODES[n].name, { anchor: p.anchor, class: `kb-name${n === here ? ' is-now' : ''}`, 'font-size': fmt(g.nameFs) });
+      if (g.bare) {
+        for (const x of extras) name.append(el('tspan', { class: x.cls, text: nameMark(x) }));
+        continue;
+      }
       // A node that is both fed and drained (glutamate in and out of α-ketoglutarate) carries two lines.
-      extras.forEach((x, i) => ring.text(ox, base + (up ? -1 : 1) * lh * (i + 1), x.text, { anchor, class: x.cls, 'font-size': fmt(g.nameFs * 0.92) }));
+      extras.forEach((x, i) => ring.text(p.x, p.base + (p.up ? -1 : 1) * p.lh * (i + 1), x.text, { anchor: p.anchor, class: x.cls, 'font-size': fmt(g.nameFs * 0.92) }));
     }
   }
 
@@ -1170,7 +1309,7 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
         const [x, y] = spots.co2;
         const share = lab && lit ? dyNum({ m: lab.co2[r - 2], e: lab.E }) : 0;
         co2(ring, x, y, g.r, g.sp, share, lit);
-        if (!g.nar) {
+        if (!g.nar && !g.bare) {
           const lbl = ring.text(x, y + g.r * 2.1 + g.tokFs * 0.8, 'CO_2', { anchor: 'middle', class: lit ? 'kb-note' : 'kb-faint', 'font-size': fmt(Math.max(9, g.tokFs * 0.92)) });
           if (share > 0) lbl.setAttribute('class', 'kb-gold');
         }
@@ -1293,7 +1432,7 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
     if (set.fuel === 'glucose') {
       return [
         { mol: 6, label: 'glucose' },
-        { arrow: 'glycolysis', products: [] },
+        { arrow: 'glycolysis', products: ['ATP', 'NADH'] },
         { mol: 3, rows: 2, label: '2 pyruvate' },
         { arrow: 'link reaction', products: ['co2', 'NADH'] },
       ];
@@ -1363,7 +1502,7 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
         const py = y + z.rr + 4 + z.pfs * 0.85;
         it.products.forEach((p, j) => {
           if (p === 'co2') co2(ring, px + pw[j] / 2, py, z.rr, z.spc, 0, true);
-          else token(ring, px + pw[j] / 2, py, p, LOADED, true, z.pfs);
+          else token(ring, px + pw[j] / 2, py, p, p === 'ATP' ? ATP_PART : LOADED, true, z.pfs);
           px += pw[j] + 4;
         });
       } else {
@@ -1377,7 +1516,8 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
       }
       x += w + z.gap;
     });
-    ring.text(g.waitX + g.sp / 2 + g.r + 6, y + z.fs * 0.35, 'acetyl-CoA', { class: 'kb-note', 'font-size': fmt(z.fs) });
+    // A glucose makes two pyruvate and so two acetyl-CoA, one for each turn; the route is drawn per glucose.
+    ring.text(g.waitX + g.sp / 2 + g.r + 6, y + z.fs * 0.35, set.fuel === 'glucose' ? '2 acetyl-CoA' : 'acetyl-CoA', { class: 'kb-note', 'font-size': fmt(z.fs) });
     return true;
   }
 
@@ -1402,13 +1542,18 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
     }
   }
 
-  // The route as one line of type: the phone's, and a wide pane's too narrow for the drawing.
+  // The route in type: the phone's, a flat stage's, and a wide pane's too narrow for the drawing. Each
+  // stage's products follow it, so nothing reads as the whole route's. A space after an arrow does not
+  // break, so a wrapped line starts with the arrow rather than ending on it.
   function feedLine(nar) {
     const f = FUELS[set.fuel];
-    if (set.fuel === 'glucose') return 'Glucose → 2 pyruvate → 2 acetyl-CoA, with 2 CO_2 and 2 NADH';
-    if (set.fuel === 'fatty-acid') return `Palmitate, cut ${cutsDone(booksNow().all.turn)} of ${f.cuts} → acetyl-CoA; each cut 1 NADH, 1 FADH_2`;
-    return nar ? 'Glutamate enters at 3; its spare oxaloacetate → acetyl-CoA' : 'Glutamate enters as α-ketoglutarate; its spare oxaloacetate → acetyl-CoA';
+    // No-break spaces bind a number to what it counts and an arrow to what it makes, so a wrapped line
+    // never ends on "→" or on "2".
+    if (set.fuel === 'glucose') return 'Glucose →\u00a02\u00a0pyruvate, with 2\u00a0ATP and 2\u00a0NADH →\u00a02\u00a0acetyl-CoA, with 2\u00a0CO_2 and 2\u00a0NADH';
+    if (set.fuel === 'fatty-acid') return `Palmitate, cut ${cutsDone(booksNow().all.turn)}\u00a0of\u00a0${f.cuts} →\u00a0acetyl-CoA; each cut 1\u00a0NADH, 1\u00a0FADH_2`;
+    return nar ? 'Glutamate enters at\u00a03; its spare oxaloacetate →\u00a0acetyl-CoA' : 'Glutamate enters as α-ketoglutarate; its spare oxaloacetate →\u00a0acetyl-CoA';
   }
+  const feedLines = (w, nar) => wrapText(feedLine(nar), w - 16, 9.5);
 
   // The turn, the last step's carbon arithmetic, and what the step did. On a phone the ring is too small
   // to hold a sentence as well, so the sentence goes under the ring, over the list of names, in two
@@ -1432,21 +1577,31 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
     const sum = st.k === 0 ? '4' : STEPS[(st.k - 1) % 8].sum;
     const words = centreWords(g.nar);
     const cls = stalled ? 'kb-alert' : 'kb-note';
-    const inside = g.nar ? [] : wrapText(words, inner * 1.62, txtFs);
     const lh = txtFs * 1.28;
-    const block = (withTurn ? headFs + 8 : 0) + sumFs + (inside.length ? 6 + inside.length * lh : 0);
-    let y = g.cy - block / 2;
+    // Where the turn, the sum and each line fall, for a sentence of n lines, centred on the ring.
+    const place = (n) => {
+      let y = g.cy - ((withTurn ? headFs + 8 : 0) + sumFs + (n ? 6 + n * lh : 0)) / 2;
+      const turnY = y + headFs * 0.9;
+      if (withTurn) y += headFs * 0.9 + 8;
+      y += sumFs * 0.86;
+      const sumY = y;
+      y += 6 + sumFs * 0.14;
+      return { turnY, sumY, lines: Array.from({ length: n }, (_, i) => y + (i + 1) * lh - lh * 0.22) };
+    };
+    // The sentence only where every line of it clears the carbon counts round the middle; a smaller ring
+    // keeps the turn and the arithmetic, and the live region still says the sentence.
+    let inside = g.nar ? [] : wrapText(words, inner * 1.62, txtFs);
+    if (inside.length) {
+      const ys = place(inside.length).lines;
+      const reach = (ln, yy) => Math.hypot((ln.length * txtFs * EM_ADVANCE) / 2, Math.max(Math.abs(yy - txtFs * 0.75 - g.cy), Math.abs(yy + txtFs * 0.25 - g.cy)));
+      if (!inside.every((ln, i) => reach(ln, ys[i]) <= inner)) inside = [];
+    }
+    const at = place(inside.length);
     // On a phone with no room for the sentence, the turn's heading is where a stop is said.
     const stop = g.nar && !g.sentH && stalled;
-    if (withTurn) {
-      y += headFs * 0.9;
-      ring.text(g.cx, y, stop ? 'STOPPED' : `TURN ${bk.all.turn}`, { anchor: 'middle', class: stop ? 'kb-head kb-stop' : 'kb-head', 'font-size': fmt(headFs) });
-      y += 8;
-    }
-    y += sumFs * 0.86;
-    if (withSum) ring.text(g.cx, y, sum, { anchor: 'middle', class: 'kb-sum', 'font-size': fmt(sumFs) });
-    y += 6 + sumFs * 0.14;
-    inside.forEach((ln, i) => ring.text(g.cx, y + (i + 1) * lh - lh * 0.22, ln, { anchor: 'middle', class: cls, 'font-size': fmt(txtFs) }));
+    if (withTurn) ring.text(g.cx, at.turnY, stop ? 'STOPPED' : `TURN ${bk.all.turn}`, { anchor: 'middle', class: stop ? 'kb-head kb-stop' : 'kb-head', 'font-size': fmt(headFs) });
+    if (withSum) ring.text(g.cx, at.sumY, sum, { anchor: 'middle', class: 'kb-sum', 'font-size': fmt(sumFs) });
+    inside.forEach((ln, i) => ring.text(g.cx, at.lines[i], ln, { anchor: 'middle', class: cls, 'font-size': fmt(txtFs) }));
     if (!g.nar || !g.sentH) return;
     const top = g.h - g.listH - g.sentH + 2;
     wrapText(words, g.w - 16, txtFs).forEach((ln, i) => ring.text(8, top + txtFs + i * SENT_LH, ln, { class: cls, 'font-size': fmt(txtFs) }));
@@ -1458,9 +1613,9 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
     let g = geometry(w, h);
     const bk = booksNow();
     const v = visProgress();
-    if (g.nar || !drawRoute(g)) {
-      if (!g.nar) g = geometry(w, h, true);
-      ring.text(8, g.feedY, feedLine(g.nar), { class: 'kb-note', 'font-size': '9.5' });
+    if (g.line || !drawRoute(g)) {
+      if (!g.line) g = geometry(w, h, true);
+      g.feed.forEach((ln, i) => ring.text(8, g.feedY + i * FEED_LH, ln, { class: 'kb-note', 'font-size': '9.5' }));
     }
     drawTrack(g);
     drawGhosts(g, v > 0 ? -1 : nodeNow());
@@ -1483,11 +1638,18 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
   const BOOK_COLS = ['This turn', 'So far'];
   const headW = (str) => str.length * 9 * 0.63;
   const booksSpread = (w) => w / 4 - headW(BOOK_COLS[1]) < 14;
-  function booksRows(r, spread3) {
+  // The books count the acetyl groups' carbon in and the CO2's carbon out, and nothing else: a drain, the
+  // top-up and glutamate move carbon they do not count (the header, THE BOOKS), so the two rows say what
+  // they count. A column too narrow for those words before its first figure writes C for carbon, as the
+  // label's own names do.
+  const BOOK_ROWS = [['Carbons in as acetyl', 'C in as acetyl'], ['Carbons out as CO_2', 'C out as CO_2']];
+  function booksRows(r, spread3, w, size) {
     const bk = booksNow();
     const vals = (a, b2) => (spread3 ? [a, '', b2] : [a, b2]);
-    r.row('Carbons in', vals(bk.turn.cIn, bk.all.cIn));
-    r.row('Carbons out', vals(bk.turn.cOut, bk.all.cOut));
+    const firstCol = spread3 ? w * (2 / 3) : w * 0.75;
+    const key = ([long, short]) => (widthOf(long, size, EM_ADVANCE) + size * 1.2 + 6 <= firstCol ? long : short);
+    r.row(key(BOOK_ROWS[0]), vals(bk.turn.cIn, bk.all.cIn));
+    r.row(key(BOOK_ROWS[1]), vals(bk.turn.cOut, bk.all.cOut));
     r.row('NADH', vals(bk.turn.nadh, bk.all.nadh));
     r.row('FADH_2', vals(bk.turn.fadh2, bk.all.fadh2));
     r.row('ATP', vals(bk.turn.atp, bk.all.atp));
@@ -1495,7 +1657,7 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
   function booksTable(opts, w, title) {
     const spread3 = booksSpread(w);
     const books = ledger.readout({ title, columns: spread3 ? [BOOK_COLS[0], '', BOOK_COLS[1]] : BOOK_COLS, width: w, ...opts });
-    booksRows(books, spread3);
+    booksRows(books, spread3, w, opts.size);
     return books;
   }
 
@@ -1557,7 +1719,9 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
     r.head('Fuel');
     r.row('Burning', firstFitting('Burning', [`${f.name}, ${f.carbons} carbons`, f.name], col));
     if (terse < 2) r.row('Enters as', f.entry);
-    if (terse < 2) r.row(`ATP per ${f.name}`, `about ${y.total}`);
+    // Rounded: glutamate's 20.5 is the figure's own bookkeeping, and crediting the fumarate the urea
+    // cycle returns makes it 21.75, so "about 21" covers both. Glucose's 32 and palmitate's 106 are whole.
+    if (terse < 2) r.row(`ATP per ${f.name}`, `about ${Math.round(y.total)}`);
     r.row('ATP per gram', `${fmt(y.perGram, 2)} mol`, { strong: true });
     if (terse > 0) return;
     if (set.fuel === 'glucose') r.note(`Two turns per glucose. The 32 assumes the malate–aspartate shuttle: ${f.tissue}.`);
@@ -1589,17 +1753,24 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
     const opts = { size, titleSize: Math.max(9.2, size - 1.2), headSize: 9, minRow: nar ? 12.5 : 14, maxRow: nar ? 17 : 22 };
     // The turn is in the middle of the ring; where the ring is too small to hold it, it heads the books.
     const title = turnInCentre ? 'The books' : `The books, turn ${booksNow().all.turn}`;
-    if (mode === 'side') {
+    if (mode === 'side' || mode === 'nside') {
+      // Flat and narrow, the column is the wide one's, shorter: all three blocks while they fit, and then
+      // the one block (and a line of the next) narrowColumn() chooses by what the reader has set going.
+      const flat = mode === 'nside';
       const col = { w, size };
       const books = booksTable(opts, w, title);
-      const rowH = clamp(h * 0.045, 15, 21);
+      const rowH = clamp(h * 0.045, flat ? 13 : 15, 21);
       const bottom = books.draw(rowH, h);
       const rest = ledger.readout({ y: bottom + rowH * 0.9, width: w, ...opts });
       rest.fit(h - bottom - rowH * 0.9, (r, level) => {
+        if (level > 2) {
+          narrowColumn(r, level - 3, col);
+          return;
+        }
         labelRows(r, level, col);
         poolRows(r, level, col);
         fuelRows(r, level, col);
-      }, { levels: 3 });
+      }, { levels: flat ? 6 : 3 });
     } else {
       const gap = nar ? 14 : 22;
       const colW = (w - gap) / 2;
@@ -1627,8 +1798,9 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
   // ---------------------------------------------------------------- layout
   //
   // Side by side, the ring at about the pane's height; on a stage taller than about four fifths of its
-  // width, the ledger under the ring in two columns; narrow, the ledger under the ring in two columns
-  // sized to five rows of books.
+  // width, the ledger under the ring in two columns; narrow and tall, the ledger under the ring in two
+  // columns sized to five rows of books; narrow and flat (the frame's 16/10 box under 800 px), side by
+  // side again, with a ledger column of 190 to 250 px.
   function arrange() {
     const rect = b.wrap.getBoundingClientRect();
     const bar = b.wrap.querySelector('.tb-toolbar');
@@ -1637,10 +1809,14 @@ export function mountKrebs(root, ctx, { drains = DRAINS } = {}) {
     const H = Math.max(0, rect.height - barH - 26);
     let want;
     let vars;
-    if (b.narrow) {
+    if (b.narrow && H > W * 0.75) {
       want = 'narrow';
       // The books' five rows at their least height, 94 px, and a little more as the stage grows.
-      vars = { '--kb-nrows': `minmax(0, 1fr) minmax(0, ${Math.round(clamp(H * 0.24, 94, 132))}px)` };
+      vars = { '--kb-ncols': 'minmax(0, 1fr)', '--kb-nrows': `minmax(0, 1fr) minmax(0, ${Math.round(clamp(H * 0.24, 94, 132))}px)`, '--kb-nlc': '1', '--kb-nlr': '2' };
+    } else if (b.narrow) {
+      want = 'nside';
+      const led = Math.round(clamp(W * 0.36, 190, 250));
+      vars = { '--kb-ncols': `minmax(0, 1fr) minmax(0, ${led}px)`, '--kb-nrows': 'minmax(0, 1fr)', '--kb-nlc': '2', '--kb-nlr': '1' };
     } else if (H > W * 0.78) {
       want = 'stacked';
       const led = Math.round(clamp(H * 0.3, 170, 260));
