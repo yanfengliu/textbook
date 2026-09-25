@@ -2860,7 +2860,7 @@ const RECIPES = {
     ['one-mole-per-litre-is-what-standard-means', async (h) => {
       const before = await h.describe();
       expect(before.deltaGKj < before.deltaGStandardKj - 15, `at a cell's concentrations ATP should be worth well more than the table: ${before.deltaGKj}`);
-      for (const name of ['ATP', 'ADP', 'Pᵢ']) {
+      for (const name of ['ATP', 'ADP', 'Pi']) {
         const slider = h.stage.getByRole('slider', { name });
         await slider.fill('1000');
         await atValue(h, slider, 1000);

@@ -42,7 +42,7 @@
 //
 // THE NUMBERS.
 //   ΔG°′ = −30.5 kJ/mol (§5.3, the standard figure, biochemists' convention).
-//   ΔG = ΔG°′ + RT ln([ADP][Pᵢ] ÷ [ATP]) with RT = 2.577 kJ/mol at 37 °C and concentrations in mol/L,
+//   ΔG = ΔG°′ + RT ln([ADP][Pi] ÷ [ATP]) with RT = 2.577 kJ/mol at 37 °C and concentrations in mol/L,
 //   which at the cell's 5 / 0.5 / 5 mmol/L gives −30.5 − 19.6 = −50.1: §5.3's own arithmetic, and the
 //   fifty §4.7 used. Setting all three sliders to one mole per litre brings ΔG back to ΔG°′, which is
 //   what "standard" means and is worth finding.
@@ -75,7 +75,7 @@
 // bench's, wrapped, so that destroy(), setTime() and setTheme() reach both. And a canvas pane still has
 // no `focusMark()`, because the bench's is an SVG path; the canvas takes the keyboard through
 // `bindInput` and shows its own focus ring from this file's CSS.
-import { C, tint, clamp as clamp2 } from './lib/svg.js';
+import { C, el, h, tint, clamp as clamp2 } from './lib/svg.js';
 import { round, INK } from './lib/mol-draw.js';
 import { ELEMENTS, atomColours, signed } from './lib/chem-atoms.js';
 import { resolvePalette } from '../palette.js';
@@ -334,6 +334,35 @@ ${scope} .at-num { fill: var(--ink); font-weight: 700; font-variant-numeric: lin
 `;
 
 const n1 = (v) => Number(v).toFixed(1);
+
+// A subscript is markup, not a precomposed character (docs/design/chapter-recipe.md, the typographic
+// pass). The phosphate is written `P_i` in the ledger, and `subscript()` rebuilds the <text> it was
+// drawn into: the letter after the mark at 0.7 of the size and a fifth of the size down, which is how
+// the prose sets <sub> (src/styles/typography.css). The shift is a `dy`, which every engine draws;
+// rubisco-fork and respiratory-chain set theirs the same way.
+const SUB_MARK = /_(.)/gu;
+function subscript(t) {
+  const s = t?.textContent ?? '';
+  if (!s.includes('_') || t.children.length) return t;
+  const size = parseFloat(t.getAttribute('font-size')) || parseFloat(getComputedStyle(t).fontSize) || 10;
+  const drop = (size * 0.2).toFixed(2);
+  const back = (str) => el('tspan', { dy: `-${drop}`, text: str });
+  const parts = [];
+  let last = 0;
+  let low = false;
+  for (const m of s.matchAll(SUB_MARK)) {
+    if (m.index > last) {
+      parts.push(low ? back(s.slice(last, m.index)) : s.slice(last, m.index));
+      low = false;
+    }
+    parts.push(el('tspan', { dy: low ? null : drop, 'font-size': (size * 0.7).toFixed(2), text: m[1] }));
+    low = true;
+    last = m.index + m[0].length;
+  }
+  if (last < s.length) parts.push(low ? back(s.slice(last)) : s.slice(last));
+  t.replaceChildren(...parts);
+  return t;
+}
 
 // ---------------------------------------------------------------- the figure
 
@@ -676,14 +705,14 @@ function build(root, ctx) {
     format: (v) => (Number(v) === 0 ? 'none' : LEDGER[Number(v) - 1].short),
     onInput: (v) => setRow(Number(v)),
   });
-  // Short labels, and they are the prose's own: §5.3 writes Pᵢ for a free inorganic phosphate. A
-  // slider's label is one word at both widths (the bench has no second form for it), and "Phosphate"
-  // made the three sliders take three rows of a phone's toolbar instead of two — which on a 342 px
-  // square stage is a tenth of everything there is.
+  // Short labels, and they are the prose's own: §5.3 writes P<sub>i</sub> for a free inorganic
+  // phosphate. A slider's label is one word at both widths (the bench has no second form for it), and
+  // "Phosphate" made the three sliders take three rows of a phone's toolbar instead of two — which on a
+  // 342 px square stage is a tenth of everything there is.
   const mmSliders = [
     ['atpMM', 'ATP'],
     ['adpMM', 'ADP'],
-    ['phosphateMM', 'Pᵢ'],
+    ['phosphateMM', 'Pi'],
   ].map(([key, label]) => b.slider(label, {
     // No `unit` beside a `format`: the format owns the whole value, and a unit passed with one was
     // silently dropped. The ledger below prints "mmol/L" against all three.
@@ -691,6 +720,11 @@ function build(root, ctx) {
     format: (v) => (Number(v) >= 100 ? `${Math.round(Number(v))}` : Number(v).toFixed(1)),
     onInput: (v) => { s[key] = Number(v); draw(); b.announce(); },
   }));
+  // The phosphate's label is P and a real <sub>i</sub>, as §5.3 prints it. Its accessible name, which is
+  // what a recipe addresses and a screen reader says, stays the letters "Pi".
+  for (const span of mmSliders[2].node.querySelectorAll(':scope > .tb-long, :scope > .tb-short')) {
+    span.replaceChildren('P', h('sub', { text: 'i' }));
+  }
   // Valued by height on the rail, so that up is up: see RUNGS above.
   const donorSlider = b.stepper('Donor', {
     min: 0, max: RUNGS - 1, step: 1, value: heightOf(START.donorIndex),
@@ -1215,10 +1249,12 @@ function build(root, ctx) {
       r.row('At these concentrations', `${n1(d.deltaGKj)} kJ/mol`);
       r.row('ATP', `${n1(s.atpMM)} mmol/L`);
       r.row('ADP', `${n1(s.adpMM)} mmol/L`);
-      r.row('Phosphate, Pᵢ', `${n1(s.phosphateMM)} mmol/L`);
+      r.row('Phosphate, P_i', `${n1(s.phosphateMM)} mmol/L`);
       note(concentrationSentence(d, false));
       note('Open the ledger to see what breaking the bond costs and what pays for it.');
-      return r.fill(room);
+      const bottom = r.fill(room);
+      for (const t of ledgerPane.node.querySelectorAll('text')) subscript(t);
+      return bottom;
     }
 
     // At a phone's width the true value leads: it is the number §5.3 sends the reader here for, and the

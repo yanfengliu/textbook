@@ -52,7 +52,7 @@
 // scene's five sliders stay sliders on a phone and wrap onto two toolbar rows rather than becoming the
 // one row of steppers the brief imagined. (2) `readout.note()` draws one <text> line and does not wrap,
 // so the sentences below are broken into lines here, against the pane's own width.
-import { C, tint, clamp } from './lib/svg.js';
+import { C, el, tint, clamp } from './lib/svg.js';
 import { atom, INK, round } from './lib/mol-draw.js';
 import { signed, hash2 } from './lib/chem-atoms.js';
 import { metabolismPart, membranePart, ORGANELLE_BY_ID } from '../palette.js';
@@ -166,6 +166,36 @@ const CARRIER = membranePart('carrier');
 const TUBULE = ORGANELLE_BY_ID.cytoskeleton;
 
 const n1 = (v) => Number(v).toFixed(1);
+
+// A subscript is markup, not a precomposed character (docs/design/chapter-recipe.md, the typographic
+// pass). The phosphate is written `P_i` in the equations, and `subscript()` rebuilds the <text> it was
+// drawn into: the letter after the mark at 0.7 of the size and a fifth of the size down, which is how
+// the prose sets <sub> (src/styles/typography.css). The shift is a `dy`, which every engine draws;
+// rubisco-fork and respiratory-chain set theirs the same way.
+const SUB_MARK = /_(.)/gu;
+const unmarked = (str) => String(str).replace(SUB_MARK, '$1');
+function subscript(t) {
+  const s = t?.textContent ?? '';
+  if (!s.includes('_') || t.children.length) return t;
+  const size = parseFloat(t.getAttribute('font-size')) || parseFloat(getComputedStyle(t).fontSize) || 10;
+  const drop = (size * 0.2).toFixed(2);
+  const back = (str) => el('tspan', { dy: `-${drop}`, text: str });
+  const parts = [];
+  let last = 0;
+  let low = false;
+  for (const m of s.matchAll(SUB_MARK)) {
+    if (m.index > last) {
+      parts.push(low ? back(s.slice(last, m.index)) : s.slice(last, m.index));
+      low = false;
+    }
+    parts.push(el('tspan', { dy: low ? null : drop, 'font-size': (size * 0.7).toFixed(2), text: m[1] }));
+    low = true;
+    last = m.index + m[0].length;
+  }
+  if (last < s.length) parts.push(low ? back(s.slice(last)) : s.slice(last));
+  t.replaceChildren(...parts);
+  return t;
+}
 
 // ---------------------------------------------------------------- the figure
 
@@ -694,9 +724,9 @@ export function mount(root, ctx) {
     scene.text(x, y + headSize + 7, s.coupled && s.source !== 'none' ? 'ONE REACTION, IN TWO STEPS' : 'TWO REACTIONS, SIDE BY SIDE', { class: 'cb-head', 'font-size': n1(headSize) });
     let ly = y + headSize + 12;
     for (const line of lines) {
-      const size = fit(line, w - 4, eqSize, 8.6);
+      const size = fit(unmarked(line), w - 4, eqSize, 8.6);
       ly += (size || eqSize) * 1.5;
-      if (size) scene.text(x + 6, ly, line, { class: 'cb-name', 'font-size': n1(size) });
+      if (size) subscript(scene.text(x + 6, ly, line, { class: 'cb-name', 'font-size': n1(size) }));
     }
     const tail = s.source === 'none'
       ? 'Nothing is being spent, and nothing happens.'
@@ -707,7 +737,8 @@ export function mount(root, ctx) {
     if (tailSize) scene.text(x + 6, Math.min(ly + tailSize * 1.7, y + hgt - 2), tail, { class: 'cb-note', 'font-size': n1(tailSize) });
   }
 
-  // The two lines, for this job and this source. `Pᵢ` and the arrow are the prose's own notation.
+  // The two lines, for this job and this source. `P_i` (set as P<sub>i</sub>) and the arrow are the
+  // prose's own notation.
   function equationLines() {
     const j = job();
     const src = source();
@@ -720,8 +751,8 @@ export function mount(root, ctx) {
     if (s.source === 'none') return [jobAlone, 'nothing is being spent'];
     if (!s.coupled) {
       const alone = {
-        atp: 'ATP + H₂O → ADP + Pᵢ + heat',
-        'creatine-phosphate': 'creatine phosphate + H₂O → creatine + Pᵢ + heat',
+        atp: 'ATP + H₂O → ADP + P_i + heat',
+        'creatine-phosphate': 'creatine phosphate + H₂O → creatine + P_i + heat',
         'sodium-gradient': 'Na⁺ outside → Na⁺ inside + heat',
       }[src.id];
       return [jobAlone, alone];
@@ -735,10 +766,10 @@ export function mount(root, ctx) {
     const donor = src.id === 'atp' ? 'ATP' : 'creatine phosphate';
     const spent = src.id === 'atp' ? 'ADP' : 'creatine';
     return {
-      glutamine: [`glutamate + ${donor} → glutamyl phosphate + ${spent}`, 'glutamyl phosphate + NH₃ → glutamine + Pᵢ'],
-      sodium: [`pump + ${donor} → pump–P + ${spent}`, 'pump–P + 3 Na⁺ inside → pump + 3 Na⁺ outside + Pᵢ'],
-      'motor-step': [`motor + ${donor} → motor·${donor === 'ATP' ? 'ATP' : 'CrP'}`, `motor·${donor === 'ATP' ? 'ATP' : 'CrP'} → motor 8 nm on + ${spent} + Pᵢ`],
-      polymer: [`monomer + ${donor} → monomer–P + ${spent}`, 'monomer–P + monomer → chain + Pᵢ'],
+      glutamine: [`glutamate + ${donor} → glutamyl phosphate + ${spent}`, 'glutamyl phosphate + NH₃ → glutamine + P_i'],
+      sodium: [`pump + ${donor} → pump–P + ${spent}`, 'pump–P + 3 Na⁺ inside → pump + 3 Na⁺ outside + P_i'],
+      'motor-step': [`motor + ${donor} → motor·${donor === 'ATP' ? 'ATP' : 'CrP'}`, `motor·${donor === 'ATP' ? 'ATP' : 'CrP'} → motor 8 nm on + ${spent} + P_i`],
+      polymer: [`monomer + ${donor} → monomer–P + ${spent}`, 'monomer–P + monomer → chain + P_i'],
     }[j.id];
   }
 
