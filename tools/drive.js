@@ -4047,17 +4047,24 @@ const RECIPES = {
     }],
     ['the-keys-the-ring-names-work-its-controls', async (h) => {
       // "Space to run, D to change the drain, T to top up, F to change the fuel, and Home to reset", on
-      // the focused ring; the arrow and L are driven above.
+      // the focused ring; the arrow and L are driven above. Each key is held to the state it found, so a
+      // step above that went red and left another state does not turn this one red too.
+      const fuels = ['glucose', 'fatty-acid', 'amino-acid'];
+      const drains = [null, 'fat', 'glutamate', 'aspartate'];
       await h.focusable().focus();
+      let d = await h.describe();
+      const fuel = fuels[(fuels.indexOf(d.fuel) + 1) % fuels.length];
       await h.page.keyboard.press('f');
-      let d = await until(h, (x) => x.fuel === 'fatty-acid', 5_000);
-      expect(d.fuel === 'fatty-acid', `F should move the fuel on from glucose: ${d.fuel}`);
+      d = await until(h, (x) => x.fuel === fuel, 5_000);
+      expect(d.fuel === fuel, `F should move the fuel on to ${fuel}: ${d.fuel}`);
+      const drain = drains[(drains.indexOf(d.drainedTo) + 1) % drains.length];
       await h.page.keyboard.press('d');
-      d = await until(h, (x) => x.drainedTo === 'aspartate', 5_000);
-      expect(d.drainedTo === 'aspartate' && d.drainedFrom === 'oxaloacetate', `D should move the drain on from glutamate to aspartate: ${JSON.stringify({ to: d.drainedTo, from: d.drainedFrom })}`);
+      d = await until(h, (x) => x.drainedTo === drain, 5_000);
+      expect(d.drainedTo === drain, `D should move the drain on to ${drain}: ${d.drainedTo}`);
+      const top = !d.toppedUp;
       await h.page.keyboard.press('t');
-      d = await until(h, (x) => x.toppedUp === false, 5_000);
-      expect(d.toppedUp === false, 'T should switch the top-up off');
+      d = await until(h, (x) => x.toppedUp === top, 5_000);
+      expect(d.toppedUp === top, `T should switch the top-up ${top ? 'on' : 'off'}`);
       await h.page.keyboard.press(' ');
       d = await until(h, (x) => x.playing === true, 5_000);
       expect(d.playing === true, 'Space should set it running');
@@ -4069,12 +4076,15 @@ const RECIPES = {
       expect(d.turn === 0 && d.t === 0 && d.fuel === 'glucose' && d.drainedTo === null && d.toppedUp === false && d.labelledCarbon === null, `Home should put everything back: ${JSON.stringify({ turn: d.turn, t: d.t, fuel: d.fuel, drain: d.drainedTo, top: d.toppedUp, lab: d.labelledCarbon })}`);
     }],
     ['reset-puts-every-control-back', async (h) => {
+      // A label, the fat drain, the top-up and glutamate, each set from whatever the step above left.
       const slider = h.stage.getByRole('slider', { name: 'Label a carbon' });
       await slider.focus();
+      await h.page.keyboard.press('Home');
+      await atValue(h, slider, 0);
       await h.page.keyboard.press('ArrowRight');
       await atValue(h, slider, 1);
       await h.button(/^Drain for fat/).click();
-      await h.button(/^Top up/).click();
+      if (!(await h.describe()).toppedUp) await h.button(/^Top up/).click();
       await h.button(/^Amino acid/).click();
       let d = await until(h, (x) => x.labelledCarbon === 'acetyl-1' && x.drainedTo === 'fat' && x.toppedUp && x.fuel === 'amino-acid', 5_000);
       expect(d.labelledCarbon === 'acetyl-1' && d.drainedTo === 'fat' && d.toppedUp && d.fuel === 'amino-acid', `the controls should have set a label, the fat drain, the top-up and glutamate: ${JSON.stringify({ lab: d.labelledCarbon, drain: d.drainedTo, top: d.toppedUp, fuel: d.fuel })}`);
