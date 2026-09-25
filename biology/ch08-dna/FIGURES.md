@@ -152,6 +152,8 @@ The physics, which the worker must get right because the figure's whole claim is
 
 **Narrow composition.** Second composition. A helix beside its pattern at 390 px puts both below legibility. Below 800 px the helix sits above the pattern, both full width, with the measurement marks labelled beside the pattern rather than on it, and the five sliders become steppers keeping their desktop labels. The pairs scene stacks the pair drawing above the duplex strip and the count beneath it.
 
+**On a flat stage below 800 px.** The frame gives its flat box from an 800 px window up, while the rail keeps the stage at 480 to 782 px, so below 800 px the stage can be wider than tall. A pattern cut to a band between the helix and the table shows only its middle there, and not the fourth row. So the stage takes two columns: the pattern and its marks fill the left one's height, and the helix stands over the table in the right one, which is 190 px at an 800 px window and grows to 300. Under 236 px the table holds the verdict alone, and the marks carry the comparison. In the pairs scene the pair fills the left column and the duplex strip stands over the table. The controls wrap as one line, so the photograph's take three rows at 480 px rather than four.
+
 ---
 ## 8.2 · `meselson-stahl` — The three schemes, on a switch
 
