@@ -209,6 +209,7 @@ const LADDER = Object.freeze([
   { id: 'g6p', label: 'Glucose 6-phosphate', kj: '−13.8' },
 ]);
 const FOOTNOTE = '† Not on Section\u00a05.3’s table; shown where it belongs.';
+const FOOTNOTE_SHORT = '† Not on Section\u00a05.3’s table.';
 // Which rung gives the current step's phosphate, and which rung it lands on.
 const LADDER_MARK = Object.freeze({ 1: { from: 'atp', to: 'g6p' }, 3: { from: 'atp' }, 6: { to: 'bpg' }, 7: { from: 'bpg', to: 'atp' }, 10: { from: 'pep', to: 'atp' } });
 
@@ -282,6 +283,8 @@ ${scope} .gl-num { font-weight: 700; font-variant-numeric: lining-nums tabular-n
 ${scope} .gl-alert { fill: var(--coral-text); font-weight: 600; }
 ${scope} .gl-note { fill: var(--ink-soft); }
 ${scope} .gl-tab { font-variant-numeric: lining-nums tabular-nums; }
+${scope}.is-narrow .tb-slider.gl-level { gap: 0.22rem; padding-inline: 0.25rem; }
+${scope}.is-narrow .gl-atp .tb-val { min-width: 2.6rem; }
 `;
 
 // ---------------------------------------------------------------- the figure
@@ -382,6 +385,12 @@ export function mount(root, ctx) {
   const atpCtl = level('ATP', 'atp', { min: 1, max: 10, step: 1, dp: 0 });
   const ampCtl = level('AMP', 'amp', { min: 0, max: 1, step: 0.1, dp: 1 });
   const citCtl = level('Citrate', 'cit', { min: 0, max: 2, step: 0.2, dp: 1 });
+  // On a stage under 700 px the three steppers share a row only if they are a little tighter than the
+  // bench sets them: at 452 px they wrapped to two rows in the 440 px toolbar of an 800 px window, the
+  // toolbar took four rows, 130 px of a 270 px stage, and the caption went under it. ATP's value keeps the
+  // width of "10 mM", so stepping it to 10 cannot wrap the row either.
+  for (const c of [atpCtl, ampCtl, citCtl]) c.node.classList.add('gl-level');
+  atpCtl.node.classList.add('gl-atp');
 
   b.keys({
     ArrowRight: () => forward(),
@@ -534,7 +543,7 @@ export function mount(root, ctx) {
       case 5:
         if (env.ko === 5) return short ? 'Only one piece goes on.' : 'With its isomerase knocked out, dihydroxyacetone phosphate cannot become glyceraldehyde 3-phosphate, and only one piece goes on.';
         return short ? 'Both pieces are now the same.' : 'Dihydroxyacetone phosphate becomes a second glyceraldehyde 3-phosphate, so both pieces run the second half.';
-      case 6: return short ? 'Oxidised, with a phosphate from solution: above ATP now.' : `${lanesText()} is oxidised, reducing an NAD^+, and takes a phosphate ion from solution. 1,3-Bisphosphoglycerate is not on Section\u00a05.3’s table, but its new phosphate belongs above ATP, at about −49 kJ/mol.`;
+      case 6: return short ? 'Oxidised, with a phosphate from solution: above ATP now.' : `${lanesText()} is oxidised, reducing an NAD^+, and takes a phosphate ion from solution. 1,3-Bisphosphoglycerate is not on Section\u00a05.3’s table, but its new phosphate belongs above ATP, at about −49\u00a0kJ/mol.`;
       case 7: {
         if (short) return 'ATP from 1,3-bisphosphoglycerate, above ATP on the ladder.';
         const even = L.net === 0 ? 'The ATP made now equals the ATP spent.' : `Net ATP is ${signed(L.net)} ${perWord()}.`;
@@ -1347,11 +1356,15 @@ export function mount(root, ctx) {
 
   // What the step just did first, then the committed step and the knock-out when they have something to
   // say. `short` takes each in its short form; `alertsOnly` leaves out a status that is not a warning.
-  function notesInto(r, { short = false, domains = false, alertsOnly = false, size }) {
-    r.note(nowSentence(short));
+  // `warnFirst`, every composition's tersest level, gives up what the step did when there is a warning to
+  // give, because the walk's own caption names the step: at an 800 px window the ledger beside the walk
+  // has room for about three lines under the tallies, and the table is clipped from the bottom, so "Shut
+  // by ATP" went entirely and "Step 1 out: glucose piles up" lost its last word.
+  function notesInto(r, { short = false, domains = false, alertsOnly = false, warnFirst = false, size }) {
     const status = statusSentence(short);
-    if (status && (status.alert || !alertsOnly)) r.note(status.text, { accent: status.alert ? INK.coral : undefined });
     const knock = knockSentence(short);
+    if (!(warnFirst && ((status && status.alert) || knock))) r.note(nowSentence(short));
+    if (status && (status.alert || !alertsOnly)) r.note(status.text, { accent: status.alert ? INK.coral : undefined });
     if (knock) r.note(knock, { accent: INK.coral });
     if (domains && !status && !knock) r.note(DOMAINS, { size: size - 1.2 });
   }
@@ -1375,8 +1388,8 @@ export function mount(root, ctx) {
       talliesInto(ledger.readout({ title, x: 0, y: 0, width: wA, size, minRow: 13, maxRow: 24 })).fill(hgt);
       // A column of sentences is not stretched to the pane's height: its lines keep their own leading.
       ledger.readout({ title: nowTitle(), x: wA + gut, y: 0, width: wB, size, minRow: 12, maxRow: 13 }).fit(hgt, (r, lv) => {
-        notesInto(r, { short: lv >= 2, domains: lv === 0, size });
-      }, { levels: 3 });
+        notesInto(r, { short: lv >= 2, domains: lv === 0, warnFirst: lv >= 3, size });
+      }, { levels: 4 });
       ladderInto(wA + wB + 2 * gut, wC, hgt, size);
     } else if (mode === 'phase') {
       const x = 10;
@@ -1388,8 +1401,8 @@ export function mount(root, ctx) {
       const head = widthOf('Ledger · per fragment', 9.4, 0.72) <= width ? title : `Per ${env.per}`;
       ledger.readout({ title: head, x, y: 0, width, size, minRow: 13, maxRow: 17 }).fit(hgt, (r, lv) => {
         talliesInto(r);
-        notesInto(r, { short: lv >= 2, domains: lv === 0, alertsOnly: lv >= 3, size });
-      }, { levels: 4 });
+        notesInto(r, { short: lv >= 2, domains: lv === 0, alertsOnly: lv >= 3, warnFirst: lv >= 4, size });
+      }, { levels: 5 });
     } else {
       // Beneath the ladder, in the ladder's own column: the tallies, and beside them what the step did.
       const cw = Math.min(w, 600);
@@ -1399,15 +1412,18 @@ export function mount(root, ctx) {
       const wA = clamp((cw - gut) * 0.44, 130, 260);
       talliesInto(ledger.readout({ title: `Per ${env.per}`, x: ox, y: 0, width: wA, size, minRow: 13, maxRow: 22 })).fill(hgt);
       ledger.readout({ title: nowTitle(), x: ox + wA + gut, y: 0, width: cw - wA - gut, size, minRow: 12, maxRow: 13 }).fit(hgt, (r, lv) => {
-        notesInto(r, { short: lv >= 1, domains: lv === 0 && cw > 520, alertsOnly: lv >= 2, size });
-      }, { levels: 3 });
+        notesInto(r, { short: lv >= 1, domains: lv === 0 && cw > 520, alertsOnly: lv >= 2, warnFirst: lv >= 3, size });
+      }, { levels: 4 });
     }
     typeset(ledger.node);
   }
 
   // The rungs the current step's phosphate moves between are set in the phosphate's violet, label and
   // value both, and the note under the table says which way it went. The footnote is kept at every size:
-  // the dagger is how the table says it does not list 1,3-bisphosphoglycerate.
+  // the dagger is how the table says it does not list 1,3-bisphosphoglycerate. At the tersest level it is
+  // the short form, one line: from a 1150 px window, where this composition starts, to 1240 px, the column
+  // is too narrow for the long form on one line and the pane too short for two, and the bench clipped
+  // "belongs." off the bottom.
   function ladderInto(x, width, hgt, size) {
     const s = Math.floor(ticks / TICKS);
     const mark = LADDER_MARK[s] ?? {};
@@ -1419,9 +1435,9 @@ export function mount(root, ctx) {
         if (rung.strong) r.sum(rung.label, rung.kj, opts);
         else r.row(rung.label, rung.kj, opts);
       }
-      r.note(FOOTNOTE, { size: small });
+      r.note(lv >= 2 ? FOOTNOTE_SHORT : FOOTNOTE, { size: small });
       if (lv === 0) r.note(LADDER_NOTE[s] ?? LADDER_REST, { size: small });
-    }, { levels: 2 });
+    }, { levels: 3 });
     const labels = new Map(LADDER.map((rung) => [rung.label, rung.id]));
     for (const t of ledger.node.querySelectorAll('text.tb-rt-key')) {
       const id = labels.get(t.textContent);
