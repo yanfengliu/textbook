@@ -653,7 +653,7 @@ export const ITEMS = [
     objective: 'atp-cellular-value',
     kind: 'task',
     figure: 'fig-atp',
-    goal: 'Push all three concentration sliders\u00A0— ATP, ADP and Pᵢ\u00A0— up to 1,000\u00A0millimoles per litre, which is one mole per litre each. Then compare the ΔG the figure prints with the ledger total above it.',
+    goal: 'Push all three concentration sliders\u00A0— ATP, ADP and phosphate\u00A0— up to 1,000\u00A0millimoles per litre, which is one mole per litre each. Then compare the ΔG the figure prints with the ledger total above it.',
     question: 'At those settings the two numbers are the same. What condition have you just put the molecule in, and why is the value a cell sees quite different?',
     expect: 'atpMM === 1000 and adpMM === 1000 and phosphateMM === 1000 and deltaGKj > -31.5 and deltaGKj < -29.5',
     explain: 'One mole per litre of everything is what "standard" means, and at that point the concentration term is zero and the true value is the table\'s −30.5. A cell holds them nowhere near that and nowhere near each other: about 5\u00A0millimoles per litre of ATP, a tenth as much ADP, and about 5\u00A0millimoles per litre of phosphate. That ratio is 5\u00A0×\u00A010<sup>−4</sup>, its natural logarithm is −7.6, and multiplied by RT\'s 2.58\u00A0kilojoules per mole it is −19.6\u00A0— so ΔG is −30.5 − 19.6, about −50. Move the sliders back and watch it return.',
