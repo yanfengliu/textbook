@@ -1749,7 +1749,7 @@ export const ITEMS = [
     options: [
       { text: 'When the last primer is removed, its gap has nothing beyond it, no 3′\u00A0end for a polymerase to extend into it.', correct: true },
       { text: 'The leading strand runs off the end of the chromosome before the fork gets there, taking its template with it.',
-        why: 'Puts the loss on the wrong strand. The leading strand runs off the end along with its template and is complete; it is the lagging strand that falls short.' },
+        why: 'Puts the loss on the wrong strand. The leading strand runs off the end along with its template and is complete; it is the lagging strand that cannot be finished.' },
       { text: 'Primase cannot reach the last stretch of template, so the final fragment is never started at all.',
         why: 'Blames the start of the fragment rather than its primer\'s removal. A last fragment can be started near the end; the trouble is filling the gap its primer leaves.' },
       { text: 'Ligase cannot seal a fragment that lies at a free end, so the last fragment falls away after copying.',
