@@ -24,7 +24,7 @@ export const OBJECTIVES = [
   },
   {
     id: 'elements-of-life',
-    statement: 'Name the four elements that make up about 96 per cent of a body by mass, and say what the main remaining elements and ions are doing.',
+    statement: 'Name the four elements that make up about 96\u00A0per\u00A0cent of a body by mass, and say what the main remaining elements and ions are doing.',
     prereqs: [],
     teaches: { sections: ['atoms'], figures: [] },
     level: 'recall',
