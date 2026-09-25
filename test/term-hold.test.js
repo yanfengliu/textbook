@@ -9,7 +9,10 @@
 //
 // Claim:
 //   1. `heldRun` holds closing, final, other and dash punctuation, and a word the label runs on into (a
-//      plural's `s`, a `’s`). It holds nothing a space, an opening mark or a Han character begins.
+//      plural's `s`, a `’s`). It holds nothing a space, an opening mark or a Han character begins. Glue —
+//      a no-break space (U+00A0, U+202F) or a word joiner (U+2060) — is held with the character after it,
+//      as in chapter 8's `</tb-term>&nbsp;— a phosphate…`, unless that is a space a line may break at, and
+//      an opening mark glue holds is held with the character after it in turn.
 //   2. `holdAfter` splits the text node after the element at that length and wraps the element and the
 //      held run in one `<tb-term-hold>`, in place. Everything after the run stays where it was, and an
 //      element with no run after it is left alone.
@@ -25,11 +28,12 @@
 // Bound: this runs under a stand-in DOM written below, in Node. It proves the element's own splitting and
 // wrapping, and that the stylesheet's text has the rules; it proves nothing about lines, or about a rule
 // elsewhere that outweighs this one. That the wrapper keeps the mark on the term's line is a claim about
-// layout engines. It was measured with a probe when this landed (0 stranded marks at 320 and 390 px, and
-// at every width from 320 to 1440 px, in chapters 1–8), and no gate re-measures it. The stand-in runs
-// `connectedCallback` on every insertion into the document, a move included, and runs it when the DOM
-// method that inserted returns, not in the middle of it, as `[CEReactions]` does in a browser. Run in the
-// middle, a callback that wraps again would find nothing after the element yet, and pass.
+// layout engines. It was measured with a probe when this landed, and again once a no-break space counted
+// as glue (docs/learning/defect-register.md, the entry of 2026-09-24, has the numbers and their bound), and
+// no gate re-measures it. The stand-in runs `connectedCallback` on every insertion into the document, a
+// move included, and runs it when the DOM method that inserted returns, not in the middle of it, as
+// `[CEReactions]` does in a browser. Run in the middle, a callback that wraps again would find nothing
+// after the element yet, and pass.
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -234,9 +238,23 @@ test('heldRun holds the marks and the word glued to a label, and nothing a new w
     ['。', '侯', 1],
     ['是諸侯', '夫', 0],
     ['、君子', '人', 1],
+    // Glue: chapter 8's two no-break spaces before a dash, the other two kinds, a word, an opening mark and
+    // a Han character glued on, and glue with nothing held after it.
+    ['\u00A0— a phosphate joining', 'd', 2],
+    ['\u00A0— it loses its amino group', 'n', 2],
+    ['\u202F—', 'd', 2],
+    ['\u2060, and', 'r', 2],
+    ['\u00A0µm across', '0', 3],
+    ['\u00A0(DNA) and', 'd', 6],
+    ['\u00A0\u2060— and', 'd', 3],
+    ['\u00A0是諸侯', '夫', 2],
+    ['\u00A0 and', 'd', 1],
+    ['\u00A0', 'd', 1],
   ];
+  // Glue is invisible, so a message names it by its code point.
+  const quoted = (s) => JSON.stringify(s).replace(/[\u00A0\u202F\u2060]/gu, (c) => visible(c));
   for (const [text, last, want] of cases) {
-    assert.equal(heldRun(text, last), want, `heldRun(${JSON.stringify(text)}, ${JSON.stringify(last)}) should hold ${want}`);
+    assert.equal(heldRun(text, last), want, `heldRun(${quoted(text)}, ${JSON.stringify(last)}) should hold ${want}`);
   }
   // A character outside the basic plane is one character and two code units, and is counted as two.
   assert.equal(heldRun('𝑠.', 'x'), 3, 'a supplementary-plane letter after a Latin label is held whole, with the mark after it');
@@ -257,6 +275,12 @@ test('holdAfter takes a run that is the whole text node without splitting it', (
   const { p } = paragraph('the last word is ', 'homeostasis', '.');
   holdAfter(p.childNodes[1]);
   assert.equal(shape(p), '[p: "the last word is " [tb-term-hold: [span: "homeostasis"] "."]]');
+});
+
+test('holdAfter holds a no-break space and the dash it glues on, as chapter 8 writes them', () => {
+  const { p } = paragraph('two nucleotides joined by a ', 'phosphodiester bond', '\u00A0— a phosphate joining');
+  assert.ok(holdAfter(p.childNodes[1]), 'a no-break space and a dash after the element were not held');
+  assert.equal(shape(p), '[p: "two nucleotides joined by a " [tb-term-hold: [span: "phosphodiester bond"] "\u00A0—"] " a phosphate joining"]');
 });
 
 test('holdAfter leaves an element alone when nothing is glued to its end', () => {

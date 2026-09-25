@@ -347,6 +347,14 @@ function copyLabel(from, into) {
 // 1's list of the properties of life, `.tb-props li span` made a span wrapper a block, and "cells," stood
 // on a line of its own.
 //
+// A no-break space is glue too. The book writes `</tb-term>&nbsp;— a phosphate…` so that a dash never
+// begins a line. But CSS Text 3 keeps the break after an atomic inline even next to a U+00A0, so a line
+// could still end on the button and the next begin with the space and the dash. On 2026-09-24 chapter 8's
+// "phosphodiester bond" did so at 52 of the 1,121 widths from 320 to 1440 px, and "deamination" at 41.
+// So a no-break space (U+00A0 or U+202F) or a word joiner (U+2060) is held with the character after it,
+// and the run goes on from there. An opening mark after one is held with the character it opens, because a
+// line may not break between those two either.
+//
 // Bound: only a text node directly after the element is read. A mark after another element in between
 // (`</tb-term><sup>…`) is not held, and neither is an opening mark before a term, which no biology chapter
 // has. 資治通鑑's marks are already bound in its 原文 markup (`.zj-kn`), and a wrapper inside that span
@@ -356,20 +364,29 @@ const WORD_CHAR = /[\p{L}\p{N}\p{M}]/u;
 /** A script written without spaces between words, which a line may break inside. */
 const UNSPACED = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
 const spacedWordChar = (c) => c !== undefined && WORD_CHAR.test(c) && !UNSPACED.test(c);
+/** What an author writes to glue the next thing on: a no-break space, a narrow one, or a word joiner. */
+const GLUE = /[\u00A0\u202F\u2060]/u;
+/** A space a line may break at: any space but the two no-break ones. */
+const BREAKING_SPACE = /[^\S\u00A0\u202F]/u;
+const OPENING_MARK = /[\p{Ps}\p{Pi}]/u;
 
 /**
  * How many code units at the start of `text` must stay on the line of a label ending in `last`: the
  * closing, final, other and dash punctuation there, and a word the label runs on into — a plural's `s`,
  * or `’s`. What an opening mark or a space begins is the next word's, and so is a Han character, which a
- * line may begin with.
+ * line may begin with. Glue is held with the character after it, whatever that is, unless it is a space a
+ * line may break at; an opening mark glue holds is held with the character after it in turn.
  */
 export function heldRun(text, last) {
   let n = 0;
   let prev = last;
+  let glued = false;
   for (const ch of text) {
     const runsOn = spacedWordChar(ch) && (spacedWordChar(prev) || prev === '’' || prev === "'");
-    if (!HELD_MARK.test(ch) && !runsOn) break;
+    const held = glued ? !BREAKING_SPACE.test(ch) : GLUE.test(ch) || HELD_MARK.test(ch) || runsOn;
+    if (!held) break;
     n += ch.length;
+    glued = GLUE.test(ch) || (glued && OPENING_MARK.test(ch));
     prev = ch;
   }
   return n;
