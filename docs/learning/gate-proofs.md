@@ -126,8 +126,105 @@ Grouped by the file the gate lives in, because that is how they are looked up. S
 - [the study system's arithmetic](#scheduler-and-store-the-study-systems-arithmetic-testschedulertestjs-teststoretestjs) — scheduler and store, 42 tests.
 - [a multiple-choice question cannot be answered by where its options stand](#choice-order-a-multiple-choice-question-cannot-be-answered-by-where-its-options-stand-testchoice-ordertestjs) — Today and the chapter checks, driven through the two components' own render and answer paths; twelve arms, after every bank shipped with its answer at A and the checks with theirs at B or C in 34 of 36. **A seed that leaves out the page passes the chi-square bound** (4.22), so a two-page check holds it. **The correct option is still the longest in 220 of 233**, which no order can hide.
 - [the flags that keep chromium's crash dialog off the desktop](#browser-quiet-the-flags-that-keep-chromiums-crash-dialog-off-the-desktop-testbrowser-quiettestjs) — and see the defect register, 2026-09-16, for the round where this test was green while the preload never ran.
+- [a mark written against a term's end, or a no-break space and what it glues on, is wrapped with the term, once](#unit-a-mark-written-against-a-terms-end-or-a-no-break-space-and-what-it-glues-on-is-wrapped-with-the-term-once-testterm-holdtestjs) — the term-hold, read as markup and stylesheet text: nineteen arms red, twelve when it landed and seven for the no-break space that review finding S1 found. **It measures no line break**; what a probe measured is in the defect register's entry of 2026-09-24.
 
 `# Six gates that were shipped unproved (2026-09-16)` below is a batch heading, not a claim: it marks six proofs written after the fact for gates that had already reached main.
+
+## unit: a mark written against a term's end, or a no-break space and what it glues on, is wrapped with the term, once (`test/term-hold.test.js`)
+
+- **The tree.** Two proofs. The first twelve arms were run by the `term-comma` worker on 2026-09-24, in its worktree at `65b9ea5`. That commit's `test/term-hold.test.js`, `src/components/term.js` and `src/styles/components.css` are identical to `f1ae404`'s, line endings aside, so the arms prove the test as it landed on `land-4`. The seven arms for the no-break space were run on `36cbc2f`, branch `land-4`, the commit that added that case. Every arm changed a copy of the files in the session scratchpad and ran the copied test against it; no tracked file was changed.
+- **Claim**, from the test's header: *"a mark written against a term's end is wrapped with the term, once"*, in five parts. `heldRun` holds closing, final, other and dash punctuation and a word the label runs on into, and since `36cbc2f` glue (U+00A0, U+202F, U+2060) with the character after it. `holdAfter` splits the text node at that length and wraps the element and the run in one `<tb-term-hold>`, in place. A built `<tb-term>` does it once, though the move runs `connectedCallback` again. The wrapper is the element `components.css` sets `white-space: nowrap`, and not a span. Its `::after` prints one zero-width space, written as the character itself, and sets `white-space: normal`. **Bound**, from the same header: it runs under a stand-in DOM in Node, and it *"proves nothing about lines, or about a rule elsewhere that outweighs this one"*. It reads markup and stylesheet text. Where a line breaks was measured by a probe, and no gate measures it again.
+- **Why it was needed.** The defect register's entry of 2026-09-24: in a 390 px frame of chapter 8, the comma after "pyrimidine dimer" began a line on its own, and 172 of the 218 marks glued to a term in chapters 1–8 did so at some width from 320 to 1440 px. The seven later arms come from review finding S1 in `docs/work/2_rest-of-the-book/reviews/2026-09-25-land-4-review-1.md`. A no-break space before a dash was not held, and chapter 8's "phosphodiester bond" began a line with the space and the dash at 52 of 1,121 widths, and "deamination" at 41.
+- **The mutations and the failures.** Each arm ran `node --test test/term-hold.test.js`, and each exited 1. The drivers printed the failing tests and the first error line of each arm, verbatim below. Two arms in the second log fail on node's strict-equality message, whose diff follows on lines the driver did not keep.
+
+  Five arms on `components.css`:
+
+  ```text
+  escape instead of the character: exit 1
+     ✖ the stylesheet puts one zero-width space after the wrapper, which wraps as the paragraph does (4.4921ms)
+     AssertionError [ERR_ASSERTION]: tb-term-hold::after in components.css prints "\200B", then "\200B" / "", where it should print "\u{200B}", then "\u{200B}" / "": one zero-width space (U+200B) written as the character itself, then the same with empty alternative text, which is what was measured. The escape \200B has a Latin letter, which test/strings.test.js takes for an English word.
+  empty string: exit 1
+     ✖ the stylesheet puts one zero-width space after the wrapper, which wraps as the paragraph does (3.4256ms)
+     AssertionError [ERR_ASSERTION]: tb-term-hold::after in components.css prints "", then "" / "", where it should print "\u{200B}", then "\u{200B}" / "": one zero-width space (U+200B) written as the character itself, then the same with empty alternative text, which is what was measured. The escape \200B has a Latin letter, which test/strings.test.js takes for an English word.
+  no white-space: normal: exit 1
+     ✖ the stylesheet puts one zero-width space after the wrapper, which wraps as the paragraph does (5.1388ms)
+     AssertionError [ERR_ASSERTION]: tb-term-hold::after in components.css does not set white-space: normal. Inheriting the pair's nowrap, its space made no difference to Chromium.
+  rule dropped: exit 1
+     ✖ the stylesheet puts one zero-width space after the wrapper, which wraps as the paragraph does (1.2536ms)
+     AssertionError [ERR_ASSERTION]: components.css has no rule for tb-term-hold::after. Without the zero-width space it prints, Chromium sends a held term and its mark down a line early wherever a paragraph sets hyphens: auto. The rule prints "\u{200B}", then "\u{200B}" / "" and sets white-space: normal.
+  wrapper nowrap dropped: exit 1
+     ✖ the stylesheet sets the wrapper holdAfter builds white-space: nowrap (45.889ms)
+     AssertionError [ERR_ASSERTION]: the <tb-term-hold> rule in components.css does not set white-space: nowrap, so a line may still break between a term and its mark
+  restored: ['ℹ pass 7', 'ℹ fail 0']
+  ```
+
+  Seven arms on `term.js`:
+
+  ```text
+  held again on every connect (the guard skipped): exit 1
+     ✖ a built <tb-term> holds its comma once, though the move runs connectedCallback again (16.5861ms)
+     RangeError: Maximum call stack size exceeded
+  holdTrailing never called: exit 1
+     ✖ a built <tb-term> holds its comma once, though the move runs connectedCallback again (0.7675ms)
+     AssertionError [ERR_ASSERTION]: connectedCallback ran 1 time(s), where the build and the move are 2
+  dash punctuation not held: exit 1
+     ✖ heldRun holds the marks and the word glued to a label, and nothing a new word begins (1.935ms)
+     AssertionError [ERR_ASSERTION]: heldRun("—the", "n") should hold 1
+  no run-on word (a plural, a possessive): exit 1
+     ✖ heldRun holds the marks and the word glued to a label, and nothing a new word begins (1.2146ms)
+     AssertionError [ERR_ASSERTION]: heldRun("s, which", "e") should hold 2
+  a Han character taken for a spaced word: exit 1
+     ✖ heldRun holds the marks and the word glued to a label, and nothing a new word begins (2.0573ms)
+     ✖ holdAfter leaves an element alone when nothing is glued to its end (0.7729ms)
+     AssertionError [ERR_ASSERTION]: heldRun("是諸侯", "夫") should hold 0
+  the run not split off the text node: exit 1
+     ✖ a built <tb-term> holds its comma once, though the move runs connectedCallback again (0.4228ms)
+     ✖ holdAfter wraps the element and its run in one <tb-term-hold>, in place, and leaves the rest (0.9082ms)
+     AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  a span for the wrapper: exit 1
+     ✖ a built <tb-term> holds its comma once, though the move runs connectedCallback again (0.4035ms)
+     ✖ holdAfter takes a run that is the whole text node without splitting it (0.1858ms)
+     ✖ holdAfter wraps the element and its run in one <tb-term-hold>, in place, and leaves the rest (0.9228ms)
+     ✖ the stylesheet puts one zero-width space after the wrapper, which wraps as the paragraph does (1.1213ms)
+     ✖ the stylesheet sets the wrapper holdAfter builds white-space: nowrap (0.1526ms)
+     AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  restored: 0 ['ℹ pass 7', 'ℹ fail 0']
+  ```
+
+  Seven arms on `term.js` for the no-break space, at `36cbc2f`:
+
+  ```text
+  the fix taken out (heldRun as it was at f1ae404): exit 1
+     ✖ heldRun holds the marks and the word glued to a label, and nothing a new word begins (2.4509ms)
+     ✖ holdAfter holds a no-break space and the dash it glues on, as chapter 8 writes them (0.1236ms)
+     AssertionError [ERR_ASSERTION]: heldRun("\u{A0}— a phosphate joining", "d") should hold 2
+  a no-break space (U+00A0) not glue: exit 1
+     ✖ heldRun holds the marks and the word glued to a label, and nothing a new word begins (2.2667ms)
+     ✖ holdAfter holds a no-break space and the dash it glues on, as chapter 8 writes them (0.1191ms)
+     AssertionError [ERR_ASSERTION]: heldRun("\u{A0}— a phosphate joining", "d") should hold 2
+  a narrow no-break space (U+202F) not glue: exit 1
+     ✖ heldRun holds the marks and the word glued to a label, and nothing a new word begins (2.285ms)
+     AssertionError [ERR_ASSERTION]: heldRun("\u{202F}—", "d") should hold 2
+  a word joiner (U+2060) not glue: exit 1
+     ✖ heldRun holds the marks and the word glued to a label, and nothing a new word begins (2.3282ms)
+     AssertionError [ERR_ASSERTION]: heldRun("\u{2060}, and", "r") should hold 2
+  glue holds only itself, not the character after it: exit 1
+     ✖ heldRun holds the marks and the word glued to a label, and nothing a new word begins (2.3159ms)
+     AssertionError [ERR_ASSERTION]: heldRun("\u{A0}µm across", "0") should hold 3
+  a space a line may break at held after glue: exit 1
+     ✖ heldRun holds the marks and the word glued to a label, and nothing a new word begins (2.431ms)
+     AssertionError [ERR_ASSERTION]: heldRun("\u{A0} and", "d") should hold 1
+  an opening mark after glue not held with what it opens: exit 1
+     ✖ heldRun holds the marks and the word glued to a label, and nothing a new word begins (2.2617ms)
+     AssertionError [ERR_ASSERTION]: heldRun("\u{A0}(DNA) and", "d") should hold 6
+  restored: 0 [ 'ℹ pass 8', 'ℹ fail 0' ]
+  term.js copy sha256 before 0d49b5a528743e1cc052a73e951075e63d696d80c74142d9976569b39e63cc8e after 0d49b5a528743e1cc052a73e951075e63d696d80c74142d9976569b39e63cc8e
+  worktree term.js sha256 0d49b5a528743e1cc052a73e951075e63d696d80c74142d9976569b39e63cc8e
+  ```
+
+  One of the seven is weaker than it looks. With *"glue holds only itself"*, chapter 8's two cases stay green, because a dash is held as a mark anyway. The arm is red only on the cases where glue meets a word, an opening mark or a Han character; the log shows the first of them, `µm`.
+- **The restoration.** The first driver wrote the stylesheet copy back from `components.orig.css`. Both now have sha256 `5037861f3dd788b2f7c2510c0135f9706f0d82a497f57f5783b5b617b388c434`, which is `f1ae404`'s file with its line endings taken out. The second driver wrote its `term.js` copy back: sha256 `dea2b065a5d780cfcfec414eefcc310c6024cdbc432106ff825b7293eece7747`, which is `f1ae404`'s file with CRLF endings. Both restored copies passed 7 of 7. The third driver's copy has sha256 `0d49b5a528743e1cc052a73e951075e63d696d80c74142d9976569b39e63cc8e` before and after, the same as the worktree's `term.js` at `36cbc2f`, and passed 8 of 8.
+- **What it does not prove.** Where a line breaks. An engine that breaks inside a `nowrap` box, or a rule elsewhere that outweighs this one, passes the test; the claim about lines rests on the probe measurements in the defect register's entry, which no gate repeats. It does not see a mark after another element (`</tb-term><sup>…`) or an opening mark before a term, because `holdAfter` reads only the text node directly after the element. And the first twelve arms were run on a test with no glue case, which is how the no-break space went unseen until review finding S1.
 
 ## drive: a whole leaf absorbs about three-quarters of the green at 550 nm, and the extract about a third (`tools/drive.js`, `pigment-spectra the-whole-leaf-catches-three-quarters-of-the-green`)
 
