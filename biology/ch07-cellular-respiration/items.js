@@ -990,7 +990,7 @@ export const ITEMS = [
       'oxygen is the terminal electron acceptor: it takes the electrons at the bottom of the chain and leaves as water',
       'complex\u00a0IV needs four electrons and four protons to turn one O<sub>2</sub> into two waters, and holds the oxygen between an iron and a copper atom until all four have arrived',
       'without oxygen, complex\u00a0IV has nowhere to put its electrons and stops; cytochrome\u00a0c stays reduced, so complex\u00a0III stops; ubiquinone stays reduced, so complex\u00a0I stops',
-      'complex\u00a0I is the only thing that can empty the matrix\'s NADH in any quantity, and the shuttles that empty the cytosol\'s hand their electrons to the same stopped chain, so NADH can no longer be emptied',
+      'in an animal cell, complex\u00a0I is the only thing that can empty the matrix\'s NADH in any quantity, and the shuttles that empty the cytosol\'s hand their electrons to the same stopped chain, so NADH can no longer be emptied',
       'the Krebs cycle and the link reaction stop for want of NAD<sup>+</sup>, and within seconds so does glycolysis, unless the cell ferments',
       'oxygen is not what the chain is for: it is the best sink available, at +0.82 V, and the 220-kilojoule fall exists because it is there',
       'it is the waste product of somebody else\'s photosynthesis (Section\u00a06.7), and before there was any in the air no organism could respire this way',
@@ -1629,7 +1629,7 @@ export const ITEMS = [
         why: 'Invents a feedback the pathway does not have. Phosphofructokinase reads ATP, AMP and citrate, and pyruvate piling up does not switch it off; what stops glycolysis is the empty NAD<sup>+</sup> its sixth step needs.' },
       { text: 'NAD<sup>+</sup>: with the chain stopped the small pool all turns into NADH, and glycolysis\'s sixth step has nothing to hand its electrons to.', correct: true },
     ],
-    explain: 'Trace it. Complex\u00a0IV cannot hand on its electrons, so cytochrome\u00a0c stays reduced and complex\u00a0III stops; ubiquinone stays reduced and complex\u00a0I stops; and complex\u00a0I is the only thing that can empty the matrix\'s NADH in any quantity, and the shuttles that empty the cytosol\'s hand their electrons to the same stopped chain. The pool is small, a fraction of a millimole per litre, and glycolysis at a working muscle\'s rate fills it with NADH in seconds. Then the sixth step stops for want of an empty carrier, and so does everything.',
+    explain: 'Trace it. Complex\u00a0IV cannot hand on its electrons, so cytochrome\u00a0c stays reduced and complex\u00a0III stops; ubiquinone stays reduced and complex\u00a0I stops; and, in an animal cell, complex\u00a0I is the only thing that can empty the matrix\'s NADH in any quantity, and the shuttles that empty the cytosol\'s hand their electrons to the same stopped chain. The pool is small, a fraction of a millimole per litre, and glycolysis at a working muscle\'s rate fills it with NADH in seconds. Then the sixth step stops for want of an empty carrier, and so does everything.',
   },
   {
     id: 'i-carrier-pool-limit-2',
@@ -1638,7 +1638,7 @@ export const ITEMS = [
     question: 'Explain why, in a cell that cannot ferment, glycolysis stops within seconds of the chain stopping. Trace the backing-up from complex\u00a0IV to glycolysis, compare the size of the carrier pool with that of the ATP pool, and name exactly what has run out.',
     rubric: [
       'with no oxygen, complex\u00a0IV has nowhere to put its electrons, so it stops; cytochrome\u00a0c stays reduced, so complex\u00a0III stops; ubiquinone stays reduced, so complex\u00a0I stops',
-      'complex\u00a0I is the only thing that can empty the matrix\'s NADH in any quantity, and the shuttles that empty the cytosol\'s hand their electrons to the same stopped chain, so NADH can no longer be emptied',
+      'in an animal cell, complex\u00a0I is the only thing that can empty the matrix\'s NADH in any quantity, and the shuttles that empty the cytosol\'s hand their electrons to the same stopped chain, so NADH can no longer be emptied',
       'a cell holds very little of the carrier and recycles it constantly: the pool is a fraction of a millimole per litre, against about five millimoles per litre of ATP',
       'glycolysis at a working muscle\'s rate would turn the whole pool into NADH in a matter of seconds',
       'glycolysis\'s sixth step needs an empty NAD<sup>+</sup> to hand its electrons to',
