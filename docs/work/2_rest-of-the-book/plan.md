@@ -69,6 +69,7 @@ What has been checked:
   - review 1's S1 measure: chapter 8's two no-break-space dashes are held and never strand, while 32 of the 38 held cases strand once unheld, so the probe sees the class;
   - every character chapters 7 and 8, Today and chapter 6 show is drawn by a face the page loaded.
 - Figure 3.3's two fixes, by a GPU probe on chapter 3 at 390, 1024 and 1440 px, both envelopes, on `?t=0`: the canvas holds still for 1.5 s after scrolling into view (it moved in all six cases before), and real clicks on the drawn filament select the flagellum or the archaellum: 2 of 7 sample points at 390 px and 6 of 7 at 1024 and 1440 px, where none of the 42 did before.
+- On `27d1626`, `npm run unit` (268 of 268), `npm run check` (15 pages), and `drive`, `pinned`, `narrow` and `legible` on the four figures the fixes of 2026-09-25 touched (`replication-fork`, `respiratory-chain`, `atp3d` and `prokaryote`): all green, with 51 drive steps, 88 pinned mounts, 42 states at a 390 px stage and 2,250 glyph runs. The land-4 worker looked at the 390 px frames of Figure 7.3 in the dark theme and Figure 8.3 in the light one.
 - The full `npm test` runs once, untrimmed, on the final tree before the push. Its result is recorded here when it has run.
 
 `origin/ch06-07`, `origin/items-ch07`, `origin/items-ch07-final`, `origin/items-ch08` and `origin/ch08-dna` are not merged: `ch07` and `ch08` took their files from them. The `textbook-wt-*` worktrees, the `provenance-*` and `autocompact-setting` branches and `stash@{0}` belong to other sessions.
