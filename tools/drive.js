@@ -187,7 +187,24 @@ const chapterLadder = () => {
   // Tags may carry attributes: a row the pattern skipped would drop out of the comparison without a word.
   const body = /<tbody[^>]*>([\s\S]*?)<\/tbody>/.exec(html.slice(start, end));
   if (!body) throw new Error(`${path}'s <section id="atp"> has no <tbody>, so §5.3's table of phosphate compounds could not be read`);
-  const rows = [...body[1].matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].map((m) => [...m[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/g)].map((c) => c[1].replace(/<[^>]+>/g, '').trim()));
+  // A cell is read as a reader sees it: tags dropped, character references decoded, the characters that
+  // only steer a line break (a word joiner, a zero-width space, a soft hyphen) left out, and a no-break
+  // space read as a space. The figures draw plain names, and a raw cell matched none of them once
+  // 090da73 kept "Glucose 1-&#8288;phosphate" together with a word joiner.
+  const named = { nbsp: '\u00a0', amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
+  const cell = (inner) => {
+    const text = inner.replace(/<[^>]+>/g, '')
+      .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+      .replace(/&#([0-9]+);/g, (_, dec) => String.fromCodePoint(Number(dec)))
+      .replace(/&([a-z]+);/gi, (ref, name) => named[name] ?? ref)
+      .replace(/[\u2060\u200b\u00ad]/g, '')
+      .replace(/[\u00a0\u202f]/g, ' ')
+      .trim();
+    const left = /&[#a-z0-9]+;/i.exec(text);
+    if (left) throw new Error(`${path}: a cell of §5.3's table reads "${text}", and this reader does not decode ${left[0]}. Add it to \`named\` in chapterLadder() in tools/drive.js, or write the character itself in the chapter.`);
+    return text;
+  };
+  const rows = [...body[1].matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].map((m) => [...m[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/g)].map((c) => cell(c[1])));
   const trs = (body[1].match(/<tr[\s>]/g) || []).length;
   if (rows.length !== trs) throw new Error(`${path}: §5.3's table has ${trs} <tr> and ${rows.length} of them could be read as rows`);
   const table = rows.map(([name, kj]) => ({ name, kj: Number(String(kj).replace('−', '-')) }));
