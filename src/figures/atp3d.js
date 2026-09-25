@@ -720,11 +720,14 @@ function build(root, ctx) {
     format: (v) => (Number(v) >= 100 ? `${Math.round(Number(v))}` : Number(v).toFixed(1)),
     onInput: (v) => { s[key] = Number(v); draw(); b.announce(); },
   }));
-  // The phosphate's label is P and a real <sub>i</sub>, as §5.3 prints it. Its accessible name, which is
-  // what a recipe addresses and a screen reader says, stays the letters "Pi".
+  // The phosphate's label is P and a real <sub>i</sub>, as §5.3 prints it. Its accessible name is "Pi,
+  // phosphate": a screen reader says the letters alone as "pie". The name still starts with the visible
+  // label, as label-in-name asks, and a recipe's getByRole name 'Pi' still finds it, because a name there
+  // matches as a substring unless `exact` is set.
   for (const span of mmSliders[2].node.querySelectorAll(':scope > .tb-long, :scope > .tb-short')) {
     span.replaceChildren('P', h('sub', { text: 'i' }));
   }
+  mmSliders[2].input.setAttribute('aria-label', 'Pi, phosphate');
   // Valued by height on the rail, so that up is up: see RUNGS above.
   const donorSlider = b.stepper('Donor', {
     min: 0, max: RUNGS - 1, step: 1, value: heightOf(START.donorIndex),
