@@ -91,6 +91,12 @@
 // and are left out when too few would remain; a sentence that cannot fit whole is left out rather than
 // cut, and the rows take its room. Down to a 360 px phone every sentence fits. On a 320 px phone that
 // leaves the copies, the labels that fit and the table's rows, without the sentence.
+//
+// THE FLAT COMPOSITION. The frame gives its flat box from an 800 px window up, and the rail keeps the
+// stage narrower than 800 there: 480 × 270 px at an 800 px window, 782 × 440 at 1150. The narrow drawing
+// stays, and the table stands beside the end in one column (`arrange()`). When the rows leave the sentence
+// no room under them, at an 800 px window, it goes under the end, and the whole telomere's band gives way
+// to it (`compact`): its length, its limit and what it has lost are rows of the table.
 import { C, clamp, lerp, el } from './lib/svg.js';
 import { bench } from './lib/bench.js';
 import { hash2 } from './lib/chem-atoms.js';
@@ -203,7 +209,8 @@ export function mount(root, ctx) {
   const table = b.pane('table', { as: 'svg' });
 
   // Wide, the end takes the stage's whole width, because it is a long thin thing drawn to scale, and
-  // the table is a band of three short columns and a sentence beneath it.
+  // the table is a band of three short columns and a sentence beneath it. Narrow, the end over the
+  // table, or beside it on a flat stage (`arrange()`).
   b.compose({
     wide: {
       columns: 'minmax(0, 1fr)',
@@ -211,9 +218,9 @@ export function mount(root, ctx) {
       at: { end: [1, 1], table: [1, 2] },
     },
     narrow: {
-      columns: 'minmax(0, 1fr)',
-      rows: 'minmax(0, 69fr) minmax(0, 31fr)',
-      at: { end: [1, 1], table: [1, 2] },
+      columns: 'var(--ce-cols, minmax(0, 1fr))',
+      rows: 'var(--ce-rows, minmax(0, 69fr) minmax(0, 31fr))',
+      at: { end: [1, 1], table: ['var(--ce-tc, 1)', 'var(--ce-tr, 2)'] },
     },
   });
 
@@ -442,10 +449,53 @@ export function mount(root, ctx) {
   });
 
   // ---- drawing ----
+  // A flat stage below 800 px: the frame gives one from an 800 px window up, where the rail keeps the
+  // stage narrower than 800 (480 × 270 px at an 800 px window, 782 × 440 at 1150). The end over its
+  // table has no height there, so the table stands beside the end, its rows in one column. The end keeps
+  // about 320 px, what the labels either side of its two copies need; the table has the rest, up to 280.
+  let flat = false;
+  let columns = '';
+  function arrange() {
+    const r = root.getBoundingClientRect();
+    flat = b.narrow && r.width > r.height;
+    const want = flat ? `minmax(0, 1fr) ${Math.round(clamp(r.width - 344, 130, 280))}px` : '';
+    if (want === columns) return false;
+    columns = want;
+    b.setVar('--ce-cols', flat ? want : 'minmax(0, 1fr)');
+    b.setVar('--ce-rows', flat ? 'minmax(0, 1fr)' : 'minmax(0, 69fr) minmax(0, 31fr)');
+    b.setVar('--ce-tc', flat ? '2' : '1');
+    b.setVar('--ce-tr', flat ? '1' : '2');
+    return true;
+  }
+
+  // Flat, the sentence stands under the table's rows while they leave it room. When they do not, as on
+  // an 800 px window's stage, it goes under the end instead, and the whole telomere over the end gives
+  // way to it: its length, its limit and what it has lost are rows of the table.
+  let compact = false;
+  function tableLeavesRoom() {
+    const { w, h: hgt } = table.box;
+    const n = tableRows(state(), true).length;
+    const t = table.readout({ title: 'At the tip', x: 0, width: w, size: 10 });
+    for (let i = 0; i < n; i += 1) t.row('', '');
+    t.head('The count');
+    return t.height(13) + 2 + tableNote(w).height(14) <= hgt;
+  }
+  function tableNote(w, y = 0, pane = table) {
+    const t = pane.readout({ x: 0, y, width: w, size: 10 });
+    t.note(noteWords(state()), { size: 9.4 });
+    return t;
+  }
+
   b.onDraw(() => {
+    if (arrange()) b.remeasure();
+    compact = flat && !tableLeavesRoom();
     endPane.clear();
     table.clear();
     drawEnd();
+    if (compact) {
+      const top = endPane.box.h - tableNote(endPane.box.w).height(14);
+      tableNote(endPane.box.w, top, endPane).draw(14, endPane.box.h - top);
+    }
     drawTable();
   });
 
@@ -494,10 +544,11 @@ export function mount(root, ctx) {
     const circ = shape === 'circular';
     const O = overhangOf(loss);
     const ov = narrow
-      ? { x0: 8, x1: w - 8, top: 2, h: 50 }
+      ? { x0: 8, x1: w - 8, top: 2, h: compact ? 0 : 50 }
       : { x0: 12, x1: w - 12, top: 2, h: clamp(hgt * 0.18, 54, 66) };
     const tvTop = ov.top + ov.h + (narrow ? 8 : 4);
-    const tvBot = hgt - 4;
+    // Compact, the sentence is under the end, and the drawing stops 6 px above it.
+    const tvBot = hgt - 4 - (compact ? tableNote(w).height(14) + 6 : 0);
     const tvH = Math.max(40, tvBot - tvTop);
     const size = narrow ? 10 : clamp(hgt * 0.028, 10, 11.5);
     const withInset = telomerase && !circ;
@@ -674,7 +725,8 @@ export function mount(root, ctx) {
     p.rect(0, 0, G.w, G.hgt, {}, clip);
     p.add(clip);
 
-    drawOverview(G, lab);
+    if (compact) lab.reserve(0, G.tvBot, G.w, G.hgt);
+    else drawOverview(G, lab);
 
     const ticks = p.group({ 'clip-path': `url(#${clipId})` });
     const dna = p.group({ 'clip-path': `url(#${clipId})` });
@@ -924,7 +976,9 @@ export function mount(root, ctx) {
     const nameX = G.xMin + (0 - G.xMin) * 0.3;
     // Sideways along its copy before further from it: one step up from the copy, on a short stage, is
     // the band of the whole telomere, where a copy's name would read as the band's.
-    const nameShifts = [0, -40, 40, -80, 80, 120, 160, 200];
+    // Beside the table, the copies are shorter than a phone's, and the half steps find the gaps between
+    // the other labels.
+    const nameShifts = [0, -40, 40, -80, 80, 120, 160, 200, ...(flat ? [-20, 20, -60, 60] : [])];
     place(around(nameX, upOut(nameX), 1, { offs: [12, 24, 36], shifts: nameShifts }), narrow ? 'lagging copy' : 'copied by the lagging strand');
     place(around(nameX, loOut(nameX), -1, { offs: [12, 24, 36], shifts: nameShifts }), narrow ? 'leading copy' : 'copied by the leading strand');
     endMark(0, upOut(0), '3′', 1);
@@ -1191,9 +1245,9 @@ export function mount(root, ctx) {
     p.path(`M${jx.toFixed(1)} ${(jy + (narrow ? 0 : 3)).toFixed(1)}L${lx.toFixed(1)} ${ly.toFixed(1)}`, { stroke: C.faint, 'stroke-width': 0.8, 'stroke-dasharray': '2 3' });
   }
 
-  function drawTable() {
-    const { w, h: hgt } = table.box;
-    const st = state();
+  // The table's rows. In one column beside the end, the repeats added are a row only once telomerase is
+  // on or has added some: before that the row is a nought, and the column has no room to spare for it.
+  function tableRows(st, oneColumn = false) {
     const rows = shape === 'circular'
       ? [
         ['Divisions', String(st.divisions)],
@@ -1212,8 +1266,18 @@ export function mount(root, ctx) {
         ['Divisions left', st.divisionsLeft === null ? 'no limit' : String(st.divisionsLeft)],
         ['Repeats added', nt(st.repeatsAdded)],
       ];
+    if (oneColumn && shape !== 'circular' && !telomerase && !st.repeatsAdded) rows.pop();
+    return rows;
+  }
+
+  function drawTable() {
+    const { w, h: hgt } = table.box;
+    const st = state();
+    const two = !flat;
+    const rows = tableRows(st, flat);
     const words = noteWords(st);
-    const title = shape === 'circular' ? 'A circular chromosome' : 'At the tip';
+    // The one column beside the end is 130 px wide at an 800 px window, too narrow for the circle's title.
+    const title = shape === 'circular' ? (flat && w < 170 ? 'A circle' : 'A circular chromosome') : 'At the tip';
     if (!b.narrow) {
       // Three short tables side by side, every row at one height so that they line up across, and the
       // sentence in a fourth column.
@@ -1239,9 +1303,28 @@ export function mount(root, ctx) {
       if (note.height(16) <= hgt + 0.01) note.draw(16, hgt);
       return;
     }
-    // Narrow: the rows in two columns, the sentence under them at full width.
+    // Narrow: the rows in two columns, the sentence under them at full width. Flat, beside the end, the
+    // rows in one column, taller where the stage is; compact, the rows alone, the sentence under the end.
     const size = 10;
-    const colW = (w - 14) / 2;
+    const colW = two ? (w - 14) / 2 : w;
+    const half = Math.ceil(rows.length / 2);
+    const second = shape === 'circular' ? 'Its copies' : 'The count';
+    const lay = (into) => {
+      const left = table.readout({ title, x: 0, width: colW, size, minRow: 13, maxRow: two ? 20 : 24 });
+      for (const [k, v] of rows.slice(0, two ? half : rows.length)) {
+        if (!two && k === rows[half][0]) left.head(second);
+        left.row(k, v);
+      }
+      const bl = left.fill(into);
+      if (!two) return bl;
+      const right = table.readout({ title: second, x: colW + 14, width: colW, size, minRow: 13, maxRow: 20 });
+      for (const [k, v] of rows.slice(half)) right.row(k, v);
+      return Math.max(bl, right.fill(into));
+    };
+    if (compact) {
+      lay(hgt);
+      return;
+    }
     const noteT = table.readout({ x: 0, width: w, size });
     noteT.note(words, { size: 9.4 });
     // The rows make room for the sentence under them only when it can fit there whole; when it cannot,
@@ -1251,17 +1334,11 @@ export function mount(root, ctx) {
     const H = hgt - foot;
     const spare = H - noteT.height(14) - 2;
     const into = spare >= 60 ? spare : H;
-    const half = Math.ceil(rows.length / 2);
-    const left = table.readout({ title, x: 0, width: colW, size, minRow: 13, maxRow: 20 });
-    for (const [k, v] of rows.slice(0, half)) left.row(k, v);
-    const bl = left.fill(into);
-    const right = table.readout({ title: shape === 'circular' ? 'Its copies' : 'The count', x: colW + 14, width: colW, size, minRow: 13, maxRow: 20 });
-    for (const [k, v] of rows.slice(half)) right.row(k, v);
-    const br = right.fill(into);
-    const noteAt = table.readout({ x: 0, y: Math.max(bl, br) + 2, width: w, size });
+    const bottom = lay(into);
+    const noteAt = table.readout({ x: 0, y: bottom + 2, width: w, size });
     noteAt.note(words, { size: 9.4 });
     // Whole or not at all, as in the wide table: on a stage narrower than a 360 px phone's it is left out.
-    const room = H - Math.max(bl, br) - 2;
+    const room = H - bottom - 2;
     if (noteAt.height(14) <= room + 0.01) noteAt.draw(14, room);
   }
 

@@ -278,6 +278,8 @@ The numbers, with their sources, for the header: the repeat is TTAGGG; a telomer
 
 **Narrow composition.** Second composition. Below 800 px the chromosome end runs down the stage, tip at the bottom, so the repeats keep a legible spacing; the telomerase action is drawn beside the tip, and the readouts become rows of type beneath.
 
+**On a flat stage below 800 px.** The frame gives its flat box from an 800 px window up, while the rail keeps the stage at 480 to 782 px, so below 800 px the stage can be wider than tall. There the table stands beside the end, its rows in one column, and the end keeps about 320 px, what the labels either side of the two copies need. Where the rows leave the sentence no room under them, at an 800 px window, the sentence goes under the end and the band of the whole telomere gives way to it: its length, its limit and what it has lost are rows of the table. In one column the repeats added are a row only once telomerase is on or has added some.
+
 ---
 ## Notes for whoever registers these
 
