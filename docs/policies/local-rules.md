@@ -214,7 +214,7 @@ The canon already says a blocker you inherited is a claim like any other. This a
 
 ## Demonstrate a gate's bound, do not merely state it
 
-The canon says name the bound in the gate's own header. This repository's practice goes one step further, and the step is cheap.
+FLEET.md's repo file shape puts a gate's bounds in its test's header. This repository's practice goes one step further, and the step is cheap.
 
 `test/use-before-declared.test.js` landed on 2026-09-17 finding **zero** real instances across 56 modules — the three it was written for had already been fixed. Its red proof therefore had to come from mutations, and it added a third arm that is worth copying: it reintroduced **the one real instance this repository has actually shipped**, verbatim (`const tw = tween({ … done: () => tweens.delete(tw) })`, `symbiont.js`, 2026-09-16), and recorded that the check stays **green** on it, because that read is inside a closure and the walk is scope-exact.
 
