@@ -12,7 +12,7 @@ Stack: plain HTML, CSS, and ES modules on Node 24 (`.nvmrc`); Three.js pinned th
 
 **Current direction** (the owner, 2026-09-23 and 2026-09-24). The weekly usage allowance is the budget: about 40M price-weighted tokens a chapter, spent on what a reader sees first. Contexts stay small. A chapter has at most about four bespoke interactive figures, with authored static SVG elsewhere. No chapter ships without an accuracy review against OpenStax Biology 2e. The study loop must run before more study features are built. `npm test` stays the commit gate until a core gate exists. One textbook session runs at a time. The biology book's Chinese edition is parked. Chapters 7 and 8 were already written, so they ship at chapter 6's reduced scope. No chapter after 8 starts, and other new work waits, until the owner asks. The ten points and their evidence are in [docs/policies/local-rules.md](docs/policies/local-rules.md#the-usage-allowance-is-the-budget-the-owners-direction-of-2026-09-23).
 
-<!-- FLEET-CANON:BEGIN sha=b0a069afa8a5 generated from ../fleet/FLEET.md by `npm run sync-canon` — do not edit inside this block; this repo's own rules go in docs/policies/local-rules.md -->
+<!-- FLEET-CANON:BEGIN sha=926530db9933 generated from ../fleet/FLEET.md by `npm run sync-canon` — do not edit inside this block; this repo's own rules go in docs/policies/local-rules.md -->
 ## Fleet constitution
 
 Shared rules for every repo under `github/`, kept in `../fleet/FLEET.md`; `../fleet/` is fleet's checkout beside this repo's primary checkout. Where a rule gives its reason, use the reason to judge cases the rule does not name; each `[Rn]`'s history is in `../fleet/docs/canon-rationale.md`. This repo's `docs/policies/local-rules.md` may add rules but cannot change these permissions or limits. [R13]
@@ -45,7 +45,7 @@ The designated coordinator reads `../fleet/docs/skills/coordinator.md` before pl
 ### Records, sized to the work
 
 - Read `docs/learning/lessons.md` at session start; it lists this repo's known traps, and its header says how to add one. [R18]
-- Work that spans sessions, has several agents writing, or gets an independent review keeps its plan and review records in `docs/work/` (`../fleet/docs/work-docs.md`) and adds a dated line to `docs/devlog/summary.md` (`../fleet/docs/devlog-template.md`) when it lands. Other work needs neither. [R24]
+- Every change that alters behaviour adds a dated line to `docs/devlog/summary.md` (`../fleet/docs/devlog-template.md`) when it lands, because later sessions orient from its newest entries. Work that spans sessions, has several agents writing, or gets an independent review also keeps its plan and review records in `docs/work/` (`../fleet/docs/work-docs.md`); other work needs none. [R24]
 - Raw output (logs, captures, screenshots) stays in ignored folders. Never commit a binary over 512 KiB or any file over 1 MiB; LFS needs the owner's OK. [R23]
 
 ### Style and environment
